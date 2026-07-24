@@ -5,6 +5,7 @@ import { Enterprise, MovementRecord } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { useAuth } from '../context/AuthContext'
+import { useMasterData } from '../context/MasterDataContext'
 import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
 const MOVEMENT_TYPE_LABELS: Record<string, string> = {
@@ -21,6 +22,7 @@ const MOVEMENT_TYPE_ICONS: Record<string, string> = {
 const MovementLog: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
+  const { speciesLabel } = useMasterData()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -241,7 +243,7 @@ const MovementLog: React.FC = () => {
                       if (!selectedEnterpriseId) return []
                       const res = await apiService.get(`/enterprises/${selectedEnterpriseId}/animals`, { params: { search: q, limit: 20 } })
                       const items = res.data?.items || res.data?.animals || res.data || []
-                      return items.map((a: any) => ({ value: a.id, label: a.name, sublabel: [a.species, a.breed].filter(Boolean).join(' · ') }))
+                      return items.map((a: any) => ({ value: a.id, label: a.name, sublabel: [speciesLabel(a.species, t), a.breed].filter(Boolean).join(' · ') }))
                     }}
                   />
                 </div>

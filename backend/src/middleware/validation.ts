@@ -1705,6 +1705,12 @@ export const createBranchHospitalSchema = Joi.object({
 export const createMasterSpeciesSchema = Joi.object({
   code: Joi.string().min(1).max(50).required(),
   label: Joi.string().min(1).max(100).required(),
+  labelKey: Joi.string().max(150).allow('', null).optional(),
+  labelHi: Joi.string().max(150).allow('', null).optional(),
+  labelKn: Joi.string().max(150).allow('', null).optional(),
+  labelMl: Joi.string().max(150).allow('', null).optional(),
+  labelTa: Joi.string().max(150).allow('', null).optional(),
+  labelTe: Joi.string().max(150).allow('', null).optional(),
   icon: Joi.string().max(10).allow('', null).optional(),
   category: Joi.string().max(50).allow('', null).optional(),
   hasEarTag: Joi.boolean().optional(),
@@ -1713,6 +1719,12 @@ export const createMasterSpeciesSchema = Joi.object({
 });
 export const updateMasterSpeciesSchema = Joi.object({
   label: Joi.string().min(1).max(100).optional(),
+  labelKey: Joi.string().max(150).allow('', null).optional(),
+  labelHi: Joi.string().max(150).allow('', null).optional(),
+  labelKn: Joi.string().max(150).allow('', null).optional(),
+  labelMl: Joi.string().max(150).allow('', null).optional(),
+  labelTa: Joi.string().max(150).allow('', null).optional(),
+  labelTe: Joi.string().max(150).allow('', null).optional(),
   icon: Joi.string().max(10).allow('', null).optional(),
   category: Joi.string().max(50).allow('', null).optional(),
   hasEarTag: Joi.boolean().optional(),

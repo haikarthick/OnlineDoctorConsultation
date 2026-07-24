@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import AutocompleteInput from '../../components/AutocompleteInput'
+import { useMasterData } from '../../context/MasterDataContext'
 import '../../styles/modules.css'
 import './VaccineProtocolAdmin.css'
 
@@ -108,6 +109,7 @@ const EMPTY_FORM: Partial<Protocol> = {
 
 const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate: _onNavigate }) => {
   const { t } = useTranslation()
+  const { speciesLabel } = useMasterData()
   const [protocols, setProtocols] = useState<Protocol[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -384,7 +386,7 @@ const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate:
               </div>
               <div className="vpa-species-chips">
                 {p.species.slice(0, 4).map(s => (
-                  <span key={s} className="vpa-species-chip">{s}</span>
+                  <span key={s} className="vpa-species-chip">{speciesLabel(s, t)}</span>
                 ))}
                 {p.species.length > 4 && (
                   <span className="vpa-species-chip">+{p.species.length - 4}</span>

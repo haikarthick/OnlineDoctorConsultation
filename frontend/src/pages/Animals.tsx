@@ -39,7 +39,7 @@ function classOrGenderLabel(
 
 const Animals: React.FC = () => {
   const { t } = useTranslation()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies } = useMasterData()
+  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies, speciesLabel } = useMasterData()
 
   const { user } = useAuth()
   const { formatDate } = useSettings()
@@ -463,7 +463,7 @@ const Animals: React.FC = () => {
           />
           <select value={speciesFilter} onChange={e => setSpeciesFilter(e.target.value)} style={{ ...fieldStyle, maxWidth: 160 }}>
             <option value="">{t('animals.allSpecies')}</option>
-            {uniqueSpecies.map(s => <option key={s} value={s}>{speciesIcon(s)} {s}</option>)}
+            {uniqueSpecies.map(s => <option key={s} value={s}>{speciesIcon(s)} {speciesLabel(s, t)}</option>)}
           </select>
           {isFarmer && enterpriseOptions.length > 0 && (
             <select value={enterpriseFilter} onChange={e => { setEnterpriseFilter(e.target.value); setGroupFilter('') }} style={{ ...fieldStyle, maxWidth: 180 }}>
@@ -507,7 +507,7 @@ const Animals: React.FC = () => {
                   {speciesCategories.map(cat => (
                     <optgroup key={cat.label} label={cat.label}>
                       {cat.species.map(s => (
-                        <option key={s} value={s}>{speciesIcon(s)} {s}</option>
+                        <option key={s} value={s}>{speciesIcon(s)} {speciesLabel(s, t)}</option>
                       ))}
                     </optgroup>
                   ))}
@@ -733,7 +733,7 @@ const Animals: React.FC = () => {
                       <span className="si-42fc55d5">{speciesIcon(animal.species)}</span>
                       <div>
                         <div className="si-90c2c65d">{animal.name}</div>
-                        <div className="si-122e0f6b">{animal.species}{animal.breed ? ` • ${animal.breed}` : ''}</div>
+                        <div className="si-122e0f6b">{speciesLabel(animal.species, t)}{animal.breed ? ` • ${animal.breed}` : ''}</div>
                       </div>
                     </div>
                     <div className="si-f4e64596">
@@ -845,7 +845,7 @@ const Animals: React.FC = () => {
                 <span className="si-0067e898">{speciesIcon(detailAnimal.species)}</span>
                 <div>
                   <div className="si-f0920f33">{detailAnimal.name}</div>
-                  <div className="si-e17c55f7">{detailAnimal.species}{detailAnimal.breed ? ` • ${detailAnimal.breed}` : ''} — {detailAnimal.uniqueId}</div>
+                  <div className="si-e17c55f7">{speciesLabel(detailAnimal.species, t)}{detailAnimal.breed ? ` • ${detailAnimal.breed}` : ''} — {detailAnimal.uniqueId}</div>
                 </div>
               </div>
               <button onClick={() => setDetailAnimal(null)} className="si-1b1a545b">✕</button>
@@ -855,7 +855,7 @@ const Animals: React.FC = () => {
               {sectionTitle('📝', t('animals.detailModal.basicInfo'))}
               <div className="si-7e1e70ef">
                 <div><span className="si-23033f05">{t('animals.detailModal.name')}</span> <strong>{detailAnimal.name}</strong></div>
-                <div><span className="si-23033f05">{t('animals.detailModal.species')}</span> <strong>{detailAnimal.species}</strong></div>
+                <div><span className="si-23033f05">{t('animals.detailModal.species')}</span> <strong>{speciesLabel(detailAnimal.species, t)}</strong></div>
                 {detailAnimal.breed && <div><span className="si-23033f05">{t('animals.detailModal.breed')}</span> <strong>{detailAnimal.breed}</strong></div>}
                 {(detailAnimal.animalClass || detailAnimal.gender) && <div><span className="si-23033f05">{t('animals.detailModal.gender')}</span> <strong>{classOrGenderLabel(t, findClassTerm, detailAnimal.species, detailAnimal.animalClass, detailAnimal.gender)}</strong></div>}
                 {detailAnimal.dateOfBirth && <div><span className="si-23033f05">{t('animals.detailModal.dob')}</span> <strong>{formatDate(detailAnimal.dateOfBirth)}</strong></div>}
@@ -946,7 +946,7 @@ const Animals: React.FC = () => {
                       {importPreview.slice(0, 20).map((row, i) => (
                         <tr key={i}>
                           <td>{row.name}</td>
-                          <td>{row.species}</td>
+                          <td>{speciesLabel(row.species, t)}</td>
                           <td>{row.breed || '—'}</td>
                           <td>{row.gender || '—'}</td>
                         </tr>

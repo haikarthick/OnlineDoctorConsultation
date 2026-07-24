@@ -2,6 +2,7 @@
 import { useNavigate as useRouterNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
+import { useMasterData } from '../context/MasterDataContext'
 import apiService from '../services/api'
 import { useTranslation } from 'react-i18next'
 import './AnimalTimeline.css'
@@ -92,6 +93,7 @@ const AnimalTimeline: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { formatDate } = useSettings()
+  const { speciesLabel } = useMasterData()
   const routerNavigate = useRouterNavigate()
 
   const isVet   = user?.role === 'veterinarian'
@@ -498,7 +500,7 @@ const AnimalTimeline: React.FC = () => {
           <h1>📅 {t('timeline.title', 'Animal Life Timeline')}</h1>
           <p className="tl-subtitle">
             {t('timeline.showing', 'Showing')} {filteredEvents.length !== events.length ? `${filteredEvents.length} of` : ''} {events.length} {t('timeline.events', 'events')}
-            {selectedAnimal && <> — <strong>{selectedAnimal.name}</strong> ({selectedAnimal.species})</>}
+            {selectedAnimal && <> — <strong>{selectedAnimal.name}</strong> ({speciesLabel(selectedAnimal.species, t)})</>}
           </p>
         </div>
         <div className="tl-toolbar">
@@ -506,7 +508,7 @@ const AnimalTimeline: React.FC = () => {
             {animals.length === 0 && <option value="">No animals</option>}
             {animals.map(a => (
               <option key={a.id} value={a.id}>
-                {a.name} ({a.species}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
+                {a.name} ({speciesLabel(a.species, t)}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
               </option>
             ))}
           </select>
@@ -782,7 +784,7 @@ const AnimalTimeline: React.FC = () => {
             <div className="tl-drawer-body">
               {[
                 { k: t('common.date'),        v: formatEventDate(drawerEvent.date) },
-                { k: t('common.animal'),      v: selectedAnimal ? `${selectedAnimal.name} (${selectedAnimal.species})` : undefined },
+                { k: t('common.animal'),      v: selectedAnimal ? `${selectedAnimal.name} (${speciesLabel(selectedAnimal.species, t)})` : undefined },
                 { k: t('common.status'),      v: drawerEvent.status,       col: drawerEvent.status === 'active' || drawerEvent.status === 'valid' ? '#2e7d32' : undefined },
                 { k: t('timeline.severity'),    v: drawerEvent.severity,     col: severityColor(drawerEvent.severity) || undefined },
                 { k: t('timeline.recordedBy'), v: drawerEvent.createdByName },

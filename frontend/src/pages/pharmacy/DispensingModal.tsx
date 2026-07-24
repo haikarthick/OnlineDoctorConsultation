@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
+import { useMasterData } from '../../context/MasterDataContext'
 import DispensingReceiptView, { DispensingReceiptData } from '../../components/pharmacy/DispensingReceiptView'
 import MedicationLabelPrint, { LabelItem } from '../../components/pharmacy/MedicationLabelPrint'
 
@@ -70,6 +71,7 @@ function parseMedications(raw: Medication[] | string | undefined): Medication[] 
 export default function DispensingModal({ prescription, pharmacyId, onClose, onDone }: Props) {
   const { t } = useTranslation()
   const { formatCurrency } = useSettings()
+  const { speciesLabel } = useMasterData()
   const [method, setMethod] = useState<typeof METHODS[number]>('walk_in_pickup')
   const [notes, setNotes] = useState('')
   const [inventory, setInventory] = useState<InventoryItem[]>([])
@@ -254,7 +256,7 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
         {/* Patient summary */}
         <div className="si-b11f08cf">
           <strong>🐾 {prescription.pet_name}</strong>
-          {prescription.animal_species && <span className="si-50edd4e9"> ({prescription.animal_species})</span>}
+          {prescription.animal_species && <span className="si-50edd4e9"> ({speciesLabel(prescription.animal_species, t)})</span>}
           {' · '}<span className="si-c477d325">👤 {prescription.owner_name}</span>
           {prescription.vet_name && <span className="si-c477d325"> · 👨‍⚕️ {prescription.vet_name}</span>}
         </div>

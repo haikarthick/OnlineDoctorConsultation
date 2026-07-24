@@ -4,9 +4,11 @@ import './ModulePage.css'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, GeneticProfile, LineagePair } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useMasterData } from '../context/MasterDataContext'
 
 const GenomicLineagePage: React.FC = () => {
   const { t } = useTranslation()
+  const { speciesLabel } = useMasterData()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -158,7 +160,7 @@ const GenomicLineagePage: React.FC = () => {
                   <table className="data-table">
                     <thead><tr><th>{t('genomicLineage.species')}</th><th>{t('genomicLineage.count')}</th><th>{t('genomicLineage.avgInbreeding')}</th></tr></thead>
                     <tbody>{dashboard.bySpecies.map((s: any, i: number) => (
-                      <tr key={i}><td>{s.species}</td><td>{s.count}</td><td>{(+s.avg_inbreeding).toFixed(4)}</td></tr>
+                      <tr key={i}><td>{speciesLabel(s.species, t)}</td><td>{s.count}</td><td>{(+s.avg_inbreeding).toFixed(4)}</td></tr>
                     ))}</tbody>
                   </table>
                 </div>
@@ -170,7 +172,7 @@ const GenomicLineagePage: React.FC = () => {
                   <table className="data-table">
                     <thead><tr><th>{t('genomicLineage.animal')}</th><th>{t('genomicLineage.species')}</th><th>{t('genomicLineage.inbreedingCoeff')}</th></tr></thead>
                     <tbody>{dashboard.highRiskInbreeding.map((a: any, i: number) => (
-                      <tr key={i}><td>{a.name}</td><td>{a.species}</td><td className="si-d36904fc">{(+a.inbreeding_coefficient).toFixed(4)}</td></tr>
+                      <tr key={i}><td>{a.name}</td><td>{speciesLabel(a.species, t)}</td><td className="si-d36904fc">{(+a.inbreeding_coefficient).toFixed(4)}</td></tr>
                     ))}</tbody>
                   </table>
                 </div>
@@ -211,7 +213,7 @@ const GenomicLineagePage: React.FC = () => {
                   {profiles.map(p => (
                     <tr key={p.id}>
                       <td>{p.animalName || (p as any).animal_name || p.animalId}</td>
-                      <td>{p.species || '—'}</td>
+                      <td>{p.species ? speciesLabel(p.species, t) : '—'}</td>
                       <td>{p.sireName || (p as any).sire_name || '—'}</td>
                       <td>{p.damName || (p as any).dam_name || '—'}</td>
                       <td>{p.generation || (p as any).generation}</td>

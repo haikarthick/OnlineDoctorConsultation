@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
+import { useMasterData } from '../../context/MasterDataContext'
 import apiService from '../../services/api'
 import { VideoSession, ChatMessage } from '../../types'
 import { useWebRTC } from '../../hooks/useWebRTC'
@@ -16,6 +17,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   const { t } = useTranslation()
   const { user } = useAuth()
   const { formatTime } = useSettings()
+  const { speciesLabel } = useMasterData()
 
   // Session & chat state
   const [session, setSession] = useState<VideoSession | null>(null)
@@ -940,7 +942,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                       🐾 {animalInfo.name || 'Unknown'}
                     </div>
                     <div className="si-9ac294d9">
-                      {animalInfo.species || ''}{animalInfo.breed ? ` / ${animalInfo.breed}` : ''}
+                      {speciesLabel(animalInfo.species, t)}{animalInfo.breed ? ` / ${animalInfo.breed}` : ''}
                       {animalInfo.age ? ` — ${animalInfo.age}` : ''}
                       {animalInfo.weight ? ` — ${animalInfo.weight}kg` : ''}
                     </div>

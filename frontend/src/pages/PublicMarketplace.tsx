@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import apiService from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing } from '../types'
@@ -17,7 +18,7 @@ const PublicMarketplace: React.FC = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
-  const { classTermsForSpecies, marketplaceCategories, resolveLabel, marketplaceEligibleSpecies } = useMasterData()
+  const { classTermsForSpecies, marketplaceCategories, resolveLabel, marketplaceEligibleSpecies, speciesLabel } = useMasterData()
   const SPECIES_LIST = marketplaceEligibleSpecies
   const CATEGORY_KEYS: Array<{ value: string; label: string }> = [
     { value: '', label: t('marketplace.categories.all') },
@@ -192,7 +193,7 @@ const PublicMarketplace: React.FC = () => {
                   <button key={f.species}
                     className={`pub-mp-facet ${filters.species === f.species ? 'active' : ''}`}
                     onClick={() => updateFilter('species', filters.species === f.species ? '' : f.species)}>
-                    <span className="pub-mp-facet-name">{f.species}</span>
+                    <span className="pub-mp-facet-name">{speciesLabel(f.species, t)}</span>
                     {f.count !== undefined && <span className="pub-mp-facet-count">{f.count}</span>}
                   </button>
                 ))
@@ -222,7 +223,7 @@ const PublicMarketplace: React.FC = () => {
           </select>
           <select className="module-input" value={filters.species || ''} onChange={e => updateFilter('species', e.target.value)}>
             <option value="">{t('marketplace.livestock.allSpecies')}</option>
-            {SPECIES_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+            {SPECIES_LIST.map(s => <option key={s} value={s}>{speciesLabel(s, t)}</option>)}
           </select>
           <select className="module-input" value={filters.gender || ''} onChange={e => updateFilter('gender', e.target.value)}>
             <option value="">{t('marketplace.livestock.anyGender')}</option>
@@ -325,7 +326,8 @@ const PublicMarketplace: React.FC = () => {
 }
 
 // ─── Public Listing Card (reuses marketplace CSS) ───
-const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: (key: string, opts?: any) => string }> = ({ listing: l, formatCurrency, onView, t }) => {
+const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: TFunction }> = ({ listing: l, formatCurrency, onView, t }) => {
+  const { speciesLabel } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -366,7 +368,7 @@ const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency:
 
         {(species || breed) && (
           <div className="mp-card-livestock">
-            {species && <span className="mp-tag species">{species}</span>}
+            {species && <span className="mp-tag species">{speciesLabel(species, t)}</span>}
             {breed && <span className="mp-tag breed">{breed}</span>}
             {gender && <span className="mp-tag gender">{gender === 'female' ? '♀' : '♂'}</span>}
           </div>
@@ -407,10 +409,10 @@ const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency:
 const PublicListingDetail: React.FC<{
   listing: MarketplaceListing; formatCurrency: (n: number) => string;
   onBack: () => void; onLoginPrompt: () => void; isAuthenticated: boolean;
-  t: (key: string, opts?: any) => string;
+  t: TFunction;
 }> = ({ listing: l, formatCurrency, onBack, onLoginPrompt, isAuthenticated, t }) => {
   const navigate = useNavigate()
-  const { findClassTerm } = useMasterData()
+  const { findClassTerm, speciesLabel } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -484,7 +486,7 @@ const PublicListingDetail: React.FC<{
             <div className="mp-detail-section">
               <h3>{t('marketplace.detail.animalProfile')}</h3>
               <div className="mp-detail-grid">
-                {species && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.species')}</span><span className="mp-detail-value">{species}</span></div>}
+                {species && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.species')}</span><span className="mp-detail-value">{speciesLabel(species, t)}</span></div>}
                 {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breed}</span></div>}
                 {(gender || animalClass) && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{(() => {
                   const term = animalClass ? findClassTerm(species || '', animalClass) : undefined

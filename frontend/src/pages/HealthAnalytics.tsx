@@ -5,6 +5,7 @@ import { useScrollToForm } from '../hooks/useScrollToForm'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { Enterprise, HealthObservation, HealthDashboard } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useMasterData } from '../context/MasterDataContext'
 import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -13,6 +14,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 
 const HealthAnalytics: React.FC = () => {
   const { t } = useTranslation()
+  const { speciesLabel } = useMasterData()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -156,7 +158,7 @@ const HealthAnalytics: React.FC = () => {
                       return items.map((a: any) => ({
                         value: a.id,
                         label: a.name,
-                        sublabel: [a.species, a.breed].filter(Boolean).join(' · '),
+                        sublabel: [speciesLabel(a.species, t), a.breed].filter(Boolean).join(' · '),
                       }))
                     }}
                   />

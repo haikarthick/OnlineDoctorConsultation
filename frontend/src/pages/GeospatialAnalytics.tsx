@@ -4,6 +4,7 @@ import './ModulePage.css'
 import { GeofenceZone, GeospatialEvent } from '../types'
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
+import { useMasterData } from '../context/MasterDataContext'
 import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
 const ZONE_TYPES = ['pasture', 'barn', 'medical', 'quarantine', 'feeding', 'water', 'boundary', 'custom']
@@ -12,6 +13,7 @@ const EVENT_TYPES = ['location_update', 'zone_entry', 'zone_exit', 'zone_breach'
 
 const GeospatialAnalytics: React.FC = () => {
   const { t } = useTranslation()
+  const { speciesLabel } = useMasterData()
 
   const [enterprises, setEnterprises] = useState<any[]>([])
   const [enterpriseId, setEnterpriseId] = useState('')
@@ -324,7 +326,7 @@ const GeospatialAnalytics: React.FC = () => {
                         if (!enterpriseId) return []
                         const res = await apiService.get(`/enterprises/${enterpriseId}/animals`, { params: { search: q, limit: 20 } })
                         const items = res.data?.items || res.data?.animals || res.data || []
-                        return items.map((a: any) => ({ value: a.id, label: a.name, sublabel: [a.species, a.breed].filter(Boolean).join(' · ') }))
+                        return items.map((a: any) => ({ value: a.id, label: a.name, sublabel: [speciesLabel(a.species, t), a.breed].filter(Boolean).join(' · ') }))
                       }}
                     />
                   </div>
@@ -488,7 +490,7 @@ const GeospatialAnalytics: React.FC = () => {
                     if (!enterpriseId) return []
                     const res = await apiService.get(`/enterprises/${enterpriseId}/animals`, { params: { search: q, limit: 20 } })
                     const items = res.data?.items || res.data?.animals || res.data || []
-                    return items.map((a: any) => ({ value: a.id, label: a.name, sublabel: [a.species, a.breed].filter(Boolean).join(' · ') }))
+                    return items.map((a: any) => ({ value: a.id, label: a.name, sublabel: [speciesLabel(a.species, t), a.breed].filter(Boolean).join(' · ') }))
                   }}
                 />
               </div>

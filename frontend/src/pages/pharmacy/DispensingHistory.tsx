@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
+import { useMasterData } from '../../context/MasterDataContext'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import DispensingReceiptView, { DispensingReceiptData } from '../../components/pharmacy/DispensingReceiptView'
 
@@ -49,6 +50,7 @@ const METHOD_ICONS: Record<string, string> = {
 export default function DispensingHistory({ pharmacyId }: Props) {
   const { t } = useTranslation()
   const { formatCurrency, formatDate } = useSettings()
+  const { speciesLabel } = useMasterData()
   const [records, setRecords] = useState<DispensingRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -164,7 +166,7 @@ export default function DispensingHistory({ pharmacyId }: Props) {
                     <tr key={r.id}>
                       <td>
                         <strong>{r.animal_name || '—'}</strong>
-                        {r.animal_species && <small className="si-1a0c0bfa">{r.animal_species}</small>}
+                        {r.animal_species && <small className="si-1a0c0bfa">{speciesLabel(r.animal_species, t)}</small>}
                         <small className="si-40d2db53">👤 {r.owner_name || '—'}</small>
                       </td>
                       <td className="si-d83d7d70">

@@ -3,6 +3,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, SustainabilityMetric, SustainabilityGoal } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useMasterData } from '../context/MasterDataContext'
 
 const METRIC_TYPES = [
   { value: 'carbon_emissions', label: '🏭 Carbon Emissions', unit: 'kg CO2e' },
@@ -19,6 +20,7 @@ const SCOPE_LABELS: Record<string, string> = { scope_1: 'Direct Emissions', scop
 
 const Sustainability: React.FC = () => {
   const { t } = useTranslation()
+  const { speciesLabel } = useMasterData()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -291,7 +293,7 @@ const Sustainability: React.FC = () => {
                 <table className="module-table">
                   <thead><tr><th>{t('sustainability.species')}</th><th>{t('sustainability.headCount')}</th><th>{t('sustainability.emissionFactor')}</th><th>{t('sustainability.annualCO2kg')}</th><th>{t('sustainability.annualCO2tons')}</th></tr></thead>
                   <tbody>{carbonEst.estimates?.map((e: any) => (
-                    <tr key={e.species}><td className="si-b2cfcbec">{e.species}</td><td>{e.count}</td><td>{e.emissionFactor} kg CO₂e/head/yr</td>
+                    <tr key={e.species}><td className="si-b2cfcbec">{speciesLabel(e.species, t)}</td><td>{e.count}</td><td>{e.emissionFactor} kg CO₂e/head/yr</td>
                     <td>{Number(e.annualCO2kg ?? 0).toLocaleString()}</td><td>{(Number(e.annualCO2kg ?? 0) / 1000).toFixed(2)}</td></tr>
                   ))}</tbody>
                 </table>

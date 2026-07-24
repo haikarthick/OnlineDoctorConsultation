@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
+import { useMasterData } from '../../context/MasterDataContext'
 import apiService from '../../services/api'
 import CertificatePrintView, { CertificatePrintData, CertificateTemplate } from '../../components/CertificatePrintView'
 import '../../styles/modules.css'
@@ -37,6 +38,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
   const { t } = useTranslation()
   const { user } = useAuth()
   const { formatDate } = useSettings()
+  const { speciesLabel } = useMasterData()
 
   // Read URL params (edit mode or pre-fill)
   const urlParams = new URLSearchParams(window.location.search)
@@ -539,7 +541,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                   <option value="">{isHerd ? `— ${t('certificateWriter.optionalForHerd')} —` : t('certificateWriter.selectAnimal')}</option>
                   {animals.map(a => (
                     <option key={a.id} value={a.id}>
-                      {a.uniqueId ? `[${a.uniqueId}] ` : ''}{a.name} ({a.species}{a.breed ? ', ' + a.breed : ''})
+                      {a.uniqueId ? `[${a.uniqueId}] ` : ''}{a.name} ({speciesLabel(a.species, t)}{a.breed ? ', ' + a.breed : ''})
                     </option>
                   ))}
                 </select>

@@ -6,6 +6,7 @@ import { WellnessScorecard, WellnessReminder } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
+import { useMasterData } from '../context/MasterDataContext'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const SCORE_COLORS = (score: number) => score >= 80 ? '#22c55e' : score >= 60 ? '#eab308' : score >= 40 ? '#f97316' : '#ef4444'
@@ -18,6 +19,7 @@ const WellnessPortal: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { formatDate } = useSettings()
+  const { speciesLabel } = useMasterData()
   const navigate = useNavigate()
   const isFarmer = user?.role === 'farmer'
   const REMINDER_TYPES = isFarmer ? FARMER_REMINDER_TYPES : PET_REMINDER_TYPES
@@ -159,7 +161,7 @@ const WellnessPortal: React.FC = () => {
                       <h4 className="si-44087c4b">{sc.animal_name}</h4>
                       <span style={{ fontSize: 24, fontWeight: 700, color: SCORE_COLORS(+sc.overall_score) }}>{(+sc.overall_score).toFixed(0)}</span>
                     </div>
-                    <div className="si-fb366e09">{sc.species} · {t('wellnessPortal.weight')} {sc.weight_status}</div>
+                    <div className="si-fb366e09">{speciesLabel(sc.species, t)} · {t('wellnessPortal.weight')} {sc.weight_status}</div>
                     <div className="si-319b7b12">
                       {renderScoreGauge(t('wellnessPortal.scoreLabels.nutrition'), +sc.nutrition_score, '🥩')}
                       {renderScoreGauge(t('wellnessPortal.scoreLabels.activity'), +sc.activity_score, '🏃')}
@@ -205,7 +207,7 @@ const WellnessPortal: React.FC = () => {
                 <div><label className="module-label">{t('wellnessPortal.labelAnimal')}</label>
                   <select className="module-input" value={scorecardForm.animalId} onChange={e => setScorecardForm(f => ({ ...f, animalId: e.target.value }))}>
                     <option value="">{t('wellnessPortal.selectAnimal')}</option>
-                    {animals.map((a: any) => <option key={a.id} value={a.id}>{a.name} ({a.species})</option>)}
+                    {animals.map((a: any) => <option key={a.id} value={a.id}>{a.name} ({speciesLabel(a.species, t)})</option>)}
                   </select></div>
                 <div className="si-7e460960">
                   {[[t('wellnessPortal.scoreLabels.nutrition'), 'nutritionScore'], [t('wellnessPortal.scoreLabels.activity'), 'activityScore'], [t('wellnessPortal.scoreLabels.vaccines'), 'vaccinationScore'], [t('wellnessPortal.scoreLabels.dental'), 'dentalScore']].map(([label, field]) => (
@@ -241,7 +243,7 @@ const WellnessPortal: React.FC = () => {
                 <div className="si-eab13361">
                   <div>
                     <h4 className="si-44087c4b">{sc.animalName}</h4>
-                    <div className="si-a3f3564c">{sc.species} · {sc.weightStatus}</div>
+                    <div className="si-a3f3564c">{speciesLabel(sc.species, t)} · {sc.weightStatus}</div>
                   </div>
                 </div>
                 <div className="si-d4b9ebb0">
@@ -285,7 +287,7 @@ const WellnessPortal: React.FC = () => {
                   <div className="si-6acd75e8"><label className="module-label">{t('wellnessPortal.labelAnimal')}</label>
                     <select className="module-input" value={reminderForm.animalId} onChange={e => setReminderForm(f => ({ ...f, animalId: e.target.value }))}>
                       <option value="">{t('wellnessPortal.selectAnimal')}</option>
-                      {animals.map((a: any) => <option key={a.id} value={a.id}>{a.name} ({a.species})</option>)}
+                      {animals.map((a: any) => <option key={a.id} value={a.id}>{a.name} ({speciesLabel(a.species, t)})</option>)}
                     </select></div>
                   <div className="si-6acd75e8"><label className="module-label">{t('wellnessPortal.labelType')}</label>
                     <select className="module-input" value={reminderForm.reminderType} onChange={e => setReminderForm(f => ({ ...f, reminderType: e.target.value }))}>

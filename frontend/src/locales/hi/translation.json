@@ -7483,6 +7483,7 @@
     "noEntries": "अभी कोई प्रविष्टि नहीं",
     "protectedHint": "सुरक्षित — मुख्य लॉजिक इस कोड पर निर्भर है",
     "labelKeyHint": "अंतर्निहित अनुवाद बनाए रखने के लिए खाली छोड़ें",
+    "perLocaleLabelsHint": "वैकल्पिक — नीचे किसी भी भाषा के लिए अनुवादित लेबल जोड़ें। खाली छोड़ने पर उस भाषा में अंग्रेज़ी लेबल दिखेगा।",
     "confirmDelete": "इस प्रविष्टि को हटाएं? इसे पूर्ववत नहीं किया जा सकता।",
     "deleteBlocked": "हटाया नहीं जा सका — यह अभी भी उपयोग में हो सकता है",
     "updatedSuccess": "सफलतापूर्वक अपडेट किया गया",
@@ -7507,7 +7508,25 @@
       "impliedGender": "निहित लिंग",
       "canBePregnant": "गर्भवती हो सकती है",
       "canProduceMilk": "दूध दे सकती है",
-      "marketplaceEligible": "मार्केटप्लेस पर बिक्री योग्य"
+      "marketplaceEligible": "मार्केटप्लेस पर बिक्री योग्य",
+      "labelHi": "Label (हिन्दी)",
+      "labelKn": "Label (ಕನ್ನಡ)",
+      "labelMl": "Label (മലയാളം)",
+      "labelTa": "Label (தமிழ்)",
+      "labelTe": "Label (తెలుగు)"
     }
+  },
+  "speciesNames": {
+    "dog": "कुत्ता", "cat": "बिल्ली", "rabbit": "खरगोश", "hamster": "हैम्स्टर", "guinea_pig": "गिनी पिग",
+    "gerbil": "गर्बिल", "chinchilla": "चिनचिला", "ferret": "फेरेट", "hedgehog": "हेजहॉग",
+    "sugar_glider": "शुगर ग्लाइडर", "parrot": "तोता", "budgerigar": "बजरीगर", "cockatiel": "कॉकटेल",
+    "lovebird": "लवबर्ड", "finch": "फिंच", "canary": "कैनरी", "mynah": "मैना", "pigeon": "कबूतर",
+    "bird": "पक्षी", "tortoise": "कछुआ", "turtle": "जलीय कछुआ", "gecko": "छिपकली",
+    "bearded_dragon": "बियर्डेड ड्रैगन", "chameleon": "गिरगिट", "snake": "साँप", "frog": "मेंढक",
+    "axolotl": "एक्सोलोटल", "ornamental_fish": "सजावटी मछली", "koi": "कोई मछली", "arowana": "अरोवाना",
+    "goldfish": "गोल्डफिश", "cattle": "गाय-बैल", "buffalo": "भैंस", "horse": "घोड़ा", "donkey": "गधा",
+    "sheep": "भेड़", "goat": "बकरी", "pig": "सुअर", "camel": "ऊँट", "yak": "याक", "deer": "हिरण",
+    "chicken": "मुर्गी", "duck": "बत्तख", "turkey": "टर्की", "quail": "बटेर", "emu": "एमू",
+    "ostrich": "शुतुरमुर्ग", "peacock": "मोर", "llama": "लामा", "alpaca": "अल्पाका", "other": "अन्य"
   }
 }

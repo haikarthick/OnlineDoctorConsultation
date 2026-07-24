@@ -5,6 +5,7 @@ import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, DiseasePrediction, OutbreakZone, RiskDashboard } from '../types'
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
+import { useMasterData } from '../context/MasterDataContext'
 
 const SEVERITY_COLORS: Record<string, string> = {
   low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444'
@@ -12,6 +13,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 
 const DiseasePredictionPage: React.FC = () => {
   const { t } = useTranslation()
+  const { speciesLabel } = useMasterData()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -192,7 +194,7 @@ const DiseasePredictionPage: React.FC = () => {
                     <tbody>
                       {(dashboard.topRiskAnimals || []).map((a, i) => (
                         <tr key={i}>
-                          <td>{a.name}</td><td>{a.species}</td><td>{a.breed}</td>
+                          <td>{a.name}</td><td>{speciesLabel(a.species, t)}</td><td>{a.breed}</td>
                           <td><span className="badge" style={{ backgroundColor: +a.highest_risk > 70 ? '#ef4444' : +a.highest_risk > 40 ? '#f97316' : '#22c55e' }}>{(+a.highest_risk).toFixed(1)}%</span></td>
                           <td>{a.prediction_count}</td>
                         </tr>

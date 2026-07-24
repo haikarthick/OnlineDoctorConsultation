@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import apiService from '../services/api'
 import './ModulePage.css'
 import './Marketplace.css'
@@ -51,7 +52,7 @@ const Marketplace: React.FC = () => {
   const { user } = useAuth()
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, marketplaceCategories, marketplaceConditions, resolveLabel, marketplaceEligibleSpecies } = useMasterData()
+  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, marketplaceCategories, marketplaceConditions, resolveLabel, marketplaceEligibleSpecies, speciesLabel } = useMasterData()
   const isAdmin = user?.role === 'admin'
   const SPECIES_LIST = marketplaceEligibleSpecies
   const CATEGORY_KEYS: Array<{ value: string; label: string }> = [
@@ -812,7 +813,7 @@ const Marketplace: React.FC = () => {
               <div className="mp-species-grid">
                 {dashboard.bySpecies.map((s: any) => (
                   <div key={s.species} className="mp-species-card" onClick={() => { setTab('browse'); updateFilter('species', s.species) }}>
-                    <div className="mp-species-name">{s.species}</div>
+                    <div className="mp-species-name">{speciesLabel(s.species, t)}</div>
                     <div className="mp-species-count">{s.count} {t('marketplace.units.listings')}</div>
                     <div className="mp-species-price">{t('common.average')}: {formatCurrency(Math.round(s.avg_price || 0))}</div>
                     {s.avg_milk_yield > 0 && <div className="mp-species-milk">🥛 {Number(s.avg_milk_yield).toFixed(1)}{t('marketplace.units.avgLPerDay')}</div>}
@@ -887,7 +888,7 @@ const Marketplace: React.FC = () => {
                 </select>
                 <select className="module-input si-1403a954" value={filters.species || ''} onChange={e => updateFilter('species', e.target.value)}>
                   <option value="">{t('marketplace.livestock.allSpecies')}</option>
-                  {SPECIES_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+                  {SPECIES_LIST.map(s => <option key={s} value={s}>{speciesLabel(s, t)}</option>)}
                 </select>
                 <select className="module-input si-8ceadd67" value={filters.gender || ''} onChange={e => updateFilter('gender', e.target.value)}>
                   <option value="">{t('marketplace.livestock.anyGender')}</option>
@@ -1012,7 +1013,7 @@ const Marketplace: React.FC = () => {
                         <label className="module-label">{t('marketplace.sell.selectAnimal')}</label>
                         <select className="module-input mp-animal-select" value={selectedAnimalId} onChange={e => handleAnimalSelect(e.target.value)}>
                           <option value="">{t('marketplace.sell.manualEntry')}</option>
-                          {userAnimals.map((a: any) => <option key={a.id} value={a.id}>{a.name} ({a.species}{a.breed ? ` - ${a.breed}` : ''})</option>)}
+                          {userAnimals.map((a: any) => <option key={a.id} value={a.id}>{a.name} ({speciesLabel(a.species, t)}{a.breed ? ` - ${a.breed}` : ''})</option>)}
                         </select>
                       </div>
                       {selectedAnimalId && <div className="mp-auto-populated-badge">✅ {t('marketplace.sell.autoPopulated')}</div>}
@@ -1117,7 +1118,7 @@ const Marketplace: React.FC = () => {
                           <option value="">{t('marketplace.livestock.selectSpecies')}</option>
                           {speciesCategories.map(cat => (
                             <optgroup key={cat.label} label={cat.label}>
-                              {cat.species.map(s => <option key={s} value={s}>{s}</option>)}
+                              {cat.species.map(s => <option key={s} value={s}>{speciesLabel(s, t)}</option>)}
                             </optgroup>
                           ))}
                         </select>
@@ -1402,7 +1403,7 @@ const Marketplace: React.FC = () => {
                   <ReviewItem label={t('marketplace.sell.title').replace(' *', '')} value={sellForm.title} />
                   <ReviewItem label={t('marketplace.sell.category')} value={sellForm.category} />
                   <ReviewItem label={t('marketplace.reviewLabels.type')} value={sellForm.listingType} />
-                  <ReviewItem label={t('marketplace.livestock.species')} value={sellForm.species} />
+                  <ReviewItem label={t('marketplace.livestock.species')} value={speciesLabel(sellForm.species, t)} />
                   <ReviewItem label={t('marketplace.livestock.breed')} value={sellForm.breed} />
                   <ReviewItem label={t('marketplace.livestock.gender')} value={(() => {
                     const term = findClassTerm(sellForm.species, sellForm.animalClass)
@@ -1497,7 +1498,7 @@ const Marketplace: React.FC = () => {
                   return (
                     <tr key={o.id}>
                       <td>{g(o, 'listingTitle', 'listing_title') || '—'}</td>
-                      <td>{o.species || '—'}</td>
+                      <td>{o.species ? speciesLabel(o.species, t) : '—'}</td>
                       <td>{orderRole === 'buyer' ? g(o, 'sellerName', 'seller_name') : g(o, 'buyerName', 'buyer_name')}</td>
                       <td>{o.quantity}</td>
                       <td className="mp-price-highlight">{formatCurrency(g(o, 'totalPrice', 'total_price') || 0)}</td>
@@ -1664,7 +1665,7 @@ const Marketplace: React.FC = () => {
                 <tbody>
                   {marketPrices.map((mp, i) => (
                     <tr key={i}>
-                      <td><strong>{mp.species}</strong></td>
+                      <td><strong>{speciesLabel(mp.species, t)}</strong></td>
                       <td>{mp.breed || '—'}</td>
                       <td>{mp.total_listings}</td>
                       <td className="mp-price-highlight">{formatCurrency(Math.round(mp.avg_price || 0))}</td>
@@ -1715,7 +1716,7 @@ const Marketplace: React.FC = () => {
                   <table className="module-table">
                     <thead><tr><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.admin.count')}</th><th>{t('marketplace.prices.avgPrice')}</th><th>{t('marketplace.admin.avgMilkYield')}</th><th>{t('marketplace.prices.avgWeight')}</th></tr></thead>
                     <tbody>{adminStats.bySpecies.map((s, i) => (
-                      <tr key={i}><td><strong>{s.species}</strong></td><td>{s.count}</td>
+                      <tr key={i}><td><strong>{speciesLabel(s.species, t)}</strong></td><td>{s.count}</td>
                         <td>{formatCurrency(Math.round(s.avg_price || 0))}</td>
                         <td>{s.avg_milk_yield ? `${Number(s.avg_milk_yield).toFixed(1)}L` : '—'}</td>
                         <td>{s.avg_weight ? `${Number(s.avg_weight).toFixed(0)}${t('marketplace.units.kg')}` : '—'}</td></tr>
@@ -1757,7 +1758,7 @@ const Marketplace: React.FC = () => {
                             </div>
                           </td>
                           <td>{g(l, 'sellerName', 'seller_name') || '—'}</td>
-                          <td>{l.species || '—'}</td>
+                          <td>{l.species ? speciesLabel(l.species, t) : '—'}</td>
                           <td>{l.price ? formatCurrency(l.price) : '—'}</td>
                           <td><span className={`module-badge ${l.status === 'active' ? 'success' : l.status === 'rejected' ? 'error' : ''}`}>{l.status}</span></td>
                           <td>{g(l, 'adminApproved', 'admin_approved') === true ? '✅' : g(l, 'adminApproved', 'admin_approved') === false ? '❌' : '⏳'}</td>
@@ -2081,7 +2082,8 @@ const Marketplace: React.FC = () => {
 }
 
 // ─── Listing Card Component ───
-const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: (key: string) => string; isFavorite?: boolean; onToggleFavorite?: () => void }> = ({ listing: l, formatCurrency, onView, t, isFavorite, onToggleFavorite }) => {
+const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: TFunction; isFavorite?: boolean; onToggleFavorite?: () => void }> = ({ listing: l, formatCurrency, onView, t, isFavorite, onToggleFavorite }) => {
+  const { speciesLabel } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -2156,7 +2158,7 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
         {/* Livestock details row */}
         {(species || breed) && (
           <div className="mp-card-livestock">
-            {species && <span className="mp-tag species">{species}</span>}
+            {species && <span className="mp-tag species">{speciesLabel(species, t)}</span>}
             {breed && <span className="mp-tag breed">{breed}</span>}
             {gender && <span className="mp-tag gender">{gender === 'female' ? '♀' : '♂'}</span>}
           </div>
@@ -2230,9 +2232,9 @@ const ListingDetail: React.FC<{
   userId?: string; onRequestContact?: () => void;
   isFavorite?: boolean; onToggleFavorite?: () => void; onMessageSeller?: () => void;
   onReport?: () => void; onBookVetCheck?: () => void; transport?: { url: string };
-  t: (key: string) => string;
+  t: TFunction;
 }> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
-  const { findClassTerm } = useMasterData()
+  const { findClassTerm, speciesLabel } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -2332,7 +2334,7 @@ const ListingDetail: React.FC<{
             <div className="mp-detail-section">
               <h3>{t('marketplace.detail.animalProfile')}</h3>
               <div className="mp-detail-grid">
-                {species && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.species')}</span><span className="mp-detail-value">{species}</span></div>}
+                {species && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.species')}</span><span className="mp-detail-value">{speciesLabel(species, t)}</span></div>}
                 {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breed}</span></div>}
                 {(gender || animalClass) && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{(() => {
                   const term = animalClass ? findClassTerm(species || '', animalClass) : undefined

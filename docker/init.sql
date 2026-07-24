@@ -3484,6 +3484,10 @@ CREATE TABLE IF NOT EXISTS master_species (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code VARCHAR(50) UNIQUE NOT NULL,
   label VARCHAR(100) NOT NULL,
+  -- i18n key resolved via resolveLabel() (same fallback pattern as
+  -- master_marketplace_categories/conditions) — see migration 024. NULL for a
+  -- newly admin-added species with no matching translation falls back to `label`.
+  label_key VARCHAR(150),
   icon VARCHAR(10),
   category VARCHAR(50),
   has_ear_tag BOOLEAN DEFAULT false,
@@ -3495,6 +3499,15 @@ CREATE TABLE IF NOT EXISTS master_species (
   -- newly admin-added species don't silently become sellable; the seed data below
   -- explicitly enables it for the species that were already in the old hardcoded picker.
   is_marketplace_eligible BOOLEAN NOT NULL DEFAULT false,
+  -- Per-locale label overrides (migration 025) — lets an admin type all 6 language
+  -- labels directly when adding a species, no labelKey/i18n-file/deploy needed.
+  -- Checked first by the frontend's speciesLabel() resolver; NULL falls back to
+  -- the label_key/i18n-key path above, same as pre-seeded species always have.
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -3617,6 +3630,12 @@ ON CONFLICT (code) DO NOTHING;
 -- preserves today's marketplace species picker contents exactly, nothing more.
 UPDATE master_species SET is_marketplace_eligible = true
 WHERE code IN ('Cattle', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Chicken', 'Dog', 'Cat', 'Rabbit', 'Other');
+
+-- Species label_key backfill (migration 024): deterministic key per species so every
+-- species name resolves through i18n immediately, no admin action needed.
+UPDATE master_species
+SET label_key = 'speciesNames.' || lower(regexp_replace(code, '[^a-zA-Z0-9]+', '_', 'g'))
+WHERE label_key IS NULL;
 
 -- Breeds (generated from BREED_DATABASE, frontend/src/constants/speciesBreeds.ts)
 INSERT INTO master_breeds (id, species_id, name, sort_order, is_active) VALUES

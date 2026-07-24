@@ -8,7 +8,9 @@ import './MasterDataManagement.css'
 type TabKey = 'species' | 'breeds' | 'classes' | 'categories' | 'conditions'
 
 interface SpeciesRow {
-  id: string; code: string; label: string; icon: string | null; category: string | null;
+  id: string; code: string; label: string;
+  labelHi: string | null; labelKn: string | null; labelMl: string | null; labelTa: string | null; labelTe: string | null;
+  icon: string | null; category: string | null;
   hasEarTag: boolean; sortOrder: number; isActive: boolean; isProtected: boolean; isMarketplaceEligible: boolean
 }
 interface BreedRow { id: string; speciesId: string; speciesCode?: string; name: string; sortOrder: number; isActive: boolean }
@@ -80,7 +82,7 @@ const MasterDataManagement: React.FC = () => {
   const openAdd = () => {
     clearMessages()
     setEditingId(null)
-    if (tab === 'species') setFormData({ code: '', label: '', icon: '', category: '', hasEarTag: false, sortOrder: 0, isMarketplaceEligible: false })
+    if (tab === 'species') setFormData({ code: '', label: '', labelHi: '', labelKn: '', labelMl: '', labelTa: '', labelTe: '', icon: '', category: '', hasEarTag: false, sortOrder: 0, isMarketplaceEligible: false })
     else if (tab === 'breeds') setFormData({ speciesId: scopeSpeciesId, name: '', sortOrder: 0 })
     else if (tab === 'classes') setFormData({ speciesId: scopeSpeciesId, value: '', label: '', impliedGender: 'unknown', canBePregnant: false, canProduceMilk: false, sortOrder: 0 })
     else if (tab === 'categories') setFormData({ code: '', label: '', icon: '', sortOrder: 0 })
@@ -327,6 +329,27 @@ const MasterDataManagement: React.FC = () => {
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.label', 'Label')}</label>
                   <input className="module-input" value={formData.label || ''} onChange={e => setFormData((f: any) => ({ ...f, label: e.target.value }))} />
+                </div>
+                <p className="module-hint">{t('masterData.perLocaleLabelsHint', 'Optional — add a translated label for any language below. Left blank, that language shows the English label instead.')}</p>
+                <div className="module-form-group">
+                  <label className="module-label">{t('masterData.col.labelHi', 'Label (हिन्दी)')}</label>
+                  <input className="module-input" value={formData.labelHi || ''} onChange={e => setFormData((f: any) => ({ ...f, labelHi: e.target.value }))} />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('masterData.col.labelKn', 'Label (ಕನ್ನಡ)')}</label>
+                  <input className="module-input" value={formData.labelKn || ''} onChange={e => setFormData((f: any) => ({ ...f, labelKn: e.target.value }))} />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('masterData.col.labelMl', 'Label (മലയാളം)')}</label>
+                  <input className="module-input" value={formData.labelMl || ''} onChange={e => setFormData((f: any) => ({ ...f, labelMl: e.target.value }))} />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('masterData.col.labelTa', 'Label (தமிழ்)')}</label>
+                  <input className="module-input" value={formData.labelTa || ''} onChange={e => setFormData((f: any) => ({ ...f, labelTa: e.target.value }))} />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('masterData.col.labelTe', 'Label (తెలుగు)')}</label>
+                  <input className="module-input" value={formData.labelTe || ''} onChange={e => setFormData((f: any) => ({ ...f, labelTe: e.target.value }))} />
                 </div>
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.icon', 'Icon (emoji)')}</label>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../context/SettingsContext'
+import { useMasterData } from '../context/MasterDataContext'
 import { vetHospitalApi } from '../services/api/vetHospitalApi'
 import apiService from '../services/api'
 import AnimalSearchPicker from '../components/AnimalSearchPicker'
@@ -25,6 +26,7 @@ const ADMISSION_TYPES = ['surgery_recovery', 'overnight_observation', 'boarding'
 export default function InpatientManagement() {
   const { t } = useTranslation()
   const { formatDateTime, formatCurrency } = useSettings()
+  const { speciesLabel } = useMasterData()
 
   const [hospitalId, setHospitalId] = useState('')
   const [hospitals, setHospitals] = useState<any[]>([])
@@ -235,7 +237,7 @@ export default function InpatientManagement() {
                 <div className="si-7a981126">
                   <div>
                     <div className="si-9dd702ba">{p.animal_name}</div>
-                    <div className="si-4801fc30">{p.animal_species}{p.animal_breed ? ` — ${p.animal_breed}` : ''}{p.animal_weight ? ` • ${p.animal_weight}kg` : ''}</div>
+                    <div className="si-4801fc30">{speciesLabel(p.animal_species, t)}{p.animal_breed ? ` — ${p.animal_breed}` : ''}{p.animal_weight ? ` • ${p.animal_weight}kg` : ''}</div>
                     <div className="si-db3602ae">{t('inpatientManagement.owner')}: {p.owner_first_name} {p.owner_last_name}{p.owner_phone ? ` • ${p.owner_phone}` : ''}</div>
                     {p.enterpriseName && (
                       <div className="si-e893254c">
@@ -534,7 +536,7 @@ export default function InpatientManagement() {
                 {medicalHistory.animal && (
                   <div className="si-1a4f5caf">
                     <div className="si-8b3478d6">🐾 {medicalHistory.animal.name}</div>
-                    <div className="si-c3e04596">{medicalHistory.animal.species}{medicalHistory.animal.breed ? ` — ${medicalHistory.animal.breed}` : ''}{medicalHistory.animal.weight ? ` • ${medicalHistory.animal.weight}kg` : ''}{medicalHistory.animal.age_years ? ` • ${medicalHistory.animal.age_years}y` : ''}</div>
+                    <div className="si-c3e04596">{speciesLabel(medicalHistory.animal.species, t)}{medicalHistory.animal.breed ? ` — ${medicalHistory.animal.breed}` : ''}{medicalHistory.animal.weight ? ` • ${medicalHistory.animal.weight}kg` : ''}{medicalHistory.animal.age_years ? ` • ${medicalHistory.animal.age_years}y` : ''}</div>
                     <div className="si-f199afd6">{t('inpatientManagement.owner')}: {medicalHistory.animal.owner_first_name} {medicalHistory.animal.owner_last_name}</div>
                   </div>
                 )}

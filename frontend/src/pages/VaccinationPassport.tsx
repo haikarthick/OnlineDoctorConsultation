@@ -100,7 +100,7 @@ function ComplianceMeter({ percent }: { percent: number }) {
 
 const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _onNavigate }) => {
   const { t } = useTranslation()
-  const { speciesIcon } = useMasterData()
+  const { speciesIcon, speciesLabel } = useMasterData()
   const { user } = useAuth()
   const { formatDate } = useSettings()
 
@@ -335,7 +335,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                 </div>
               )}
               <div className="vp-animal-meta">
-                {animal.species}
+                {speciesLabel(animal.species, t)}
                 {animal.breed ? ` · ${animal.breed}` : ''}
                 {animal.gender ? ` · ${animal.gender}` : ''}
                 {animal.dateOfBirth
@@ -480,7 +480,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                     <span className="vp-table-icon">{speciesIcon(row.species)}</span>
                     {row.animalName}
                   </td>
-                  <td>{row.species}</td>
+                  <td>{speciesLabel(row.species, t)}</td>
                   <td>{row.ownerName || '—'}</td>
                   <td>{row.totalProtocols}</td>
                   <td>
@@ -528,7 +528,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
           <option value="">{t('vaccinationPassport.selectAnimal')}</option>
           {passports.map((a) => (
             <option key={a.animalId} value={a.animalId}>
-              {speciesIcon(a.species)} {a.animalName} ({a.species}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
+              {speciesIcon(a.species)} {a.animalName} ({speciesLabel(a.species, t)}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
             </option>
           ))}
         </select>

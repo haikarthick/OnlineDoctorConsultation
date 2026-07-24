@@ -6,9 +6,11 @@ import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, ENTERPRISE_TYPE_LABELS, EnterpriseType, EnterpriseStats, EnterpriseMember } from '../types'
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
+import { useMasterData } from '../context/MasterDataContext'
 
 const EnterpriseManagement: React.FC = () => {
   const { t } = useTranslation()
+  const { speciesLabel } = useMasterData()
 
   const { user } = useAuth()
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
@@ -342,7 +344,7 @@ const EnterpriseManagement: React.FC = () => {
                 <h4 className="si-305f3e0a">Animals by Species</h4>
                 {stats.animalsBySpecies.map(s => (
                   <div key={s.species} className="si-4721f179">
-                    <span>{s.species}</span>
+                    <span>{speciesLabel(s.species, t)}</span>
                     <span className="si-b2cfcbec">{s.count}</span>
                   </div>
                 ))}

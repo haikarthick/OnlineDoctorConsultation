@@ -7498,6 +7498,7 @@
     "noEntries": "ಇನ್ನೂ ನಮೂದುಗಳಿಲ್ಲ",
     "protectedHint": "ಸಂರಕ್ಷಿತ — ಪ್ರಮುಖ ತರ್ಕವು ಈ ಕೋಡ್ ಅನ್ನು ಅವಲಂಬಿಸಿದೆ",
     "labelKeyHint": "ಅಂತರ್ನಿರ್ಮಿತ ಅನುವಾದವನ್ನು ಇರಿಸಿಕೊಳ್ಳಲು ಖಾಲಿ ಬಿಡಿ",
+    "perLocaleLabelsHint": "ಐಚ್ಛಿಕ — ಕೆಳಗಿನ ಯಾವುದೇ ಭಾಷೆಗೆ ಅನುವಾದಿತ ಲೇಬಲ್ ಸೇರಿಸಿ. ಖಾಲಿ ಬಿಟ್ಟರೆ, ಆ ಭಾಷೆಯಲ್ಲಿ ಇಂಗ್ಲಿಷ್ ಲೇಬಲ್ ತೋರಿಸಲಾಗುತ್ತದೆ.",
     "confirmDelete": "ಈ ನಮೂದನ್ನು ಅಳಿಸುವುದೇ? ಇದನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.",
     "deleteBlocked": "ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ — ಇದು ಇನ್ನೂ ಬಳಕೆಯಲ್ಲಿರಬಹುದು",
     "updatedSuccess": "ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ",
@@ -7522,7 +7523,25 @@
       "impliedGender": "ಸೂಚಿತ ಲಿಂಗ",
       "canBePregnant": "ಗರ್ಭಿಣಿಯಾಗಬಹುದು",
       "canProduceMilk": "ಹಾಲು ಉತ್ಪಾದಿಸಬಹುದು",
-      "marketplaceEligible": "ಮಾರುಕಟ್ಟೆಯಲ್ಲಿ ಮಾರಾಟ ಯೋಗ್ಯ"
+      "marketplaceEligible": "ಮಾರುಕಟ್ಟೆಯಲ್ಲಿ ಮಾರಾಟ ಯೋಗ್ಯ",
+      "labelHi": "Label (हिन्दी)",
+      "labelKn": "Label (ಕನ್ನಡ)",
+      "labelMl": "Label (മലയാളം)",
+      "labelTa": "Label (தமிழ்)",
+      "labelTe": "Label (తెలుగు)"
     }
+  },
+  "speciesNames": {
+    "dog": "ನಾಯಿ", "cat": "ಬೆಕ್ಕು", "rabbit": "ಮೊಲ", "hamster": "ಹ್ಯಾಮ್ಸ್ಟರ್", "guinea_pig": "ಗಿನಿ ಪಿಗ್",
+    "gerbil": "ಜರ್ಬಿಲ್", "chinchilla": "ಚಿಂಚಿಲ್ಲಾ", "ferret": "ಫೆರೆಟ್", "hedgehog": "ಮುಳ್ಳುಹಂದಿ",
+    "sugar_glider": "ಶುಗರ್ ಗ್ಲೈಡರ್", "parrot": "ಗಿಳಿ", "budgerigar": "ಬಡ್ಜಿ", "cockatiel": "ಕಾಕಟೀಲ್",
+    "lovebird": "ಲವ್ ಬರ್ಡ್", "finch": "ಫಿಂಚ್", "canary": "ಕ್ಯಾನರಿ", "mynah": "ಗೊರವಂಕ", "pigeon": "ಪಾರಿವಾಳ",
+    "bird": "ಪಕ್ಷಿ", "tortoise": "ಆಮೆ", "turtle": "ನೀರಾಮೆ", "gecko": "ಹಲ್ಲಿ",
+    "bearded_dragon": "ಬಿಯರ್ಡೆಡ್ ಡ್ರ್ಯಾಗನ್", "chameleon": "ಗೋಸುಂಬೆ", "snake": "ಹಾವು", "frog": "ಕಪ್ಪೆ",
+    "axolotl": "ಆಕ್ಸೊಲೊಟಲ್", "ornamental_fish": "ಅಲಂಕಾರಿಕ ಮೀನು", "koi": "ಕೋಯಿ ಮೀನು", "arowana": "ಅರೋವಾನಾ",
+    "goldfish": "ಚಿನ್ನದ ಮೀನು", "cattle": "ದನ", "buffalo": "ಎಮ್ಮೆ", "horse": "ಕುದುರೆ", "donkey": "ಕತ್ತೆ",
+    "sheep": "ಕುರಿ", "goat": "ಮೇಕೆ", "pig": "ಹಂದಿ", "camel": "ಒಂಟೆ", "yak": "ಯಾಕ್", "deer": "ಜಿಂಕೆ",
+    "chicken": "ಕೋಳಿ", "duck": "ಬಾತುಕೋಳಿ", "turkey": "ಟರ್ಕಿ ಕೋಳಿ", "quail": "ಲಾವಕ್ಕಿ", "emu": "ಎಮು",
+    "ostrich": "ಆಸ್ಟ್ರಿಚ್", "peacock": "ನವಿಲು", "llama": "ಲಾಮಾ", "alpaca": "ಅಲ್ಪಾಕ", "other": "ಇತರೆ"
   }
 }
