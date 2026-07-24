@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useMasterData } from '../context/MasterDataContext'
+import type { AnimalClassTerm } from '../constants/speciesBreeds'
 
 interface AnimalData {
   id: string; uniqueId?: string; name: string; species: string; breed?: string;
@@ -27,12 +28,13 @@ interface GroupOption { id: string; name: string }
 /** Species-correct class label ("Bullock") when set, falling back to raw gender ("Male"). */
 function classOrGenderLabel(
   t: (k: string) => string,
-  findClassTerm: (species: string, value: string) => { labelKey: string; label?: string | null } | undefined,
+  findClassTerm: (species: string, value: string) => AnimalClassTerm | undefined,
+  resolveLabel: (item: AnimalClassTerm, t: (key: string) => string) => string,
   species: string, animalClass: string | undefined, gender: string | undefined
 ): string | null {
   const term = animalClass ? findClassTerm(species, animalClass) : undefined
-  // Admin-typed label wins over the built-in labelKey translation (matches resolveLabel).
-  if (term) return term.label ? term.label : (term.labelKey ? t(term.labelKey) : null)
+  // Locale-aware (per-locale override → English label → labelKey translation), via resolveLabel.
+  if (term) { const l = resolveLabel(term, t); if (l) return l }
   if (gender === 'male') return t('animals.form.maleDisplay')
   if (gender === 'female') return t('animals.form.femaleDisplay')
   return null
@@ -40,7 +42,7 @@ function classOrGenderLabel(
 
 const Animals: React.FC = () => {
   const { t } = useTranslation()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
+  const { speciesCategories, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
 
   const { user } = useAuth()
   const { formatDate } = useSettings()
@@ -519,7 +521,7 @@ const Animals: React.FC = () => {
                 {breeds.length > 0 ? (
                   <select value={formData.breed} onChange={e => setFormData(p => ({ ...p, breed: e.target.value, customBreed: '' }))} style={fieldStyle}>
                     <option value="">{t('animals.registerModal.selectBreed')}</option>
-                    {breeds.map(b => <option key={b} value={b}>{b}</option>)}
+                    {breeds.map(b => <option key={b} value={b}>{breedLabel(formData.species, b)}</option>)}
                     <option value="Other">{t('animals.registerModal.otherBreed')}</option>
                   </select>
                 ) : (
@@ -734,7 +736,7 @@ const Animals: React.FC = () => {
                       <span className="si-42fc55d5">{speciesIcon(animal.species)}</span>
                       <div>
                         <div className="si-90c2c65d">{animal.name}</div>
-                        <div className="si-122e0f6b">{speciesLabel(animal.species, t)}{animal.breed ? ` • ${animal.breed}` : ''}</div>
+                        <div className="si-122e0f6b">{speciesLabel(animal.species, t)}{animal.breed ? ` • ${breedLabel(animal.species, animal.breed)}` : ''}</div>
                       </div>
                     </div>
                     <div className="si-f4e64596">
@@ -760,7 +762,7 @@ const Animals: React.FC = () => {
                   {/* Card Body */}
                   <div className="si-d29f2575">
                     <div className="si-3b3a79d7">
-                      {(animal.animalClass || animal.gender) && <div><span className="si-23033f05">{t('animals.cardLabels.gender')}</span> <strong>{classOrGenderLabel(t, findClassTerm, animal.species, animal.animalClass, animal.gender)}</strong></div>}
+                      {(animal.animalClass || animal.gender) && <div><span className="si-23033f05">{t('animals.cardLabels.gender')}</span> <strong>{classOrGenderLabel(t, findClassTerm, resolveLabel, animal.species, animal.animalClass, animal.gender)}</strong></div>}
                       {animal.weight && <div><span className="si-23033f05">{t('animals.cardLabels.weight')}</span> <strong>{animal.weight} kg</strong></div>}
                       {animal.color && <div><span className="si-23033f05">{t('animals.cardLabels.color')}</span> <strong>{animal.color}</strong></div>}
                       {animal.isNeutered && <div><span className="si-23033f05">{t('animals.cardLabels.neutered')}</span> <strong className="si-487e8582">{t('animals.cardLabels.yesCheck')}</strong></div>}
@@ -846,7 +848,7 @@ const Animals: React.FC = () => {
                 <span className="si-0067e898">{speciesIcon(detailAnimal.species)}</span>
                 <div>
                   <div className="si-f0920f33">{detailAnimal.name}</div>
-                  <div className="si-e17c55f7">{speciesLabel(detailAnimal.species, t)}{detailAnimal.breed ? ` • ${detailAnimal.breed}` : ''} — {detailAnimal.uniqueId}</div>
+                  <div className="si-e17c55f7">{speciesLabel(detailAnimal.species, t)}{detailAnimal.breed ? ` • ${breedLabel(detailAnimal.species, detailAnimal.breed)}` : ''} — {detailAnimal.uniqueId}</div>
                 </div>
               </div>
               <button onClick={() => setDetailAnimal(null)} className="si-1b1a545b">✕</button>
@@ -857,8 +859,8 @@ const Animals: React.FC = () => {
               <div className="si-7e1e70ef">
                 <div><span className="si-23033f05">{t('animals.detailModal.name')}</span> <strong>{detailAnimal.name}</strong></div>
                 <div><span className="si-23033f05">{t('animals.detailModal.species')}</span> <strong>{speciesLabel(detailAnimal.species, t)}</strong></div>
-                {detailAnimal.breed && <div><span className="si-23033f05">{t('animals.detailModal.breed')}</span> <strong>{detailAnimal.breed}</strong></div>}
-                {(detailAnimal.animalClass || detailAnimal.gender) && <div><span className="si-23033f05">{t('animals.detailModal.gender')}</span> <strong>{classOrGenderLabel(t, findClassTerm, detailAnimal.species, detailAnimal.animalClass, detailAnimal.gender)}</strong></div>}
+                {detailAnimal.breed && <div><span className="si-23033f05">{t('animals.detailModal.breed')}</span> <strong>{breedLabel(detailAnimal.species, detailAnimal.breed)}</strong></div>}
+                {(detailAnimal.animalClass || detailAnimal.gender) && <div><span className="si-23033f05">{t('animals.detailModal.gender')}</span> <strong>{classOrGenderLabel(t, findClassTerm, resolveLabel, detailAnimal.species, detailAnimal.animalClass, detailAnimal.gender)}</strong></div>}
                 {detailAnimal.dateOfBirth && <div><span className="si-23033f05">{t('animals.detailModal.dob')}</span> <strong>{formatDate(detailAnimal.dateOfBirth)}</strong></div>}
                 {detailAnimal.sireName && <div><span className="si-23033f05">{t('animalClass.sire')}</span> <strong>{detailAnimal.sireName}</strong></div>}
                 {detailAnimal.damName && <div><span className="si-23033f05">{t('animalClass.dam')}</span> <strong>{detailAnimal.damName}</strong></div>}

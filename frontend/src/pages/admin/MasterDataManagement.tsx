@@ -14,22 +14,26 @@ interface SpeciesRow {
   hasEarTag: boolean; sortOrder: number; isActive: boolean; isProtected: boolean; isMarketplaceEligible: boolean
 }
 
-/** Per-locale label fields on the Species form, in display order. `col` is the
+/** Per-locale label fields shared by every master-data form, in display order. `col` is the
  *  i18n key for the field caption; `field` is the formData/DB column camelCase key. */
-const SPECIES_LOCALE_FIELDS: Array<{ locale: string; field: 'labelHi' | 'labelKn' | 'labelMl' | 'labelTa' | 'labelTe'; col: string }> = [
+const LOCALE_LABEL_FIELDS: Array<{ locale: string; field: 'labelHi' | 'labelKn' | 'labelMl' | 'labelTa' | 'labelTe'; col: string }> = [
   { locale: 'hi', field: 'labelHi', col: 'masterData.col.labelHi' },
   { locale: 'kn', field: 'labelKn', col: 'masterData.col.labelKn' },
   { locale: 'ml', field: 'labelMl', col: 'masterData.col.labelMl' },
   { locale: 'ta', field: 'labelTa', col: 'masterData.col.labelTa' },
   { locale: 'te', field: 'labelTe', col: 'masterData.col.labelTe' },
 ]
-interface BreedRow { id: string; speciesId: string; speciesCode?: string; name: string; sortOrder: number; isActive: boolean }
-interface ClassRow {
+/** Per-locale label overrides present on every master-data row (migrations 025/026). */
+interface LocaleLabelCols {
+  labelHi: string | null; labelKn: string | null; labelMl: string | null; labelTa: string | null; labelTe: string | null
+}
+interface BreedRow extends LocaleLabelCols { id: string; speciesId: string; speciesCode?: string; name: string; sortOrder: number; isActive: boolean }
+interface ClassRow extends LocaleLabelCols {
   id: string; speciesId: string; speciesCode?: string; value: string; labelKey: string | null; label: string | null;
   impliedGender: 'male' | 'female' | 'unknown'; canBePregnant: boolean; canProduceMilk: boolean; sortOrder: number; isActive: boolean
 }
-interface CategoryRow { id: string; code: string; labelKey: string | null; label: string | null; icon: string | null; sortOrder: number; isActive: boolean; isProtected: boolean }
-interface ConditionRow { id: string; code: string; labelKey: string | null; label: string | null; sortOrder: number; isActive: boolean }
+interface CategoryRow extends LocaleLabelCols { id: string; code: string; labelKey: string | null; label: string | null; icon: string | null; sortOrder: number; isActive: boolean; isProtected: boolean }
+interface ConditionRow extends LocaleLabelCols { id: string; code: string; labelKey: string | null; label: string | null; sortOrder: number; isActive: boolean }
 
 const MasterDataManagement: React.FC = () => {
   const { t, i18n } = useTranslation()
@@ -75,8 +79,32 @@ const MasterDataManagement: React.FC = () => {
       const v = i18n.getFixedT(locale)(key)
       if (v && v !== key) return v
     }
-    return (formData.label as string) || ''
-  }, [formData.labelKey, formData.label, i18n, localeReady])
+    // Breeds have no labelKey — their English value is `name`.
+    return (formData.label as string) || (formData.name as string) || ''
+  }, [formData.labelKey, formData.label, formData.name, i18n, localeReady])
+
+  /** The shared per-locale label input block, reused by all five entity forms. */
+  const renderLocaleLabelInputs = () => (
+    <>
+      <p className="module-hint">{t('masterData.perLocaleLabelsHint', 'Optional — add a translation for any language below. Left blank, that language uses the built-in translation (shown greyed inside each box).')}</p>
+      {LOCALE_LABEL_FIELDS.map(({ locale, field, col }) => {
+        const builtin = builtinLabelFor(locale)
+        return (
+          <div className="module-form-group" key={field}>
+            <label className="module-label">{t(col)}</label>
+            <input className="module-input" value={formData[field] || ''}
+              placeholder={builtin ? t('masterData.currentlyShowing', 'Currently showing: {{value}}', { value: builtin }) : ''}
+              onChange={e => setFormData((f: any) => ({ ...f, [field]: e.target.value }))} />
+          </div>
+        )
+      })}
+    </>
+  )
+
+  /** Per-locale label values from the current form, for update payloads. */
+  const localeLabelsFromForm = () => ({
+    labelHi: formData.labelHi, labelKn: formData.labelKn, labelMl: formData.labelMl, labelTa: formData.labelTa, labelTe: formData.labelTe,
+  })
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -141,20 +169,21 @@ const MasterDataManagement: React.FC = () => {
         else await apiService.adminCreateMasterSpecies(formData)
       } else if (tab === 'breeds') {
         if (!formData.speciesId) { setError(t('masterData.errors.speciesRequired', 'Select a species first')); setSaving(false); return }
-        if (editingId) await apiService.adminUpdateMasterBreed(editingId, { name: formData.name, sortOrder: formData.sortOrder })
+        if (editingId) await apiService.adminUpdateMasterBreed(editingId, { name: formData.name, sortOrder: formData.sortOrder, ...localeLabelsFromForm() })
         else await apiService.adminCreateMasterBreed(formData)
       } else if (tab === 'classes') {
         if (!formData.speciesId) { setError(t('masterData.errors.speciesRequired', 'Select a species first')); setSaving(false); return }
         if (editingId) await apiService.adminUpdateMasterAnimalClass(editingId, {
           label: formData.label, impliedGender: formData.impliedGender,
           canBePregnant: formData.canBePregnant, canProduceMilk: formData.canProduceMilk, sortOrder: formData.sortOrder,
+          ...localeLabelsFromForm(),
         })
         else await apiService.adminCreateMasterAnimalClass(formData)
       } else if (tab === 'categories') {
-        if (editingId) await apiService.adminUpdateMasterMarketplaceCategory(editingId, { label: formData.label, icon: formData.icon, sortOrder: formData.sortOrder })
+        if (editingId) await apiService.adminUpdateMasterMarketplaceCategory(editingId, { label: formData.label, icon: formData.icon, sortOrder: formData.sortOrder, ...localeLabelsFromForm() })
         else await apiService.adminCreateMasterMarketplaceCategory(formData)
       } else {
-        if (editingId) await apiService.adminUpdateMasterMarketplaceCondition(editingId, { label: formData.label, sortOrder: formData.sortOrder })
+        if (editingId) await apiService.adminUpdateMasterMarketplaceCondition(editingId, { label: formData.label, sortOrder: formData.sortOrder, ...localeLabelsFromForm() })
         else await apiService.adminCreateMasterMarketplaceCondition(formData)
       }
       setSuccess(editingId ? t('masterData.updatedSuccess', 'Updated successfully') : t('masterData.createdSuccess', 'Created successfully'))
@@ -365,18 +394,7 @@ const MasterDataManagement: React.FC = () => {
                   <label className="module-label">{t('masterData.col.label', 'Label')}</label>
                   <input className="module-input" value={formData.label || ''} onChange={e => setFormData((f: any) => ({ ...f, label: e.target.value }))} />
                 </div>
-                <p className="module-hint">{t('masterData.perLocaleLabelsHint', 'Optional — add a translated label for any language below. Left blank, that language uses the built-in translation (shown greyed inside each box).')}</p>
-                {SPECIES_LOCALE_FIELDS.map(({ locale, field, col }) => {
-                  const builtin = builtinLabelFor(locale)
-                  return (
-                    <div className="module-form-group" key={field}>
-                      <label className="module-label">{t(col)}</label>
-                      <input className="module-input" value={formData[field] || ''}
-                        placeholder={builtin ? t('masterData.currentlyShowing', 'Currently showing: {{value}}', { value: builtin }) : ''}
-                        onChange={e => setFormData((f: any) => ({ ...f, [field]: e.target.value }))} />
-                    </div>
-                  )
-                })}
+                {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.icon', 'Icon (emoji)')}</label>
                   <input className="module-input" value={formData.icon || ''} onChange={e => setFormData((f: any) => ({ ...f, icon: e.target.value }))} maxLength={10} />
@@ -406,6 +424,7 @@ const MasterDataManagement: React.FC = () => {
                   <label className="module-label">{t('common.name')}</label>
                   <input className="module-input" value={formData.name || ''} onChange={e => setFormData((f: any) => ({ ...f, name: e.target.value }))} />
                 </div>
+                {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>
                   <input type="number" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
@@ -425,6 +444,7 @@ const MasterDataManagement: React.FC = () => {
                   <input className="module-input" value={formData.label || ''} onChange={e => setFormData((f: any) => ({ ...f, label: e.target.value }))}
                     placeholder={formData.labelKey ? t('masterData.currentlyShowing', 'Currently showing: {{value}}', { value: t(formData.labelKey) }) : ''} />
                 </div>
+                {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.impliedGender', 'Implied gender')}</label>
                   <select className="module-input" value={formData.impliedGender || 'unknown'} onChange={e => setFormData((f: any) => ({ ...f, impliedGender: e.target.value }))}>
@@ -460,6 +480,7 @@ const MasterDataManagement: React.FC = () => {
                   <input className="module-input" value={formData.label || ''} onChange={e => setFormData((f: any) => ({ ...f, label: e.target.value }))}
                     placeholder={formData.labelKey ? t('masterData.currentlyShowing', 'Currently showing: {{value}}', { value: t(formData.labelKey) }) : ''} />
                 </div>
+                {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.icon', 'Icon (emoji)')}</label>
                   <input className="module-input" value={formData.icon || ''} onChange={e => setFormData((f: any) => ({ ...f, icon: e.target.value }))} maxLength={10} />
@@ -483,6 +504,7 @@ const MasterDataManagement: React.FC = () => {
                   <input className="module-input" value={formData.label || ''} onChange={e => setFormData((f: any) => ({ ...f, label: e.target.value }))}
                     placeholder={formData.labelKey ? t('masterData.currentlyShowing', 'Currently showing: {{value}}', { value: t(formData.labelKey) }) : ''} />
                 </div>
+                {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>
                   <input type="number" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />

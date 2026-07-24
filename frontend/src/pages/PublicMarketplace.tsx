@@ -327,7 +327,7 @@ const PublicMarketplace: React.FC = () => {
 
 // ─── Public Listing Card (reuses marketplace CSS) ───
 const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: TFunction }> = ({ listing: l, formatCurrency, onView, t }) => {
-  const { speciesLabel } = useMasterData()
+  const { speciesLabel, breedLabel } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -369,7 +369,7 @@ const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency:
         {(species || breed) && (
           <div className="mp-card-livestock">
             {species && <span className="mp-tag species">{speciesLabel(species, t)}</span>}
-            {breed && <span className="mp-tag breed">{breed}</span>}
+            {breed && <span className="mp-tag breed">{breedLabel(species, breed)}</span>}
             {gender && <span className="mp-tag gender">{gender === 'female' ? '♀' : '♂'}</span>}
           </div>
         )}
@@ -412,7 +412,7 @@ const PublicListingDetail: React.FC<{
   t: TFunction;
 }> = ({ listing: l, formatCurrency, onBack, onLoginPrompt, isAuthenticated, t }) => {
   const navigate = useNavigate()
-  const { findClassTerm, speciesLabel, resolveLabel } = useMasterData()
+  const { findClassTerm, speciesLabel, resolveLabel, breedLabel } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -487,7 +487,7 @@ const PublicListingDetail: React.FC<{
               <h3>{t('marketplace.detail.animalProfile')}</h3>
               <div className="mp-detail-grid">
                 {species && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.species')}</span><span className="mp-detail-value">{speciesLabel(species, t)}</span></div>}
-                {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breed}</span></div>}
+                {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breedLabel(species, breed)}</span></div>}
                 {(gender || animalClass) && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{(() => {
                   const term = animalClass ? findClassTerm(species || '', animalClass) : undefined
                   if (term) return resolveLabel(term, t)

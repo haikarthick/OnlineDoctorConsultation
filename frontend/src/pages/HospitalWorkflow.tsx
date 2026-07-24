@@ -31,7 +31,7 @@ const STAGE_ICONS: Record<string, string> = {
 export default function HospitalWorkflow() {
   const { t } = useTranslation()
   const { formatDateTime } = useSettings()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
+  const { speciesCategories, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
 
   const [tab, setTab] = useState<'queue' | 'workflow' | 'referrals'>('queue')
   const [hospitalId, setHospitalId] = useState('')
@@ -733,7 +733,7 @@ export default function HospitalWorkflow() {
                             {breedsForSpecies(walkInForm.animalSpecies).length > 0 ? (
                               <select value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value, animalCustomBreed: '' }))} className="si-f3740d1a">
                                 <option value="">{t('hospitalWorkflow.walkIn.selectBreed')}</option>
-                                {breedsForSpecies(walkInForm.animalSpecies).map(b => <option key={b} value={b}>{b}</option>)}
+                                {breedsForSpecies(walkInForm.animalSpecies).map(b => <option key={b} value={b}>{breedLabel(walkInForm.animalSpecies, b)}</option>)}
                               </select>
                             ) : (
                               <input placeholder={t('hospitalWorkflow.walkIn.breedPlaceholder')} value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value }))} className="si-d0e0df59" />

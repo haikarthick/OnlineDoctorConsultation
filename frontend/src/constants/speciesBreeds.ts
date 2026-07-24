@@ -94,6 +94,12 @@ export interface AnimalClassTerm {
   labelKey: string
   /** Admin-typed plain-text label (master-data CRUD) — fallback when labelKey is empty. */
   label?: string | null
+  /** Admin-typed per-locale display overrides (migration 026). */
+  labelHi?: string | null
+  labelKn?: string | null
+  labelMl?: string | null
+  labelTa?: string | null
+  labelTe?: string | null
   impliedGender: 'male' | 'female' | 'unknown'
   canBePregnant: boolean
   canProduceMilk: boolean

@@ -52,7 +52,7 @@ const Marketplace: React.FC = () => {
   const { user } = useAuth()
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, marketplaceCategories, marketplaceConditions, resolveLabel, marketplaceEligibleSpecies, speciesLabel } = useMasterData()
+  const { speciesCategories, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, marketplaceCategories, marketplaceConditions, resolveLabel, marketplaceEligibleSpecies, speciesLabel } = useMasterData()
   const isAdmin = user?.role === 'admin'
   const SPECIES_LIST = marketplaceEligibleSpecies
   const CATEGORY_KEYS: Array<{ value: string; label: string }> = [
@@ -1136,7 +1136,7 @@ const Marketplace: React.FC = () => {
                           return breeds.length > 0 ? (
                             <select className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} disabled={!sellForm.species}>
                               <option value="">{sellForm.species ? t('marketplace.sell.selectBreed') : t('marketplace.sell.selectSpeciesFirst')}</option>
-                              {breeds.map(b => <option key={b} value={b}>{b}</option>)}
+                              {breeds.map(b => <option key={b} value={b}>{breedLabel(sellForm.species, b)}</option>)}
                             </select>
                           ) : (
                             <input className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} placeholder={t('marketplace.sell.breedPlaceholder')} disabled={!sellForm.species} />
@@ -1410,7 +1410,7 @@ const Marketplace: React.FC = () => {
                   <ReviewItem label={t('marketplace.sell.category')} value={sellForm.category} />
                   <ReviewItem label={t('marketplace.reviewLabels.type')} value={sellForm.listingType} />
                   <ReviewItem label={t('marketplace.livestock.species')} value={speciesLabel(sellForm.species, t)} />
-                  <ReviewItem label={t('marketplace.livestock.breed')} value={sellForm.breed} />
+                  <ReviewItem label={t('marketplace.livestock.breed')} value={breedLabel(sellForm.species, sellForm.breed)} />
                   <ReviewItem label={t('marketplace.livestock.gender')} value={(() => {
                     const term = findClassTerm(sellForm.species, sellForm.animalClass)
                     if (term) return resolveLabel(term, t)
@@ -2089,7 +2089,7 @@ const Marketplace: React.FC = () => {
 
 // ─── Listing Card Component ───
 const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: TFunction; isFavorite?: boolean; onToggleFavorite?: () => void }> = ({ listing: l, formatCurrency, onView, t, isFavorite, onToggleFavorite }) => {
-  const { speciesLabel } = useMasterData()
+  const { speciesLabel, breedLabel } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -2165,7 +2165,7 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
         {(species || breed) && (
           <div className="mp-card-livestock">
             {species && <span className="mp-tag species">{speciesLabel(species, t)}</span>}
-            {breed && <span className="mp-tag breed">{breed}</span>}
+            {breed && <span className="mp-tag breed">{breedLabel(species, breed)}</span>}
             {gender && <span className="mp-tag gender">{gender === 'female' ? '♀' : '♂'}</span>}
           </div>
         )}
@@ -2240,7 +2240,7 @@ const ListingDetail: React.FC<{
   onReport?: () => void; onBookVetCheck?: () => void; transport?: { url: string };
   t: TFunction;
 }> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
-  const { findClassTerm, speciesLabel, resolveLabel } = useMasterData()
+  const { findClassTerm, speciesLabel, resolveLabel, breedLabel } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -2341,7 +2341,7 @@ const ListingDetail: React.FC<{
               <h3>{t('marketplace.detail.animalProfile')}</h3>
               <div className="mp-detail-grid">
                 {species && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.species')}</span><span className="mp-detail-value">{speciesLabel(species, t)}</span></div>}
-                {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breed}</span></div>}
+                {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breedLabel(species, breed)}</span></div>}
                 {(gender || animalClass) && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{(() => {
                   const term = animalClass ? findClassTerm(species || '', animalClass) : undefined
                   if (term) return resolveLabel(term, t)

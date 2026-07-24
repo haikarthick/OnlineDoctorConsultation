@@ -3518,6 +3518,13 @@ CREATE TABLE IF NOT EXISTS master_breeds (
   name VARCHAR(150) NOT NULL,
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
+  -- Per-locale display overrides (migration 026) — translate `name`; NULL falls back to
+  -- the canonical English name, which remains the stored/value column.
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(species_id, name)
@@ -3534,6 +3541,12 @@ CREATE TABLE IF NOT EXISTS master_animal_classes (
   can_produce_milk BOOLEAN DEFAULT false,
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
+  -- Per-locale label overrides (migration 026) — NULL falls back to label_key/label.
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(species_id, value)
@@ -3548,6 +3561,12 @@ CREATE TABLE IF NOT EXISTS master_marketplace_categories (
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
   is_protected BOOLEAN DEFAULT false,
+  -- Per-locale label overrides (migration 026) — NULL falls back to label_key/label.
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -3559,6 +3578,12 @@ CREATE TABLE IF NOT EXISTS master_marketplace_conditions (
   label VARCHAR(100),
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
+  -- Per-locale label overrides (migration 026) — NULL falls back to label_key/label.
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

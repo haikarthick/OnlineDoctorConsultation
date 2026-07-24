@@ -26,7 +26,17 @@ export interface MasterSpecies {
   updatedAt: string;
 }
 
-export interface MasterBreed {
+/** Per-locale label overrides shared by every master-data entity (migrations 025/026).
+ *  For breeds these translate `name`; for the others they translate the labelKey/label. */
+export interface LocaleLabels {
+  labelHi: string | null;
+  labelKn: string | null;
+  labelMl: string | null;
+  labelTa: string | null;
+  labelTe: string | null;
+}
+
+export interface MasterBreed extends LocaleLabels {
   id: string;
   speciesId: string;
   speciesCode?: string;
@@ -37,7 +47,7 @@ export interface MasterBreed {
   updatedAt: string;
 }
 
-export interface MasterAnimalClass {
+export interface MasterAnimalClass extends LocaleLabels {
   id: string;
   speciesId: string;
   speciesCode?: string;
@@ -53,7 +63,7 @@ export interface MasterAnimalClass {
   updatedAt: string;
 }
 
-export interface MasterMarketplaceCategory {
+export interface MasterMarketplaceCategory extends LocaleLabels {
   id: string;
   code: string;
   labelKey: string | null;
@@ -66,7 +76,7 @@ export interface MasterMarketplaceCategory {
   updatedAt: string;
 }
 
-export interface MasterMarketplaceCondition {
+export interface MasterMarketplaceCondition extends LocaleLabels {
   id: string;
   code: string;
   labelKey: string | null;
@@ -78,6 +88,19 @@ export interface MasterMarketplaceCondition {
 }
 
 // ─── Row mappers ─────────────────────────────────────────────────────────────
+
+/** camelCase per-locale label fields from a raw row (label_hi..label_te). */
+function mapLocaleLabels(row: any): LocaleLabels {
+  return { labelHi: row.label_hi, labelKn: row.label_kn, labelMl: row.label_ml, labelTa: row.label_ta, labelTe: row.label_te };
+}
+
+/** DB column names for the per-locale label update field maps, keyed by input field. */
+const LOCALE_LABEL_COLUMNS: Record<string, string> = {
+  labelHi: 'label_hi', labelKn: 'label_kn', labelMl: 'label_ml', labelTa: 'label_ta', labelTe: 'label_te',
+};
+
+/** Optional per-locale label inputs accepted by create/update methods. */
+type LocaleLabelInput = { labelHi?: string; labelKn?: string; labelMl?: string; labelTa?: string; labelTe?: string };
 
 function mapSpecies(row: any): MasterSpecies {
   return {
@@ -94,6 +117,7 @@ function mapBreed(row: any): MasterBreed {
   return {
     id: row.id, speciesId: row.species_id, speciesCode: row.species_code,
     name: row.name, sortOrder: row.sort_order, isActive: row.is_active,
+    ...mapLocaleLabels(row),
     createdAt: row.created_at, updatedAt: row.updated_at,
   };
 }
@@ -104,6 +128,7 @@ function mapAnimalClass(row: any): MasterAnimalClass {
     value: row.value, labelKey: row.label_key, label: row.label,
     impliedGender: row.implied_gender, canBePregnant: row.can_be_pregnant, canProduceMilk: row.can_produce_milk,
     sortOrder: row.sort_order, isActive: row.is_active,
+    ...mapLocaleLabels(row),
     createdAt: row.created_at, updatedAt: row.updated_at,
   };
 }
@@ -112,6 +137,7 @@ function mapCategory(row: any): MasterMarketplaceCategory {
   return {
     id: row.id, code: row.code, labelKey: row.label_key, label: row.label, icon: row.icon,
     sortOrder: row.sort_order, isActive: row.is_active, isProtected: row.is_protected,
+    ...mapLocaleLabels(row),
     createdAt: row.created_at, updatedAt: row.updated_at,
   };
 }
@@ -120,6 +146,7 @@ function mapCondition(row: any): MasterMarketplaceCondition {
   return {
     id: row.id, code: row.code, labelKey: row.label_key, label: row.label,
     sortOrder: row.sort_order, isActive: row.is_active,
+    ...mapLocaleLabels(row),
     createdAt: row.created_at, updatedAt: row.updated_at,
   };
 }
@@ -216,20 +243,25 @@ class MasterDataService {
     return result.rows.map(mapBreed);
   }
 
-  async createBreed(input: { speciesId: string; name: string; sortOrder?: number }): Promise<MasterBreed> {
+  async createBreed(input: { speciesId: string; name: string; sortOrder?: number } & LocaleLabelInput): Promise<MasterBreed> {
     const result = await database.query(
-      `INSERT INTO master_breeds (species_id, name, sort_order) VALUES ($1, $2, $3) RETURNING *`,
-      [input.speciesId, input.name, input.sortOrder ?? 0]
+      `INSERT INTO master_breeds (species_id, name, sort_order, label_hi, label_kn, label_ml, label_ta, label_te)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [input.speciesId, input.name, input.sortOrder ?? 0,
+       input.labelHi ?? null, input.labelKn ?? null, input.labelMl ?? null, input.labelTa ?? null, input.labelTe ?? null]
     );
     return mapBreed(result.rows[0]);
   }
 
-  async updateBreed(id: string, input: { name?: string; sortOrder?: number }): Promise<MasterBreed> {
+  async updateBreed(id: string, input: { name?: string; sortOrder?: number } & LocaleLabelInput): Promise<MasterBreed> {
     const setClauses: string[] = [];
     const params: any[] = [];
     let idx = 1;
     if (input.name !== undefined) { setClauses.push(`name = $${idx}`); params.push(input.name); idx++; }
     if (input.sortOrder !== undefined) { setClauses.push(`sort_order = $${idx}`); params.push(input.sortOrder); idx++; }
+    for (const [key, col] of Object.entries(LOCALE_LABEL_COLUMNS)) {
+      if ((input as any)[key] !== undefined) { setClauses.push(`${col} = $${idx}`); params.push((input as any)[key]); idx++; }
+    }
     if (setClauses.length === 0) {
       const existing = await database.query('SELECT * FROM master_breeds WHERE id = $1', [id]);
       if (!existing.rows[0]) throw new NotFoundError('Breed', id);
@@ -319,11 +351,12 @@ class MasterDataService {
   async createAnimalClass(input: {
     speciesId: string; value: string; labelKey?: string; label?: string;
     impliedGender: 'male' | 'female' | 'unknown'; canBePregnant?: boolean; canProduceMilk?: boolean; sortOrder?: number;
-  }): Promise<MasterAnimalClass> {
+  } & LocaleLabelInput): Promise<MasterAnimalClass> {
     const result = await database.query(
-      `INSERT INTO master_animal_classes (species_id, value, label_key, label, implied_gender, can_be_pregnant, can_produce_milk, sort_order)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [input.speciesId, input.value, input.labelKey ?? null, input.label ?? null, input.impliedGender, input.canBePregnant ?? false, input.canProduceMilk ?? false, input.sortOrder ?? 0]
+      `INSERT INTO master_animal_classes (species_id, value, label_key, label, implied_gender, can_be_pregnant, can_produce_milk, sort_order, label_hi, label_kn, label_ml, label_ta, label_te)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+      [input.speciesId, input.value, input.labelKey ?? null, input.label ?? null, input.impliedGender, input.canBePregnant ?? false, input.canProduceMilk ?? false, input.sortOrder ?? 0,
+       input.labelHi ?? null, input.labelKn ?? null, input.labelMl ?? null, input.labelTa ?? null, input.labelTe ?? null]
     );
     return mapAnimalClass(result.rows[0]);
   }
@@ -331,13 +364,14 @@ class MasterDataService {
   async updateAnimalClass(id: string, input: {
     labelKey?: string; label?: string; impliedGender?: 'male' | 'female' | 'unknown';
     canBePregnant?: boolean; canProduceMilk?: boolean; sortOrder?: number;
-  }): Promise<MasterAnimalClass> {
+  } & LocaleLabelInput): Promise<MasterAnimalClass> {
     const setClauses: string[] = [];
     const params: any[] = [];
     let idx = 1;
     const fieldMap: Record<string, string> = {
       labelKey: 'label_key', label: 'label', impliedGender: 'implied_gender',
       canBePregnant: 'can_be_pregnant', canProduceMilk: 'can_produce_milk', sortOrder: 'sort_order',
+      ...LOCALE_LABEL_COLUMNS,
     };
     for (const [key, col] of Object.entries(fieldMap)) {
       if ((input as any)[key] !== undefined) { setClauses.push(`${col} = $${idx}`); params.push((input as any)[key]); idx++; }
@@ -387,19 +421,21 @@ class MasterDataService {
     return result.rows.map(mapCategory);
   }
 
-  async createMarketplaceCategory(input: { code: string; labelKey?: string; label?: string; icon?: string; sortOrder?: number }): Promise<MasterMarketplaceCategory> {
+  async createMarketplaceCategory(input: { code: string; labelKey?: string; label?: string; icon?: string; sortOrder?: number } & LocaleLabelInput): Promise<MasterMarketplaceCategory> {
     const result = await database.query(
-      `INSERT INTO master_marketplace_categories (code, label_key, label, icon, sort_order) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [input.code, input.labelKey ?? null, input.label ?? null, input.icon ?? null, input.sortOrder ?? 0]
+      `INSERT INTO master_marketplace_categories (code, label_key, label, icon, sort_order, label_hi, label_kn, label_ml, label_ta, label_te)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [input.code, input.labelKey ?? null, input.label ?? null, input.icon ?? null, input.sortOrder ?? 0,
+       input.labelHi ?? null, input.labelKn ?? null, input.labelMl ?? null, input.labelTa ?? null, input.labelTe ?? null]
     );
     return mapCategory(result.rows[0]);
   }
 
-  async updateMarketplaceCategory(id: string, input: { labelKey?: string; label?: string; icon?: string; sortOrder?: number }): Promise<MasterMarketplaceCategory> {
+  async updateMarketplaceCategory(id: string, input: { labelKey?: string; label?: string; icon?: string; sortOrder?: number } & LocaleLabelInput): Promise<MasterMarketplaceCategory> {
     const setClauses: string[] = [];
     const params: any[] = [];
     let idx = 1;
-    const fieldMap: Record<string, string> = { labelKey: 'label_key', label: 'label', icon: 'icon', sortOrder: 'sort_order' };
+    const fieldMap: Record<string, string> = { labelKey: 'label_key', label: 'label', icon: 'icon', sortOrder: 'sort_order', ...LOCALE_LABEL_COLUMNS };
     for (const [key, col] of Object.entries(fieldMap)) {
       if ((input as any)[key] !== undefined) { setClauses.push(`${col} = $${idx}`); params.push((input as any)[key]); idx++; }
     }
@@ -443,19 +479,21 @@ class MasterDataService {
     return result.rows.map(mapCondition);
   }
 
-  async createMarketplaceCondition(input: { code: string; labelKey?: string; label?: string; sortOrder?: number }): Promise<MasterMarketplaceCondition> {
+  async createMarketplaceCondition(input: { code: string; labelKey?: string; label?: string; sortOrder?: number } & LocaleLabelInput): Promise<MasterMarketplaceCondition> {
     const result = await database.query(
-      `INSERT INTO master_marketplace_conditions (code, label_key, label, sort_order) VALUES ($1, $2, $3, $4) RETURNING *`,
-      [input.code, input.labelKey ?? null, input.label ?? null, input.sortOrder ?? 0]
+      `INSERT INTO master_marketplace_conditions (code, label_key, label, sort_order, label_hi, label_kn, label_ml, label_ta, label_te)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [input.code, input.labelKey ?? null, input.label ?? null, input.sortOrder ?? 0,
+       input.labelHi ?? null, input.labelKn ?? null, input.labelMl ?? null, input.labelTa ?? null, input.labelTe ?? null]
     );
     return mapCondition(result.rows[0]);
   }
 
-  async updateMarketplaceCondition(id: string, input: { labelKey?: string; label?: string; sortOrder?: number }): Promise<MasterMarketplaceCondition> {
+  async updateMarketplaceCondition(id: string, input: { labelKey?: string; label?: string; sortOrder?: number } & LocaleLabelInput): Promise<MasterMarketplaceCondition> {
     const setClauses: string[] = [];
     const params: any[] = [];
     let idx = 1;
-    const fieldMap: Record<string, string> = { labelKey: 'label_key', label: 'label', sortOrder: 'sort_order' };
+    const fieldMap: Record<string, string> = { labelKey: 'label_key', label: 'label', sortOrder: 'sort_order', ...LOCALE_LABEL_COLUMNS };
     for (const [key, col] of Object.entries(fieldMap)) {
       if ((input as any)[key] !== undefined) { setClauses.push(`${col} = $${idx}`); params.push((input as any)[key]); idx++; }
     }
