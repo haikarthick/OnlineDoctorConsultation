@@ -148,7 +148,7 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
       for (const c of [...classes].sort((a, b2) => a.sortOrder - b2.sortOrder)) {
         if (!classMap[c.speciesCode]) classMap[c.speciesCode] = []
         classMap[c.speciesCode].push({
-          value: c.value, labelKey: c.labelKey || '', impliedGender: c.impliedGender,
+          value: c.value, labelKey: c.labelKey || '', label: c.label ?? null, impliedGender: c.impliedGender,
           canBePregnant: c.canBePregnant, canProduceMilk: c.canProduceMilk,
         })
       }

@@ -27,11 +27,11 @@ interface GroupOption { id: string; name: string }
 /** Species-correct class label ("Bullock") when set, falling back to raw gender ("Male"). */
 function classOrGenderLabel(
   t: (k: string) => string,
-  findClassTerm: (species: string, value: string) => { labelKey: string } | undefined,
+  findClassTerm: (species: string, value: string) => { labelKey: string; label?: string | null } | undefined,
   species: string, animalClass: string | undefined, gender: string | undefined
 ): string | null {
   const term = animalClass ? findClassTerm(species, animalClass) : undefined
-  if (term) return t(term.labelKey)
+  if (term) return term.labelKey ? t(term.labelKey) : (term.label || null)
   if (gender === 'male') return t('animals.form.maleDisplay')
   if (gender === 'female') return t('animals.form.femaleDisplay')
   return null
@@ -39,7 +39,7 @@ function classOrGenderLabel(
 
 const Animals: React.FC = () => {
   const { t } = useTranslation()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies, speciesLabel } = useMasterData()
+  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
 
   const { user } = useAuth()
   const { formatDate } = useSettings()
@@ -540,7 +540,7 @@ const Animals: React.FC = () => {
                       setFormData(p => ({ ...p, animalClass: e.target.value, gender: term?.impliedGender || p.gender }))
                     }} style={fieldStyle}>
                       <option value="">{t('animalClass.selectClass')}</option>
-                      {classTermsForSpecies(formData.species).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                      {classTermsForSpecies(formData.species).map(c => <option key={c.value} value={c.value}>{resolveLabel(c, t)}</option>)}
                     </select>
                   </>
                 ) : (

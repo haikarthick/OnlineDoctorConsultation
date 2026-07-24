@@ -93,7 +93,7 @@ const REVIEW_STATUS_KEY: Record<string, string> = {
 const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, onClose }) => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
-  const { findClassTerm } = useMasterData()
+  const { findClassTerm, resolveLabel } = useMasterData()
   const tpl = { ...DEFAULT_TEMPLATE, ...template }
   const overlayRef = useRef<HTMLDivElement>(null)
 
@@ -218,7 +218,7 @@ const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, on
                 <span className="rx-info-value">
                   {(() => {
                     const classTerm = rx.animalClass ? findClassTerm(rx.animalSpecies || '', rx.animalClass) : undefined
-                    const genderOrClass = classTerm ? t(classTerm.labelKey) : rx.animalGender
+                    const genderOrClass = classTerm ? resolveLabel(classTerm, t) : rx.animalGender
                     return [rx.animalAge, genderOrClass].filter(Boolean).join(' / ')
                   })()}
                 </span>

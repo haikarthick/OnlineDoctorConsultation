@@ -92,6 +92,8 @@ export const SPECIES_CATEGORIES: Array<{ label: string; species: string[] }> = [
 export interface AnimalClassTerm {
   value: string
   labelKey: string
+  /** Admin-typed plain-text label (master-data CRUD) — fallback when labelKey is empty. */
+  label?: string | null
   impliedGender: 'male' | 'female' | 'unknown'
   canBePregnant: boolean
   canProduceMilk: boolean

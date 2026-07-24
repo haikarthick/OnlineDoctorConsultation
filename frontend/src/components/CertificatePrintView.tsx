@@ -181,7 +181,7 @@ function VaccineTable({ details, t }: { details?: { vaccines?: VaccinationEntry[
 const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, onClose }) => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
-  const { findClassTerm, speciesLabel } = useMasterData()
+  const { findClassTerm, speciesLabel, resolveLabel } = useMasterData()
   const tpl = { ...DEFAULT_TEMPLATE, ...template }
   const overlayRef = useRef<HTMLDivElement>(null)
   const docRef = useRef<HTMLDivElement>(null)
@@ -372,7 +372,7 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
                 <span className="cert-info-value">
                   {(() => {
                     const classTerm = cert.animalClass ? findClassTerm(cert.animalSpecies || '', cert.animalClass) : undefined
-                    const genderOrClass = classTerm ? t(classTerm.labelKey) : cert.animalGender
+                    const genderOrClass = classTerm ? resolveLabel(classTerm, t) : cert.animalGender
                     return [calcAge(cert.animalDob), genderOrClass].filter(Boolean).join(' / ')
                   })()}
                 </span>

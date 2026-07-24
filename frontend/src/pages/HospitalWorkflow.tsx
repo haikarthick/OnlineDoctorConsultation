@@ -31,7 +31,7 @@ const STAGE_ICONS: Record<string, string> = {
 export default function HospitalWorkflow() {
   const { t } = useTranslation()
   const { formatDateTime } = useSettings()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, earTagSpecies, speciesLabel } = useMasterData()
+  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
 
   const [tab, setTab] = useState<'queue' | 'workflow' | 'referrals'>('queue')
   const [hospitalId, setHospitalId] = useState('')
@@ -756,7 +756,7 @@ export default function HospitalWorkflow() {
                                   setWalkInForm(f => ({ ...f, animalClass: e.target.value, animalGender: term?.impliedGender || f.animalGender }))
                                 }} className="si-f3740d1a">
                                   <option value="">{t('animalClass.selectClass')}</option>
-                                  {classTermsForSpecies(walkInForm.animalSpecies).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                                  {classTermsForSpecies(walkInForm.animalSpecies).map(c => <option key={c.value} value={c.value}>{resolveLabel(c, t)}</option>)}
                                 </select>
                               </>
                             ) : (
