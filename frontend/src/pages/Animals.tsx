@@ -31,7 +31,8 @@ function classOrGenderLabel(
   species: string, animalClass: string | undefined, gender: string | undefined
 ): string | null {
   const term = animalClass ? findClassTerm(species, animalClass) : undefined
-  if (term) return term.labelKey ? t(term.labelKey) : (term.label || null)
+  // Admin-typed label wins over the built-in labelKey translation (matches resolveLabel).
+  if (term) return term.label ? term.label : (term.labelKey ? t(term.labelKey) : null)
   if (gender === 'male') return t('animals.form.maleDisplay')
   if (gender === 'female') return t('animals.form.femaleDisplay')
   return null

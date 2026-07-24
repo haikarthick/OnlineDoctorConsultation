@@ -189,8 +189,14 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
   }, [classesBySpecies])
 
   const resolveLabel = useCallback((item: { labelKey?: string | null; label?: string | null }, t: (key: string) => string): string => {
+    // Admin-typed `label` wins over the built-in i18n `labelKey`: it's the override an
+    // admin sets when renaming an entry. Seeded rows have label=NULL (see migration 022 —
+    // categories/conditions/classes seed label_key only), so they correctly fall through
+    // to the translated labelKey. Without this precedence, renaming a seeded entry via the
+    // Master Data label field saved but never displayed (labelKey always shadowed it).
+    if (item.label) return item.label
     if (item.labelKey) return t(item.labelKey)
-    return item.label || ''
+    return ''
   }, [])
 
   const speciesLabel = useCallback((species: string | undefined, t: TFunction): string => {
