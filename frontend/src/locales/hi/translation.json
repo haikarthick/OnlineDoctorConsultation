@@ -5279,7 +5279,8 @@
     "resetPasswordLabel": "New Password",
     "resetPasswordBtn": "Reset Password",
     "resetPasswordSuccess": "Password reset successfully",
-    "resetPasswordMin": "Minimum 8 characters required"
+    "resetPasswordMin": "Minimum 8 characters required",
+    "vetRoleHint": "पशु चिकित्सक भूमिका देने से एक डॉक्टर प्रोफ़ाइल बनती है। सत्यापित चिह्नित करने के लिए लाइसेंस नंबर जोड़ें, या असत्यापित (लेकिन दृश्यमान) प्रोफ़ाइल के लिए खाली छोड़ें।"
   },
   "vetHospitalAdmin": {
     "title": "पशु अस्पताल प्रशासन",

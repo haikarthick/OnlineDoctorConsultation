@@ -233,16 +233,49 @@ class AdminService {
     return result.rows[0];
   }
 
-  async changeUserRole(userId: string, newRole: string): Promise<any> {
-    const result = await database.query(
-      `UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2
-       RETURNING id, email, first_name as "firstName", last_name as "lastName", role,
-       is_active as "isActive", account_status as "accountStatus", updated_at as "updatedAt"`,
-      [newRole, userId]
-    );
-    if (result.rows.length === 0) throw new NotFoundError('User', userId);
-    logger.info('User role changed', { userId, newRole });
-    return result.rows[0];
+  async changeUserRole(
+    userId: string,
+    newRole: string,
+    profile?: { licenseNumber?: string; specializations?: string[]; qualifications?: string[]; yearsOfExperience?: number; consultationFee?: number; clinicName?: string }
+  ): Promise<any> {
+    // Provision the vet_profiles satellite row in the same transaction as the role flip, so a
+    // user assigned the veterinarian role is always visible/bookable in Find Doctor (INNER JOIN
+    // vet_profiles). ON CONFLICT DO NOTHING never clobbers an existing (possibly verified) profile.
+    // is_verified=true only when the admin supplied a license (that entry IS the verification).
+    return database.transaction(async (client: any) => {
+      const result = await client.query(
+        `UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2
+         RETURNING id, email, first_name as "firstName", last_name as "lastName", role,
+         is_active as "isActive", account_status as "accountStatus", updated_at as "updatedAt"`,
+        [newRole, userId]
+      );
+      if (result.rows.length === 0) throw new NotFoundError('User', userId);
+
+      if (newRole === 'veterinarian') {
+        const p = profile || {};
+        const license = (p.licenseNumber || '').toString().trim();
+        await client.query(
+          `INSERT INTO vet_profiles
+             (user_id, license_number, specializations, qualifications, years_of_experience,
+              clinic_name, consultation_fee, is_verified, is_available)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
+           ON CONFLICT (user_id) DO NOTHING`,
+          [
+            userId,
+            license,
+            Array.isArray(p.specializations) ? p.specializations : [],
+            Array.isArray(p.qualifications) ? p.qualifications : [],
+            Number(p.yearsOfExperience) || 0,
+            (p.clinicName || '').toString().trim(),
+            Number(p.consultationFee) || 0,
+            license !== '',
+          ]
+        );
+      }
+
+      logger.info('User role changed', { userId, newRole, vetProfileEnsured: newRole === 'veterinarian' });
+      return result.rows[0];
+    });
   }
 
   async listAllConsultations(params: { limit?: number; offset?: number; status?: string }): Promise<PaginatedResponse<any>> {

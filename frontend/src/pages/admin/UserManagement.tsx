@@ -71,6 +71,11 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
   const [processing, setProcessing] = useState<string | null>(null)
   const [showRoleModal, setShowRoleModal] = useState<User | null>(null)
   const [newRole, setNewRole] = useState('')
+  // Vet details when an admin assigns the veterinarian role directly — supplying a license
+  // marks the provisioned vet_profiles row verified; leaving it blank still makes the vet
+  // visible/bookable (unverified) so they never silently disappear from Find Doctor.
+  const [roleVetLicense, setRoleVetLicense] = useState('')
+  const [roleVetFee, setRoleVetFee] = useState('')
 
   // Vet Profile Modal
   const [showVetModal, setShowVetModal] = useState<User | null>(null)
@@ -287,9 +292,16 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
     if (!showRoleModal || !newRole) return
     try {
       setProcessing(showRoleModal.id)
-      await apiService.adminChangeUserRole(showRoleModal.id, newRole)
+      const vetProfile = newRole === 'veterinarian'
+        ? {
+            licenseNumber: roleVetLicense.trim() || undefined,
+            consultationFee: roleVetFee ? Number(roleVetFee) : undefined,
+          }
+        : undefined
+      await apiService.adminChangeUserRole(showRoleModal.id, newRole, vetProfile)
       setUsers(users.map(u => u.id === showRoleModal.id ? { ...u, role: newRole } : u))
       setShowRoleModal(null)
+      setRoleVetLicense(''); setRoleVetFee('')
     } catch (err: any) {
       console.error('Failed to change role:', err?.message)
       setActionError(err?.response?.data?.message || err?.message || 'Failed to change user role')
@@ -755,6 +767,22 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                   <option value="admin">{t('userManagement.admin')}</option>
                 </select>
               </div>
+              {newRole === 'veterinarian' && (
+                <div className="module-alert si-e120eda2">
+                  <p className="si-c3b93ebb">{t('userManagement.vetRoleHint')}</p>
+                  <div className="form-group">
+                    <label className="form-label">{t('settings.roleChange.vetLicense')}</label>
+                    <input className="form-input" type="text" value={roleVetLicense}
+                      onChange={e => setRoleVetLicense(e.target.value)}
+                      placeholder={t('settings.roleChange.vetLicensePlaceholder')} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">{t('settings.roleChange.vetFee')}</label>
+                    <input className="form-input" type="number" min={0} value={roleVetFee}
+                      onChange={e => setRoleVetFee(e.target.value)} placeholder="500" />
+                  </div>
+                </div>
+              )}
               <div className="si-f5f9f5f6">
                 <button className="btn btn-outline" onClick={() => setShowRoleModal(null)}>{t('userManagement.cancel')}</button>
                 <button className="btn btn-primary" disabled={!newRole || processing === showRoleModal.id} onClick={handleChangeRole}>
@@ -814,7 +842,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                   <td>
                     <div className="si-50c82988">
                       {/* Role button */}
-                      <button className="btn btn-sm btn-outline" onClick={() => { setShowRoleModal(u); setNewRole('') }}>
+                      <button className="btn btn-sm btn-outline" onClick={() => { setShowRoleModal(u); setNewRole(''); setRoleVetLicense(''); setRoleVetFee('') }}>
                         {t('userManagement.role')}
                       </button>
                       {/* Vet profile button */}

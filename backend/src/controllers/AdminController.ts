@@ -178,10 +178,10 @@ class AdminController {
 
   async changeUserRole(req: Request, res: Response) {
     const authReq = this.assertAdmin(req);
-    const { role } = req.body;
+    const { role, profile } = req.body;
     if (!role) throw new ValidationError('role field is required');
 
-    const user = await AdminService.changeUserRole(req.params.id, role);
+    const user = await AdminService.changeUserRole(req.params.id, role, profile);
 
     await AdminService.createAuditLog({
       userId: authReq.userId!,

@@ -5279,7 +5279,8 @@
     "resetPasswordLabel": "New Password",
     "resetPasswordBtn": "Reset Password",
     "resetPasswordSuccess": "Password reset successfully",
-    "resetPasswordMin": "Minimum 8 characters required"
+    "resetPasswordMin": "Minimum 8 characters required",
+    "vetRoleHint": "கால்நடை மருத்துவர் பணியை வழங்குவது ஒரு மருத்துவர் சுயவிவரத்தை உருவாக்குகிறது. சரிபார்க்கப்பட்டதாகக் குறிக்க உரிமம் எண்ணைச் சேர்க்கவும், அல்லது சரிபார்க்கப்படாத (ஆனால் தெரியும்) சுயவிவரத்திற்கு காலியாக விடவும்."
   },
   "vetHospitalAdmin": {
     "title": "கால்நடை மருத்துவமனை நிர்வாகம்",

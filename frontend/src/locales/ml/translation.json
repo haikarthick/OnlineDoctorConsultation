@@ -5034,7 +5034,8 @@
     "resetPasswordLabel": "New Password",
     "resetPasswordBtn": "Reset Password",
     "resetPasswordSuccess": "Password reset successfully",
-    "resetPasswordMin": "Minimum 8 characters required"
+    "resetPasswordMin": "Minimum 8 characters required",
+    "vetRoleHint": "വെറ്ററിനറി റോൾ നൽകുന്നത് ഒരു ഡോക്ടർ പ്രൊഫൈൽ സൃഷ്ടിക്കുന്നു. പരിശോധിച്ചുറപ്പിച്ചതായി അടയാളപ്പെടുത്താൻ ലൈസൻസ് നമ്പർ ചേർക്കുക, അല്ലെങ്കിൽ പരിശോധിക്കാത്ത (എന്നാൽ ദൃശ്യമായ) പ്രൊഫൈലിനായി ശൂന്യമായി വിടുക."
   },
   "vetHospitalAdmin": {
     "title": "വെറ്റ് ആശുപത്രി അഡ്മിൻ",

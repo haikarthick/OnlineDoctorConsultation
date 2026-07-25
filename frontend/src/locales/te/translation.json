@@ -5279,7 +5279,8 @@
     "resetPasswordLabel": "New Password",
     "resetPasswordBtn": "Reset Password",
     "resetPasswordSuccess": "Password reset successfully",
-    "resetPasswordMin": "Minimum 8 characters required"
+    "resetPasswordMin": "Minimum 8 characters required",
+    "vetRoleHint": "పశువైద్యుని పాత్రను కేటాయించడం డాక్టర్ ప్రొఫైల్‌ను సృష్టిస్తుంది. ధృవీకరించబడినట్లు గుర్తించడానికి లైసెన్స్ నంబర్‌ను జోడించండి, లేదా ధృవీకరించని (కానీ కనిపించే) ప్రొఫైల్ కోసం ఖాళీగా ఉంచండి."
   },
   "vetHospitalAdmin": {
     "title": "పశు ఆసుపత్రి నిర్వహణ",

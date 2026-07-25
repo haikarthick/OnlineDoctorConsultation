@@ -5281,7 +5281,8 @@
     "resetPasswordLabel": "New Password",
     "resetPasswordBtn": "Reset Password",
     "resetPasswordSuccess": "Password reset successfully",
-    "resetPasswordMin": "Minimum 8 characters required"
+    "resetPasswordMin": "Minimum 8 characters required",
+    "vetRoleHint": "ಪಶುವೈದ್ಯ ಪಾತ್ರವನ್ನು ನಿಯೋಜಿಸುವುದು ವೈದ್ಯ ಪ್ರೊಫೈಲ್ ರಚಿಸುತ್ತದೆ. ಪರಿಶೀಲಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಲು ಪರವಾನಗಿ ಸಂಖ್ಯೆ ಸೇರಿಸಿ, ಅಥವಾ ಪರಿಶೀಲಿಸದ (ಆದರೆ ಗೋಚರ) ಪ್ರೊಫೈಲ್‌ಗಾಗಿ ಖಾಲಿ ಬಿಡಿ."
   },
   "vetHospitalAdmin": {
     "title": "ಪಶು ಆಸ್ಪತ್ರೆ ನಿರ್ವಹಣೆ",

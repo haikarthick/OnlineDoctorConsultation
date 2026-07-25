@@ -955,8 +955,12 @@ class ApiService {
     return response.data
   }
 
-  async adminChangeUserRole(userId: string, role: string) {
-    const response = await this.client.put(`/admin/users/${userId}/role`, { role })
+  async adminChangeUserRole(
+    userId: string,
+    role: string,
+    profile?: { licenseNumber?: string; consultationFee?: number; yearsOfExperience?: number; specializations?: string[]; clinicName?: string }
+  ) {
+    const response = await this.client.put(`/admin/users/${userId}/role`, profile ? { role, profile } : { role })
     return response.data
   }
 
