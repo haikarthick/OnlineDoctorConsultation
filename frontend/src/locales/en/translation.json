@@ -1842,7 +1842,18 @@
       "errSameRole": "You already have this role.",
       "errAlreadyPending": "You already have a pending request.",
       "successSubmit": "Request submitted! Admin will review shortly.",
-      "successCancel": "Request cancelled."
+      "successCancel": "Request cancelled.",
+      "vetDetailsTitle": "Veterinarian Details",
+      "vetDetailsDesc": "These details are required so the admin can verify your credentials and activate your doctor profile in one step.",
+      "vetLicense": "License Number",
+      "vetLicensePlaceholder": "e.g. VET-12345",
+      "vetLicenseRequired": "License number is required to request the veterinarian role.",
+      "vetFee": "Consultation Fee",
+      "vetExperience": "Years of Experience",
+      "vetClinic": "Clinic Name",
+      "vetClinicPlaceholder": "e.g. City Pet Clinic",
+      "vetSpecializations": "Specializations",
+      "vetSpecializationsPlaceholder": "Small Animals, Surgery, Dentistry (comma separated)"
     }
   },
   "enterpriseManagement": {
@@ -4666,7 +4677,14 @@
     "approveSuccess": "Role change approved. User must re-login.",
     "rejectSuccess": "Role change request rejected.",
     "reviewedBy": "Reviewed by {{name}}",
-    "rejectedReason": "Reason: {{reason}}"
+    "rejectedReason": "Reason: {{reason}}",
+    "vet": {
+      "license": "License",
+      "fee": "Fee",
+      "experience": "Experience (yrs)",
+      "specializations": "Specializations",
+      "clinic": "Clinic"
+    }
   },
   "adminDashboard": {
     "title": "Admin Dashboard",

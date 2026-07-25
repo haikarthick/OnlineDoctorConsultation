@@ -29,6 +29,13 @@ const Settings: React.FC = () => {
   const [rcMsg, setRcMsg] = useState('')
   const [selectedNewRole, setSelectedNewRole] = useState('')
   const [rcReason, setRcReason] = useState('')
+  // Vet-specific details, required when requesting the veterinarian role (mirrors
+  // registration) so an admin can verify + provision the vet profile in one approval step.
+  const [rcVetLicense, setRcVetLicense] = useState('')
+  const [rcVetFee, setRcVetFee] = useState('')
+  const [rcVetExperience, setRcVetExperience] = useState('')
+  const [rcVetSpecializations, setRcVetSpecializations] = useState('')
+  const [rcVetClinic, setRcVetClinic] = useState('')
 
   // P6-NOTIFICATIONS: notification preferences
   const [digestEnabled, setDigestEnabled] = useState(true)
@@ -51,15 +58,35 @@ const Settings: React.FC = () => {
   const pendingRequest = roleRequests.find((r: any) => r.status === 'pending')
   const approvedRequest = roleRequests.find((r: any) => r.status === 'approved')
 
+  const isVetRequest = selectedNewRole === 'veterinarian'
+  const vetDetailsMissing = isVetRequest && !rcVetLicense.trim()
+
   const handleSubmitRoleChange = async () => {
     if (!selectedNewRole || !rcReason.trim()) return
+    if (vetDetailsMissing) { setRcMsg(t('settings.roleChange.vetLicenseRequired')); return }
     setRcSubmitting(true)
     setRcMsg('')
     try {
-      await apiService.submitRoleChangeRequest({ requested_role: selectedNewRole, reason: rcReason })
+      const payload: Parameters<typeof apiService.submitRoleChangeRequest>[0] = {
+        requested_role: selectedNewRole,
+        reason: rcReason,
+      }
+      if (isVetRequest) {
+        payload.profile = {
+          licenseNumber: rcVetLicense.trim(),
+          consultationFee: rcVetFee ? Number(rcVetFee) : undefined,
+          yearsOfExperience: rcVetExperience ? Number(rcVetExperience) : undefined,
+          specializations: rcVetSpecializations
+            ? rcVetSpecializations.split(',').map(s => s.trim()).filter(Boolean)
+            : undefined,
+          clinicName: rcVetClinic.trim() || undefined,
+        }
+      }
+      await apiService.submitRoleChangeRequest(payload)
       setRcMsg(t('settings.roleChange.successSubmit'))
       setSelectedNewRole('')
       setRcReason('')
+      setRcVetLicense(''); setRcVetFee(''); setRcVetExperience(''); setRcVetSpecializations(''); setRcVetClinic('')
       const r = await apiService.getMyRoleChangeRequests()
       setRoleRequests((r as any).data || [])
     } catch (err: any) {
@@ -574,6 +601,46 @@ const Settings: React.FC = () => {
                 </select>
               </div>
             </div>
+            {/* Vet-specific details — shown only when requesting the veterinarian role, so
+                the admin can verify the license and provision the vet profile in one step. */}
+            {isVetRequest && (
+              <div className="module-alert si-e120eda2">
+                <strong>{t('settings.roleChange.vetDetailsTitle')}</strong>
+                <p className="si-676930d7">{t('settings.roleChange.vetDetailsDesc')}</p>
+                <div className="module-form-row">
+                  <div className="module-form-group">
+                    <label className="module-label">{t('settings.roleChange.vetLicense')} *</label>
+                    <input className="module-input" type="text" value={rcVetLicense}
+                      onChange={e => setRcVetLicense(e.target.value)}
+                      placeholder={t('settings.roleChange.vetLicensePlaceholder')} />
+                  </div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('settings.roleChange.vetFee')}</label>
+                    <input className="module-input" type="number" min={0} value={rcVetFee}
+                      onChange={e => setRcVetFee(e.target.value)} placeholder="500" />
+                  </div>
+                </div>
+                <div className="module-form-row">
+                  <div className="module-form-group">
+                    <label className="module-label">{t('settings.roleChange.vetExperience')}</label>
+                    <input className="module-input" type="number" min={0} value={rcVetExperience}
+                      onChange={e => setRcVetExperience(e.target.value)} placeholder="5" />
+                  </div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('settings.roleChange.vetClinic')}</label>
+                    <input className="module-input" type="text" value={rcVetClinic}
+                      onChange={e => setRcVetClinic(e.target.value)}
+                      placeholder={t('settings.roleChange.vetClinicPlaceholder')} />
+                  </div>
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('settings.roleChange.vetSpecializations')}</label>
+                  <input className="module-input" type="text" value={rcVetSpecializations}
+                    onChange={e => setRcVetSpecializations(e.target.value)}
+                    placeholder={t('settings.roleChange.vetSpecializationsPlaceholder')} />
+                </div>
+              </div>
+            )}
             <div className="module-form-group">
               <label className="module-label">{t('settings.roleChange.reasonLabel')}</label>
               <textarea
@@ -582,12 +649,12 @@ const Settings: React.FC = () => {
                 value={rcReason}
                 onChange={e => setRcReason(e.target.value)}
                 placeholder={t('settings.roleChange.reasonPlaceholder')}
-               
+
               />
             </div>
             <button
               className="module-btn primary"
-              disabled={!selectedNewRole || rcReason.length < 10 || rcSubmitting}
+              disabled={!selectedNewRole || rcReason.length < 10 || rcSubmitting || vetDetailsMissing}
               onClick={handleSubmitRoleChange}
             >
               {rcSubmitting ? t('settings.roleChange.submitting') : t('settings.roleChange.submitBtn')}

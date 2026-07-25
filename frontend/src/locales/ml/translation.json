@@ -1842,7 +1842,18 @@
       "errSameRole": "You already have this role.",
       "errAlreadyPending": "You already have a pending request.",
       "successSubmit": "Request submitted! Admin will review shortly.",
-      "successCancel": "Request cancelled."
+      "successCancel": "Request cancelled.",
+      "vetDetailsTitle": "വെറ്ററിനറി ഡോക്ടർ വിവരങ്ങൾ",
+      "vetDetailsDesc": "അഡ്മിന് നിങ്ങളുടെ യോഗ്യതകൾ പരിശോധിച്ച് ഒറ്റ ഘട്ടത്തിൽ നിങ്ങളുടെ ഡോക്ടർ പ്രൊഫൈൽ സജീവമാക്കാൻ ഈ വിവരങ്ങൾ ആവശ്യമാണ്.",
+      "vetLicense": "ലൈസൻസ് നമ്പർ",
+      "vetLicensePlaceholder": "ഉദാ. VET-12345",
+      "vetLicenseRequired": "വെറ്ററിനറി റോൾ അഭ്യർത്ഥിക്കാൻ ലൈസൻസ് നമ്പർ ആവശ്യമാണ്.",
+      "vetFee": "കൺസൾട്ടേഷൻ ഫീസ്",
+      "vetExperience": "പരിചയ വർഷങ്ങൾ",
+      "vetClinic": "ക്ലിനിക്കിന്റെ പേര്",
+      "vetClinicPlaceholder": "ഉദാ. സിറ്റി പെറ്റ് ക്ലിനിക്",
+      "vetSpecializations": "സ്പെഷ്യലൈസേഷനുകൾ",
+      "vetSpecializationsPlaceholder": "ചെറിയ മൃഗങ്ങൾ, ശസ്ത്രക്രിയ, ദന്തചികിത്സ (കോമ കൊണ്ട് വേർതിരിക്കുക)"
     }
   },
   "enterpriseManagement": {
@@ -6271,7 +6282,14 @@
     "approveSuccess": "Role change approved. User must re-login.",
     "rejectSuccess": "Role change request rejected.",
     "reviewedBy": "Reviewed by {{name}}",
-    "rejectedReason": "Reason: {{reason}}"
+    "rejectedReason": "Reason: {{reason}}",
+    "vet": {
+      "license": "ലൈസൻസ്",
+      "fee": "ഫീസ്",
+      "experience": "പരിചയം (വർഷം)",
+      "specializations": "സ്പെഷ്യലൈസേഷനുകൾ",
+      "clinic": "ക്ലിനിക്"
+    }
   },
   "wallet": {
     "pageTitle": "💰 My Wallet",

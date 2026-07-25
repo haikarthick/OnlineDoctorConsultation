@@ -1824,6 +1824,10 @@ CREATE TABLE IF NOT EXISTS role_change_requests (
     "current_role" VARCHAR(50) NOT NULL,
     requested_role VARCHAR(50) NOT NULL,
     reason TEXT,
+    -- Role-specific details captured at request time (e.g. vet license_number,
+    -- specializations, fee) so an admin can review + provision the satellite profile
+    -- (vet_profiles) in one approval step. See migration 027.
+    profile_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
     status VARCHAR(20) NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
     reviewed_by UUID REFERENCES users(id),

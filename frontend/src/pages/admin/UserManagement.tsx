@@ -630,7 +630,18 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       </td>
                       <td>{getRoleBadge(r.currentRole)}</td>
                       <td>{getRoleBadge(r.requestedRole)}</td>
-                      <td className="si-af971f42">{r.reason}</td>
+                      <td className="si-af971f42">
+                        {r.reason}
+                        {r.requestedRole === 'veterinarian' && r.profilePayload?.licenseNumber && (
+                          <div className="si-a5de6cea si-7e63ec4f">
+                            <div><strong>{t('adminRoleRequests.vet.license')}:</strong> {r.profilePayload.licenseNumber}</div>
+                            {r.profilePayload.consultationFee != null && <div><strong>{t('adminRoleRequests.vet.fee')}:</strong> {r.profilePayload.consultationFee}</div>}
+                            {r.profilePayload.yearsOfExperience != null && <div><strong>{t('adminRoleRequests.vet.experience')}:</strong> {r.profilePayload.yearsOfExperience}</div>}
+                            {Array.isArray(r.profilePayload.specializations) && r.profilePayload.specializations.length > 0 && <div><strong>{t('adminRoleRequests.vet.specializations')}:</strong> {r.profilePayload.specializations.join(', ')}</div>}
+                            {r.profilePayload.clinicName && <div><strong>{t('adminRoleRequests.vet.clinic')}:</strong> {r.profilePayload.clinicName}</div>}
+                          </div>
+                        )}
+                      </td>
                       <td className="si-0a803082">{new Date(r.createdAt).toLocaleDateString()}</td>
                       {requestsFilter === 'pending' ? (
                         <td>

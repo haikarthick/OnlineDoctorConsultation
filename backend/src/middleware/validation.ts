@@ -1592,9 +1592,26 @@ export const createPatientConsentSchema = Joi.object({
   validUntil: Joi.date().min(Joi.ref('validFrom')).optional().allow(null),
 });
 
+// Vet details captured on a role-change request TO veterinarian, so the admin can
+// review the license and provision vet_profiles in one approval step (see migration 027).
+const roleChangeVetProfileSchema = Joi.object({
+  licenseNumber: shortText(100).required(),
+  specializations: Joi.array().items(Joi.string().max(100)).optional(),
+  qualifications: Joi.array().items(Joi.string().max(200)).optional(),
+  yearsOfExperience: positiveInt.max(80).optional(),
+  consultationFee: positiveNumber.max(100000).optional(),
+  clinicName: shortText().optional().allow('', null),
+});
+
 export const roleChangeRequestSchema = Joi.object({
   requested_role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'corporate_admin').required(),
   reason: Joi.string().min(10).max(1000).required(),
+  // Required only when requesting the veterinarian role; ignored/forbidden otherwise.
+  profile: Joi.when('requested_role', {
+    is: 'veterinarian',
+    then: roleChangeVetProfileSchema.required(),
+    otherwise: Joi.object().strip(),
+  }),
 });
 
 export const rejectRoleChangeSchema = Joi.object({

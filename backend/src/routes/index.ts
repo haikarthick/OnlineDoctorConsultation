@@ -3265,7 +3265,7 @@ router.get('/vaccine-certificate-log/animal/:animalId', authMiddleware, asyncHan
 // User submits a role change request
 router.post('/role-change-requests', authMiddleware, validateBody(roleChangeRequestSchema), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
-  const { requested_role, reason } = req.body;
+  const { requested_role, reason, profile } = req.body;
   const userId = authReq.userId;
   const currentRole = authReq.userRole;
   if (requested_role === currentRole) {
@@ -3277,10 +3277,13 @@ router.post('/role-change-requests', authMiddleware, validateBody(roleChangeRequ
   if (existing.rows.length > 0) {
     return res.status(409).json({ success: false, message: 'You already have a pending role change request' });
   }
+  // Store role-specific details (validated by roleChangeRequestSchema) so the admin can
+  // review + provision the satellite profile on approval. Empty object for non-vet roles.
+  const profilePayload = requested_role === 'veterinarian' && profile ? profile : {};
   const result = await (await import('../utils/database')).default.query(
-    `INSERT INTO role_change_requests (user_id, "current_role", requested_role, reason)
-     VALUES ($1, $2, $3, $4) RETURNING id, status, created_at`,
-    [userId, currentRole, requested_role, reason]
+    `INSERT INTO role_change_requests (user_id, "current_role", requested_role, reason, profile_payload)
+     VALUES ($1, $2, $3, $4, $5) RETURNING id, status, created_at`,
+    [userId, currentRole, requested_role, reason, JSON.stringify(profilePayload)]
   );
   res.status(201).json({ success: true, data: result.rows[0] });
 }));
@@ -3319,7 +3322,10 @@ router.get('/admin/role-change-requests', authMiddleware, roleMiddleware(['admin
   const { status = 'pending' } = req.query;
   const result = await (await import('../utils/database')).default.query(
     `SELECT r.id, r."current_role" AS "currentRole", r.requested_role AS "requestedRole",
+            r.reason, r.profile_payload AS "profilePayload", r.created_at AS "createdAt",
+            u.first_name || ' ' || u.last_name AS "userName",
             u.email AS "userEmail", u.unique_id AS "uniqueId",
+            r.rejection_reason AS "rejectionReason", r.reviewed_at AS "reviewedAt",
             rev.first_name || ' ' || rev.last_name AS "reviewedBy"
      FROM role_change_requests r
      JOIN users u ON u.id = r.user_id
@@ -3342,11 +3348,48 @@ router.put('/admin/role-change-requests/:id/approve', authMiddleware, roleMiddle
   if (rcrResult.rows.length === 0) return res.status(404).json({ success: false, message: 'Request not found' });
   const rcr = rcrResult.rows[0];
   if (rcr.status !== 'pending') return res.status(400).json({ success: false, message: 'Request is no longer pending' });
-  await db.query(`UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2`, [rcr.requested_role, rcr.uid]);
-  await db.query(
-    `UPDATE role_change_requests SET status = 'approved', reviewed_by = $1, reviewed_at = NOW(), updated_at = NOW() WHERE id = $2`,
-    [authReq.userId, req.params.id]
-  );
+
+  // Provision the role's satellite profile in the SAME transaction as the role flip, so a
+  // user approved into 'veterinarian' always gets a vet_profiles row and is immediately
+  // visible/bookable in Find Doctor (which INNER JOINs vet_profiles). Admin-approval counts
+  // as verification, so is_verified/is_available = true (mirrors AdminService.approveUser).
+  await db.transaction(async (client: any) => {
+    await client.query(`UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2`, [rcr.requested_role, rcr.uid]);
+
+    if (rcr.requested_role === 'veterinarian') {
+      const p = rcr.profile_payload || {};
+      await client.query(
+        `INSERT INTO vet_profiles
+           (user_id, license_number, specializations, qualifications, years_of_experience,
+            clinic_name, consultation_fee, is_verified, is_available)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, true, true)
+         ON CONFLICT (user_id) DO UPDATE SET
+           license_number      = COALESCE(NULLIF(EXCLUDED.license_number, ''), vet_profiles.license_number),
+           specializations     = CASE WHEN cardinality(EXCLUDED.specializations) > 0 THEN EXCLUDED.specializations ELSE vet_profiles.specializations END,
+           qualifications      = CASE WHEN cardinality(EXCLUDED.qualifications) > 0 THEN EXCLUDED.qualifications ELSE vet_profiles.qualifications END,
+           years_of_experience = GREATEST(EXCLUDED.years_of_experience, vet_profiles.years_of_experience),
+           clinic_name         = COALESCE(NULLIF(EXCLUDED.clinic_name, ''), vet_profiles.clinic_name),
+           consultation_fee    = CASE WHEN EXCLUDED.consultation_fee > 0 THEN EXCLUDED.consultation_fee ELSE vet_profiles.consultation_fee END,
+           is_verified         = true,
+           is_available        = true,
+           updated_at          = NOW()`,
+        [
+          rcr.uid,
+          (p.licenseNumber || '').toString().trim(),
+          Array.isArray(p.specializations) ? p.specializations : [],
+          Array.isArray(p.qualifications) ? p.qualifications : [],
+          Number(p.yearsOfExperience) || 0,
+          (p.clinicName || '').toString().trim(),
+          Number(p.consultationFee) || 0,
+        ]
+      );
+    }
+
+    await client.query(
+      `UPDATE role_change_requests SET status = 'approved', reviewed_by = $1, reviewed_at = NOW(), updated_at = NOW() WHERE id = $2`,
+      [authReq.userId, req.params.id]
+    );
+  });
   res.json({ success: true, message: 'Role change approved. User must re-login to receive new permissions.' });
 }));
 

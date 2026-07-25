@@ -1838,7 +1838,18 @@
       "errSameRole": "இந்த பங்கு ஏற்கனவே உங்களிடம் உள்ளது.",
       "errAlreadyPending": "ஏற்கனவே ஒரு நிலுவை கோரிக்கை உள்ளது.",
       "successSubmit": "கோரிக்கை சமர்ப்பிக்கப்பட்டது!",
-      "successCancel": "கோரிக்கை ரத்து செய்யப்பட்டது."
+      "successCancel": "கோரிக்கை ரத்து செய்யப்பட்டது.",
+      "vetDetailsTitle": "கால்நடை மருத்துவர் விவரங்கள்",
+      "vetDetailsDesc": "நிர்வாகி உங்கள் தகுதிகளைச் சரிபார்த்து ஒரே கட்டத்தில் உங்கள் மருத்துவர் சுயவிவரத்தைச் செயல்படுத்த இந்த விவரங்கள் தேவை.",
+      "vetLicense": "உரிமம் எண்",
+      "vetLicensePlaceholder": "எ.கா. VET-12345",
+      "vetLicenseRequired": "கால்நடை மருத்துவர் பணியைக் கோர உரிமம் எண் தேவை.",
+      "vetFee": "ஆலோசனைக் கட்டணம்",
+      "vetExperience": "அனுபவ ஆண்டுகள்",
+      "vetClinic": "மருத்துவமனை பெயர்",
+      "vetClinicPlaceholder": "எ.கா. சிட்டி பெட் கிளினிக்",
+      "vetSpecializations": "சிறப்புத் துறைகள்",
+      "vetSpecializationsPlaceholder": "சிறிய விலங்குகள், அறுவை சிகிச்சை, பல் மருத்துவம் (கமாவால் பிரிக்கவும்)"
     },
     "certificateServices": "Certificate Services I Offer",
     "certificateServicesDesc": "Select which veterinary certificates you are qualified to issue",
@@ -4670,7 +4681,14 @@
     "approveSuccess": "பங்கு மாற்றம் அங்கீகரிக்கப்பட்டது.",
     "rejectSuccess": "கோரிக்கை நிராகரிக்கப்பட்டது.",
     "reviewedBy": "ஆய்வு: {{name}}",
-    "rejectedReason": "காரணம்: {{reason}}"
+    "rejectedReason": "காரணம்: {{reason}}",
+    "vet": {
+      "license": "உரிமம்",
+      "fee": "கட்டணம்",
+      "experience": "அனுபவம் (ஆண்டுகள்)",
+      "specializations": "சிறப்புத் துறைகள்",
+      "clinic": "மருத்துவமனை"
+    }
   },
   "adminDashboard": {
     "title": "நிர்வாகி டாஷ்போர்டு",

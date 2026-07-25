@@ -2827,7 +2827,18 @@ class ApiService {
   }
 
   // Role Change Requests
-  async submitRoleChangeRequest(data: { requested_role: string; reason: string }) {
+  async submitRoleChangeRequest(data: {
+    requested_role: string
+    reason: string
+    profile?: {
+      licenseNumber: string
+      specializations?: string[]
+      qualifications?: string[]
+      yearsOfExperience?: number
+      consultationFee?: number
+      clinicName?: string
+    }
+  }) {
     const response = await this.client.post('/role-change-requests', data)
     return response.data
   }

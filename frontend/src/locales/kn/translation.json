@@ -1840,7 +1840,18 @@
       "errSameRole": "ಈ ಪಾತ್ರ ಈಗಾಗಲೇ ನಿಮ್ಮದಾಗಿದೆ.",
       "errAlreadyPending": "ಒಂದು ವಿನಂತಿ ಈಗಾಗಲೇ ಬಾಕಿ ಇದೆ.",
       "successSubmit": "ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ!",
-      "successCancel": "ವಿನಂತಿ ರದ್ದು ಮಾಡಲಾಗಿದೆ."
+      "successCancel": "ವಿನಂತಿ ರದ್ದು ಮಾಡಲಾಗಿದೆ.",
+      "vetDetailsTitle": "ಪಶುವೈದ್ಯರ ವಿವರಗಳು",
+      "vetDetailsDesc": "ನಿರ್ವಾಹಕರು ನಿಮ್ಮ ರುಜುವಾತುಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಒಂದೇ ಹಂತದಲ್ಲಿ ನಿಮ್ಮ ವೈದ್ಯ ಪ್ರೊಫೈಲ್ ಸಕ್ರಿಯಗೊಳಿಸಲು ಈ ವಿವರಗಳು ಅಗತ್ಯ.",
+      "vetLicense": "ಪರವಾನಗಿ ಸಂಖ್ಯೆ",
+      "vetLicensePlaceholder": "ಉದಾ. VET-12345",
+      "vetLicenseRequired": "ಪಶುವೈದ್ಯ ಪಾತ್ರವನ್ನು ಕೋರಲು ಪರವಾನಗಿ ಸಂಖ್ಯೆ ಅಗತ್ಯ.",
+      "vetFee": "ಸಮಾಲೋಚನೆ ಶುಲ್ಕ",
+      "vetExperience": "ಅನುಭವದ ವರ್ಷಗಳು",
+      "vetClinic": "ಕ್ಲಿನಿಕ್ ಹೆಸರು",
+      "vetClinicPlaceholder": "ಉದಾ. ಸಿಟಿ ಪೆಟ್ ಕ್ಲಿನಿಕ್",
+      "vetSpecializations": "ಪರಿಣತಿಗಳು",
+      "vetSpecializationsPlaceholder": "ಸಣ್ಣ ಪ್ರಾಣಿಗಳು, ಶಸ್ತ್ರಚಿಕಿತ್ಸೆ, ದಂತವೈದ್ಯ (ಅಲ್ಪವಿರಾಮದಿಂದ ಬೇರ್ಪಡಿಸಿ)"
     },
     "certificateServices": "Certificate Services I Offer",
     "certificateServicesDesc": "Select which veterinary certificates you are qualified to issue",
@@ -4672,7 +4683,14 @@
     "approveSuccess": "ಪಾತ್ರ ಬದಲಾವಣೆ ಅನುಮೋದಿಸಲಾಗಿದೆ.",
     "rejectSuccess": "ವಿನಂತಿ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ.",
     "reviewedBy": "ಪರಿಶೀಲನೆ: {{name}}",
-    "rejectedReason": "ಕಾರಣ: {{reason}}"
+    "rejectedReason": "ಕಾರಣ: {{reason}}",
+    "vet": {
+      "license": "ಪರವಾನಗಿ",
+      "fee": "ಶುಲ್ಕ",
+      "experience": "ಅನುಭವ (ವರ್ಷ)",
+      "specializations": "ಪರಿಣತಿಗಳು",
+      "clinic": "ಕ್ಲಿನಿಕ್"
+    }
   },
   "adminDashboard": {
     "title": "ಅಡ್ಮಿನ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",

@@ -473,7 +473,7 @@ class ScheduleService {
              u.first_name as "firstName", u.last_name as "lastName",
              vp.created_at as "createdAt", vp.updated_at as "updatedAt"
       FROM vet_profiles vp JOIN users u ON u.id = vp.user_id
-      WHERE u.is_active = true
+      WHERE u.is_active = true AND u.role = 'veterinarian'
     `;
     const vetParams: any[] = [];
     let idx = 0;

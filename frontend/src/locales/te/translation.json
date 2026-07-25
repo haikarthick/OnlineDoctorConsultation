@@ -1838,7 +1838,18 @@
       "errSameRole": "ఈ పాత్ర ఇప్పటికే మీది.",
       "errAlreadyPending": "ఒక అభ్యర్థన ఇప్పటికే పెండింగ్‌లో ఉంది.",
       "successSubmit": "అభ్యర్థన సమర్పించబడింది!",
-      "successCancel": "అభ్యర్థన రద్దు చేయబడింది."
+      "successCancel": "అభ్యర్థన రద్దు చేయబడింది.",
+      "vetDetailsTitle": "పశువైద్యుని వివరాలు",
+      "vetDetailsDesc": "నిర్వాహకుడు మీ ఆధారాలను ధృవీకరించి ఒకే దశలో మీ డాక్టర్ ప్రొఫైల్‌ను సక్రియం చేయడానికి ఈ వివరాలు అవసరం.",
+      "vetLicense": "లైసెన్స్ నంబర్",
+      "vetLicensePlaceholder": "ఉదా. VET-12345",
+      "vetLicenseRequired": "పశువైద్యుని పాత్రను అభ్యర్థించడానికి లైసెన్స్ నంబర్ అవసరం.",
+      "vetFee": "సంప్రదింపు రుసుము",
+      "vetExperience": "అనుభవ సంవత్సరాలు",
+      "vetClinic": "క్లినిక్ పేరు",
+      "vetClinicPlaceholder": "ఉదా. సిటీ పెట్ క్లినిక్",
+      "vetSpecializations": "ప్రత్యేకతలు",
+      "vetSpecializationsPlaceholder": "చిన్న జంతువులు, శస్త్రచికిత్స, దంతవైద్యం (కామాతో వేరు చేయండి)"
     },
     "certificateServices": "Certificate Services I Offer",
     "certificateServicesDesc": "Select which veterinary certificates you are qualified to issue",
@@ -4670,7 +4681,14 @@
     "approveSuccess": "పాత్ర మార్పు ఆమోదించబడింది.",
     "rejectSuccess": "అభ్యర్థన తిరస్కరించబడింది.",
     "reviewedBy": "సమీక్ష: {{name}}",
-    "rejectedReason": "కారణం: {{reason}}"
+    "rejectedReason": "కారణం: {{reason}}",
+    "vet": {
+      "license": "లైసెన్స్",
+      "fee": "రుసుము",
+      "experience": "అనుభవం (సం.)",
+      "specializations": "ప్రత్యేకతలు",
+      "clinic": "క్లినిక్"
+    }
   },
   "adminDashboard": {
     "title": "అడ్మిన్ డాష్‌బోర్డ్",

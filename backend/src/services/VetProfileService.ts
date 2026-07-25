@@ -168,9 +168,11 @@ export class VetProfileService {
                u.first_name as "firstName", u.last_name as "lastName", u.email,
                vp.created_at as "createdAt", vp.updated_at as "updatedAt"
         FROM vet_profiles vp JOIN users u ON u.id = vp.user_id
-        WHERE u.is_active = true
+        WHERE u.is_active = true AND u.role = 'veterinarian'
       `;
-      let countWhere = ' WHERE u.is_active = true';
+      // role filter: a user who was a vet but later changed role keeps their vet_profiles
+      // row; without this they would still surface as a bookable doctor.
+      let countWhere = " WHERE u.is_active = true AND u.role = 'veterinarian'";
       const params: any[] = [];
       const countParams: any[] = [];
       let idx = 0;

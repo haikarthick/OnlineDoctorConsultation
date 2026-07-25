@@ -1838,7 +1838,18 @@
       "errSameRole": "आपके पास पहले से यह भूमिका है।",
       "errAlreadyPending": "आपका एक अनुरोध पहले से लंबित है।",
       "successSubmit": "अनुरोध सबमिट हुआ! एडमिन जल्द समीक्षा करेगा।",
-      "successCancel": "अनुरोध रद्द किया गया।"
+      "successCancel": "अनुरोध रद्द किया गया।",
+      "vetDetailsTitle": "पशु चिकित्सक विवरण",
+      "vetDetailsDesc": "ये विवरण आवश्यक हैं ताकि व्यवस्थापक आपकी साख सत्यापित कर एक ही चरण में आपकी डॉक्टर प्रोफ़ाइल सक्रिय कर सके।",
+      "vetLicense": "लाइसेंस नंबर",
+      "vetLicensePlaceholder": "उदा. VET-12345",
+      "vetLicenseRequired": "पशु चिकित्सक भूमिका के अनुरोध के लिए लाइसेंस नंबर आवश्यक है।",
+      "vetFee": "परामर्श शुल्क",
+      "vetExperience": "अनुभव के वर्ष",
+      "vetClinic": "क्लिनिक का नाम",
+      "vetClinicPlaceholder": "उदा. सिटी पेट क्लिनिक",
+      "vetSpecializations": "विशेषज्ञताएँ",
+      "vetSpecializationsPlaceholder": "छोटे जानवर, सर्जरी, दंत चिकित्सा (अल्पविराम से अलग)"
     },
     "certificateServices": "Certificate Services I Offer",
     "certificateServicesDesc": "Select which veterinary certificates you are qualified to issue",
@@ -4670,7 +4681,14 @@
     "approveSuccess": "भूमिका परिवर्तन स्वीकृत। उपयोगकर्ता को पुनः लॉगिन करना होगा।",
     "rejectSuccess": "अनुरोध अस्वीकृत।",
     "reviewedBy": "समीक्षा: {{name}}",
-    "rejectedReason": "कारण: {{reason}}"
+    "rejectedReason": "कारण: {{reason}}",
+    "vet": {
+      "license": "लाइसेंस",
+      "fee": "शुल्क",
+      "experience": "अनुभव (वर्ष)",
+      "specializations": "विशेषज्ञताएँ",
+      "clinic": "क्लिनिक"
+    }
   },
   "adminDashboard": {
     "title": "एडमिन डैशबोर्ड",
