@@ -1997,6 +1997,11 @@ CREATE TABLE IF NOT EXISTS marketplace_listings (
   quantity INT DEFAULT 1,
   unit VARCHAR(30),
   condition VARCHAR(30) DEFAULT 'new',
+  -- Animal attributes (also added idempotently by migration 008); required here because the
+  -- idx_mp_listings_fts full-text index below references breed/species, and init.sql runs
+  -- atomically BEFORE migrations on a fresh DB — omitting them aborts the entire schema build.
+  species VARCHAR(60),
+  breed VARCHAR(100),
   images JSONB DEFAULT '[]',
   location VARCHAR(200),
   shipping_options JSONB DEFAULT '[]',
