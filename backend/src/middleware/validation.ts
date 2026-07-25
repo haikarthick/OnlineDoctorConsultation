@@ -32,8 +32,8 @@ export const registerSchema = Joi.object({
     'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
     'any.required': 'Password is required',
   }),
-  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'corporate_admin').default('pet_owner').messages({
-    'any.only': 'Role must be one of: pet_owner, farmer, veterinarian, corporate_admin',
+  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'corporate_admin', 'groomer').default('pet_owner').messages({
+    'any.only': 'Role must be one of: pet_owner, farmer, veterinarian, corporate_admin, groomer',
   }),
   confirmPassword: Joi.string().optional().strip(),
   // Veterinarian-specific fields (required when role = 'veterinarian')
@@ -489,7 +489,7 @@ const roleChangeVetProfileSchema = Joi.object({
 });
 
 export const changeUserRoleSchema = Joi.object({
-  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin').required(),
+  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin', 'groomer', 'support').required(),
   // Optional vet details when an admin directly assigns the veterinarian role. If a license
   // is supplied the resulting vet_profiles row is marked verified; otherwise it is provisioned
   // unverified-but-visible so the vet can complete their license later. Stripped for non-vet roles.
@@ -1613,7 +1613,7 @@ export const createPatientConsentSchema = Joi.object({
 });
 
 export const roleChangeRequestSchema = Joi.object({
-  requested_role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'corporate_admin').required(),
+  requested_role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'corporate_admin', 'groomer').required(),
   reason: Joi.string().min(10).max(1000).required(),
   // Required only when requesting the veterinarian role; ignored/forbidden otherwise.
   profile: Joi.when('requested_role', {

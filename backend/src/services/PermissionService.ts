@@ -156,6 +156,22 @@ export const PERMISSION_CATEGORIES = {
       'pharmacy_view_reports',
       'pharmacy_settings_manage',
     ]
+  },
+  grooming: {
+    label: 'Grooming & Spa',
+    permissions: [
+      'grooming_browse',           // find a groomer (customer)
+      'grooming_book',             // book grooming (customer)
+      'grooming_my_orders',        // track own grooming orders (customer)
+      'grooming_provider_console', // provider dashboard / today board
+      'grooming_manage_services',  // catalog: services, add-ons, resources, locations
+      'grooming_manage_bookings',  // orders, schedule, intake/execution ops
+      'grooming_intake_write',     // intake + S.C.E.N.T. + execution updates (staff)
+      'grooming_staff_manage',     // manager: invite/manage provider staff
+      'grooming_earnings_view',    // provider earnings + payout/statements
+      'grooming_admin',            // platform: verify providers, categories, commission, settlements
+      'grooming_support',          // support: grooming bookings/refunds/disputes
+    ]
   }
 };
 
@@ -219,6 +235,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'network_membership_manage',
     // Wallet
     'wallet',
+    // Grooming & Spa (customer)
+    'grooming_browse', 'grooming_book', 'grooming_my_orders',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'review_create', 'animal_manage',
@@ -254,6 +272,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'network_membership_manage',
     // Wallet
     'wallet',
+    // Grooming & Spa (customer)
+    'grooming_browse', 'grooming_book', 'grooming_my_orders',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'review_create', 'animal_manage',
@@ -359,8 +379,30 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'wallet', 'admin_cancellation_dashboard',
     // Holiday management
     'admin_holidays',
+    // Grooming & Spa (full oversight)
+    'grooming_admin', 'grooming_support', 'grooming_provider_console',
+    'grooming_manage_services', 'grooming_manage_bookings', 'grooming_earnings_view',
     // Actions
     'booking_confirm', 'booking_cancel', 'review_moderate',
+    // Dashboard widgets
+    'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
+  ],
+  groomer: [
+    // Core
+    'dashboard', 'settings', 'wallet',
+    // Grooming provider workspace
+    'grooming_provider_console', 'grooming_manage_services', 'grooming_manage_bookings',
+    'grooming_intake_write', 'grooming_staff_manage', 'grooming_earnings_view',
+    // NOTE: deliberately NO medical-write permissions — groomers escalate, never diagnose.
+    // Dashboard widgets
+    'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
+    'dashboard_upcoming_bookings',
+  ],
+  support: [
+    // Core
+    'dashboard', 'settings',
+    // Platform support scope
+    'grooming_support', 'dispute_management', 'admin_cancellation_dashboard',
     // Dashboard widgets
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
   ]
@@ -467,6 +509,18 @@ export const PERMISSION_LABELS: Record<string, string> = {
   animal_timeline: 'Animal Life Timeline',
   // Dispute Management
   dispute_management: 'Dispute Management',
+  // Grooming & Spa
+  grooming_browse: 'Find a Groomer',
+  grooming_book: 'Book Grooming/Spa',
+  grooming_my_orders: 'My Grooming Orders',
+  grooming_provider_console: 'Grooming Provider Console',
+  grooming_manage_services: 'Manage Grooming Services',
+  grooming_manage_bookings: 'Manage Grooming Bookings',
+  grooming_intake_write: 'Grooming Intake & Execution',
+  grooming_staff_manage: 'Manage Grooming Staff',
+  grooming_earnings_view: 'Grooming Earnings & Payouts',
+  grooming_admin: 'Grooming Administration',
+  grooming_support: 'Grooming Support',
   // Dashboard widgets
   dashboard_stats: 'Dashboard Stats Cards',
   dashboard_quick_actions: 'Dashboard Quick Actions',
@@ -553,7 +607,7 @@ class PermissionService {
     );
 
     const matrix: Record<string, Record<string, boolean>> = {};
-    const roles = ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'];
+    const roles = ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'];
 
     // Initialize with defaults
     for (const role of roles) {
@@ -582,7 +636,7 @@ class PermissionService {
     if (!ALL_PERMISSIONS.includes(permission)) {
       throw new Error(`Unknown permission: ${permission}`);
     }
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
@@ -603,7 +657,7 @@ class PermissionService {
     permissions: Record<string, boolean>,
     updatedBy?: string
   ): Promise<void> {
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
@@ -623,7 +677,7 @@ class PermissionService {
 
   /** Reset a role's permissions to defaults */
   async resetToDefaults(role: string): Promise<void> {
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
@@ -662,7 +716,7 @@ class PermissionService {
       categories: PERMISSION_CATEGORIES,
       labels: PERMISSION_LABELS,
       allPermissions: ALL_PERMISSIONS,
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'],
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'],
       roleLabels: {
         veterinarian: 'Veterinarian',
         pet_owner: 'Pet Owner',
@@ -670,7 +724,9 @@ class PermissionService {
         admin: 'Admin',
         corporate_admin: 'Hospital Network Admin',
         hospital_staff: 'Hospital Staff',
-        pharmacist: 'Pharmacist'
+        pharmacist: 'Pharmacist',
+        groomer: 'Grooming Provider',
+        support: 'Platform Support'
       }
     };
   }

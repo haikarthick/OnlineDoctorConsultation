@@ -2066,7 +2066,7 @@ router.get('/users/:id/roles', authMiddleware, roleMiddleware(['admin']), asyncH
 
 router.post('/users/:id/roles', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
   const { role, notes } = req.body;
-  const validRoles = ['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff'];
+  const validRoles = ['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'];
   if (!role || !validRoles.includes(role)) {
     return res.status(400).json({ error: `role must be one of: ${validRoles.join(', ')}` });
   }
