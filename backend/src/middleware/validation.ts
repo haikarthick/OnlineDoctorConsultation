@@ -1828,3 +1828,80 @@ export const updateMasterMarketplaceConditionSchema = Joi.object({
   sortOrder: Joi.number().integer().optional(),
   ...localeLabelFields,
 });
+
+// ─── Grooming & Spa module ───────────────────────────────────
+export const createGroomingProviderSchema = Joi.object({
+  businessName: shortText(200).required(),
+  providerType: Joi.string().valid('veterinarian', 'groomer', 'business', 'clinic').optional(),
+  description: longText(2000).optional().allow('', null),
+  logoUrl: Joi.string().uri({ allowRelative: true }).max(500).optional().allow('', null),
+  contactPhone: shortText(20).optional().allow('', null),
+  contactEmail: Joi.string().email().max(255).optional().allow('', null),
+  offersAtPremises: Joi.boolean().optional(),
+  offersMobile: Joi.boolean().optional(),
+  operatingHours: Joi.object().optional(),
+  supportedSpecies: Joi.array().items(Joi.string().max(60)).optional(),
+  sizeLimits: Joi.object().optional(),
+  legalName: shortText(255).optional().allow('', null),
+  pan: shortText(20).optional().allow('', null),
+  gstin: shortText(20).optional().allow('', null),
+  businessAddress: longText(500).optional().allow('', null),
+  payoutAccountName: shortText(255).optional().allow('', null),
+  payoutAccountNumber: shortText(50).optional().allow('', null),
+  payoutIfsc: shortText(20).optional().allow('', null),
+  payoutUpi: shortText(100).optional().allow('', null),
+});
+
+export const updateGroomingProviderSchema = createGroomingProviderSchema.fork(
+  ['businessName'], (s) => s.optional()
+).keys({ isPaused: Joi.boolean().optional() }).min(1);
+
+export const groomingLocationSchema = Joi.object({
+  name: shortText(200).required(),
+  locationType: Joi.string().valid('premises', 'mobile_zone').optional(),
+  address: longText(500).optional().allow('', null),
+  city: shortText(100).optional().allow('', null),
+  state: shortText(100).optional().allow('', null),
+  postalCode: shortText(20).optional().allow('', null),
+  gpsLatitude: Joi.number().min(-90).max(90).optional().allow(null),
+  gpsLongitude: Joi.number().min(-180).max(180).optional().allow(null),
+  serviceRadiusKm: positiveNumber.max(500).optional().allow(null),
+});
+
+export const groomingResourceSchema = Joi.object({
+  name: shortText(150).required(),
+  resourceType: Joi.string().valid('grooming_table', 'bath_station', 'drying_cage', 'spa_room', 'other').optional(),
+  locationId: uuid.optional().allow(null),
+});
+
+export const groomingServiceSchema = Joi.object({
+  name: shortText(200).required(),
+  categoryId: uuid.optional().allow(null),
+  description: longText(2000).optional().allow('', null),
+  serviceKind: Joi.string().valid('service', 'package', 'membership').optional(),
+  basePrice: positiveNumber.max(1000000).required(),
+  currency: Joi.string().max(10).optional(),
+  durationMinutes: positiveInt.max(1440).optional(),
+  taxPercent: positiveNumber.max(100).optional(),
+  paymentRule: Joi.string().valid('full', 'deposit').optional(),
+  depositAmount: positiveNumber.max(1000000).optional(),
+  isVariablePrice: Joi.boolean().optional(),
+  cancellationPolicy: Joi.object().optional(),
+  supportedSpecies: Joi.array().items(Joi.string().max(60)).optional(),
+  availableAtPremises: Joi.boolean().optional(),
+  availableMobile: Joi.boolean().optional(),
+  sortOrder: Joi.number().integer().optional(),
+});
+
+export const updateGroomingServiceSchema = groomingServiceSchema.fork(
+  ['name', 'basePrice'], (s) => s.optional()
+).keys({ isActive: Joi.boolean().optional(), isPaused: Joi.boolean().optional() }).min(1);
+
+export const groomingStaffSchema = Joi.object({
+  email: Joi.string().email().required(),
+  role: Joi.string().valid('manager', 'staff').required(),
+});
+
+export const groomingProviderRejectSchema = Joi.object({
+  reason: Joi.string().min(5).max(500).required(),
+});

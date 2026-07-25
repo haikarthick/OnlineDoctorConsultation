@@ -2,6 +2,14 @@ import { Router, Request, Response } from 'express';
 import logger from '../utils/logger';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
 import { requireNetworkAccess, NetworkAccessRequest, resolveNetworkAccess } from '../middleware/networkAccess';
+import { groomingEnabled } from '../middleware/grooming';
+import GroomingProviderService from '../services/grooming/GroomingProviderService';
+import GroomingModuleConfig from '../services/grooming/GroomingModuleConfig';
+import {
+  createGroomingProviderSchema, updateGroomingProviderSchema, groomingLocationSchema,
+  groomingResourceSchema, groomingServiceSchema, updateGroomingServiceSchema,
+  groomingStaffSchema, groomingProviderRejectSchema,
+} from '../middleware/validation';
 import database from '../utils/database';
 import cacheManager from '../utils/cacheManager';
 import {
@@ -5112,5 +5120,138 @@ router.get('/pharmacies/:pharmacyId/dashboard', authMiddleware, asyncHandler(asy
     todays_dispensed: parseInt(todayRevenue.rows[0]?.dispensed ?? '0'),
   });
 }));
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PET WELLNESS / GROOMING & SPA MODULE (P1: onboarding + discovery + admin verify)
+// Dark-launched behind grooming.enabled (groomingEnabled middleware → 404 when off).
+// Provider-scoped isolation enforced inside GroomingProviderService.resolveProviderAccess.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Public status probe (NO gate) so the frontend can hide the whole module when disabled.
+router.get('/grooming/status', asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: { enabled: await GroomingModuleConfig.isEnabled() } });
+}));
+
+// ── Provider onboarding (self-service) ──
+router.post('/grooming/providers', authMiddleware, groomingEnabled, validateBody(createGroomingProviderSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    const p = await GroomingProviderService.createProvider((req as any).userId, req.body);
+    res.status(201).json({ success: true, data: p });
+  }));
+
+router.get('/grooming/providers/me', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingProviderService.getMyProvider((req as any).userId) });
+  }));
+
+router.put('/grooming/providers/:id', authMiddleware, groomingEnabled, validateBody(updateGroomingProviderSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingProviderService.updateProvider((req as any).userId, req.params.id, req.body) });
+  }));
+
+// ── Locations ──
+router.get('/grooming/providers/:id/locations', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    if (!await GroomingProviderService.resolveProviderAccess((req as any).userId, req.params.id))
+      return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, data: await GroomingProviderService.listLocations(req.params.id) });
+  }));
+router.post('/grooming/providers/:id/locations', authMiddleware, groomingEnabled, validateBody(groomingLocationSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await GroomingProviderService.addLocation((req as any).userId, req.params.id, req.body) });
+  }));
+router.delete('/grooming/providers/:id/locations/:locId', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    await GroomingProviderService.deleteLocation((req as any).userId, req.params.id, req.params.locId);
+    res.json({ success: true });
+  }));
+
+// ── Resources ──
+router.get('/grooming/providers/:id/resources', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    if (!await GroomingProviderService.resolveProviderAccess((req as any).userId, req.params.id))
+      return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, data: await GroomingProviderService.listResources(req.params.id) });
+  }));
+router.post('/grooming/providers/:id/resources', authMiddleware, groomingEnabled, validateBody(groomingResourceSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await GroomingProviderService.addResource((req as any).userId, req.params.id, req.body) });
+  }));
+router.delete('/grooming/providers/:id/resources/:resId', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    await GroomingProviderService.deleteResource((req as any).userId, req.params.id, req.params.resId);
+    res.json({ success: true });
+  }));
+
+// ── Services (catalog) ──
+router.get('/grooming/providers/:id/services', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    if (!await GroomingProviderService.resolveProviderAccess((req as any).userId, req.params.id))
+      return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, data: await GroomingProviderService.listServices(req.params.id) });
+  }));
+router.post('/grooming/providers/:id/services', authMiddleware, groomingEnabled, validateBody(groomingServiceSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await GroomingProviderService.addService((req as any).userId, req.params.id, req.body) });
+  }));
+router.put('/grooming/providers/:id/services/:svcId', authMiddleware, groomingEnabled, validateBody(updateGroomingServiceSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingProviderService.updateService((req as any).userId, req.params.id, req.params.svcId, req.body) });
+  }));
+router.delete('/grooming/providers/:id/services/:svcId', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    await GroomingProviderService.deleteService((req as any).userId, req.params.id, req.params.svcId);
+    res.json({ success: true });
+  }));
+
+// ── Staff ──
+router.get('/grooming/providers/:id/staff', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    if (!await GroomingProviderService.resolveProviderAccess((req as any).userId, req.params.id))
+      return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, data: await GroomingProviderService.listStaff(req.params.id) });
+  }));
+router.post('/grooming/providers/:id/staff', authMiddleware, groomingEnabled, validateBody(groomingStaffSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    const authReq = req as any;
+    res.status(201).json({ success: true, data: await GroomingProviderService.addStaffByEmail(authReq.userId, req.params.id, req.body.email, req.body.role, authReq.userId) });
+  }));
+router.delete('/grooming/providers/:id/staff/:userId', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    await GroomingProviderService.removeStaff((req as any).userId, req.params.id, req.params.userId);
+    res.json({ success: true });
+  }));
+
+// ── Public discovery (verified providers only) ──
+router.get('/grooming/discover', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { mobile, species, search, limit, offset } = req.query;
+    const result = await GroomingProviderService.listPublicProviders({
+      mobile: mobile === 'true', species, search, limit, offset,
+    });
+    res.json({ success: true, data: result });
+  }));
+router.get('/grooming/providers/:id/public', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingProviderService.getPublicProvider(req.params.id) });
+  }));
+
+// ── Admin verification ──
+router.get('/grooming/admin/providers', authMiddleware, roleMiddleware(['admin']), groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingProviderService.adminListProviders((req.query.status as string) || 'pending') });
+  }));
+router.put('/grooming/admin/providers/:id/verify', authMiddleware, roleMiddleware(['admin']), groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingProviderService.adminVerify(req.params.id, (req as any).userId) });
+  }));
+router.put('/grooming/admin/providers/:id/reject', authMiddleware, roleMiddleware(['admin']), groomingEnabled, validateBody(groomingProviderRejectSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingProviderService.adminReject(req.params.id, (req as any).userId, req.body.reason) });
+  }));
+router.put('/grooming/admin/providers/:id/suspend', authMiddleware, roleMiddleware(['admin']), groomingEnabled, validateBody(groomingProviderRejectSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingProviderService.adminSuspend(req.params.id, (req as any).userId, req.body.reason) });
+  }));
 
 export default router;
