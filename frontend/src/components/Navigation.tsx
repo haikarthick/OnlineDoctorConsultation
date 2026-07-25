@@ -262,6 +262,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Hospital Networks' },
 
     // ── Grooming & Spa ──
+    { id: 'grooming-find', label: t('nav.groomingFind'), icon: '💈', path: '/grooming/find',
+      roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
+    { id: 'grooming-my-orders', label: t('nav.groomingMyOrders'), icon: '📅', path: '/grooming/my-orders',
+      roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
     { id: 'grooming-provider', label: t('nav.groomingProvider'), icon: '💈', path: '/grooming/provider',
       roles: ['groomer', 'veterinarian', 'admin'], section: 'Grooming & Spa' },
     { id: 'admin-grooming-providers', label: t('nav.groomingAdmin'), icon: '💈', path: '/admin/grooming-providers',

@@ -2960,6 +2960,30 @@ class ApiService {
     const response = await this.client.put(`/grooming/admin/providers/${id}/suspend`, { reason })
     return response.data
   }
+  async createGroomingOrder(data: any) {
+    const response = await this.client.post('/grooming/orders', data)
+    return response.data
+  }
+  async listMyGroomingOrders() {
+    const response = await this.client.get('/grooming/orders')
+    return response.data
+  }
+  async getGroomingOrder(id: string) {
+    const response = await this.client.get(`/grooming/orders/${id}`)
+    return response.data
+  }
+  async payGroomingOrder(id: string, deposit = false) {
+    const response = await this.client.post(`/grooming/orders/${id}/pay`, { deposit })
+    return response.data
+  }
+  async cancelGroomingOrder(id: string, reason?: string) {
+    const response = await this.client.put(`/grooming/orders/${id}/cancel`, { reason })
+    return response.data
+  }
+  async listGroomingProviderOrders(id: string, status?: string) {
+    const response = await this.client.get(`/grooming/providers/${id}/orders`, { params: status ? { status } : {} })
+    return response.data
+  }
 
   // ── Network Subscription Plans ──
   async getNetworkSubscriptionPlans() {

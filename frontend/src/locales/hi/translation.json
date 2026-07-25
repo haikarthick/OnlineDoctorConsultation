@@ -208,7 +208,9 @@
     "financeReports": "वित्त रिपोर्ट",
     "masterData": "मास्टर डेटा",
     "groomingProvider": "मेरा ग्रूमिंग व्यवसाय",
-    "groomingAdmin": "ग्रूमिंग प्रदाता"
+    "groomingAdmin": "ग्रूमिंग प्रदाता",
+    "groomingFind": "ग्रूमर खोजें",
+    "groomingMyOrders": "मेरी ग्रूमिंग"
   },
   "login": {
     "welcome": "वापस स्वागत है",
@@ -7706,5 +7708,79 @@
     "rejectReasonPlaceholder": "Explain why this provider is rejected…",
     "cancel": "Cancel",
     "confirmReject": "Confirm Reject"
+  },
+  "groomingFind": {
+    "title": "Find a Groomer",
+    "subtitle": "Discover verified grooming & spa providers near you.",
+    "searchPlaceholder": "Search by name…",
+    "mobileOnly": "Home / mobile only",
+    "none": "No groomers found",
+    "noneHint": "Try a different search.",
+    "count": "{{count}} groomer(s) available",
+    "mobile": "Home / Mobile",
+    "atPremises": "At Premises",
+    "from": "From",
+    "viewBook": "View & Book"
+  },
+  "groomingPublic": {
+    "notFound": "Provider not available.",
+    "back": "Back to groomers",
+    "orders": "orders",
+    "services": "Services",
+    "noServices": "No services listed yet.",
+    "book": "Book"
+  },
+  "groomingBook": {
+    "missingParams": "Missing booking details.",
+    "serviceUnavailable": "This service is not available.",
+    "back": "Back",
+    "title": "Book Grooming",
+    "inclTax": "incl. tax",
+    "selectPet": "Select pet (optional)",
+    "noPet": "No specific pet",
+    "serviceMode": "Service location",
+    "atPremises": "At Premises",
+    "mobile": "Home / Mobile",
+    "date": "Date",
+    "time": "Time",
+    "handlingNotes": "Handling notes",
+    "handlingPlaceholder": "Anything the groomer should know (temperament, allergies)…",
+    "consentHandling": "I consent to my pet being handled and groomed with standard tools and products.",
+    "consentPhoto": "I allow before/after photos.",
+    "consentRequired": "Handling consent is required to book.",
+    "total": "Total",
+    "demoPay": "Demo payment (no real charge)",
+    "booking": "Booking…",
+    "confirmPay": "Confirm & Pay"
+  },
+  "groomingOrders": {
+    "cancelReason": "Reason for cancellation (optional):",
+    "title": "My Grooming Orders",
+    "bookNew": "Book grooming",
+    "none": "No grooming orders yet",
+    "findGroomer": "Find a groomer",
+    "payNow": "Pay now",
+    "cancel": "Cancel"
+  },
+  "groomingStatus": {
+    "draft": "Draft",
+    "payment_pending": "Payment pending",
+    "payment_expired": "Payment expired",
+    "confirmed": "Confirmed",
+    "provider_assigned": "Provider assigned",
+    "checked_in": "Checked in",
+    "en_route": "On the way",
+    "intake_done": "Intake done",
+    "in_progress": "In progress",
+    "awaiting_approval": "Awaiting approval",
+    "quality_check": "Quality check",
+    "ready_for_pickup": "Ready for pickup",
+    "returning": "Returning",
+    "completed": "Completed",
+    "cancelled_by_customer": "Cancelled",
+    "cancelled_by_provider": "Cancelled by provider",
+    "no_show": "No-show",
+    "disputed": "Disputed",
+    "closed": "Closed"
   }
 }

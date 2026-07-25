@@ -121,6 +121,9 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   // Grooming & Spa
   grooming_provider_console: ['/grooming/provider'],
   grooming_admin: ['/admin/grooming-providers'],
+  grooming_browse: ['/grooming/find', '/grooming/provider/:id'],
+  grooming_book: ['/grooming/book'],
+  grooming_my_orders: ['/grooming/my-orders'],
 }
 
 // Reverse map: route path → required permission
@@ -218,6 +221,8 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   // Grooming & Spa
   'grooming-provider': 'grooming_provider_console',
   'admin-grooming-providers': 'grooming_admin',
+  'grooming-find': 'grooming_browse',
+  'grooming-my-orders': 'grooming_my_orders',
 }
 
 // ─── Context ────────────────────────────────────────────────
