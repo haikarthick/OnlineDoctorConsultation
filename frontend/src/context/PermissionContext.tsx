@@ -118,6 +118,9 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   dispute_management: ['/admin/disputes'],
   // Pharmacy
   pharmacy_view_dashboard: ['/pharmacy'],
+  // Grooming & Spa
+  grooming_provider_console: ['/grooming/provider'],
+  grooming_admin: ['/admin/grooming-providers'],
 }
 
 // Reverse map: route path → required permission
@@ -212,6 +215,9 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'admin-disputes': 'dispute_management',
   // Pharmacy
   'pharmacy': 'pharmacy_view_dashboard',
+  // Grooming & Spa
+  'grooming-provider': 'grooming_provider_console',
+  'admin-grooming-providers': 'grooming_admin',
 }
 
 // ─── Context ────────────────────────────────────────────────

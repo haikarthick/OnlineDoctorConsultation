@@ -374,3 +374,31 @@ test.describe('Auto-Discovered — /admin/master-data', () => {
     await context.close()
   })
 })
+
+test.describe('Auto-Discovered — /grooming/provider', () => {
+  test('should load /grooming/provider without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await loginAs(page, 'admin')
+    await page.goto('/grooming/provider')
+    await page.waitForLoadState('domcontentloaded')
+    await expect(page).not.toHaveURL(/\/login/)
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
+})
+
+test.describe('Auto-Discovered — /admin/grooming-providers', () => {
+  test('should load /admin/grooming-providers without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await loginAs(page, 'admin')
+    await page.goto('/admin/grooming-providers')
+    await page.waitForLoadState('domcontentloaded')
+    await expect(page).not.toHaveURL(/\/login/)
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
+})

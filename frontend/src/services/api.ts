@@ -2867,6 +2867,100 @@ class ApiService {
     return response.data
   }
 
+  // ── Grooming & Spa ──
+  async groomingStatus() {
+    const response = await this.client.get('/grooming/status')
+    return response.data
+  }
+  async createGroomingProvider(data: any) {
+    const response = await this.client.post('/grooming/providers', data)
+    return response.data
+  }
+  async getMyGroomingProvider() {
+    const response = await this.client.get('/grooming/providers/me')
+    return response.data
+  }
+  async updateGroomingProvider(id: string, data: any) {
+    const response = await this.client.put(`/grooming/providers/${id}`, data)
+    return response.data
+  }
+  async listGroomingLocations(id: string) {
+    const response = await this.client.get(`/grooming/providers/${id}/locations`)
+    return response.data
+  }
+  async addGroomingLocation(id: string, data: any) {
+    const response = await this.client.post(`/grooming/providers/${id}/locations`, data)
+    return response.data
+  }
+  async deleteGroomingLocation(id: string, locId: string) {
+    const response = await this.client.delete(`/grooming/providers/${id}/locations/${locId}`)
+    return response.data
+  }
+  async listGroomingResources(id: string) {
+    const response = await this.client.get(`/grooming/providers/${id}/resources`)
+    return response.data
+  }
+  async addGroomingResource(id: string, data: any) {
+    const response = await this.client.post(`/grooming/providers/${id}/resources`, data)
+    return response.data
+  }
+  async deleteGroomingResource(id: string, resId: string) {
+    const response = await this.client.delete(`/grooming/providers/${id}/resources/${resId}`)
+    return response.data
+  }
+  async listGroomingServices(id: string) {
+    const response = await this.client.get(`/grooming/providers/${id}/services`)
+    return response.data
+  }
+  async addGroomingService(id: string, data: any) {
+    const response = await this.client.post(`/grooming/providers/${id}/services`, data)
+    return response.data
+  }
+  async updateGroomingService(id: string, svcId: string, data: any) {
+    const response = await this.client.put(`/grooming/providers/${id}/services/${svcId}`, data)
+    return response.data
+  }
+  async deleteGroomingService(id: string, svcId: string) {
+    const response = await this.client.delete(`/grooming/providers/${id}/services/${svcId}`)
+    return response.data
+  }
+  async listGroomingStaff(id: string) {
+    const response = await this.client.get(`/grooming/providers/${id}/staff`)
+    return response.data
+  }
+  async addGroomingStaff(id: string, email: string, role: string) {
+    const response = await this.client.post(`/grooming/providers/${id}/staff`, { email, role })
+    return response.data
+  }
+  async removeGroomingStaff(id: string, userId: string) {
+    const response = await this.client.delete(`/grooming/providers/${id}/staff/${userId}`)
+    return response.data
+  }
+  async discoverGroomingProviders(params: Record<string, any> = {}) {
+    const response = await this.client.get('/grooming/discover', { params })
+    return response.data
+  }
+  async getPublicGroomingProvider(id: string) {
+    const response = await this.client.get(`/grooming/providers/${id}/public`)
+    return response.data
+  }
+  async adminListGroomingProviders(status = 'pending') {
+    const response = await this.client.get('/grooming/admin/providers', { params: { status } })
+    return response.data
+  }
+  async adminVerifyGroomingProvider(id: string) {
+    const response = await this.client.put(`/grooming/admin/providers/${id}/verify`, {})
+    return response.data
+  }
+  async adminRejectGroomingProvider(id: string, reason: string) {
+    const response = await this.client.put(`/grooming/admin/providers/${id}/reject`, { reason })
+    return response.data
+  }
+  async adminSuspendGroomingProvider(id: string, reason: string) {
+    const response = await this.client.put(`/grooming/admin/providers/${id}/suspend`, { reason })
+    return response.data
+  }
+
   // ── Network Subscription Plans ──
   async getNetworkSubscriptionPlans() {
     const response = await this.client.get('/network-subscription-plans')

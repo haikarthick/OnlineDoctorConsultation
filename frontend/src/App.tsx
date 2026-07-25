@@ -120,6 +120,10 @@ const NetworkMemberships = React.lazy(() => import('./pages/petowner/NetworkMemb
 // Pharmacy
 const PharmacyDashboard = React.lazy(() => import('./pages/pharmacy/PharmacyDashboard'))
 
+// Grooming & Spa
+const GroomingProvider = React.lazy(() => import('./pages/grooming/GroomingProvider'))
+const GroomingProvidersAdmin = React.lazy(() => import('./pages/admin/GroomingProvidersAdmin'))
+
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
   return (
@@ -402,6 +406,10 @@ function AppRoutes() {
 
       {/* ── Pharmacy Module ── */}
       <Route path="/pharmacy" element={<RoleRoute path="/pharmacy"><AppLayout><PharmacyDashboard /></AppLayout></RoleRoute>} />
+
+      {/* ── Grooming & Spa Module ── */}
+      <Route path="/grooming/provider" element={<RoleRoute path="/grooming/provider"><AppLayout><RoutedPage Component={GroomingProvider} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/grooming-providers" element={<RoleRoute path="/admin/grooming-providers"><AppLayout><RoutedPage Component={GroomingProvidersAdmin} /></AppLayout></RoleRoute>} />
 
       {/* Catch-all → home */}
       <Route path="*" element={<Navigate to="/" replace />} />

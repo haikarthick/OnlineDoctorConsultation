@@ -93,7 +93,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
   const menuItems: MenuItem[] = [
     // ── Dashboard (always first, ungrouped) ──
     { id: 'dashboard', label: t('nav.dashboard'), icon: '📊', path: '/dashboard',
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'], section: 'Main' },
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'], section: 'Main' },
     { id: 'marketplace', label: t('nav.marketplace'), icon: '🏪', path: '/marketplace',
       roles: ['farmer', 'admin', 'pet_owner', 'veterinarian'], section: 'Main' },
 
@@ -261,9 +261,15 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'admin-network-subscriptions', label: 'Network Subscriptions', icon: '💳', path: '/admin/network-subscriptions',
       roles: ['admin'], section: 'Hospital Networks' },
 
+    // ── Grooming & Spa ──
+    { id: 'grooming-provider', label: t('nav.groomingProvider'), icon: '💈', path: '/grooming/provider',
+      roles: ['groomer', 'veterinarian', 'admin'], section: 'Grooming & Spa' },
+    { id: 'admin-grooming-providers', label: t('nav.groomingAdmin'), icon: '💈', path: '/admin/grooming-providers',
+      roles: ['admin'], section: 'Grooming & Spa' },
+
     // ── Preferences (bottom) ──
     { id: 'settings', label: t('nav.settings'), icon: '⚙️', path: '/settings',
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin', 'hospital_staff', 'pharmacist'], section: 'Preferences' }
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'], section: 'Preferences' }
   ]
 
   // Filter by role AND permission — supports multi-role users (P4-HIGH1)
