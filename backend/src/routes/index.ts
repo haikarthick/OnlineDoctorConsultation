@@ -4,11 +4,13 @@ import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth
 import { requireNetworkAccess, NetworkAccessRequest, resolveNetworkAccess } from '../middleware/networkAccess';
 import { groomingEnabled } from '../middleware/grooming';
 import GroomingProviderService from '../services/grooming/GroomingProviderService';
+import GroomingOrderService from '../services/grooming/GroomingOrderService';
 import GroomingModuleConfig from '../services/grooming/GroomingModuleConfig';
 import {
   createGroomingProviderSchema, updateGroomingProviderSchema, groomingLocationSchema,
   groomingResourceSchema, groomingServiceSchema, updateGroomingServiceSchema,
   groomingStaffSchema, groomingProviderRejectSchema,
+  createGroomingOrderSchema, groomingCancelSchema,
 } from '../middleware/validation';
 import database from '../utils/database';
 import cacheManager from '../utils/cacheManager';
@@ -5252,6 +5254,32 @@ router.put('/grooming/admin/providers/:id/reject', authMiddleware, roleMiddlewar
 router.put('/grooming/admin/providers/:id/suspend', authMiddleware, roleMiddleware(['admin']), groomingEnabled, validateBody(groomingProviderRejectSchema),
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingProviderService.adminSuspend(req.params.id, (req as any).userId, req.body.reason) });
+  }));
+
+// ── Orders (P2: customer booking + provider view) ──
+router.post('/grooming/orders', authMiddleware, groomingEnabled, validateBody(createGroomingOrderSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await GroomingOrderService.createOrder((req as any).userId, req.body) });
+  }));
+router.get('/grooming/orders', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.listMyOrders((req as any).userId) });
+  }));
+router.get('/grooming/orders/:id', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.getOrder((req as any).userId, req.params.id) });
+  }));
+router.post('/grooming/orders/:id/pay', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.payOrder((req as any).userId, req.params.id, { deposit: req.body?.deposit === true }) });
+  }));
+router.put('/grooming/orders/:id/cancel', authMiddleware, groomingEnabled, validateBody(groomingCancelSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.cancelOrder((req as any).userId, req.params.id, req.body?.reason) });
+  }));
+router.get('/grooming/providers/:id/orders', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.listProviderOrders((req as any).userId, req.params.id, req.query.status as string) });
   }));
 
 export default router;

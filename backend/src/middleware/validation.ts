@@ -1905,3 +1905,29 @@ export const groomingStaffSchema = Joi.object({
 export const groomingProviderRejectSchema = Joi.object({
   reason: Joi.string().min(5).max(500).required(),
 });
+
+export const createGroomingOrderSchema = Joi.object({
+  providerId: uuid.required(),
+  serviceId: uuid.required(),
+  animalId: uuid.optional().allow(null),
+  locationId: uuid.optional().allow(null),
+  serviceMode: Joi.string().valid('premises', 'mobile').optional(),
+  scheduledDate: Joi.date().required(),
+  timeSlotStart: Joi.string().pattern(/^\d{2}:\d{2}/).required(),
+  addons: Joi.array().items(Joi.object({
+    name: shortText(200).required(),
+    price: positiveNumber.max(1000000).required(),
+  })).optional(),
+  handlingNotes: longText(1000).optional().allow('', null),
+  ownerNotes: longText(1000).optional().allow('', null),
+  consent: Joi.object({
+    handling: Joi.boolean().valid(true).required(),
+    products: Joi.boolean().optional(),
+    photography: Joi.boolean().optional(),
+    emergencyContact: Joi.boolean().optional(),
+  }).required(),
+});
+
+export const groomingCancelSchema = Joi.object({
+  reason: shortText(500).optional().allow('', null),
+});
