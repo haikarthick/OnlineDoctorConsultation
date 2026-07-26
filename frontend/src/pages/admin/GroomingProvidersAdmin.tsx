@@ -20,6 +20,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
   const [rejectModal, setRejectModal] = useState<string | null>(null)
   const [reason, setReason] = useState('')
   const [recon, setRecon] = useState<any>(null)
+  const [report, setReport] = useState<any>(null)
 
   const load = useCallback(async () => {
     try {
@@ -30,6 +31,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
   }, [filter])
   useEffect(() => { load() }, [load])
   useEffect(() => { apiService.adminGroomingReconciliation().then(r => setRecon(r.data)).catch(() => {}) }, [msg])
+  useEffect(() => { apiService.getGroomingPlatformReport().then(r => setReport(r.data)).catch(() => {}) }, [msg])
 
   const settle = async (id: string) => {
     const ref = prompt(t('groomingAdmin.settlePrompt')); if (ref === null) return
@@ -52,6 +54,13 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
           <div><div style={{ fontWeight: 800, fontSize: 20, color: '#16a34a' }}>{formatCurrency(Number(recon.orders?.commission || 0))}</div><div className="si-676930d7">{t('groomingAdmin.commission')}</div></div>
           <div><div style={{ fontWeight: 800, fontSize: 20, color: '#d97706' }}>{formatCurrency(Number(recon.payableNow || 0))}</div><div className="si-676930d7">{t('groomingAdmin.payableNow')}</div></div>
           <div><div style={{ fontWeight: 800, fontSize: 20, color: '#2563eb' }}>{formatCurrency(Number(recon.totalSettled || 0))}</div><div className="si-676930d7">{t('groomingAdmin.settledTotal')}</div></div>
+        </div>
+      )}
+      {report?.moat && (
+        <div className="module-card" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'space-around', textAlign: 'center', background: '#f5f3ff' }}>
+          <div><div style={{ fontWeight: 800, fontSize: 20 }}>{report.moat.escalationRatePct}%</div><div className="si-676930d7">{t('groomingReport.escalationRate')}</div></div>
+          <div><div style={{ fontWeight: 800, fontSize: 20 }}>{report.moat.wellnessNudgeConversionPct}%</div><div className="si-676930d7">{t('groomingReport.wellnessConversion')}</div></div>
+          <div><div style={{ fontWeight: 800, fontSize: 20 }}>{report.disputes?.open || 0}</div><div className="si-676930d7">{t('groomingReport.openDisputes')}</div></div>
         </div>
       )}
       {msg && <div className="module-alert success">{msg}</div>}

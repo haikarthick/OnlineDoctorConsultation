@@ -12,6 +12,10 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
   const [summary, setSummary] = useState<any>(null)
   const [entries, setEntries] = useState<any[]>([])
   const [settlements, setSettlements] = useState<any[]>([])
+  const [report, setReport] = useState<any>(null)
+  const [disputes, setDisputes] = useState<any[]>([])
+  const [providerId, setProviderId] = useState('')
+  const [busy, setBusy] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
 
@@ -20,12 +24,23 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
       setLoading(true); setErr('')
       const prov = (await apiService.getMyGroomingProvider()).data
       if (!prov) { setErr(t('groomingEarnings.noProvider')); setLoading(false); return }
+      setProviderId(prov.id)
       const e = (await apiService.getGroomingEarnings(prov.id)).data
       setSummary(e.summary); setEntries(e.entries || [])
       setSettlements((await apiService.listGroomingSettlements(prov.id)).data || [])
+      try { setReport((await apiService.getGroomingProviderReport(prov.id)).data) } catch { /* optional */ }
+      try { setDisputes((await apiService.listGroomingProviderDisputes(prov.id)).data || []) } catch { /* optional */ }
     } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
   }, [])
   useEffect(() => { load() }, [load])
+
+  const respondDispute = async (id: string, status: string) => {
+    let refundAmount: number | undefined
+    if (status === 'partially_refunded') { const a = prompt(t('groomingDispute.refundPrompt')); if (a === null) return; refundAmount = Number(a) || 0 }
+    try { setBusy(id); await apiService.respondGroomingDispute(id, { status, refundAmount }); load() }
+    catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+  }
+  void providerId
 
   if (loading) return <div className="module-page"><div className="loading-container"><div className="loading-spinner" /></div></div>
 
@@ -52,6 +67,50 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
           </div>
           <p className="si-676930d7">{t('groomingEarnings.manualNote')}</p>
         </>
+      )}
+
+      {report && (
+        <div className="module-card">
+          <h3>{t('groomingReport.title')}</h3>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <div><strong>{report.ordersByStatus?.completed || 0}</strong> {t('groomingReport.completed')}</div>
+            <div><strong>{report.ordersByStatus?.confirmed || 0}</strong> {t('groomingReport.upcoming')}</div>
+            <div><strong>{report.ordersByStatus?.no_show || 0}</strong> {t('groomingReport.noShows')}</div>
+            <div><strong>{report.disputes?.total || 0}</strong> {t('groomingReport.disputes')}</div>
+          </div>
+          {report.revenueByService?.length > 0 && (
+            <div style={{ marginTop: 10 }}>
+              <div className="si-676930d7">{t('groomingReport.byService')}</div>
+              {report.revenueByService.map((s: any, i: number) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                  <span>{s.name} ×{s.count}</span><span>{formatCurrency(Number(s.revenue))}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {disputes.length > 0 && (
+        <div className="module-card" style={{ border: '1px solid #fca5a5' }}>
+          <h3>{t('groomingDispute.title')}</h3>
+          {disputes.map(d => (
+            <div key={d.id} style={{ padding: 10, border: '1px solid #fecaca', borderRadius: 8, marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                <div><strong>{d.orderNumber}</strong> · {d.reason}{d.comments ? <div className="si-676930d7">{d.comments}</div> : null}</div>
+                <span className="badge badge-inactive">{t(`groomingDispute.st.${d.status}`, { defaultValue: (d.status || '').replace(/_/g, ' ') })}</span>
+              </div>
+              {['open', 'under_review'].includes(d.status) && (
+                <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                  <button className="btn btn-sm btn-outline" disabled={busy === d.id} onClick={() => respondDispute(d.id, 'under_review')}>{t('groomingDispute.review')}</button>
+                  <button className="btn btn-sm btn-primary" disabled={busy === d.id} onClick={() => respondDispute(d.id, 'partially_refunded')}>{t('groomingDispute.partialRefund')}</button>
+                  <button className="btn btn-sm btn-outline" disabled={busy === d.id} onClick={() => respondDispute(d.id, 'resolved')}>{t('groomingDispute.resolve')}</button>
+                  <button className="btn btn-sm btn-outline" disabled={busy === d.id} onClick={() => respondDispute(d.id, 'rejected')}>{t('groomingDispute.reject')}</button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
 
       <div className="module-card">

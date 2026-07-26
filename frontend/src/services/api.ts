@@ -3048,6 +3048,30 @@ class ApiService {
     const response = await this.client.get(`/grooming/pets/${animalId}/passport`)
     return response.data
   }
+  async raiseGroomingDispute(id: string, data: any) {
+    const response = await this.client.post(`/grooming/orders/${id}/disputes`, data)
+    return response.data
+  }
+  async listMyGroomingDisputes() {
+    const response = await this.client.get('/grooming/disputes/mine')
+    return response.data
+  }
+  async listGroomingProviderDisputes(id: string) {
+    const response = await this.client.get(`/grooming/providers/${id}/disputes`)
+    return response.data
+  }
+  async respondGroomingDispute(disputeId: string, data: any) {
+    const response = await this.client.put(`/grooming/disputes/${disputeId}/respond`, data)
+    return response.data
+  }
+  async getGroomingProviderReport(id: string) {
+    const response = await this.client.get(`/grooming/providers/${id}/report`)
+    return response.data
+  }
+  async getGroomingPlatformReport() {
+    const response = await this.client.get('/grooming/admin/report')
+    return response.data
+  }
 
   // ── Network Subscription Plans ──
   async getNetworkSubscriptionPlans() {

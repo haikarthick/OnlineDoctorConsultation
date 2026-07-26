@@ -7924,5 +7924,35 @@
     "vetAdvised": "A vet check is advised for: {{areas}}.",
     "history": "Grooming history",
     "noHistory": "No grooming visits yet."
+  },
+  "groomingDispute": {
+    "title": "Disputes",
+    "raise": "Raise a concern",
+    "reasonPrompt": "What went wrong? (short reason)",
+    "raised": "Your concern was submitted.",
+    "myDisputes": "My concerns",
+    "refundPrompt": "Refund amount:",
+    "review": "Mark under review",
+    "partialRefund": "Partial refund",
+    "resolve": "Resolve",
+    "reject": "Reject",
+    "st": {
+      "open": "Open",
+      "under_review": "Under review",
+      "resolved": "Resolved",
+      "partially_refunded": "Partially refunded",
+      "rejected": "Rejected"
+    }
+  },
+  "groomingReport": {
+    "title": "Business summary",
+    "completed": "completed",
+    "upcoming": "upcoming",
+    "noShows": "no-shows",
+    "disputes": "disputes",
+    "byService": "Revenue by service",
+    "escalationRate": "Vet escalation rate",
+    "wellnessConversion": "Wellness → consult",
+    "openDisputes": "Open disputes"
   }
 }
