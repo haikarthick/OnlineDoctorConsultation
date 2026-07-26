@@ -21,7 +21,7 @@ class GroomingPaymentService {
     const r = await database.query(
       `SELECT o.id, o.pet_owner_id, o.provider_id, o.status, o.grand_total, o.deposit_due, o.subtotal,
               o.addons_total, o.variable_total, o.tax_total, o.commission_amount, o.currency,
-              o.gateway, o.gateway_order_id, o.amount_paid, o.order_number,
+              o.gateway, o.gateway_order_id, o.amount_paid, o.order_number, o.payment_id,
               gp.owner_user_id AS "providerOwnerId", gp.legal_name AS "providerLegal",
               gp.gstin AS "providerGstin", gp.business_name AS "providerName", gp.business_address AS "providerAddress"
        FROM grooming_orders o JOIN grooming_providers gp ON gp.id = o.provider_id WHERE o.id = $1`, [orderId]);
