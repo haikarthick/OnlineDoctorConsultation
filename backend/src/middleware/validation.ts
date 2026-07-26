@@ -2005,3 +2005,16 @@ export const groomingEscalationRespondSchema = Joi.object({
   status: Joi.string().valid('owner_notified', 'consult_booked', 'resolved', 'dismissed').required(),
   consultationBookingId: uuid.optional().allow(null),
 });
+
+export const groomingDisputeSchema = Joi.object({
+  reason: shortText(100).required(),
+  comments: longText(2000).optional().allow('', null),
+  images: Joi.array().items(Joi.string().max(500)).optional(),
+  requestedResolution: shortText(30).optional().allow('', null),
+});
+
+export const groomingDisputeRespondSchema = Joi.object({
+  status: Joi.string().valid('under_review', 'resolved', 'partially_refunded', 'rejected').required(),
+  resolutionNote: longText(2000).optional().allow('', null),
+  refundAmount: positiveNumber.max(1000000).optional(),
+});

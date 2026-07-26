@@ -7,6 +7,8 @@ import GroomingProviderService from '../services/grooming/GroomingProviderServic
 import GroomingOrderService from '../services/grooming/GroomingOrderService';
 import GroomingSettlementService from '../services/grooming/GroomingSettlementService';
 import GroomingCareService from '../services/grooming/GroomingCareService';
+import GroomingDisputeService from '../services/grooming/GroomingDisputeService';
+import GroomingReportService from '../services/grooming/GroomingReportService';
 import GroomingModuleConfig from '../services/grooming/GroomingModuleConfig';
 import {
   createGroomingProviderSchema, updateGroomingProviderSchema, groomingLocationSchema,
@@ -17,6 +19,7 @@ import {
   groomingItemStatusSchema, groomingReportCardSchema, groomingSettleSchema,
   groomingVariableRequestSchema, groomingVariableRespondSchema,
   groomingEscalationSchema, groomingEscalationRespondSchema,
+  groomingDisputeSchema, groomingDisputeRespondSchema,
 } from '../middleware/validation';
 import database from '../utils/database';
 import cacheManager from '../utils/cacheManager';
@@ -5363,6 +5366,42 @@ router.put('/grooming/escalations/:id/respond', authMiddleware, groomingEnabled,
 router.get('/grooming/pets/:animalId/passport', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingCareService.getPetPassport((req as any).userId, req.params.animalId) });
+  }));
+
+// ── P6: disputes & refunds ──
+router.post('/grooming/orders/:id/disputes', authMiddleware, groomingEnabled, validateBody(groomingDisputeSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await GroomingDisputeService.raiseDispute((req as any).userId, req.params.id, req.body) });
+  }));
+router.get('/grooming/disputes/mine', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingDisputeService.listMyDisputes((req as any).userId) });
+  }));
+router.get('/grooming/providers/:id/disputes', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingDisputeService.listProviderDisputes((req as any).userId, req.params.id) });
+  }));
+router.get('/grooming/admin/disputes', authMiddleware, roleMiddleware(['admin']), groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingDisputeService.adminListDisputes(req.query.status as string) });
+  }));
+router.put('/grooming/disputes/:id/respond', authMiddleware, groomingEnabled, validateBody(groomingDisputeRespondSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    const authReq = req as any;
+    const isAdmin = authReq.userRole === 'admin' || (authReq.userRoles || []).includes('admin');
+    res.json({ success: true, data: await GroomingDisputeService.respondDispute(authReq.userId, isAdmin, req.params.id, req.body) });
+  }));
+
+// ── P7: reports ──
+router.get('/grooming/providers/:id/report', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    const authReq = req as any;
+    const isAdmin = authReq.userRole === 'admin' || (authReq.userRoles || []).includes('admin');
+    res.json({ success: true, data: await GroomingReportService.providerReport(authReq.userId, req.params.id, isAdmin) });
+  }));
+router.get('/grooming/admin/report', authMiddleware, roleMiddleware(['admin']), groomingEnabled,
+  asyncHandler(async (_req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingReportService.platformReport() });
   }));
 
 export default router;
