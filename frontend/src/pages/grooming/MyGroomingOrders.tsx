@@ -73,6 +73,7 @@ const MyGroomingOrders: React.FC<Props> = ({ onNavigate }) => {
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                      <button className="btn btn-sm btn-outline" onClick={() => onNavigate(`/grooming/order/${o.id}`)}>{t('groomingOrders.details')}</button>
                       {o.status === 'payment_pending' && <button className="btn btn-sm btn-primary" disabled={busy === o.id} onClick={() => pay(o.id)}>{t('groomingOrders.payNow')}</button>}
                       {cancellable(o.status) && <button className="btn btn-sm btn-outline" disabled={busy === o.id} onClick={() => cancel(o.id)}>{t('groomingOrders.cancel')}</button>}
                     </div>

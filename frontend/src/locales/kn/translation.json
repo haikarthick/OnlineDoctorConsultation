@@ -210,7 +210,9 @@
     "groomingProvider": "ನನ್ನ ಗ್ರೂಮಿಂಗ್ ವ್ಯಾಪಾರ",
     "groomingAdmin": "ಗ್ರೂಮಿಂಗ್ ಪೂರೈಕೆದಾರರು",
     "groomingFind": "ಗ್ರೂಮರ್ ಹುಡುಕಿ",
-    "groomingMyOrders": "ನನ್ನ ಗ್ರೂಮಿಂಗ್"
+    "groomingMyOrders": "ನನ್ನ ಗ್ರೂಮಿಂಗ್",
+    "groomingOrders": "ಗ್ರೂಮಿಂಗ್ ಆರ್ಡರ್‌ಗಳು",
+    "groomingEarnings": "ಗ್ರೂಮಿಂಗ್ ಗಳಿಕೆ"
   },
   "login": {
     "welcome": "ಮತ್ತೆ ಸ್ವಾಗತ",
@@ -7722,7 +7724,14 @@
     "rejectReasonLabel": "Rejection reason (required)",
     "rejectReasonPlaceholder": "Explain why this provider is rejected…",
     "cancel": "Cancel",
-    "confirmReject": "Confirm Reject"
+    "confirmReject": "Confirm Reject",
+    "settle": "Settle payout",
+    "settlePrompt": "Payout reference (bank/UPI ref):",
+    "settled": "Paid out {{amount}}.",
+    "collected": "Collected",
+    "commission": "Commission",
+    "payableNow": "Payable now",
+    "settledTotal": "Settled to date"
   },
   "groomingFind": {
     "title": "Find a Groomer",
@@ -7775,7 +7784,8 @@
     "none": "No grooming orders yet",
     "findGroomer": "Find a groomer",
     "payNow": "Pay now",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "details": "Details"
   },
   "groomingStatus": {
     "draft": "Draft",
@@ -7797,5 +7807,88 @@
     "no_show": "No-show",
     "disputed": "Disputed",
     "closed": "Closed"
+  },
+  "groomingBoard": {
+    "title": "Manage Orders",
+    "noProvider": "Create your grooming business first.",
+    "all": "All",
+    "none": "No orders yet.",
+    "details": "Details",
+    "earnings": "Earnings & payouts",
+    "action": {
+      "checkIn": "Check in",
+      "start": "Start",
+      "noShow": "No-show",
+      "qualityCheck": "Quality check",
+      "ready": "Ready",
+      "complete": "Complete"
+    }
+  },
+  "groomingDetail": {
+    "back": "Back",
+    "notFound": "Order not found.",
+    "items": "Services & items",
+    "intake": "Intake & wellness",
+    "arrivalCondition": "Arrival condition",
+    "scent": "S.C.E.N.T. wellness check (non-medical)",
+    "scentSkin": "Skin",
+    "scentCoat": "Coat",
+    "scentEars": "Ears",
+    "scentNails": "Nails",
+    "scentTeeth": "Teeth",
+    "scentNotes": "Wellness notes",
+    "saveIntake": "Save intake",
+    "noIntake": "No intake recorded yet.",
+    "reportCard": "Report card",
+    "summary": "Summary",
+    "aftercare": "Aftercare notes",
+    "productsUsed": "Products used",
+    "completeWithReport": "Complete & save report card",
+    "noReport": "No report card yet.",
+    "timeline": "Timeline",
+    "intakeSaved": "Intake saved.",
+    "reportSaved": "Report card saved; order completed."
+  },
+  "groomingEarnings": {
+    "noProvider": "No grooming business found.",
+    "title": "Earnings & Payouts",
+    "backToBoard": "Back to orders",
+    "available": "Available",
+    "clearing": "Clearing",
+    "paid": "Paid out",
+    "manualNote": "Payouts are settled manually by the platform after the clearance window.",
+    "ledger": "Earnings ledger",
+    "noEntries": "No earnings yet.",
+    "order": "Order",
+    "gross": "Gross",
+    "commission": "Commission",
+    "net": "Net",
+    "status": "Status",
+    "st": {
+      "clearing": "Clearing",
+      "available": "Available",
+      "paid": "Paid",
+      "reversed": "Reversed"
+    },
+    "settlements": "Settlements",
+    "noSettlements": "No payouts yet.",
+    "date": "Date",
+    "amount": "Amount",
+    "netPaid": "Net paid",
+    "method": "Method",
+    "reference": "Reference"
+  },
+  "groomingItem": {
+    "pending": "Pending",
+    "started": "Started",
+    "completed": "Completed",
+    "skipped": "Skipped",
+    "awaiting_approval": "Awaiting approval",
+    "paused": "Paused"
+  },
+  "groomingScent": {
+    "good": "Good",
+    "watch": "Watch",
+    "vet_advised": "Vet advised"
   }
 }

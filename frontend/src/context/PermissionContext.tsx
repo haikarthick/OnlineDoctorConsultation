@@ -124,6 +124,10 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   grooming_browse: ['/grooming/find', '/grooming/provider/:id'],
   grooming_book: ['/grooming/book'],
   grooming_my_orders: ['/grooming/my-orders'],
+  grooming_manage_bookings: ['/grooming/orders'],
+  grooming_earnings_view: ['/grooming/earnings'],
+  // /grooming/order/:id is intentionally NOT mapped — shared by provider + customer, so it is
+  // auth-only at the route layer and access is enforced per-order by the backend.
 }
 
 // Reverse map: route path → required permission
@@ -223,6 +227,8 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'admin-grooming-providers': 'grooming_admin',
   'grooming-find': 'grooming_browse',
   'grooming-my-orders': 'grooming_my_orders',
+  'grooming-orders': 'grooming_manage_bookings',
+  'grooming-earnings': 'grooming_earnings_view',
 }
 
 // ─── Context ────────────────────────────────────────────────

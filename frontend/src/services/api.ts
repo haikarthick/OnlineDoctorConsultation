@@ -2984,6 +2984,46 @@ class ApiService {
     const response = await this.client.get(`/grooming/providers/${id}/orders`, { params: status ? { status } : {} })
     return response.data
   }
+  async getGroomingOrderDetail(id: string) {
+    const response = await this.client.get(`/grooming/orders/${id}/detail`)
+    return response.data
+  }
+  async transitionGroomingOrder(id: string, toStatus: string, note?: string) {
+    const response = await this.client.put(`/grooming/orders/${id}/transition`, { toStatus, note })
+    return response.data
+  }
+  async assignGroomingOrder(id: string, data: any) {
+    const response = await this.client.put(`/grooming/orders/${id}/assign`, data)
+    return response.data
+  }
+  async saveGroomingIntake(id: string, data: any) {
+    const response = await this.client.put(`/grooming/orders/${id}/intake`, data)
+    return response.data
+  }
+  async updateGroomingItem(id: string, itemId: string, status: string, reason?: string) {
+    const response = await this.client.put(`/grooming/orders/${id}/items/${itemId}`, { status, reason })
+    return response.data
+  }
+  async createGroomingReportCard(id: string, data: any) {
+    const response = await this.client.put(`/grooming/orders/${id}/report-card`, data)
+    return response.data
+  }
+  async getGroomingEarnings(id: string) {
+    const response = await this.client.get(`/grooming/providers/${id}/earnings`)
+    return response.data
+  }
+  async listGroomingSettlements(id: string) {
+    const response = await this.client.get(`/grooming/providers/${id}/settlements`)
+    return response.data
+  }
+  async adminSettleGrooming(id: string, data: any) {
+    const response = await this.client.post(`/grooming/admin/providers/${id}/settle`, data)
+    return response.data
+  }
+  async adminGroomingReconciliation() {
+    const response = await this.client.get('/grooming/admin/reconciliation')
+    return response.data
+  }
 
   // ── Network Subscription Plans ──
   async getNetworkSubscriptionPlans() {
