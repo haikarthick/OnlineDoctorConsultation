@@ -29,10 +29,10 @@ let passed = 0;
 let failed = 0;
 const failures = [];
 
-function runCheck(name, command, cwd) {
+function runCheck(name, command, cwd, timeout = 120000) {
   process.stdout.write(`  ${name} ... `);
   try {
-    execSync(command, { cwd, stdio: 'pipe', timeout: 120000 });
+    execSync(command, { cwd, stdio: 'pipe', timeout });
     console.log(`${GREEN}✓${RESET}`);
     passed++;
   } catch (err) {
@@ -52,11 +52,15 @@ function runCheck(name, command, cwd) {
 
 console.log(`\n${CYAN}━━━ VetCare Pre-Deployment Checks ━━━${RESET}\n`);
 
-// 1. Backend TypeScript
-runCheck('Backend TypeScript', 'npx tsc --noEmit', BACKEND);
+// 1. Backend PRODUCTION BUILD — run exactly what Render's render-build.sh runs (`npm run build`
+//    = real `tsc` emit), not just `tsc --noEmit`. Catches any build-time failure before push so
+//    it can never reach Render. (Emits to backend/dist; harmless locally.)
+runCheck('Backend Build (npm run build)', 'npm run build', BACKEND, 300000);
 
-// 2. Frontend TypeScript
-runCheck('Frontend TypeScript', 'npx tsc --noEmit', FRONTEND);
+// 2. Frontend PRODUCTION BUILD — the real Vite build + bundle-budget postbuild that Render runs.
+//    `tsc --noEmit` alone (the old check) never bundled, so a Vite/Rollup failure or a bundle-budget
+//    breach could pass the gate and then fail the Render deploy. This closes that gap.
+runCheck('Frontend Build (npm run build)', 'npm run build', FRONTEND, 300000);
 
 // 3. Schema validation
 runCheck('Schema Validation', 'node scripts/schema-check.js', BACKEND);

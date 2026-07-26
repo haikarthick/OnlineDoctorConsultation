@@ -28,6 +28,11 @@ services:
     buildCommand: chmod +x render-build.sh && ./render-build.sh
     startCommand: chmod +x render-start.sh && ./render-start.sh
     envVars:
+      # Pin Node to the version CI builds+tests on (Node 20). Unpinned, Render picks its own
+      # default which can differ from the proven-good CI/local envs and cause build/runtime drift.
+      # Also pinned via .nvmrc (which Render reads automatically each build). See lessons: deploy-safety.
+      - key: NODE_VERSION
+        value: "20"
       - key: DATABASE_URL
         fromDatabase:
           name: vetcare-db
@@ -71,6 +76,8 @@ services:
     buildCommand: chmod +x render-build.sh && ./render-build.sh
     startCommand: chmod +x render-start.sh && ./render-start.sh
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: DB_SCHEMA
         value: vetcare_demo
       - key: NODE_ENV
