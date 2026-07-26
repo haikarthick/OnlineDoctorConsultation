@@ -2976,6 +2976,14 @@ class ApiService {
     const response = await this.client.post(`/grooming/orders/${id}/pay`, { deposit })
     return response.data
   }
+  async createGroomingCheckout(id: string, deposit = false) {
+    const response = await this.client.post(`/grooming/orders/${id}/checkout`, { deposit })
+    return response.data
+  }
+  async confirmGroomingPayment(id: string, body: any) {
+    const response = await this.client.post(`/grooming/orders/${id}/confirm-payment`, body)
+    return response.data
+  }
   async cancelGroomingOrder(id: string, reason?: string) {
     const response = await this.client.put(`/grooming/orders/${id}/cancel`, { reason })
     return response.data

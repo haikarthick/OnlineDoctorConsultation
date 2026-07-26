@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
+import { payGroomingOrderFlow } from '../../utils/groomingCheckout'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
@@ -49,8 +50,8 @@ const MyGroomingOrders: React.FC<Props> = ({ onNavigate }) => {
     catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
   }
   const pay = async (id: string) => {
-    try { setBusy(id); await apiService.payGroomingOrder(id, false); load() }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+    try { setBusy(id); await payGroomingOrderFlow(id, false); flash(t('groomingOrders.paid')); load() }
+    catch (e: any) { setErr(e?.response?.data?.message || e.message || 'Payment failed') } finally { setBusy(null) }
   }
 
   const cancellable = (s: string) => !['completed', 'closed', 'cancelled_by_customer', 'cancelled_by_provider', 'no_show'].includes(s)

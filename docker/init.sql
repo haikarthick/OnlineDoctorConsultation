@@ -2658,7 +2658,7 @@ ON CONFLICT (sac_code) DO NOTHING;
 CREATE TABLE IF NOT EXISTS invoices (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   invoice_number VARCHAR(100) UNIQUE NOT NULL,
-  invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('consultation', 'commission', 'pharmacy')),
+  invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('consultation', 'commission', 'pharmacy', 'grooming')),
   payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
   withdrawal_id UUID REFERENCES withdrawal_requests(id) ON DELETE SET NULL,
   issuer_details JSONB NOT NULL DEFAULT '{}',
@@ -3824,6 +3824,10 @@ CREATE TABLE IF NOT EXISTS grooming_orders (
   cancelled_by UUID REFERENCES users(id) ON DELETE SET NULL,
   cancelled_at TIMESTAMP,
   eta_minutes INT,
+  gateway_order_id VARCHAR(120),
+  gateway_payment_id VARCHAR(120),
+  gateway VARCHAR(30),
+  invoice_number VARCHAR(100),
   completed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

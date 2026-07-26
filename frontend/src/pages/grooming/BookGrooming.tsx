@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
+import { payGroomingOrderFlow } from '../../utils/groomingCheckout'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
@@ -70,8 +71,8 @@ const BookGrooming: React.FC<Props> = ({ onNavigate }) => {
         consent: { handling: consentHandling, photography: consentPhoto },
       })
       const order = orderRes.data
-      // Demo pay immediately (real gateway integration later)
-      await apiService.payGroomingOrder(order.id, false)
+      // Real gateway checkout (demo auto-confirms; Razorpay opens the widget) + GST invoice
+      await payGroomingOrderFlow(order.id, false)
       onNavigate('/grooming/my-orders')
     } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setSubmitting(false) }
   }

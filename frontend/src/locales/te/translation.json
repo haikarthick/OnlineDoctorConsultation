@@ -7784,7 +7784,8 @@
     "payNow": "Pay now",
     "cancel": "Cancel",
     "details": "Details",
-    "passport": "Passport"
+    "passport": "Passport",
+    "paid": "చెల్లింపు విజయవంతమైంది."
   },
   "groomingStatus": {
     "draft": "Draft",

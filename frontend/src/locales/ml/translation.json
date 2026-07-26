@@ -7767,7 +7767,8 @@
     "payNow": "Pay now",
     "cancel": "Cancel",
     "details": "Details",
-    "passport": "Passport"
+    "passport": "Passport",
+    "paid": "പേയ്‌മെന്റ് വിജയകരമായി."
   },
   "groomingStatus": {
     "draft": "Draft",

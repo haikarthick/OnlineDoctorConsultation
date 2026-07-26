@@ -9,6 +9,7 @@ import GroomingSettlementService from '../services/grooming/GroomingSettlementSe
 import GroomingCareService from '../services/grooming/GroomingCareService';
 import GroomingDisputeService from '../services/grooming/GroomingDisputeService';
 import GroomingReportService from '../services/grooming/GroomingReportService';
+import GroomingPaymentService from '../services/grooming/GroomingPaymentService';
 import GroomingModuleConfig from '../services/grooming/GroomingModuleConfig';
 import {
   createGroomingProviderSchema, updateGroomingProviderSchema, groomingLocationSchema,
@@ -5281,6 +5282,15 @@ router.get('/grooming/orders/:id', authMiddleware, groomingEnabled,
 router.post('/grooming/orders/:id/pay', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingOrderService.payOrder((req as any).userId, req.params.id, { deposit: req.body?.deposit === true }) });
+  }));
+// Real gateway checkout (demo auto-verifies; Razorpay opens on the client) + GST invoice
+router.post('/grooming/orders/:id/checkout', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await GroomingPaymentService.createCheckout((req as any).userId, req.params.id, req.body?.deposit === true) });
+  }));
+router.post('/grooming/orders/:id/confirm-payment', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingPaymentService.confirmCheckout((req as any).userId, req.params.id, req.body || {}) });
   }));
 router.put('/grooming/orders/:id/cancel', authMiddleware, groomingEnabled, validateBody(groomingCancelSchema),
   asyncHandler(async (req: Request, res: Response) => {

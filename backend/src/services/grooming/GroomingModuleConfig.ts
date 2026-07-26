@@ -59,6 +59,10 @@ class GroomingModuleConfig {
   async getClearanceDays(): Promise<number> { return this.getNumber('grooming.settlement.clearanceDays', 3); }
   /** Slot-hold minutes for pay-at-booking. */
   async getHoldMinutes(): Promise<number> { return this.getNumber('grooming.holdMinutes', 15); }
+  /** Prefix for the grooming GST invoice series (separate from consultation). */
+  async getInvoicePrefix(): Promise<string> { return this.getString('grooming.invoicePrefix', 'GRM'); }
+  /** SAC code for grooming/spa services (CA-confirmed at go-live). */
+  async getSacCode(): Promise<string> { return this.getString('grooming.sacCode', '999721'); }
 }
 
 export default new GroomingModuleConfig();

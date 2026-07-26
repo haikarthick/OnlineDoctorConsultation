@@ -7771,7 +7771,8 @@
     "payNow": "Pay now",
     "cancel": "Cancel",
     "details": "Details",
-    "passport": "Passport"
+    "passport": "Passport",
+    "paid": "भुगतान सफल।"
   },
   "groomingStatus": {
     "draft": "Draft",

@@ -22,6 +22,7 @@ const ORDER_SELECT = `
   o.commission_percent as "commissionPercent", o.commission_amount as "commissionAmount",
   o.handling_notes as "handlingNotes", o.owner_notes as "ownerNotes",
   o.cancellation_reason as "cancellationReason", o.eta_minutes as "etaMinutes",
+  o.invoice_number as "invoiceNumber",
   o.completed_at as "completedAt", o.created_at as "createdAt", o.updated_at as "updatedAt"
 `;
 

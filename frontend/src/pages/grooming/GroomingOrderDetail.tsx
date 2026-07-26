@@ -89,6 +89,7 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
           <div style={{ textAlign: 'right' }}>
             <span className="badge badge-info">{t(`groomingStatus.${order.status}`, { defaultValue: (order.status || '').replace(/_/g, ' ') })}</span>
             <div style={{ fontWeight: 700, marginTop: 4 }}>{formatCurrency(Number(order.grandTotal))}</div>
+            {order.invoiceNumber && <div className="si-676930d7">🧾 {order.invoiceNumber}</div>}
           </div>
         </div>
       </div>
