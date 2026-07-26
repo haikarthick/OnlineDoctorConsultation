@@ -1994,3 +1994,14 @@ export const groomingVariableRequestSchema = Joi.object({
 export const groomingVariableRespondSchema = Joi.object({
   approve: Joi.boolean().required(),
 });
+
+export const groomingEscalationSchema = Joi.object({
+  issueType: shortText(40).required(),
+  description: longText(2000).optional().allow('', null),
+  photos: Joi.array().items(Joi.string().max(500)).optional(),
+});
+
+export const groomingEscalationRespondSchema = Joi.object({
+  status: Joi.string().valid('owner_notified', 'consult_booked', 'resolved', 'dismissed').required(),
+  consultationBookingId: uuid.optional().allow(null),
+});

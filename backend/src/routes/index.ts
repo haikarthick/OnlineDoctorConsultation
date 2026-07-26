@@ -6,6 +6,7 @@ import { groomingEnabled } from '../middleware/grooming';
 import GroomingProviderService from '../services/grooming/GroomingProviderService';
 import GroomingOrderService from '../services/grooming/GroomingOrderService';
 import GroomingSettlementService from '../services/grooming/GroomingSettlementService';
+import GroomingCareService from '../services/grooming/GroomingCareService';
 import GroomingModuleConfig from '../services/grooming/GroomingModuleConfig';
 import {
   createGroomingProviderSchema, updateGroomingProviderSchema, groomingLocationSchema,
@@ -15,6 +16,7 @@ import {
   groomingTransitionSchema, groomingAssignSchema, groomingIntakeSchema,
   groomingItemStatusSchema, groomingReportCardSchema, groomingSettleSchema,
   groomingVariableRequestSchema, groomingVariableRespondSchema,
+  groomingEscalationSchema, groomingEscalationRespondSchema,
 } from '../middleware/validation';
 import database from '../utils/database';
 import cacheManager from '../utils/cacheManager';
@@ -5343,6 +5345,24 @@ router.get('/grooming/admin/providers/:id/earnings', authMiddleware, roleMiddlew
 router.get('/grooming/admin/reconciliation', authMiddleware, roleMiddleware(['admin']), groomingEnabled,
   asyncHandler(async (_req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingSettlementService.adminReconciliation() });
+  }));
+
+// ── P5: safety escalation (groomer → vet) + grooming passport ──
+router.post('/grooming/orders/:id/escalations', authMiddleware, groomingEnabled, validateBody(groomingEscalationSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await GroomingCareService.raiseEscalation((req as any).userId, req.params.id, req.body) });
+  }));
+router.get('/grooming/orders/:id/escalations', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingCareService.listEscalations((req as any).userId, req.params.id) });
+  }));
+router.put('/grooming/escalations/:id/respond', authMiddleware, groomingEnabled, validateBody(groomingEscalationRespondSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingCareService.respondEscalation((req as any).userId, req.params.id, req.body) });
+  }));
+router.get('/grooming/pets/:animalId/passport', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingCareService.getPetPassport((req as any).userId, req.params.animalId) });
   }));
 
 export default router;
