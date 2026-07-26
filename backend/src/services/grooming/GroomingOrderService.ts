@@ -203,6 +203,146 @@ class GroomingOrderService {
     await this.addHistory(orderId, order.status, newStatus, userId, reason || undefined);
     return this.getOrderById(orderId);
   }
+
+  // ── P3 ops: provider-driven execution workflow ──────────────
+  private async requireProviderStaff(userId: string, orderId: string): Promise<{ order: any; providerRole: string }> {
+    const { order, providerRole } = await this.resolveOrderAccess(userId, orderId);
+    if (!providerRole) throw new ForbiddenError('Provider staff access required');
+    return { order, providerRole };
+  }
+
+  private static PROVIDER_TRANSITIONS: Record<string, string[]> = {
+    confirmed: ['provider_assigned', 'checked_in', 'en_route', 'in_progress', 'no_show'],
+    provider_assigned: ['checked_in', 'en_route', 'in_progress', 'no_show'],
+    en_route: ['checked_in', 'in_progress', 'no_show'],
+    checked_in: ['intake_done', 'in_progress', 'no_show'],
+    intake_done: ['in_progress'],
+    in_progress: ['quality_check', 'ready_for_pickup'],
+    quality_check: ['ready_for_pickup', 'in_progress'],
+    ready_for_pickup: ['completed', 'returning'],
+    returning: ['completed'],
+  };
+
+  /** Provider advances the order along the workflow. Completion stamps completed_at. */
+  async transitionOrder(userId: string, orderId: string, toStatus: string, note?: string): Promise<any> {
+    const { order } = await this.requireProviderStaff(userId, orderId);
+    const allowed = GroomingOrderService.PROVIDER_TRANSITIONS[order.status] || [];
+    if (!allowed.includes(toStatus)) throw new ValidationError(`Cannot move from ${order.status} to ${toStatus}`);
+    const stampCompleted = toStatus === 'completed';
+    await database.query(
+      `UPDATE grooming_orders SET status = $2, updated_at = NOW()${stampCompleted ? ', completed_at = NOW()' : ''} WHERE id = $1`,
+      [orderId, toStatus]);
+    await this.addHistory(orderId, order.status, toStatus, userId, note);
+    return this.getOrderById(orderId);
+  }
+
+  async assignOrder(userId: string, orderId: string, data: { staffId?: string; resourceId?: string; etaMinutes?: number }): Promise<any> {
+    await this.requireProviderStaff(userId, orderId);
+    const sets: string[] = []; const params: any[] = []; let i = 0;
+    if (data.staffId !== undefined) { i++; sets.push(`assigned_staff_id = $${i}`); params.push(data.staffId || null); }
+    if (data.resourceId !== undefined) { i++; sets.push(`assigned_resource_id = $${i}`); params.push(data.resourceId || null); }
+    if (data.etaMinutes !== undefined) { i++; sets.push(`eta_minutes = $${i}`); params.push(data.etaMinutes ?? null); }
+    if (sets.length === 0) return this.getOrderById(orderId);
+    i++; params.push(orderId);
+    await database.query(`UPDATE grooming_orders SET ${sets.join(', ')}, updated_at = NOW() WHERE id = $${i}`, params);
+    return this.getOrderById(orderId);
+  }
+
+  /** Upsert intake + S.C.E.N.T. wellness (non-medical, observational). */
+  async saveIntake(userId: string, orderId: string, data: any): Promise<any> {
+    await this.requireProviderStaff(userId, orderId);
+    const scent = ['skin', 'coat', 'ears', 'nails', 'teeth'];
+    for (const k of scent) {
+      const v = data[`scent${k[0].toUpperCase()}${k.slice(1)}`];
+      if (v != null && !['good', 'watch', 'vet_advised'].includes(v)) throw new ValidationError(`Invalid S.C.E.N.T. value for ${k}`);
+    }
+    await database.query(
+      `INSERT INTO grooming_intake
+         (order_id, recorded_by, arrival_condition, temperament, owner_instructions, allergies, handling_restrictions,
+          scent_skin, scent_coat, scent_ears, scent_nails, scent_teeth, scent_notes, before_photos,
+          consent_handling, consent_products, consent_photography, consent_emergency_contact)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+       ON CONFLICT (order_id) DO UPDATE SET
+         recorded_by = EXCLUDED.recorded_by, arrival_condition = EXCLUDED.arrival_condition,
+         temperament = EXCLUDED.temperament, owner_instructions = EXCLUDED.owner_instructions,
+         allergies = EXCLUDED.allergies, handling_restrictions = EXCLUDED.handling_restrictions,
+         scent_skin = EXCLUDED.scent_skin, scent_coat = EXCLUDED.scent_coat, scent_ears = EXCLUDED.scent_ears,
+         scent_nails = EXCLUDED.scent_nails, scent_teeth = EXCLUDED.scent_teeth, scent_notes = EXCLUDED.scent_notes,
+         before_photos = EXCLUDED.before_photos, consent_handling = EXCLUDED.consent_handling,
+         consent_products = EXCLUDED.consent_products, consent_photography = EXCLUDED.consent_photography,
+         consent_emergency_contact = EXCLUDED.consent_emergency_contact, updated_at = NOW()`,
+      [orderId, userId, data.arrivalCondition || null, data.temperament || null, data.ownerInstructions || null,
+       data.allergies || null, data.handlingRestrictions || null,
+       data.scentSkin || null, data.scentCoat || null, data.scentEars || null, data.scentNails || null, data.scentTeeth || null,
+       data.scentNotes || null, Array.isArray(data.beforePhotos) ? data.beforePhotos : [],
+       data.consentHandling === true, data.consentProducts === true, data.consentPhotography === true, data.consentEmergencyContact === true]);
+    return this.getIntake(userId, orderId);
+  }
+
+  async getIntake(userId: string, orderId: string): Promise<any | null> {
+    await this.resolveOrderAccess(userId, orderId); // owner or provider staff may view
+    const r = await database.query(
+      `SELECT order_id as "orderId", arrival_condition as "arrivalCondition", temperament,
+              owner_instructions as "ownerInstructions", allergies, handling_restrictions as "handlingRestrictions",
+              scent_skin as "scentSkin", scent_coat as "scentCoat", scent_ears as "scentEars",
+              scent_nails as "scentNails", scent_teeth as "scentTeeth", scent_notes as "scentNotes",
+              before_photos as "beforePhotos", consent_handling as "consentHandling",
+              consent_products as "consentProducts", consent_photography as "consentPhotography",
+              consent_emergency_contact as "consentEmergencyContact"
+       FROM grooming_intake WHERE order_id = $1`, [orderId]);
+    return r.rows[0] || null;
+  }
+
+  /** Update an execution line item (staff marks pending/started/completed/skipped/…). */
+  async updateItemStatus(userId: string, orderId: string, itemId: string, status: string, opts?: { reason?: string; photoUrl?: string }): Promise<any> {
+    await this.requireProviderStaff(userId, orderId);
+    const valid = ['pending', 'started', 'completed', 'skipped', 'awaiting_approval', 'paused'];
+    if (!valid.includes(status)) throw new ValidationError('Invalid item status');
+    await database.query(
+      `UPDATE grooming_order_items SET status = $3, reason = COALESCE($4, reason), photo_url = COALESCE($5, photo_url), updated_at = NOW()
+       WHERE id = $1 AND order_id = $2`, [itemId, orderId, status, opts?.reason || null, opts?.photoUrl || null]);
+    return this.getOrderById(orderId);
+  }
+
+  /** Create/replace the report card and mark the order completed. */
+  async createReportCard(userId: string, orderId: string, data: any): Promise<any> {
+    const { order } = await this.requireProviderStaff(userId, orderId);
+    await database.query(
+      `INSERT INTO grooming_report_card (order_id, after_photos, products_used, aftercare_notes, summary, next_recommended_date, created_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       ON CONFLICT (order_id) DO UPDATE SET after_photos = EXCLUDED.after_photos, products_used = EXCLUDED.products_used,
+         aftercare_notes = EXCLUDED.aftercare_notes, summary = EXCLUDED.summary, next_recommended_date = EXCLUDED.next_recommended_date`,
+      [orderId, Array.isArray(data.afterPhotos) ? data.afterPhotos : [], data.productsUsed || null,
+       data.aftercareNotes || null, data.summary || null, data.nextRecommendedDate || null, userId]);
+    // Completing via report card if not already terminal
+    if (!['completed', 'closed', 'cancelled_by_customer', 'cancelled_by_provider'].includes(order.status)) {
+      await database.query(`UPDATE grooming_orders SET status = 'completed', completed_at = NOW(), updated_at = NOW() WHERE id = $1`, [orderId]);
+      await this.addHistory(orderId, order.status, 'completed', userId, 'Completed with report card');
+    }
+    return this.getReportCard(userId, orderId);
+  }
+
+  async getReportCard(userId: string, orderId: string): Promise<any | null> {
+    await this.resolveOrderAccess(userId, orderId);
+    const r = await database.query(
+      `SELECT order_id as "orderId", after_photos as "afterPhotos", products_used as "productsUsed",
+              aftercare_notes as "aftercareNotes", summary, next_recommended_date as "nextRecommendedDate"
+       FROM grooming_report_card WHERE order_id = $1`, [orderId]);
+    return r.rows[0] || null;
+  }
+
+  /** Full order detail (order + items + intake + report card + history), owner or provider staff. */
+  async getOrderDetail(userId: string, orderId: string): Promise<any> {
+    await this.resolveOrderAccess(userId, orderId);
+    const order = await this.getOrderById(orderId);
+    order.intake = await this.getIntake(userId, orderId);
+    order.reportCard = await this.getReportCard(userId, orderId);
+    const hist = await database.query(
+      `SELECT from_status as "fromStatus", to_status as "toStatus", note, created_at as "createdAt"
+       FROM grooming_order_status_history WHERE order_id = $1 ORDER BY created_at ASC`, [orderId]);
+    order.history = hist.rows;
+    return order;
+  }
 }
 
 export default new GroomingOrderService();

@@ -5,12 +5,15 @@ import { requireNetworkAccess, NetworkAccessRequest, resolveNetworkAccess } from
 import { groomingEnabled } from '../middleware/grooming';
 import GroomingProviderService from '../services/grooming/GroomingProviderService';
 import GroomingOrderService from '../services/grooming/GroomingOrderService';
+import GroomingSettlementService from '../services/grooming/GroomingSettlementService';
 import GroomingModuleConfig from '../services/grooming/GroomingModuleConfig';
 import {
   createGroomingProviderSchema, updateGroomingProviderSchema, groomingLocationSchema,
   groomingResourceSchema, groomingServiceSchema, updateGroomingServiceSchema,
   groomingStaffSchema, groomingProviderRejectSchema,
   createGroomingOrderSchema, groomingCancelSchema,
+  groomingTransitionSchema, groomingAssignSchema, groomingIntakeSchema,
+  groomingItemStatusSchema, groomingReportCardSchema, groomingSettleSchema,
 } from '../middleware/validation';
 import database from '../utils/database';
 import cacheManager from '../utils/cacheManager';
@@ -5280,6 +5283,56 @@ router.put('/grooming/orders/:id/cancel', authMiddleware, groomingEnabled, valid
 router.get('/grooming/providers/:id/orders', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingOrderService.listProviderOrders((req as any).userId, req.params.id, req.query.status as string) });
+  }));
+
+// ── Order detail + ops workflow (P3) ──
+router.get('/grooming/orders/:id/detail', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.getOrderDetail((req as any).userId, req.params.id) });
+  }));
+router.put('/grooming/orders/:id/transition', authMiddleware, groomingEnabled, validateBody(groomingTransitionSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.transitionOrder((req as any).userId, req.params.id, req.body.toStatus, req.body.note) });
+  }));
+router.put('/grooming/orders/:id/assign', authMiddleware, groomingEnabled, validateBody(groomingAssignSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.assignOrder((req as any).userId, req.params.id, req.body) });
+  }));
+router.put('/grooming/orders/:id/intake', authMiddleware, groomingEnabled, validateBody(groomingIntakeSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.saveIntake((req as any).userId, req.params.id, req.body) });
+  }));
+router.put('/grooming/orders/:id/items/:itemId', authMiddleware, groomingEnabled, validateBody(groomingItemStatusSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.updateItemStatus((req as any).userId, req.params.id, req.params.itemId, req.body.status, { reason: req.body.reason, photoUrl: req.body.photoUrl }) });
+  }));
+router.put('/grooming/orders/:id/report-card', authMiddleware, groomingEnabled, validateBody(groomingReportCardSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.createReportCard((req as any).userId, req.params.id, req.body) });
+  }));
+
+// ── Earnings + manual settlement (P3) ──
+router.get('/grooming/providers/:id/earnings', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingSettlementService.getEarnings((req as any).userId, req.params.id) });
+  }));
+router.get('/grooming/providers/:id/settlements', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    const authReq = req as any;
+    const isAdmin = authReq.userRole === 'admin' || (authReq.userRoles || []).includes('admin');
+    res.json({ success: true, data: await GroomingSettlementService.listSettlements(authReq.userId, req.params.id, isAdmin) });
+  }));
+router.post('/grooming/admin/providers/:id/settle', authMiddleware, roleMiddleware(['admin']), groomingEnabled, validateBody(groomingSettleSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await GroomingSettlementService.adminSettle((req as any).userId, req.params.id, req.body) });
+  }));
+router.get('/grooming/admin/providers/:id/earnings', authMiddleware, roleMiddleware(['admin']), groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingSettlementService.getEarningsAdmin(req.params.id) });
+  }));
+router.get('/grooming/admin/reconciliation', authMiddleware, roleMiddleware(['admin']), groomingEnabled,
+  asyncHandler(async (_req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingSettlementService.adminReconciliation() });
   }));
 
 export default router;

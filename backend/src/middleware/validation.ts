@@ -1931,3 +1931,54 @@ export const createGroomingOrderSchema = Joi.object({
 export const groomingCancelSchema = Joi.object({
   reason: shortText(500).optional().allow('', null),
 });
+
+// ─── Grooming ops (P3) ───────────────────────────────────────
+const scentValue = Joi.string().valid('good', 'watch', 'vet_advised').optional().allow(null, '');
+
+export const groomingTransitionSchema = Joi.object({
+  toStatus: Joi.string().valid('provider_assigned', 'checked_in', 'en_route', 'intake_done',
+    'in_progress', 'quality_check', 'ready_for_pickup', 'returning', 'completed', 'no_show').required(),
+  note: shortText(500).optional().allow('', null),
+});
+
+export const groomingAssignSchema = Joi.object({
+  staffId: uuid.optional().allow(null),
+  resourceId: uuid.optional().allow(null),
+  etaMinutes: positiveInt.max(600).optional().allow(null),
+}).min(1);
+
+export const groomingIntakeSchema = Joi.object({
+  arrivalCondition: longText(1000).optional().allow('', null),
+  temperament: shortText(50).optional().allow('', null),
+  ownerInstructions: longText(1000).optional().allow('', null),
+  allergies: longText(1000).optional().allow('', null),
+  handlingRestrictions: longText(1000).optional().allow('', null),
+  scentSkin: scentValue, scentCoat: scentValue, scentEars: scentValue, scentNails: scentValue, scentTeeth: scentValue,
+  scentNotes: longText(1000).optional().allow('', null),
+  beforePhotos: Joi.array().items(Joi.string().max(500)).optional(),
+  consentHandling: Joi.boolean().optional(),
+  consentProducts: Joi.boolean().optional(),
+  consentPhotography: Joi.boolean().optional(),
+  consentEmergencyContact: Joi.boolean().optional(),
+});
+
+export const groomingItemStatusSchema = Joi.object({
+  status: Joi.string().valid('pending', 'started', 'completed', 'skipped', 'awaiting_approval', 'paused').required(),
+  reason: shortText(500).optional().allow('', null),
+  photoUrl: Joi.string().max(500).optional().allow('', null),
+});
+
+export const groomingReportCardSchema = Joi.object({
+  afterPhotos: Joi.array().items(Joi.string().max(500)).optional(),
+  productsUsed: longText(1000).optional().allow('', null),
+  aftercareNotes: longText(2000).optional().allow('', null),
+  summary: longText(2000).optional().allow('', null),
+  nextRecommendedDate: Joi.date().optional().allow(null),
+});
+
+export const groomingSettleSchema = Joi.object({
+  method: Joi.string().valid('bank_transfer', 'upi', 'other').optional(),
+  reference: shortText(120).optional().allow('', null),
+  tdsAmount: positiveNumber.max(1000000).optional(),
+  notes: longText(500).optional().allow('', null),
+});
