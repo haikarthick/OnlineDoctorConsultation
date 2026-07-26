@@ -7785,7 +7785,8 @@
     "findGroomer": "Find a groomer",
     "payNow": "Pay now",
     "cancel": "Cancel",
-    "details": "Details"
+    "details": "Details",
+    "passport": "Passport"
   },
   "groomingStatus": {
     "draft": "Draft",
@@ -7910,5 +7911,37 @@
     "price": "Price",
     "reason": "Reason",
     "requestApproval": "Request approval"
+  },
+  "groomingEsc": {
+    "title": "Safety escalation",
+    "typeRequired": "Issue type is required.",
+    "raised": "Escalation raised; owner notified.",
+    "issueType": "Issue type",
+    "issuePlaceholder": "e.g. skin irritation, open wound",
+    "description": "Description",
+    "raise": "Raise escalation",
+    "dismiss": "Dismiss",
+    "markResolved": "Mark resolved",
+    "bookConsult": "Book a vet consult",
+    "wellnessNudge": "A wellness check flagged something worth a vet’s look.",
+    "disclaimer": "Groomers can flag concerns and recommend a vet, but do not diagnose or treat.",
+    "st": {
+      "open": "Open",
+      "owner_notified": "Owner notified",
+      "consult_booked": "Consult booked",
+      "resolved": "Resolved",
+      "dismissed": "Dismissed"
+    }
+  },
+  "groomingPassport": {
+    "notFound": "Passport not available.",
+    "back": "Back to my orders",
+    "title": "{{name}}’s Grooming Passport",
+    "wellness": "S.C.E.N.T. wellness trend",
+    "wellnessNote": "Non-medical observations from grooming visits (Skin, Coat, Ears, Nails, Teeth).",
+    "noData": "No data",
+    "vetAdvised": "A vet check is advised for: {{areas}}.",
+    "history": "Grooming history",
+    "noHistory": "No grooming visits yet."
   }
 }

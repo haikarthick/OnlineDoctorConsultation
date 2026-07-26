@@ -20,6 +20,8 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
   const [busy, setBusy] = useState(false)
   const [intake, setIntake] = useState<any>({})
   const [report, setReport] = useState<any>({ summary: '', aftercareNotes: '', productsUsed: '' })
+  const [escalations, setEscalations] = useState<any[]>([])
+  const [escType, setEscType] = useState(''); const [escDesc, setEscDesc] = useState('')
 
   const load = useCallback(async () => {
     if (!id) return
@@ -30,6 +32,7 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
       setIntake(o.intake || {})
       if (o.reportCard) setReport(o.reportCard)
       try { const mine = (await apiService.getMyGroomingProvider()).data; setIsProvider(!!mine && mine.id === o.providerId) } catch { setIsProvider(false) }
+      try { setEscalations((await apiService.listGroomingEscalations(id)).data || []) } catch { setEscalations([]) }
     } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
   }, [id])
   useEffect(() => { load() }, [load])
@@ -52,6 +55,18 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
   }
   const setOnTheWay = async () => {
     try { setBusy(true); if (eta) await apiService.assignGroomingOrder(id!, { etaMinutes: Number(eta) }); await apiService.transitionGroomingOrder(id!, 'en_route'); flash(t('groomingVar.enRouteSet')); load() } catch (e) { fail(e) } finally { setBusy(false) }
+  }
+  // P5: safety escalation
+  const raiseEsc = async () => {
+    if (!escType.trim()) { fail({ message: t('groomingEsc.typeRequired') }); return }
+    try { setBusy(true); await apiService.raiseGroomingEscalation(id!, { issueType: escType.trim(), description: escDesc || undefined }); setEscType(''); setEscDesc(''); flash(t('groomingEsc.raised')); load() } catch (e) { fail(e) } finally { setBusy(false) }
+  }
+  const resolveEsc = async (escId: string, status: string) => {
+    try { setBusy(true); await apiService.respondGroomingEscalation(escId, status); load() } catch (e) { fail(e) } finally { setBusy(false) }
+  }
+  const bookVetConsult = (escId: string) => {
+    if (order?.animalId) apiService.respondGroomingEscalation(escId, 'consult_booked').catch(() => {})
+    onNavigate(`/book-consultation${order?.animalId ? `?animalId=${order.animalId}` : ''}`)
   }
 
   if (loading) return <div className="module-page"><div className="loading-container"><div className="loading-spinner" /></div></div>
@@ -77,6 +92,48 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
           </div>
         </div>
       </div>
+
+      {/* Wellness nudge — S.C.E.N.T. flagged "vet advised" */}
+      {!isProvider && order.intake && SCENT_KEYS.some(k => order.intake[`scent${k}`] === 'vet_advised') && (
+        <div className="module-alert" style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+          <span>🩺 {t('groomingEsc.wellnessNudge')}</span>
+          <button className="btn btn-sm btn-primary" onClick={() => onNavigate(`/book-consultation${order.animalId ? `?animalId=${order.animalId}` : ''}`)}>{t('groomingEsc.bookConsult')}</button>
+        </div>
+      )}
+
+      {/* Safety escalation (groomer → vet) */}
+      {(escalations.length > 0 || (isProvider && active)) && (
+        <div className="module-card" style={{ border: '1px solid #fca5a5' }}>
+          <h3>🚨 {t('groomingEsc.title')}</h3>
+          {escalations.map(e => (
+            <div key={e.id} style={{ padding: 10, border: '1px solid #fecaca', borderRadius: 8, marginBottom: 8, background: '#fff5f5' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                <div><strong>{e.issueType}</strong>{e.description ? <div className="si-676930d7">{e.description}</div> : null}</div>
+                <span className="badge badge-inactive">{t(`groomingEsc.st.${e.status}`, { defaultValue: (e.status || '').replace(/_/g, ' ') })}</span>
+              </div>
+              {!isProvider && !['resolved', 'dismissed'].includes(e.status) && (
+                <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                  <button className="btn btn-sm btn-primary" onClick={() => bookVetConsult(e.id)}>🩺 {t('groomingEsc.bookConsult')}</button>
+                  <button className="btn btn-sm btn-outline" disabled={busy} onClick={() => resolveEsc(e.id, 'resolved')}>{t('groomingEsc.markResolved')}</button>
+                </div>
+              )}
+              {isProvider && !['resolved', 'dismissed'].includes(e.status) && (
+                <button className="btn btn-sm btn-outline" style={{ marginTop: 8 }} disabled={busy} onClick={() => resolveEsc(e.id, 'dismissed')}>{t('groomingEsc.dismiss')}</button>
+              )}
+            </div>
+          ))}
+          {isProvider && active && (
+            <div className="module-form-row" style={{ alignItems: 'flex-end' }}>
+              <div className="module-form-group"><label className="module-label">{t('groomingEsc.issueType')}</label>
+                <input className="module-input" value={escType} onChange={e => setEscType(e.target.value)} placeholder={t('groomingEsc.issuePlaceholder')} /></div>
+              <div className="module-form-group"><label className="module-label">{t('groomingEsc.description')}</label>
+                <input className="module-input" value={escDesc} onChange={e => setEscDesc(e.target.value)} /></div>
+              <button className="module-btn" style={{ background: '#dc2626', color: 'white' }} disabled={busy} onClick={raiseEsc}>🚨 {t('groomingEsc.raise')}</button>
+            </div>
+          )}
+          <p className="si-676930d7">{t('groomingEsc.disclaimer')}</p>
+        </div>
+      )}
 
       {/* Mobile tracking */}
       {order.serviceMode === 'mobile' && (order.status === 'en_route' || (isProvider && !completed)) && (

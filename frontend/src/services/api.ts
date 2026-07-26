@@ -3032,6 +3032,22 @@ class ApiService {
     const response = await this.client.put(`/grooming/orders/${id}/variable-items/${itemId}/respond`, { approve })
     return response.data
   }
+  async raiseGroomingEscalation(id: string, data: any) {
+    const response = await this.client.post(`/grooming/orders/${id}/escalations`, data)
+    return response.data
+  }
+  async listGroomingEscalations(id: string) {
+    const response = await this.client.get(`/grooming/orders/${id}/escalations`)
+    return response.data
+  }
+  async respondGroomingEscalation(escId: string, status: string, consultationBookingId?: string) {
+    const response = await this.client.put(`/grooming/escalations/${escId}/respond`, { status, consultationBookingId })
+    return response.data
+  }
+  async getGroomingPetPassport(animalId: string) {
+    const response = await this.client.get(`/grooming/pets/${animalId}/passport`)
+    return response.data
+  }
 
   // ── Network Subscription Plans ──
   async getNetworkSubscriptionPlans() {

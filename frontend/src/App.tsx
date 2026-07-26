@@ -130,6 +130,7 @@ const MyGroomingOrders = React.lazy(() => import('./pages/grooming/MyGroomingOrd
 const GroomingOrdersBoard = React.lazy(() => import('./pages/grooming/GroomingOrdersBoard'))
 const GroomingOrderDetail = React.lazy(() => import('./pages/grooming/GroomingOrderDetail'))
 const GroomingEarnings = React.lazy(() => import('./pages/grooming/GroomingEarnings'))
+const GroomingPassport = React.lazy(() => import('./pages/grooming/GroomingPassport'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
@@ -424,6 +425,7 @@ function AppRoutes() {
       <Route path="/grooming/orders" element={<RoleRoute path="/grooming/orders"><AppLayout><RoutedPage Component={GroomingOrdersBoard} /></AppLayout></RoleRoute>} />
       <Route path="/grooming/order/:id" element={<RoleRoute path="/grooming/order/:id"><AppLayout><RoutedPage Component={GroomingOrderDetail} paramKey="id" /></AppLayout></RoleRoute>} />
       <Route path="/grooming/earnings" element={<RoleRoute path="/grooming/earnings"><AppLayout><RoutedPage Component={GroomingEarnings} /></AppLayout></RoleRoute>} />
+      <Route path="/grooming/passport/:animalId" element={<RoleRoute path="/grooming/passport/:animalId"><AppLayout><RoutedPage Component={GroomingPassport} paramKey="animalId" /></AppLayout></RoleRoute>} />
 
       {/* Catch-all → home */}
       <Route path="*" element={<Navigate to="/" replace />} />
