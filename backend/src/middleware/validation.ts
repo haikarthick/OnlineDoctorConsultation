@@ -1982,3 +1982,15 @@ export const groomingSettleSchema = Joi.object({
   tdsAmount: positiveNumber.max(1000000).optional(),
   notes: longText(500).optional().allow('', null),
 });
+
+export const groomingVariableRequestSchema = Joi.object({
+  name: shortText(200).required(),
+  price: positiveNumber.max(1000000).required(),
+  taxPercent: positiveNumber.max(100).optional().allow(null),
+  reason: longText(1000).optional().allow('', null),
+  photoUrl: Joi.string().max(500).optional().allow('', null),
+});
+
+export const groomingVariableRespondSchema = Joi.object({
+  approve: Joi.boolean().required(),
+});

@@ -14,6 +14,7 @@ import {
   createGroomingOrderSchema, groomingCancelSchema,
   groomingTransitionSchema, groomingAssignSchema, groomingIntakeSchema,
   groomingItemStatusSchema, groomingReportCardSchema, groomingSettleSchema,
+  groomingVariableRequestSchema, groomingVariableRespondSchema,
 } from '../middleware/validation';
 import database from '../utils/database';
 import cacheManager from '../utils/cacheManager';
@@ -5309,6 +5310,15 @@ router.put('/grooming/orders/:id/items/:itemId', authMiddleware, groomingEnabled
 router.put('/grooming/orders/:id/report-card', authMiddleware, groomingEnabled, validateBody(groomingReportCardSchema),
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingOrderService.createReportCard((req as any).userId, req.params.id, req.body) });
+  }));
+// P4: variable-price (extra work) approval
+router.post('/grooming/orders/:id/variable-items', authMiddleware, groomingEnabled, validateBody(groomingVariableRequestSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await GroomingOrderService.requestVariableItem((req as any).userId, req.params.id, req.body) });
+  }));
+router.put('/grooming/orders/:id/variable-items/:itemId/respond', authMiddleware, groomingEnabled, validateBody(groomingVariableRespondSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.respondVariableItem((req as any).userId, req.params.id, req.params.itemId, req.body.approve === true) });
   }));
 
 // ── Earnings + manual settlement (P3) ──

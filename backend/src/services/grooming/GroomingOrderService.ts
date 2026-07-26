@@ -343,6 +343,79 @@ class GroomingOrderService {
     order.history = hist.rows;
     return order;
   }
+
+  // ── P4: variable-price approval (transparent extra-work flow) ──
+  /** Provider proposes extra work → item enters 'requested' + order moves to awaiting_approval. */
+  async requestVariableItem(userId: string, orderId: string, data: any): Promise<any> {
+    const { order } = await this.requireProviderStaff(userId, orderId);
+    if (!['checked_in', 'intake_done', 'in_progress'].includes(order.status))
+      throw new ValidationError('Extra work can only be requested during the service');
+    const price = Number(data.price) || 0;
+    if (price <= 0 || !data.name?.trim()) throw new ValidationError('name and a positive price are required');
+    const gross = Number(order.subtotal) + Number(order.addonsTotal) + Number(order.variableTotal);
+    const taxPct = data.taxPercent != null ? Number(data.taxPercent)
+      : (gross > 0 ? +(Number(order.taxTotal) / gross * 100).toFixed(2) : 0);
+    const lineTotal = +(price * (1 + taxPct / 100)).toFixed(2);
+    await database.query(
+      `INSERT INTO grooming_order_items
+         (order_id, item_type, name, unit_price, tax_percent, line_total, status, approval_status, reason, photo_url)
+       VALUES ($1,'variable',$2,$3,$4,$5,'awaiting_approval','requested',$6,$7)`,
+      [orderId, data.name.trim(), price, taxPct, lineTotal, data.reason || null, data.photoUrl || null]);
+    await database.query(`UPDATE grooming_orders SET status = 'awaiting_approval', updated_at = NOW() WHERE id = $1`, [orderId]);
+    await this.addHistory(orderId, order.status, 'awaiting_approval', userId, `Extra work requested: ${data.name.trim()} (+${price})`);
+    return this.getOrderDetail(userId, orderId);
+  }
+
+  /** Owner approves (+ demo pays the delta) or declines the extra work; order returns to in_progress. */
+  async respondVariableItem(userId: string, orderId: string, itemId: string, approve: boolean): Promise<any> {
+    const { order, isOwner } = await this.resolveOrderAccess(userId, orderId);
+    if (!isOwner) throw new ForbiddenError('Only the customer can approve extra work');
+    if (order.status !== 'awaiting_approval') throw new ValidationError('There is no pending approval on this order');
+    const itemRes = await database.query(
+      `SELECT id, unit_price, tax_percent, line_total, approval_status
+       FROM grooming_order_items WHERE id = $1 AND order_id = $2 AND item_type = 'variable'`, [itemId, orderId]);
+    if (itemRes.rows.length === 0) throw new NotFoundError('GroomingOrderItem', itemId);
+    const item = itemRes.rows[0];
+    if (item.approval_status !== 'requested') throw new ValidationError('This item has already been answered');
+    const clearanceDays = await GroomingModuleConfig.getClearanceDays();
+
+    return database.transaction(async (client: any) => {
+      if (approve) {
+        const price = Number(item.unit_price);
+        const taxPct = Number(item.tax_percent);
+        const lineTotal = Number(item.line_total);
+        const commissionPct = Number(order.commissionPercent) || 0;
+        const addCommission = +(price * commissionPct / 100).toFixed(2);
+        const addTax = +(price * taxPct / 100).toFixed(2);
+        await client.query(
+          `UPDATE grooming_order_items SET approval_status = 'approved', status = 'completed', updated_at = NOW() WHERE id = $1`, [itemId]);
+        await client.query(
+          `UPDATE grooming_orders SET
+             variable_total = variable_total + $2, tax_total = tax_total + $3,
+             grand_total = grand_total + $4, commission_amount = commission_amount + $5,
+             amount_paid = amount_paid + $4, status = 'in_progress', updated_at = NOW()
+           WHERE id = $1`, [orderId, price, addTax, lineTotal, addCommission]);
+        const net = +(price - addCommission).toFixed(2);
+        await client.query(
+          `INSERT INTO grooming_earnings
+             (provider_id, order_id, gross_amount, commission_amount, tax_amount, net_amount, entry_type, status, available_at)
+           VALUES ($1,$2,$3,$4,$5,$6,'earning','clearing', NOW() + ($7 || ' days')::interval)`,
+          [order.providerId, orderId, price, addCommission, addTax, net, String(clearanceDays)]);
+        await client.query(
+          `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
+           VALUES ($1,'awaiting_approval','in_progress',$2,'Extra work approved & paid')`, [orderId, userId]);
+      } else {
+        await client.query(
+          `UPDATE grooming_order_items SET approval_status = 'declined', status = 'skipped', updated_at = NOW() WHERE id = $1`, [itemId]);
+        await client.query(`UPDATE grooming_orders SET status = 'in_progress', updated_at = NOW() WHERE id = $1`, [orderId]);
+        await client.query(
+          `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
+           VALUES ($1,'awaiting_approval','in_progress',$2,'Extra work declined')`, [orderId, userId]);
+      }
+      const r = await client.query(`SELECT ${ORDER_SELECT} FROM grooming_orders o WHERE o.id = $1`, [orderId]);
+      return r.rows[0];
+    });
+  }
 }
 
 export default new GroomingOrderService();
