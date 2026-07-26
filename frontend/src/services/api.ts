@@ -3024,6 +3024,14 @@ class ApiService {
     const response = await this.client.get('/grooming/admin/reconciliation')
     return response.data
   }
+  async requestGroomingVariableItem(id: string, data: any) {
+    const response = await this.client.post(`/grooming/orders/${id}/variable-items`, data)
+    return response.data
+  }
+  async respondGroomingVariableItem(id: string, itemId: string, approve: boolean) {
+    const response = await this.client.put(`/grooming/orders/${id}/variable-items/${itemId}/respond`, { approve })
+    return response.data
+  }
 
   // ── Network Subscription Plans ──
   async getNetworkSubscriptionPlans() {

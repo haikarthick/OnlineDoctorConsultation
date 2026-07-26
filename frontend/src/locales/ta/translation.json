@@ -7875,5 +7875,25 @@
     "good": "Good",
     "watch": "Watch",
     "vet_advised": "Vet advised"
+  },
+  "groomingVar": {
+    "title": "Extra work approval",
+    "namePriceRequired": "Work name and price are required.",
+    "requested": "Sent to the customer for approval.",
+    "approved": "Approved & paid.",
+    "declined": "Declined.",
+    "enRouteSet": "Marked on the way.",
+    "onTheWay": "Groomer is on the way",
+    "eta": "ETA {{min}} min",
+    "etaLabel": "ETA (minutes)",
+    "markOnTheWay": "On the way",
+    "approvePay": "Approve & Pay",
+    "decline": "Decline",
+    "waitingOwner": "Waiting for customer approval…",
+    "workName": "Extra work",
+    "workPlaceholder": "e.g. Severe matting removal",
+    "price": "Price",
+    "reason": "Reason",
+    "requestApproval": "Request approval"
   }
 }

@@ -41,10 +41,25 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
   const setItem = async (itemId: string, status: string) => { try { await apiService.updateGroomingItem(id!, itemId, status); load() } catch (e) { fail(e) } }
   const submitReport = async () => { try { setBusy(true); await apiService.createGroomingReportCard(id!, report); flash(t('groomingDetail.reportSaved')); load() } catch (e) { fail(e) } finally { setBusy(false) } }
 
+  // P4: variable-price + ETA tracking
+  const [varName, setVarName] = useState(''); const [varPrice, setVarPrice] = useState(''); const [varReason, setVarReason] = useState(''); const [eta, setEta] = useState('')
+  const requestVariable = async () => {
+    if (!varName.trim() || !varPrice) { fail({ message: t('groomingVar.namePriceRequired') }); return }
+    try { setBusy(true); await apiService.requestGroomingVariableItem(id!, { name: varName.trim(), price: Number(varPrice), reason: varReason || undefined }); setVarName(''); setVarPrice(''); setVarReason(''); flash(t('groomingVar.requested')); load() } catch (e) { fail(e) } finally { setBusy(false) }
+  }
+  const respondVariable = async (itemId: string, approve: boolean) => {
+    try { setBusy(true); await apiService.respondGroomingVariableItem(id!, itemId, approve); flash(approve ? t('groomingVar.approved') : t('groomingVar.declined')); load() } catch (e) { fail(e) } finally { setBusy(false) }
+  }
+  const setOnTheWay = async () => {
+    try { setBusy(true); if (eta) await apiService.assignGroomingOrder(id!, { etaMinutes: Number(eta) }); await apiService.transitionGroomingOrder(id!, 'en_route'); flash(t('groomingVar.enRouteSet')); load() } catch (e) { fail(e) } finally { setBusy(false) }
+  }
+
   if (loading) return <div className="module-page"><div className="loading-container"><div className="loading-spinner" /></div></div>
   if (!order) return <div className="module-page"><div className="module-alert error">{err || t('groomingDetail.notFound')}</div></div>
 
   const completed = ['completed', 'closed'].includes(order.status)
+  const active = ['checked_in', 'intake_done', 'in_progress'].includes(order.status)
+  const pendingVar = (order.items || []).filter((it: any) => it.itemType === 'variable' && it.approvalStatus === 'requested')
 
   return (
     <div className="module-page">
@@ -62,6 +77,53 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
           </div>
         </div>
       </div>
+
+      {/* Mobile tracking */}
+      {order.serviceMode === 'mobile' && (order.status === 'en_route' || (isProvider && !completed)) && (
+        <div className="module-card" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+          {order.status === 'en_route'
+            ? <div>🚚 <strong>{t('groomingVar.onTheWay')}</strong>{order.etaMinutes ? ` · ${t('groomingVar.eta', { min: order.etaMinutes })}` : ''}</div>
+            : isProvider && <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                <div className="module-form-group" style={{ margin: 0 }}>
+                  <label className="module-label">{t('groomingVar.etaLabel')}</label>
+                  <input className="module-input" type="number" min={0} value={eta} onChange={e => setEta(e.target.value)} style={{ width: 120 }} />
+                </div>
+                <button className="module-btn primary" disabled={busy} onClick={setOnTheWay}>🚚 {t('groomingVar.markOnTheWay')}</button>
+              </div>}
+        </div>
+      )}
+
+      {/* Variable-price extra work */}
+      {(pendingVar.length > 0 || (isProvider && active)) && (
+        <div className="module-card" style={{ border: '1px solid #fde68a', background: '#fffbeb' }}>
+          <h3>➕ {t('groomingVar.title')}</h3>
+          {pendingVar.map((it: any) => (
+            <div key={it.id} style={{ padding: 10, border: '1px solid #fcd34d', borderRadius: 8, marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                <div><strong>{it.name}</strong>{it.reason ? <div className="si-676930d7">{it.reason}</div> : null}</div>
+                <div style={{ fontWeight: 700 }}>+{formatCurrency(Number(it.lineTotal))}</div>
+              </div>
+              {!isProvider ? (
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <button className="btn btn-sm btn-primary" disabled={busy} onClick={() => respondVariable(it.id, true)}>{t('groomingVar.approvePay')}</button>
+                  <button className="btn btn-sm btn-outline" disabled={busy} onClick={() => respondVariable(it.id, false)}>{t('groomingVar.decline')}</button>
+                </div>
+              ) : <div className="si-676930d7" style={{ marginTop: 6 }}>{t('groomingVar.waitingOwner')}</div>}
+            </div>
+          ))}
+          {isProvider && active && (
+            <div className="module-form-row" style={{ alignItems: 'flex-end' }}>
+              <div className="module-form-group"><label className="module-label">{t('groomingVar.workName')}</label>
+                <input className="module-input" value={varName} onChange={e => setVarName(e.target.value)} placeholder={t('groomingVar.workPlaceholder')} /></div>
+              <div className="module-form-group"><label className="module-label">{t('groomingVar.price')}</label>
+                <input className="module-input" type="number" min={0} value={varPrice} onChange={e => setVarPrice(e.target.value)} /></div>
+              <div className="module-form-group"><label className="module-label">{t('groomingVar.reason')}</label>
+                <input className="module-input" value={varReason} onChange={e => setVarReason(e.target.value)} /></div>
+              <button className="module-btn primary" disabled={busy} onClick={requestVariable}>{t('groomingVar.requestApproval')}</button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Items / execution */}
       <div className="module-card">
