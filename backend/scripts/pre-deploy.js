@@ -29,10 +29,11 @@ let passed = 0;
 let failed = 0;
 const failures = [];
 
-function runCheck(name, command, cwd, timeout = 120000) {
+function runCheck(name, command, cwd, timeout = 120000, envOverride = null) {
   process.stdout.write(`  ${name} ... `);
   try {
-    execSync(command, { cwd, stdio: 'pipe', timeout });
+    const env = envOverride ? { ...process.env, ...envOverride } : process.env;
+    execSync(command, { cwd, stdio: 'pipe', timeout, env });
     console.log(`${GREEN}✓${RESET}`);
     passed++;
   } catch (err) {
@@ -52,15 +53,22 @@ function runCheck(name, command, cwd, timeout = 120000) {
 
 console.log(`\n${CYAN}━━━ VetCare Pre-Deployment Checks ━━━${RESET}\n`);
 
+// Mirror render-build.sh EXACTLY: it forces NODE_ENV=production for both build commands (a
+// deployed app is always a production build, even though the dev SERVICE runs NODE_ENV=development
+// at runtime). Building here with the same forced env guarantees the gate produces the same bundle
+// Render will — otherwise a dev-ambient env on the build host inflates the entry chunk ~147KB past
+// the 600KB bundle-budget and the gate would disagree with the deploy. See [[feedback-deploy-safety]].
+const PROD_BUILD = { NODE_ENV: 'production' };
+
 // 1. Backend PRODUCTION BUILD — run exactly what Render's render-build.sh runs (`npm run build`
 //    = real `tsc` emit), not just `tsc --noEmit`. Catches any build-time failure before push so
 //    it can never reach Render. (Emits to backend/dist; harmless locally.)
-runCheck('Backend Build (npm run build)', 'npm run build', BACKEND, 300000);
+runCheck('Backend Build (npm run build)', 'npm run build', BACKEND, 300000, PROD_BUILD);
 
 // 2. Frontend PRODUCTION BUILD — the real Vite build + bundle-budget postbuild that Render runs.
 //    `tsc --noEmit` alone (the old check) never bundled, so a Vite/Rollup failure or a bundle-budget
 //    breach could pass the gate and then fail the Render deploy. This closes that gap.
-runCheck('Frontend Build (npm run build)', 'npm run build', FRONTEND, 300000);
+runCheck('Frontend Build (npm run build)', 'npm run build', FRONTEND, 300000, PROD_BUILD);
 
 // 3. Schema validation
 runCheck('Schema Validation', 'node scripts/schema-check.js', BACKEND);
