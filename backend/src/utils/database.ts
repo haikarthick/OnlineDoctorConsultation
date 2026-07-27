@@ -67,6 +67,26 @@ types.setTypeParser(1700, (val: string) => parseFloat(val));
 types.setTypeParser(700, (val: string) => parseFloat(val));
 types.setTypeParser(701, (val: string) => parseFloat(val));
 
+/**
+ * Canonical system-role list — the ONLY place the legacy self-heal below may get roles from.
+ *
+ * The self-heal blocks unconditionally DROP and re-ADD users.role / user_roles.role CHECK
+ * constraints on every startup. They used to carry their own inlined copies of this list, which
+ * silently fell behind: migration 030 correctly widened the constraints to include
+ * 'groomer'/'support', then the next boot clobbered it back to the pre-grooming 7 — so groomer
+ * registration failed with `users_role_check` on every already-deployed environment while a
+ * freshly-seeded local DB looked fine.
+ *
+ * MUST stay in sync with: docker/init.sql (users + user_roles CHECKs),
+ * backend/migrations/030_grooming_roles.sql, PermissionService.DEFAULT_ROLE_PERMISSIONS,
+ * and the role enums in middleware/validation.ts.
+ */
+const SYSTEM_ROLES = [
+  'farmer', 'pet_owner', 'veterinarian', 'admin',
+  'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support',
+] as const;
+const SYSTEM_ROLES_SQL = SYSTEM_ROLES.map(r => `'${r}'`).join(', ');
+
 class PostgresDatabase {
   private pool: Pool;
 
@@ -1318,13 +1338,14 @@ class PostgresDatabase {
       ).catch(() => {});
     }
 
-    // Also ensure users.role CHECK includes hospital_staff + pharmacist
+    // Also ensure users.role CHECK covers every system role (see SYSTEM_ROLES — never inline
+    // the list here again, it is what silently reverted migration 030 on every boot)
     await this.pool.query(`
       ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check
     `).catch(() => {});
     await this.pool.query(`
       ALTER TABLE users ADD CONSTRAINT users_role_check
-        CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'))
+        CHECK (role IN (${SYSTEM_ROLES_SQL}))
     `).catch(() => {});
 
     // Marketplace performance indexes — critical for free-tier Render cold-start
@@ -1576,7 +1597,7 @@ class PostgresDatabase {
       CREATE TABLE IF NOT EXISTS user_roles (
         id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        role VARCHAR(50) NOT NULL CHECK (role IN ('pet_owner','farmer','veterinarian','admin','corporate_admin','hospital_staff')),
+        role VARCHAR(50) NOT NULL CHECK (role IN (${SYSTEM_ROLES_SQL})),
         is_primary BOOLEAN DEFAULT false,
         granted_by UUID REFERENCES users(id),
         granted_at TIMESTAMPTZ DEFAULT NOW(),
@@ -1867,18 +1888,19 @@ class PostgresDatabase {
       await this.pool.query(ddl).catch(() => {});
     }
 
-    // Add pharmacist to users.role CHECK
+    // Keep users.role CHECK aligned with SYSTEM_ROLES (do not inline the list — see above)
     await this.pool.query(`ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check`).catch(() => {});
     await this.pool.query(`
       ALTER TABLE users ADD CONSTRAINT users_role_check
-        CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'))
+        CHECK (role IN (${SYSTEM_ROLES_SQL}))
     `).catch(() => {});
 
-    // Also update user_roles role CHECK to include pharmacist
+    // Same for the additive user_roles table — this one is what blocks createProvider()'s
+    // 'groomer' grant when it falls behind
     await this.pool.query(`ALTER TABLE user_roles DROP CONSTRAINT IF EXISTS user_roles_role_check`).catch(() => {});
     await this.pool.query(`
       ALTER TABLE user_roles ADD CONSTRAINT user_roles_role_check
-        CHECK (role IN ('farmer','pet_owner','veterinarian','admin','corporate_admin','hospital_staff','pharmacist'))
+        CHECK (role IN (${SYSTEM_ROLES_SQL}))
     `).catch(() => {});
 
     // Pharmacy indexes
