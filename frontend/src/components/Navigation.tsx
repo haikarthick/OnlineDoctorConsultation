@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { usePermission, NAV_PERMISSION_MAP } from '../context/PermissionContext'
+import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { MenuItem, UserRole } from '../types'
 import './Navigation.css'
@@ -17,6 +18,7 @@ const NAV_SCROLL_KEY = 'vetcare_nav_scroll'
 export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath }) => {
   const { user, logout } = useAuth()
   const { hasPermission, networks } = usePermission()
+  const { enabled: groomingEnabled } = useGroomingEnabled()
   const { t } = useTranslation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -266,12 +268,21 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
     { id: 'grooming-my-orders', label: t('nav.groomingMyOrders'), icon: '📅', path: '/grooming/my-orders',
       roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
+    // Self-service onboarding entry. Same path as the console below — the page renders the
+    // "create your business" form until a provider exists. Hidden once the user actually holds
+    // grooming_provider_console (see the filter below) so the two never show at once.
+    { id: 'grooming-apply', label: t('nav.groomingApply'), icon: '🏪', path: '/grooming/provider',
+      roles: ['pet_owner', 'farmer', 'veterinarian'], section: 'Grooming & Spa' },
+    // pet_owner/farmer are listed on the provider items because createProvider() grants the
+    // 'groomer' role in the DB but the cached login payload keeps their original role until they
+    // re-login. The permission check below is the real gate — it reads live DB roles — so a
+    // customer who has not registered a business still never sees these.
     { id: 'grooming-provider', label: t('nav.groomingProvider'), icon: '💈', path: '/grooming/provider',
-      roles: ['groomer', 'veterinarian', 'admin'], section: 'Grooming & Spa' },
+      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
     { id: 'grooming-orders', label: t('nav.groomingOrders'), icon: '📋', path: '/grooming/orders',
-      roles: ['groomer', 'veterinarian', 'admin'], section: 'Grooming & Spa' },
+      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
     { id: 'grooming-earnings', label: t('nav.groomingEarnings'), icon: '💰', path: '/grooming/earnings',
-      roles: ['groomer', 'veterinarian', 'admin'], section: 'Grooming & Spa' },
+      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
     { id: 'admin-grooming-providers', label: t('nav.groomingAdmin'), icon: '💈', path: '/admin/grooming-providers',
       roles: ['admin'], section: 'Grooming & Spa' },
 
@@ -292,6 +303,17 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
         && !userRoles.includes('admin' as UserRole)
         && !userRoles.includes('corporate_admin' as UserRole)
         && networks.length === 0) {
+      return false
+    }
+    // Grooming onboarding CTA disappears once the user owns/staffs a provider — from then on the
+    // "My Grooming Business" console entry covers the same route.
+    if (item.id === 'grooming-apply' && hasPermission('grooming_provider_console')) {
+      return false
+    }
+    // Dark launch: while `grooming.enabled` is off every /grooming route 404s server-side, so the
+    // whole section is hidden rather than leading users into dead pages. Permissions alone can't
+    // do this — the flag is a runtime setting, not a role.
+    if (item.section === 'Grooming & Spa' && !groomingEnabled) {
       return false
     }
     return true

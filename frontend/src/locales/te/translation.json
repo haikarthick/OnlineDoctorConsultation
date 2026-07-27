@@ -212,7 +212,8 @@
     "groomingFind": "గ్రూమర్‌ను కనుగొనండి",
     "groomingMyOrders": "నా గ్రూమింగ్",
     "groomingOrders": "గ్రూమింగ్ ఆర్డర్లు",
-    "groomingEarnings": "గ్రూమింగ్ ఆదాయం"
+    "groomingEarnings": "గ్రూమింగ్ ఆదాయం",
+    "groomingApply": "మీ వ్యాపారాన్ని నమోదు చేయండి"
   },
   "login": {
     "welcome": "తిరిగి స్వాగతం",
@@ -343,7 +344,11 @@
     "termsLink": "సేవా నిబంధనలు",
     "acceptAnd": "మరియు",
     "privacyLink": "గోప్యతా విధానం",
-    "doctorAgreementLink": "డాక్టర్ సేవా ఒప్పందం"
+    "doctorAgreementLink": "డాక్టర్ సేవా ఒప్పందం",
+    "roleGroomer": "గ్రూమింగ్ ప్రొవైడర్",
+    "roleGroomerDesc": "గ్రూమింగ్ & స్పా సేవలు అందించండి",
+    "groomerNoticeTitle": "తర్వాత: మీ వ్యాపారాన్ని నమోదు చేయండి",
+    "groomerNoticeBody": "మీ ఖాతా వెంటనే యాక్టివ్ అవుతుంది. సైన్ ఇన్ చేసిన తర్వాత మీ వ్యాపార వివరాలు మరియు సేవల జాబితాను జోడించండి — కస్టమర్ శోధనలో కనిపించే ముందు ప్రతి వ్యాపారాన్ని మా బృందం ధృవీకరిస్తుంది."
   },
   "home": {
     "signIn": "సైన్ ఇన్",
@@ -1860,7 +1865,12 @@
     "certificateServices": "Certificate Services I Offer",
     "certificateServicesDesc": "Select which veterinary certificates you are qualified to issue",
     "saveCertificateTypes": "Save Certificate Preferences",
-    "certificateTypesSaved": "Certificate preferences saved"
+    "certificateTypesSaved": "Certificate preferences saved",
+    "becomeGroomer": {
+      "title": "గ్రూమింగ్ & స్పా సేవలు అందించండి",
+      "desc": "గ్రూమింగ్ వ్యాపారాన్ని నమోదు చేసి బుకింగ్‌లు స్వీకరించడం ప్రారంభించండి. ఇది మీ ప్రస్తుత ఖాతాకు జోడించబడుతుంది — మీ ప్రస్తుత పాత్ర అలాగే ఉంటుంది.",
+      "btn": "నా వ్యాపారాన్ని నమోదు చేయి"
+    }
   },
   "enterpriseManagement": {
     "pageTitle": "🏢 ఎంటర్‌ప్రైజ్ నిర్వహణ",
@@ -7742,7 +7752,10 @@
     "mobile": "ఇల్లు/మొబైల్",
     "atPremises": "ఆవరణలో",
     "from": "నుండి",
-    "viewBook": "చూసి బుక్ చేయి"
+    "viewBook": "చూసి బుక్ చేయి",
+    "ownerCtaTitle": "మీరు గ్రూమరా?",
+    "ownerCtaDesc": "మీ గ్రూమింగ్ లేదా స్పా వ్యాపారాన్ని నమోదు చేసి, మీ సమీపంలోని పెంపుడు జంతువుల యజమానుల నుండి బుకింగ్‌లు స్వీకరించండి.",
+    "ownerCtaBtn": "మీ వ్యాపారాన్ని నమోదు చేయండి"
   },
   "groomingPublic": {
     "notFound": "ప్రొవైడర్ అందుబాటులో లేరు.",

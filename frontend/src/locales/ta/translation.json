@@ -212,7 +212,8 @@
     "groomingFind": "கிரூமரைக் கண்டறியவும்",
     "groomingMyOrders": "எனது கிரூமிங்",
     "groomingOrders": "கிரூமிங் ஆர்டர்கள்",
-    "groomingEarnings": "கிரூமிங் வருவாய்"
+    "groomingEarnings": "கிரூமிங் வருவாய்",
+    "groomingApply": "உங்கள் வணிகத்தைப் பதிவு செய்யுங்கள்"
   },
   "login": {
     "welcome": "மீண்டும் வரவேற்கிறோம்",
@@ -343,7 +344,11 @@
     "termsLink": "சேவை விதிமுறைகள்",
     "acceptAnd": "மற்றும்",
     "privacyLink": "தனியுரிமைக் கொள்கை",
-    "doctorAgreementLink": "மருத்துவர் சேவை ஒப்பந்தம்"
+    "doctorAgreementLink": "மருத்துவர் சேவை ஒப்பந்தம்",
+    "roleGroomer": "கிரூமிங் வழங்குநர்",
+    "roleGroomerDesc": "கிரூமிங் & ஸ்பா சேவைகளை வழங்குங்கள்",
+    "groomerNoticeTitle": "அடுத்து: உங்கள் வணிகத்தைப் பதிவு செய்யுங்கள்",
+    "groomerNoticeBody": "உங்கள் கணக்கு உடனடியாகச் செயல்படும். உள்நுழைந்த பிறகு உங்கள் வணிக விவரங்களையும் சேவைப் பட்டியலையும் சேர்க்கவும் — வாடிக்கையாளர் தேடலில் தோன்றும் முன் ஒவ்வொரு வணிகத்தையும் எங்கள் குழு சரிபார்க்கிறது."
   },
   "home": {
     "signIn": "உள்நுழை",
@@ -1860,7 +1865,12 @@
     "certificateServices": "Certificate Services I Offer",
     "certificateServicesDesc": "Select which veterinary certificates you are qualified to issue",
     "saveCertificateTypes": "Save Certificate Preferences",
-    "certificateTypesSaved": "Certificate preferences saved"
+    "certificateTypesSaved": "Certificate preferences saved",
+    "becomeGroomer": {
+      "title": "கிரூமிங் & ஸ்பா சேவைகளை வழங்குங்கள்",
+      "desc": "கிரூமிங் வணிகத்தைப் பதிவு செய்து முன்பதிவுகளைப் பெறத் தொடங்குங்கள். இது உங்கள் தற்போதைய கணக்குடன் சேர்க்கப்படுகிறது — உங்கள் தற்போதைய பங்கு அப்படியே இருக்கும்.",
+      "btn": "என் வணிகத்தைப் பதிவு செய்"
+    }
   },
   "enterpriseManagement": {
     "pageTitle": "🏢 நிறுவன மேலாண்மை",
@@ -7729,7 +7739,10 @@
     "mobile": "வீடு/மொபைல்",
     "atPremises": "வளாகத்தில்",
     "from": "இருந்து",
-    "viewBook": "பார்த்து முன்பதிவு செய்"
+    "viewBook": "பார்த்து முன்பதிவு செய்",
+    "ownerCtaTitle": "நீங்கள் ஒரு கிரூமரா?",
+    "ownerCtaDesc": "உங்கள் கிரூமிங் அல்லது ஸ்பா வணிகத்தைப் பதிவு செய்து அருகிலுள்ள செல்லப்பிராணி உரிமையாளர்களிடமிருந்து முன்பதிவுகளைப் பெறுங்கள்.",
+    "ownerCtaBtn": "உங்கள் வணிகத்தைப் பதிவு செய்"
   },
   "groomingPublic": {
     "notFound": "வழங்குநர் கிடைக்கவில்லை.",

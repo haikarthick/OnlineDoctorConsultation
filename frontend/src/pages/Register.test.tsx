@@ -3,9 +3,15 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import Register from './Register'
 
 const mockRegister = vi.fn()
+const mockGroomingEnabled = vi.fn(() => ({ enabled: false, loading: false }))
 
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ register: mockRegister }),
+}))
+
+// Keep the module-flag probe out of the test — the real hook hits GET /grooming/status.
+vi.mock('../hooks/useGroomingEnabled', () => ({
+  useGroomingEnabled: () => mockGroomingEnabled(),
 }))
 
 vi.mock('react-i18next', () => ({
@@ -18,6 +24,7 @@ describe('Register form validation', () => {
   beforeEach(() => {
     mockRegister.mockReset()
     mockRegister.mockResolvedValue(undefined)
+    mockGroomingEnabled.mockReturnValue({ enabled: false, loading: false })
   })
 
   function fillRequiredFields(overrides: Partial<Record<'firstName' | 'lastName' | 'email' | 'phone' | 'password' | 'confirmPassword', string>> = {}) {
@@ -110,5 +117,30 @@ describe('Register form validation', () => {
 
     const submitBtn = screen.getByRole('button', { name: /register.createAccountBtn/ })
     expect(submitBtn).toBeDisabled()
+  })
+
+  it('hides the grooming provider role while the grooming module is disabled', () => {
+    mockGroomingEnabled.mockReturnValue({ enabled: false, loading: false })
+    render(<Register onSwitchToLogin={onSwitchToLogin} />)
+
+    expect(document.querySelector('input[name="role"][value="groomer"]')).toBeNull()
+  })
+
+  it('offers the grooming provider role and submits it once the module is enabled', async () => {
+    mockGroomingEnabled.mockReturnValue({ enabled: true, loading: false })
+    render(<Register onSwitchToLogin={onSwitchToLogin} />)
+
+    const groomerRadio = document.querySelector('input[name="role"][value="groomer"]') as HTMLInputElement
+    expect(groomerRadio).not.toBeNull()
+
+    fireEvent.click(groomerRadio)
+    fillRequiredFields()
+    acceptTerms()
+    fireEvent.click(screen.getByRole('button', { name: /register.createAccountBtn/ }))
+
+    await waitFor(() => expect(mockRegister).toHaveBeenCalledTimes(1))
+    expect(mockRegister).toHaveBeenCalledWith(expect.objectContaining({ role: 'groomer' }))
+    // groomer is NOT an approval-gated role — no licence field, no review banner
+    expect(screen.queryByText('Account Review Required')).toBeNull()
   })
 })

@@ -212,7 +212,8 @@
     "groomingFind": "ಗ್ರೂಮರ್ ಹುಡುಕಿ",
     "groomingMyOrders": "ನನ್ನ ಗ್ರೂಮಿಂಗ್",
     "groomingOrders": "ಗ್ರೂಮಿಂಗ್ ಆರ್ಡರ್‌ಗಳು",
-    "groomingEarnings": "ಗ್ರೂಮಿಂಗ್ ಗಳಿಕೆ"
+    "groomingEarnings": "ಗ್ರೂಮಿಂಗ್ ಗಳಿಕೆ",
+    "groomingApply": "ನಿಮ್ಮ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ"
   },
   "login": {
     "welcome": "ಮತ್ತೆ ಸ್ವಾಗತ",
@@ -343,7 +344,11 @@
     "termsLink": "ಸೇವಾ ನಿಯಮಗಳು",
     "acceptAnd": "ಮತ್ತು",
     "privacyLink": "ಗೌಪ್ಯತಾ ನೀತಿ",
-    "doctorAgreementLink": "ವೈದ್ಯ ಸೇವಾ ಒಪ್ಪಂದ"
+    "doctorAgreementLink": "ವೈದ್ಯ ಸೇವಾ ಒಪ್ಪಂದ",
+    "roleGroomer": "ಗ್ರೂಮಿಂಗ್ ಪೂರೈಕೆದಾರ",
+    "roleGroomerDesc": "ಗ್ರೂಮಿಂಗ್ & ಸ್ಪಾ ಸೇವೆಗಳನ್ನು ನೀಡಿ",
+    "groomerNoticeTitle": "ಮುಂದೆ: ನಿಮ್ಮ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ",
+    "groomerNoticeBody": "ನಿಮ್ಮ ಖಾತೆ ತಕ್ಷಣವೇ ಸಕ್ರಿಯವಾಗುತ್ತದೆ. ಸೈನ್ ಇನ್ ಆದ ನಂತರ ನಿಮ್ಮ ವ್ಯವಹಾರದ ವಿವರಗಳು ಮತ್ತು ಸೇವಾ ಪಟ್ಟಿಯನ್ನು ಸೇರಿಸಿ — ಗ್ರಾಹಕರ ಹುಡುಕಾಟದಲ್ಲಿ ಕಾಣಿಸುವ ಮೊದಲು ನಮ್ಮ ತಂಡ ಪ್ರತಿ ವ್ಯವಹಾರವನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ."
   },
   "home": {
     "signIn": "ಸೈನ್ ಇನ್",
@@ -1862,7 +1867,12 @@
     "certificateServices": "Certificate Services I Offer",
     "certificateServicesDesc": "Select which veterinary certificates you are qualified to issue",
     "saveCertificateTypes": "Save Certificate Preferences",
-    "certificateTypesSaved": "Certificate preferences saved"
+    "certificateTypesSaved": "Certificate preferences saved",
+    "becomeGroomer": {
+      "title": "ಗ್ರೂಮಿಂಗ್ & ಸ್ಪಾ ಸೇವೆಗಳನ್ನು ನೀಡಿ",
+      "desc": "ಗ್ರೂಮಿಂಗ್ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ ಬುಕಿಂಗ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಪ್ರಾರಂಭಿಸಿ. ಇದು ನಿಮ್ಮ ಈಗಿನ ಖಾತೆಗೆ ಸೇರುತ್ತದೆ — ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಪಾತ್ರ ಹಾಗೆಯೇ ಉಳಿಯುತ್ತದೆ.",
+      "btn": "ನನ್ನ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ"
+    }
   },
   "enterpriseManagement": {
     "pageTitle": "🏢 Enterprise Management",
@@ -7744,7 +7754,10 @@
     "mobile": "ಮನೆ/ಮೊಬೈಲ್",
     "atPremises": "ಆವರಣದಲ್ಲಿ",
     "from": "ಇಂದ",
-    "viewBook": "ನೋಡಿ ಮತ್ತು ಬುಕ್ ಮಾಡಿ"
+    "viewBook": "ನೋಡಿ ಮತ್ತು ಬುಕ್ ಮಾಡಿ",
+    "ownerCtaTitle": "ನೀವು ಗ್ರೂಮರ್ ಆಗಿದ್ದೀರಾ?",
+    "ownerCtaDesc": "ನಿಮ್ಮ ಗ್ರೂಮಿಂಗ್ ಅಥವಾ ಸ್ಪಾ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ ಮತ್ತು ಹತ್ತಿರದ ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರಿಂದ ಬುಕಿಂಗ್‌ಗಳನ್ನು ಪಡೆಯಿರಿ.",
+    "ownerCtaBtn": "ನಿಮ್ಮ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ"
   },
   "groomingPublic": {
     "notFound": "ಪೂರೈಕೆದಾರ ಲಭ್ಯವಿಲ್ಲ.",

@@ -212,7 +212,8 @@
     "groomingFind": "Find a Groomer",
     "groomingMyOrders": "My Grooming",
     "groomingOrders": "Grooming Orders",
-    "groomingEarnings": "Grooming Earnings"
+    "groomingEarnings": "Grooming Earnings",
+    "groomingApply": "List Your Business"
   },
   "login": {
     "welcome": "Welcome back",
@@ -343,7 +344,11 @@
     "termsLink": "Terms of Service",
     "acceptAnd": "and",
     "privacyLink": "Privacy Policy",
-    "doctorAgreementLink": "Doctor Service-Provider Agreement"
+    "doctorAgreementLink": "Doctor Service-Provider Agreement",
+    "roleGroomer": "Grooming Provider",
+    "roleGroomerDesc": "Offer grooming & spa services",
+    "groomerNoticeTitle": "Next: register your business",
+    "groomerNoticeBody": "Your account is active right away. After signing in, add your business details and service menu — our team verifies every business before it appears in customer search."
   },
   "home": {
     "signIn": "Sign In",
@@ -1860,6 +1865,11 @@
       "vetClinicPlaceholder": "e.g. City Pet Clinic",
       "vetSpecializations": "Specializations",
       "vetSpecializationsPlaceholder": "Small Animals, Surgery, Dentistry (comma separated)"
+    },
+    "becomeGroomer": {
+      "title": "Offer grooming & spa services",
+      "desc": "Register a grooming business and start taking bookings. This is added to your existing account — you keep your current role and everything in it.",
+      "btn": "Register my business"
     }
   },
   "enterpriseManagement": {
@@ -7724,7 +7734,10 @@
     "mobile": "Home / Mobile",
     "atPremises": "At Premises",
     "from": "From",
-    "viewBook": "View & Book"
+    "viewBook": "View & Book",
+    "ownerCtaTitle": "Are you a groomer?",
+    "ownerCtaDesc": "List your grooming or spa business and start taking bookings from pet owners near you.",
+    "ownerCtaBtn": "List your business"
   },
   "groomingPublic": {
     "notFound": "Provider not available.",

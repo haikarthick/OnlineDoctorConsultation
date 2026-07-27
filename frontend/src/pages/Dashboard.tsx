@@ -8,6 +8,7 @@ import { Booking, Consultation } from '../types'
 import './Dashboard.css'
 import { useTranslation } from 'react-i18next'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
+import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
 
 /* ════════════════════════════════════════════════════════
  * TYPES
@@ -45,6 +46,8 @@ const Dashboard: React.FC = () => {
   const isHospitalStaff = user?.role === 'hospital_staff'
   const isCorporateAdmin = user?.role === 'corporate_admin'
   const isPharmacist = user?.role === 'pharmacist'
+  const isGroomer = user?.role === 'groomer'
+  const { enabled: groomingEnabled } = useGroomingEnabled()
 
   // Pharmacist's home is the Pharmacy module — redirect immediately so they never see the generic dashboard
   useEffect(() => {
@@ -52,6 +55,16 @@ const Dashboard: React.FC = () => {
       navigate('/pharmacy', { replace: true })
     }
   }, [isPharmacist, navigate])
+
+  // Same for a groomer-primary account: their home is the grooming business console, which doubles
+  // as the onboarding form for someone who just self-registered. Only when the module is live —
+  // otherwise every /grooming route 404s and the generic dashboard is the safer landing.
+  // Users who hold 'groomer' as a SECONDARY role keep their own primary dashboard.
+  useEffect(() => {
+    if (isGroomer && groomingEnabled) {
+      navigate('/grooming/provider', { replace: true })
+    }
+  }, [isGroomer, groomingEnabled, navigate])
 
   useEffect(() => { loadDashboardData() }, [])
 

@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
+import { usePermission } from '../context/PermissionContext'
+import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
@@ -9,6 +12,9 @@ import { VetProfile } from '../types'
 const Settings: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const { hasPermission } = usePermission()
+  const { enabled: groomingEnabled } = useGroomingEnabled()
   const { formatCurrency, formatDateTime } = useSettings()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const isVet = user?.role === 'veterinarian'
@@ -557,6 +563,20 @@ const Settings: React.FC = () => {
           <span className="si-c3b93ebb">{t('settings.roleChange.currentRole')}: </span>
           <span className="badge badge-active si-ecf1d5e5">{user?.role?.replace('_', ' ')}</span>
         </div>
+
+        {/* Grooming & Spa: becoming a provider is ADDITIVE (createProvider grants the 'groomer'
+            role alongside the existing one), so it deliberately does NOT go through the role-change
+            request below — that flow REPLACES users.role and would cost a pet owner access to
+            their own animals. Hidden once they already run a business. */}
+        {groomingEnabled && !hasPermission('grooming_provider_console') && (
+          <div className="module-card si-7e63ec4f" style={{ maxWidth: 640 }}>
+            <h3 className="si-ff527946">💈 {t('settings.becomeGroomer.title')}</h3>
+            <p className="si-676930d7">{t('settings.becomeGroomer.desc')}</p>
+            <button className="module-btn primary" onClick={() => navigate('/grooming/provider')}>
+              {t('settings.becomeGroomer.btn')}
+            </button>
+          </div>
+        )}
 
         {rcMsg && <div className={`module-alert ${rcMsg.includes('✓') || rcMsg.includes('submitted') || rcMsg.includes('cancel') ? 'success' : 'error'} si-7e63ec4f`}>{rcMsg}</div>}
 

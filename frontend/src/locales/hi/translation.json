@@ -212,7 +212,8 @@
     "groomingFind": "ग्रूमर खोजें",
     "groomingMyOrders": "मेरी ग्रूमिंग",
     "groomingOrders": "ग्रूमिंग ऑर्डर",
-    "groomingEarnings": "ग्रूमिंग कमाई"
+    "groomingEarnings": "ग्रूमिंग कमाई",
+    "groomingApply": "अपना व्यवसाय सूचीबद्ध करें"
   },
   "login": {
     "welcome": "वापस स्वागत है",
@@ -343,7 +344,11 @@
     "termsLink": "सेवा की शर्तें",
     "acceptAnd": "और",
     "privacyLink": "गोपनीयता नीति",
-    "doctorAgreementLink": "डॉक्टर सेवा-प्रदाता अनुबंध"
+    "doctorAgreementLink": "डॉक्टर सेवा-प्रदाता अनुबंध",
+    "roleGroomer": "ग्रूमिंग प्रदाता",
+    "roleGroomerDesc": "ग्रूमिंग और स्पा सेवाएँ प्रदान करें",
+    "groomerNoticeTitle": "आगे: अपना व्यवसाय पंजीकृत करें",
+    "groomerNoticeBody": "आपका खाता तुरंत सक्रिय हो जाता है। साइन इन करने के बाद अपने व्यवसाय का विवरण और सेवा सूची जोड़ें — ग्राहक खोज में दिखने से पहले हमारी टीम हर व्यवसाय को सत्यापित करती है।"
   },
   "home": {
     "signIn": "साइन इन करें",
@@ -1860,7 +1865,12 @@
     "certificateServices": "Certificate Services I Offer",
     "certificateServicesDesc": "Select which veterinary certificates you are qualified to issue",
     "saveCertificateTypes": "Save Certificate Preferences",
-    "certificateTypesSaved": "Certificate preferences saved"
+    "certificateTypesSaved": "Certificate preferences saved",
+    "becomeGroomer": {
+      "title": "ग्रूमिंग और स्पा सेवाएँ प्रदान करें",
+      "desc": "ग्रूमिंग व्यवसाय पंजीकृत करें और बुकिंग लेना शुरू करें। यह आपके मौजूदा खाते में जुड़ता है — आपकी वर्तमान भूमिका और उसका सब कुछ बना रहता है।",
+      "btn": "मेरा व्यवसाय पंजीकृत करें"
+    }
   },
   "enterpriseManagement": {
     "pageTitle": "🏢 उद्यम प्रबंधन",
@@ -7729,7 +7739,10 @@
     "mobile": "घर/मोबाइल",
     "atPremises": "परिसर में",
     "from": "से",
-    "viewBook": "देखें और बुक करें"
+    "viewBook": "देखें और बुक करें",
+    "ownerCtaTitle": "क्या आप ग्रूमर हैं?",
+    "ownerCtaDesc": "अपना ग्रूमिंग या स्पा व्यवसाय सूचीबद्ध करें और अपने आस-पास के पालतू मालिकों से बुकिंग लेना शुरू करें।",
+    "ownerCtaBtn": "अपना व्यवसाय सूचीबद्ध करें"
   },
   "groomingPublic": {
     "notFound": "प्रदाता उपलब्ध नहीं।",

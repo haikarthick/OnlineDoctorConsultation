@@ -163,6 +163,7 @@ export const PERMISSION_CATEGORIES = {
       'grooming_browse',           // find a groomer (customer)
       'grooming_book',             // book grooming (customer)
       'grooming_my_orders',        // track own grooming orders (customer)
+      'grooming_provider_apply',   // reach the "register your grooming business" onboarding form
       'grooming_provider_console', // provider dashboard / today board
       'grooming_manage_services',  // catalog: services, add-ons, resources, locations
       'grooming_manage_bookings',  // orders, schedule, intake/execution ops
@@ -209,6 +210,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'patient_consent_manage',
     // Wallet
     'wallet',
+    // Grooming & Spa — vets may run a grooming/spa arm (provider_type 'veterinarian'/'clinic').
+    // Console/ops permissions arrive with the 'groomer' role that createProvider() grants.
+    'grooming_provider_apply',
     // Actions
     'booking_confirm', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'consultation_start', 'prescription_create',
@@ -235,8 +239,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'network_membership_manage',
     // Wallet
     'wallet',
-    // Grooming & Spa (customer)
-    'grooming_browse', 'grooming_book', 'grooming_my_orders',
+    // Grooming & Spa (customer + self-service provider onboarding)
+    'grooming_browse', 'grooming_book', 'grooming_my_orders', 'grooming_provider_apply',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'review_create', 'animal_manage',
@@ -272,8 +276,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'network_membership_manage',
     // Wallet
     'wallet',
-    // Grooming & Spa (customer)
-    'grooming_browse', 'grooming_book', 'grooming_my_orders',
+    // Grooming & Spa (customer + self-service provider onboarding)
+    'grooming_browse', 'grooming_book', 'grooming_my_orders', 'grooming_provider_apply',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'review_create', 'animal_manage',
@@ -380,7 +384,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Holiday management
     'admin_holidays',
     // Grooming & Spa (full oversight)
-    'grooming_admin', 'grooming_support', 'grooming_provider_console',
+    'grooming_admin', 'grooming_support', 'grooming_provider_apply', 'grooming_provider_console',
     'grooming_manage_services', 'grooming_manage_bookings', 'grooming_earnings_view',
     // Actions
     'booking_confirm', 'booking_cancel', 'review_moderate',
@@ -390,8 +394,11 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
   groomer: [
     // Core
     'dashboard', 'settings', 'wallet',
-    // Grooming provider workspace
-    'grooming_provider_console', 'grooming_manage_services', 'grooming_manage_bookings',
+    // Grooming provider workspace — 'grooming_provider_apply' is required too: a user who
+    // self-registers AS a groomer has no provider row yet and must be able to open the same
+    // /grooming/provider route to complete business onboarding.
+    'grooming_provider_apply', 'grooming_provider_console',
+    'grooming_manage_services', 'grooming_manage_bookings',
     'grooming_intake_write', 'grooming_staff_manage', 'grooming_earnings_view',
     // NOTE: deliberately NO medical-write permissions — groomers escalate, never diagnose.
     // Dashboard widgets
@@ -513,6 +520,7 @@ export const PERMISSION_LABELS: Record<string, string> = {
   grooming_browse: 'Find a Groomer',
   grooming_book: 'Book Grooming/Spa',
   grooming_my_orders: 'My Grooming Orders',
+  grooming_provider_apply: 'Register a Grooming Business',
   grooming_provider_console: 'Grooming Provider Console',
   grooming_manage_services: 'Manage Grooming Services',
   grooming_manage_bookings: 'Manage Grooming Bookings',

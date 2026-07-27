@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
+import { usePermission } from '../../context/PermissionContext'
 import '../../styles/modules.css'
 
 interface Props { onNavigate: (path: string) => void }
@@ -18,6 +19,7 @@ const STATUS_BADGE: Record<string, { bg: string; color: string; icon: string }> 
 const GroomingProvider: React.FC<Props> = () => {
   const { t } = useTranslation()
   const { formatCurrency } = useSettings()
+  const { reloadPermissions } = usePermission()
   const [loading, setLoading] = useState(true)
   const [provider, setProvider] = useState<any>(null)
   const [tab, setTab] = useState<Tab>('overview')
@@ -49,6 +51,10 @@ const GroomingProvider: React.FC<Props> = () => {
       setSaving(true); setErr('')
       const res = await apiService.createGroomingProvider(form)
       setProvider(res.data)
+      // createProvider() grants the 'groomer' role in the DB, and authMiddleware reads roles live
+      // on every request — so refetching permissions here lights up the provider nav (console,
+      // orders, earnings) immediately, with no re-login.
+      await reloadPermissions()
       flash(t('grooming.created'))
     } catch (e) { fail(e) } finally { setSaving(false) }
   }

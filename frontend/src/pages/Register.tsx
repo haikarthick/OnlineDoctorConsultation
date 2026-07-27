@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
+import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
 import './Auth.css'
 
 interface RegisterProps {
@@ -33,9 +34,24 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
   const [submitted, setSubmitted] = useState(false)
   const [acceptTerms, setAcceptTerms] = useState(false)
 
+  // Grooming & Spa is dark-launched behind `grooming.enabled`; only offer the role when the
+  // module is actually live, otherwise the account would land on a workspace that 404s.
+  const { enabled: groomingEnabled } = useGroomingEnabled()
+
   const isVet = formData.role === 'veterinarian'
   const isCorporate = formData.role === 'corporate_admin'
+  const isGroomer = formData.role === 'groomer'
+  // groomer self-registers ACTIVE — verification happens per business, not per account
+  // (migration 030 + UserService.createUser's pendingRoles list).
   const isPendingRole = isVet || isCorporate
+
+  // If the flag flips off (or the probe resolves late) while 'groomer' is selected, fall back to
+  // the default role so the form can never submit a role the backend will reject.
+  useEffect(() => {
+    if (!groomingEnabled && formData.role === 'groomer') {
+      setFormData(prev => ({ ...prev, role: 'pet_owner' }))
+    }
+  }, [groomingEnabled, formData.role])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -131,6 +147,9 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
     { value: 'farmer', label: t('register.roleFarmer'), icon: '🐄', desc: t('register.roleFarmerDesc') },
     { value: 'veterinarian', label: t('register.roleVet'), icon: '👨‍⚕️', desc: t('register.roleVetDesc') },
     { value: 'corporate_admin', label: t('register.roleCorporateAdmin'), icon: '🏥', desc: t('register.roleCorporateAdminDesc') },
+    ...(groomingEnabled
+      ? [{ value: 'groomer', label: t('register.roleGroomer'), icon: '💈', desc: t('register.roleGroomerDesc') }]
+      : []),
   ]
 
   // After a pending-role submits successfully, show confirmation screen only
@@ -245,6 +264,18 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
                       ? 'Veterinarian registrations are reviewed by our platform team to verify your license. You will receive an email confirmation once approved.'
                       : 'Corporate admin accounts are reviewed before activation. You will be notified by email once your account has been approved.'}
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* Groomer next-steps notice — the account is active immediately; it is the BUSINESS
+                that needs admin verification before it becomes publicly searchable. */}
+            {isGroomer && (
+              <div className="hospital-callout" role="note">
+                <span className="hospital-callout-icon">💈</span>
+                <div className="hospital-callout-body">
+                  <strong>{t('register.groomerNoticeTitle')}</strong>
+                  <p>{t('register.groomerNoticeBody')}</p>
                 </div>
               </div>
             )}

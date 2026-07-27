@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
+import { usePermission } from '../../context/PermissionContext'
 import '../../styles/modules.css'
 
 interface Props { onNavigate: (path: string) => void }
@@ -9,6 +10,7 @@ interface Props { onNavigate: (path: string) => void }
 const FindGrooming: React.FC<Props> = ({ onNavigate }) => {
   const { t } = useTranslation()
   const { formatCurrency } = useSettings()
+  const { hasPermission } = usePermission()
   const [items, setItems] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -76,6 +78,20 @@ const FindGrooming: React.FC<Props> = ({ onNavigate }) => {
               </div>
             </>
           )}
+
+      {/* Supply-side entry point: the marketplace only works if groomers can find their way in.
+          Hidden for users who already run a business (they have the console instead). */}
+      {!hasPermission('grooming_provider_console') && (
+        <div className="module-card" style={{ marginTop: 24, display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ minWidth: 0 }}>
+            <h3 style={{ margin: 0 }}>🏪 {t('groomingFind.ownerCtaTitle')}</h3>
+            <p className="si-676930d7" style={{ margin: '4px 0 0' }}>{t('groomingFind.ownerCtaDesc')}</p>
+          </div>
+          <button className="module-btn primary" onClick={() => onNavigate('/grooming/provider')}>
+            {t('groomingFind.ownerCtaBtn')}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
