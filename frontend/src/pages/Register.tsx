@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
+import PasswordInput from '../components/PasswordInput'
 import './Auth.css'
 
 interface RegisterProps {
@@ -320,11 +321,11 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="reg-password">{t('register.password')}</label>
-                <input id="reg-password" type="password" name="password" placeholder="Min 8 chars, A-Z, a-z, 0-9" value={formData.password} onChange={handleChange} required autoComplete="new-password" />
+                <PasswordInput id="reg-password" name="password" placeholder="Min 8 chars, A-Z, a-z, 0-9" value={formData.password} onChange={handleChange} required autoComplete="new-password" />
               </div>
               <div className="form-group">
                 <label htmlFor="reg-confirmPassword">{t('register.confirmPassword')}</label>
-                <input id="reg-confirmPassword" type="password" name="confirmPassword" placeholder="Re-enter password" value={formData.confirmPassword} onChange={handleChange} required autoComplete="new-password" />
+                <PasswordInput id="reg-confirmPassword" name="confirmPassword" placeholder="Re-enter password" value={formData.confirmPassword} onChange={handleChange} required autoComplete="new-password" />
               </div>
             </div>
 

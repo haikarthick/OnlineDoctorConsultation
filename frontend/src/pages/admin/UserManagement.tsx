@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
+import PasswordInput from '../../components/PasswordInput'
 import '../../styles/modules.css'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
@@ -1108,13 +1109,13 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
               {resetPasswordMsg && <div className="module-alert success si-bab8e8bc">{resetPasswordMsg}</div>}
               <div className="form-group">
                 <label className="form-label">{t('userManagement.resetPasswordLabel')} *</label>
-                <input
+                <PasswordInput
                   className="form-input"
-                  type="password"
                   value={resetPasswordValue}
                   onChange={e => setResetPasswordValue(e.target.value)}
                   placeholder={t('userManagement.resetPasswordMin')}
                   minLength={8}
+                  autoComplete="new-password"
                 />
                 {resetPasswordValue && resetPasswordValue.length < 8 && (
                   <p className="si-513c70eb">⚠️ {t('userManagement.resetPasswordMin')}</p>

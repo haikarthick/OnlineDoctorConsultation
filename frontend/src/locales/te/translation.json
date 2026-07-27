@@ -104,7 +104,9 @@
     "none": "None",
     "error": "Error",
     "deactivate": "Deactivate",
-    "previous": "మునుపటి"
+    "previous": "మునుపటి",
+    "showPassword": "పాస్‌వర్డ్ చూపించు",
+    "hidePassword": "పాస్‌వర్డ్ దాచు"
   },
   "nav": {
     "brand": "VetCare",

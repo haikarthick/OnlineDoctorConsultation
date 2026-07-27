@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import { vetHospitalApi } from '../services/api/vetHospitalApi'
+import PasswordInput from '../components/PasswordInput'
 import './ModulePage.css'
 import './VetHospitals.css'
 import { useTranslation } from 'react-i18next'
@@ -103,25 +104,25 @@ const AcceptInvite: React.FC = () => {
           <form onSubmit={handleSubmit} className="si-7025369d">
             <div className="hb-form-group">
               <label className="form-label">{t('acceptInvite.createPassword')}</label>
-              <input
-                type="password"
+              <PasswordInput
                 className="form-input"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder={t('acceptInvite.minChars')}
                 minLength={8}
                 required
+                autoComplete="new-password"
               />
             </div>
             <div className="hb-form-group">
               <label className="form-label">{t('acceptInvite.confirmPassword')}</label>
-              <input
-                type="password"
+              <PasswordInput
                 className="form-input"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder={t('acceptInvite.reEnterPassword')}
                 required
+                autoComplete="new-password"
               />
             </div>
             <button type="submit" className="btn-primary si-32d8ba6d" disabled={submitting}>

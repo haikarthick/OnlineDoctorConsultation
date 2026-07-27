@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
+import PasswordInput from '../components/PasswordInput'
 import './Auth.css'
 
 interface ResetPasswordProps {
@@ -21,7 +22,6 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
   const [invalidReason, setInvalidReason] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -169,28 +169,16 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
             <label htmlFor="rp-password" className="si-701dd00b">
               {t('resetPassword.newPasswordLabel')}
             </label>
-            <div className="si-314cecae">
-              <input
-                id="rp-password"
-                type={showPassword ? 'text' : 'password'}
-                className="form-input si-40bf6aa1"
-               
-                value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
-                required
-                autoFocus
-                autoComplete="new-password"
-                aria-required="true"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(v => !v)}
-                className="si-b1d82847"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? '🙈' : '👁️'}
-              </button>
-            </div>
+            <PasswordInput
+              id="rp-password"
+              className="form-input"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+              required
+              autoFocus
+              autoComplete="new-password"
+              aria-required="true"
+            />
             {newPassword.length > 0 && (
               <div className="si-291ca0c2">
                 <PasswordStrengthHint password={newPassword} t={t} />
@@ -202,14 +190,10 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
             <label htmlFor="rp-confirm" className="si-701dd00b">
               {t('resetPassword.confirmPasswordLabel')}
             </label>
-            <input
+            <PasswordInput
               id="rp-confirm"
-              type={showPassword ? 'text' : 'password'}
               className="form-input"
-              style={{
-                width: '100%', boxSizing: 'border-box',
-                borderColor: confirmPassword.length > 0 && !passwordsMatch ? '#ef4444' : undefined,
-              }}
+              style={{ borderColor: confirmPassword.length > 0 && !passwordsMatch ? '#ef4444' : undefined }}
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
               required

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
+import PasswordInput from '../components/PasswordInput'
 import './AcceptHospitalInvite.css'
 
 interface InviteInfo {
@@ -173,12 +174,12 @@ export default function AcceptHospitalInvite() {
 
           <div className="invite-form-group">
             <label>{t('hospitalStaff.password')}</label>
-            <input type="password" required minLength={8} value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
+            <PasswordInput required minLength={8} autoComplete="new-password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
           </div>
 
           <div className="invite-form-group">
             <label>{t('hospitalStaff.confirmPassword')}</label>
-            <input type="password" required value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} />
+            <PasswordInput required autoComplete="new-password" value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} />
           </div>
 
           <div className="invite-privacy-note">

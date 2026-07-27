@@ -119,6 +119,22 @@ describe('Register form validation', () => {
     expect(submitBtn).toBeDisabled()
   })
 
+  it('reveals and re-masks the password when the show/hide toggle is used', () => {
+    render(<Register onSwitchToLogin={onSwitchToLogin} />)
+
+    const passwordInput = screen.getByLabelText('register.password') as HTMLInputElement
+    expect(passwordInput.type).toBe('password')
+
+    // Two password fields on this form; each toggle drives only its own input.
+    const [toggle] = screen.getAllByLabelText('common.showPassword')
+    fireEvent.click(toggle)
+    expect(passwordInput.type).toBe('text')
+    expect((screen.getByLabelText('register.confirmPassword') as HTMLInputElement).type).toBe('password')
+
+    fireEvent.click(screen.getByLabelText('common.hidePassword'))
+    expect(passwordInput.type).toBe('password')
+  })
+
   it('hides the grooming provider role while the grooming module is disabled', () => {
     mockGroomingEnabled.mockReturnValue({ enabled: false, loading: false })
     render(<Register onSwitchToLogin={onSwitchToLogin} />)
