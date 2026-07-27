@@ -87,6 +87,16 @@ const SYSTEM_ROLES = [
 ] as const;
 const SYSTEM_ROLES_SQL = SYSTEM_ROLES.map(r => `'${r}'`).join(', ');
 
+/**
+ * Canonical invoice types — same anti-drift rule as SYSTEM_ROLES above.
+ * The self-heal was still rebuilding invoices_invoice_type_check without 'grooming', so every
+ * grooming GST invoice (GRM series) would have been rejected in production the same way
+ * groomer registration was. Caught by scripts/runtime-verify.js.
+ * MUST stay in sync with docker/init.sql and migrations/031_grooming_payments.sql.
+ */
+const INVOICE_TYPES = ['consultation', 'commission', 'pharmacy', 'grooming'] as const;
+const INVOICE_TYPES_SQL = INVOICE_TYPES.map(t => `'${t}'`).join(', ');
+
 class PostgresDatabase {
   private pool: Pool;
 
@@ -1933,11 +1943,12 @@ class PostgresDatabase {
     // GSTIN on the pharmacy entity itself (issuer of the pharmacy invoice, distinct from the network's own GSTIN)
     await this.pool.query(`ALTER TABLE hospital_pharmacies ADD COLUMN IF NOT EXISTS gstin VARCHAR(20)`).catch(() => {});
 
-    // invoice_type CHECK was missing 'pharmacy' — dispensing payments could never get a GST invoice
+    // invoice_type CHECK — derive from INVOICE_TYPES, never inline the list (this block used to
+    // hardcode 3 values and silently dropped 'grooming' back off on every boot)
     await this.pool.query(`ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_invoice_type_check`).catch(() => {});
     await this.pool.query(`
       ALTER TABLE invoices ADD CONSTRAINT invoices_invoice_type_check
-        CHECK (invoice_type IN ('consultation', 'commission', 'pharmacy'))
+        CHECK (invoice_type IN (${INVOICE_TYPES_SQL}))
     `).catch(() => {});
 
     // Add withdrawal_period_days to pharmacy_medications (for livestock)

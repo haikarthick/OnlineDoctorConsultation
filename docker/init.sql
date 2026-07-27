@@ -180,7 +180,11 @@ CREATE TABLE IF NOT EXISTS consultations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-  animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
+  -- RESTRICT, not SET NULL: an animal with consultation history must not be deletable, and
+  -- nulling the link would orphan the clinical record. database.ts's startup self-heal has
+  -- always forced RESTRICT here, so every deployed DB is already RESTRICT — this line used to
+  -- say SET NULL and lost the fight on every boot. Kept aligned so the two cannot disagree.
+  animal_id UUID REFERENCES animals(id) ON DELETE RESTRICT,
   animal_type VARCHAR(100) NOT NULL DEFAULT '',
   symptom_description TEXT NOT NULL DEFAULT '',
   status VARCHAR(50) NOT NULL DEFAULT 'scheduled'
@@ -1905,7 +1909,10 @@ CREATE TABLE IF NOT EXISTS hospital_staff_invites (
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
   invited_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   invitee_email VARCHAR(255) NOT NULL,
-  invitee_name VARCHAR(200) NOT NULL,
+  -- Nullable by design — the invite form labels this field "(optional)". database.ts's startup
+  -- self-heal has always run `ALTER COLUMN invitee_name DROP NOT NULL`, so deployed DBs are
+  -- already nullable; this used to say NOT NULL and was silently undone on every boot.
+  invitee_name VARCHAR(200),
   staff_position VARCHAR(50) NOT NULL
     CHECK (staff_position IN (
       'nurse','technician','receptionist','lab_tech',

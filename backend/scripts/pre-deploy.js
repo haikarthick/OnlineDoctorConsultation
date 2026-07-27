@@ -3,9 +3,14 @@
  * Pre-Deployment Validation
  * ─────────────────────────
  * Runs ALL checks before deploying to catch issues early:
- *   1. Backend TypeScript compilation
- *   2. Frontend TypeScript compilation
- *   3. Schema validation (column mismatches)
+ *   1. Backend production build
+ *   2. Frontend production build (+ bundle budget)
+ *   3. Schema validation (column mismatches, static)
+ *   4. E2E route coverage
+ *   5. Runtime verification — real Postgres, real migrations, real server, real HTTP
+ *
+ * Checks 1-4 are STATIC. They have never executed a line of SQL. Check 5 exists because that
+ * gap let a completely broken feature through with every other check green.
  *
  * Run: npm run pre-deploy  (from backend/)
  *   or: node backend/scripts/pre-deploy.js (from root)
@@ -75,6 +80,14 @@ runCheck('Schema Validation', 'node scripts/schema-check.js', BACKEND);
 
 // 4. E2E route coverage (ensure all routes have tests)
 runCheck('E2E Route Coverage', 'node e2e/generate-tests.cjs', FRONTEND);
+
+// 5. RUNTIME verification — the only check that actually executes SQL and boots the server.
+//    Checks 1-4 are all static: they prove code compiles, links and bundles. They cannot see a
+//    constraint violation, a migration that fails on a real DB, or startup code that silently
+//    reverts a migration. That blind spot shipped the groomer-registration bug (2026-07-27) —
+//    tsc, vitest and the production build were ALL green while the feature was broken for every
+//    user. Slow (~2-3 min) and worth every second. See backend/scripts/runtime-verify.js.
+runCheck('Runtime Verification (real DB + real server)', 'node scripts/runtime-verify.js', BACKEND, 900000);
 
 // 5. Memory staleness check — warn if code changed but memory wasn't updated
 // (non-blocking: only prints warning, doesn't fail the push)

@@ -20,6 +20,7 @@
     "migrate:create": "ts-node --project tsconfig.json src/utils/migrate.ts --create",
     "seed": "ts-node --project tsconfig.json src/utils/seedDatabase.ts",
     "schema-check": "node scripts/schema-check.js",
+    "verify:runtime": "node scripts/runtime-verify.js",
     "pre-deploy": "node scripts/pre-deploy.js",
     "install-hooks": "node scripts/install-hooks.js",
     "log:bug": "node scripts/log-memory.js bug",
