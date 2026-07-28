@@ -27,7 +27,8 @@
     "log:lesson": "node scripts/log-memory.js lesson",
     "log:feature": "node scripts/log-memory.js feature",
     "log:research": "node scripts/log-memory.js research",
-    "log:note": "node scripts/log-memory.js note"
+    "log:note": "node scripts/log-memory.js note",
+    "verify:runtime:full": "node scripts/runtime-verify.js --full"
   },
   "keywords": [
     "veterinary",

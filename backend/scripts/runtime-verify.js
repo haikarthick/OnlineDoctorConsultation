@@ -23,6 +23,9 @@
  *   PHASE 6  HTTP smoke — register every self-registerable role, log in, read permissions.
  *            The role list is PARSED FROM validation.ts so it cannot drift from the source
  *            of truth: add a role there and this test automatically covers it.
+ *   PHASE 7  BROWSER — Playwright drives the real SPA the server is serving. PHASE 6 proves
+ *            the API accepts a role; only this proves the SCREEN offers it, the form submits,
+ *            and the app the user lands in renders (no raw i18n keys, no console errors).
  *
  * Run: npm run verify:runtime  (from backend/)
  *
@@ -42,6 +45,14 @@ const BACKEND = path.join(ROOT, 'backend');
 const INIT_SQL = path.join(ROOT, 'docker', 'init.sql');
 const MIGRATIONS_DIR = path.join(BACKEND, 'migrations');
 const SCHEMA = 'vetcare_dev'; // deployments are schema-scoped; `public` would hide schema bugs
+
+/**
+ * --full: seed the demo dataset and run the ENTIRE e2e suite (462 tests) instead of just the
+ * @critical journeys. Far too slow for a push gate, but it gives the older specs — which need a
+ * seeded, already-running app and were wired to nothing — a real way to be executed on demand:
+ *   cd backend && npm run verify:runtime:full
+ */
+const FULL = process.argv.includes('--full');
 
 const RED = '\x1b[31m', GREEN = '\x1b[32m', CYAN = '\x1b[36m', YELLOW = '\x1b[33m';
 const DIM = '\x1b[2m', RESET = '\x1b[0m';
@@ -177,8 +188,13 @@ function snapshot(db) {
     JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE n.nspname = '${SCHEMA}'
     ORDER BY 1, 2, 3`);
+  // data_type + is_nullable + column_default: a self-heal block that quietly changes a DEFAULT
+  // (say, a status column's initial value) is the same class of silent drift as a CHECK rewrite,
+  // and would otherwise slip through this gate.
   const columns = psqlJson(db, `
-    SELECT table_name AS tbl, column_name AS name, data_type AS def
+    SELECT table_name AS tbl, column_name AS name,
+           data_type || ' | nullable=' || is_nullable ||
+             ' | default=' || COALESCE(column_default, '(none)') AS def
     FROM information_schema.columns
     WHERE table_schema = '${SCHEMA}'
     ORDER BY 1, 2`);
@@ -319,6 +335,7 @@ async function http(method, url, body, token) {
     // ── PHASE 3/4/5: snapshot → boot → drift ──
     let baseline = null;
     let port = null;
+    let serverHealthy = false;
     if (!failed) {
       step('PHASE 3  Schema snapshot (before the server has ever connected)');
       baseline = snapshot('verifydb');
@@ -337,7 +354,7 @@ async function http(method, url, body, token) {
           DATABASE_URL: '', DB_HOST: '127.0.0.1', DB_PORT: String(PG_PORT),
           DB_USER: 'postgres', DB_PASSWORD: '', DB_NAME: 'verifydb', DB_SCHEMA: SCHEMA,
           MOCK_DB: 'false', MOCK_REDIS: 'true',
-          SEED_ON_STARTUP: 'false', FORCE_RESEED: 'false',
+          SEED_ON_STARTUP: FULL ? 'true' : 'false', FORCE_RESEED: 'false',
           // Never let a verification run touch a real provider — a unit test once sent a REAL
           // email through the developer's Gmail (2026-07-10). Blanking these forces log-only.
           RESEND_API_KEY: '', SMTP_HOST: '', SMTP_USER: '', SMTP_PASS: '',
@@ -349,18 +366,24 @@ async function http(method, url, body, token) {
       let serverLog = '';
       serverProc.stdout.on('data', d => { serverLog += d.toString(); });
       serverProc.stderr.on('data', d => { serverLog += d.toString(); });
+      serverProc.on('error', e => { serverLog += `\nSPAWN ERROR: ${e.message}\n`; });
+      serverProc.on('exit', (code, sig) => { serverLog += `\nSERVER EXITED early (code=${code} signal=${sig})\n`; });
 
       let healthy = false;
-      for (let i = 0; i < 60; i++) {
+      let lastHealthErr = '';
+      for (let i = 0; i < 90; i++) {
         try {
           const r = await fetch(`http://127.0.0.1:${port}/api/v1/health`);
-          if (r.status === 200) { healthy = true; break; }
-        } catch { /* not up yet */ }
+          if (r.status === 200) { healthy = true; serverHealthy = true; break; }
+          lastHealthErr = `health returned HTTP ${r.status}`;
+        } catch (e) { lastHealthErr = e.message; }
         await sleep(1000);
       }
       if (!healthy) {
-        fail('Server never became healthy against a real database.',
-          serverLog.split('\n').filter(Boolean).slice(-15));
+        const detail = serverLog.split('\n').filter(Boolean).slice(-25);
+        detail.push(`last health probe: ${lastHealthErr}`);
+        if (serverLog.trim() === '') detail.push('(server produced NO output at all)');
+        fail('Server never became healthy against a real database.', detail);
       } else {
         ok();
         // Let every deferred startup task finish before snapshotting.
@@ -391,7 +414,7 @@ async function http(method, url, body, token) {
     // Runs even if PHASE 5 failed: drift and user-facing breakage are independent diagnostics,
     // and seeing both ("the constraint was reverted" AND "so this role cannot register") makes
     // the cause-and-effect obvious instead of leaving it to be inferred.
-    if (port) {
+    if (serverHealthy && port) {
       const roles = registerableRoles();
       step(`PHASE 6  Registering all ${roles.length} self-registerable role(s)`);
       const problems = [];
@@ -434,6 +457,57 @@ async function http(method, url, body, token) {
         fail(`${problems.length} role(s) are broken end-to-end.`, problems);
       } else {
         ok(roles.join(', '));
+      }
+    }
+
+    // ── PHASE 7: the browser ──
+    if (serverHealthy && port) {
+      const FRONTEND = path.join(ROOT, 'frontend');
+      const distIndex = path.join(FRONTEND, 'dist', 'index.html');
+
+      if (!fs.existsSync(distIndex)) {
+        step('PHASE 7  Browser journeys');
+        fail('frontend/dist is missing — the server has no SPA to serve.',
+          ['Run `npm run build` in frontend/ first (the pre-deploy gate does this as check #2).']);
+      } else {
+        // The grooming module is dark-launched; switch it on so the browser pass covers the
+        // flag-on UI (the groomer role option, the grooming nav section) rather than silently
+        // testing a smaller app than production runs.
+        try {
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public;
+            INSERT INTO system_settings (key, value, description)
+            VALUES ('grooming.enabled', 'true', 'enabled by runtime-verify PHASE 7')
+            ON CONFLICT (key) DO UPDATE SET value = 'true';`);
+        } catch { /* settings table shape differs — the browser pass still runs without it */ }
+
+        step(`PHASE 7  Browser journeys (${FULL ? 'FULL e2e suite' : 'critical journeys'} vs the real SPA)`);
+        try {
+          // --retries=0: a gate must be deterministic. Retries would hide a genuinely flaky
+          // journey behind a green tick, which is how a check stops being trustworthy.
+          // Invoke Playwright's CLI through node directly. `npx` needs a shell on Windows
+          // (deprecated + unescaped args) and `npx.cmd` is not reliably spawnable — both fail
+          // with EMPTY stdout/stderr, which makes a real test failure look like a mystery.
+          const cli = path.join(FRONTEND, 'node_modules', '@playwright', 'test', 'cli.js');
+          execFileSync(process.execPath, [cli, 'test', ...(FULL ? [] : ['--grep', '@critical']), '--reporter', 'list', '--retries=0'], {
+            cwd: FRONTEND,
+            encoding: 'utf8',
+            stdio: 'pipe',
+            timeout: 600000,
+            maxBuffer: 64 * 1024 * 1024,
+            env: { ...process.env, E2E_BASE_URL: `http://127.0.0.1:${port}`, CI: '1' },
+          });
+          ok('registration, shell render, i18n, password toggle');
+        } catch (e) {
+          const out = `${(e.stdout || '').toString()}\n${(e.stderr || '').toString()}`.trim();
+          if (/Executable doesn't exist|playwright install/i.test(out)) {
+            fail('Playwright browsers are not installed.',
+              ['Install them once with:  cd frontend && npx playwright install chromium']);
+          } else {
+            const lines = out ? out.split('\n').filter(l => l.trim()).slice(-30)
+              : [`(no output captured) ${e.message}`];
+            fail('Browser journeys failed against the real app.', lines);
+          }
+        }
       }
     }
   } catch (err) {
