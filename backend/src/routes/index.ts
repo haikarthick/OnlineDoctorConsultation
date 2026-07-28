@@ -5292,6 +5292,12 @@ router.post('/grooming/orders/:id/confirm-payment', authMiddleware, groomingEnab
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingPaymentService.confirmCheckout((req as any).userId, req.params.id, req.body || {}) });
   }));
+// What the customer gets back if they cancel now — grooming's own policy engine, shown in the
+// cancel dialog before they commit (mirrors /payments/refund-preview for consultations).
+router.get('/grooming/orders/:id/refund-preview', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.getRefundPreview((req as any).userId, req.params.id) });
+  }));
 router.put('/grooming/orders/:id/cancel', authMiddleware, groomingEnabled, validateBody(groomingCancelSchema),
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingOrderService.cancelOrder((req as any).userId, req.params.id, req.body?.reason) });

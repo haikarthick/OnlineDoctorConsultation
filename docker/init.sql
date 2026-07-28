@@ -3840,6 +3840,16 @@ CREATE TABLE IF NOT EXISTS grooming_orders (
   gateway_payment_id VARCHAR(120),
   gateway VARCHAR(30),
   invoice_number VARCHAR(100),
+  -- Slot-hold window: an unpaid order past expires_at is released by the grooming expiry job.
+  -- Grooming keeps its OWN hold/refund columns rather than leaning on the consultation
+  -- payment-hold fields, so the two modules' lifecycles can change independently.
+  expires_at TIMESTAMP,
+  refund_amount DECIMAL(10,2) DEFAULT 0.00,
+  refund_status VARCHAR(20) NOT NULL DEFAULT 'none'
+    CHECK (refund_status IN ('none', 'partial', 'full', 'failed')),
+  refund_destination VARCHAR(20) CHECK (refund_destination IN ('wallet', 'gateway')),
+  refund_reason TEXT,
+  refunded_at TIMESTAMP,
   completed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

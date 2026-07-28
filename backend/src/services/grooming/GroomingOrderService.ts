@@ -22,7 +22,9 @@ const ORDER_SELECT = `
   o.commission_percent as "commissionPercent", o.commission_amount as "commissionAmount",
   o.handling_notes as "handlingNotes", o.owner_notes as "ownerNotes",
   o.cancellation_reason as "cancellationReason", o.eta_minutes as "etaMinutes",
-  o.invoice_number as "invoiceNumber",
+  o.invoice_number as "invoiceNumber", o.expires_at as "expiresAt",
+  o.refund_amount as "refundAmount", o.refund_status as "refundStatus",
+  o.refund_destination as "refundDestination", o.refunded_at as "refundedAt",
   o.completed_at as "completedAt", o.created_at as "createdAt", o.updated_at as "updatedAt"
 `;
 
@@ -83,17 +85,21 @@ class GroomingOrderService {
     const depositDue = svc.payment_rule === 'deposit' ? (Number(svc.deposit_amount) || 0) : grandTotal;
     const currency = svc.currency || await GroomingModuleConfig.getCurrency();
 
+    // Slot-hold window — an unpaid order past this is released by the grooming expiry job.
+    const holdMinutes = await GroomingModuleConfig.getHoldMinutes();
+
     const result = await database.query(
       `INSERT INTO grooming_orders
          (order_number, pet_owner_id, animal_id, provider_id, location_id, primary_service_id, service_mode,
           scheduled_date, time_slot_start, subtotal, addons_total, tax_total, grand_total, deposit_due,
-          currency, commission_percent, commission_amount, handling_notes, owner_notes, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,'payment_pending')
+          currency, commission_percent, commission_amount, handling_notes, owner_notes, status, expires_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,'payment_pending',
+               NOW() + ($20 || ' minutes')::interval)
        RETURNING id`,
       [genOrderNumber(), userId, data.animalId || null, data.providerId, data.locationId || null, data.serviceId,
        data.serviceMode || 'premises', data.scheduledDate, data.timeSlotStart, serviceValue, addonsTotal,
        taxTotal, grandTotal, depositDue, currency, commissionPct, commissionAmount,
-       data.handlingNotes || null, data.ownerNotes || null]);
+       data.handlingNotes || null, data.ownerNotes || null, String(holdMinutes)]);
     const orderId = result.rows[0].id;
 
     // Line items
@@ -197,12 +203,23 @@ class GroomingOrderService {
     await database.query(
       `UPDATE grooming_orders SET status = $2, cancellation_reason = $3, cancelled_by = $4, cancelled_at = NOW(), updated_at = NOW()
        WHERE id = $1`, [orderId, newStatus, reason || null, userId]);
-    // Reverse any clearing earning for this order (nothing settled yet in P2).
-    await database.query(
-      `UPDATE grooming_earnings SET status = 'reversed', updated_at = NOW()
-       WHERE order_id = $1 AND status = 'clearing'`, [orderId]);
     await this.addHistory(orderId, order.status, newStatus, userId, reason || undefined);
+
+    // Refund + provider-ledger reconciliation (reverses the clearing earning, applies the
+    // penalty/compensation entries). Grooming's own engine — see GroomingRefundService's module
+    // boundary note; nothing here may reach into the consultation refund path.
+    const GroomingRefundService = (await import('./GroomingRefundService')).default;
+    await GroomingRefundService.refundForCancellation(
+      orderId, isOwner ? 'customer' : 'provider', reason || 'Order cancelled');
+
     return this.getOrderById(orderId);
+  }
+
+  /** What the customer would get back if they cancelled right now (for the cancel dialog). */
+  async getRefundPreview(userId: string, orderId: string): Promise<any> {
+    const { isOwner } = await this.resolveOrderAccess(userId, orderId);
+    const GroomingRefundService = (await import('./GroomingRefundService')).default;
+    return GroomingRefundService.computeRefundPreview(orderId, isOwner ? 'customer' : 'provider');
   }
 
   // ── P3 ops: provider-driven execution workflow ──────────────
@@ -234,6 +251,13 @@ class GroomingOrderService {
       `UPDATE grooming_orders SET status = $2, updated_at = NOW()${stampCompleted ? ', completed_at = NOW()' : ''} WHERE id = $1`,
       [orderId, toStatus]);
     await this.addHistory(orderId, order.status, toStatus, userId, note);
+
+    // A no-show closes the money side too: no refund to the customer, but the provider is
+    // compensated and the clearing earning is settled rather than left hanging.
+    if (toStatus === 'no_show') {
+      const GroomingRefundService = (await import('./GroomingRefundService')).default;
+      await GroomingRefundService.refundForCancellation(orderId, 'no_show', note || 'Customer did not show up');
+    }
     return this.getOrderById(orderId);
   }
 

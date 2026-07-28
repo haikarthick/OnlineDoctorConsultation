@@ -63,6 +63,27 @@ class GroomingModuleConfig {
   async getInvoicePrefix(): Promise<string> { return this.getString('grooming.invoicePrefix', 'GRM'); }
   /** SAC code for grooming/spa services (CA-confirmed at go-live). */
   async getSacCode(): Promise<string> { return this.getString('grooming.sacCode', '999721'); }
+
+  // ── Cancellation / refund policy ──────────────────────────────
+  // Deliberately a separate 'grooming.*' namespace from the consultation 'cancellation.*' keys:
+  // the two modules must be tunable without either affecting the other.
+  /** Cancel at least this many hours out → full amount back, less the processing charge. */
+  async getCancellationFreeWindowHours(): Promise<number> { return this.getNumber('grooming.cancellation.freeWindowHours', 24); }
+  /** Inside the free window but at least this far out → partial refund percentage applies. */
+  async getCancellationPartialWindowHours(): Promise<number> { return this.getNumber('grooming.cancellation.partialRefundWindowHours', 4); }
+  async getCancellationPartialPercent(): Promise<number> { return this.getNumber('grooming.cancellation.partialRefundPercent', 50); }
+  async getCancellationProcessingFlatFee(): Promise<number> { return this.getNumber('grooming.cancellation.processingFlatFee', 25); }
+  /** Wallet bonus (% of amount paid) credited to the customer when the PROVIDER cancels. */
+  async getGoodwillBonusPercent(): Promise<number> { return this.getNumber('grooming.cancellation.goodwillBonusPercent', 10); }
+  /** Provider share (%) of money retained on a late customer cancellation. */
+  async getProviderShareOfRetainedPercent(): Promise<number> { return this.getNumber('grooming.compensation.providerShareOfRetainedPercent', 50); }
+  /** Provider share (%) of their net earning when the customer no-shows. */
+  async getProviderShareOnNoShowPercent(): Promise<number> { return this.getNumber('grooming.compensation.providerShareOnNoShowPercent', 100); }
+  /** Default refund destination: 'wallet' (instant) or 'gateway' (back to source). */
+  async getDefaultRefundDestination(): Promise<'wallet' | 'gateway'> {
+    const v = (await this.getString('grooming.refund.defaultDestination', 'wallet')).trim().toLowerCase();
+    return v === 'gateway' ? 'gateway' : 'wallet';
+  }
 }
 
 export default new GroomingModuleConfig();

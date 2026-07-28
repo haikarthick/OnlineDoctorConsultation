@@ -89,24 +89,34 @@ class GroomingDisputeService {
     const refund = Number(data.refundAmount) || 0;
     if (refund < 0) throw new ValidationError('refundAmount cannot be negative');
 
-    return database.transaction(async (client: any) => {
+    const result = await database.transaction(async (client: any) => {
+      // $2 is cast explicitly at BOTH uses. Assigned to a varchar column and compared against
+      // string literals, Postgres deduced it as varchar in one place and text in the other and
+      // rejected the whole statement ("inconsistent types deduced for parameter $2" / 42P08) —
+      // which meant every dispute response 500'd and no dispute could ever be resolved.
       await client.query(
-        `UPDATE grooming_disputes SET status = $2, resolution_note = COALESCE($3, resolution_note),
-                resolved_by = $4, resolved_at = CASE WHEN $2 IN ('resolved','partially_refunded','rejected') THEN NOW() ELSE resolved_at END, updated_at = NOW()
+        `UPDATE grooming_disputes SET status = $2::varchar, resolution_note = COALESCE($3, resolution_note),
+                resolved_by = $4,
+                resolved_at = CASE WHEN $2::varchar IN ('resolved','partially_refunded','rejected') THEN NOW() ELSE resolved_at END,
+                updated_at = NOW()
          WHERE id = $1`, [disputeId, data.status, data.resolutionNote || null, userId]);
-      if (refund > 0 && ['resolved', 'partially_refunded'].includes(data.status)) {
-        // Negative adjustment reduces the provider's payable balance (available).
-        await client.query(
-          `INSERT INTO grooming_earnings (provider_id, order_id, gross_amount, commission_amount, tax_amount, net_amount, entry_type, status, note)
-           VALUES ($1,$2,0,0,0,$3,'refund_adjustment','available',$4)`,
-          [dispute.provider_id, dispute.order_id, -refund, `Refund for dispute ${disputeId}`]);
-      }
       if (['resolved', 'partially_refunded', 'rejected'].includes(data.status)) {
         await client.query(`UPDATE grooming_orders SET status = 'closed', updated_at = NOW() WHERE id = $1 AND status = 'disputed'`, [dispute.order_id]);
       }
       const r = await client.query(`SELECT ${DISPUTE_SELECT} FROM grooming_disputes d WHERE d.id = $1`, [disputeId]);
       return r.rows[0];
     });
+
+    // The agreed refund must actually reach the customer. This used to insert only a negative
+    // provider-ledger entry, which reduced what the platform owed the provider but returned
+    // nothing to the person who paid. The refund service performs both legs (customer money out,
+    // provider ledger debited) and caps the total at what was collected.
+    if (refund > 0 && ['resolved', 'partially_refunded'].includes(data.status)) {
+      const GroomingRefundService = (await import('./GroomingRefundService')).default;
+      await GroomingRefundService.refundDiscretionary(
+        dispute.order_id, refund, `Refund for dispute ${disputeId}`);
+    }
+    return result;
   }
 }
 

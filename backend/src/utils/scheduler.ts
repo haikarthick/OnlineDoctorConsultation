@@ -53,6 +53,9 @@ export function startScheduler(): void {
   // Payment module: expire unpaid slot holds (no-op while payment.enabled=false)
   setInterval(runPaymentHoldExpiry, FIVE_MINUTES);
 
+  // Grooming module: expire unpaid grooming slot holds (no-op while grooming.enabled=false)
+  setInterval(runGroomingHoldExpiry, FIVE_MINUTES);
+
   // Payment module: reconcile stuck 'pending' payments against the gateway (daily + on boot)
   runPaymentReconciliation();
   setInterval(runPaymentReconciliation, TWENTY_FOUR_HOURS);
@@ -67,7 +70,7 @@ export function startScheduler(): void {
   // Payment module: emergency confirm-window fast-track (every minute; cheap no-op query)
   setInterval(runEmergencyFastTrack, 60 * 1000);
 
-  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, pharmacy stock alerts every 24h, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min');
+  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, pharmacy stock alerts every 24h, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min, grooming hold expiry every 5min');
 }
 
 async function runExpiryCheck(): Promise<void> {
@@ -95,6 +98,20 @@ async function runPaymentHoldExpiry(): Promise<void> {
     await PaymentOrchestrator.expireStalePaymentHolds();
   } catch (err: any) {
     logger.error('[Payments] Hold expiry job failed', { error: err.message });
+  }
+}
+
+/**
+ * Grooming's own hold expiry — separate job from the consultation one above on purpose: they
+ * release different resources (grooming_orders vs bookings) under different settings, and one
+ * module's schedule must never depend on the other's.
+ */
+async function runGroomingHoldExpiry(): Promise<void> {
+  try {
+    const GroomingPaymentService = (await import('../services/grooming/GroomingPaymentService')).default;
+    await GroomingPaymentService.expireStaleHolds();
+  } catch (err: any) {
+    logger.error('[Grooming] Hold expiry job failed', { error: err.message });
   }
 }
 

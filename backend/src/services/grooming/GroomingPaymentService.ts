@@ -3,6 +3,7 @@ import logger from '../../utils/logger';
 import { NotFoundError, ForbiddenError, ValidationError } from '../../utils/errors';
 import { getActiveGateway, getGatewayForMode } from '../payment/gateways';
 import GroomingModuleConfig from './GroomingModuleConfig';
+import NotificationService from '../NotificationService';
 
 /**
  * Real gateway payments + GST invoices for grooming orders. Reuses the shared payment gateway
@@ -94,6 +95,14 @@ class GroomingPaymentService {
   async confirmCheckout(userId: string, orderId: string, body: any): Promise<any> {
     const o = await this.loadOwnedOrder(userId, orderId);
     if (o.status === 'confirmed') return { orderId, status: 'confirmed', invoiceNumber: o.invoice_number, alreadyPaid: true };
+    // The customer paid, but the slot hold had already lapsed by the time the callback arrived.
+    // Refuse the booking AND return the money — never both keep the payment and drop the slot.
+    if (o.status === 'payment_expired') {
+      const GroomingRefundService = (await import('./GroomingRefundService')).default;
+      const lateId = body.gatewayPaymentId || o.gateway_payment_id || '';
+      await GroomingRefundService.refundExpiredCapture(orderId, lateId);
+      throw new ValidationError('This booking expired before the payment completed. The full amount has been refunded — please book again.');
+    }
     if (o.status !== 'payment_pending') throw new ValidationError('Order is not awaiting payment');
 
     const mode = o.gateway || 'demo';
@@ -133,14 +142,61 @@ class GroomingPaymentService {
    */
   async completeFromGateway(paymentId: string, gatewayPaymentId: string): Promise<void> {
     const r = await database.query(
-      `SELECT o.id, o.gateway FROM grooming_orders o WHERE o.payment_id = $1`, [paymentId]);
+      `SELECT o.id, o.gateway, o.status FROM grooming_orders o WHERE o.payment_id = $1`, [paymentId]);
     if (r.rows.length === 0) {
       logger.warn('Grooming completion requested for a payment with no order', { paymentId });
+      return;
+    }
+    // The slot was already released before this capture landed. Keeping the money for a slot the
+    // customer no longer holds is not an option — return it in full instead of confirming.
+    if (r.rows[0].status === 'payment_expired') {
+      const GroomingRefundService = (await import('./GroomingRefundService')).default;
+      await GroomingRefundService.refundExpiredCapture(r.rows[0].id, gatewayPaymentId);
       return;
     }
     await this.finalizeConfirmedOrder(r.rows[0].id, {
       gatewayPaymentId, mode: r.rows[0].gateway || 'demo', actorUserId: null,
     });
+  }
+
+  /**
+   * Slot-hold expiry (grooming's own — consultations expire via
+   * PaymentOrchestrator.expireStalePaymentHolds against `bookings`, and the two must stay apart).
+   *
+   * Releases orders that were never paid for within grooming.holdMinutes. Only touches orders
+   * whose payment has NOT completed, so a confirmed booking can never be expired out from under
+   * the customer; and a capture that lands afterwards is refunded in full by completeFromGateway
+   * rather than silently kept.
+   */
+  async expireStaleHolds(): Promise<number> {
+    if (!(await GroomingModuleConfig.isEnabled())) return 0;
+    const expired = await database.query(
+      `UPDATE grooming_orders o SET status = 'payment_expired', updated_at = NOW()
+       WHERE o.status = 'payment_pending'
+         AND o.expires_at IS NOT NULL AND o.expires_at < NOW()
+         AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.id = o.payment_id AND p.status = 'completed')
+       RETURNING o.id, o.pet_owner_id, o.payment_id`);
+
+    for (const row of expired.rows) {
+      try {
+        if (row.payment_id) {
+          await database.query(
+            `UPDATE payments SET status = 'expired', updated_at = NOW()
+             WHERE id = $1 AND status IN ('created', 'pending')`, [row.payment_id]);
+        }
+        await database.query(
+          `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
+           VALUES ($1,'payment_pending','payment_expired',NULL,'Slot hold expired before payment')`, [row.id]);
+        await NotificationService.createNotification(
+          row.pet_owner_id, 'payment', 'Grooming Booking Expired',
+          'Your grooming slot was released because payment was not completed in time. You can book again if the slot is still available.',
+          'all', { orderId: row.id });
+      } catch (err: any) {
+        logger.error('Grooming hold expiry post-processing failed', { orderId: row.id, error: err.message });
+      }
+    }
+    if (expired.rows.length > 0) logger.info(`[Grooming] Expired ${expired.rows.length} stale slot hold(s)`);
+    return expired.rows.length;
   }
 
   /**
