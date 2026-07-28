@@ -112,13 +112,25 @@ class GroomingPaymentService {
     });
   }
 
-  /** Race-safe sequential GRM/FY invoice number (separate series from consultation VC/…). */
+  /**
+   * Race-safe sequential GRM/FY invoice number (separate series from consultation VC/…).
+   *
+   * Continues from the HIGHEST suffix already issued, never from COUNT(*). Counting rows
+   * assumes the series is a contiguous 1..N; the moment it has a gap — one invoice deleted,
+   * a partial clean_start_launch.sql, any manual cleanup — COUNT(*)+1 lands on a number that
+   * already exists and the UNIQUE index on invoice_number aborts the whole confirm transaction.
+   * That surfaced as a bare 500 on payment confirmation with the customer already charged at
+   * the gateway, and it never self-heals: every later attempt recomputes the same taken number.
+   */
   private async nextGroomingInvoiceNumber(client: any): Promise<string> {
     const prefix = await GroomingModuleConfig.getInvoicePrefix();
     const fy = financialYearLabel(new Date());
     await client.query(`SELECT pg_advisory_xact_lock(hashtext('grooming_invoice_number_seq'))`);
-    const res = await client.query(`SELECT COUNT(*) AS count FROM invoices WHERE invoice_number LIKE $1`, [`${prefix}/${fy}/%`]);
-    const next = parseInt(res.rows[0].count, 10) + 1;
+    const res = await client.query(
+      `SELECT COALESCE(MAX(substring(invoice_number from '([0-9]+)$')::bigint), 0) AS last
+       FROM invoices WHERE invoice_number LIKE $1 AND invoice_number ~ '/[0-9]+$'`,
+      [`${prefix}/${fy}/%`]);
+    const next = Number(res.rows[0].last) + 1;
     return `${prefix}/${fy}/${String(next).padStart(5, '0')}`;
   }
 }

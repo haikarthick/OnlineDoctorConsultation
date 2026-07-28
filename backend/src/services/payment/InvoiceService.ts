@@ -41,16 +41,24 @@ class InvoiceService {
     return { ratePercent: parseFloat(String(res.rows[0].rate_percent)), label: res.rows[0].label };
   }
 
-  /** Race-safe sequential invoice number within the financial year. */
+  /**
+   * Race-safe sequential invoice number within the financial year.
+   *
+   * Continues from the HIGHEST suffix already issued, never from COUNT(*) — a counted series
+   * only works while it is a contiguous 1..N, and any gap (a deleted invoice, a partial
+   * clean_start_launch.sql) makes it recompute a number that is already taken, which the
+   * UNIQUE index on invoice_number then rejects. See the same fix in GroomingPaymentService.
+   */
   private async nextInvoiceNumber(client: any): Promise<string> {
     const prefix = await PaymentModuleConfig.getString('tax.invoicePrefix', 'VC');
     const fy = financialYearLabel(new Date());
     await client.query(`SELECT pg_advisory_xact_lock(hashtext('invoice_number_seq'))`);
     const res = await client.query(
-      `SELECT COUNT(*) as count FROM invoices WHERE invoice_number LIKE $1`,
+      `SELECT COALESCE(MAX(substring(invoice_number from '([0-9]+)$')::bigint), 0) AS last
+       FROM invoices WHERE invoice_number LIKE $1 AND invoice_number ~ '/[0-9]+$'`,
       [`${prefix}/${fy}/%`]
     );
-    const next = parseInt(res.rows[0].count, 10) + 1;
+    const next = Number(res.rows[0].last) + 1;
     return `${prefix}/${fy}/${String(next).padStart(5, '0')}`;
   }
 
