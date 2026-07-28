@@ -626,6 +626,11 @@ CREATE TABLE IF NOT EXISTS payments (
   transaction_id VARCHAR(255),
   invoice_number VARCHAR(100),
   gateway VARCHAR(50) DEFAULT 'stripe',
+  -- Which revenue stream this payment belongs to. The finance overview counts GMV by it and the
+  -- Razorpay webhook routes completion by it, so it must exist from a fresh install — it used to
+  -- be added only by the startup self-heal, which runs AFTER migrations.
+  payment_source VARCHAR(30) DEFAULT 'consultation'
+    CHECK (payment_source IN ('consultation', 'pharmacy', 'subscription', 'other', 'grooming')),
   tax_amount DECIMAL(10,2) DEFAULT 0,
   discount_amount DECIMAL(10,2) DEFAULT 0,
   refund_amount DECIMAL(10,2) DEFAULT 0,

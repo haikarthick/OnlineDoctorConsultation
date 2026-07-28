@@ -325,7 +325,7 @@ class PaymentOrchestrator {
 
     if (!gatewayOrderId) return { handled: true, reason: 'no_order_ref' };
     const payRes = await database.query(
-      `SELECT id, status, amount, wallet_amount_used FROM payments WHERE gateway_order_id = $1 ORDER BY created_at DESC LIMIT 1`,
+      `SELECT id, status, amount, wallet_amount_used, payment_source FROM payments WHERE gateway_order_id = $1 ORDER BY created_at DESC LIMIT 1`,
       [gatewayOrderId]
     );
     if (payRes.rows.length === 0) {
@@ -337,12 +337,21 @@ class PaymentOrchestrator {
     if (eventType === 'payment.captured' || eventType === 'order.paid') {
       if (p.status !== 'completed') {
         const fee = entity?.fee ? Math.round(entity.fee) / 100 : 0;
-        await this.completeCapturedPayment(p.id, {
-          gatewayPaymentId: gatewayPaymentId || 'unknown',
-          gatewayFee: fee,
-          method: entity?.method || 'razorpay',
-          actorUserId: null,
-        });
+        // Completion is per revenue stream. completeCapturedPayment is the CONSULTATION path —
+        // it snapshots a vet commission, flips a booking and issues a VC invoice, none of which
+        // apply to a grooming order. Routing by payment_source keeps the streams from
+        // contaminating each other now that grooming rows are visible to this lookup at all.
+        if (p.payment_source === 'grooming') {
+          const GroomingPaymentService = (await import('../grooming/GroomingPaymentService')).default;
+          await GroomingPaymentService.completeFromGateway(p.id, gatewayPaymentId || 'unknown');
+        } else {
+          await this.completeCapturedPayment(p.id, {
+            gatewayPaymentId: gatewayPaymentId || 'unknown',
+            gatewayFee: fee,
+            method: entity?.method || 'razorpay',
+            actorUserId: null,
+          });
+        }
       }
       return { handled: true };
     }
@@ -368,7 +377,7 @@ class PaymentOrchestrator {
     const gateway = await getActiveGateway();
     if (gateway.mode === 'demo') return 0;
     const stuck = await database.query(
-      `SELECT id, gateway_order_id, amount, wallet_amount_used FROM payments
+      `SELECT id, gateway_order_id, amount, wallet_amount_used, payment_source FROM payments
        WHERE status = 'pending' AND gateway_order_id IS NOT NULL
          AND updated_at < NOW() - INTERVAL '1 hour'
        ORDER BY created_at ASC LIMIT 50`
@@ -381,12 +390,18 @@ class PaymentOrchestrator {
         const attempts = await rzp.fetchOrderPayments(p.gateway_order_id);
         const captured = attempts.find((a: any) => a.status === 'captured');
         if (captured) {
-          await this.completeCapturedPayment(p.id, {
-            gatewayPaymentId: captured.gatewayPaymentId,
-            gatewayFee: captured.fee,
-            method: captured.method || 'razorpay',
-            actorUserId: null,
-          });
+          // Same per-stream routing as the webhook — see handleRazorpayWebhook.
+          if (p.payment_source === 'grooming') {
+            const GroomingPaymentService = (await import('../grooming/GroomingPaymentService')).default;
+            await GroomingPaymentService.completeFromGateway(p.id, captured.gatewayPaymentId);
+          } else {
+            await this.completeCapturedPayment(p.id, {
+              gatewayPaymentId: captured.gatewayPaymentId,
+              gatewayFee: captured.fee,
+              method: captured.method || 'razorpay',
+              actorUserId: null,
+            });
+          }
           fixed++;
           await this.logEvent(p.id, 'reconciled_captured', 'pending', 'completed', null, {});
         }

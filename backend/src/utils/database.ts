@@ -97,6 +97,16 @@ const SYSTEM_ROLES_SQL = SYSTEM_ROLES.map(r => `'${r}'`).join(', ');
 const INVOICE_TYPES = ['consultation', 'commission', 'pharmacy', 'grooming'] as const;
 const INVOICE_TYPES_SQL = INVOICE_TYPES.map(t => `'${t}'`).join(', ');
 
+/**
+ * Canonical payment sources — same anti-drift rule as SYSTEM_ROLES / INVOICE_TYPES above.
+ * `payment_source` is what separates the revenue streams: the finance overview counts GMV
+ * WHERE payment_source = 'consultation', and the Razorpay webhook routes completion by it.
+ * A grooming payment left labelled 'consultation' is both wrong money and wrong routing.
+ * MUST stay in sync with migrations/033_grooming_payment_integration.sql.
+ */
+const PAYMENT_SOURCES = ['consultation', 'pharmacy', 'subscription', 'other', 'grooming'] as const;
+const PAYMENT_SOURCES_SQL = PAYMENT_SOURCES.map(s => `'${s}'`).join(', ');
+
 class PostgresDatabase {
   private pool: Pool;
 
@@ -1924,13 +1934,13 @@ class PostgresDatabase {
     // Add dispensing_id and payment_source to payments (link dispensing to payment system)
     await this.pool.query(`ALTER TABLE payments ADD COLUMN IF NOT EXISTS dispensing_id UUID REFERENCES dispensing_records(id) ON DELETE SET NULL`).catch(() => {});
     await this.pool.query(`ALTER TABLE payments ADD COLUMN IF NOT EXISTS payment_source VARCHAR(30) DEFAULT 'consultation'`).catch(() => {});
+    // payment_source CHECK — derive from PAYMENT_SOURCES and REBUILD it, never inline the list
+    // behind an IF NOT EXISTS. The old guarded form could only ever create the constraint, so a
+    // migration that widened it was invisible here and a widened value stayed rejected forever.
+    await this.pool.query(`ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_payment_source_check`).catch(() => {});
     await this.pool.query(`
-      DO $$ BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='payments_payment_source_check') THEN
-          ALTER TABLE payments ADD CONSTRAINT payments_payment_source_check
-            CHECK (payment_source IN ('consultation','pharmacy','subscription','other'));
-        END IF;
-      END $$
+      ALTER TABLE payments ADD CONSTRAINT payments_payment_source_check
+        CHECK (payment_source IN (${PAYMENT_SOURCES_SQL}))
     `).catch(() => {});
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_payments_dispensing_id ON payments(dispensing_id)`).catch(() => {});
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_payments_payment_source ON payments(payment_source)`).catch(() => {});
