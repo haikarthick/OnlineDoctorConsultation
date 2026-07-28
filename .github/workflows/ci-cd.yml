@@ -112,6 +112,71 @@ jobs:
           path: frontend/dist/
 
   # ═════════════════════════════════════════════
+  #  2a. Runtime Verification — the only job that RUNS anything
+  # ═════════════════════════════════════════════
+  # Every other job here is static: lint, jest-with-mocks, tsc, vite build. None of them
+  # execute a line of SQL or boot the server — which is exactly how a fully broken feature
+  # shipped green on 2026-07-27. The local pre-push hook runs this same gate, but a hook can
+  # be bypassed with `git push --no-verify`; this job is what makes it unskippable, and
+  # `resolve-env` (which gates deploy) depends on it.
+  #
+  # See docs/VERIFICATION.md and backend/scripts/runtime-verify.js.
+  runtime-verify:
+    name: Runtime Verification (real DB + real server + browser)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # The harness creates its OWN throwaway cluster with initdb (so it can control the exact
+      # startup sequence), which needs the postgresql SERVER package, not just the client.
+      # initdb refuses to run as root — GitHub runners execute as the non-root `runner` user.
+      - name: Install PostgreSQL server
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql
+          ls /usr/lib/postgresql/
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      # NODE_ENV=production for the BUILDS only, mirroring render-build.sh.
+      - name: Build backend
+        working-directory: backend
+        run: NODE_ENV=production npm run build
+
+      - name: Build frontend
+        working-directory: frontend
+        run: NODE_ENV=production npm run build
+
+      - name: Install Playwright chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run runtime verification
+        working-directory: backend
+        run: npm run verify:runtime
+
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-verify-playwright
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ═════════════════════════════════════════════
   #  2b. E2E Route Coverage Check
   # ═════════════════════════════════════════════
   e2e-coverage:
@@ -246,7 +311,9 @@ jobs:
   resolve-env:
     name: Resolve Environment
     runs-on: ubuntu-latest
-    needs: [backend-test, frontend-test]
+    # runtime-verify is a hard dependency: no deploy may proceed on a build whose schema,
+    # server boot and critical UI journeys have not actually been executed.
+    needs: [backend-test, frontend-test, runtime-verify]
     if: github.event_name == 'push'
     outputs:
       environment: ${{ steps.env.outputs.environment }}

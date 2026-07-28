@@ -75,9 +75,15 @@ function findPgBin() {
       candidates.push(`${drive}\\Program Files\\PostgreSQL\\${major}\\bin`);
     }
   }
-  // POSIX
-  candidates.push('/usr/lib/postgresql/16/bin', '/usr/lib/postgresql/15/bin',
-    '/usr/local/bin', '/usr/bin', '/opt/homebrew/bin');
+  // POSIX — enumerate whatever major versions are actually installed (newest first) rather
+  // than guessing, so a CI runner that ships PG 17 or 18 is found without editing this list.
+  try {
+    const base = '/usr/lib/postgresql';
+    for (const v of fs.readdirSync(base).sort((a, b) => parseInt(b, 10) - parseInt(a, 10))) {
+      candidates.push(path.join(base, v, 'bin'));
+    }
+  } catch { /* not a Debian-style layout */ }
+  candidates.push('/usr/local/bin', '/usr/bin', '/opt/homebrew/bin');
 
   for (const dir of candidates) {
     const exe = process.platform === 'win32' ? 'initdb.exe' : 'initdb';
