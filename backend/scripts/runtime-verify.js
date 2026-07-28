@@ -498,7 +498,9 @@ async function http(method, url, body, token) {
             cwd: FRONTEND,
             encoding: 'utf8',
             stdio: 'pipe',
-            timeout: 600000,
+            // @critical is a handful of journeys; --full is 462 tests on a single worker and
+            // needs far longer. Overridable via VERIFY_E2E_TIMEOUT_MS.
+            timeout: Number(process.env.VERIFY_E2E_TIMEOUT_MS) || (FULL ? 3600000 : 600000),
             maxBuffer: 64 * 1024 * 1024,
             env: { ...process.env, E2E_BASE_URL: `http://127.0.0.1:${port}`, CI: '1' },
           });

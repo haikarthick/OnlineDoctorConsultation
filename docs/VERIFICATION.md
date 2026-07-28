@@ -118,6 +118,13 @@ Same ephemeral stack, but seeded with the demo dataset and running **all** e2e s
 just `@critical`. Far too slow for a push gate; this exists so the older specs — which need a
 seeded, already-running app and were wired into nothing — have a real way to be executed.
 
+> **Known gap — the legacy e2e suite is NOT green.** 462 tests across 17 files. They parse, and
+> the stack serves them (`admin.spec.ts` logs in and its first assertions pass, so seeding and
+> UI login both work), but a large consecutive block of `admin.spec.ts` then fails on ~35s
+> timeouts. The root cause has **not** been diagnosed and is not claimed here. Treat these specs
+> as unverified until someone works through them — they are deliberately excluded from the push
+> gate, which runs only `@critical`. Do not read a passing gate as "the 462 tests pass".
+
 Needs a local PostgreSQL. If it is not on a default path:
 
 ```bash
@@ -126,6 +133,24 @@ PGBIN="C:\Program Files\PostgreSQL\18\bin" npm run verify:runtime
 
 Takes ~2-3 minutes. It creates a temporary cluster on a random free port and removes it
 afterwards; it never touches your own databases.
+
+## Known remaining risks (honest list)
+
+1. **The legacy self-heal in `database.ts` is still the biggest structural hazard.** It runs on
+   every boot, after migrations, is untracked, and is wrapped in `.catch(() => {})` so failures
+   are silent. PHASE 5 now *detects* when it overwrites a migration, but the real fix is
+   retiring it. Its own header comment (~line 226) says not to add to it.
+2. **Three constraint rebuilds there still carry inline value lists** —
+   `payments_status_check`, `bookings_status_check`, `bookings_booking_type_check`. All three
+   currently match `init.sql` (verified — PHASE 5 is green), so nothing is broken today, and
+   PHASE 5 will fail the moment one drifts. Converting them to shared constants like
+   `SYSTEM_ROLES` / `INVOICE_TYPES` would remove the hazard entirely.
+3. **The legacy e2e suite is unverified** — see the box above.
+4. **The GitHub Actions `runtime-verify` job has never executed.** The YAML is validated and the
+   job graph is confirmed (`resolve-env` depends on it), but a workflow's first real run is on
+   GitHub. Watch the first push after this lands.
+5. **Seeding is only exercised in `--full` mode.** The push gate runs with
+   `SEED_ON_STARTUP=false`, so a broken demo seed would not fail it.
 
 ## When adding a new role, enum value, or CHECK-constrained column
 
