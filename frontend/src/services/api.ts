@@ -2972,16 +2972,24 @@ class ApiService {
     const response = await this.client.get(`/grooming/orders/${id}`)
     return response.data
   }
-  async payGroomingOrder(id: string, deposit = false) {
-    const response = await this.client.post(`/grooming/orders/${id}/pay`, { deposit })
-    return response.data
-  }
   async createGroomingCheckout(id: string, deposit = false) {
     const response = await this.client.post(`/grooming/orders/${id}/checkout`, { deposit })
     return response.data
   }
   async confirmGroomingPayment(id: string, body: any) {
     const response = await this.client.post(`/grooming/orders/${id}/confirm-payment`, body)
+    return response.data
+  }
+  async createGroomingBalanceCheckout(id: string) {
+    const response = await this.client.post(`/grooming/orders/${id}/balance-checkout`, {})
+    return response.data
+  }
+  async confirmGroomingBalancePayment(id: string, body: any) {
+    const response = await this.client.post(`/grooming/orders/${id}/confirm-balance`, body)
+    return response.data
+  }
+  async getGroomingRefundPreview(id: string) {
+    const response = await this.client.get(`/grooming/orders/${id}/refund-preview`)
     return response.data
   }
   async cancelGroomingOrder(id: string, reason?: string) {

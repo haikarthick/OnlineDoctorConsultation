@@ -5279,10 +5279,10 @@ router.get('/grooming/orders/:id', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingOrderService.getOrder((req as any).userId, req.params.id) });
   }));
-router.post('/grooming/orders/:id/pay', authMiddleware, groomingEnabled,
-  asyncHandler(async (req: Request, res: Response) => {
-    res.json({ success: true, data: await GroomingOrderService.payOrder((req as any).userId, req.params.id, { deposit: req.body?.deposit === true }) });
-  }));
+// NOTE: the legacy POST /grooming/orders/:id/pay route was REMOVED. It was the demo-era
+// "mark it paid" shortcut and it confirmed an order, set amount_paid and credited the provider
+// WITHOUT taking any money — any customer could self-issue a free booking. Payment goes through
+// /checkout + /confirm-payment (real gateway, verified capture) only.
 // Real gateway checkout (demo auto-verifies; Razorpay opens on the client) + GST invoice
 router.post('/grooming/orders/:id/checkout', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
@@ -5291,6 +5291,16 @@ router.post('/grooming/orders/:id/checkout', authMiddleware, groomingEnabled,
 router.post('/grooming/orders/:id/confirm-payment', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingPaymentService.confirmCheckout((req as any).userId, req.params.id, req.body || {}) });
+  }));
+// Balance collection (approved extra work / remainder after a deposit). Separate payments row
+// per collection, linked by payments.grooming_order_id.
+router.post('/grooming/orders/:id/balance-checkout', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await GroomingPaymentService.createBalanceCheckout((req as any).userId, req.params.id) });
+  }));
+router.post('/grooming/orders/:id/confirm-balance', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingPaymentService.confirmBalancePayment((req as any).userId, req.params.id, req.body || {}) });
   }));
 // What the customer gets back if they cancel now — grooming's own policy engine, shown in the
 // cancel dialog before they commit (mirrors /payments/refund-preview for consultations).

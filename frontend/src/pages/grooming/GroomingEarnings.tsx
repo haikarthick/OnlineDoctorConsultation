@@ -16,6 +16,8 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
   const [disputes, setDisputes] = useState<any[]>([])
   const [providerId, setProviderId] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
+  const [refundFor, setRefundFor] = useState<any | null>(null)
+  const [refundAmt, setRefundAmt] = useState('')
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
 
@@ -34,10 +36,11 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
   }, [])
   useEffect(() => { load() }, [load])
 
-  const respondDispute = async (id: string, status: string) => {
-    let refundAmount: number | undefined
-    if (status === 'partially_refunded') { const a = prompt(t('groomingDispute.refundPrompt')); if (a === null) return; refundAmount = Number(a) || 0 }
-    try { setBusy(id); await apiService.respondGroomingDispute(id, { status, refundAmount }); load() }
+  // A partial refund now opens a proper dialog instead of a browser prompt(): the amount is real
+  // money leaving the provider's balance and going back to the customer, so it deserves a field
+  // that can be validated and cancelled rather than an untyped string box.
+  const respondDispute = async (id: string, status: string, refundAmount?: number) => {
+    try { setBusy(id); await apiService.respondGroomingDispute(id, { status, refundAmount }); setRefundFor(null); load() }
     catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
   }
   void providerId
@@ -103,7 +106,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
               {['open', 'under_review'].includes(d.status) && (
                 <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
                   <button className="btn btn-sm btn-outline" disabled={busy === d.id} onClick={() => respondDispute(d.id, 'under_review')}>{t('groomingDispute.review')}</button>
-                  <button className="btn btn-sm btn-primary" disabled={busy === d.id} onClick={() => respondDispute(d.id, 'partially_refunded')}>{t('groomingDispute.partialRefund')}</button>
+                  <button className="btn btn-sm btn-primary" disabled={busy === d.id} onClick={() => { setRefundFor(d); setRefundAmt('') }}>{t('groomingDispute.partialRefund')}</button>
                   <button className="btn btn-sm btn-outline" disabled={busy === d.id} onClick={() => respondDispute(d.id, 'resolved')}>{t('groomingDispute.resolve')}</button>
                   <button className="btn btn-sm btn-outline" disabled={busy === d.id} onClick={() => respondDispute(d.id, 'rejected')}>{t('groomingDispute.reject')}</button>
                 </div>
@@ -157,6 +160,27 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
           </div>
         )}
       </div>
+      {refundFor && (
+        <div className="modal-overlay" onClick={() => setRefundFor(null)}>
+          <div className="modal-content" style={{ maxWidth: 400 }} onClick={e => e.stopPropagation()}>
+            <h3>{t('groomingDispute.partialRefund')}</h3>
+            <p className="si-676930d7">{refundFor.orderNumber} · {refundFor.reason}</p>
+            <label className="module-label">{t('groomingDispute.refundPrompt')}</label>
+            <input className="module-input" type="number" min="0" step="0.01" value={refundAmt}
+              onChange={e => setRefundAmt(e.target.value)} />
+            <div className="si-a5de6cea" style={{ marginTop: 6 }}>{t('groomingDispute.refundHint')}</div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
+              <button className="btn btn-outline" onClick={() => setRefundFor(null)}>{t('groomingDispute.cancel')}</button>
+              <button className="btn btn-primary"
+                disabled={!(Number(refundAmt) > 0) || busy === refundFor.id}
+                onClick={() => respondDispute(refundFor.id, 'partially_refunded', Number(refundAmt))}>
+                {t('groomingDispute.issueRefund')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

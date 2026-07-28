@@ -2670,7 +2670,8 @@ ON CONFLICT (sac_code) DO NOTHING;
 CREATE TABLE IF NOT EXISTS invoices (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   invoice_number VARCHAR(100) UNIQUE NOT NULL,
-  invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('consultation', 'commission', 'pharmacy', 'grooming')),
+  invoice_type VARCHAR(30) NOT NULL
+    CHECK (invoice_type IN ('consultation', 'commission', 'pharmacy', 'grooming', 'grooming_credit_note')),
   payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
   withdrawal_id UUID REFERENCES withdrawal_requests(id) ON DELETE SET NULL,
   issuer_details JSONB NOT NULL DEFAULT '{}',
@@ -3850,6 +3851,9 @@ CREATE TABLE IF NOT EXISTS grooming_orders (
   refund_destination VARCHAR(20) CHECK (refund_destination IN ('wallet', 'gateway')),
   refund_reason TEXT,
   refunded_at TIMESTAMP,
+  -- Still owed on this order: set when only a deposit was taken, and grown when the customer
+  -- approves extra work mid-service. A balance checkout collects it.
+  balance_due DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   completed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -3873,6 +3877,8 @@ CREATE TABLE IF NOT EXISTS grooming_order_items (
     CHECK (approval_status IN ('not_required','requested','approved','declined')),
   reason TEXT,
   photo_url VARCHAR(500),
+  -- Which invoice already billed this line, so a supplementary invoice covers only new work.
+  invoice_number VARCHAR(100),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -4004,6 +4010,13 @@ CREATE INDEX IF NOT EXISTS idx_grooming_services_provider ON grooming_services(p
 CREATE INDEX IF NOT EXISTS idx_grooming_services_active ON grooming_services(is_active);
 CREATE INDEX IF NOT EXISTS idx_grooming_service_addons_service ON grooming_service_addons(service_id);
 CREATE INDEX IF NOT EXISTS idx_grooming_pet_profile_animal ON grooming_pet_profile(animal_id);
+-- payments.grooming_order_id is added here, not in the payments CREATE TABLE, because payments is
+-- defined long before grooming_orders and a forward FK reference would abort the whole file (this
+-- script applies as ONE transaction). A grooming order can have several payments: the initial or
+-- deposit collection, plus one per balance collection for approved extra work.
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS grooming_order_id UUID REFERENCES grooming_orders(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_payments_grooming_order ON payments(grooming_order_id);
+
 CREATE INDEX IF NOT EXISTS idx_grooming_orders_owner ON grooming_orders(pet_owner_id);
 CREATE INDEX IF NOT EXISTS idx_grooming_orders_provider ON grooming_orders(provider_id);
 CREATE INDEX IF NOT EXISTS idx_grooming_orders_status ON grooming_orders(status);

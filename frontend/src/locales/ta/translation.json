@@ -7787,19 +7787,44 @@
     "cancel": "ரத்து",
     "details": "விவரங்கள்",
     "passport": "பாஸ்போர்ட்",
-    "paid": "கட்டணம் வெற்றி."
+    "paid": "கட்டணம் வெற்றி.",
+    "cancelled": "முன்பதிவு ரத்து செய்யப்பட்டது",
+    "cancelTitle": "இந்த முன்பதிவை ரத்து செய்யவா?",
+    "cancelling": "ரத்து செய்யப்படுகிறது…",
+    "confirmCancel": "முன்பதிவை ரத்து செய்",
+    "keepBooking": "முன்பதிவை வைத்திரு",
+    "amountPaid": "செலுத்திய தொகை",
+    "processingCharge": "செயலாக்கக் கட்டணம்",
+    "youGetBack": "உங்களுக்கு திரும்பக் கிடைப்பது",
+    "noPaymentToRefund": "இந்த முன்பதிவுக்கு இதுவரை பணம் பெறப்படவில்லை.",
+    "balanceDue": "செலுத்த வேண்டிய நிலுவை: {{amount}}",
+    "payBalance": "நிலுவையை செலுத்து",
+    "balancePaid": "நிலுவை செலுத்தப்பட்டது",
+    "refunded": "{{amount}} திருப்பியளிக்கப்பட்டது",
+    "refundPartial": "பகுதி",
+    "refundTo": {
+      "wallet": "வாலட்டிற்கு",
+      "gateway": "அசல் கட்டண முறைக்கு"
+    },
+    "policy": {
+      "customer_free_window": "சந்திப்புக்கு நன்கு முன்பே ரத்து — செயலாக்கக் கட்டணம் போக முழு பணத்திருப்பம்.",
+      "customer_partial_window": "சந்திப்புக்கு அருகில் ரத்து — ரத்துக் கொள்கைப்படி பகுதி பணத்திருப்பம்.",
+      "customer_no_refund_window": "சந்திப்புக்கு மிக அருகில் ரத்து — பணத்திருப்பம் இல்லை.",
+      "customer_no_show": "வரவில்லை எனக் குறிக்கப்பட்டது — பணத்திருப்பம் இல்லை.",
+      "provider_cancel_full_refund": "குரூமரால் ரத்து — முழு பணத்திருப்பம் மற்றும் நல்லெண்ண போனஸ்."
+    }
   },
   "groomingStatus": {
     "draft": "வரைவு",
     "payment_pending": "கட்டணம் நிலுவையில்",
-    "payment_expired": "கட்டணம் காலாவதி",
+    "payment_expired": "காலாவதி",
     "confirmed": "உறுதி",
-    "provider_assigned": "வழங்குநர் நியமிக்கப்பட்டார்",
+    "provider_assigned": "ஒதுக்கப்பட்டது",
     "checked_in": "செக்-இன்",
     "en_route": "வழியில்",
     "intake_done": "உள்வாங்கல் முடிந்தது",
     "in_progress": "நடைபெறுகிறது",
-    "awaiting_approval": "ஒப்புதல் காத்திருக்கிறது",
+    "awaiting_approval": "உங்கள் ஒப்புதல் தேவை",
     "quality_check": "தர சோதனை",
     "ready_for_pickup": "எடுக்கத் தயார்",
     "returning": "திரும்புகிறது",
@@ -7807,7 +7832,7 @@
     "cancelled_by_customer": "ரத்து",
     "cancelled_by_provider": "வழங்குநரால் ரத்து",
     "no_show": "வரவில்லை",
-    "disputed": "சர்ச்சை",
+    "disputed": "தகராறு",
     "closed": "மூடப்பட்டது"
   },
   "groomingBoard": {
@@ -7962,7 +7987,11 @@
       "resolved": "தீர்க்கப்பட்டது",
       "partially_refunded": "பகுதி திரும்பப்பணம்",
       "rejected": "நிராகரிக்கப்பட்டது"
-    }
+    },
+    "submit": "புகார் பதிவு செய்",
+    "cancel": "ரத்து",
+    "issueRefund": "பணத்திருப்பம் வழங்கு",
+    "refundHint": "இந்தத் தொகை வாடிக்கையாளருக்குத் திருப்பியளிக்கப்பட்டு உங்கள் இருப்பிலிருந்து கழிக்கப்படும்."
   },
   "groomingReport": {
     "title": "வணிக சுருக்கம்",

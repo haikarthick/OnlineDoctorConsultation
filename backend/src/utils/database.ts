@@ -94,7 +94,7 @@ const SYSTEM_ROLES_SQL = SYSTEM_ROLES.map(r => `'${r}'`).join(', ');
  * groomer registration was. Caught by scripts/runtime-verify.js.
  * MUST stay in sync with docker/init.sql and migrations/031_grooming_payments.sql.
  */
-const INVOICE_TYPES = ['consultation', 'commission', 'pharmacy', 'grooming'] as const;
+const INVOICE_TYPES = ['consultation', 'commission', 'pharmacy', 'grooming', 'grooming_credit_note'] as const;
 const INVOICE_TYPES_SQL = INVOICE_TYPES.map(t => `'${t}'`).join(', ');
 
 /**

@@ -56,6 +56,10 @@ export function startScheduler(): void {
   // Grooming module: expire unpaid grooming slot holds (no-op while grooming.enabled=false)
   setInterval(runGroomingHoldExpiry, FIVE_MINUTES);
 
+  // Grooming module: mature provider earnings clearing → available (hourly + on boot)
+  runGroomingEarningsMaturity();
+  setInterval(runGroomingEarningsMaturity, ONE_HOUR);
+
   // Payment module: reconcile stuck 'pending' payments against the gateway (daily + on boot)
   runPaymentReconciliation();
   setInterval(runPaymentReconciliation, TWENTY_FOUR_HOURS);
@@ -112,6 +116,16 @@ async function runGroomingHoldExpiry(): Promise<void> {
     await GroomingPaymentService.expireStaleHolds();
   } catch (err: any) {
     logger.error('[Grooming] Hold expiry job failed', { error: err.message });
+  }
+}
+
+/** Grooming's own earnings maturity sweep (clearing → available), separate from the doctor one. */
+async function runGroomingEarningsMaturity(): Promise<void> {
+  try {
+    const GroomingSettlementService = (await import('../services/grooming/GroomingSettlementService')).default;
+    await GroomingSettlementService.releaseAllMatured();
+  } catch (err: any) {
+    logger.error('[Grooming] Earnings maturity job failed', { error: err.message });
   }
 }
 

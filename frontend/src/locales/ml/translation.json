@@ -7783,22 +7783,47 @@
     "cancel": "റദ്ദാക്കുക",
     "details": "വിശദാംശങ്ങൾ",
     "passport": "പാസ്‌പോർട്ട്",
-    "paid": "പേയ്‌മെന്റ് വിജയകരം."
+    "paid": "പേയ്‌മെന്റ് വിജയകരം.",
+    "cancelled": "ബുക്കിംഗ് റദ്ദാക്കി",
+    "cancelTitle": "ഈ ബുക്കിംഗ് റദ്ദാക്കണോ?",
+    "cancelling": "റദ്ദാക്കുന്നു…",
+    "confirmCancel": "ബുക്കിംഗ് റദ്ദാക്കുക",
+    "keepBooking": "ബുക്കിംഗ് നിലനിർത്തുക",
+    "amountPaid": "അടച്ച തുക",
+    "processingCharge": "പ്രോസസ്സിംഗ് ഫീസ്",
+    "youGetBack": "നിങ്ങൾക്ക് തിരികെ ലഭിക്കുന്നത്",
+    "noPaymentToRefund": "ഈ ബുക്കിംഗിന് ഇതുവരെ പണം സ്വീകരിച്ചിട്ടില്ല.",
+    "balanceDue": "ബാക്കി തുക: {{amount}}",
+    "payBalance": "ബാക്കി അടയ്ക്കുക",
+    "balancePaid": "ബാക്കി അടച്ചു",
+    "refunded": "{{amount}} തിരികെ നൽകി",
+    "refundPartial": "ഭാഗികം",
+    "refundTo": {
+      "wallet": "വാലറ്റിലേക്ക്",
+      "gateway": "യഥാർത്ഥ പണമടയ്ക്കൽ മാർഗത്തിലേക്ക്"
+    },
+    "policy": {
+      "customer_free_window": "അപ്പോയിന്റ്മെന്റിന് വളരെ മുൻപ് റദ്ദാക്കി — പ്രോസസ്സിംഗ് ഫീസ് കിഴിച്ച് പൂർണ്ണ റീഫണ്ട്.",
+      "customer_partial_window": "അപ്പോയിന്റ്മെന്റിനോട് അടുത്ത് റദ്ദാക്കി — റദ്ദാക്കൽ നയപ്രകാരം ഭാഗിക റീഫണ്ട്.",
+      "customer_no_refund_window": "അപ്പോയിന്റ്മെന്റിനോട് വളരെ അടുത്ത് റദ്ദാക്കി — റീഫണ്ട് ഇല്ല.",
+      "customer_no_show": "നോ-ഷോ ആയി രേഖപ്പെടുത്തി — റീഫണ്ട് ഇല്ല.",
+      "provider_cancel_full_refund": "ഗ്രൂമർ റദ്ദാക്കി — പൂർണ്ണ റീഫണ്ടും സൗമനസ്യ ബോണസും."
+    }
   },
   "groomingStatus": {
     "draft": "ഡ്രാഫ്റ്റ്",
     "payment_pending": "പേയ്‌മെന്റ് തീർപ്പാക്കാത്തത്",
-    "payment_expired": "പേയ്‌മെന്റ് കാലഹരണപ്പെട്ടു",
+    "payment_expired": "കാലഹരണപ്പെട്ടു",
     "confirmed": "സ്ഥിരീകരിച്ചു",
-    "provider_assigned": "ദാതാവിനെ നിയോഗിച്ചു",
+    "provider_assigned": "നിയോഗിച്ചു",
     "checked_in": "ചെക്ക്-ഇൻ",
     "en_route": "വഴിയിൽ",
-    "intake_done": "ഇന്റേക്ക് പൂർത്തിയായി",
+    "intake_done": "ഇൻടേക്ക് പൂർത്തിയായി",
     "in_progress": "പുരോഗതിയിൽ",
-    "awaiting_approval": "അംഗീകാരം കാത്തിരിക്കുന്നു",
+    "awaiting_approval": "നിങ്ങളുടെ അനുമതി വേണം",
     "quality_check": "ഗുണനിലവാര പരിശോധന",
     "ready_for_pickup": "പിക്കപ്പിന് തയ്യാർ",
-    "returning": "മടങ്ങുന്നു",
+    "returning": "തിരികെ വരുന്നു",
     "completed": "പൂർത്തിയായി",
     "cancelled_by_customer": "റദ്ദാക്കി",
     "cancelled_by_provider": "ദാതാവ് റദ്ദാക്കി",
@@ -7958,7 +7983,11 @@
       "resolved": "പരിഹരിച്ചു",
       "partially_refunded": "ഭാഗികമായി റീഫണ്ട്",
       "rejected": "നിരസിച്ചു"
-    }
+    },
+    "submit": "തർക്കം രജിസ്റ്റർ ചെയ്യുക",
+    "cancel": "റദ്ദാക്കുക",
+    "issueRefund": "റീഫണ്ട് നൽകുക",
+    "refundHint": "ഈ തുക ഉപഭോക്താവിന് തിരികെ നൽകുകയും നിങ്ങളുടെ ബാലൻസിൽ നിന്ന് കുറയ്ക്കുകയും ചെയ്യും."
   },
   "groomingReport": {
     "title": "ബിസിനസ് സംഗ്രഹം",

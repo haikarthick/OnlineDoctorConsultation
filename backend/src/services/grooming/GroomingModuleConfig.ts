@@ -79,6 +79,10 @@ class GroomingModuleConfig {
   async getProviderShareOfRetainedPercent(): Promise<number> { return this.getNumber('grooming.compensation.providerShareOfRetainedPercent', 50); }
   /** Provider share (%) of their net earning when the customer no-shows. */
   async getProviderShareOnNoShowPercent(): Promise<number> { return this.getNumber('grooming.compensation.providerShareOnNoShowPercent', 100); }
+  /** Prefix for the grooming GST credit-note series issued on refunds (separate from GRM). */
+  async getCreditNotePrefix(): Promise<string> { return this.getString('grooming.creditNotePrefix', 'GRMCN'); }
+  /** TDS percentage withheld on grooming provider payouts (own key — not the consultation one). */
+  async getTdsRatePercent(): Promise<number> { return this.getNumber('grooming.settlement.tdsRatePercent', 0); }
   /** Default refund destination: 'wallet' (instant) or 'gateway' (back to source). */
   async getDefaultRefundDestination(): Promise<'wallet' | 'gateway'> {
     const v = (await this.getString('grooming.refund.defaultDestination', 'wallet')).trim().toLowerCase();

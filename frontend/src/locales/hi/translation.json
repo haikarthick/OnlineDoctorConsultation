@@ -7787,22 +7787,47 @@
     "cancel": "रद्द करें",
     "details": "विवरण",
     "passport": "पासपोर्ट",
-    "paid": "भुगतान सफल।"
+    "paid": "भुगतान सफल।",
+    "cancelled": "बुकिंग रद्द कर दी गई",
+    "cancelTitle": "क्या यह बुकिंग रद्द करें?",
+    "cancelling": "रद्द किया जा रहा है…",
+    "confirmCancel": "बुकिंग रद्द करें",
+    "keepBooking": "बुकिंग रखें",
+    "amountPaid": "भुगतान की गई राशि",
+    "processingCharge": "प्रोसेसिंग शुल्क",
+    "youGetBack": "आपको वापस मिलेगा",
+    "noPaymentToRefund": "इस बुकिंग के लिए अभी तक कोई भुगतान नहीं लिया गया है।",
+    "balanceDue": "शेष देय: {{amount}}",
+    "payBalance": "शेष भुगतान करें",
+    "balancePaid": "शेष भुगतान हो गया",
+    "refunded": "{{amount}} वापस किया गया",
+    "refundPartial": "आंशिक",
+    "refundTo": {
+      "wallet": "वॉलेट में",
+      "gateway": "मूल भुगतान माध्यम में"
+    },
+    "policy": {
+      "customer_free_window": "अपॉइंटमेंट से काफी पहले रद्द — प्रोसेसिंग शुल्क घटाकर पूरा रिफंड।",
+      "customer_partial_window": "अपॉइंटमेंट के करीब रद्द — रद्दीकरण नीति के अनुसार आंशिक रिफंड।",
+      "customer_no_refund_window": "अपॉइंटमेंट के बहुत करीब रद्द — कोई रिफंड देय नहीं।",
+      "customer_no_show": "नो-शो के रूप में चिह्नित — कोई रिफंड देय नहीं।",
+      "provider_cancel_full_refund": "ग्रूमर द्वारा रद्द — पूरा रिफंड और सद्भावना बोनस।"
+    }
   },
   "groomingStatus": {
-    "draft": "ड्राफ़्ट",
+    "draft": "ड्राफ्ट",
     "payment_pending": "भुगतान लंबित",
-    "payment_expired": "भुगतान समाप्त",
+    "payment_expired": "समाप्त",
     "confirmed": "पुष्ट",
-    "provider_assigned": "प्रदाता नियुक्त",
+    "provider_assigned": "सौंपा गया",
     "checked_in": "चेक-इन",
     "en_route": "रास्ते में",
     "intake_done": "इनटेक पूर्ण",
     "in_progress": "प्रगति में",
-    "awaiting_approval": "अनुमोदन प्रतीक्षित",
-    "quality_check": "गुणवत्ता जांच",
+    "awaiting_approval": "आपकी मंजूरी चाहिए",
+    "quality_check": "गुणवत्ता जाँच",
     "ready_for_pickup": "पिकअप के लिए तैयार",
-    "returning": "वापस आ रहे",
+    "returning": "वापसी",
     "completed": "पूर्ण",
     "cancelled_by_customer": "रद्द",
     "cancelled_by_provider": "प्रदाता द्वारा रद्द",
@@ -7962,7 +7987,11 @@
       "resolved": "हल",
       "partially_refunded": "आंशिक रिफंड",
       "rejected": "अस्वीकृत"
-    }
+    },
+    "submit": "विवाद दर्ज करें",
+    "cancel": "रद्द करें",
+    "issueRefund": "रिफंड जारी करें",
+    "refundHint": "यह राशि ग्राहक को लौटाई जाती है और आपके बैलेंस से घटाई जाती है।"
   },
   "groomingReport": {
     "title": "व्यवसाय सारांश",

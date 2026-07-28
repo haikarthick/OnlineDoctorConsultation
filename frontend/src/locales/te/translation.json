@@ -7800,19 +7800,44 @@
     "cancel": "రద్దు",
     "details": "వివరాలు",
     "passport": "పాస్‌పోర్ట్",
-    "paid": "చెల్లింపు విజయవంతం."
+    "paid": "చెల్లింపు విజయవంతం.",
+    "cancelled": "బుకింగ్ రద్దు చేయబడింది",
+    "cancelTitle": "ఈ బుకింగ్‌ను రద్దు చేయాలా?",
+    "cancelling": "రద్దు చేస్తోంది…",
+    "confirmCancel": "బుకింగ్ రద్దు చేయి",
+    "keepBooking": "బుకింగ్ ఉంచు",
+    "amountPaid": "చెల్లించిన మొత్తం",
+    "processingCharge": "ప్రాసెసింగ్ ఛార్జీ",
+    "youGetBack": "మీకు తిరిగి వచ్చేది",
+    "noPaymentToRefund": "ఈ బుకింగ్‌కు ఇంకా చెల్లింపు తీసుకోలేదు.",
+    "balanceDue": "చెల్లించవలసిన బ్యాలెన్స్: {{amount}}",
+    "payBalance": "బ్యాలెన్స్ చెల్లించు",
+    "balancePaid": "బ్యాలెన్స్ చెల్లించబడింది",
+    "refunded": "{{amount}} వాపసు చేయబడింది",
+    "refundPartial": "పాక్షికం",
+    "refundTo": {
+      "wallet": "వాలెట్‌కు",
+      "gateway": "అసలు చెల్లింపు విధానానికి"
+    },
+    "policy": {
+      "customer_free_window": "అపాయింట్‌మెంట్‌కు చాలా ముందే రద్దు — ప్రాసెసింగ్ ఛార్జీ మినహా పూర్తి వాపసు.",
+      "customer_partial_window": "అపాయింట్‌మెంట్‌కు దగ్గరగా రద్దు — రద్దు విధానం ప్రకారం పాక్షిక వాపసు.",
+      "customer_no_refund_window": "అపాయింట్‌మెంట్‌కు చాలా దగ్గరగా రద్దు — వాపసు లేదు.",
+      "customer_no_show": "నో-షోగా గుర్తించబడింది — వాపసు లేదు.",
+      "provider_cancel_full_refund": "గ్రూమర్ రద్దు చేశారు — పూర్తి వాపసు మరియు గుడ్‌విల్ బోనస్."
+    }
   },
   "groomingStatus": {
     "draft": "డ్రాఫ్ట్",
     "payment_pending": "చెల్లింపు పెండింగ్",
-    "payment_expired": "చెల్లింపు గడువు ముగిసింది",
+    "payment_expired": "గడువు ముగిసింది",
     "confirmed": "నిర్ధారించబడింది",
-    "provider_assigned": "ప్రొవైడర్ కేటాయించబడ్డారు",
+    "provider_assigned": "కేటాయించబడింది",
     "checked_in": "చెక్-ఇన్",
     "en_route": "దారిలో",
-    "intake_done": "ఇన్‌టేక్ పూర్తయింది",
+    "intake_done": "ఇన్‌టేక్ పూర్తి",
     "in_progress": "జరుగుతోంది",
-    "awaiting_approval": "ఆమోదం కోసం వేచి",
+    "awaiting_approval": "మీ ఆమోదం కావాలి",
     "quality_check": "నాణ్యత తనిఖీ",
     "ready_for_pickup": "పికప్‌కు సిద్ధం",
     "returning": "తిరిగి వస్తోంది",
@@ -7975,7 +8000,11 @@
       "resolved": "పరిష్కరించబడింది",
       "partially_refunded": "పాక్షికంగా రీఫండ్",
       "rejected": "తిరస్కరించబడింది"
-    }
+    },
+    "submit": "వివాదం నమోదు చేయి",
+    "cancel": "రద్దు",
+    "issueRefund": "వాపసు జారీ చేయి",
+    "refundHint": "ఈ మొత్తం కస్టమర్‌కు తిరిగి ఇవ్వబడి మీ బ్యాలెన్స్ నుండి తీసివేయబడుతుంది."
   },
   "groomingReport": {
     "title": "వ్యాపార సారాంశం",

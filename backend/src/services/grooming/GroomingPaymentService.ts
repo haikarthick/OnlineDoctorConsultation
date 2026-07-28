@@ -30,6 +30,7 @@ const ORDER_PAYMENT_SELECT = `
   o.id, o.pet_owner_id, o.provider_id, o.status, o.grand_total, o.deposit_due, o.subtotal,
   o.addons_total, o.variable_total, o.tax_total, o.commission_amount, o.currency,
   o.gateway, o.gateway_order_id, o.amount_paid, o.order_number, o.payment_id, o.invoice_number,
+  o.balance_due,
   gp.owner_user_id AS "providerOwnerId", gp.legal_name AS "providerLegal",
   gp.gstin AS "providerGstin", gp.business_name AS "providerName", gp.business_address AS "providerAddress"`;
 
@@ -48,11 +49,10 @@ class GroomingPaymentService {
   async createCheckout(userId: string, orderId: string, deposit: boolean): Promise<any> {
     const o = await this.loadOwnedOrder(userId, orderId);
     if (o.status !== 'payment_pending') throw new ValidationError('Order is not awaiting payment');
-    // Part-payment is not modelled end-to-end yet: confirmation books the provider's earning and
-    // issues the GST invoice for the FULL order value, so collecting only the deposit would credit
-    // and invoice money that was never taken. Refused until the balance leg exists.
-    if (deposit) throw new ValidationError('Deposit part-payment is not available yet — the full amount is due at booking.');
-    const amount = Number(o.grand_total);
+    // Deposit part-payment is safe now that a balance leg exists: confirmation books the earning
+    // and invoices only what was actually collected, and the remainder becomes balance_due which
+    // must be collected before the order can be completed.
+    const amount = deposit ? Number(o.deposit_due) : Number(o.grand_total);
     if (!(amount > 0)) throw new ValidationError('Nothing to pay');
     const currency = o.currency || await GroomingModuleConfig.getCurrency();
     const gateway = await getActiveGateway();
@@ -68,13 +68,13 @@ class GroomingPaymentService {
     if (paymentId) {
       await database.query(
         `UPDATE payments SET amount = $2, currency = $3, gateway = $4, tax_amount = $5,
-                payee_id = $6, payment_source = 'grooming', updated_at = NOW() WHERE id = $1`,
-        [paymentId, amount, currency, gateway.mode, Number(o.tax_total), o.providerOwnerId]);
+                payee_id = $6, payment_source = 'grooming', grooming_order_id = $7, updated_at = NOW() WHERE id = $1`,
+        [paymentId, amount, currency, gateway.mode, Number(o.tax_total), o.providerOwnerId, orderId]);
     } else {
       const payRes = await database.query(
-        `INSERT INTO payments (user_id, payer_id, payee_id, amount, currency, status, gateway, tax_amount, payment_source)
-         VALUES ($1,$1,$2,$3,$4,'pending',$5,$6,'grooming') RETURNING id`,
-        [userId, o.providerOwnerId, amount, currency, gateway.mode, Number(o.tax_total)]);
+        `INSERT INTO payments (user_id, payer_id, payee_id, amount, currency, status, gateway, tax_amount, payment_source, grooming_order_id)
+         VALUES ($1,$1,$2,$3,$4,'pending',$5,$6,'grooming',$7) RETURNING id`,
+        [userId, o.providerOwnerId, amount, currency, gateway.mode, Number(o.tax_total), orderId]);
       paymentId = payRes.rows[0].id;
     }
 
@@ -200,19 +200,23 @@ class GroomingPaymentService {
   }
 
   /**
-   * The single transactional completion path. Locks the order row FIRST and re-checks its status
-   * inside the transaction, so concurrent confirms (double-click, browser retry, webhook racing
-   * the callback) collapse to exactly one earning and one GST invoice. Checking the status before
-   * the transaction — as this used to — let 8 parallel calls book 6 earnings and 6 invoices.
+   * The single transactional completion path for the FIRST collection on an order (full amount or
+   * deposit). Locks the order row FIRST and re-checks its status inside the transaction, so
+   * concurrent confirms (double-click, browser retry, webhook racing the callback) collapse to
+   * exactly one earning and one GST invoice. Checking the status before the transaction — as this
+   * used to — let 8 parallel calls book 6 earnings and 6 invoices.
+   *
+   * Only what was actually COLLECTED is credited and invoiced. Anything still owed becomes
+   * balance_due and is billed by a supplementary invoice when collected.
    */
   private async finalizeConfirmedOrder(orderId: string, opts: {
-    gatewayPaymentId: string; mode: string; actorUserId: string | null;
+    gatewayPaymentId: string; mode: string; actorUserId: string | null; paymentId?: string;
   }): Promise<any> {
     const clearanceDays = await GroomingModuleConfig.getClearanceDays();
     const sac = await GroomingModuleConfig.getSacCode();
     const prefix = await GroomingModuleConfig.getInvoicePrefix();
 
-    return database.transaction(async (client: any) => {
+    const result: any = await database.transaction(async (client: any) => {
       const lockRes = await client.query(
         `SELECT ${ORDER_PAYMENT_SELECT}
          FROM grooming_orders o JOIN grooming_providers gp ON gp.id = o.provider_id
@@ -224,60 +228,260 @@ class GroomingPaymentService {
         return { orderId, status: 'confirmed', invoiceNumber: o.invoice_number, alreadyPaid: true };
       }
       if (o.status !== 'payment_pending') throw new ValidationError('Order is not awaiting payment');
-      if (!o.payment_id) throw new ValidationError('No payment initiated for this order');
+      const paymentId = opts.paymentId || o.payment_id;
+      if (!paymentId) throw new ValidationError('No payment initiated for this order');
 
-      const payRes = await client.query(`SELECT amount, status FROM payments WHERE id = $1 FOR UPDATE`, [o.payment_id]);
-      const payAmount = Number(payRes.rows[0]?.amount) || Number(o.grand_total);
+      const payRes = await client.query(`SELECT amount, status FROM payments WHERE id = $1 FOR UPDATE`, [paymentId]);
+      const collected = Number(payRes.rows[0]?.amount) || Number(o.grand_total);
+      const balanceDue = +(Number(o.grand_total) - collected).toFixed(2);
 
       await client.query(
         `UPDATE payments SET status = 'completed', transaction_id = $2, gateway_payment_id = $2,
-                payment_source = 'grooming', paid_at = NOW(), updated_at = NOW() WHERE id = $1`,
-        [o.payment_id, opts.gatewayPaymentId]);
+                payment_source = 'grooming', grooming_order_id = $3, paid_at = NOW(), updated_at = NOW() WHERE id = $1`,
+        [paymentId, opts.gatewayPaymentId, orderId]);
       await client.query(
-        `UPDATE grooming_orders SET status = 'confirmed', amount_paid = $2, gateway_payment_id = $3, updated_at = NOW() WHERE id = $1`,
-        [orderId, payAmount, opts.gatewayPaymentId]);
+        `UPDATE grooming_orders SET status = 'confirmed', amount_paid = $2, balance_due = $3,
+                gateway_payment_id = $4, updated_at = NOW() WHERE id = $1`,
+        [orderId, collected, Math.max(balanceDue, 0), opts.gatewayPaymentId]);
 
-      // Provider earning enters the dedicated clearing ledger.
-      const gross = Number(o.subtotal) + Number(o.addons_total) + Number(o.variable_total);
-      const net = +(gross - Number(o.commission_amount)).toFixed(2);
+      // Provider earning: only the collected share. A deposit credits the provider pro-rata; the
+      // remainder is booked when the balance is collected.
+      const grossTotal = Number(o.subtotal) + Number(o.addons_total) + Number(o.variable_total);
+      const share = Number(o.grand_total) > 0 ? collected / Number(o.grand_total) : 1;
+      const gross = +(grossTotal * share).toFixed(2);
+      const commission = +(Number(o.commission_amount) * share).toFixed(2);
+      const taxPortion = +(Number(o.tax_total) * share).toFixed(2);
+      const net = +(gross - commission).toFixed(2);
       await client.query(
         `INSERT INTO grooming_earnings (provider_id, order_id, gross_amount, commission_amount, tax_amount, net_amount, entry_type, status, available_at)
          VALUES ($1,$2,$3,$4,$5,$6,'earning','clearing', NOW() + ($7 || ' days')::interval)`,
-        [o.provider_id, orderId, gross, Number(o.commission_amount), Number(o.tax_total), net, String(clearanceDays)]);
+        [o.provider_id, orderId, gross, commission, taxPortion, net, String(clearanceDays)]);
       await client.query(
         `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
-         VALUES ($1,'payment_pending','confirmed',$2,$3)`, [orderId, opts.actorUserId, `Payment received (${opts.mode})`]);
+         VALUES ($1,'payment_pending','confirmed',$2,$3)`,
+        [orderId, opts.actorUserId,
+         balanceDue > 0 ? `Deposit received (${opts.mode}) — balance ${balanceDue.toFixed(2)} due`
+                        : `Payment received (${opts.mode})`]);
 
       const items = await client.query(
-        `SELECT name, quantity, unit_price, tax_percent, line_total FROM grooming_order_items
+        `SELECT id, name, quantity, unit_price, tax_percent, line_total FROM grooming_order_items
          WHERE order_id = $1 AND (approval_status IS NULL OR approval_status <> 'declined') ORDER BY created_at ASC`, [orderId]);
 
-      // GST invoice (GRM/FY series)
+      // GST invoice (GRM/FY series) for what was collected.
       const invoiceNumber = await this.nextGroomingInvoiceNumber(client, prefix);
-      const taxRate = gross > 0 ? +(Number(o.tax_total) / gross * 100).toFixed(2) : 0;
+      const taxRate = gross > 0 ? +(taxPortion / gross * 100).toFixed(2) : 0;
       await client.query(
         `INSERT INTO invoices (invoice_number, invoice_type, payment_id, issuer_details, recipient_details,
            line_items, subtotal, tax_amount, total, sac_code, tax_rate, currency)
          VALUES ($1,'grooming',$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
-        [invoiceNumber, o.payment_id,
+        [invoiceNumber, paymentId,
          JSON.stringify({ name: o.providerLegal || o.providerName, gstin: o.providerGstin || null, address: o.providerAddress || null }),
-         JSON.stringify({ orderNumber: o.order_number, userId: o.pet_owner_id }),
+         JSON.stringify({ orderNumber: o.order_number, userId: o.pet_owner_id, kind: balanceDue > 0 ? 'advance' : 'full' }),
          JSON.stringify(items.rows.map((it: any) => ({ name: it.name, qty: it.quantity, unitPrice: Number(it.unit_price), taxPercent: Number(it.tax_percent), lineTotal: Number(it.line_total) }))),
-         gross, Number(o.tax_total), Number(o.grand_total), sac, taxRate, o.currency || 'INR']);
+         gross, taxPortion, collected, sac, taxRate, o.currency || 'INR']);
       await client.query(`UPDATE grooming_orders SET invoice_number = $2 WHERE id = $1`, [orderId, invoiceNumber]);
+      // Mark these lines billed so a later supplementary invoice covers only new work.
+      await client.query(
+        `UPDATE grooming_order_items SET invoice_number = $2 WHERE order_id = $1 AND invoice_number IS NULL
+           AND (approval_status IS NULL OR approval_status <> 'declined')`, [orderId, invoiceNumber]);
 
       // Audit trail on the shared payment ledger, same as consultations (non-fatal).
       try {
         await client.query(
           `INSERT INTO payment_events (id, payment_id, event_type, from_status, to_status, actor_user_id, payload, created_at)
            VALUES (gen_random_uuid(), $1, 'grooming_payment_completed', 'pending', 'completed', $2, $3, NOW())`,
-          [o.payment_id, opts.actorUserId,
-           JSON.stringify({ orderId, gatewayPaymentId: opts.gatewayPaymentId, mode: opts.mode, invoiceNumber, amountPaid: payAmount })]);
+          [paymentId, opts.actorUserId,
+           JSON.stringify({ orderId, gatewayPaymentId: opts.gatewayPaymentId, mode: opts.mode, invoiceNumber, amountPaid: collected, balanceDue })]);
       } catch (err: any) {
         logger.warn('grooming payment_events insert failed (non-blocking)', { orderId, error: err.message });
       }
 
-      return { orderId, status: 'confirmed', invoiceNumber, amountPaid: payAmount };
+      return {
+        orderId, status: 'confirmed', invoiceNumber, amountPaid: collected,
+        balanceDue: Math.max(balanceDue, 0),
+        notify: { customerId: o.pet_owner_id, providerOwnerId: o.providerOwnerId, orderNumber: o.order_number },
+      };
+    });
+
+    // Both sides hear about it once the money is booked. Previously nobody was told a grooming
+    // order had been paid — the provider had no signal that a booking even existed.
+    if (result && result.notify) {
+      const n = result.notify;
+      if (!result.alreadyPaid) {
+        try {
+          await NotificationService.createNotification(
+            n.customerId, 'payment', 'Grooming Payment Received',
+            result.balanceDue > 0
+              ? `Your deposit for booking ${n.orderNumber} was received. A balance of ${result.balanceDue.toFixed(2)} is due before the service can be completed.`
+              : `Your payment for grooming booking ${n.orderNumber} was received. Invoice ${result.invoiceNumber}.`,
+            'all', { orderId, invoiceNumber: result.invoiceNumber });
+        } catch { /* non-blocking */ }
+        try {
+          if (n.providerOwnerId) {
+            await NotificationService.createNotification(
+              n.providerOwnerId, 'booking', 'New Paid Grooming Booking',
+              `Booking ${n.orderNumber} has been paid and confirmed. Please review and assign it.`,
+              'all', { orderId });
+          }
+        } catch { /* non-blocking */ }
+      }
+      delete result.notify;
+    }
+    return result;
+  }
+
+  /**
+   * Balance collection — the money leg for approved extra work and for the remainder after a
+   * deposit. Creates its OWN payments row (an order can have several), linked by
+   * payments.grooming_order_id the same way consultations link by booking_id.
+   */
+  async createBalanceCheckout(userId: string, orderId: string): Promise<any> {
+    const o = await this.loadOwnedOrder(userId, orderId);
+    const balance = Number(o.balance_due) || 0;
+    if (!(balance > 0)) throw new ValidationError('This order has no balance to pay');
+    if (['cancelled_by_customer', 'cancelled_by_provider', 'payment_expired', 'closed'].includes(o.status)) {
+      throw new ValidationError('This order is no longer payable');
+    }
+    const currency = o.currency || await GroomingModuleConfig.getCurrency();
+    const gateway = await getActiveGateway();
+
+    // Reuse an outstanding pending balance payment rather than stacking one per click.
+    const existing = await database.query(
+      `SELECT id FROM payments WHERE grooming_order_id = $1 AND status = 'pending' ORDER BY created_at DESC LIMIT 1`,
+      [orderId]);
+    let paymentId: string;
+    if (existing.rows.length > 0) {
+      paymentId = existing.rows[0].id;
+      await database.query(
+        `UPDATE payments SET amount = $2, currency = $3, gateway = $4, payee_id = $5, updated_at = NOW() WHERE id = $1`,
+        [paymentId, balance, currency, gateway.mode, o.providerOwnerId]);
+    } else {
+      const payRes = await database.query(
+        `INSERT INTO payments (user_id, payer_id, payee_id, amount, currency, status, gateway, payment_source, grooming_order_id)
+         VALUES ($1,$1,$2,$3,$4,'pending',$5,'grooming',$6) RETURNING id`,
+        [userId, o.providerOwnerId, balance, currency, gateway.mode, orderId]);
+      paymentId = payRes.rows[0].id;
+    }
+
+    const go = await gateway.createOrder(balance, currency, paymentId, { orderId, kind: 'grooming_balance' });
+    await database.query(
+      `UPDATE payments SET gateway_order_id = $2, updated_at = NOW() WHERE id = $1`, [paymentId, go.gatewayOrderId]);
+    return { paymentId, mode: gateway.mode, gatewayOrderId: go.gatewayOrderId, amount: balance, currency, checkoutPayload: go.checkoutPayload };
+  }
+
+  /** Verify + book a balance payment (extras / deposit remainder). */
+  async confirmBalancePayment(userId: string, orderId: string, body: any): Promise<any> {
+    const o = await this.loadOwnedOrder(userId, orderId);
+    if (!(Number(o.balance_due) > 0)) return { orderId, balanceDue: 0, alreadyPaid: true };
+
+    const payRes = await database.query(
+      `SELECT id, amount, gateway, gateway_order_id FROM payments
+       WHERE grooming_order_id = $1 AND status = 'pending' ORDER BY created_at DESC LIMIT 1`, [orderId]);
+    if (payRes.rows.length === 0) throw new ValidationError('No balance payment initiated for this order');
+    const pay = payRes.rows[0];
+
+    const mode = pay.gateway || o.gateway || 'demo';
+    const gateway = await getGatewayForMode(mode);
+    const gwOrderId = body.gatewayOrderId || pay.gateway_order_id;
+    const gwPaymentId = body.gatewayPaymentId || `demo_pay_${String(pay.gateway_order_id || '').replace('demo_order_', '')}`;
+    const signature = body.gatewaySignature || body.signature || 'demo';
+    if (!gateway.verifyCheckoutSignature(gwOrderId, gwPaymentId, signature)) throw new ValidationError('Payment verification failed');
+
+    if (mode !== 'demo') {
+      const gwPayment = await gateway.fetchPayment(gwPaymentId);
+      if (gwPayment.status !== 'captured' && gwPayment.status !== 'authorized') {
+        throw new ValidationError(`Payment is not captured at the gateway (status: ${gwPayment.status}).`);
+      }
+      if (Math.abs(gwPayment.amount - Number(pay.amount)) > 0.01) {
+        throw new ValidationError('Paid amount does not match the balance due. Please contact support.');
+      }
+    }
+    return this.finalizeBalancePayment(orderId, pay.id, gwPaymentId, mode, userId);
+  }
+
+  /**
+   * Books a collected balance: the incremental provider earning (whatever of the order's net has
+   * not been credited yet) plus a SUPPLEMENTARY GST invoice covering only the lines not already
+   * billed. Locked and idempotent like the initial confirmation.
+   */
+  private async finalizeBalancePayment(orderId: string, paymentId: string, gatewayPaymentId: string,
+    mode: string, actorUserId: string | null): Promise<any> {
+    const clearanceDays = await GroomingModuleConfig.getClearanceDays();
+    const sac = await GroomingModuleConfig.getSacCode();
+    const prefix = await GroomingModuleConfig.getInvoicePrefix();
+
+    return database.transaction(async (client: any) => {
+      const lockRes = await client.query(
+        `SELECT ${ORDER_PAYMENT_SELECT}
+         FROM grooming_orders o JOIN grooming_providers gp ON gp.id = o.provider_id
+         WHERE o.id = $1 FOR UPDATE OF o`, [orderId]);
+      if (lockRes.rows.length === 0) throw new NotFoundError('GroomingOrder', orderId);
+      const o = lockRes.rows[0];
+      if (!(Number(o.balance_due) > 0)) return { orderId, balanceDue: 0, alreadyPaid: true };
+
+      const payLock = await client.query(`SELECT amount, status FROM payments WHERE id = $1 FOR UPDATE`, [paymentId]);
+      if (payLock.rows[0]?.status === 'completed') return { orderId, balanceDue: Number(o.balance_due), alreadyPaid: true };
+      const collected = Number(payLock.rows[0]?.amount) || Number(o.balance_due);
+
+      await client.query(
+        `UPDATE payments SET status = 'completed', transaction_id = $2, gateway_payment_id = $2,
+                paid_at = NOW(), updated_at = NOW() WHERE id = $1`, [paymentId, gatewayPaymentId]);
+      const newBalance = +(Number(o.balance_due) - collected).toFixed(2);
+      await client.query(
+        `UPDATE grooming_orders SET amount_paid = amount_paid + $2, balance_due = $3, updated_at = NOW() WHERE id = $1`,
+        [orderId, collected, Math.max(newBalance, 0)]);
+
+      // Credit whatever of this order's net has not been credited yet — self-correcting, so it
+      // stays right however the order was split across deposit and extras.
+      const grossTotal = Number(o.subtotal) + Number(o.addons_total) + Number(o.variable_total);
+      const netTotal = +(grossTotal - Number(o.commission_amount)).toFixed(2);
+      const already = await client.query(
+        `SELECT COALESCE(SUM(net_amount), 0) AS net, COALESCE(SUM(gross_amount), 0) AS gross,
+                COALESCE(SUM(commission_amount), 0) AS commission, COALESCE(SUM(tax_amount), 0) AS tax
+         FROM grooming_earnings WHERE order_id = $1 AND entry_type = 'earning'`, [orderId]);
+      const deltaNet = +(netTotal - Number(already.rows[0].net)).toFixed(2);
+      const deltaGross = +(grossTotal - Number(already.rows[0].gross)).toFixed(2);
+      const deltaCommission = +(Number(o.commission_amount) - Number(already.rows[0].commission)).toFixed(2);
+      const deltaTax = +(Number(o.tax_total) - Number(already.rows[0].tax)).toFixed(2);
+      if (deltaNet !== 0) {
+        await client.query(
+          `INSERT INTO grooming_earnings (provider_id, order_id, gross_amount, commission_amount, tax_amount, net_amount, entry_type, status, available_at, note)
+           VALUES ($1,$2,$3,$4,$5,$6,'earning','clearing', NOW() + ($7 || ' days')::interval, 'Balance collected')`,
+          [o.provider_id, orderId, deltaGross, deltaCommission, deltaTax, deltaNet, String(clearanceDays)]);
+      }
+
+      // Supplementary GST invoice for the lines not billed yet.
+      const items = await client.query(
+        `SELECT id, name, quantity, unit_price, tax_percent, line_total FROM grooming_order_items
+         WHERE order_id = $1 AND invoice_number IS NULL
+           AND (approval_status IS NULL OR approval_status <> 'declined') ORDER BY created_at ASC`, [orderId]);
+      const invoiceNumber = await this.nextGroomingInvoiceNumber(client, prefix);
+      const taxRate = deltaGross > 0 ? +(deltaTax / deltaGross * 100).toFixed(2) : 0;
+      await client.query(
+        `INSERT INTO invoices (invoice_number, invoice_type, payment_id, issuer_details, recipient_details,
+           line_items, subtotal, tax_amount, total, sac_code, tax_rate, currency)
+         VALUES ($1,'grooming',$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+        [invoiceNumber, paymentId,
+         JSON.stringify({ name: o.providerLegal || o.providerName, gstin: o.providerGstin || null, address: o.providerAddress || null }),
+         JSON.stringify({ orderNumber: o.order_number, userId: o.pet_owner_id, kind: 'supplementary', supplementaryTo: o.invoice_number }),
+         JSON.stringify(items.rows.map((it: any) => ({ name: it.name, qty: it.quantity, unitPrice: Number(it.unit_price), taxPercent: Number(it.tax_percent), lineTotal: Number(it.line_total) }))),
+         Math.max(deltaGross, 0), Math.max(deltaTax, 0), collected, sac, taxRate, o.currency || 'INR']);
+      await client.query(
+        `UPDATE grooming_order_items SET invoice_number = $2 WHERE order_id = $1 AND invoice_number IS NULL
+           AND (approval_status IS NULL OR approval_status <> 'declined')`, [orderId, invoiceNumber]);
+
+      await client.query(
+        `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
+         VALUES ($1,$2,$2,$3,$4)`,
+        [orderId, o.status, actorUserId, `Balance ${collected.toFixed(2)} collected (${mode}) — invoice ${invoiceNumber}`]);
+      try {
+        await client.query(
+          `INSERT INTO payment_events (id, payment_id, event_type, from_status, to_status, actor_user_id, payload, created_at)
+           VALUES (gen_random_uuid(), $1, 'grooming_balance_collected', 'pending', 'completed', $2, $3, NOW())`,
+          [paymentId, actorUserId, JSON.stringify({ orderId, collected, invoiceNumber, remainingBalance: Math.max(newBalance, 0) })]);
+      } catch { /* non-blocking */ }
+
+      return { orderId, collected, invoiceNumber, balanceDue: Math.max(newBalance, 0) };
     });
   }
 

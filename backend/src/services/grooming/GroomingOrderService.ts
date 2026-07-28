@@ -18,7 +18,8 @@ const ORDER_SELECT = `
   o.assigned_staff_id as "assignedStaffId", o.assigned_resource_id as "assignedResourceId",
   o.subtotal, o.addons_total as "addonsTotal", o.variable_total as "variableTotal",
   o.discount_total as "discountTotal", o.tax_total as "taxTotal", o.grand_total as "grandTotal",
-  o.deposit_due as "depositDue", o.amount_paid as "amountPaid", o.currency,
+  o.deposit_due as "depositDue", o.amount_paid as "amountPaid",
+  o.balance_due as "balanceDue", o.currency,
   o.commission_percent as "commissionPercent", o.commission_amount as "commissionAmount",
   o.handling_notes as "handlingNotes", o.owner_notes as "ownerNotes",
   o.cancellation_reason as "cancellationReason", o.eta_minutes as "etaMinutes",
@@ -140,34 +141,8 @@ class GroomingOrderService {
     return this.getOrderById(orderId);
   }
 
-  /** Demo/manual payment: marks the order confirmed, records amount, opens a clearing earning. */
-  async payOrder(userId: string, orderId: string, opts?: { deposit?: boolean }): Promise<any> {
-    const { order, isOwner } = await this.resolveOrderAccess(userId, orderId);
-    if (!isOwner) throw new ForbiddenError('Only the customer can pay for this order');
-    if (order.status !== 'payment_pending') throw new ValidationError('Order is not awaiting payment');
-
-    const payAmount = opts?.deposit ? Number(order.depositDue) : Number(order.grandTotal);
-    const clearanceDays = await GroomingModuleConfig.getClearanceDays();
-
-    return database.transaction(async (client: any) => {
-      await client.query(
-        `UPDATE grooming_orders SET status = 'confirmed', amount_paid = $2, updated_at = NOW() WHERE id = $1`,
-        [orderId, payAmount]);
-      // Provider earning enters the clearing ledger (manual settlement releases it after the window).
-      const gross = Number(order.subtotal) + Number(order.addonsTotal);
-      const net = +(gross - Number(order.commissionAmount)).toFixed(2);
-      await client.query(
-        `INSERT INTO grooming_earnings
-           (provider_id, order_id, gross_amount, commission_amount, tax_amount, net_amount, entry_type, status, available_at)
-         VALUES ($1,$2,$3,$4,$5,$6,'earning','clearing', NOW() + ($7 || ' days')::interval)`,
-        [order.providerId, orderId, gross, Number(order.commissionAmount), Number(order.taxTotal), net, String(clearanceDays)]);
-      await client.query(
-        `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
-         VALUES ($1,'payment_pending','confirmed',$2,'Payment received (demo)')`, [orderId, userId]);
-      const r = await client.query(`SELECT ${ORDER_SELECT} FROM grooming_orders o WHERE o.id = $1`, [orderId]);
-      return r.rows[0];
-    });
-  }
+  // payOrder() was REMOVED with the legacy /pay route: it confirmed an order and credited the
+  // provider without collecting a rupee. Payment lives in GroomingPaymentService only.
 
   async listMyOrders(userId: string): Promise<any[]> {
     const r = await database.query(
@@ -247,6 +222,12 @@ class GroomingOrderService {
     const allowed = GroomingOrderService.PROVIDER_TRANSITIONS[order.status] || [];
     if (!allowed.includes(toStatus)) throw new ValidationError(`Cannot move from ${order.status} to ${toStatus}`);
     const stampCompleted = toStatus === 'completed';
+    // An order cannot be completed while money is still owed on it. This is what makes the
+    // balance leg enforceable rather than advisory — approved extras must be collected.
+    if (stampCompleted && Number(order.balanceDue || 0) > 0) {
+      throw new ValidationError(
+        `This order still has ${Number(order.balanceDue).toFixed(2)} outstanding. Collect the balance before completing it.`);
+    }
     await database.query(
       `UPDATE grooming_orders SET status = $2, updated_at = NOW()${stampCompleted ? ', completed_at = NOW()' : ''} WHERE id = $1`,
       [orderId, toStatus]);
@@ -391,7 +372,8 @@ class GroomingOrderService {
     return this.getOrderDetail(userId, orderId);
   }
 
-  /** Owner approves (+ demo pays the delta) or declines the extra work; order returns to in_progress. */
+  /** Owner approves or declines the extra work; order returns to in_progress. Approving adds the
+   *  line to balance_due — it is NOT paid here; GroomingPaymentService collects it. */
   async respondVariableItem(userId: string, orderId: string, itemId: string, approve: boolean): Promise<any> {
     const { order, isOwner } = await this.resolveOrderAccess(userId, orderId);
     if (!isOwner) throw new ForbiddenError('Only the customer can approve extra work');
@@ -402,7 +384,6 @@ class GroomingOrderService {
     if (itemRes.rows.length === 0) throw new NotFoundError('GroomingOrderItem', itemId);
     const item = itemRes.rows[0];
     if (item.approval_status !== 'requested') throw new ValidationError('This item has already been answered');
-    const clearanceDays = await GroomingModuleConfig.getClearanceDays();
 
     return database.transaction(async (client: any) => {
       if (approve) {
@@ -414,21 +395,21 @@ class GroomingOrderService {
         const addTax = +(price * taxPct / 100).toFixed(2);
         await client.query(
           `UPDATE grooming_order_items SET approval_status = 'approved', status = 'completed', updated_at = NOW() WHERE id = $1`, [itemId]);
+        // Approving extra work makes it OWED, not paid. This used to add the line to amount_paid
+        // and immediately credit the provider while collecting nothing — the platform paid out
+        // money it never took, and the history note even claimed "approved & paid". The earning
+        // and the supplementary GST invoice are now booked by GroomingPaymentService when the
+        // balance is actually collected.
         await client.query(
           `UPDATE grooming_orders SET
              variable_total = variable_total + $2, tax_total = tax_total + $3,
              grand_total = grand_total + $4, commission_amount = commission_amount + $5,
-             amount_paid = amount_paid + $4, status = 'in_progress', updated_at = NOW()
+             balance_due = balance_due + $4, status = 'in_progress', updated_at = NOW()
            WHERE id = $1`, [orderId, price, addTax, lineTotal, addCommission]);
-        const net = +(price - addCommission).toFixed(2);
-        await client.query(
-          `INSERT INTO grooming_earnings
-             (provider_id, order_id, gross_amount, commission_amount, tax_amount, net_amount, entry_type, status, available_at)
-           VALUES ($1,$2,$3,$4,$5,$6,'earning','clearing', NOW() + ($7 || ' days')::interval)`,
-          [order.providerId, orderId, price, addCommission, addTax, net, String(clearanceDays)]);
         await client.query(
           `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
-           VALUES ($1,'awaiting_approval','in_progress',$2,'Extra work approved & paid')`, [orderId, userId]);
+           VALUES ($1,'awaiting_approval','in_progress',$2,$3)`,
+          [orderId, userId, `Extra work approved — ${lineTotal.toFixed(2)} added to the balance due`]);
       } else {
         await client.query(
           `UPDATE grooming_order_items SET approval_status = 'declined', status = 'skipped', updated_at = NOW() WHERE id = $1`, [itemId]);

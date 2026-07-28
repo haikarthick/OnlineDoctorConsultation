@@ -7782,19 +7782,44 @@
     "cancel": "Cancel",
     "details": "Details",
     "passport": "Passport",
-    "paid": "Payment successful."
+    "paid": "Payment successful.",
+    "cancelled": "Booking cancelled",
+    "cancelTitle": "Cancel this booking?",
+    "cancelling": "Cancelling…",
+    "confirmCancel": "Cancel booking",
+    "keepBooking": "Keep booking",
+    "amountPaid": "Amount paid",
+    "processingCharge": "Processing charge",
+    "youGetBack": "You get back",
+    "noPaymentToRefund": "No payment has been taken for this booking yet.",
+    "balanceDue": "Balance due: {{amount}}",
+    "payBalance": "Pay balance",
+    "balancePaid": "Balance paid",
+    "refunded": "Refunded {{amount}}",
+    "refundPartial": "partial",
+    "refundTo": {
+      "wallet": "to wallet",
+      "gateway": "to original payment method"
+    },
+    "policy": {
+      "customer_free_window": "Cancelled well before the appointment — full refund less the processing charge.",
+      "customer_partial_window": "Cancelled close to the appointment — partial refund under the cancellation policy.",
+      "customer_no_refund_window": "Cancelled too close to the appointment — no refund is due.",
+      "customer_no_show": "Marked as a no-show — no refund is due.",
+      "provider_cancel_full_refund": "Cancelled by the groomer — full refund plus a goodwill bonus."
+    }
   },
   "groomingStatus": {
     "draft": "Draft",
     "payment_pending": "Payment pending",
-    "payment_expired": "Payment expired",
+    "payment_expired": "Expired",
     "confirmed": "Confirmed",
-    "provider_assigned": "Provider assigned",
+    "provider_assigned": "Assigned",
     "checked_in": "Checked in",
     "en_route": "On the way",
     "intake_done": "Intake done",
     "in_progress": "In progress",
-    "awaiting_approval": "Awaiting approval",
+    "awaiting_approval": "Needs your approval",
     "quality_check": "Quality check",
     "ready_for_pickup": "Ready for pickup",
     "returning": "Returning",
@@ -7957,7 +7982,11 @@
       "resolved": "Resolved",
       "partially_refunded": "Partially refunded",
       "rejected": "Rejected"
-    }
+    },
+    "submit": "Raise dispute",
+    "cancel": "Cancel",
+    "issueRefund": "Issue refund",
+    "refundHint": "This amount is returned to the customer and deducted from your balance."
   },
   "groomingReport": {
     "title": "Business summary",

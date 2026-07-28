@@ -71,8 +71,12 @@ class GroomingRefundService {
               o.amount_paid, o.currency, o.gateway, o.gateway_payment_id, o.payment_id,
               p.id AS "paymentId", p.status AS "paymentStatus", p.amount AS "paymentAmount",
               p.gateway_fee_amount AS "gatewayFee", p.gateway_payment_id AS "payGatewayPaymentId",
-              COALESCE(p.refund_amount, 0) AS "alreadyRefunded"
+              COALESCE(p.refund_amount, 0) AS "alreadyRefunded",
+              o.subtotal, o.addons_total, o.variable_total, o.tax_total, o.order_number, o.invoice_number,
+              gp.legal_name AS "providerLegal", gp.business_name AS "providerName",
+              gp.gstin AS "providerGstin", gp.business_address AS "providerAddress"
        FROM grooming_orders o
+       JOIN grooming_providers gp ON gp.id = o.provider_id
        JOIN payments p ON p.id = o.payment_id AND p.status IN ('completed', 'partially_refunded')
        WHERE o.id = $1`, [orderId]);
     return r.rows[0] || null;
@@ -292,10 +296,12 @@ class GroomingRefundService {
           }
         }
 
+        const creditNote = await this.issueCreditNote(client, o, preview.refundAmount, reason);
         await client.query(
           `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
            VALUES ($1,$2,$2,NULL,$3)`,
-          [orderId, o.status, `Refund ${preview.refundAmount.toFixed(2)} (${preview.policy}, ${dest}) — ${clearanceNote}`]);
+          [orderId, o.status,
+           `Refund ${preview.refundAmount.toFixed(2)} (${preview.policy}, ${dest})${creditNote ? ` — credit note ${creditNote}` : ''} — ${clearanceNote}`]);
 
         try {
           await client.query(
@@ -406,11 +412,12 @@ class GroomingRefundService {
            VALUES ($1,$2,0,0,0,$3,'refund_adjustment','available',$4)`,
           [o.provider_id, orderId, -refundAmount, reason]);
 
+        const creditNote = await this.issueCreditNote(client, o, refundAmount, reason);
         try {
           await client.query(
             `INSERT INTO payment_events (id, payment_id, event_type, from_status, to_status, payload, created_at)
              VALUES (gen_random_uuid(), $1, 'grooming_dispute_refund', 'completed', $2, $3, NOW())`,
-            [o.paymentId, payStatus, JSON.stringify({ orderId, refundAmount, reason, destination: dest })]);
+            [o.paymentId, payStatus, JSON.stringify({ orderId, refundAmount, reason, destination: dest, creditNote })]);
         } catch { /* non-blocking */ }
       });
     } catch (err: any) {
@@ -435,6 +442,53 @@ class GroomingRefundService {
     };
   }
 
+
+  /**
+   * GST credit note for a refund (GRMCN/FY series, separate from the GRM invoice series).
+   *
+   * A refunded order previously kept its full-value GRM invoice standing, which does not survive
+   * a GST audit — the outward supply has to be reduced by a credit note referencing the original
+   * invoice. Numbering continues from the highest suffix issued, never COUNT(*), for the same
+   * reason the invoice series does.
+   */
+  private async issueCreditNote(client: any, o: any, amount: number, reason: string): Promise<string | null> {
+    if (!(amount > 0)) return null;
+    const prefix = await GroomingModuleConfig.getCreditNotePrefix();
+    const sac = await GroomingModuleConfig.getSacCode();
+    const d = new Date();
+    const y = d.getFullYear(); const m = d.getMonth();
+    const startYear = m >= 3 ? y : y - 1;
+    const fy = `${startYear}-${String((startYear + 1) % 100).padStart(2, '0')}`;
+
+    await client.query(`SELECT pg_advisory_xact_lock(hashtext('grooming_credit_note_seq'))`);
+    const res = await client.query(
+      `SELECT COALESCE(MAX(substring(invoice_number from '([0-9]+)$')::bigint), 0) AS last
+       FROM invoices WHERE invoice_number LIKE $1 AND invoice_number ~ '/[0-9]+$'`,
+      [`${prefix}/${fy}/%`]);
+    const number = `${prefix}/${fy}/${String(Number(res.rows[0].last) + 1).padStart(5, '0')}`;
+
+    // Split the refund back into taxable value + tax at the order's effective rate so the credit
+    // note reverses GST proportionally rather than treating the whole refund as taxable value.
+    const grossTotal = Number(o.subtotal || 0) + Number(o.addons_total || 0) + Number(o.variable_total || 0);
+    const orderTotal = Number(o.paymentAmount) || Number(o.amount_paid) || 0;
+    const taxShare = orderTotal > 0 ? Number(o.tax_total || 0) / orderTotal : 0;
+    const taxPortion = +(amount * taxShare).toFixed(2);
+    const valuePortion = +(amount - taxPortion).toFixed(2);
+    const taxRate = valuePortion > 0 ? +(taxPortion / valuePortion * 100).toFixed(2) : 0;
+    void grossTotal;
+
+    await client.query(
+      `INSERT INTO invoices (invoice_number, invoice_type, payment_id, issuer_details, recipient_details,
+         line_items, subtotal, tax_amount, total, sac_code, tax_rate, currency)
+       VALUES ($1,'grooming_credit_note',$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+      [number, o.paymentId,
+       JSON.stringify({ name: o.providerLegal || o.providerName || null, gstin: o.providerGstin || null, address: o.providerAddress || null }),
+       JSON.stringify({ orderNumber: o.order_number, userId: o.pet_owner_id, againstInvoice: o.invoice_number || null, reason }),
+       JSON.stringify([{ name: `Refund — ${reason}`, qty: 1, unitPrice: valuePortion, taxPercent: taxRate, lineTotal: amount }]),
+       valuePortion, taxPortion, amount, sac, taxRate, o.currency || 'INR']);
+    return number;
+  }
+
   /**
    * A capture that arrived after the slot-hold already expired. Standard gateway practice is to
    * return it in full rather than keep money for a slot the customer no longer holds — the order
@@ -442,8 +496,14 @@ class GroomingRefundService {
    */
   async refundExpiredCapture(orderId: string, gatewayPaymentId: string): Promise<void> {
     const r = await database.query(
-      `SELECT o.id, o.pet_owner_id, o.currency, o.gateway, o.payment_id, p.amount, p.status
-       FROM grooming_orders o JOIN payments p ON p.id = o.payment_id WHERE o.id = $1`, [orderId]);
+      `SELECT o.id, o.pet_owner_id, o.currency, o.gateway, o.payment_id, o.order_number, o.invoice_number,
+              o.subtotal, o.addons_total, o.variable_total, o.tax_total, o.amount_paid,
+              gp.legal_name AS "providerLegal", gp.business_name AS "providerName",
+              gp.gstin AS "providerGstin", gp.business_address AS "providerAddress",
+              p.amount, p.status
+       FROM grooming_orders o
+       JOIN grooming_providers gp ON gp.id = o.provider_id
+       JOIN payments p ON p.id = o.payment_id WHERE o.id = $1`, [orderId]);
     if (r.rows.length === 0) throw new NotFoundError('GroomingOrder', orderId);
     const o = r.rows[0];
     const amount = Number(o.amount) || 0;
@@ -486,10 +546,12 @@ class GroomingRefundService {
            VALUES ($1,$2,'refund',$3,'Grooming slot hold expired — payment returned',$4,'grooming_order',NOW())`,
           [uuidv4(), walletId, amount, orderId]);
       }
+      const creditNote = await this.issueCreditNote(client,
+        { ...o, paymentId: o.payment_id, paymentAmount: amount }, amount, 'Slot hold expired before payment confirmation');
       await client.query(
         `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
          VALUES ($1,'payment_expired','payment_expired',NULL,$2)`,
-        [orderId, `Late capture refunded in full to ${destination}`]);
+        [orderId, `Late capture refunded in full to ${destination}${creditNote ? ` — credit note ${creditNote}` : ''}`]);
     });
 
     try {

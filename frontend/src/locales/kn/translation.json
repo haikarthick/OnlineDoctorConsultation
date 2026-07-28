@@ -7802,19 +7802,44 @@
     "cancel": "ರದ್ದು",
     "details": "ವಿವರಗಳು",
     "passport": "ಪಾಸ್‌ಪೋರ್ಟ್",
-    "paid": "ಪಾವತಿ ಯಶಸ್ವಿ."
+    "paid": "ಪಾವತಿ ಯಶಸ್ವಿ.",
+    "cancelled": "ಬುಕಿಂಗ್ ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ",
+    "cancelTitle": "ಈ ಬುಕಿಂಗ್ ರದ್ದುಗೊಳಿಸಬೇಕೇ?",
+    "cancelling": "ರದ್ದುಗೊಳಿಸಲಾಗುತ್ತಿದೆ…",
+    "confirmCancel": "ಬುಕಿಂಗ್ ರದ್ದುಗೊಳಿಸಿ",
+    "keepBooking": "ಬುಕಿಂಗ್ ಉಳಿಸಿ",
+    "amountPaid": "ಪಾವತಿಸಿದ ಮೊತ್ತ",
+    "processingCharge": "ಪ್ರಕ್ರಿಯೆ ಶುಲ್ಕ",
+    "youGetBack": "ನಿಮಗೆ ಮರಳಿ ಸಿಗುವುದು",
+    "noPaymentToRefund": "ಈ ಬುಕಿಂಗ್‌ಗೆ ಇನ್ನೂ ಪಾವತಿ ಸ್ವೀಕರಿಸಿಲ್ಲ.",
+    "balanceDue": "ಬಾಕಿ ಮೊತ್ತ: {{amount}}",
+    "payBalance": "ಬಾಕಿ ಪಾವತಿಸಿ",
+    "balancePaid": "ಬಾಕಿ ಪಾವತಿಯಾಗಿದೆ",
+    "refunded": "{{amount}} ಮರುಪಾವತಿಸಲಾಗಿದೆ",
+    "refundPartial": "ಭಾಗಶಃ",
+    "refundTo": {
+      "wallet": "ವಾಲೆಟ್‌ಗೆ",
+      "gateway": "ಮೂಲ ಪಾವತಿ ವಿಧಾನಕ್ಕೆ"
+    },
+    "policy": {
+      "customer_free_window": "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗಿಂತ ಬಹಳ ಮೊದಲು ರದ್ದು — ಪ್ರಕ್ರಿಯೆ ಶುಲ್ಕ ಕಳೆದು ಪೂರ್ಣ ಮರುಪಾವತಿ.",
+      "customer_partial_window": "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗೆ ಹತ್ತಿರ ರದ್ದು — ರದ್ದತಿ ನೀತಿಯಂತೆ ಭಾಗಶಃ ಮರುಪಾವತಿ.",
+      "customer_no_refund_window": "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗೆ ಬಹಳ ಹತ್ತಿರ ರದ್ದು — ಮರುಪಾವತಿ ಇಲ್ಲ.",
+      "customer_no_show": "ನೋ-ಶೋ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ — ಮರುಪಾವತಿ ಇಲ್ಲ.",
+      "provider_cancel_full_refund": "ಗ್ರೂಮರ್ ರದ್ದುಗೊಳಿಸಿದ್ದಾರೆ — ಪೂರ್ಣ ಮರುಪಾವತಿ ಮತ್ತು ಸದ್ಭಾವನಾ ಬೋನಸ್."
+    }
   },
   "groomingStatus": {
-    "draft": "ಡ್ರಾಫ್ಟ್",
+    "draft": "ಕರಡು",
     "payment_pending": "ಪಾವತಿ ಬಾಕಿ",
-    "payment_expired": "ಪಾವತಿ ಅವಧಿ ಮುಗಿದಿದೆ",
+    "payment_expired": "ಅವಧಿ ಮುಗಿದಿದೆ",
     "confirmed": "ದೃಢೀಕರಿಸಲಾಗಿದೆ",
-    "provider_assigned": "ಪೂರೈಕೆದಾರ ನಿಯೋಜಿಸಲಾಗಿದೆ",
+    "provider_assigned": "ನಿಯೋಜಿಸಲಾಗಿದೆ",
     "checked_in": "ಚೆಕ್-ಇನ್",
     "en_route": "ದಾರಿಯಲ್ಲಿ",
-    "intake_done": "ಒಳಗೆಗೆ ಪೂರ್ಣ",
+    "intake_done": "ಇನ್‌ಟೇಕ್ ಮುಗಿದಿದೆ",
     "in_progress": "ಪ್ರಗತಿಯಲ್ಲಿ",
-    "awaiting_approval": "ಅನುಮೋದನೆ ಕಾಯುತ್ತಿದೆ",
+    "awaiting_approval": "ನಿಮ್ಮ ಅನುಮೋದನೆ ಬೇಕು",
     "quality_check": "ಗುಣಮಟ್ಟ ಪರಿಶೀಲನೆ",
     "ready_for_pickup": "ಪಿಕಪ್‌ಗೆ ಸಿದ್ಧ",
     "returning": "ಹಿಂತಿರುಗುತ್ತಿದೆ",
@@ -7977,7 +8002,11 @@
       "resolved": "ಪರಿಹರಿಸಲಾಗಿದೆ",
       "partially_refunded": "ಭಾಗಶಃ ಮರುಪಾವತಿ",
       "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ"
-    }
+    },
+    "submit": "ವಿವಾದ ದಾಖಲಿಸಿ",
+    "cancel": "ರದ್ದು",
+    "issueRefund": "ಮರುಪಾವತಿ ನೀಡಿ",
+    "refundHint": "ಈ ಮೊತ್ತವನ್ನು ಗ್ರಾಹಕರಿಗೆ ಹಿಂತಿರುಗಿಸಿ ನಿಮ್ಮ ಬಾಕಿಯಿಂದ ಕಳೆಯಲಾಗುತ್ತದೆ."
   },
   "groomingReport": {
     "title": "ವ್ಯಾಪಾರ ಸಾರಾಂಶ",

@@ -323,13 +323,19 @@ class PaymentOrchestrator {
       if (claim.rows.length === 0) return { handled: true, reason: 'duplicate' };
     }
 
-    if (!gatewayOrderId) return { handled: true, reason: 'no_order_ref' };
-    const payRes = await database.query(
-      `SELECT id, status, amount, wallet_amount_used, payment_source FROM payments WHERE gateway_order_id = $1 ORDER BY created_at DESC LIMIT 1`,
-      [gatewayOrderId]
-    );
+    // Refund events carry payload.refund.entity (which references a PAYMENT id), not
+    // payload.payment.entity — resolving them by order id alone would silently drop every one.
+    const refundPaymentRef = event?.payload?.refund?.entity?.payment_id;
+    if (!gatewayOrderId && !refundPaymentRef) return { handled: true, reason: 'no_order_ref' };
+    const payRes = gatewayOrderId
+      ? await database.query(
+        `SELECT id, status, amount, wallet_amount_used, payment_source FROM payments WHERE gateway_order_id = $1 ORDER BY created_at DESC LIMIT 1`,
+        [gatewayOrderId])
+      : await database.query(
+        `SELECT id, status, amount, wallet_amount_used, payment_source FROM payments WHERE gateway_payment_id = $1 ORDER BY created_at DESC LIMIT 1`,
+        [refundPaymentRef]);
     if (payRes.rows.length === 0) {
-      logger.warn('Razorpay webhook for unknown order', { gatewayOrderId, eventType });
+      logger.warn('Razorpay webhook for unknown order', { gatewayOrderId, refundPaymentRef, eventType });
       return { handled: true, reason: 'unknown_order' };
     }
     const p = payRes.rows[0];
@@ -351,6 +357,36 @@ class PaymentOrchestrator {
             method: entity?.method || 'razorpay',
             actorUserId: null,
           });
+        }
+      }
+      return { handled: true };
+    }
+    // Refunds issued from the Razorpay dashboard never touch our refund code, so without this the
+    // ledger silently disagrees with the gateway. Our OWN refunds also fire these events, hence
+    // the "only record what we have not already recorded" guard — it must not double-count.
+    if (eventType === 'refund.processed' || eventType === 'refund.created') {
+      const refundEntity = event?.payload?.refund?.entity;
+      const refundedTotal = refundEntity?.amount ? Math.round(refundEntity.amount) / 100 : 0;
+      if (refundedTotal > 0) {
+        const cur = await database.query(`SELECT COALESCE(refund_amount, 0) AS r, amount FROM payments WHERE id = $1`, [p.id]);
+        const already = Number(cur.rows[0]?.r) || 0;
+        if (refundedTotal > already) {
+          const isFull = refundedTotal >= Number(cur.rows[0]?.amount || 0);
+          await database.query(
+            `UPDATE payments SET refund_amount = $2, status = $3,
+                    refund_reason = COALESCE(refund_reason, 'Refunded at the gateway'),
+                    refund_destination = COALESCE(refund_destination, 'gateway'), updated_at = NOW()
+             WHERE id = $1`,
+            [p.id, refundedTotal, isFull ? 'refunded' : 'partially_refunded']);
+          if (p.payment_source === 'grooming') {
+            await database.query(
+              `UPDATE grooming_orders SET refund_amount = $2, refund_status = $3, refund_destination = 'gateway',
+                      refunded_at = NOW(), updated_at = NOW()
+               WHERE payment_id = $1`, [p.id, refundedTotal, isFull ? 'full' : 'partial']);
+          }
+          await this.logEvent(p.id, 'gateway_refund_recorded', p.status, isFull ? 'refunded' : 'partially_refunded',
+            null, { refundedTotal, previouslyRecorded: already, source: p.payment_source });
+          logger.warn('Refund recorded from a gateway webhook (not initiated in-app)', { paymentId: p.id, refundedTotal });
         }
       }
       return { handled: true };

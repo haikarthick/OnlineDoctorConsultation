@@ -1,6 +1,8 @@
 import database from '../../utils/database';
+import logger from '../../utils/logger';
 import { NotFoundError, ValidationError } from '../../utils/errors';
 import GroomingProviderService from './GroomingProviderService';
+import GroomingModuleConfig from './GroomingModuleConfig';
 
 /**
  * Grooming provider earnings + MANUAL settlement (P3). No escrow: the platform collects (MoR),
@@ -15,6 +17,22 @@ class GroomingSettlementService {
       `UPDATE grooming_earnings SET status = 'available', updated_at = NOW()
        WHERE provider_id = $1 AND status = 'clearing' AND available_at IS NOT NULL AND available_at <= NOW()`,
       [providerId]);
+  }
+
+  /**
+   * Platform-wide maturity sweep for the scheduler. releaseMatured() above is per-provider and
+   * only ran when someone happened to LOOK at a provider's earnings, so a provider who never
+   * opened the screen could sit on matured money that still showed as clearing. Consultations
+   * have had a scheduled equivalent all along; grooming now has its own.
+   */
+  async releaseAllMatured(): Promise<number> {
+    if (!(await GroomingModuleConfig.isEnabled())) return 0;
+    const res = await database.query(
+      `UPDATE grooming_earnings SET status = 'available', updated_at = NOW()
+       WHERE status = 'clearing' AND available_at IS NOT NULL AND available_at <= NOW()
+       RETURNING id`);
+    if (res.rows.length > 0) logger.info(`[Grooming] Matured ${res.rows.length} earning(s) to available`);
+    return res.rows.length;
   }
 
   private async requireProviderView(userId: string, providerId: string): Promise<void> {
@@ -72,7 +90,12 @@ class GroomingSettlementService {
          WHERE provider_id = $1 AND status = 'available' FOR UPDATE`, [providerId]);
       if (avail.rows.length === 0) throw new ValidationError('No available earnings to settle');
       const amount = +avail.rows.reduce((s: number, r: any) => s + Number(r.net_amount), 0).toFixed(2);
-      const tds = +(Number(data.tdsAmount) || 0).toFixed(2);
+      // TDS defaults to the configured grooming rate rather than 0 — an admin who forgets to type
+      // a figure was previously paying out gross and under-withholding. An explicit tdsAmount
+      // (including 0) still wins, so a manual override remains possible.
+      const tds = data.tdsAmount !== undefined && data.tdsAmount !== null
+        ? +(Number(data.tdsAmount) || 0).toFixed(2)
+        : +(amount * (await GroomingModuleConfig.getTdsRatePercent()) / 100).toFixed(2);
       const netPaid = +(amount - tds).toFixed(2);
       const dates = avail.rows.map((r: any) => new Date(r.created_at));
       const periodFrom = new Date(Math.min(...dates.map((d: Date) => d.getTime())));

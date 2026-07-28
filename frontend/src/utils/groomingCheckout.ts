@@ -19,13 +19,38 @@ function loadRazorpayScript(): Promise<boolean> {
  * (incl. invoiceNumber) or rejects/aborts. Reuses the shared payment gateways via the backend.
  */
 export async function payGroomingOrderFlow(orderId: string, deposit = false): Promise<any> {
-  const res = await apiService.createGroomingCheckout(orderId, deposit)
+  return runGroomingGatewayFlow(
+    () => apiService.createGroomingCheckout(orderId, deposit),
+    (body) => apiService.confirmGroomingPayment(orderId, body),
+    'Grooming & Spa service',
+  )
+}
+
+/**
+ * Pays an order's outstanding balance — the remainder after a deposit, or extra work the customer
+ * approved mid-service. Same gateway mechanics, different endpoints and its own payments row.
+ */
+export async function payGroomingBalanceFlow(orderId: string): Promise<any> {
+  return runGroomingGatewayFlow(
+    () => apiService.createGroomingBalanceCheckout(orderId),
+    (body) => apiService.confirmGroomingBalancePayment(orderId, body),
+    'Grooming balance due',
+  )
+}
+
+/** Shared gateway mechanics for both grooming collections (initial and balance). */
+async function runGroomingGatewayFlow(
+  createCheckout: () => Promise<any>,
+  confirm: (body: any) => Promise<any>,
+  description: string,
+): Promise<any> {
+  const res = await createCheckout()
   const data = res?.data || res
   const mode: string = data.mode
   const payload = data.checkoutPayload || {}
 
   if (mode === 'demo') {
-    return (await apiService.confirmGroomingPayment(orderId, { gatewayOrderId: data.gatewayOrderId })).data
+    return (await confirm({ gatewayOrderId: data.gatewayOrderId })).data
   }
 
   // Razorpay checkout
@@ -40,10 +65,10 @@ export async function payGroomingOrderFlow(orderId: string, deposit = false): Pr
       currency: payload.currency || 'INR',
       order_id: payload.orderId,
       name: 'VetCare Grooming',
-      description: 'Grooming & Spa service',
+      description,
       handler: async (r: any) => {
         try {
-          const out = await apiService.confirmGroomingPayment(orderId, {
+          const out = await confirm({
             gatewayOrderId: r.razorpay_order_id,
             gatewayPaymentId: r.razorpay_payment_id,
             gatewaySignature: r.razorpay_signature,
