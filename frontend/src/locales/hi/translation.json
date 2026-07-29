@@ -176,6 +176,7 @@
     "sections": {
       "main": "मुख्य",
       "consultations": "परामर्श",
+      "groomingSpa": "ग्रूमिंग और स्पा",
       "animalsHealth": "पशु और स्वास्थ्य",
       "farmManagement": "फार्म प्रबंधन",
       "analyticsTools": "विश्लेषण और उपकरण",
@@ -185,6 +186,7 @@
       "account": "खाता",
       "finance": "वित्त",
       "administration": "प्रशासन",
+      "hospitalNetworks": "अस्पताल नेटवर्क",
       "preferences": "प्राथमिकताएं"
     },
     "roles": {

@@ -176,6 +176,7 @@
     "sections": {
       "main": "ప్రధాన",
       "consultations": "సంప్రదింపులు",
+      "groomingSpa": "గ్రూమింగ్ & స్పా",
       "animalsHealth": "జంతువులు & ఆరోగ్యం",
       "farmManagement": "ఫార్మ్ నిర్వహణ",
       "analyticsTools": "విశ్లేషణ & సాధనాలు",
@@ -185,6 +186,7 @@
       "account": "ఖాతా",
       "finance": "ఫైనాన్స్",
       "administration": "పరిపాలన",
+      "hospitalNetworks": "ఆసుపత్రి నెట్‌వర్క్",
       "preferences": "ప్రాధాన్యతలు"
     },
     "roles": {

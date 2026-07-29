@@ -174,6 +174,7 @@
     "sections": {
       "main": "முதன்மை",
       "consultations": "ஆலோசனைகள்",
+      "groomingSpa": "க்ரூமிங் & ஸ்பா",
       "animalsHealth": "விலங்குகள் & ஆரோக்கியம்",
       "farmManagement": "பண்ணை மேலாண்மை",
       "analyticsTools": "பகுப்பாய்வு & கருவிகள்",
@@ -183,6 +184,7 @@
       "account": "கணக்கு",
       "finance": "நிதி",
       "administration": "நிர்வாகம்",
+      "hospitalNetworks": "மருத்துவமனை நெட்வொர்க்",
       "preferences": "விருப்பத்தேர்வுகள்"
     },
     "roles": {

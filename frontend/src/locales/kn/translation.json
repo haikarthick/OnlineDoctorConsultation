@@ -176,6 +176,7 @@
     "sections": {
       "main": "ಮುಖ್ಯ",
       "consultations": "ಸಮಾಲೋಚನೆಗಳು",
+      "groomingSpa": "ಗ್ರೂಮಿಂಗ್ ಮತ್ತು ಸ್ಪಾ",
       "animalsHealth": "ಪ್ರಾಣಿಗಳು ಮತ್ತು ಆರೋಗ್ಯ",
       "farmManagement": "ಕೃಷಿ ನಿರ್ವಹಣೆ",
       "analyticsTools": "ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಪರಿಕರಗಳು",
@@ -185,6 +186,7 @@
       "account": "ಖಾತೆ",
       "finance": "ಹಣಕಾಸು",
       "administration": "ಆಡಳಿತ",
+      "hospitalNetworks": "ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್",
       "preferences": "ಆದ್ಯತೆಗಳು"
     },
     "roles": {

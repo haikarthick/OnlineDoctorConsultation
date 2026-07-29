@@ -184,6 +184,7 @@
     "sections": {
       "main": "Main",
       "consultations": "Consultations",
+      "groomingSpa": "Grooming & Spa",
       "animalsHealth": "Animals & Health",
       "farmManagement": "Farm Management",
       "analyticsTools": "Analytics & Tools",
@@ -193,6 +194,7 @@
       "account": "Account",
       "finance": "Finance",
       "administration": "Administration",
+      "hospitalNetworks": "Hospital Networks",
       "preferences": "Preferences"
     },
     "roles": {

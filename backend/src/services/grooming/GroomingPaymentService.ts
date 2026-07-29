@@ -200,6 +200,60 @@ class GroomingPaymentService {
   }
 
   /**
+   * Human-readable booking facts for notification copy — pet, service, provider, customer and a
+   * formatted date/time. Read outside the confirming transaction on purpose: notifications are
+   * best-effort and must never widen the row lock or fail the payment. Every field degrades to a
+   * sensible phrase so the copy still reads correctly when a column is null.
+   */
+  private async loadNotificationContext(orderId: string): Promise<{
+    serviceLine: string; petLine: string; whenLine: string;
+    providerName: string; customerName: string; currencySymbol: string;
+  }> {
+    const fallback = {
+      serviceLine: 'your grooming appointment', petLine: '', whenLine: 'the scheduled date',
+      providerName: 'your grooming provider', customerName: 'A customer', currencySymbol: '',
+    };
+    try {
+      const r = await database.query(
+        `SELECT gs.name AS "serviceName", a.name AS "petName", gp.business_name AS "providerName",
+                o.scheduled_date AS "scheduledDate", o.time_slot_start AS "timeSlotStart", o.currency,
+                u.first_name AS "firstName", u.last_name AS "lastName"
+         FROM grooming_orders o
+         JOIN grooming_providers gp ON gp.id = o.provider_id
+         LEFT JOIN grooming_services gs ON gs.id = o.primary_service_id
+         LEFT JOIN animals a ON a.id = o.animal_id
+         LEFT JOIN users u ON u.id = o.pet_owner_id
+         WHERE o.id = $1`, [orderId]);
+      if (r.rows.length === 0) return fallback;
+      const x = r.rows[0];
+
+      // scheduled_date is a DATE — render it in a stable, unambiguous form rather than an ISO
+      // timestamp, which is what a groomer scanning a phone notification actually needs.
+      let whenLine = fallback.whenLine;
+      if (x.scheduledDate) {
+        const d = new Date(x.scheduledDate);
+        if (!isNaN(d.getTime())) {
+          whenLine = d.toLocaleDateString('en-IN', {
+            weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
+          });
+          if (x.timeSlotStart) whenLine += ` at ${String(x.timeSlotStart).slice(0, 5)}`;
+        }
+      }
+      const customerName = [x.firstName, x.lastName].filter(Boolean).join(' ').trim();
+      return {
+        serviceLine: x.serviceName || fallback.serviceLine,
+        petLine: x.petName ? ` for ${x.petName}` : '',
+        whenLine,
+        providerName: x.providerName || fallback.providerName,
+        customerName: customerName || fallback.customerName,
+        currencySymbol: (x.currency || 'INR') === 'INR' ? '₹' : `${x.currency} `,
+      };
+    } catch {
+      return fallback;
+    }
+  }
+
+  /**
    * The single transactional completion path for the FIRST collection on an order (full amount or
    * deposit). Locks the order row FIRST and re-checks its status inside the transaction, so
    * concurrent confirms (double-click, browser retry, webhook racing the callback) collapse to
@@ -308,19 +362,30 @@ class GroomingPaymentService {
     if (result && result.notify) {
       const n = result.notify;
       if (!result.alreadyPaid) {
+        // The old copy ("Please review and assign it") named no pet, service, date or customer,
+        // so neither recipient could tell what the message was about or who it was for. Both
+        // notifications now lead with the concrete booking.
+        const ctx = await this.loadNotificationContext(orderId);
         try {
           await NotificationService.createNotification(
-            n.customerId, 'payment', 'Grooming Payment Received',
+            n.customerId, 'payment',
+            result.balanceDue > 0 ? 'Grooming deposit received' : 'Grooming booking confirmed',
             result.balanceDue > 0
-              ? `Your deposit for booking ${n.orderNumber} was received. A balance of ${result.balanceDue.toFixed(2)} is due before the service can be completed.`
-              : `Your payment for grooming booking ${n.orderNumber} was received. Invoice ${result.invoiceNumber}.`,
+              ? `We've received your deposit for ${ctx.serviceLine} at ${ctx.providerName} on ${ctx.whenLine}. `
+                + `A balance of ${ctx.currencySymbol}${result.balanceDue.toFixed(2)} is due before your appointment can be completed — `
+                + `you can pay it from My Grooming Bookings (${n.orderNumber}). Invoice ${result.invoiceNumber}.`
+              : `Your booking for ${ctx.serviceLine} at ${ctx.providerName} on ${ctx.whenLine} is confirmed and paid in full. `
+                + `Booking reference ${n.orderNumber}, invoice ${result.invoiceNumber}. `
+                + `${ctx.providerName} will be in touch if anything changes.`,
             'all', { orderId, invoiceNumber: result.invoiceNumber });
         } catch { /* non-blocking */ }
         try {
           if (n.providerOwnerId) {
             await NotificationService.createNotification(
-              n.providerOwnerId, 'booking', 'New Paid Grooming Booking',
-              `Booking ${n.orderNumber} has been paid and confirmed. Please review and assign it.`,
+              n.providerOwnerId, 'booking', `New booking — ${ctx.whenLine}`,
+              `${ctx.customerName} has booked and paid for ${ctx.serviceLine}${ctx.petLine} on ${ctx.whenLine}. `
+                + `Open booking ${n.orderNumber} to check the details and assign a groomer and station for it`
+                + `${result.balanceDue > 0 ? `. Note: ${ctx.currencySymbol}${result.balanceDue.toFixed(2)} is still outstanding on this order` : ''}.`,
               'all', { orderId });
           }
         } catch { /* non-blocking */ }

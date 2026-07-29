@@ -113,6 +113,32 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'prescriptions', label: t('nav.myPrescriptions'), icon: '💊', path: '/prescriptions',
       roles: ['pet_owner', 'farmer'], section: 'Consultations' },
 
+    // ── Grooming & Spa ──
+    // Sits directly after Consultations by design: both are "book a service for my animal"
+    // journeys, so a customer scanning the menu finds them together instead of hunting past
+    // the farm/analytics/network sections. Section order here IS the render order.
+    { id: 'grooming-find', label: t('nav.groomingFind'), icon: '💈', path: '/grooming/find',
+      roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
+    { id: 'grooming-my-orders', label: t('nav.groomingMyOrders'), icon: '📅', path: '/grooming/my-orders',
+      roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
+    // Self-service onboarding entry. Same path as the console below — the page renders the
+    // "create your business" form until a provider exists. Hidden once the user actually holds
+    // grooming_provider_console (see the filter below) so the two never show at once.
+    { id: 'grooming-apply', label: t('nav.groomingApply'), icon: '🏪', path: '/grooming/provider',
+      roles: ['pet_owner', 'farmer', 'veterinarian'], section: 'Grooming & Spa' },
+    // pet_owner/farmer are listed on the provider items because createProvider() grants the
+    // 'groomer' role in the DB but the cached login payload keeps their original role until they
+    // re-login. The permission check below is the real gate — it reads live DB roles — so a
+    // customer who has not registered a business still never sees these.
+    { id: 'grooming-provider', label: t('nav.groomingProvider'), icon: '💈', path: '/grooming/provider',
+      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
+    { id: 'grooming-orders', label: t('nav.groomingOrders'), icon: '📋', path: '/grooming/orders',
+      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
+    { id: 'grooming-earnings', label: t('nav.groomingEarnings'), icon: '💰', path: '/grooming/earnings',
+      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
+    { id: 'admin-grooming-providers', label: t('nav.groomingAdmin'), icon: '💈', path: '/admin/grooming-providers',
+      roles: ['admin'], section: 'Grooming & Spa' },
+
     // ── Animals & Health ──
     { id: 'animals', label: t(isPetOwner ? 'nav.myPets' : (user?.role === 'veterinarian' ? 'nav.myPets' : 'nav.myAnimals')),
       icon: (isPetOwner || user?.role === 'veterinarian') ? '🐾' : '🐄', path: '/animals',
@@ -263,29 +289,6 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'admin-network-subscriptions', label: 'Network Subscriptions', icon: '💳', path: '/admin/network-subscriptions',
       roles: ['admin'], section: 'Hospital Networks' },
 
-    // ── Grooming & Spa ──
-    { id: 'grooming-find', label: t('nav.groomingFind'), icon: '💈', path: '/grooming/find',
-      roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
-    { id: 'grooming-my-orders', label: t('nav.groomingMyOrders'), icon: '📅', path: '/grooming/my-orders',
-      roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
-    // Self-service onboarding entry. Same path as the console below — the page renders the
-    // "create your business" form until a provider exists. Hidden once the user actually holds
-    // grooming_provider_console (see the filter below) so the two never show at once.
-    { id: 'grooming-apply', label: t('nav.groomingApply'), icon: '🏪', path: '/grooming/provider',
-      roles: ['pet_owner', 'farmer', 'veterinarian'], section: 'Grooming & Spa' },
-    // pet_owner/farmer are listed on the provider items because createProvider() grants the
-    // 'groomer' role in the DB but the cached login payload keeps their original role until they
-    // re-login. The permission check below is the real gate — it reads live DB roles — so a
-    // customer who has not registered a business still never sees these.
-    { id: 'grooming-provider', label: t('nav.groomingProvider'), icon: '💈', path: '/grooming/provider',
-      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
-    { id: 'grooming-orders', label: t('nav.groomingOrders'), icon: '📋', path: '/grooming/orders',
-      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
-    { id: 'grooming-earnings', label: t('nav.groomingEarnings'), icon: '💰', path: '/grooming/earnings',
-      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
-    { id: 'admin-grooming-providers', label: t('nav.groomingAdmin'), icon: '💈', path: '/admin/grooming-providers',
-      roles: ['admin'], section: 'Grooming & Spa' },
-
     // ── Preferences (bottom) ──
     { id: 'settings', label: t('nav.settings'), icon: '⚙️', path: '/settings',
       roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'], section: 'Preferences' }
@@ -373,7 +376,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
   // Section icon map for collapsed view
   const sectionIcons: Record<string, string> = {
-    'Main': '🏠', 'Consultations': '🏥', 'Animals & Health': '🐾',
+    'Main': '🏠', 'Consultations': '🏥', 'Grooming & Spa': '💈', 'Animals & Health': '🐾',
     'Farm Management': '🌾', 'Analytics & Tools': '📈', 'Innovation': '🚀',
     'Intelligence': '🤖', 'Veterinarian': '🩺', 'Administration': '🛡️',
     'Hospital Networks': '🌐', 'Preferences': '⚙️', 'Finance': '💰',
@@ -383,6 +386,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
   const sectionNameMap: Record<string, string> = {
     'Main': t('nav.sections.main'),
     'Consultations': t('nav.sections.consultations'),
+    'Grooming & Spa': t('nav.sections.groomingSpa'),
     'Animals & Health': t('nav.sections.animalsHealth'),
     'Farm Management': t('nav.sections.farmManagement'),
     'Analytics & Tools': t('nav.sections.analyticsTools'),
@@ -392,7 +396,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     'Account': t('nav.sections.account'),
     'Finance': t('nav.sections.finance'),
     'Administration': t('nav.sections.administration'),
-    'Hospital Networks': 'Hospital Networks',
+    'Hospital Networks': t('nav.sections.hospitalNetworks'),
     'Preferences': t('nav.sections.preferences'),
   }
 

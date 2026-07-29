@@ -169,6 +169,7 @@
     "sections": {
       "main": "പ്രധാനം",
       "consultations": "കൺസൾട്ടേഷനുകൾ",
+      "groomingSpa": "ഗ്രൂമിംഗ് & സ്പാ",
       "animalsHealth": "മൃഗങ്ങൾ & ആരോഗ്യം",
       "farmManagement": "ഫാം മാനേജ്‌മെന്റ്",
       "analyticsTools": "അനലിറ്റിക്സ് & ടൂളുകൾ",
@@ -178,6 +179,7 @@
       "account": "അക്കൗണ്ട്",
       "finance": "ധനകാര്യം",
       "administration": "അഡ്മിനിസ്ട്രേഷൻ",
+      "hospitalNetworks": "ഹോസ്പിറ്റൽ നെറ്റ്‌വർക്ക്",
       "preferences": "മുൻഗണനകൾ"
     },
     "roles": {
