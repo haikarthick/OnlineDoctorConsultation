@@ -5176,3 +5176,1199 @@
 </details>
 
 ---
+
+## 2026-07-23 07:04 · `76d2a80` · OTHER
+
+**Commit:** chore(memory,pharmacy,marketplace): memory-system housekeeping + fix self-ping cost bug + 2 new features  
+**Author:** haikarthick  
+**Categories:** CONFIG · MIGRATION · SERVICE · DB-SCHEMA · AUTH/PERM · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (19)</summary>
+
+  - .github/workflows/uptime-monitor.yml
+  - backend/migrations/023_marketplace_eligible_species.sql
+  - backend/src/index.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/services/MasterDataService.ts
+  - docker/init.sql
+  - frontend/src/context/MasterDataContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/pages/PublicMarketplace.tsx
+  - frontend/src/pages/admin/MasterDataManagement.tsx
+  - frontend/src/pages/pharmacy/MedicationTransfers.tsx
+  - frontend/src/pages/pharmacy/PharmacyDashboard.tsx
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-07-23 10:09 · `4688cc6` · OTHER
+
+**Commit:** fix(i18n): make species names translatable across all 6 locales  
+**Author:** haikarthick  
+**Categories:** MIGRATION · SERVICE · DB-SCHEMA · UI · AUTH/PERM · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (46)</summary>
+
+  - backend/migrations/024_species_label_key.sql
+  - backend/src/middleware/validation.ts
+  - backend/src/services/MasterDataService.ts
+  - docker/init.sql
+  - frontend/src/components/AnimalSearchPicker.tsx
+  - frontend/src/components/CertificatePrintView.tsx
+  - frontend/src/context/MasterDataContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/AICopilot.tsx
+  - frontend/src/pages/AnimalGroups.tsx
+  - frontend/src/pages/AnimalTimeline.tsx
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/DiseasePrediction.tsx
+  - frontend/src/pages/EnterpriseManagement.tsx
+  - frontend/src/pages/GenomicLineage.tsx
+  - ... and 26 more
+
+</details>
+
+---
+
+## 2026-07-23 10:10 · `46d4578` · OTHER
+
+**Commit:** docs(memory): log species-name i18n fix in feature tracker + lessons  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - memories/repo/feature-tracker.md
+  - memories/repo/lessons.md
+
+</details>
+
+---
+
+## 2026-07-23 10:39 · `d8b8e86` · OTHER
+
+**Commit:** feat(admin): self-serve per-locale species labels, no deploy needed  
+**Author:** haikarthick  
+**Categories:** MIGRATION · SERVICE · DB-SCHEMA · AUTH/PERM · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (14)</summary>
+
+  - backend/migrations/025_species_per_locale_labels.sql
+  - backend/src/middleware/validation.ts
+  - backend/src/services/MasterDataService.ts
+  - docker/init.sql
+  - frontend/src/context/MasterDataContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/MasterDataManagement.css
+  - frontend/src/pages/admin/MasterDataManagement.tsx
+  - memories/repo/feature-tracker.md
+
+</details>
+
+---
+
+## 2026-07-24 12:38 · `63dfcaa` · OTHER
+
+**Commit:** fix(marketplace): admin-added animal-class labels render blank + Sell/Browse species mismatch  
+**Author:** haikarthick  
+**Categories:** UI · AUTH/PERM  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - frontend/src/components/CertificatePrintView.tsx
+  - frontend/src/components/PrescriptionPrintView.tsx
+  - frontend/src/constants/speciesBreeds.ts
+  - frontend/src/context/MasterDataContext.tsx
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/HospitalWorkflow.tsx
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/pages/PublicMarketplace.tsx
+
+</details>
+
+---
+
+## 2026-07-24 13:10 · `fde39d6` · OTHER
+
+**Commit:** fix(admin,i18n): Master Data per-locale label UX — identifiable field names, show current translation on edit, admin rename now displays  
+**Author:** haikarthick  
+**Categories:** AUTH/PERM · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - frontend/src/context/MasterDataContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/admin/MasterDataManagement.tsx
+
+</details>
+
+---
+
+## 2026-07-24 13:49 · `8c0c944` · OTHER
+
+**Commit:** feat(admin,i18n): per-locale labels for breeds, animal classes, marketplace categories & conditions  
+**Author:** haikarthick  
+**Categories:** MIGRATION · SERVICE · AUTH/PERM · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - backend/migrations/026_child_master_data_per_locale_labels.sql
+  - backend/src/middleware/validation.ts
+  - backend/src/services/MasterDataService.ts
+  - frontend/src/constants/speciesBreeds.ts
+  - frontend/src/context/MasterDataContext.tsx
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/HospitalWorkflow.tsx
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/pages/PublicMarketplace.tsx
+  - frontend/src/pages/admin/MasterDataManagement.tsx
+
+</details>
+
+---
+
+## 2026-07-24 13:55 · `0de0774` · OTHER
+
+**Commit:** feat(admin,i18n): per-locale labels for breeds, animal classes, marketplace categories & conditions  
+**Author:** haikarthick  
+**Categories:** MIGRATION · SERVICE · DB-SCHEMA · AUTH/PERM · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - backend/migrations/026_child_master_data_per_locale_labels.sql
+  - backend/src/middleware/validation.ts
+  - backend/src/services/MasterDataService.ts
+  - docker/init.sql
+  - frontend/src/constants/speciesBreeds.ts
+  - frontend/src/context/MasterDataContext.tsx
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/HospitalWorkflow.tsx
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/pages/PublicMarketplace.tsx
+  - frontend/src/pages/admin/MasterDataManagement.tsx
+
+</details>
+
+---
+
+## 2026-07-25 06:43 · `4ce86c1` · OTHER
+
+**Commit:** fix(roles): provision vet_profiles on role-change approval; hide former vets from search  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · DB-SCHEMA · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (16)</summary>
+
+  - backend/migrations/027_role_change_profile_payload.sql
+  - backend/migrations/028_backfill_missing_vet_profiles.sql
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/ScheduleService.ts
+  - backend/src/services/VetProfileService.ts
+  - docker/init.sql
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Settings.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-25 07:10 · `2b7eb5c` · OTHER
+
+**Commit:** fix(roles): provision vet_profiles on admin direct role change too  
+**Author:** haikarthick  
+**Categories:** SERVICE · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (12)</summary>
+
+  - backend/src/controllers/AdminController.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/services/AdminService.ts
+  - backend/tests/unit/AdminService.test.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-25 10:04 · `00ec2c9` · OTHER
+
+**Commit:** feat(grooming): P0 schema foundation for Pet Wellness/Grooming/Spa module  
+**Author:** haikarthick  
+**Categories:** MIGRATION · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/migrations/029_grooming_module.sql
+  - docker/init.sql
+  - docs/PET_WELLNESS_GROOMING_SPA_PLAN.md
+
+</details>
+
+---
+
+## 2026-07-25 11:13 · `743dd88` · OTHER
+
+**Commit:** fix(db): fresh-DB init.sql aborted — marketplace_listings FTS index referenced missing breed/species  
+**Author:** haikarthick  
+**Categories:** DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - docker/init.sql
+
+</details>
+
+---
+
+## 2026-07-25 11:20 · `a92bc99` · OTHER
+
+**Commit:** feat(grooming): P0b add groomer + support system roles  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - backend/migrations/030_grooming_roles.sql
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/PermissionService.ts
+  - docker/init.sql
+  - frontend/src/types/index.ts
+
+</details>
+
+---
+
+## 2026-07-25 13:57 · `81e5986` · OTHER
+
+**Commit:** feat(grooming): P1 backend — provider onboarding, catalog, staff, discovery, admin verify  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - backend/src/middleware/grooming.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingModuleConfig.ts
+  - backend/src/services/grooming/GroomingProviderService.ts
+
+</details>
+
+---
+
+## 2026-07-25 15:15 · `f8127ba` · OTHER
+
+**Commit:** feat(grooming): P1 frontend — provider console, admin verification queue, 4-file permission sync  
+**Author:** haikarthick  
+**Categories:** UI · AUTH/PERM · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (13)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/context/PermissionContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/GroomingProvidersAdmin.tsx
+  - frontend/src/pages/grooming/GroomingProvider.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-25 16:28 · `449bcb4` · OTHER
+
+**Commit:** feat(grooming): P2 backend — order lifecycle (create → pay → confirmed), earnings, cancel  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingOrderService.ts
+
+</details>
+
+---
+
+## 2026-07-25 16:45 · `77cb6a2` · OTHER
+
+**Commit:** feat(grooming): P2 frontend — customer discovery, provider profile, booking, my orders  
+**Author:** haikarthick  
+**Categories:** UI · AUTH/PERM · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (15)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/context/PermissionContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/grooming/BookGrooming.tsx
+  - frontend/src/pages/grooming/FindGrooming.tsx
+  - frontend/src/pages/grooming/GroomingProviderPublic.tsx
+  - frontend/src/pages/grooming/MyGroomingOrders.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-26 03:01 · `1d6b09a` · OTHER
+
+**Commit:** feat(grooming): P3 backend — ops workflow (transitions, intake/S.C.E.N.T., report card) + manual settlement  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingOrderService.ts
+  - backend/src/services/grooming/GroomingSettlementService.ts
+
+</details>
+
+---
+
+## 2026-07-26 03:29 · `bf4bd10` · OTHER
+
+**Commit:** feat(grooming): P3 frontend — ops board, order detail (intake/S.C.E.N.T./report card), earnings, admin settle  
+**Author:** haikarthick  
+**Categories:** UI · AUTH/PERM · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (16)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/context/PermissionContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/GroomingProvidersAdmin.tsx
+  - frontend/src/pages/grooming/GroomingEarnings.tsx
+  - frontend/src/pages/grooming/GroomingOrderDetail.tsx
+  - frontend/src/pages/grooming/GroomingOrdersBoard.tsx
+  - frontend/src/pages/grooming/MyGroomingOrders.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-26 03:57 · `0852f83` · OTHER
+
+**Commit:** feat(grooming): P4 backend — transparent variable-price (extra-work) approval  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingOrderService.ts
+
+</details>
+
+---
+
+## 2026-07-26 04:04 · `b2746f4` · OTHER
+
+**Commit:** feat(grooming): P4 frontend — variable-price approval UI + mobile ETA tracking  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/grooming/GroomingOrderDetail.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-26 04:43 · `a5d3a87` · OTHER
+
+**Commit:** feat(grooming): P5 backend — groomer→vet safety escalation + per-pet grooming passport  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingCareService.ts
+
+</details>
+
+---
+
+## 2026-07-26 04:50 · `16d2eb0` · OTHER
+
+**Commit:** feat(grooming): P5 frontend — safety escalation UI + wellness nudge + grooming passport  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - frontend/src/App.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/grooming/GroomingOrderDetail.tsx
+  - frontend/src/pages/grooming/GroomingPassport.tsx
+  - frontend/src/pages/grooming/MyGroomingOrders.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-26 07:29 · `5905008` · OTHER
+
+**Commit:** feat(grooming): P6 disputes/refunds + P7 reports (backend)  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingDisputeService.ts
+  - backend/src/services/grooming/GroomingReportService.ts
+
+</details>
+
+---
+
+## 2026-07-26 07:35 · `9d7d2cb` · OTHER
+
+**Commit:** feat(grooming): P6+P7 frontend — disputes UI + reports (provider summary + platform moat metrics)  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/GroomingProvidersAdmin.tsx
+  - frontend/src/pages/grooming/GroomingEarnings.tsx
+  - frontend/src/pages/grooming/MyGroomingOrders.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-26 08:39 · `0f86f7a` · OTHER
+
+**Commit:** feat(grooming): real gateway payments + GST invoices (GRM series) — replaces demo-only pay  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · DB-SCHEMA · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (17)</summary>
+
+  - backend/migrations/031_grooming_payments.sql
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingModuleConfig.ts
+  - backend/src/services/grooming/GroomingOrderService.ts
+  - backend/src/services/grooming/GroomingPaymentService.ts
+  - docker/init.sql
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/grooming/BookGrooming.tsx
+  - frontend/src/pages/grooming/GroomingOrderDetail.tsx
+  - frontend/src/pages/grooming/MyGroomingOrders.tsx
+  - frontend/src/services/api.ts
+  - frontend/src/utils/groomingCheckout.ts
+
+</details>
+
+---
+
+## 2026-07-26 08:51 · `bb12b1a` · OTHER
+
+**Commit:** fix(grooming): confirmCheckout read payment_id — loadOwnedOrder SELECT was missing it  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/services/grooming/GroomingPaymentService.ts
+
+</details>
+
+---
+
+## 2026-07-26 13:42 · `099b4f5` · OTHER
+
+**Commit:** i18n(grooming): fully localize all grooming UI strings into hi/ta/te/kn/ml  
+**Author:** haikarthick  
+**Categories:** i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+
+</details>
+
+---
+
+## 2026-07-26 15:05 · `14bd5e6` · OTHER
+
+**Commit:** ci(deploy): harden against deploy failures — real-build gate + pinned Node 20  
+**Author:** haikarthick  
+**Categories:** DEPS · TOOLING · DEPLOY  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - .nvmrc
+  - backend/package.json
+  - backend/scripts/pre-deploy.js
+  - frontend/package.json
+  - render.yaml
+
+</details>
+
+---
+
+## 2026-07-26 15:29 · `1dccde8` · OTHER
+
+**Commit:** fix(deploy): force NODE_ENV=production for the build step — fixes bundle-budget deploy failure  
+**Author:** haikarthick  
+**Categories:** TOOLING · BUILD · DEPLOY  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/scripts/pre-deploy.js
+  - frontend/vite.config.ts
+  - render-build.sh
+
+</details>
+
+---
+
+## 2026-07-27 12:49 · `909662c` · OTHER
+
+**Commit:** feat(grooming): groomer self-registration + break the provider-onboarding catch-22  
+**Author:** haikarthick  
+**Categories:** DEPS · SERVICE · UI · AUTH/PERM · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (19)</summary>
+
+  - backend/package-lock.json
+  - backend/src/middleware/auth.ts
+  - backend/src/services/PermissionService.ts
+  - frontend/package-lock.json
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/context/PermissionContext.tsx
+  - frontend/src/hooks/useGroomingEnabled.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Dashboard.tsx
+  - frontend/src/pages/Register.test.tsx
+  - frontend/src/pages/Register.tsx
+  - frontend/src/pages/Settings.tsx
+  - frontend/src/pages/grooming/FindGrooming.tsx
+  - frontend/src/pages/grooming/GroomingProvider.tsx
+
+</details>
+
+---
+
+## 2026-07-27 13:09 · `e38f68e` · OTHER
+
+**Commit:** feat(auth): show/hide password toggle on every password field  
+**Author:** haikarthick  
+**Categories:** UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (15)</summary>
+
+  - frontend/src/components/PasswordInput.css
+  - frontend/src/components/PasswordInput.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/AcceptHospitalInvite.tsx
+  - frontend/src/pages/AcceptInvite.tsx
+  - frontend/src/pages/Login.tsx
+  - frontend/src/pages/Register.test.tsx
+  - frontend/src/pages/Register.tsx
+  - frontend/src/pages/ResetPassword.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+
+</details>
+
+---
+
+## 2026-07-27 13:43 · `790a668` · OTHER
+
+**Commit:** fix(auth): groomer registration failed — startup self-heal reverted the role CHECK every boot  
+**Author:** haikarthick  
+**Categories:** MIGRATION · UTILS · DB  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/migrations/032_fix_role_check_constraints.sql
+  - backend/src/utils/database.ts
+
+</details>
+
+---
+
+## 2026-07-27 16:09 · `34b6f2e` · OTHER
+
+**Commit:** feat(ci): runtime verification gate — real Postgres, real server, real HTTP  
+**Author:** haikarthick  
+**Categories:** DEPS · TOOLING · UTILS · DB · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - backend/package.json
+  - backend/scripts/pre-deploy.js
+  - backend/scripts/runtime-verify.js
+  - backend/src/utils/database.ts
+  - docker/init.sql
+  - docs/VERIFICATION.md
+
+</details>
+
+---
+
+## 2026-07-28 02:30 · `5ec2691` · OTHER
+
+**Commit:** feat(ci): PHASE 7 — Playwright drives the real SPA inside the runtime gate  
+**Author:** haikarthick  
+**Categories:** DEPS · TOOLING  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/package.json
+  - backend/scripts/runtime-verify.js
+  - docs/VERIFICATION.md
+  - frontend/e2e/critical-journeys.spec.ts
+
+</details>
+
+---
+
+## 2026-07-28 02:37 · `8a8b746` · OTHER
+
+**Commit:** ci: make the runtime gate unskippable — enforce it in GitHub Actions before deploy  
+**Author:** haikarthick  
+**Categories:** CONFIG · TOOLING  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - .github/workflows/ci-cd.yml
+  - backend/scripts/runtime-verify.js
+
+</details>
+
+---
+
+## 2026-07-28 02:43 · `861805b` · OTHER
+
+**Commit:** docs(ci): record the honest state — --full timeout raised, legacy e2e suite flagged unverified  
+**Author:** haikarthick  
+**Categories:** TOOLING  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/scripts/runtime-verify.js
+  - docs/VERIFICATION.md
+
+</details>
+
+---
+
+## 2026-07-28 06:54 · `6d2d30a` · OTHER
+
+**Commit:** @  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/services/grooming/GroomingPaymentService.ts
+  - backend/src/services/payment/InvoiceService.ts
+
+</details>
+
+---
+
+## 2026-07-28 06:54 · `a7e7262` · OTHER
+
+**Commit:** fix(payments): grooming payment 500 — invoice numbering collided on any gap in the series  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/services/grooming/GroomingPaymentService.ts
+  - backend/src/services/payment/InvoiceService.ts
+
+</details>
+
+---
+
+## 2026-07-28 07:51 · `92ca0ad` · OTHER
+
+**Commit:** fix(payments): close four money bugs in the grooming payment flow  
+**Author:** haikarthick  
+**Categories:** MIGRATION · SERVICE · UTILS · DB · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - backend/migrations/033_grooming_payment_integration.sql
+  - backend/src/services/grooming/GroomingPaymentService.ts
+  - backend/src/services/payment/PaymentOrchestrator.ts
+  - backend/src/utils/database.ts
+  - docker/init.sql
+
+</details>
+
+---
+
+## 2026-07-28 11:43 · `699e04d` · OTHER
+
+**Commit:** feat(grooming): cancellation refund lifecycle + slot-hold expiry, as its own module  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · UTILS · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - backend/migrations/034_grooming_refunds_and_holds.sql
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingDisputeService.ts
+  - backend/src/services/grooming/GroomingModuleConfig.ts
+  - backend/src/services/grooming/GroomingOrderService.ts
+  - backend/src/services/grooming/GroomingPaymentService.ts
+  - backend/src/services/grooming/GroomingRefundService.ts
+  - backend/src/utils/scheduler.ts
+  - docker/init.sql
+
+</details>
+
+---
+
+## 2026-07-28 12:42 · `6cf9336` · OTHER
+
+**Commit:** feat(grooming): close every open item in the spa/grooming lifecycle  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · UTILS · DB · DB-SCHEMA · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (21)</summary>
+
+  - backend/migrations/035_grooming_balance_and_credit_notes.sql
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingModuleConfig.ts
+  - backend/src/services/grooming/GroomingOrderService.ts
+  - backend/src/services/grooming/GroomingPaymentService.ts
+  - backend/src/services/grooming/GroomingRefundService.ts
+  - backend/src/services/grooming/GroomingSettlementService.ts
+  - backend/src/services/payment/PaymentOrchestrator.ts
+  - backend/src/utils/database.ts
+  - backend/src/utils/scheduler.ts
+  - docker/init.sql
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/grooming/GroomingEarnings.tsx
+  - frontend/src/pages/grooming/MyGroomingOrders.tsx
+  - frontend/src/services/api.ts
+  - ... and 1 more
+
+</details>
+
+---
+
+## 2026-07-29 02:00 · `84e2c4d` · OTHER
+
+**Commit:** fix(seed): demo seed was silently broken on every deploy — 21 of 94 sections failing  
+**Author:** haikarthick  
+**Categories:** TOOLING · UTILS · DB · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - backend/scripts/runtime-verify.js
+  - backend/src/app.ts
+  - backend/src/utils/database.ts
+  - docker/seed-demo-data.sql
+  - frontend/e2e/constants.ts
+  - frontend/e2e/critical-journeys.spec.ts
+
+</details>
+
+---
+
+## 2026-07-29 02:43 · `5f4c225` · OTHER
+
+**Commit:** feat(ci): prove the legacy self-heal is retirable — CI now runs the gate with it OFF too  
+**Author:** haikarthick  
+**Categories:** CONFIG · TOOLING · UTILS · DB  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - .github/workflows/ci-cd.yml
+  - backend/scripts/runtime-verify.js
+  - backend/src/utils/database.ts
+  - docs/VERIFICATION.md
+
+</details>
+
+---
+
+## 2026-07-29 05:28 · `5d44438` · OTHER
+
+**Commit:** feat(grooming): menu placement, clearer paid-booking notifications, design-system guard  
+**Author:** haikarthick  
+**Categories:** SERVICE · UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - backend/src/services/grooming/GroomingPaymentService.ts
+  - docs/DESIGN_SYSTEM.md
+  - frontend/.eslintrc.json
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+
+</details>
+
+---
+
+## 2026-07-29 07:09 · `7b1e683` · OTHER
+
+**Commit:** feat(grooming): provider must accept a paid booking, or it auto-refunds  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · UTILS · DB-SCHEMA · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (20)</summary>
+
+  - backend/migrations/036_grooming_provider_acceptance.sql
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingModuleConfig.ts
+  - backend/src/services/grooming/GroomingOrderService.ts
+  - backend/src/services/grooming/GroomingPaymentService.ts
+  - backend/src/services/grooming/GroomingRefundService.ts
+  - backend/src/utils/scheduler.ts
+  - docker/init.sql
+  - frontend/.eslintrc.json
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/grooming/GroomingOrdersBoard.tsx
+  - frontend/src/pages/grooming/MyGroomingOrders.tsx
+  - frontend/src/services/api.ts
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-07-29 07:51 · `90d21c6` · OTHER
+
+**Commit:** feat(grooming): real availability — working hours, capacity and bookable slots  
+**Author:** haikarthick  
+**Categories:** MIGRATION · DEPS · TOOLING · API · SERVICE · DB-SCHEMA · UI · AUTH/PERM · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (23)</summary>
+
+  - backend/migrations/037_grooming_availability.sql
+  - backend/package.json
+  - backend/scripts/verify-grooming-slots.js
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingOrderService.ts
+  - backend/src/services/grooming/GroomingProviderService.ts
+  - backend/src/services/grooming/GroomingScheduleService.ts
+  - docker/init.sql
+  - frontend/.eslintrc.json
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/context/PermissionContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/grooming/BookGrooming.tsx
+  - ... and 3 more
+
+</details>
+
+---
+
+## 2026-07-29 10:16 · `19fbced` · OTHER
+
+**Commit:** fix(payments): refunds go back to source, and the wallet gets an exit door  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · DB-SCHEMA · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (14)</summary>
+
+  - backend/migrations/038_wallet_withdrawals.sql
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/WalletWithdrawalService.ts
+  - backend/src/services/grooming/GroomingModuleConfig.ts
+  - docker/init.sql
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Wallet.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-29 11:38 · `07440ef` · OTHER
+
+**Commit:** feat(payments): settlement lifecycle — a payables register and real payout evidence  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (14)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/grooming/GroomingSettlementService.ts
+  - backend/src/services/payment/WithdrawalService.ts
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/Payables.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-29 12:04 · `905e8c7` · OTHER
+
+**Commit:** refactor(grooming): align the whole module with the design system  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/pages/admin/GroomingProvidersAdmin.tsx
+  - frontend/src/pages/grooming/FindGrooming.tsx
+  - frontend/src/pages/grooming/GroomingEarnings.tsx
+  - frontend/src/pages/grooming/GroomingOrderDetail.tsx
+  - frontend/src/pages/grooming/GroomingPassport.tsx
+  - frontend/src/pages/grooming/GroomingProvider.tsx
+  - frontend/src/pages/grooming/GroomingProviderPublic.tsx
+  - frontend/src/pages/grooming/MyGroomingOrders.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
