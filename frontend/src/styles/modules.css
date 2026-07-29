@@ -2188,3 +2188,352 @@ textarea.module-input {
   .schedule-day-row .btn { width: 100%; }
   .rule-list li { flex-direction: column; align-items: flex-start; }
 }
+
+/* ── Provider discovery cards (grooming; pairs with .vet-grid) ── */
+.provider-card {
+  padding: 16px;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+/* CSS hover, not JS onMouseEnter — the handlers it replaces skipped keyboard focus entirely. */
+.provider-card:hover,
+.provider-card:focus-within {
+  box-shadow: var(--shadow-lg);
+}
+.provider-card-head { display: flex; gap: 12px; align-items: center; }
+.provider-avatar {
+  width: 54px;
+  height: 54px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-lg);
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+.provider-card-identity { min-width: 0; }
+.provider-card-name {
+  margin: 0;
+  font-size: 16px;
+  /* Long business names must truncate rather than blow out the card. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.provider-card-rating { font-size: 13px; color: var(--gray-500); }
+.provider-card-tags { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+.provider-card-price { margin-top: 10px; font-weight: 700; }
+.provider-card-cta { margin-top: 10px; width: 100%; }
+
+.result-count { font-size: 13px; color: var(--gray-600); margin: 0 0 12px; }
+.page-subtitle { color: var(--gray-600); margin: 0 0 16px; }
+.empty-state-icon { font-size: 40px; margin-bottom: 8px; }
+
+.filter-checkbox {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Full-width call-to-action strip at the foot of a list page. */
+.cta-banner {
+  margin-top: 24px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+}
+.cta-banner-copy { min-width: 0; }
+.cta-banner-copy h3 { margin: 0; }
+.cta-banner-copy p { margin: 4px 0 0; color: var(--gray-600); font-size: 14px; }
+
+.search-filter-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 16px;
+}
+.search-filter-bar .search-input { flex: 1 1 240px; }
+
+/* ── S.C.E.N.T. wellness tiles (grooming passport) ── */
+.scent-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+.scent-tile {
+  flex: 1 1 100px;
+  text-align: center;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  background: var(--gray-100);
+  color: var(--gray-500);
+}
+.scent-tile.is-good { background: var(--success-light); color: var(--success); }
+.scent-tile.is-watch { background: var(--warning-light); color: var(--warning); }
+.scent-tile.is-vet-advised { background: var(--danger-light); color: var(--danger); }
+.scent-tile-icon { font-size: 22px; }
+.scent-tile-label { font-weight: 700; }
+.scent-tile-value { font-size: 12px; }
+
+.vet-advised-banner {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.back-link { margin-bottom: 12px; }
+
+/* Simple two-column history rows (label left, amount/status right). */
+.history-list { list-style: none; padding: 0; margin: 0; }
+.history-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gray-200);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.history-list li:last-child { border-bottom: none; }
+
+/* A button that reads as inline text — used where a row navigates but must stay keyboard-usable. */
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.link-button:hover { color: var(--primary); }
+.link-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ── Earnings & payouts (grooming) ── */
+.module-header-split {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.earnings-stat-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.earnings-stat { flex: 1 1 160px; text-align: center; padding: 16px; }
+.earnings-stat-value { font-size: 24px; font-weight: 800; }
+.earnings-stat-value.is-success { color: var(--success); }
+.earnings-stat-value.is-warning { color: var(--warning); }
+.earnings-stat-value.is-info { color: var(--primary); }
+
+.metric-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.revenue-breakdown { margin-top: 10px; }
+.revenue-row { display: flex; justify-content: space-between; padding: 4px 0; }
+
+.dispute-panel { border: 1px solid var(--danger); }
+.dispute-row {
+  padding: 10px;
+  border: 1px solid var(--danger-light);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+}
+.dispute-row-head {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modal-narrow { max-width: 400px; }
+
+/* ── Public provider profile ── */
+.provider-hero { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.provider-hero-avatar {
+  width: 68px;
+  height: 68px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-lg);
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+}
+.provider-hero-identity { min-width: 0; }
+.provider-hero-identity h1 { margin: 0; overflow-wrap: anywhere; }
+.provider-hero-description { margin-top: 12px; }
+
+/* Service rows on the profile / console. */
+.service-list { display: grid; gap: 12px; }
+.service-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  flex-wrap: wrap;
+}
+.service-row-info { min-width: 0; }
+.service-row-description { font-size: 13px; color: var(--gray-500); }
+.service-row-buy { text-align: right; }
+.service-row-price { font-weight: 700; font-size: 18px; margin-bottom: 6px; }
+@media (max-width: 480px) {
+  .service-row-buy { text-align: left; width: 100%; }
+  .service-row-buy .module-btn { width: 100%; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ORDER STATUS CHIPS
+   One class per state, replacing a per-page hardcoded hex map.
+   Every state the grooming machine can reach has an entry — a
+   missing one renders as an unlabelled grey pill.
+   ══════════════════════════════════════════════════════════════ */
+.status-chip { font-weight: 700; }
+.status-draft,
+.status-no_show,
+.status-closed              { background: var(--gray-100); color: var(--gray-700); }
+.status-payment_pending,
+.status-pending_provider_acceptance,
+.status-in_progress         { background: var(--warning-light); color: var(--warning); }
+.status-payment_expired,
+.status-declined_by_provider,
+.status-cancelled_by_customer,
+.status-cancelled_by_provider { background: var(--danger-light); color: var(--danger); }
+.status-confirmed,
+.status-provider_assigned,
+.status-checked_in,
+.status-en_route            { background: var(--primary-light); color: var(--primary); }
+.status-intake_done,
+.status-quality_check       { background: var(--info-light); color: var(--info); }
+.status-awaiting_approval   { background: var(--warning-light); color: var(--warning); }
+.status-ready_for_pickup,
+.status-returning,
+.status-completed           { background: var(--success-light); color: var(--success); }
+.status-disputed            { background: var(--danger-light); color: var(--danger); }
+
+/* ── Customer order list extras ── */
+.balance-due-banner {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.refund-note { margin-top: 8px; font-size: 13px; color: var(--gray-600); }
+.refund-preview { margin-top: 8px; padding: 12px; }
+.refund-preview-row { display: flex; justify-content: space-between; }
+.refund-preview-row.is-total {
+  border-top: 1px solid var(--gray-200);
+  margin-top: 6px;
+  padding-top: 6px;
+  font-weight: 700;
+}
+.disputes-card { margin-top: 16px; }
+.dispute-list-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gray-200);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dispute-list-row:last-child { border-bottom: none; }
+.modal-medium { max-width: 460px; }
+
+/* ── Provider console ── */
+.verification-chip {
+  align-self: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.verification-chip.is-pending   { background: var(--warning-light); color: var(--warning); }
+.verification-chip.is-verified  { background: var(--success-light); color: var(--success); }
+.verification-chip.is-rejected  { background: var(--danger-light); color: var(--danger); }
+.verification-chip.is-suspended { background: var(--gray-100); color: var(--gray-700); }
+
+.form-card { max-width: 640px; }
+.section-heading { margin-top: 18px; }
+.spaced-top { margin-top: 10px; }
+.module-form-row.is-bottom-aligned { align-items: flex-end; }
+
+/* Configuration lists (locations, resources, services) inside the console. */
+.config-list { list-style: none; padding: 0; margin-top: 10px; }
+.config-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gray-200);
+  flex-wrap: wrap;
+}
+.config-list li:last-child { border-bottom: none; }
+
+/* ── Order detail panels (grooming ops workflow) ── */
+.detail-order-number { margin: 0; }
+
+/* Tonal panels: escalations (danger), assignment (info), extra-work approval (warning). */
+.panel-danger  { border: 1px solid var(--danger); }
+.panel-info    { background: var(--primary-light); border: 1px solid var(--primary); }
+.panel-warning { background: var(--warning-light); border: 1px solid var(--warning); }
+
+.panel-row {
+  padding: 10px;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+}
+.panel-row.is-danger  { border: 1px solid var(--danger); background: var(--danger-light); }
+.panel-row.is-warning { border: 1px solid var(--warning); background: white; }
+
+.eta-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.module-form-group.is-flush { margin: 0; }
+.input-narrow { width: 120px; }
+.input-auto { width: auto; }
+.scent-field { min-width: 120px; }
+.variable-item-price { font-weight: 700; }
+
+.execution-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gray-200);
+  flex-wrap: wrap;
+}
+.execution-item-row:last-child { border-bottom: none; }
+
+/* Status history */
+.timeline-list { list-style: none; padding: 0; margin: 0; }
+.timeline-list li { padding: 6px 0; border-bottom: 1px solid var(--gray-100); }
+.timeline-list li:last-child { border-bottom: none; }
+.timeline-meta { margin-left: 8px; font-size: 13px; color: var(--gray-600); }
+
+/* Destructive variant of the module button (escalation). */
+.module-btn.danger { background: var(--danger); color: white; border-color: var(--danger); }
+.module-btn.danger:hover { background: #b91c1c; }
+
+/* ── Admin metric strip (reconciliation / moat KPIs) ── */
+.metric-strip {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  text-align: center;
+  padding: 16px;
+}
+.metric-strip.is-accent { background: var(--info-light); }
+.metric-value { font-weight: 800; font-size: 20px; }
+.metric-value.is-success { color: var(--success); }
+.metric-value.is-warning { color: var(--warning); }
+.metric-value.is-info { color: var(--primary); }

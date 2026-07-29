@@ -9,11 +9,10 @@ interface Props { onNavigate: (path: string) => void }
 
 type Tab = 'overview' | 'services' | 'locations' | 'resources' | 'staff'
 
-const STATUS_BADGE: Record<string, { bg: string; color: string; icon: string }> = {
-  pending:   { bg: '#fef3c7', color: '#92400e', icon: '⏳' },
-  verified:  { bg: '#d1fae5', color: '#065f46', icon: '✓' },
-  rejected:  { bg: '#fee2e2', color: '#991b1b', icon: '✕' },
-  suspended: { bg: '#e5e7eb', color: '#374151', icon: '⏸' },
+// Icon only — the colours live in modules.css as .verification-chip modifiers, so a status
+// looks the same everywhere it is rendered instead of per-page hex.
+const STATUS_ICON: Record<string, string> = {
+  pending: '⏳', verified: '✓', rejected: '✕', suspended: '⏸',
 }
 
 const GroomingProvider: React.FC<Props> = () => {
@@ -68,7 +67,7 @@ const GroomingProvider: React.FC<Props> = () => {
         <div className="module-header"><h1>💈 {t('grooming.providerTitle')}</h1></div>
         <p className="si-edc77e88">{t('grooming.onboardIntro')}</p>
         {err && <div className="module-alert error">{err}</div>}
-        <div className="module-card" style={{ maxWidth: 640 }}>
+        <div className="module-card form-card">
           <h3>{t('grooming.createBusiness')}</h3>
           <div className="module-form-group">
             <label className="module-label">{t('grooming.businessName')} *</label>
@@ -98,7 +97,7 @@ const GroomingProvider: React.FC<Props> = () => {
             <input className="module-input" type="email" value={form.contactEmail}
               onChange={e => setForm({ ...form, contactEmail: e.target.value })} />
           </div>
-          <label className="si-6fa2ebba" style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '8px 0' }}>
+          <label className="consent-row">
             <input type="checkbox" checked={form.offersMobile}
               onChange={e => setForm({ ...form, offersMobile: e.target.checked })} />
             <span>🚐 {t('grooming.offersMobile')}</span>
@@ -111,20 +110,20 @@ const GroomingProvider: React.FC<Props> = () => {
     )
   }
 
-  const badge = STATUS_BADGE[provider.verificationStatus] || STATUS_BADGE.pending
+  const statusIcon = STATUS_ICON[provider.verificationStatus] || STATUS_ICON.pending
   const canManage = provider.myRole === 'owner' || provider.myRole === 'manager'
 
   return (
     <div className="module-page">
-      <div className="module-header" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+      <div className="module-header module-header-split">
         <h1>💈 {provider.businessName}</h1>
-        <span style={{ background: badge.bg, color: badge.color, padding: '6px 14px', borderRadius: 20, fontWeight: 700, fontSize: 13, alignSelf: 'center' }}>
-          {badge.icon} {t(`grooming.status.${provider.verificationStatus}`)}
+        <span className={`verification-chip is-${provider.verificationStatus}`}>
+          {statusIcon} {t(`grooming.status.${provider.verificationStatus}`)}
         </span>
       </div>
 
       {provider.verificationStatus === 'pending' && (
-        <div className="module-alert" style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e' }}>
+        <div className="module-alert warning">
           {t('grooming.pendingReview')}
         </div>
       )}
@@ -181,7 +180,7 @@ const OverviewTab: React.FC<any> = ({ provider, canManage, onSaved, flash, fail,
       <div className="module-form-group"><label className="module-label">{t('grooming.description')}</label>
         <textarea className="module-input" rows={2} value={f.description || ''} disabled={!canManage} onChange={e => set('description', e.target.value)} /></div>
 
-      <h3 style={{ marginTop: 18 }}>{t('grooming.legalPayout')}</h3>
+      <h3 className="section-heading">{t('grooming.legalPayout')}</h3>
       <div className="module-form-row">
         <div className="module-form-group"><label className="module-label">{t('grooming.legalName')}</label>
           <input className="module-input" value={f.legalName || ''} disabled={!canManage} onChange={e => set('legalName', e.target.value)} /></div>
@@ -221,12 +220,12 @@ const ServicesTab: React.FC<any> = ({ provider, canManage, formatCurrency, flash
   const remove = async (id: string) => { try { await apiService.deleteGroomingService(provider.id, id); reload() } catch (e) { fail(e) } }
   return (
     <div className="module-card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+      <div className="module-header-split">
         <h3>{t('grooming.tab.services')}</h3>
         {canManage && <button className="module-btn primary small" onClick={() => setShowAdd(s => !s)}>+ {t('grooming.addService')}</button>}
       </div>
       {showAdd && canManage && (
-        <div className="module-alert si-e120eda2" style={{ marginTop: 10 }}>
+        <div className="module-alert info spaced-top">
           <div className="module-form-row">
             <div className="module-form-group"><label className="module-label">{t('grooming.serviceName')} *</label>
               <input className="module-input" value={n.name} onChange={e => setN({ ...n, name: e.target.value })} placeholder={t('grooming.serviceNamePlaceholder')} /></div>
@@ -248,7 +247,7 @@ const ServicesTab: React.FC<any> = ({ provider, canManage, formatCurrency, flash
         </div>
       )}
       {items.length === 0 ? <p className="si-676930d7">{t('grooming.noServices')}</p> : (
-        <div className="data-table-container" style={{ marginTop: 10 }}>
+        <div className="data-table-container spaced-top">
           <table className="data-table">
             <thead><tr><th>{t('grooming.serviceName')}</th><th>{t('grooming.price')}</th><th>{t('grooming.durationMin')}</th><th>{t('grooming.paymentRule')}</th>{canManage && <th></th>}</tr></thead>
             <tbody>
@@ -281,7 +280,7 @@ const LocationsTab: React.FC<any> = ({ provider, canManage, flash, fail, t }) =>
     <div className="module-card">
       <h3>{t('grooming.tab.locations')}</h3>
       {canManage && (
-        <div className="module-form-row" style={{ alignItems: 'flex-end' }}>
+        <div className="module-form-row is-bottom-aligned">
           <div className="module-form-group"><label className="module-label">{t('grooming.locationName')}</label>
             <input className="module-input" value={n.name} onChange={e => setN({ ...n, name: e.target.value })} /></div>
           <div className="module-form-group"><label className="module-label">{t('grooming.locationType')}</label>
@@ -295,9 +294,9 @@ const LocationsTab: React.FC<any> = ({ provider, canManage, flash, fail, t }) =>
         </div>
       )}
       {items.length === 0 ? <p className="si-676930d7">{t('grooming.noLocations')}</p> : (
-        <ul style={{ listStyle: 'none', padding: 0, marginTop: 10 }}>
+        <ul className="config-list">
           {items.map(l => (
-            <li key={l.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #eee' }}>
+            <li key={l.id}>
               <span>📍 <strong>{l.name}</strong> · {t(l.locationType === 'mobile_zone' ? 'grooming.mobileZone' : 'grooming.premises')}{l.city ? ` · ${l.city}` : ''}</span>
               {canManage && <button className="btn btn-sm btn-outline" onClick={() => remove(l.id)}>{t('grooming.remove')}</button>}
             </li>
@@ -321,7 +320,7 @@ const ResourcesTab: React.FC<any> = ({ provider, canManage, flash, fail, t }) =>
     <div className="module-card">
       <h3>{t('grooming.tab.resources')}</h3>
       {canManage && (
-        <div className="module-form-row" style={{ alignItems: 'flex-end' }}>
+        <div className="module-form-row is-bottom-aligned">
           <div className="module-form-group"><label className="module-label">{t('grooming.resourceName')}</label>
             <input className="module-input" value={n.name} onChange={e => setN({ ...n, name: e.target.value })} /></div>
           <div className="module-form-group"><label className="module-label">{t('grooming.resourceType')}</label>
@@ -332,9 +331,9 @@ const ResourcesTab: React.FC<any> = ({ provider, canManage, flash, fail, t }) =>
         </div>
       )}
       {items.length === 0 ? <p className="si-676930d7">{t('grooming.noResources')}</p> : (
-        <ul style={{ listStyle: 'none', padding: 0, marginTop: 10 }}>
+        <ul className="config-list">
           {items.map(r => (
-            <li key={r.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #eee' }}>
+            <li key={r.id}>
               <span>🛁 <strong>{r.name}</strong> · {t(`grooming.resType.${r.resourceType}`)}</span>
               {canManage && <button className="btn btn-sm btn-outline" onClick={() => remove(r.id)}>{t('grooming.remove')}</button>}
             </li>
@@ -358,7 +357,7 @@ const StaffTab: React.FC<any> = ({ provider, canManage, flash, fail, t }) => {
       <h3>{t('grooming.tab.staff')}</h3>
       <p className="si-676930d7">{t('grooming.staffIntro')}</p>
       {canManage && (
-        <div className="module-form-row" style={{ alignItems: 'flex-end' }}>
+        <div className="module-form-row is-bottom-aligned">
           <div className="module-form-group"><label className="module-label">{t('grooming.staffEmail')}</label>
             <input className="module-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" /></div>
           <div className="module-form-group"><label className="module-label">{t('grooming.role')}</label>
@@ -369,9 +368,9 @@ const StaffTab: React.FC<any> = ({ provider, canManage, flash, fail, t }) => {
           <button className="module-btn primary" onClick={add}>+ {t('grooming.addStaff')}</button>
         </div>
       )}
-      <ul style={{ listStyle: 'none', padding: 0, marginTop: 10 }}>
+      <ul className="config-list">
         {items.map(s => (
-          <li key={s.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #eee' }}>
+          <li key={s.id}>
             <span>👤 <strong>{s.firstName} {s.lastName}</strong> · {s.email} · {t(`grooming.role${s.providerRole === 'manager' ? 'Manager' : s.providerRole === 'owner' ? 'Owner' : 'Staff'}`)}</span>
             {canManage && s.providerRole !== 'owner' && <button className="btn btn-sm btn-outline" onClick={() => remove(s.userId)}>{t('grooming.remove')}</button>}
           </li>

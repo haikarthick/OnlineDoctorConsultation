@@ -1,7 +1,11 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "react", "react-hooks"],
+  "plugins": [
+    "@typescript-eslint",
+    "react",
+    "react-hooks"
+  ],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -11,7 +15,9 @@
   "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module",
-    "ecmaFeatures": { "jsx": true }
+    "ecmaFeatures": {
+      "jsx": true
+    }
   },
   "env": {
     "browser": true,
@@ -19,11 +25,18 @@
     "node": true
   },
   "settings": {
-    "react": { "version": "detect" }
+    "react": {
+      "version": "detect"
+    }
   },
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/ban-types": "warn",
     "@typescript-eslint/no-empty-function": "warn",
@@ -35,7 +48,6 @@
     "react/react-in-jsx-scope": "off",
     "react/no-unescaped-entities": "warn",
     "react/no-unknown-property": "warn",
-
     "react/forbid-dom-props": [
       "error",
       {
@@ -48,8 +60,11 @@
       }
     ]
   },
-  "ignorePatterns": ["dist/", "node_modules/", "coverage/"],
-
+  "ignorePatterns": [
+    "dist/",
+    "node_modules/",
+    "coverage/"
+  ],
   "overrides": [
     {
       "files": [
@@ -109,7 +124,6 @@
         "src/pages/admin/ComplianceDashboard.tsx",
         "src/pages/admin/ConsultationManagement.tsx",
         "src/pages/admin/FinanceReports.tsx",
-        "src/pages/admin/GroomingProvidersAdmin.tsx",
         "src/pages/admin/HolidayManagement.tsx",
         "src/pages/admin/MasterDataManagement.tsx",
         "src/pages/admin/MedicalRecordManagement.tsx",
@@ -126,13 +140,6 @@
         "src/pages/doctor/PrescriptionWriter.tsx",
         "src/pages/doctor/Prescriptions.tsx",
         "src/pages/doctor/VetEarnings.tsx",
-        "src/pages/grooming/FindGrooming.tsx",
-        "src/pages/grooming/GroomingEarnings.tsx",
-        "src/pages/grooming/GroomingOrderDetail.tsx",
-        "src/pages/grooming/GroomingPassport.tsx",
-        "src/pages/grooming/GroomingProvider.tsx",
-        "src/pages/grooming/GroomingProviderPublic.tsx",
-        "src/pages/grooming/MyGroomingOrders.tsx",
         "src/pages/hospitalnetwork/HospitalNetworks.tsx",
         "src/pages/hospitalnetwork/NetworkRoleMatrix.tsx",
         "src/pages/petowner/BookConsultation.tsx",
@@ -162,8 +169,13 @@
       }
     },
     {
-      "files": ["src/**/*.test.tsx", "src/test/**/*.tsx"],
-      "rules": { "react/forbid-dom-props": "off" }
+      "files": [
+        "src/**/*.test.tsx",
+        "src/test/**/*.tsx"
+      ],
+      "rules": {
+        "react/forbid-dom-props": "off"
+      }
     }
   ]
 }

@@ -17,6 +17,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
   const [providerId, setProviderId] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
   const [refundFor, setRefundFor] = useState<any | null>(null)
+  const [statement, setStatement] = useState<any | null>(null)
   const [refundAmt, setRefundAmt] = useState('')
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
@@ -45,47 +46,54 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
   }
   void providerId
 
+  const openStatement = async (settlementId: string) => {
+    try {
+      setBusy(settlementId); setErr('')
+      setStatement((await apiService.getGroomingSettlementStatement(settlementId)).data)
+    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+  }
+
   if (loading) return <div className="module-page"><div className="loading-container"><div className="loading-spinner" /></div></div>
 
-  const stat = (label: string, val: number, color: string) => (
-    <div className="module-card" style={{ flex: '1 1 160px', textAlign: 'center' }}>
-      <div style={{ fontSize: 24, fontWeight: 800, color }}>{formatCurrency(val)}</div>
-      <div className="si-676930d7">{label}</div>
+  const stat = (label: string, val: number, tone: 'success' | 'warning' | 'info') => (
+    <div className="module-card earnings-stat">
+      <div className={`earnings-stat-value is-${tone}`}>{formatCurrency(val)}</div>
+      <div className="slot-hint">{label}</div>
     </div>
   )
 
   return (
     <div className="module-page">
-      <div className="module-header" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+      <div className="module-header module-header-split">
         <h1>💰 {t('groomingEarnings.title')}</h1>
         <button className="module-btn" onClick={() => onNavigate('/grooming/orders')}>← {t('groomingEarnings.backToBoard')}</button>
       </div>
       {err && <div className="module-alert error">{err}</div>}
       {summary && (
         <>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            {stat(t('groomingEarnings.available'), Number(summary.available), '#16a34a')}
-            {stat(t('groomingEarnings.clearing'), Number(summary.clearing), '#d97706')}
-            {stat(t('groomingEarnings.paid'), Number(summary.paid), '#2563eb')}
+          <div className="earnings-stat-row">
+            {stat(t('groomingEarnings.available'), Number(summary.available), 'success')}
+            {stat(t('groomingEarnings.clearing'), Number(summary.clearing), 'warning')}
+            {stat(t('groomingEarnings.paid'), Number(summary.paid), 'info')}
           </div>
-          <p className="si-676930d7">{t('groomingEarnings.manualNote')}</p>
+          <p className="slot-hint">{t('groomingEarnings.manualNote')}</p>
         </>
       )}
 
       {report && (
         <div className="module-card">
           <h3>{t('groomingReport.title')}</h3>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <div className="metric-row">
             <div><strong>{report.ordersByStatus?.completed || 0}</strong> {t('groomingReport.completed')}</div>
             <div><strong>{report.ordersByStatus?.confirmed || 0}</strong> {t('groomingReport.upcoming')}</div>
             <div><strong>{report.ordersByStatus?.no_show || 0}</strong> {t('groomingReport.noShows')}</div>
             <div><strong>{report.disputes?.total || 0}</strong> {t('groomingReport.disputes')}</div>
           </div>
           {report.revenueByService?.length > 0 && (
-            <div style={{ marginTop: 10 }}>
-              <div className="si-676930d7">{t('groomingReport.byService')}</div>
+            <div className="revenue-breakdown">
+              <div className="slot-hint">{t('groomingReport.byService')}</div>
               {report.revenueByService.map((s: any, i: number) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                <div key={i} className="revenue-row">
                   <span>{s.name} ×{s.count}</span><span>{formatCurrency(Number(s.revenue))}</span>
                 </div>
               ))}
@@ -95,16 +103,16 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
       )}
 
       {disputes.length > 0 && (
-        <div className="module-card" style={{ border: '1px solid #fca5a5' }}>
+        <div className="module-card dispute-panel">
           <h3>{t('groomingDispute.title')}</h3>
           {disputes.map(d => (
-            <div key={d.id} style={{ padding: 10, border: '1px solid #fecaca', borderRadius: 8, marginBottom: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                <div><strong>{d.orderNumber}</strong> · {d.reason}{d.comments ? <div className="si-676930d7">{d.comments}</div> : null}</div>
+            <div key={d.id} className="dispute-row">
+              <div className="dispute-row-head">
+                <div><strong>{d.orderNumber}</strong> · {d.reason}{d.comments ? <div className="slot-hint">{d.comments}</div> : null}</div>
                 <span className="badge badge-inactive">{t(`groomingDispute.st.${d.status}`, { defaultValue: (d.status || '').replace(/_/g, ' ') })}</span>
               </div>
               {['open', 'under_review'].includes(d.status) && (
-                <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                <div className="order-row-actions">
                   <button className="btn btn-sm btn-outline" disabled={busy === d.id} onClick={() => respondDispute(d.id, 'under_review')}>{t('groomingDispute.review')}</button>
                   <button className="btn btn-sm btn-primary" disabled={busy === d.id} onClick={() => { setRefundFor(d); setRefundAmt('') }}>{t('groomingDispute.partialRefund')}</button>
                   <button className="btn btn-sm btn-outline" disabled={busy === d.id} onClick={() => respondDispute(d.id, 'resolved')}>{t('groomingDispute.resolve')}</button>
@@ -118,7 +126,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
 
       <div className="module-card">
         <h3>{t('groomingEarnings.ledger')}</h3>
-        {entries.length === 0 ? <p className="si-676930d7">{t('groomingEarnings.noEntries')}</p> : (
+        {entries.length === 0 ? <p className="slot-hint">{t('groomingEarnings.noEntries')}</p> : (
           <div className="data-table-container">
             <table className="data-table">
               <thead><tr><th>{t('groomingEarnings.order')}</th><th>{t('groomingEarnings.gross')}</th><th>{t('groomingEarnings.commission')}</th><th>{t('groomingEarnings.net')}</th><th>{t('groomingEarnings.status')}</th></tr></thead>
@@ -140,10 +148,10 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
 
       <div className="module-card">
         <h3>{t('groomingEarnings.settlements')}</h3>
-        {settlements.length === 0 ? <p className="si-676930d7">{t('groomingEarnings.noSettlements')}</p> : (
+        {settlements.length === 0 ? <p className="slot-hint">{t('groomingEarnings.noSettlements')}</p> : (
           <div className="data-table-container">
             <table className="data-table">
-              <thead><tr><th>{t('groomingEarnings.date')}</th><th>{t('groomingEarnings.amount')}</th><th>TDS</th><th>{t('groomingEarnings.netPaid')}</th><th>{t('groomingEarnings.method')}</th><th>{t('groomingEarnings.reference')}</th></tr></thead>
+              <thead><tr><th>{t('groomingEarnings.date')}</th><th>{t('groomingEarnings.amount')}</th><th>TDS</th><th>{t('groomingEarnings.netPaid')}</th><th>{t('groomingEarnings.method')}</th><th>{t('groomingEarnings.reference')}</th><th>{t('groomingEarnings.statement')}</th></tr></thead>
               <tbody>
                 {settlements.map(s => (
                   <tr key={s.id}>
@@ -153,6 +161,14 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
                     <td>{formatCurrency(Number(s.netPaid))}</td>
                     <td>{s.method}</td>
                     <td>{s.reference || '—'}</td>
+                    <td>
+                      {/* The payout amount alone is not reconcilable — the provider needs to see
+                          WHICH bookings it covered. */}
+                      <button className="btn btn-sm btn-outline" disabled={busy === s.id}
+                        onClick={() => openStatement(s.id)}>
+                        {t('groomingEarnings.viewStatement')}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -160,16 +176,60 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
           </div>
         )}
       </div>
+      {statement && (
+        <div className="modal-overlay" onClick={() => setStatement(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{t('groomingEarnings.statementTitle')}</h3>
+            </div>
+            <div className="modal-body">
+              <div className="metric-row">
+                <div><span className="field-caption">{t('groomingEarnings.netPaid')}</span><div><strong>{formatCurrency(Number(statement.netPaid))}</strong></div></div>
+                <div><span className="field-caption">TDS</span><div>{formatCurrency(Number(statement.tdsAmount))}</div></div>
+                <div><span className="field-caption">{t('groomingEarnings.reference')}</span><div>{statement.reference || '—'}</div></div>
+                <div><span className="field-caption">{t('groomingEarnings.date')}</span><div>{statement.settledAt ? new Date(statement.settledAt).toLocaleDateString() : '—'}</div></div>
+              </div>
+              {statement.notes && <p className="slot-hint">{statement.notes}</p>}
+              <div className="data-table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>{t('groomingEarnings.order')}</th>
+                      <th>{t('groomingEarnings.gross')}</th>
+                      <th>{t('groomingEarnings.commission')}</th>
+                      <th>{t('groomingEarnings.net')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(statement.lines || []).map((l: any) => (
+                      <tr key={l.id}>
+                        <td>{l.orderNumber || '—'}</td>
+                        <td>{formatCurrency(Number(l.grossAmount))}</td>
+                        <td>-{formatCurrency(Number(l.commissionAmount))}</td>
+                        <td>{formatCurrency(Number(l.netAmount))}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-outline" onClick={() => setStatement(null)}>{t('common.close')}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {refundFor && (
         <div className="modal-overlay" onClick={() => setRefundFor(null)}>
-          <div className="modal-content" style={{ maxWidth: 400 }} onClick={e => e.stopPropagation()}>
+          <div className="modal-content modal-narrow" onClick={e => e.stopPropagation()}>
             <h3>{t('groomingDispute.partialRefund')}</h3>
-            <p className="si-676930d7">{refundFor.orderNumber} · {refundFor.reason}</p>
+            <p className="slot-hint">{refundFor.orderNumber} · {refundFor.reason}</p>
             <label className="module-label">{t('groomingDispute.refundPrompt')}</label>
             <input className="module-input" type="number" min="0" step="0.01" value={refundAmt}
               onChange={e => setRefundAmt(e.target.value)} />
-            <div className="si-a5de6cea" style={{ marginTop: 6 }}>{t('groomingDispute.refundHint')}</div>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
+            <div className="slot-hint">{t('groomingDispute.refundHint')}</div>
+            <div className="modal-footer">
               <button className="btn btn-outline" onClick={() => setRefundFor(null)}>{t('groomingDispute.cancel')}</button>
               <button className="btn btn-primary"
                 disabled={!(Number(refundAmt) > 0) || busy === refundFor.id}

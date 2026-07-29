@@ -34,12 +34,12 @@ const FindGrooming: React.FC<Props> = ({ onNavigate }) => {
   return (
     <div className="module-page">
       <div className="module-header"><h1>💈 {t('groomingFind.title')}</h1></div>
-      <p className="si-edc77e88">{t('groomingFind.subtitle')}</p>
+      <p className="page-subtitle">{t('groomingFind.subtitle')}</p>
 
-      <div className="module-card" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-        <input className="module-input" style={{ flex: '1 1 240px' }} placeholder={t('groomingFind.searchPlaceholder')}
+      <div className="module-card search-filter-bar">
+        <input className="module-input search-input" placeholder={t('groomingFind.searchPlaceholder')}
           value={search} onChange={e => setSearch(e.target.value)} />
-        <label style={{ display: 'flex', gap: 8, alignItems: 'center', whiteSpace: 'nowrap' }}>
+        <label className="filter-checkbox">
           <input type="checkbox" checked={mobileOnly} onChange={e => setMobileOnly(e.target.checked)} />
           <span>🚐 {t('groomingFind.mobileOnly')}</span>
         </label>
@@ -47,45 +47,55 @@ const FindGrooming: React.FC<Props> = ({ onNavigate }) => {
 
       {err && <div className="module-alert error">{err}</div>}
       {loading ? <div className="loading-container"><div className="loading-spinner" /></div>
-        : items.length === 0 ? <div className="empty-state"><div className="si-71a36f28">💈</div><h3>{t('groomingFind.none')}</h3><p>{t('groomingFind.noneHint')}</p></div>
-          : (
-            <>
-              <p className="si-c3b93ebb">{t('groomingFind.count', { count: total })}</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
-                {items.map(p => (
-                  <div key={p.id} className="module-card" style={{ cursor: 'pointer', transition: 'box-shadow .2s' }}
-                    onClick={() => onNavigate(`/grooming/provider/${p.id}`)}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.boxShadow = '0 6px 24px rgba(0,0,0,.12)'}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.boxShadow = ''}>
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                      <div style={{ width: 54, height: 54, borderRadius: 12, background: 'linear-gradient(135deg,#667eea,#764ba2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>💈</div>
-                      <div style={{ minWidth: 0 }}>
-                        <h3 style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.businessName}</h3>
-                        <div style={{ fontSize: 13, color: '#6b7280' }}>⭐ {Number(p.rating || 0).toFixed(1)} · {p.totalReviews || 0}</div>
+        : items.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">💈</div>
+            <h3>{t('groomingFind.none')}</h3>
+            <p>{t('groomingFind.noneHint')}</p>
+          </div>
+        ) : (
+          <>
+            <p className="result-count">{t('groomingFind.count', { count: total })}</p>
+            {/* Same grid the doctor search uses, so the two discovery journeys match. */}
+            <div className="vet-grid">
+              {items.map(p => (
+                <div key={p.id} className="module-card provider-card"
+                  onClick={() => onNavigate(`/grooming/provider/${p.id}`)}>
+                  <div className="provider-card-head">
+                    <div className="provider-avatar" aria-hidden="true">💈</div>
+                    <div className="provider-card-identity">
+                      <h3 className="provider-card-name">{p.businessName}</h3>
+                      <div className="provider-card-rating">
+                        ⭐ {Number(p.rating || 0).toFixed(1)} · {p.totalReviews || 0}
                       </div>
                     </div>
-                    <div style={{ marginTop: 10, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      {p.offersMobile && <span className="si-d9973be4">🚐 {t('groomingFind.mobile')}</span>}
-                      {p.offersAtPremises && <span className="si-d9973be4">🏠 {t('groomingFind.atPremises')}</span>}
-                    </div>
-                    {p.priceFrom != null && <div style={{ marginTop: 10, fontWeight: 700 }}>{t('groomingFind.from')} {formatCurrency(Number(p.priceFrom))}</div>}
-                    <button className="module-btn primary si-1e1fafbf" style={{ marginTop: 10, width: '100%' }}
-                      onClick={e => { e.stopPropagation(); onNavigate(`/grooming/provider/${p.id}`) }}>
-                      {t('groomingFind.viewBook')}
-                    </button>
                   </div>
-                ))}
-              </div>
-            </>
-          )}
+                  <div className="provider-card-tags">
+                    {p.offersMobile && <span className="module-badge">🚐 {t('groomingFind.mobile')}</span>}
+                    {p.offersAtPremises && <span className="module-badge">🏠 {t('groomingFind.atPremises')}</span>}
+                  </div>
+                  {p.priceFrom != null && (
+                    <div className="provider-card-price">
+                      {t('groomingFind.from')} {formatCurrency(Number(p.priceFrom))}
+                    </div>
+                  )}
+                  <button className="module-btn primary provider-card-cta"
+                    onClick={e => { e.stopPropagation(); onNavigate(`/grooming/provider/${p.id}`) }}>
+                    {t('groomingFind.viewBook')}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
       {/* Supply-side entry point: the marketplace only works if groomers can find their way in.
           Hidden for users who already run a business (they have the console instead). */}
       {!hasPermission('grooming_provider_console') && (
-        <div className="module-card" style={{ marginTop: 24, display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ minWidth: 0 }}>
-            <h3 style={{ margin: 0 }}>🏪 {t('groomingFind.ownerCtaTitle')}</h3>
-            <p className="si-676930d7" style={{ margin: '4px 0 0' }}>{t('groomingFind.ownerCtaDesc')}</p>
+        <div className="module-card cta-banner">
+          <div className="cta-banner-copy">
+            <h3>🏪 {t('groomingFind.ownerCtaTitle')}</h3>
+            <p>{t('groomingFind.ownerCtaDesc')}</p>
           </div>
           <button className="module-btn primary" onClick={() => onNavigate('/grooming/provider')}>
             {t('groomingFind.ownerCtaBtn')}

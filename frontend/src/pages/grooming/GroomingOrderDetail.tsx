@@ -78,25 +78,25 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
 
   return (
     <div className="module-page">
-      <button className="module-btn" style={{ marginBottom: 12 }} onClick={() => onNavigate(isProvider ? '/grooming/orders' : '/grooming/my-orders')}>← {t('groomingDetail.back')}</button>
+      <button className="module-btn back-link" onClick={() => onNavigate(isProvider ? '/grooming/orders' : '/grooming/my-orders')}>← {t('groomingDetail.back')}</button>
       {msg && <div className="module-alert success">{msg}</div>}
       {err && <div className="module-alert error">{err}</div>}
 
       <div className="module-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <div><h2 style={{ margin: 0 }}>{order.orderNumber}</h2>
-            <div className="si-676930d7">{order.scheduledDate} · {order.timeSlotStart} · {t(order.serviceMode === 'mobile' ? 'groomingBook.mobile' : 'groomingBook.atPremises')}</div></div>
-          <div style={{ textAlign: 'right' }}>
+        <div className="order-row-head">
+          <div><h2 className="detail-order-number">{order.orderNumber}</h2>
+            <div className="slot-hint">{order.scheduledDate} · {order.timeSlotStart} · {t(order.serviceMode === 'mobile' ? 'groomingBook.mobile' : 'groomingBook.atPremises')}</div></div>
+          <div className="order-row-amount">
             <span className="badge badge-info">{t(`groomingStatus.${order.status}`, { defaultValue: (order.status || '').replace(/_/g, ' ') })}</span>
-            <div style={{ fontWeight: 700, marginTop: 4 }}>{formatCurrency(Number(order.grandTotal))}</div>
-            {order.invoiceNumber && <div className="si-676930d7">🧾 {order.invoiceNumber}</div>}
+            <div className="order-row-total">{formatCurrency(Number(order.grandTotal))}</div>
+            {order.invoiceNumber && <div className="slot-hint">🧾 {order.invoiceNumber}</div>}
           </div>
         </div>
       </div>
 
       {/* Wellness nudge — S.C.E.N.T. flagged "vet advised" */}
       {!isProvider && order.intake && SCENT_KEYS.some(k => order.intake[`scent${k}`] === 'vet_advised') && (
-        <div className="module-alert" style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+        <div className="module-alert error vet-advised-banner">
           <span>🩺 {t('groomingEsc.wellnessNudge')}</span>
           <button className="btn btn-sm btn-primary" onClick={() => onNavigate(`/book-consultation${order.animalId ? `?animalId=${order.animalId}` : ''}`)}>{t('groomingEsc.bookConsult')}</button>
         </div>
@@ -104,47 +104,47 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
 
       {/* Safety escalation (groomer → vet) */}
       {(escalations.length > 0 || (isProvider && active)) && (
-        <div className="module-card" style={{ border: '1px solid #fca5a5' }}>
+        <div className="module-card panel-danger">
           <h3>🚨 {t('groomingEsc.title')}</h3>
           {escalations.map(e => (
-            <div key={e.id} style={{ padding: 10, border: '1px solid #fecaca', borderRadius: 8, marginBottom: 8, background: '#fff5f5' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                <div><strong>{e.issueType}</strong>{e.description ? <div className="si-676930d7">{e.description}</div> : null}</div>
+            <div key={e.id} className="panel-row is-danger">
+              <div className="order-row-head">
+                <div><strong>{e.issueType}</strong>{e.description ? <div className="slot-hint">{e.description}</div> : null}</div>
                 <span className="badge badge-inactive">{t(`groomingEsc.st.${e.status}`, { defaultValue: (e.status || '').replace(/_/g, ' ') })}</span>
               </div>
               {!isProvider && !['resolved', 'dismissed'].includes(e.status) && (
-                <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                <div className="order-row-actions">
                   <button className="btn btn-sm btn-primary" onClick={() => bookVetConsult(e.id)}>🩺 {t('groomingEsc.bookConsult')}</button>
                   <button className="btn btn-sm btn-outline" disabled={busy} onClick={() => resolveEsc(e.id, 'resolved')}>{t('groomingEsc.markResolved')}</button>
                 </div>
               )}
               {isProvider && !['resolved', 'dismissed'].includes(e.status) && (
-                <button className="btn btn-sm btn-outline" style={{ marginTop: 8 }} disabled={busy} onClick={() => resolveEsc(e.id, 'dismissed')}>{t('groomingEsc.dismiss')}</button>
+                <button className="btn btn-sm btn-outline spaced-top" disabled={busy} onClick={() => resolveEsc(e.id, 'dismissed')}>{t('groomingEsc.dismiss')}</button>
               )}
             </div>
           ))}
           {isProvider && active && (
-            <div className="module-form-row" style={{ alignItems: 'flex-end' }}>
+            <div className="module-form-row is-bottom-aligned">
               <div className="module-form-group"><label className="module-label">{t('groomingEsc.issueType')}</label>
                 <input className="module-input" value={escType} onChange={e => setEscType(e.target.value)} placeholder={t('groomingEsc.issuePlaceholder')} /></div>
               <div className="module-form-group"><label className="module-label">{t('groomingEsc.description')}</label>
                 <input className="module-input" value={escDesc} onChange={e => setEscDesc(e.target.value)} /></div>
-              <button className="module-btn" style={{ background: '#dc2626', color: 'white' }} disabled={busy} onClick={raiseEsc}>🚨 {t('groomingEsc.raise')}</button>
+              <button className="module-btn danger" disabled={busy} onClick={raiseEsc}>🚨 {t('groomingEsc.raise')}</button>
             </div>
           )}
-          <p className="si-676930d7">{t('groomingEsc.disclaimer')}</p>
+          <p className="slot-hint">{t('groomingEsc.disclaimer')}</p>
         </div>
       )}
 
       {/* Mobile tracking */}
       {order.serviceMode === 'mobile' && (order.status === 'en_route' || (isProvider && !completed)) && (
-        <div className="module-card" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+        <div className="module-card panel-info">
           {order.status === 'en_route'
             ? <div>🚚 <strong>{t('groomingVar.onTheWay')}</strong>{order.etaMinutes ? ` · ${t('groomingVar.eta', { min: order.etaMinutes })}` : ''}</div>
-            : isProvider && <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-                <div className="module-form-group" style={{ margin: 0 }}>
+            : isProvider && <div className="eta-row">
+                <div className="module-form-group is-flush">
                   <label className="module-label">{t('groomingVar.etaLabel')}</label>
-                  <input className="module-input" type="number" min={0} value={eta} onChange={e => setEta(e.target.value)} style={{ width: 120 }} />
+                  <input className="module-input input-narrow" type="number" min={0} value={eta} onChange={e => setEta(e.target.value)} />
                 </div>
                 <button className="module-btn primary" disabled={busy} onClick={setOnTheWay}>🚚 {t('groomingVar.markOnTheWay')}</button>
               </div>}
@@ -153,24 +153,24 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
 
       {/* Variable-price extra work */}
       {(pendingVar.length > 0 || (isProvider && active)) && (
-        <div className="module-card" style={{ border: '1px solid #fde68a', background: '#fffbeb' }}>
+        <div className="module-card panel-warning">
           <h3>➕ {t('groomingVar.title')}</h3>
           {pendingVar.map((it: any) => (
-            <div key={it.id} style={{ padding: 10, border: '1px solid #fcd34d', borderRadius: 8, marginBottom: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                <div><strong>{it.name}</strong>{it.reason ? <div className="si-676930d7">{it.reason}</div> : null}</div>
-                <div style={{ fontWeight: 700 }}>+{formatCurrency(Number(it.lineTotal))}</div>
+            <div key={it.id} className="panel-row is-warning">
+              <div className="order-row-head">
+                <div><strong>{it.name}</strong>{it.reason ? <div className="slot-hint">{it.reason}</div> : null}</div>
+                <div className="variable-item-price">+{formatCurrency(Number(it.lineTotal))}</div>
               </div>
               {!isProvider ? (
-                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <div className="order-row-actions">
                   <button className="btn btn-sm btn-primary" disabled={busy} onClick={() => respondVariable(it.id, true)}>{t('groomingVar.approvePay')}</button>
                   <button className="btn btn-sm btn-outline" disabled={busy} onClick={() => respondVariable(it.id, false)}>{t('groomingVar.decline')}</button>
                 </div>
-              ) : <div className="si-676930d7" style={{ marginTop: 6 }}>{t('groomingVar.waitingOwner')}</div>}
+              ) : <div className="slot-hint">{t('groomingVar.waitingOwner')}</div>}
             </div>
           ))}
           {isProvider && active && (
-            <div className="module-form-row" style={{ alignItems: 'flex-end' }}>
+            <div className="module-form-row is-bottom-aligned">
               <div className="module-form-group"><label className="module-label">{t('groomingVar.workName')}</label>
                 <input className="module-input" value={varName} onChange={e => setVarName(e.target.value)} placeholder={t('groomingVar.workPlaceholder')} /></div>
               <div className="module-form-group"><label className="module-label">{t('groomingVar.price')}</label>
@@ -187,10 +187,10 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
       <div className="module-card">
         <h3>{t('groomingDetail.items')}</h3>
         {(order.items || []).map((it: any) => (
-          <div key={it.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, padding: '8px 0', borderBottom: '1px solid #eee', flexWrap: 'wrap' }}>
+          <div key={it.id} className="execution-item-row">
             <span>{it.itemType === 'addon' ? '➕ ' : ''}{it.name} · {formatCurrency(Number(it.lineTotal))}</span>
             {isProvider && !completed ? (
-              <select className="module-input" style={{ width: 'auto' }} value={it.status} onChange={e => setItem(it.id, e.target.value)}>
+              <select className="module-input input-auto" value={it.status} onChange={e => setItem(it.id, e.target.value)}>
                 {['pending', 'started', 'completed', 'skipped', 'awaiting_approval', 'paused'].map(s => <option key={s} value={s}>{t(`groomingItem.${s}`, { defaultValue: s.replace(/_/g, ' ') })}</option>)}
               </select>
             ) : <span className="badge badge-inactive">{t(`groomingItem.${it.status}`, { defaultValue: (it.status || '').replace(/_/g, ' ') })}</span>}
@@ -206,9 +206,9 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
             <div className="module-form-group"><label className="module-label">{t('groomingDetail.arrivalCondition')}</label>
               <textarea className="module-input" rows={2} value={intake.arrivalCondition || ''} onChange={e => setIntake({ ...intake, arrivalCondition: e.target.value })} /></div>
             <label className="module-label">{t('groomingDetail.scent')}</label>
-            <div className="module-form-row" style={{ flexWrap: 'wrap' }}>
+            <div className="module-form-row">
               {SCENT_KEYS.map(k => (
-                <div className="module-form-group" key={k} style={{ minWidth: 120 }}>
+                <div className="module-form-group scent-field" key={k}>
                   <label className="module-label">{t(`groomingDetail.scent${k}`)}</label>
                   <select className="module-input" value={intake[`scent${k}`] || ''} onChange={e => setIntake({ ...intake, [`scent${k}`]: e.target.value || null })}>
                     <option value="">—</option>
@@ -224,14 +224,14 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
         ) : order.intake ? (
           <div>
             {order.intake.arrivalCondition && <p>{order.intake.arrivalCondition}</p>}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="chip-row">
               {SCENT_KEYS.map(k => order.intake[`scent${k}`] && (
                 <span key={k} className="badge badge-inactive">{t(`groomingDetail.scent${k}`)}: {t(`groomingScent.${order.intake[`scent${k}`]}`)}</span>
               ))}
             </div>
-            {order.intake.scentNotes && <p className="si-676930d7">{order.intake.scentNotes}</p>}
+            {order.intake.scentNotes && <p className="slot-hint">{order.intake.scentNotes}</p>}
           </div>
-        ) : <p className="si-676930d7">{t('groomingDetail.noIntake')}</p>}
+        ) : <p className="slot-hint">{t('groomingDetail.noIntake')}</p>}
       </div>
 
       {/* Report card */}
@@ -251,19 +251,19 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
           <div>
             {order.reportCard.summary && <p><strong>{order.reportCard.summary}</strong></p>}
             {order.reportCard.aftercareNotes && <p>🧴 {order.reportCard.aftercareNotes}</p>}
-            {order.reportCard.productsUsed && <p className="si-676930d7">{t('groomingDetail.productsUsed')}: {order.reportCard.productsUsed}</p>}
+            {order.reportCard.productsUsed && <p className="slot-hint">{t('groomingDetail.productsUsed')}: {order.reportCard.productsUsed}</p>}
           </div>
-        ) : <p className="si-676930d7">{t('groomingDetail.noReport')}</p>}
+        ) : <p className="slot-hint">{t('groomingDetail.noReport')}</p>}
       </div>
 
       {/* Timeline */}
       <div className="module-card">
         <h3>{t('groomingDetail.timeline')}</h3>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul className="timeline-list">
           {(order.history || []).map((h: any, i: number) => (
-            <li key={i} style={{ padding: '6px 0', borderBottom: '1px solid #f0f0f0' }}>
+            <li key={i}>
               <span className="badge badge-info">{t(`groomingStatus.${h.toStatus}`, { defaultValue: (h.toStatus || '').replace(/_/g, ' ') })}</span>
-              <span className="si-676930d7" style={{ marginLeft: 8 }}>{new Date(h.createdAt).toLocaleString()}{h.note ? ` · ${h.note}` : ''}</span>
+              <span className="timeline-meta">{new Date(h.createdAt).toLocaleString()}{h.note ? ` · ${h.note}` : ''}</span>
             </li>
           ))}
         </ul>

@@ -26,38 +26,42 @@ const GroomingProviderPublic: React.FC<Props> = ({ onNavigate, id }) => {
 
   return (
     <div className="module-page">
-      <button className="module-btn" style={{ marginBottom: 12 }} onClick={() => onNavigate('/grooming/find')}>← {t('groomingPublic.back')}</button>
+      <button className="module-btn back-link" onClick={() => onNavigate('/grooming/find')}>← {t('groomingPublic.back')}</button>
       <div className="module-card">
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ width: 68, height: 68, borderRadius: 14, background: 'linear-gradient(135deg,#667eea,#764ba2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>💈</div>
-          <div>
-            <h1 style={{ margin: 0 }}>{p.businessName}</h1>
-            <div style={{ color: '#6b7280' }}>⭐ {Number(p.rating || 0).toFixed(1)} · {p.totalReviews || 0} · {p.totalOrders || 0} {t('groomingPublic.orders')}</div>
-            <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {p.offersMobile && <span className="si-d9973be4">🚐 {t('groomingFind.mobile')}</span>}
-              {p.offersAtPremises && <span className="si-d9973be4">🏠 {t('groomingFind.atPremises')}</span>}
+        <div className="provider-hero">
+          <div className="provider-hero-avatar" aria-hidden="true">💈</div>
+          <div className="provider-hero-identity">
+            <h1>{p.businessName}</h1>
+            <div className="provider-card-rating">
+              ⭐ {Number(p.rating || 0).toFixed(1)} · {p.totalReviews || 0} · {p.totalOrders || 0} {t('groomingPublic.orders')}
+            </div>
+            <div className="provider-card-tags">
+              {p.offersMobile && <span className="module-badge">🚐 {t('groomingFind.mobile')}</span>}
+              {p.offersAtPremises && <span className="module-badge">🏠 {t('groomingFind.atPremises')}</span>}
             </div>
           </div>
         </div>
-        {p.description && <p style={{ marginTop: 12 }}>{p.description}</p>}
-        {p.contactPhone && <div className="si-676930d7">📞 {p.contactPhone}</div>}
+        {p.description && <p className="provider-hero-description">{p.description}</p>}
+        {p.contactPhone && <div className="slot-hint">📞 {p.contactPhone}</div>}
       </div>
 
       <div className="module-card">
         <h3>{t('groomingPublic.services')}</h3>
-        {(!p.services || p.services.length === 0) ? <p className="si-676930d7">{t('groomingPublic.noServices')}</p>
+        {(!p.services || p.services.length === 0) ? <p className="slot-hint">{t('groomingPublic.noServices')}</p>
           : (
-            <div style={{ display: 'grid', gap: 12 }}>
+            <div className="service-list">
               {p.services.map((s: any) => (
-                <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: 12, border: '1px solid #e5e7eb', borderRadius: 10, flexWrap: 'wrap' }}>
-                  <div style={{ minWidth: 0 }}>
+                <div key={s.id} className="service-row">
+                  <div className="service-row-info">
                     <strong>{s.name}</strong>
-                    <div className="si-676930d7">{s.durationMinutes} min · {t(s.paymentRule === 'deposit' ? 'grooming.payDeposit' : 'grooming.payFull')}</div>
-                    {s.description && <div style={{ fontSize: 13, color: '#6b7280' }}>{s.description}</div>}
+                    <div className="slot-hint">{s.durationMinutes} {t('groomingBook.minutes')} · {t(s.paymentRule === 'deposit' ? 'grooming.payDeposit' : 'grooming.payFull')}</div>
+                    {s.description && <div className="service-row-description">{s.description}</div>}
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 700, fontSize: 18 }}>{formatCurrency(Number(s.basePrice))}{Number(s.taxPercent) > 0 ? ` +${s.taxPercent}%` : ''}</div>
-                    <button className="module-btn primary small" style={{ marginTop: 6 }}
+                  <div className="service-row-buy">
+                    <div className="service-row-price">
+                      {formatCurrency(Number(s.basePrice))}{Number(s.taxPercent) > 0 ? ` +${s.taxPercent}%` : ''}
+                    </div>
+                    <button className="module-btn primary small"
                       onClick={() => onNavigate(`/grooming/book?providerId=${p.id}&serviceId=${s.id}`)}>
                       {t('groomingPublic.book')}
                     </button>

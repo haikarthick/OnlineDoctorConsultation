@@ -49,18 +49,18 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
       <div className="module-header"><h1>💈 {t('groomingAdmin.title')}</h1></div>
       <p className="si-edc77e88">{t('groomingAdmin.subtitle')}</p>
       {recon && (
-        <div className="module-card" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'space-around', textAlign: 'center' }}>
-          <div><div style={{ fontWeight: 800, fontSize: 20 }}>{formatCurrency(Number(recon.orders?.collected || 0))}</div><div className="si-676930d7">{t('groomingAdmin.collected')}</div></div>
-          <div><div style={{ fontWeight: 800, fontSize: 20, color: '#16a34a' }}>{formatCurrency(Number(recon.orders?.commission || 0))}</div><div className="si-676930d7">{t('groomingAdmin.commission')}</div></div>
-          <div><div style={{ fontWeight: 800, fontSize: 20, color: '#d97706' }}>{formatCurrency(Number(recon.payableNow || 0))}</div><div className="si-676930d7">{t('groomingAdmin.payableNow')}</div></div>
-          <div><div style={{ fontWeight: 800, fontSize: 20, color: '#2563eb' }}>{formatCurrency(Number(recon.totalSettled || 0))}</div><div className="si-676930d7">{t('groomingAdmin.settledTotal')}</div></div>
+        <div className="module-card metric-strip">
+          <div><div className="metric-value">{formatCurrency(Number(recon.orders?.collected || 0))}</div><div className="slot-hint">{t('groomingAdmin.collected')}</div></div>
+          <div><div className="metric-value is-success">{formatCurrency(Number(recon.orders?.commission || 0))}</div><div className="slot-hint">{t('groomingAdmin.commission')}</div></div>
+          <div><div className="metric-value is-warning">{formatCurrency(Number(recon.payableNow || 0))}</div><div className="slot-hint">{t('groomingAdmin.payableNow')}</div></div>
+          <div><div className="metric-value is-info">{formatCurrency(Number(recon.totalSettled || 0))}</div><div className="slot-hint">{t('groomingAdmin.settledTotal')}</div></div>
         </div>
       )}
       {report?.moat && (
-        <div className="module-card" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'space-around', textAlign: 'center', background: '#f5f3ff' }}>
-          <div><div style={{ fontWeight: 800, fontSize: 20 }}>{report.moat.escalationRatePct}%</div><div className="si-676930d7">{t('groomingReport.escalationRate')}</div></div>
-          <div><div style={{ fontWeight: 800, fontSize: 20 }}>{report.moat.wellnessNudgeConversionPct}%</div><div className="si-676930d7">{t('groomingReport.wellnessConversion')}</div></div>
-          <div><div style={{ fontWeight: 800, fontSize: 20 }}>{report.disputes?.open || 0}</div><div className="si-676930d7">{t('groomingReport.openDisputes')}</div></div>
+        <div className="module-card metric-strip is-accent">
+          <div><div className="metric-value">{report.moat.escalationRatePct}%</div><div className="slot-hint">{t('groomingReport.escalationRate')}</div></div>
+          <div><div className="metric-value">{report.moat.wellnessNudgeConversionPct}%</div><div className="slot-hint">{t('groomingReport.wellnessConversion')}</div></div>
+          <div><div className="metric-value">{report.disputes?.open || 0}</div><div className="slot-hint">{t('groomingReport.openDisputes')}</div></div>
         </div>
       )}
       {msg && <div className="module-alert success">{msg}</div>}
@@ -98,7 +98,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
                         {p.payoutUpi && <div>UPI: {p.payoutUpi}</div>}
                       </td>
                       <td>
-                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        <div className="order-row-actions">
                           {filter !== 'verified' && <button className="btn btn-sm btn-primary" disabled={busy === p.id} onClick={() => verify(p.id)}>{busy === p.id ? '…' : t('groomingAdmin.verify')}</button>}
                           {filter === 'pending' && <button className="btn btn-sm btn-outline" disabled={busy === p.id} onClick={() => { setRejectModal(p.id); setReason('') }}>{t('groomingAdmin.reject')}</button>}
                           {filter === 'verified' && <button className="btn btn-sm btn-primary" disabled={busy === p.id} onClick={() => settle(p.id)}>{t('groomingAdmin.settle')}</button>}
