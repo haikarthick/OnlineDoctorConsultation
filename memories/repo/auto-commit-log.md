@@ -6372,3 +6372,36 @@
 </details>
 
 ---
+
+## 2026-07-29 12:05 · `d97a3b5` · OTHER
+
+**Commit:** docs(memory): record the 2026-07-29 grooming lifecycle work and the design-system ratchet  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-07-29 13:41 · `0afddc3` · OTHER
+
+**Commit:** fix(verify): stop the runtime gates leaking console windows, processes and ~78 MB per run  
+**Author:** haikarthick  
+**Categories:** TOOLING  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/scripts/runtime-verify.js
+  - backend/scripts/verify-grooming-slots.js
+
+</details>
+
+---
