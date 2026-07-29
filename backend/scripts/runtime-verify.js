@@ -115,6 +115,10 @@ let DATA_DIR = null;
 let PG_PORT = null;
 let pgProc = null;
 let PG_LOG = null;
+// Held open for the server's stdout/stderr. MUST be closed before the data dir is deleted:
+// while this fd is open, Node itself has a handle on postgres.log, so rmSync fails on Windows
+// no matter how many times it retries — which is why every run used to strand its cluster.
+let PG_LOG_FD = null;
 let serverProc = null;
 
 function pgRun(bin, args, opts = {}) {
@@ -174,10 +178,10 @@ async function startCluster() {
   // Log to a file rather than 'ignore': when the server refuses to start, this file is the
   // ONLY explanation available, and swallowing it turns a one-line fix into a guessing game.
   PG_LOG = path.join(DATA_DIR, 'postgres.log');
-  const logFd = fs.openSync(PG_LOG, 'a');
+  PG_LOG_FD = fs.openSync(PG_LOG, 'a');
   pgProc = spawn(pg('postgres'), args,
     // detached so KEEP_DB=1 can leave a live cluster behind for inspection after we exit
-    { stdio: ['ignore', logFd, logFd], windowsHide: true, detached: true });
+    { stdio: ['ignore', PG_LOG_FD, PG_LOG_FD], windowsHide: true, detached: true });
   pgProc.unref();
 
   for (let i = 0; i < 60; i++) {
@@ -206,10 +210,25 @@ function stopEverything() {
   }
   killTree(serverProc);
   killTree(pgProc);
+  // Release our own handle on postgres.log before trying to delete the directory that holds it.
+  if (PG_LOG_FD !== null) {
+    try { fs.closeSync(PG_LOG_FD); } catch { /* already closed */ }
+    PG_LOG_FD = null;
+  }
   if (DATA_DIR) {
-    for (let i = 0; i < 8; i++) {
-      try { fs.rmSync(DATA_DIR, { recursive: true, force: true }); break; }
-      catch { /* Windows holds file locks briefly after kill */ }
+    // Windows holds file locks for a moment after the kill, so the retries have to WAIT.
+    // They previously ran back-to-back with no delay, so all 8 attempts finished inside a
+    // millisecond and every failing run stranded a ~78 MB cluster in %TEMP% forever.
+    // Teardown is synchronous (it runs from a finally/exit path), hence the Atomics sleep.
+    let removed = false;
+    for (let i = 0; i < 8 && !removed; i++) {
+      try { fs.rmSync(DATA_DIR, { recursive: true, force: true }); removed = true; }
+      catch {
+        try { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 250); } catch { /* noop */ }
+      }
+    }
+    if (!removed) {
+      console.log(`  ${YELLOW}note:${RESET} could not delete ${DATA_DIR} — remove it manually.`);
     }
   }
 }

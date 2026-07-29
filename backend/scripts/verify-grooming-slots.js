@@ -48,7 +48,27 @@ function freePort() {
   });
 }
 function run(cmd, args, opts = {}) {
-  return execFileSync(pg(cmd), args, { encoding: 'utf8', stdio: 'pipe', ...opts });
+  // windowsHide stops every psql/initdb invocation flashing a console window.
+  return execFileSync(pg(cmd), args, { encoding: 'utf8', stdio: 'pipe', windowsHide: true, ...opts });
+}
+
+/**
+ * Kill the postmaster AND its children.
+ *
+ * child.kill() only signals the postmaster. PostgreSQL 18 spawns io_worker children, and on
+ * Windows those SURVIVE their parent — so every run of this script used to leak an orphaned
+ * postgres.exe that nothing ever reaped. taskkill /T walks the tree; this is the same helper
+ * runtime-verify.js already used, which is why that gate never leaked and this one did.
+ */
+function killTree(proc) {
+  if (!proc || proc.killed) return;
+  try {
+    if (process.platform === 'win32') {
+      execFileSync('taskkill', ['/pid', String(proc.pid), '/T', '/F'], { stdio: 'ignore', windowsHide: true });
+    } else {
+      process.kill(proc.pid, 'SIGKILL');
+    }
+  } catch { /* already gone */ }
 }
 function psql(db, sql, singleTx) {
   const args = ['-h', '127.0.0.1', '-p', String(PORT), '-U', 'postgres', '-d', db,
@@ -75,11 +95,24 @@ function check(name, cond, detail) {
   console.log(`\n━━━ Grooming slot-engine runtime test (port ${PORT}) ━━━\n`);
   run('initdb', ['-D', dataPath, '-U', 'postgres', '-A', 'trust', '-E', 'UTF8'], { stdio: 'ignore' });
 
+  // windowsHide is what stops a Windows Terminal window opening for the server. Without it every
+  // run left a visible console behind, which then showed a confusing
+  // "[error 0x800700e8 when launching '']" once the process it hosted was gone.
   const server = spawn(pg('postgres'), ['-D', dataPath, '-p', String(PORT), '-h', '127.0.0.1'],
-    { stdio: 'ignore', detached: false });
+    { stdio: 'ignore', detached: false, windowsHide: true });
 
-  const stop = () => { try { server.kill('SIGKILL'); } catch {} };
+  // Tear down the cluster AND delete its ~75 MB data directory. Cleanup must be idempotent:
+  // it runs on normal exit, on Ctrl-C and on an uncaught throw, and must not fire twice.
+  let stopped = false;
+  const stop = () => {
+    if (stopped) return;
+    stopped = true;
+    killTree(server);
+    try { fs.rmSync(dir, { recursive: true, force: true, maxRetries: 3 }); } catch { /* best effort */ }
+  };
   process.on('exit', stop);
+  process.on('SIGINT', () => { stop(); process.exit(130); });
+  process.on('SIGTERM', () => { stop(); process.exit(143); });
 
   // wait for readiness
   for (let i = 0; i < 60; i++) {
