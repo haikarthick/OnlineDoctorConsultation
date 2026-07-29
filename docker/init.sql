@@ -3695,6 +3695,11 @@ CREATE TABLE IF NOT EXISTS grooming_providers (
   rating DECIMAL(3,2) DEFAULT 0.00,
   total_reviews INT DEFAULT 0,
   total_orders INT DEFAULT 0,
+  -- Acceptance SLA counters: a provider that routinely declines or lets bookings lapse is a
+  -- marketplace quality problem, and admin needs it visible rather than inferred from orders.
+  total_accepted INT DEFAULT 0,
+  total_declined INT DEFAULT 0,
+  total_acceptance_timeouts INT DEFAULT 0,
   reliability_score DECIMAL(5,2) DEFAULT 100.00,
   commission_override_percent DECIMAL(5,2),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -3812,8 +3817,13 @@ CREATE TABLE IF NOT EXISTS grooming_orders (
   scheduled_date DATE NOT NULL,
   time_slot_start VARCHAR(10) NOT NULL,
   time_slot_end VARCHAR(10),
+  -- pending_provider_acceptance sits between payment and confirmed: the provider must actively
+  -- accept the booking. Declining, or letting acceptance_deadline lapse, triggers a full
+  -- no-fault refund. Mirrors the doctor confirm/decline gate on bookings, kept module-separate.
   status VARCHAR(30) NOT NULL DEFAULT 'draft'
-    CHECK (status IN ('draft','payment_pending','payment_expired','confirmed','provider_assigned',
+    CHECK (status IN ('draft','payment_pending','payment_expired',
+                      'pending_provider_acceptance','declined_by_provider',
+                      'confirmed','provider_assigned',
                       'checked_in','en_route','intake_done','in_progress','awaiting_approval',
                       'quality_check','ready_for_pickup','returning','completed',
                       'cancelled_by_customer','cancelled_by_provider','no_show','disputed','closed')),
@@ -3854,10 +3864,20 @@ CREATE TABLE IF NOT EXISTS grooming_orders (
   -- Still owed on this order: set when only a deposit was taken, and grown when the customer
   -- approves extra work mid-service. A balance checkout collects it.
   balance_due DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  -- Provider acceptance gate (see the status CHECK above).
+  acceptance_deadline TIMESTAMP,
+  accepted_at TIMESTAMP,
+  accepted_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  declined_at TIMESTAMP,
+  decline_reason TEXT,
   completed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_grooming_orders_acceptance_deadline
+  ON grooming_orders (acceptance_deadline)
+  WHERE status = 'pending_provider_acceptance';
 
 CREATE TABLE IF NOT EXISTS grooming_order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

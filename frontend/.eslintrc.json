@@ -130,7 +130,6 @@
         "src/pages/grooming/FindGrooming.tsx",
         "src/pages/grooming/GroomingEarnings.tsx",
         "src/pages/grooming/GroomingOrderDetail.tsx",
-        "src/pages/grooming/GroomingOrdersBoard.tsx",
         "src/pages/grooming/GroomingPassport.tsx",
         "src/pages/grooming/GroomingProvider.tsx",
         "src/pages/grooming/GroomingProviderPublic.tsx",

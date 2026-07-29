@@ -1963,3 +1963,104 @@ textarea.module-input {
   .edit-form-panel   { padding: 12px; }
   .edit-form-overlay { padding: 10px 4px; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   ACTION-REQUIRED QUEUE
+   Generic treatment for "someone is waiting on you and there is a
+   deadline" — introduced for the grooming provider acceptance gate,
+   but deliberately module-neutral so any queue can reuse it.
+   ══════════════════════════════════════════════════════════════ */
+.action-required-list {
+  display: grid;
+  gap: 12px;
+}
+.action-required-card {
+  border: 2px solid var(--warning);
+  border-radius: var(--radius-lg);
+  background: var(--warning-light);
+  padding: 16px;
+}
+.action-required-card.is-urgent {
+  border-color: var(--danger);
+  background: var(--danger-light);
+}
+.action-required-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.action-required-title {
+  font-weight: 700;
+  color: var(--gray-900);
+  /* Long service/customer names must not push the deadline off the card. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.action-required-meta {
+  font-size: 13px;
+  color: var(--gray-600);
+  margin-top: 2px;
+}
+.action-required-deadline {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--warning);
+  white-space: nowrap;
+}
+.action-required-card.is-urgent .action-required-deadline { color: var(--danger); }
+.action-required-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.action-required-note {
+  font-size: 12px;
+  color: var(--gray-600);
+  margin: 8px 0 0;
+}
+
+/* Inline reason capture — a destructive confirm that needs a typed justification. */
+.reason-prompt {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+.reason-prompt textarea {
+  width: 100%;
+  min-height: 64px;
+  padding: 8px 10px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius);
+  font: inherit;
+  resize: vertical;
+}
+.reason-prompt textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  border-color: var(--primary);
+}
+
+@media (max-width: 480px) {
+  .action-required-actions .btn { flex: 1 1 100%; }
+  .action-required-deadline    { white-space: normal; }
+}
+
+/* ── Grooming order board: shared list/grid scaffolding ── */
+.order-list { display: grid; gap: 12px; }
+.order-row-head {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.order-row-head .order-row-amount { text-align: right; }
+.order-row-total { font-weight: 700; margin-top: 4px; }
+.order-row-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.order-footer-actions { margin-top: 16px; }
+
+/* Inline explanation attached to an order whose state needs narrating (acceptance gate). */
+.acceptance-notice { margin-top: 10px; display: block; }
+.acceptance-notice p { margin: 4px 0 0; font-size: 13px; }

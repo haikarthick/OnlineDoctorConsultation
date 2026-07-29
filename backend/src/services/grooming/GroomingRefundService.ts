@@ -31,7 +31,13 @@ import NotificationService from '../NotificationService';
  *   customer no-show        → same as the no-refund window
  */
 
-export type GroomingCanceller = 'customer' | 'provider' | 'admin' | 'no_show';
+export type GroomingCanceller =
+  | 'customer' | 'provider' | 'admin' | 'no_show'
+  // Acceptance-gate outcomes (migration 036). Both return the customer 100% of what they paid:
+  // the provider never accepted the booking, so no cancellation window or penalty applies to
+  // the customer. They are kept distinct from 'provider' because that path also pays a goodwill
+  // bonus for breaking a COMMITTED appointment — nothing was committed here.
+  | 'provider_declined' | 'acceptance_timeout';
 
 export interface GroomingRefundPreview {
   hasPayment: boolean;
@@ -105,6 +111,16 @@ class GroomingRefundService {
     // collected however many times a refund path is invoked.
     const refundable = round2(Math.max(amountPaid - (Number(o.alreadyRefunded) || 0), 0));
     const cap = (n: number) => round2(Math.min(Math.max(n, 0), refundable));
+
+    // Acceptance gate: the booking was paid but never accepted, so the customer is made whole —
+    // full amount back, no processing charge, no window maths. Deliberately no goodwill bonus:
+    // the money was held for minutes, not a broken commitment.
+    if (canceller === 'provider_declined' || canceller === 'acceptance_timeout') {
+      return {
+        hasPayment: true, amountPaid, refundAmount: cap(amountPaid), processingCharge: 0, goodwillBonus: 0,
+        policy: canceller === 'provider_declined' ? 'provider_declined_full_refund' : 'acceptance_timeout_full_refund',
+      };
+    }
 
     if (canceller === 'provider' || canceller === 'admin') {
       const bonusPercent = canceller === 'provider' ? await GroomingModuleConfig.getGoodwillBonusPercent() : 0;
@@ -271,6 +287,19 @@ class GroomingRefundService {
                VALUES ($1,$2,0,0,0,$3,'penalty','available',$4)`,
               [o.provider_id, orderId, -penalty,
                `Cancellation penalty: goodwill ${preview.goodwillBonus.toFixed(2)} + gateway fee ${(Number(o.gatewayFee) || 0).toFixed(2)}`]);
+          }
+        } else if (canceller === 'acceptance_timeout') {
+          // Letting a paid booking lapse without answering is an SLA failure, so the provider
+          // carries the gateway fee the platform cannot recover on the refund. An explicit
+          // decline does NOT incur this — saying "we're full" promptly is legitimate, and
+          // charging for it would just train providers to stay silent instead.
+          const fee = round2(Number(o.gatewayFee) || 0);
+          if (fee > 0) {
+            await client.query(
+              `INSERT INTO grooming_earnings (provider_id, order_id, gross_amount, commission_amount, tax_amount, net_amount, entry_type, status, note)
+               VALUES ($1,$2,0,0,0,$3,'penalty','available',$4)`,
+              [o.provider_id, orderId, -fee,
+               `Acceptance window lapsed — non-recoverable gateway fee ${fee.toFixed(2)}`]);
           }
         } else if (preview.policy === 'customer_partial_window') {
           const retained = round2(Math.max(preview.amountPaid - preview.refundAmount - preview.processingCharge, 0));

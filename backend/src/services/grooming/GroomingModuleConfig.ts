@@ -64,6 +64,19 @@ class GroomingModuleConfig {
   /** SAC code for grooming/spa services (CA-confirmed at go-live). */
   async getSacCode(): Promise<string> { return this.getString('grooming.sacCode', '999721'); }
 
+  // ── Provider acceptance gate ──────────────────────────────────
+  // Money is collected first, then the order waits here for the provider to actively accept.
+  // Grooming's own keys: the consultation gate has no timeout at all (unconfirmed bookings are
+  // swept to 'missed' by a different job), so the two must stay independently tunable.
+  /** How long a provider has to accept a paid booking before it auto-refunds. */
+  async getAcceptanceWindowMinutes(): Promise<number> { return this.getNumber('grooming.acceptance.windowMinutes', 120); }
+  /**
+   * Skip the gate entirely and confirm on payment (the pre-036 behaviour). Escape hatch for
+   * operators who would rather not risk auto-refunds; off by default because an unaccepted
+   * booking is exactly the failure the gate exists to prevent.
+   */
+  async isAutoAcceptEnabled(): Promise<boolean> { return this.getBoolean('grooming.acceptance.autoAccept', false); }
+
   // ── Cancellation / refund policy ──────────────────────────────
   // Deliberately a separate 'grooming.*' namespace from the consultation 'cancellation.*' keys:
   // the two modules must be tunable without either affecting the other.

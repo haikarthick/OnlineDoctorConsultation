@@ -15,7 +15,7 @@ import {
   createGroomingProviderSchema, updateGroomingProviderSchema, groomingLocationSchema,
   groomingResourceSchema, groomingServiceSchema, updateGroomingServiceSchema,
   groomingStaffSchema, groomingProviderRejectSchema,
-  createGroomingOrderSchema, groomingCancelSchema,
+  createGroomingOrderSchema, groomingCancelSchema, groomingAcceptSchema, groomingDeclineSchema,
   groomingTransitionSchema, groomingAssignSchema, groomingIntakeSchema,
   groomingItemStatusSchema, groomingReportCardSchema, groomingSettleSchema,
   groomingVariableRequestSchema, groomingVariableRespondSchema,
@@ -5315,6 +5315,18 @@ router.put('/grooming/orders/:id/cancel', authMiddleware, groomingEnabled, valid
 router.get('/grooming/providers/:id/orders', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingOrderService.listProviderOrders((req as any).userId, req.params.id, req.query.status as string) });
+  }));
+
+// ── Provider acceptance gate (036) ──
+// Provider staff only (enforced in the service via requireProviderStaff). Accepting confirms the
+// appointment; declining triggers a full no-fault refund, so a reason is mandatory.
+router.put('/grooming/orders/:id/accept', authMiddleware, groomingEnabled, validateBody(groomingAcceptSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.acceptOrder((req as any).userId, req.params.id, req.body?.note) });
+  }));
+router.put('/grooming/orders/:id/decline', authMiddleware, groomingEnabled, validateBody(groomingDeclineSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingOrderService.declineOrder((req as any).userId, req.params.id, req.body.reason) });
   }));
 
 // ── Order detail + ops workflow (P3) ──

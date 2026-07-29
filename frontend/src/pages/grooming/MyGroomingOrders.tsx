@@ -14,6 +14,8 @@ const STATUS_COLOR: Record<string, { bg: string; color: string }> = {
   draft: { bg: '#f3f4f6', color: '#374151' },
   payment_pending: { bg: '#fef3c7', color: '#92400e' },
   payment_expired: { bg: '#fee2e2', color: '#7f1d1d' },
+  pending_provider_acceptance: { bg: '#fef3c7', color: '#92400e' },
+  declined_by_provider: { bg: '#fee2e2', color: '#991b1b' },
   confirmed: { bg: '#dbeafe', color: '#1e40af' },
   provider_assigned: { bg: '#e0e7ff', color: '#3730a3' },
   checked_in: { bg: '#e0f2fe', color: '#075985' },
@@ -90,7 +92,9 @@ const MyGroomingOrders: React.FC<Props> = ({ onNavigate }) => {
     catch (e: any) { setErr(e?.response?.data?.message || e.message || 'Payment failed') } finally { setBusy(null) }
   }
 
-  const cancellable = (s: string) => !['completed', 'closed', 'cancelled_by_customer', 'cancelled_by_provider', 'no_show', 'payment_expired'].includes(s)
+  // declined_by_provider is terminal and already refunded — offering Cancel on it would send the
+  // customer into a dialog the server rejects, on an order that owes them nothing further.
+  const cancellable = (s: string) => !['completed', 'closed', 'cancelled_by_customer', 'cancelled_by_provider', 'declined_by_provider', 'no_show', 'payment_expired'].includes(s)
 
   return (
     <div className="module-page">
@@ -124,6 +128,24 @@ const MyGroomingOrders: React.FC<Props> = ({ onNavigate }) => {
                         <div style={{ fontWeight: 700, marginTop: 6 }}>{formatCurrency(Number(o.grandTotal))}</div>
                       </div>
                     </div>
+
+                    {/* The gate is invisible to the customer unless we explain it: they have paid
+                        but are not confirmed, and the money can still come back automatically. */}
+                    {o.status === 'pending_provider_acceptance' && (
+                      <div className="module-alert warning acceptance-notice">
+                        <strong>⏳ {t('groomingMyOrders.acceptance.awaitingTitle')}</strong>
+                        <p>{t('groomingMyOrders.acceptance.awaitingBody')}</p>
+                      </div>
+                    )}
+                    {o.status === 'declined_by_provider' && (
+                      <div className="module-alert error acceptance-notice">
+                        <strong>{t('groomingMyOrders.acceptance.declinedTitle')}</strong>
+                        <p>
+                          {o.declineReason ? `“${o.declineReason}” — ` : ''}
+                          {t('groomingMyOrders.acceptance.declinedBody')}
+                        </p>
+                      </div>
+                    )}
 
                     {balance > 0 && (
                       <div className="module-alert warning" style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>

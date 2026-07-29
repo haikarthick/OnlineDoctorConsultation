@@ -208,15 +208,18 @@ class GroomingPaymentService {
   private async loadNotificationContext(orderId: string): Promise<{
     serviceLine: string; petLine: string; whenLine: string;
     providerName: string; customerName: string; currencySymbol: string;
+    acceptanceDeadlineLabel: string; acceptanceWindowLabel: string;
   }> {
     const fallback = {
       serviceLine: 'your grooming appointment', petLine: '', whenLine: 'the scheduled date',
       providerName: 'your grooming provider', customerName: 'A customer', currencySymbol: '',
+      acceptanceDeadlineLabel: 'the acceptance deadline', acceptanceWindowLabel: 'a short while',
     };
     try {
       const r = await database.query(
         `SELECT gs.name AS "serviceName", a.name AS "petName", gp.business_name AS "providerName",
                 o.scheduled_date AS "scheduledDate", o.time_slot_start AS "timeSlotStart", o.currency,
+                o.acceptance_deadline AS "acceptanceDeadline",
                 u.first_name AS "firstName", u.last_name AS "lastName"
          FROM grooming_orders o
          JOIN grooming_providers gp ON gp.id = o.provider_id
@@ -239,6 +242,24 @@ class GroomingPaymentService {
           if (x.timeSlotStart) whenLine += ` at ${String(x.timeSlotStart).slice(0, 5)}`;
         }
       }
+      // The acceptance deadline is a real wall-clock moment the provider is held to, so it is
+      // shown as a time (with the date only when it lands on a different day), plus a relative
+      // "within 2 hours" phrasing for the customer, who cares about the wait not the timestamp.
+      let acceptanceDeadlineLabel = fallback.acceptanceDeadlineLabel;
+      let acceptanceWindowLabel = fallback.acceptanceWindowLabel;
+      if (x.acceptanceDeadline) {
+        const dl = new Date(x.acceptanceDeadline);
+        if (!isNaN(dl.getTime())) {
+          const sameDay = dl.toDateString() === new Date().toDateString();
+          acceptanceDeadlineLabel = dl.toLocaleString('en-IN', {
+            ...(sameDay ? {} : { day: 'numeric', month: 'short' }),
+            hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata',
+          });
+          const mins = Math.max(Math.round((dl.getTime() - Date.now()) / 60000), 1);
+          acceptanceWindowLabel = mins >= 120 ? `${Math.round(mins / 60)} hours`
+            : mins >= 60 ? 'an hour' : `${mins} minutes`;
+        }
+      }
       const customerName = [x.firstName, x.lastName].filter(Boolean).join(' ').trim();
       return {
         serviceLine: x.serviceName || fallback.serviceLine,
@@ -247,6 +268,7 @@ class GroomingPaymentService {
         providerName: x.providerName || fallback.providerName,
         customerName: customerName || fallback.customerName,
         currencySymbol: (x.currency || 'INR') === 'INR' ? '₹' : `${x.currency} `,
+        acceptanceDeadlineLabel, acceptanceWindowLabel,
       };
     } catch {
       return fallback;
@@ -269,6 +291,11 @@ class GroomingPaymentService {
     const clearanceDays = await GroomingModuleConfig.getClearanceDays();
     const sac = await GroomingModuleConfig.getSacCode();
     const prefix = await GroomingModuleConfig.getInvoicePrefix();
+    // Acceptance gate (036): payment no longer confirms the booking on its own — the provider
+    // must accept it. autoAccept restores the old behaviour for operators who want it.
+    const autoAccept = await GroomingModuleConfig.isAutoAcceptEnabled();
+    const acceptanceWindowMinutes = await GroomingModuleConfig.getAcceptanceWindowMinutes();
+    const paidStatus = autoAccept ? 'confirmed' : 'pending_provider_acceptance';
 
     const result: any = await database.transaction(async (client: any) => {
       const lockRes = await client.query(
@@ -278,8 +305,11 @@ class GroomingPaymentService {
       if (lockRes.rows.length === 0) throw new NotFoundError('GroomingOrder', orderId);
       const o = lockRes.rows[0];
 
-      if (o.status === 'confirmed') {
-        return { orderId, status: 'confirmed', invoiceNumber: o.invoice_number, alreadyPaid: true };
+      // Idempotency guard: a retry must collapse onto whichever post-payment state this order
+      // already reached, not just 'confirmed' — otherwise a double-click on a gated order falls
+      // through to the 'not awaiting payment' error instead of returning the first result.
+      if (o.status === 'confirmed' || o.status === 'pending_provider_acceptance') {
+        return { orderId, status: o.status, invoiceNumber: o.invoice_number, alreadyPaid: true };
       }
       if (o.status !== 'payment_pending') throw new ValidationError('Order is not awaiting payment');
       const paymentId = opts.paymentId || o.payment_id;
@@ -294,9 +324,14 @@ class GroomingPaymentService {
                 payment_source = 'grooming', grooming_order_id = $3, paid_at = NOW(), updated_at = NOW() WHERE id = $1`,
         [paymentId, opts.gatewayPaymentId, orderId]);
       await client.query(
-        `UPDATE grooming_orders SET status = 'confirmed', amount_paid = $2, balance_due = $3,
-                gateway_payment_id = $4, updated_at = NOW() WHERE id = $1`,
-        [orderId, collected, Math.max(balanceDue, 0), opts.gatewayPaymentId]);
+        `UPDATE grooming_orders SET status = $5, amount_paid = $2, balance_due = $3,
+                gateway_payment_id = $4,
+                acceptance_deadline = CASE WHEN $5 = 'pending_provider_acceptance'
+                                          THEN NOW() + ($6 || ' minutes')::interval ELSE NULL END,
+                accepted_at = CASE WHEN $5 = 'confirmed' THEN NOW() ELSE NULL END,
+                updated_at = NOW() WHERE id = $1`,
+        [orderId, collected, Math.max(balanceDue, 0), opts.gatewayPaymentId,
+         paidStatus, String(acceptanceWindowMinutes)]);
 
       // Provider earning: only the collected share. A deposit credits the provider pro-rata; the
       // remainder is booked when the balance is collected.
@@ -312,10 +347,13 @@ class GroomingPaymentService {
         [o.provider_id, orderId, gross, commission, taxPortion, net, String(clearanceDays)]);
       await client.query(
         `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
-         VALUES ($1,'payment_pending','confirmed',$2,$3)`,
+         VALUES ($1,'payment_pending',$4,$2,$3)`,
         [orderId, opts.actorUserId,
-         balanceDue > 0 ? `Deposit received (${opts.mode}) — balance ${balanceDue.toFixed(2)} due`
-                        : `Payment received (${opts.mode})`]);
+         (balanceDue > 0 ? `Deposit received (${opts.mode}) — balance ${balanceDue.toFixed(2)} due`
+                         : `Payment received (${opts.mode})`)
+         + (paidStatus === 'pending_provider_acceptance'
+              ? ` — awaiting provider acceptance (${acceptanceWindowMinutes} min)` : ''),
+         paidStatus]);
 
       const items = await client.query(
         `SELECT id, name, quantity, unit_price, tax_percent, line_total FROM grooming_order_items
@@ -351,7 +389,7 @@ class GroomingPaymentService {
       }
 
       return {
-        orderId, status: 'confirmed', invoiceNumber, amountPaid: collected,
+        orderId, status: paidStatus, invoiceNumber, amountPaid: collected,
         balanceDue: Math.max(balanceDue, 0),
         notify: { customerId: o.pet_owner_id, providerOwnerId: o.providerOwnerId, orderNumber: o.order_number },
       };
@@ -366,26 +404,40 @@ class GroomingPaymentService {
         // so neither recipient could tell what the message was about or who it was for. Both
         // notifications now lead with the concrete booking.
         const ctx = await this.loadNotificationContext(orderId);
+        const gated = result.status === 'pending_provider_acceptance';
+        const balanceNote = result.balanceDue > 0
+          ? ` A balance of ${ctx.currencySymbol}${result.balanceDue.toFixed(2)} is due before your appointment can be completed —`
+            + ` you can pay it from My Grooming Bookings.`
+          : '';
         try {
           await NotificationService.createNotification(
             n.customerId, 'payment',
-            result.balanceDue > 0 ? 'Grooming deposit received' : 'Grooming booking confirmed',
-            result.balanceDue > 0
-              ? `We've received your deposit for ${ctx.serviceLine} at ${ctx.providerName} on ${ctx.whenLine}. `
-                + `A balance of ${ctx.currencySymbol}${result.balanceDue.toFixed(2)} is due before your appointment can be completed — `
-                + `you can pay it from My Grooming Bookings (${n.orderNumber}). Invoice ${result.invoiceNumber}.`
-              : `Your booking for ${ctx.serviceLine} at ${ctx.providerName} on ${ctx.whenLine} is confirmed and paid in full. `
-                + `Booking reference ${n.orderNumber}, invoice ${result.invoiceNumber}. `
-                + `${ctx.providerName} will be in touch if anything changes.`,
+            gated ? 'Payment received — waiting for the groomer to confirm' : 'Grooming booking confirmed',
+            gated
+              // Do not tell the customer they are confirmed when they are not. The gate can still
+              // end in a full refund, and promising confirmation here is what would make that
+              // refund feel like a broken promise rather than a normal outcome.
+              ? `We've received your payment for ${ctx.serviceLine}${ctx.petLine} at ${ctx.providerName} on ${ctx.whenLine}. `
+                + `${ctx.providerName} now has ${ctx.acceptanceWindowLabel} to confirm the appointment. `
+                + `We'll let you know as soon as they do — and if they can't take it, you'll be refunded in full automatically. `
+                + `Booking reference ${n.orderNumber}, invoice ${result.invoiceNumber}.${balanceNote}`
+              : `Your booking for ${ctx.serviceLine}${ctx.petLine} at ${ctx.providerName} on ${ctx.whenLine} is confirmed. `
+                + `Booking reference ${n.orderNumber}, invoice ${result.invoiceNumber}.${balanceNote}`,
             'all', { orderId, invoiceNumber: result.invoiceNumber });
         } catch { /* non-blocking */ }
         try {
           if (n.providerOwnerId) {
             await NotificationService.createNotification(
-              n.providerOwnerId, 'booking', `New booking — ${ctx.whenLine}`,
-              `${ctx.customerName} has booked and paid for ${ctx.serviceLine}${ctx.petLine} on ${ctx.whenLine}. `
-                + `Open booking ${n.orderNumber} to check the details and assign a groomer and station for it`
-                + `${result.balanceDue > 0 ? `. Note: ${ctx.currencySymbol}${result.balanceDue.toFixed(2)} is still outstanding on this order` : ''}.`,
+              n.providerOwnerId, 'booking',
+              gated ? `Action needed — accept or decline by ${ctx.acceptanceDeadlineLabel}`
+                    : `New booking — ${ctx.whenLine}`,
+              gated
+                ? `${ctx.customerName} has booked and paid for ${ctx.serviceLine}${ctx.petLine} on ${ctx.whenLine}. `
+                  + `Open booking ${n.orderNumber} and accept it to confirm the appointment, or decline if you can't take it. `
+                  + `If you don't respond by ${ctx.acceptanceDeadlineLabel} the booking is cancelled automatically and the `
+                  + `customer is refunded in full.`
+                : `${ctx.customerName} has booked and paid for ${ctx.serviceLine}${ctx.petLine} on ${ctx.whenLine}. `
+                  + `Open booking ${n.orderNumber} to assign a groomer and station for it.`,
               'all', { orderId });
           }
         } catch { /* non-blocking */ }

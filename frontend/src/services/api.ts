@@ -3008,6 +3008,18 @@ class ApiService {
     const response = await this.client.put(`/grooming/orders/${id}/transition`, { toStatus, note })
     return response.data
   }
+
+  /** Provider accepts a paid booking sitting at the acceptance gate → confirmed. */
+  async acceptGroomingOrder(id: string, note?: string) {
+    const response = await this.client.put(`/grooming/orders/${id}/accept`, { note })
+    return response.data
+  }
+
+  /** Provider declines a paid booking → customer is refunded in full. Reason is required. */
+  async declineGroomingOrder(id: string, reason: string) {
+    const response = await this.client.put(`/grooming/orders/${id}/decline`, { reason })
+    return response.data
+  }
   async assignGroomingOrder(id: string, data: any) {
     const response = await this.client.put(`/grooming/orders/${id}/assign`, data)
     return response.data

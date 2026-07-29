@@ -1,4 +1,5 @@
 import database from '../../utils/database';
+import logger from '../../utils/logger';
 import { NotFoundError, ValidationError, ForbiddenError } from '../../utils/errors';
 import GroomingModuleConfig from './GroomingModuleConfig';
 import GroomingProviderService from './GroomingProviderService';
@@ -21,6 +22,8 @@ const ORDER_SELECT = `
   o.deposit_due as "depositDue", o.amount_paid as "amountPaid",
   o.balance_due as "balanceDue", o.currency,
   o.commission_percent as "commissionPercent", o.commission_amount as "commissionAmount",
+  o.acceptance_deadline as "acceptanceDeadline", o.accepted_at as "acceptedAt",
+  o.declined_at as "declinedAt", o.decline_reason as "declineReason",
   o.handling_notes as "handlingNotes", o.owner_notes as "ownerNotes",
   o.cancellation_reason as "cancellationReason", o.eta_minutes as "etaMinutes",
   o.invoice_number as "invoiceNumber", o.expires_at as "expiresAt",
@@ -171,12 +174,23 @@ class GroomingOrderService {
 
   async cancelOrder(userId: string, orderId: string, reason: string): Promise<any> {
     const { order, isOwner, providerRole } = await this.resolveOrderAccess(userId, orderId);
-    if (['completed', 'closed', 'cancelled_by_customer', 'cancelled_by_provider'].includes(order.status))
+    // declined_by_provider is terminal AND already refunded. Omitting it here let a customer
+    // "cancel" a declined booking and run the refund engine a second time on the same payment.
+    if (['completed', 'closed', 'cancelled_by_customer', 'cancelled_by_provider', 'declined_by_provider'].includes(order.status))
       throw new ValidationError('Order can no longer be cancelled');
     const newStatus = isOwner ? 'cancelled_by_customer' : 'cancelled_by_provider';
     void providerRole;
+
+    // Cancelling while the provider has not yet accepted is a no-fault exit: the customer is
+    // waiting on a commitment that was never made, so the cancellation-window penalties must not
+    // apply to them. Anything already accepted follows the normal policy.
+    const awaitingAcceptance = order.status === 'pending_provider_acceptance';
+    const canceller: 'customer' | 'provider' | 'provider_declined' =
+      awaitingAcceptance ? 'provider_declined' : (isOwner ? 'customer' : 'provider');
+
     await database.query(
-      `UPDATE grooming_orders SET status = $2, cancellation_reason = $3, cancelled_by = $4, cancelled_at = NOW(), updated_at = NOW()
+      `UPDATE grooming_orders SET status = $2, cancellation_reason = $3, cancelled_by = $4,
+              cancelled_at = NOW(), acceptance_deadline = NULL, updated_at = NOW()
        WHERE id = $1`, [orderId, newStatus, reason || null, userId]);
     await this.addHistory(orderId, order.status, newStatus, userId, reason || undefined);
 
@@ -185,7 +199,8 @@ class GroomingOrderService {
     // boundary note; nothing here may reach into the consultation refund path.
     const GroomingRefundService = (await import('./GroomingRefundService')).default;
     await GroomingRefundService.refundForCancellation(
-      orderId, isOwner ? 'customer' : 'provider', reason || 'Order cancelled');
+      orderId, canceller,
+      reason || (awaitingAcceptance ? 'Cancelled before the provider accepted' : 'Order cancelled'));
 
     return this.getOrderById(orderId);
   }
@@ -205,6 +220,9 @@ class GroomingOrderService {
   }
 
   private static PROVIDER_TRANSITIONS: Record<string, string[]> = {
+    // pending_provider_acceptance is deliberately absent: it is left only via acceptOrder() /
+    // declineOrder() / the timeout sweep, all of which carry money consequences. Allowing a
+    // generic transition out of it would let a provider skip the gate and strand the refund.
     confirmed: ['provider_assigned', 'checked_in', 'en_route', 'in_progress', 'no_show'],
     provider_assigned: ['checked_in', 'en_route', 'in_progress', 'no_show'],
     en_route: ['checked_in', 'in_progress', 'no_show'],
@@ -215,6 +233,158 @@ class GroomingOrderService {
     ready_for_pickup: ['completed', 'returning'],
     returning: ['completed'],
   };
+
+  // ── Provider acceptance gate (036) ─────────────────────────────
+  /**
+   * Provider accepts a paid booking → the appointment is genuinely confirmed.
+   *
+   * Row is locked and re-checked inside the transaction so an accept racing the timeout sweep
+   * (or a double-tap on a phone) resolves to exactly one outcome. Accepting an order the sweep
+   * has already refunded must fail rather than "confirm" a refunded booking.
+   */
+  async acceptOrder(userId: string, orderId: string, note?: string): Promise<any> {
+    await this.requireProviderStaff(userId, orderId);
+    await database.transaction(async (client: any) => {
+      const r = await client.query(
+        `SELECT id, status, provider_id FROM grooming_orders WHERE id = $1 FOR UPDATE`, [orderId]);
+      if (r.rows.length === 0) throw new NotFoundError('GroomingOrder', orderId);
+      const cur = r.rows[0];
+      if (cur.status === 'confirmed') return; // idempotent
+      if (cur.status !== 'pending_provider_acceptance')
+        throw new ValidationError(`This booking is not awaiting acceptance (it is ${cur.status}).`);
+
+      await client.query(
+        `UPDATE grooming_orders SET status = 'confirmed', accepted_at = NOW(), accepted_by = $2,
+                acceptance_deadline = NULL, updated_at = NOW() WHERE id = $1`, [orderId, userId]);
+      await client.query(
+        `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
+         VALUES ($1,'pending_provider_acceptance','confirmed',$2,$3)`,
+        [orderId, userId, note || 'Provider accepted the booking']);
+      await client.query(
+        `UPDATE grooming_providers SET total_accepted = COALESCE(total_accepted, 0) + 1, updated_at = NOW()
+         WHERE id = $1`, [cur.provider_id]);
+    });
+
+    const order = await this.getOrderById(orderId);
+    try {
+      const NotificationService = (await import('../NotificationService')).default;
+      await NotificationService.createNotification(
+        order.petOwnerId, 'booking', 'Your grooming appointment is confirmed',
+        `Good news — your booking ${order.orderNumber} has been confirmed by the groomer. `
+        + `We'll remind you before your appointment.`,
+        'all', { orderId });
+    } catch { /* non-blocking */ }
+    return order;
+  }
+
+  /**
+   * Provider declines a paid booking → full no-fault refund, no penalty to either side.
+   *
+   * The refund runs AFTER the status write commits, matching cancelOrder(): the refund engine
+   * opens its own transaction, so calling it inside this one would nest and deadlock on the
+   * same order row.
+   */
+  async declineOrder(userId: string, orderId: string, reason: string): Promise<any> {
+    await this.requireProviderStaff(userId, orderId);
+    if (!reason || !reason.trim())
+      throw new ValidationError('A reason is required so the customer can be told why.');
+
+    await database.transaction(async (client: any) => {
+      const r = await client.query(
+        `SELECT id, status, provider_id FROM grooming_orders WHERE id = $1 FOR UPDATE`, [orderId]);
+      if (r.rows.length === 0) throw new NotFoundError('GroomingOrder', orderId);
+      const cur = r.rows[0];
+      if (cur.status !== 'pending_provider_acceptance')
+        throw new ValidationError(`This booking is not awaiting acceptance (it is ${cur.status}).`);
+
+      await client.query(
+        `UPDATE grooming_orders SET status = 'declined_by_provider', declined_at = NOW(),
+                decline_reason = $2, acceptance_deadline = NULL, updated_at = NOW() WHERE id = $1`,
+        [orderId, reason.trim()]);
+      await client.query(
+        `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
+         VALUES ($1,'pending_provider_acceptance','declined_by_provider',$2,$3)`,
+        [orderId, userId, `Provider declined: ${reason.trim()}`]);
+      await client.query(
+        `UPDATE grooming_providers SET total_declined = COALESCE(total_declined, 0) + 1, updated_at = NOW()
+         WHERE id = $1`, [cur.provider_id]);
+    });
+
+    const GroomingRefundService = (await import('./GroomingRefundService')).default;
+    await GroomingRefundService.refundForCancellation(
+      orderId, 'provider_declined', `Provider declined the booking: ${reason.trim()}`);
+
+    const order = await this.getOrderById(orderId);
+    try {
+      const NotificationService = (await import('../NotificationService')).default;
+      await NotificationService.createNotification(
+        order.petOwnerId, 'booking', 'Your grooming booking could not be accepted',
+        `Unfortunately the groomer could not take booking ${order.orderNumber} (${reason.trim()}). `
+        + `You have not been charged — a full refund is on its way. `
+        + `You can book another provider from Find Grooming & Spa.`,
+        'all', { orderId });
+    } catch { /* non-blocking */ }
+    return order;
+  }
+
+  /**
+   * Sweep bookings whose acceptance window lapsed: full refund to the customer, SLA counter on
+   * the provider. Runs from the grooming scheduler — see GroomingPaymentService.expireStaleHolds
+   * for the sibling job that releases UNPAID holds.
+   *
+   * Each order is handled independently so one failure cannot strand the rest of the batch.
+   */
+  async expireUnacceptedOrders(): Promise<number> {
+    if (!(await GroomingModuleConfig.isEnabled())) return 0;
+    const due = await database.query(
+      `SELECT id, order_number, pet_owner_id, provider_id FROM grooming_orders
+       WHERE status = 'pending_provider_acceptance'
+         AND acceptance_deadline IS NOT NULL AND acceptance_deadline <= NOW()`);
+    if (due.rows.length === 0) return 0;
+
+    const GroomingRefundService = (await import('./GroomingRefundService')).default;
+    const NotificationService = (await import('../NotificationService')).default;
+    let handled = 0;
+
+    for (const row of due.rows) {
+      try {
+        // Re-check under a lock: a provider accepting at the deadline must win over the sweep.
+        const claimed = await database.query(
+          `UPDATE grooming_orders SET status = 'declined_by_provider', declined_at = NOW(),
+                  decline_reason = 'Provider did not respond within the acceptance window',
+                  acceptance_deadline = NULL, updated_at = NOW()
+           WHERE id = $1 AND status = 'pending_provider_acceptance'
+           RETURNING id`, [row.id]);
+        if (claimed.rows.length === 0) continue;
+
+        await database.query(
+          `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
+           VALUES ($1,'pending_provider_acceptance','declined_by_provider',NULL,
+                   'Acceptance window lapsed — auto-cancelled and refunded')`, [row.id]);
+        await database.query(
+          `UPDATE grooming_providers
+              SET total_acceptance_timeouts = COALESCE(total_acceptance_timeouts, 0) + 1,
+                  updated_at = NOW() WHERE id = $1`, [row.provider_id]);
+
+        await GroomingRefundService.refundForCancellation(
+          row.id, 'acceptance_timeout', 'Provider did not respond within the acceptance window');
+
+        try {
+          await NotificationService.createNotification(
+            row.pet_owner_id, 'booking', 'Your grooming booking was cancelled and refunded',
+            `The groomer did not confirm booking ${row.order_number} in time, so we've cancelled it `
+            + `and refunded you in full. Sorry about that — you can book another provider from `
+            + `Find Grooming & Spa.`,
+            'all', { orderId: row.id });
+        } catch { /* non-blocking */ }
+        handled++;
+      } catch (err: any) {
+        logger.error('Grooming acceptance-timeout sweep failed for one order', { orderId: row.id, error: err.message });
+      }
+    }
+    if (handled > 0) logger.info(`[Grooming] Auto-cancelled ${handled} unaccepted booking(s)`);
+    return handled;
+  }
 
   /** Provider advances the order along the workflow. Completion stamps completed_at. */
   async transitionOrder(userId: string, orderId: string, toStatus: string, note?: string): Promise<any> {
@@ -320,8 +490,12 @@ class GroomingOrderService {
          aftercare_notes = EXCLUDED.aftercare_notes, summary = EXCLUDED.summary, next_recommended_date = EXCLUDED.next_recommended_date`,
       [orderId, Array.isArray(data.afterPhotos) ? data.afterPhotos : [], data.productsUsed || null,
        data.aftercareNotes || null, data.summary || null, data.nextRecommendedDate || null, userId]);
-    // Completing via report card if not already terminal
-    if (!['completed', 'closed', 'cancelled_by_customer', 'cancelled_by_provider'].includes(order.status)) {
+    // Completing via report card if not already terminal. declined_by_provider is terminal and
+    // already refunded — completing it would resurrect a cancelled, refunded booking. A booking
+    // still sitting at the acceptance gate has not been accepted, let alone performed, so it is
+    // excluded too: the report card records work, and no work can have happened yet.
+    if (!['completed', 'closed', 'cancelled_by_customer', 'cancelled_by_provider',
+          'declined_by_provider', 'pending_provider_acceptance'].includes(order.status)) {
       await database.query(`UPDATE grooming_orders SET status = 'completed', completed_at = NOW(), updated_at = NOW() WHERE id = $1`, [orderId]);
       await this.addHistory(orderId, order.status, 'completed', userId, 'Completed with report card');
     }

@@ -7830,7 +7830,9 @@
     "cancelled_by_provider": "Cancelled by provider",
     "no_show": "No-show",
     "disputed": "Disputed",
-    "closed": "Closed"
+    "closed": "Closed",
+    "pending_provider_acceptance": "Awaiting confirmation",
+    "declined_by_provider": "Declined — refunded"
   },
   "groomingBoard": {
     "title": "Manage Orders",
@@ -7846,6 +7848,17 @@
       "qualityCheck": "Quality check",
       "ready": "Ready",
       "complete": "Complete"
+    },
+    "acceptance": {
+      "heading": "Waiting for your response ({{count}})",
+      "accept": "Accept booking",
+      "decline": "Can't take it",
+      "confirmDecline": "Confirm decline & refund customer",
+      "reasonLabel": "Why can't you take this booking?",
+      "reasonPlaceholder": "e.g. fully booked at that time",
+      "explainer": "The customer has already paid. Accept to confirm the appointment, or decline and they will be refunded in full.",
+      "expiresIn": "Respond within {{count}} min",
+      "expiring": "Expiring now"
     }
   },
   "groomingDetail": {
@@ -8000,5 +8013,13 @@
     "escalationRate": "Vet escalation rate",
     "wellnessConversion": "Wellness → consult",
     "openDisputes": "Open disputes"
+  },
+  "groomingMyOrders": {
+    "acceptance": {
+      "awaitingTitle": "Waiting for the groomer to confirm",
+      "awaitingBody": "You have paid and the groomer has been notified. If they cannot take it, you will be refunded in full automatically.",
+      "declinedTitle": "This booking could not be accepted",
+      "declinedBody": "You have been refunded in full. You can book another provider any time."
+    }
   }
 }

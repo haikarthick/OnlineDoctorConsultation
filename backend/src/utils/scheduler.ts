@@ -56,6 +56,11 @@ export function startScheduler(): void {
   // Grooming module: expire unpaid grooming slot holds (no-op while grooming.enabled=false)
   setInterval(runGroomingHoldExpiry, FIVE_MINUTES);
 
+  // Grooming module: auto-cancel + refund bookings the provider never accepted.
+  // Every minute rather than every five: this job holds a customer's money on a booking nobody
+  // has committed to, so the window they were promised should be honoured to the minute.
+  setInterval(runGroomingAcceptanceExpiry, 60 * 1000);
+
   // Grooming module: mature provider earnings clearing → available (hourly + on boot)
   runGroomingEarningsMaturity();
   setInterval(runGroomingEarningsMaturity, ONE_HOUR);
@@ -116,6 +121,20 @@ async function runGroomingHoldExpiry(): Promise<void> {
     await GroomingPaymentService.expireStaleHolds();
   } catch (err: any) {
     logger.error('[Grooming] Hold expiry job failed', { error: err.message });
+  }
+}
+
+/**
+ * Grooming acceptance gate: bookings the provider never accepted are auto-cancelled and the
+ * customer refunded in full. Distinct from the hold expiry above — that one releases UNPAID
+ * slots, this one returns money that was already collected.
+ */
+async function runGroomingAcceptanceExpiry(): Promise<void> {
+  try {
+    const GroomingOrderService = (await import('../services/grooming/GroomingOrderService')).default;
+    await GroomingOrderService.expireUnacceptedOrders();
+  } catch (err: any) {
+    logger.error('[Grooming] Acceptance expiry job failed', { error: err.message });
   }
 }
 

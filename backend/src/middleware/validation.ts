@@ -1932,6 +1932,17 @@ export const groomingCancelSchema = Joi.object({
   reason: shortText(500).optional().allow('', null),
 });
 
+// ─── Grooming provider acceptance gate (036) ─────────────────
+export const groomingAcceptSchema = Joi.object({
+  note: shortText(500).optional().allow('', null),
+});
+
+// A decline triggers a full refund and is shown to the customer, so — unlike cancel — the
+// reason is required and may not be blank.
+export const groomingDeclineSchema = Joi.object({
+  reason: shortText(500).required(),
+});
+
 // ─── Grooming ops (P3) ───────────────────────────────────────
 const scentValue = Joi.string().valid('good', 'watch', 'vet_advised').optional().allow(null, '');
 
