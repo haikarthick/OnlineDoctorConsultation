@@ -251,6 +251,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-commission', label: t('nav.commissionSettings'), icon: '🪙', path: '/admin/commission-settings',
       roles: ['admin'], section: 'Finance' },
+    // Payables answers "who do I owe"; Settlements is the withdrawal queue. Payables first —
+    // it is the screen an admin opens to decide what to pay, before actioning anything.
+    { id: 'admin-payables', label: t('nav.payables'), icon: '💸', path: '/admin/payables',
+      roles: ['admin'], section: 'Finance' },
     { id: 'admin-settlements', label: t('nav.settlements'), icon: '🏦', path: '/admin/settlements',
       roles: ['admin'], section: 'Finance' },
     { id: 'admin-finance-reports', label: t('nav.financeReports'), icon: '📈', path: '/admin/finance-reports',

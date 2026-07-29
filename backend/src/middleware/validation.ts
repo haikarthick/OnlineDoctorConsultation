@@ -2045,7 +2045,9 @@ export const groomingReportCardSchema = Joi.object({
 
 export const groomingSettleSchema = Joi.object({
   method: Joi.string().valid('bank_transfer', 'upi', 'other').optional(),
-  reference: shortText(120).optional().allow('', null),
+  // Required, not optional. Settlement is manual — the money moves outside this system, so the
+  // reference is the ONLY evidence it happened, and it is what the provider is told.
+  reference: shortText(120).required(),
   tdsAmount: positiveNumber.max(1000000).optional(),
   notes: longText(500).optional().allow('', null),
 });

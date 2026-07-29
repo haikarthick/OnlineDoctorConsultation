@@ -1792,6 +1792,12 @@ router.get('/admin/withdrawals', authMiddleware, roleMiddleware(['admin']), asyn
   res.json({ success: true, data: await WithdrawalService.adminList(req.query.status as string | undefined) });
 }));
 
+// Doctors the platform owes money to. The negative-balance route below is its counterpart;
+// neither existed for the positive case until now, so unpaid doctors were invisible.
+router.get('/admin/withdrawals/payables', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  const WithdrawalService = (await import('../services/payment/WithdrawalService')).default;
+  res.json({ success: true, data: await WithdrawalService.adminPayables() });
+}));
 router.get('/admin/withdrawals/negative-balances', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
   const WithdrawalService = (await import('../services/payment/WithdrawalService')).default;
   res.json({ success: true, data: await WithdrawalService.adminNegativeBalances() });
@@ -5495,6 +5501,18 @@ router.post('/grooming/admin/providers/:id/settle', authMiddleware, roleMiddlewa
 router.get('/grooming/admin/providers/:id/earnings', authMiddleware, roleMiddleware(['admin']), groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingSettlementService.getEarningsAdmin(req.params.id) });
+  }));
+// "Who do I owe, and how much" — the register that made manual settlement operable.
+router.get('/grooming/admin/payables', authMiddleware, roleMiddleware(['admin']), groomingEnabled,
+  asyncHandler(async (_req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingSettlementService.adminPayables() });
+  }));
+// Statement of exactly which earnings one payout covered — the provider's reconciliation view.
+router.get('/grooming/settlements/:settlementId/statement', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    const isAdmin = ((req as any).userRoles || []).includes('admin');
+    res.json({ success: true, data: await GroomingSettlementService.getSettlementStatement(
+      (req as any).userId, req.params.settlementId, isAdmin) });
   }));
 router.get('/grooming/admin/reconciliation', authMiddleware, roleMiddleware(['admin']), groomingEnabled,
   asyncHandler(async (_req: Request, res: Response) => {

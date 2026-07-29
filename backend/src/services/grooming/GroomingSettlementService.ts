@@ -81,10 +81,108 @@ class GroomingSettlementService {
     return r.rows;
   }
 
-  /** Admin records a manual payout: pays out all currently-available earnings for the provider. */
+  /**
+   * THE PAYABLES REGISTER — "who do I owe, and how much, right now".
+   *
+   * This did not exist. adminReconciliation() returned platform-wide totals only, and the
+   * per-provider earnings route needed a providerId the admin had to already know. With manual
+   * settlement that meant there was no way to answer the basic operational question without
+   * guessing which provider to look at, so a provider could sit unpaid indefinitely simply by
+   * not being checked.
+   *
+   * Ordered by payable amount so the largest debts surface first, and every row carries the
+   * things needed to actually pay it: bank/UPI details, how long the money has been waiting,
+   * and when they were last paid.
+   */
+  async adminPayables(): Promise<any> {
+    // Mature everything platform-wide first, or a provider whose money came due minutes ago
+    // would be reported as 'clearing' and skipped.
+    await this.releaseAllMatured();
+
+    const r = await database.query(
+      `SELECT gp.id AS "providerId", gp.business_name AS "businessName", gp.legal_name AS "legalName",
+              gp.gstin, gp.verification_status AS "verificationStatus",
+              gp.payout_account_name AS "payoutAccountName", gp.payout_account_number AS "payoutAccountNumber",
+              gp.payout_ifsc AS "payoutIfsc", gp.payout_upi AS "payoutUpi",
+              u.email AS "ownerEmail",
+              COALESCE(SUM(ge.net_amount) FILTER (WHERE ge.status = 'available'), 0) AS "payableNow",
+              COALESCE(SUM(ge.net_amount) FILTER (WHERE ge.status = 'clearing'), 0) AS "clearing",
+              COALESCE(SUM(ge.net_amount) FILTER (WHERE ge.status = 'paid'), 0) AS "paidToDate",
+              COUNT(*) FILTER (WHERE ge.status = 'available') AS "entryCount",
+              MIN(ge.created_at) FILTER (WHERE ge.status = 'available') AS "oldestAvailableAt",
+              (SELECT MAX(settled_at) FROM grooming_settlements s
+                WHERE s.provider_id = gp.id AND s.status = 'paid') AS "lastSettledAt"
+       FROM grooming_providers gp
+       JOIN users u ON u.id = gp.owner_user_id
+       LEFT JOIN grooming_earnings ge ON ge.provider_id = gp.id
+       GROUP BY gp.id, u.email
+       HAVING COALESCE(SUM(ge.net_amount) FILTER (WHERE ge.status IN ('available','clearing')), 0) <> 0
+       ORDER BY COALESCE(SUM(ge.net_amount) FILTER (WHERE ge.status = 'available'), 0) DESC`);
+
+    const rows = r.rows.map((x: any) => {
+      const payableNow = Number(x.payableNow);
+      const hasBank = !!(x.payoutAccountNumber && x.payoutIfsc);
+      return {
+        ...x,
+        payableNow,
+        clearing: Number(x.clearing),
+        paidToDate: Number(x.paidToDate),
+        entryCount: Number(x.entryCount),
+        // Surfaces the two reasons a payable cannot actually be paid today, rather than letting
+        // the admin discover them only after clicking Settle.
+        canPay: payableNow > 0 && (hasBank || !!x.payoutUpi),
+        missingPayoutDetails: payableNow > 0 && !hasBank && !x.payoutUpi,
+        ageDays: x.oldestAvailableAt
+          ? Math.floor((Date.now() - new Date(x.oldestAvailableAt).getTime()) / 86400000) : null,
+      };
+    });
+
+    return {
+      providers: rows,
+      totalPayableNow: +rows.reduce((s: number, x: any) => s + x.payableNow, 0).toFixed(2),
+      totalClearing: +rows.reduce((s: number, x: any) => s + x.clearing, 0).toFixed(2),
+      blockedCount: rows.filter((x: any) => x.missingPayoutDetails).length,
+    };
+  }
+
+  /** Everything a provider needs to reconcile one payout: the settlement + the entries it paid. */
+  async getSettlementStatement(userId: string, settlementId: string, isAdmin: boolean): Promise<any> {
+    const s = await database.query(
+      `SELECT gs.id, gs.provider_id as "providerId", gs.amount, gs.tds_amount as "tdsAmount",
+              gs.net_paid as "netPaid", gs.method, gs.reference, gs.status,
+              gs.period_from as "periodFrom", gs.period_to as "periodTo", gs.notes,
+              gs.settled_at as "settledAt", gs.created_at as "createdAt",
+              gp.business_name as "businessName", gp.legal_name as "legalName", gp.gstin
+       FROM grooming_settlements gs
+       JOIN grooming_providers gp ON gp.id = gs.provider_id
+       WHERE gs.id = $1`, [settlementId]);
+    if (s.rows.length === 0) throw new NotFoundError('GroomingSettlement', settlementId);
+    const statement = s.rows[0];
+    if (!isAdmin) await this.requireProviderView(userId, statement.providerId);
+
+    const lines = await database.query(
+      `SELECT ge.id, ge.order_id as "orderId", o.order_number as "orderNumber",
+              ge.gross_amount as "grossAmount", ge.commission_amount as "commissionAmount",
+              ge.net_amount as "netAmount", ge.entry_type as "entryType", ge.created_at as "createdAt"
+       FROM grooming_earnings ge
+       LEFT JOIN grooming_orders o ON o.id = ge.order_id
+       WHERE ge.settlement_id = $1 ORDER BY ge.created_at ASC`, [settlementId]);
+    statement.lines = lines.rows;
+    return statement;
+  }
+
+  /**
+   * Admin records a manual payout: pays out all currently-available earnings for the provider.
+   *
+   * A payment reference is now REQUIRED. Manual settlement means the money moves outside this
+   * system, so the reference is the only evidence that it happened — without it neither side can
+   * prove a payout, and the provider was previously told nothing at all.
+   */
   async adminSettle(adminId: string, providerId: string, data: { method?: string; reference?: string; tdsAmount?: number; notes?: string }): Promise<any> {
+    if (!data.reference?.trim())
+      throw new ValidationError('A payment reference (UTR/transaction ID) is required so the provider has evidence of payment.');
     await this.releaseMatured(providerId);
-    return database.transaction(async (client: any) => {
+    const settlement = await database.transaction(async (client: any) => {
       const avail = await client.query(
         `SELECT id, net_amount, created_at FROM grooming_earnings
          WHERE provider_id = $1 AND status = 'available' FOR UPDATE`, [providerId]);
@@ -113,8 +211,39 @@ class GroomingSettlementService {
       const r = await client.query(
         `SELECT id, amount, tds_amount as "tdsAmount", net_paid as "netPaid", method, reference, status,
                 settled_at as "settledAt" FROM grooming_settlements WHERE id = $1`, [settlementId]);
-      return r.rows[0];
+      return { ...r.rows[0], entryCount: avail.rows.length, periodFrom, periodTo };
     });
+
+    // Tell the provider they have been paid, with the evidence. Previously nothing was sent at
+    // all: money left the platform and the vendor had no way to know it had happened, which is
+    // what makes a manual settlement process fall apart in practice. Non-blocking — the payout
+    // is already recorded and must not be rolled back by a notification failure.
+    try {
+      const owner = await database.query(
+        `SELECT gp.owner_user_id AS "ownerUserId", gp.business_name AS "businessName"
+         FROM grooming_providers gp WHERE gp.id = $1`, [providerId]);
+      const ownerUserId = owner.rows[0]?.ownerUserId;
+      if (ownerUserId) {
+        const NotificationService = (await import('../NotificationService')).default;
+        const period = `${new Date(settlement.periodFrom).toLocaleDateString('en-IN')}–${new Date(settlement.periodTo).toLocaleDateString('en-IN')}`;
+        const tdsLine = Number(settlement.tdsAmount) > 0
+          ? ` after ${Number(settlement.tdsAmount).toFixed(2)} TDS withheld` : '';
+        await NotificationService.createNotification(
+          ownerUserId, 'payment', 'Payout sent',
+          `We've paid you ${Number(settlement.netPaid).toFixed(2)} for ${settlement.entryCount} completed `
+          + `booking(s) (${period})${tdsLine}. `
+          + `Paid by ${String(settlement.method).replace(/_/g, ' ')}, reference ${settlement.reference}. `
+          + `Open Earnings & Payouts to see the full statement of what this covers.`,
+          'all', { settlementId: settlement.id, reference: settlement.reference, netPaid: settlement.netPaid });
+      }
+    } catch (err: any) {
+      logger.warn('Grooming settlement notification failed (non-blocking)', { providerId, error: err.message });
+    }
+
+    logger.info('Grooming settlement recorded', {
+      providerId, adminId, settlementId: settlement.id, netPaid: settlement.netPaid, reference: settlement.reference,
+    });
+    return settlement;
   }
 
   /** Platform-wide reconciliation snapshot for admin. */

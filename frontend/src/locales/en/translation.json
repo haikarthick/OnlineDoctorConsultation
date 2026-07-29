@@ -218,7 +218,8 @@
     "groomingOrders": "Grooming Orders",
     "groomingEarnings": "Grooming Earnings",
     "groomingApply": "List Your Business",
-    "groomingSchedule": "Working Hours"
+    "groomingSchedule": "Working Hours",
+    "payables": "Payables"
   },
   "login": {
     "welcome": "Welcome back",
@@ -8105,5 +8106,48 @@
       "rejected": "Not approved",
       "cancelled": "Cancelled"
     }
+  },
+  "payables": {
+    "title": "Payables",
+    "subtitle": "Who the platform owes right now, and what has been paid.",
+    "groomingPayable": "Grooming — payable now",
+    "groomingClearing": "Grooming — clearing",
+    "doctorPayable": "Doctors — payable now",
+    "blocked": "Blocked payouts",
+    "blockedHint": "Missing bank/UPI details",
+    "groomingTab": "Grooming providers",
+    "doctorsTab": "Doctors",
+    "noneGrooming": "Nothing owed to grooming providers.",
+    "noneDoctors": "Nothing owed to doctors.",
+    "vendor": "Vendor",
+    "payableNow": "Payable now",
+    "clearing": "Clearing",
+    "waiting": "Waiting",
+    "lastPaid": "Last paid",
+    "payoutTo": "Pay to",
+    "action": "Action",
+    "status": "Status",
+    "days": "{{count}} days",
+    "never": "Never",
+    "noPayoutDetails": "No payout details",
+    "noPayoutDetailsHint": "This provider has not saved bank or UPI details yet.",
+    "recordPayout": "Record payout",
+    "recordPayoutFor": "Record payout — {{name}}",
+    "payoutExplainer": "This marks {{amount}} as paid and tells the provider, with your reference as evidence. Send the money first, then record it here.",
+    "method": "Paid by",
+    "bankTransfer": "Bank transfer",
+    "other": "Other",
+    "reference": "Payment reference (UTR)",
+    "referencePlaceholder": "e.g. UTR / transaction ID",
+    "tdsOverride": "TDS",
+    "tdsAuto": "Auto",
+    "notes": "Notes",
+    "notifyNote": "The provider is notified with the amount, the period covered and this reference.",
+    "confirmPaid": "Confirm paid",
+    "recording": "Recording…",
+    "paidAndNotified": "Payout recorded and {{name}} has been notified.",
+    "inQueue": "Withdrawal requested",
+    "noRequestYet": "Not requested yet",
+    "doctorsHint": "Doctors are paid when they request a withdrawal. Anyone marked \"Not requested yet\" is owed money but has not asked — settle from the Settlements screen if they need paying now."
   }
 }

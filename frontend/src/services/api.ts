@@ -3009,6 +3009,22 @@ class ApiService {
     return response.data
   }
 
+  // ── Payables: who the platform currently owes, and payout evidence ──
+  async getGroomingPayables() {
+    const response = await this.client.get('/grooming/admin/payables')
+    return response.data
+  }
+
+  async getDoctorPayables() {
+    const response = await this.client.get('/admin/withdrawals/payables')
+    return response.data
+  }
+
+  async getGroomingSettlementStatement(settlementId: string) {
+    const response = await this.client.get(`/grooming/settlements/${settlementId}/statement`)
+    return response.data
+  }
+
   // ── Wallet withdrawals (038) — money out of the platform ──
   async requestWalletWithdrawal(data: {
     amount: number; method?: string; accountName?: string; accountNumber?: string; ifsc?: string; upiId?: string
