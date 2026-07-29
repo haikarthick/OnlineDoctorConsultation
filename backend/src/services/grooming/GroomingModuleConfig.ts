@@ -96,10 +96,18 @@ class GroomingModuleConfig {
   async getCreditNotePrefix(): Promise<string> { return this.getString('grooming.creditNotePrefix', 'GRMCN'); }
   /** TDS percentage withheld on grooming provider payouts (own key — not the consultation one). */
   async getTdsRatePercent(): Promise<number> { return this.getNumber('grooming.settlement.tdsRatePercent', 0); }
-  /** Default refund destination: 'wallet' (instant) or 'gateway' (back to source). */
+  /**
+   * Default refund destination: 'gateway' (back to the original payment method) or 'wallet'.
+   *
+   * Defaults to GATEWAY. It used to default to 'wallet', which meant a cancelled booking was
+   * repaid as store credit the customer had no way to withdraw — their money could only ever be
+   * spent back on this platform. Returning it to source is the correct default; the wallet
+   * remains available as an explicit customer choice, and as the fallback when a gateway refund
+   * fails (see GroomingRefundService), which is exactly why wallet withdrawals now exist.
+   */
   async getDefaultRefundDestination(): Promise<'wallet' | 'gateway'> {
-    const v = (await this.getString('grooming.refund.defaultDestination', 'wallet')).trim().toLowerCase();
-    return v === 'gateway' ? 'gateway' : 'wallet';
+    const v = (await this.getString('grooming.refund.defaultDestination', 'gateway')).trim().toLowerCase();
+    return v === 'wallet' ? 'wallet' : 'gateway';
   }
 }
 

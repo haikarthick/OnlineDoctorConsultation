@@ -22,10 +22,57 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
   const [offset, setOffset] = useState(0)
   const limit = 20
 
+  // ── Withdrawals (038) ──
+  const [withdrawals, setWithdrawals] = useState<any[]>([])
+  const [showForm, setShowForm] = useState(false)
+  const [wBusy, setWBusy] = useState(false)
+  const [wErr, setWErr] = useState('')
+  const [wMsg, setWMsg] = useState('')
+  const [form, setForm] = useState({
+    amount: '', method: 'bank_transfer', accountName: '', accountNumber: '', ifsc: '', upiId: '',
+  })
+
   useEffect(() => {
     loadWallet()
     loadTransactions(0)
+    loadWithdrawals()
   }, [])
+
+  const loadWithdrawals = async () => {
+    try {
+      const res = await apiService.listMyWalletWithdrawals()
+      setWithdrawals(Array.isArray(res.data) ? res.data : [])
+    } catch { /* the wallet itself still renders */ }
+  }
+
+  const submitWithdrawal = async () => {
+    try {
+      setWBusy(true); setWErr(''); setWMsg('')
+      await apiService.requestWalletWithdrawal({
+        amount: Number(form.amount),
+        method: form.method,
+        ...(form.method === 'upi'
+          ? { upiId: form.upiId.trim() }
+          : { accountName: form.accountName.trim(), accountNumber: form.accountNumber.trim(), ifsc: form.ifsc.trim() }),
+      })
+      setShowForm(false)
+      setWMsg(t('walletWithdrawal.submitted'))
+      // The balance moves as soon as the request is made, so both must be refetched.
+      await Promise.all([loadWallet(), loadWithdrawals(), loadTransactions(0)])
+    } catch (err: any) {
+      setWErr(err?.response?.data?.error?.message || err?.response?.data?.message || err.message)
+    } finally { setWBusy(false) }
+  }
+
+  const cancelWithdrawal = async (id: string) => {
+    try {
+      setWBusy(true); setWErr('')
+      await apiService.cancelWalletWithdrawal(id)
+      await Promise.all([loadWallet(), loadWithdrawals(), loadTransactions(0)])
+    } catch (err: any) {
+      setWErr(err?.response?.data?.error?.message || err?.response?.data?.message || err.message)
+    } finally { setWBusy(false) }
+  }
 
   const loadWallet = async () => {
     try {
@@ -139,6 +186,94 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
           <div className="si-1f14f25b">
             {gatewayMode === 'demo' ? t('wallet.simulated') : gatewayMode === 'test' ? t('wallet.sandbox') : t('wallet.realPayments')}
           </div>
+        </div>
+      </div>
+
+      {/* Withdrawals — the wallet's exit door. Without this, every refund credited here is
+          permanent store credit the customer can only ever spend back on the platform. */}
+      <div className="card">
+        <div className="card-header">
+          <h2>{t('walletWithdrawal.title')}</h2>
+        </div>
+        <div className="card-body">
+          <p className="slot-hint">{t('walletWithdrawal.hint')}</p>
+          {wErr && <div className="module-alert error">{wErr}</div>}
+          {wMsg && <div className="module-alert success">{wMsg}</div>}
+
+          {balance <= 0 ? (
+            <p className="slot-hint">{t('walletWithdrawal.nothingToWithdraw')}</p>
+          ) : !showForm ? (
+            <button className="btn btn-primary" onClick={() => { setShowForm(true); setForm({ ...form, amount: String(balance) }) }}>
+              {t('walletWithdrawal.withdraw')}
+            </button>
+          ) : (
+            <div className="inline-form-row">
+              <label>
+                <span className="field-caption">{t('walletWithdrawal.amount')}</span>
+                <input className="module-input" type="number" min={1} max={balance} step="0.01"
+                  value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
+              </label>
+              <label>
+                <span className="field-caption">{t('walletWithdrawal.method')}</span>
+                <select className="module-input" value={form.method}
+                  onChange={e => setForm({ ...form, method: e.target.value })}>
+                  <option value="bank_transfer">{t('walletWithdrawal.bank')}</option>
+                  <option value="upi">{t('walletWithdrawal.upi')}</option>
+                </select>
+              </label>
+              {form.method === 'upi' ? (
+                <label className="inline-form-grow">
+                  <span className="field-caption">{t('walletWithdrawal.upiId')}</span>
+                  <input className="module-input" value={form.upiId} placeholder="name@bank"
+                    onChange={e => setForm({ ...form, upiId: e.target.value })} />
+                </label>
+              ) : (
+                <>
+                  <label>
+                    <span className="field-caption">{t('walletWithdrawal.accountName')}</span>
+                    <input className="module-input" value={form.accountName}
+                      onChange={e => setForm({ ...form, accountName: e.target.value })} />
+                  </label>
+                  <label>
+                    <span className="field-caption">{t('walletWithdrawal.accountNumber')}</span>
+                    <input className="module-input" value={form.accountNumber}
+                      onChange={e => setForm({ ...form, accountNumber: e.target.value })} />
+                  </label>
+                  <label>
+                    <span className="field-caption">{t('walletWithdrawal.ifsc')}</span>
+                    <input className="module-input" value={form.ifsc}
+                      onChange={e => setForm({ ...form, ifsc: e.target.value.toUpperCase() })} />
+                  </label>
+                </>
+              )}
+              <button className="btn btn-primary" disabled={wBusy} onClick={submitWithdrawal}>
+                {wBusy ? t('walletWithdrawal.submitting') : t('walletWithdrawal.submit')}
+              </button>
+              <button className="btn btn-outline" disabled={wBusy} onClick={() => setShowForm(false)}>
+                {t('common.cancel')}
+              </button>
+            </div>
+          )}
+
+          {withdrawals.length > 0 && (
+            <ul className="rule-list">
+              {withdrawals.map(w => (
+                <li key={w.id}>
+                  <span>
+                    <strong>{formatCurrency(Number(w.amount))}</strong>
+                    {' · '}{t(`walletWithdrawal.status.${w.status}`, { defaultValue: w.status })}
+                    {' · '}{formatDateTime(w.createdAt)}
+                    {w.utrReference ? ` · ${t('walletWithdrawal.reference')}: ${w.utrReference}` : ''}
+                    {w.rejectionReason ? ` · ${w.rejectionReason}` : ''}
+                  </span>
+                  {w.status === 'requested' && (
+                    <button className="btn btn-sm btn-outline" disabled={wBusy}
+                      onClick={() => cancelWithdrawal(w.id)}>{t('walletWithdrawal.cancelRequest')}</button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 

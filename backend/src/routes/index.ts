@@ -18,6 +18,7 @@ import {
   groomingStaffSchema, groomingProviderRejectSchema,
   createGroomingOrderSchema, groomingCancelSchema, groomingAcceptSchema, groomingDeclineSchema,
   groomingScheduleSchema, groomingDateOverrideSchema, groomingBlockedSlotSchema,
+  walletWithdrawalRequestSchema,
   groomingTransitionSchema, groomingAssignSchema, groomingIntakeSchema,
   groomingItemStatusSchema, groomingReportCardSchema, groomingSettleSchema,
   groomingVariableRequestSchema, groomingVariableRespondSchema,
@@ -138,6 +139,7 @@ import HospitalNetworkController from '../controllers/HospitalNetworkController'
 import HospitalNetworkService, { updateBranchHospital, deleteBranchHospital, addApprovalEvent, getApprovalHistory, updateNetworkBranding, getNotificationPreferences, updateNotificationPreferences } from '../services/HospitalNetworkService';
 import VetHospitalService from '../services/VetHospitalService';
 import WalletController from '../controllers/WalletController';
+import WalletWithdrawalService from '../services/WalletWithdrawalService';
 import StaffWorkflowController from '../controllers/StaffWorkflowController';
 import { FileController } from '../controllers/FileController';
 import { uploadAny, uploadImage, uploadVideo } from '../middleware/upload';
@@ -1984,6 +1986,43 @@ router.put('/admin/razorpay-credentials/:environment', authMiddleware, roleMiddl
 // ─── Wallet routes ───────────────────────────────────────────
 router.get('/wallet', authMiddleware, asyncHandler((req: Request, res: Response) => WalletController.getWallet(req, res)));
 router.get('/wallet/transactions', authMiddleware, asyncHandler((req: Request, res: Response) => WalletController.listTransactions(req, res)));
+
+// Wallet withdrawals (038) — the wallet's exit door. Any authenticated user may withdraw their
+// OWN balance; refunds land here and must not be trapped as permanent store credit.
+router.post('/wallet/withdrawals', authMiddleware, validateBody(walletWithdrawalRequestSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await WalletWithdrawalService.requestWithdrawal((req as any).userId, req.body) });
+  }));
+router.get('/wallet/withdrawals', authMiddleware,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await WalletWithdrawalService.listMine((req as any).userId) });
+  }));
+router.post('/wallet/withdrawals/:id/cancel', authMiddleware,
+  asyncHandler(async (req: Request, res: Response) => {
+    await WalletWithdrawalService.cancelMine((req as any).userId, req.params.id);
+    res.json({ success: true });
+  }));
+
+// Admin payout queue for customer withdrawals.
+router.get('/admin/wallet-withdrawals', authMiddleware, roleMiddleware(['admin']),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await WalletWithdrawalService.adminList(req.query.status as string) });
+  }));
+router.put('/admin/wallet-withdrawals/:id/approve', authMiddleware, roleMiddleware(['admin']),
+  asyncHandler(async (req: Request, res: Response) => {
+    await WalletWithdrawalService.adminApprove(req.params.id, (req as any).userId, req.body?.note);
+    res.json({ success: true });
+  }));
+router.put('/admin/wallet-withdrawals/:id/reject', authMiddleware, roleMiddleware(['admin']),
+  asyncHandler(async (req: Request, res: Response) => {
+    await WalletWithdrawalService.adminReject(req.params.id, (req as any).userId, req.body?.reason);
+    res.json({ success: true });
+  }));
+router.put('/admin/wallet-withdrawals/:id/settle', authMiddleware, roleMiddleware(['admin']),
+  asyncHandler(async (req: Request, res: Response) => {
+    await WalletWithdrawalService.adminSettle(req.params.id, (req as any).userId, req.body?.utrReference, req.body?.note);
+    res.json({ success: true });
+  }));
 
 // ─── Doctor reliability ──────────────────────────────────────
 router.get('/doctors/:vetId/reliability', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getDoctorReliability(req, res)));

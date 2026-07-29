@@ -737,6 +737,41 @@ CREATE TABLE IF NOT EXISTS wallet_transactions (
 );
 
 -- ============================================================
+-- 18b. WALLET WITHDRAWALS (migration 038) — money OUT of the platform
+-- ============================================================
+-- Without this the wallet is a one-way door: refunds land in it and can only ever be spent
+-- back on the platform. Separate from withdrawal_requests, which is keyed to doctor earnings
+-- and carries TDS/commission-invoice semantics that do not apply to handing a customer back
+-- their own money. Only `balance` is withdrawable — `bonus_credits` is promotional.
+CREATE TABLE IF NOT EXISTS wallet_withdrawal_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  wallet_id UUID NOT NULL REFERENCES wallets(id) ON DELETE CASCADE,
+  amount DECIMAL(10,2) NOT NULL CHECK (amount > 0),
+  currency VARCHAR(10) DEFAULT 'INR',
+  status VARCHAR(20) NOT NULL DEFAULT 'requested'
+    CHECK (status IN ('requested', 'approved', 'rejected', 'settled', 'cancelled')),
+  method VARCHAR(20) NOT NULL DEFAULT 'bank_transfer'
+    CHECK (method IN ('bank_transfer', 'upi')),
+  account_name VARCHAR(255),
+  account_number VARCHAR(50),
+  ifsc VARCHAR(20),
+  upi_id VARCHAR(100),
+  utr_reference VARCHAR(100),
+  admin_note TEXT,
+  rejection_reason TEXT,
+  reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  reviewed_at TIMESTAMP,
+  settled_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  settled_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_wallet_withdrawals_user ON wallet_withdrawal_requests (user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_wallet_withdrawals_open
+  ON wallet_withdrawal_requests (created_at ASC) WHERE status IN ('requested', 'approved');
+
+-- ============================================================
 -- AUTO-UPDATE TRIGGERS  (drop+create for idempotency)
 -- ============================================================
 DROP TRIGGER IF EXISTS update_users_updated_at ON users;

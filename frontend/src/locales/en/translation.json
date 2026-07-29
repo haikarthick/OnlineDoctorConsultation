@@ -8079,5 +8079,31 @@
       "friday": "Friday",
       "saturday": "Saturday"
     }
+  },
+  "walletWithdrawal": {
+    "title": "Withdraw to your bank",
+    "hint": "Refunds credited to your wallet can be sent to your bank account or UPI. Bonus credits cannot be withdrawn.",
+    "nothingToWithdraw": "You have no withdrawable balance right now.",
+    "withdraw": "Withdraw money",
+    "amount": "Amount",
+    "method": "Send to",
+    "bank": "Bank account",
+    "upi": "UPI",
+    "upiId": "UPI ID",
+    "accountName": "Account holder",
+    "accountNumber": "Account number",
+    "ifsc": "IFSC code",
+    "submit": "Request withdrawal",
+    "submitting": "Requesting…",
+    "submitted": "Withdrawal requested. We will pay it out and send you the reference.",
+    "cancelRequest": "Cancel",
+    "reference": "Ref",
+    "status": {
+      "requested": "Pending review",
+      "approved": "Approved — payout in progress",
+      "settled": "Paid",
+      "rejected": "Not approved",
+      "cancelled": "Cancelled"
+    }
   }
 }

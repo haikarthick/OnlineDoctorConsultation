@@ -1932,6 +1932,24 @@ export const groomingCancelSchema = Joi.object({
   reason: shortText(500).optional().allow('', null),
 });
 
+// ─── Wallet withdrawals (038) ────────────────────────────────
+// Payout details are conditional on the method: a UPI payout needs a VPA, a bank transfer needs
+// name + account + IFSC. The service re-checks and returns the readable error.
+export const walletWithdrawalRequestSchema = Joi.object({
+  amount: Joi.number().positive().precision(2).required(),
+  method: Joi.string().valid('bank_transfer', 'upi').optional(),
+  accountName: shortText(255).optional().allow('', null),
+  // .message() must attach directly to the rule it overrides. Chaining it after .allow()
+  // throws "Cannot apply rules to empty ruleset" at MODULE LOAD, which tsc cannot see and
+  // which takes the whole server down on boot — caught by npm run verify:runtime.
+  accountNumber: Joi.string().pattern(/^\d{6,20}$/).message('Account number must be 6–20 digits')
+    .optional().allow('', null),
+  ifsc: Joi.string().pattern(/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/).message('Enter a valid IFSC code')
+    .optional().allow('', null),
+  upiId: Joi.string().pattern(/^[\w.\-_]{2,64}@[a-zA-Z]{2,64}$/).message('Enter a valid UPI ID (name@bank)')
+    .optional().allow('', null),
+});
+
 // ─── Grooming availability / working hours (037) ─────────────
 // HH:MM, 24-hour. Deliberately strict: a malformed time parses to 0 in the slot engine and
 // would silently open the salon at midnight.

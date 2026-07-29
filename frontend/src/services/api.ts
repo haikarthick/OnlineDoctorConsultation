@@ -3009,6 +3009,44 @@ class ApiService {
     return response.data
   }
 
+  // ── Wallet withdrawals (038) — money out of the platform ──
+  async requestWalletWithdrawal(data: {
+    amount: number; method?: string; accountName?: string; accountNumber?: string; ifsc?: string; upiId?: string
+  }) {
+    const response = await this.client.post('/wallet/withdrawals', data)
+    return response.data
+  }
+
+  async listMyWalletWithdrawals() {
+    const response = await this.client.get('/wallet/withdrawals')
+    return response.data
+  }
+
+  async cancelWalletWithdrawal(id: string) {
+    const response = await this.client.post(`/wallet/withdrawals/${id}/cancel`, {})
+    return response.data
+  }
+
+  async adminListWalletWithdrawals(status?: string) {
+    const response = await this.client.get('/admin/wallet-withdrawals', { params: { status } })
+    return response.data
+  }
+
+  async adminApproveWalletWithdrawal(id: string, note?: string) {
+    const response = await this.client.put(`/admin/wallet-withdrawals/${id}/approve`, { note })
+    return response.data
+  }
+
+  async adminRejectWalletWithdrawal(id: string, reason: string) {
+    const response = await this.client.put(`/admin/wallet-withdrawals/${id}/reject`, { reason })
+    return response.data
+  }
+
+  async adminSettleWalletWithdrawal(id: string, utrReference: string, note?: string) {
+    const response = await this.client.put(`/admin/wallet-withdrawals/${id}/settle`, { utrReference, note })
+    return response.data
+  }
+
   // ── Grooming availability & working hours (037) ──
   /** Bookable slots for one provider/date. Sized to the service when one is given. */
   async getGroomingAvailability(providerId: string, date: string, opts: { serviceId?: string; locationId?: string } = {}) {
