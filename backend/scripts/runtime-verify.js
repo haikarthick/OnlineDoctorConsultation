@@ -451,6 +451,11 @@ async function http(method, url, body, token) {
           RESEND_API_KEY: '', SMTP_HOST: '', SMTP_USER: '', SMTP_PASS: '',
           FEATURE_EMAIL_NOTIFICATIONS: 'false',
           ENABLE_SELF_PING: 'false',
+          // Pass through so the gate can be run BOTH ways:
+          //   normal        → proves production behaviour (self-heal on) still works
+          //   =true         → proves init.sql + migrations alone are sufficient, which is the
+          //                   evidence needed before the self-heal can actually be deleted
+          DISABLE_LEGACY_SELFHEAL: process.env.DISABLE_LEGACY_SELFHEAL || '',
           // The gate legitimately authenticates far more than a human would from one IP:
           // every role registers, every seeded demo account logs in, then Playwright does it
           // all again through the UI. The production default (15 per 15 min) would 429 midway

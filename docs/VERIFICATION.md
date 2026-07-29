@@ -134,23 +134,34 @@ PGBIN="C:\Program Files\PostgreSQL\18\bin" npm run verify:runtime
 Takes ~2-3 minutes. It creates a temporary cluster on a random free port and removes it
 afterwards; it never touches your own databases.
 
+## Retiring the legacy self-heal
+
+`database.ts`'s `ensureSchemaPublic()` is untracked, unversioned, runs on **every boot after the
+migration runner**, and has twice silently overwritten schema a migration established. It cannot
+just be deleted — long-lived databases may depend on objects only it creates.
+
+The path out is `DISABLE_LEGACY_SELFHEAL=true`, and **CI runs the gate both ways** as a matrix:
+
+| leg | what it proves |
+|---|---|
+| self-heal **on** | production behaviour, as Render runs it today, still works |
+| self-heal **OFF** | `init.sql` + `backend/migrations` are **sufficient on their own** for a fresh database |
+
+Both legs are green as of 2026-07-28. That is the evidence needed before the block can actually
+be deleted. It also enforces the file's own rule: **add schema to a migration, never to the
+self-heal** — do the latter and the OFF leg goes red while the ON leg stays green, which names
+the mistake exactly.
+
+Remaining step: confirm a real long-lived environment's schema matches a freshly-built one, then
+delete the block.
+
 ## Known remaining risks (honest list)
 
-1. **The legacy self-heal in `database.ts` is still the biggest structural hazard.** It runs on
-   every boot, after migrations, is untracked, and is wrapped in `.catch(() => {})` so failures
-   are silent. PHASE 5 now *detects* when it overwrites a migration, but the real fix is
-   retiring it. Its own header comment (~line 226) says not to add to it.
-2. **Three constraint rebuilds there still carry inline value lists** —
-   `payments_status_check`, `bookings_status_check`, `bookings_booking_type_check`. All three
-   currently match `init.sql` (verified — PHASE 5 is green), so nothing is broken today, and
-   PHASE 5 will fail the moment one drifts. Converting them to shared constants like
-   `SYSTEM_ROLES` / `INVOICE_TYPES` would remove the hazard entirely.
-3. **The legacy e2e suite is unverified** — see the box above.
-4. **The GitHub Actions `runtime-verify` job has never executed.** The YAML is validated and the
-   job graph is confirmed (`resolve-env` depends on it), but a workflow's first real run is on
-   GitHub. Watch the first push after this lands.
-5. **Seeding is only exercised in `--full` mode.** The push gate runs with
-   `SEED_ON_STARTUP=false`, so a broken demo seed would not fail it.
+1. **The legacy e2e suite is still unverified end to end** — see the box above. Its blocking
+   cause (wrong credentials in `e2e/constants.ts`) is fixed and PHASE 6b now guards it, but the
+   full 462-test run has not been demonstrated green.
+2. **Long-lived environments may still hold schema only the self-heal created.** The OFF leg
+   proves sufficiency for a *fresh* database, not that `vetcare-dev`'s existing schema matches.
 
 ## When adding a new role, enum value, or CHECK-constrained column
 

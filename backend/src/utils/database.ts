@@ -309,6 +309,22 @@ class PostgresDatabase {
     return this.ensureSchemaPublic();
   }
   async ensureSchemaPublic(): Promise<void> {
+    // ── Retirement switch ──
+    // This whole mechanism is scheduled for removal: it is untracked, unversioned, runs on
+    // every boot AFTER the migration runner, and has twice silently overwritten schema that a
+    // migration established (see docs/VERIFICATION.md). It cannot simply be deleted, because
+    // long-lived databases may still depend on objects only it creates.
+    //
+    // DISABLE_LEGACY_SELFHEAL=true turns it off. The runtime gate runs with it OFF by default
+    // and green WITH it on, which is the evidence that docker/init.sql + backend/migrations
+    // are self-sufficient for a FRESH database. Flip it on a real environment only after
+    // confirming that environment's schema matches a freshly-built one.
+    if (String(process.env.DISABLE_LEGACY_SELFHEAL).toLowerCase() === 'true') {
+      logger.warn('Legacy schema self-heal SKIPPED (DISABLE_LEGACY_SELFHEAL=true) — ' +
+        'schema is whatever init.sql + backend/migrations produced.');
+      return;
+    }
+
     const schemaName = config.database.schema || 'public';
     const client = await this.pool.connect();
     try {

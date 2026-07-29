@@ -122,9 +122,24 @@ jobs:
   #
   # See docs/VERIFICATION.md and backend/scripts/runtime-verify.js.
   runtime-verify:
-    name: Runtime Verification (real DB + real server + browser)
+    name: Runtime Verification (${{ matrix.mode }})
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Production behaviour: the legacy startup self-heal runs, as it does on Render today.
+          - mode: self-heal on
+            disable_selfheal: ''
+          # The retirement check. Proves docker/init.sql + backend/migrations are SUFFICIENT on
+          # their own for a fresh database. If someone adds schema only to database.ts's
+          # self-heal — which the file's own header forbids — this leg goes red while the other
+          # stays green, which names the mistake precisely.
+          - mode: self-heal OFF (migrations must suffice)
+            disable_selfheal: 'true'
+    env:
+      DISABLE_LEGACY_SELFHEAL: ${{ matrix.disable_selfheal }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -169,7 +184,8 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: runtime-verify-playwright
+          # Must be unique per matrix leg — two jobs uploading the same artifact name collide.
+          name: runtime-verify-playwright-${{ strategy.job-index }}
           path: |
             frontend/test-results/
             frontend/playwright-report/
