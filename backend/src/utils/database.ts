@@ -107,6 +107,32 @@ const INVOICE_TYPES_SQL = INVOICE_TYPES.map(t => `'${t}'`).join(', ');
 const PAYMENT_SOURCES = ['consultation', 'pharmacy', 'subscription', 'other', 'grooming'] as const;
 const PAYMENT_SOURCES_SQL = PAYMENT_SOURCES.map(s => `'${s}'`).join(', ');
 
+/**
+ * The last three enumerated CHECK lists the self-heal still rebuilt from its own inline copies.
+ * Extracted 2026-07-28 after verifying each was byte-identical to docker/init.sql §46.1/§46.2 —
+ * a hazard removal, not a behaviour change. With these, NO constraint value list remains inlined
+ * in the self-heal, so it can no longer fall behind a migration the way the role list did.
+ *   payments.status       → docker/init.sql §46.1
+ *   bookings.status       → docker/init.sql §46.2
+ *   bookings.booking_type → docker/init.sql §46.2
+ */
+const PAYMENT_STATUSES = [
+  'pending', 'processing', 'created', 'completed', 'failed',
+  'refunded', 'partially_refunded', 'expired', 'transferred',
+] as const;
+const PAYMENT_STATUSES_SQL = PAYMENT_STATUSES.map(s => `'${s}'`).join(', ');
+
+const BOOKING_STATUSES = [
+  'pending', 'confirmed', 'cancelled', 'rescheduled', 'completed',
+  'missed', 'payment_pending', 'payment_expired', 'referred',
+] as const;
+const BOOKING_STATUSES_SQL = BOOKING_STATUSES.map(s => `'${s}'`).join(', ');
+
+const BOOKING_TYPES = [
+  'video_call', 'in_person', 'phone', 'chat', 'farm_visit', 'herd_consultation',
+] as const;
+const BOOKING_TYPES_SQL = BOOKING_TYPES.map(s => `'${s}'`).join(', ');
+
 class PostgresDatabase {
   private pool: Pool;
 
@@ -399,11 +425,11 @@ class PostgresDatabase {
       `CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status)`,
       // status CHECK extensions
       `ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_status_check`,
-      `ALTER TABLE payments ADD CONSTRAINT payments_status_check CHECK (status IN ('pending', 'processing', 'created', 'completed', 'failed', 'refunded', 'partially_refunded', 'expired', 'transferred'))`,
+      `ALTER TABLE payments ADD CONSTRAINT payments_status_check CHECK (status IN (${PAYMENT_STATUSES_SQL}))`,
       `ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_status_check`,
-      `ALTER TABLE bookings ADD CONSTRAINT bookings_status_check CHECK (status IN ('pending', 'confirmed', 'cancelled', 'rescheduled', 'completed', 'missed', 'payment_pending', 'payment_expired', 'referred'))`,
+      `ALTER TABLE bookings ADD CONSTRAINT bookings_status_check CHECK (status IN (${BOOKING_STATUSES_SQL}))`,
       `ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_booking_type_check`,
-      `ALTER TABLE bookings ADD CONSTRAINT bookings_booking_type_check CHECK (booking_type IN ('video_call', 'in_person', 'phone', 'chat', 'farm_visit', 'herd_consultation'))`,
+      `ALTER TABLE bookings ADD CONSTRAINT bookings_booking_type_check CHECK (booking_type IN (${BOOKING_TYPES_SQL}))`,
       // vet_profiles
       `ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS commission_percent_override DECIMAL(5,2)`,
       `ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS commission_flat_override DECIMAL(10,2)`,
@@ -491,7 +517,7 @@ class PostgresDatabase {
       `CREATE TABLE IF NOT EXISTS invoices (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         invoice_number VARCHAR(100) UNIQUE NOT NULL,
-        invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('consultation', 'commission')),
+        invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN (${INVOICE_TYPES_SQL})),
         payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
         withdrawal_id UUID REFERENCES withdrawal_requests(id) ON DELETE SET NULL,
         issuer_details JSONB NOT NULL DEFAULT '{}',
@@ -672,7 +698,7 @@ class PostgresDatabase {
     ).catch(() => {});
     await this.pool.query(
       `ALTER TABLE bookings ADD CONSTRAINT bookings_booking_type_check
-       CHECK (booking_type IN ('video_call', 'chat', 'in_person', 'phone', 'farm_visit', 'herd_consultation'))`
+       CHECK (booking_type IN (${BOOKING_TYPES_SQL}))`
     ).catch(() => {});
 
     // Ensure vet_profiles columns added after initial table creation

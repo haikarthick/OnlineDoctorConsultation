@@ -114,6 +114,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 let DATA_DIR = null;
 let PG_PORT = null;
 let pgProc = null;
+let PG_LOG = null;
 let serverProc = null;
 
 function pgRun(bin, args, opts = {}) {
@@ -159,10 +160,24 @@ async function startCluster() {
 
   // Spawn `postgres` directly rather than `pg_ctl start`: on Windows pg_ctl leaves the
   // long-lived server holding the inherited stdio pipes, so execFileSync never sees EOF and
-  // blocks forever. Spawning detached with stdio:'ignore' also gives us a pid to kill.
-  pgProc = spawn(pg('postgres'),
-    ['-D', dataPath, '-p', String(PG_PORT), '-c', 'listen_addresses=127.0.0.1'],
-    { stdio: 'ignore', windowsHide: true });
+  // blocks forever. Spawning directly also gives us a pid to kill.
+  const args = ['-D', dataPath, '-p', String(PG_PORT), '-c', 'listen_addresses=127.0.0.1'];
+
+  // Debian/Ubuntu builds are compiled with a default unix_socket_directories of
+  // /var/run/postgresql, which does not exist (or is not writable) for an unprivileged CI
+  // user — postgres then exits immediately at startup. Point it at our own temp directory.
+  // Windows has no unix sockets, so the option is POSIX-only.
+  if (process.platform !== 'win32') {
+    args.push('-c', `unix_socket_directories=${dataPath}`);
+  }
+
+  // Log to a file rather than 'ignore': when the server refuses to start, this file is the
+  // ONLY explanation available, and swallowing it turns a one-line fix into a guessing game.
+  PG_LOG = path.join(DATA_DIR, 'postgres.log');
+  const logFd = fs.openSync(PG_LOG, 'a');
+  pgProc = spawn(pg('postgres'), args,
+    // detached so KEEP_DB=1 can leave a live cluster behind for inspection after we exit
+    { stdio: ['ignore', logFd, logFd], windowsHide: true, detached: true });
   pgProc.unref();
 
   for (let i = 0; i < 60; i++) {
@@ -171,10 +186,24 @@ async function startCluster() {
       return;
     } catch { await sleep(500); }
   }
-  throw new Error('PostgreSQL never became ready');
+
+  let why = '';
+  try { why = fs.readFileSync(PG_LOG, 'utf8').trim().split('\n').slice(-15).join('\n'); } catch { /* no log */ }
+  throw new Error(`PostgreSQL never became ready.\nServer log:\n${why || '(empty)'}`);
 }
 
 function stopEverything() {
+  // KEEP_DB=1 leaves the cluster running so a failing run can actually be inspected.
+  // Without this, the only evidence of what the database looked like is gone the moment the
+  // gate exits — which turns every seed/FK question into guesswork.
+  if (process.env.KEEP_DB === '1' && DATA_DIR) {
+    killTree(serverProc);
+    console.log(`\n  ${YELLOW}KEEP_DB=1 — cluster left running for inspection${RESET}`);
+    console.log(`  psql -h 127.0.0.1 -p ${PG_PORT} -U postgres -d verifydb`);
+    console.log(`  data dir: ${DATA_DIR}`);
+    console.log(`  stop it with: taskkill /pid ${pgProc && pgProc.pid} /T /F\n`);
+    return;
+  }
   killTree(serverProc);
   killTree(pgProc);
   if (DATA_DIR) {
@@ -255,6 +284,57 @@ function registerableRoles() {
   return roles;
 }
 
+/**
+ * Waits for the startup demo seed to FINISH.
+ *
+ * SEED_ON_STARTUP=true (set on vetcare-dev and vetcare-demo) makes fixDemoPasswords apply
+ * large chunks of docker/seed-demo-data.sql through the app pool, long after /health goes
+ * green. While that runs the server is effectively unavailable — navigations time out and the
+ * browser phase fails for reasons that have nothing to do with the app. index.ts logs a
+ * definitive marker when it is done, so wait for that rather than guessing.
+ *
+ * Returns { done, succeeded, failed }, counts taken from the seeder summary line.
+ * "Seed complete: N succeeded, M failed" line.
+ */
+async function waitForSeedComplete(getLog, budgetMs = 300000) {
+  const deadline = Date.now() + budgetMs;
+  while (Date.now() < deadline) {
+    const logText = getLog();
+    if (/fixDemoPasswords completed successfully|Demo data fix failed/i.test(logText)) {
+      const m = logText.match(/Seed complete: (\d+) succeeded, (\d+) failed/);
+      return { done: true, succeeded: m ? Number(m[1]) : null, failed: m ? Number(m[2]) : null };
+    }
+    await sleep(1000);
+  }
+  return { done: false, succeeded: null, failed: null };
+}
+/**
+ * Waits until the server is not just UP but IDLE.
+ *
+ * Health can go green long before startup work has finished. Demo seeding in particular keeps
+ * running in the background, saturating the DB and the event loop — requests then queue for
+ * tens of seconds and Playwright reports navigation timeouts that look like app bugs. Requiring
+ * several consecutive FAST health responses waits that storm out without needing to know
+ * anything about what the server is busy with.
+ */
+async function waitForServerQuiet(port, { needed = 3, fastMs = 1500, budgetMs = 240000 } = {}) {
+  const deadline = Date.now() + budgetMs;
+  let streak = 0;
+  while (Date.now() < deadline) {
+    const t0 = Date.now();
+    let good = false;
+    try {
+      const ctl = AbortSignal.timeout(fastMs);
+      const r = await fetch(`http://127.0.0.1:${port}/api/v1/health`, { signal: ctl });
+      good = r.status === 200 && (Date.now() - t0) < fastMs;
+    } catch { good = false; }
+    streak = good ? streak + 1 : 0;
+    if (streak >= needed) return true;
+    await sleep(1000);
+  }
+  return false;
+}
+
 // ── HTTP helper (no external deps) ────────────────────────────────────────
 async function http(method, url, body, token) {
   const headers = { 'Content-Type': 'application/json' };
@@ -300,7 +380,7 @@ async function http(method, url, body, token) {
   };
 
   try {
-    step(`Starting throwaway PostgreSQL ${DIM}(${path.basename(PGBIN)})${RESET}`);
+    step(`Starting throwaway PostgreSQL ${DIM}(${PGBIN})${RESET}`);
     await startCluster();
     psql('postgres', 'CREATE DATABASE verifydb');
     psql('verifydb', `CREATE SCHEMA ${SCHEMA}`);
@@ -342,6 +422,7 @@ async function http(method, url, body, token) {
     let baseline = null;
     let port = null;
     let serverHealthy = false;
+    let serverLog = '';
     if (!failed) {
       step('PHASE 3  Schema snapshot (before the server has ever connected)');
       baseline = snapshot('verifydb');
@@ -360,16 +441,25 @@ async function http(method, url, body, token) {
           DATABASE_URL: '', DB_HOST: '127.0.0.1', DB_PORT: String(PG_PORT),
           DB_USER: 'postgres', DB_PASSWORD: '', DB_NAME: 'verifydb', DB_SCHEMA: SCHEMA,
           MOCK_DB: 'false', MOCK_REDIS: 'true',
-          SEED_ON_STARTUP: FULL ? 'true' : 'false', FORCE_RESEED: 'false',
+                    // Seeding is ON for every run, not just --full: SEED_ON_STARTUP=true is set on BOTH
+          // live environments (vetcare-dev and vetcare-demo), so a broken demo seed breaks them
+          // both — and the gate used to run with it off, which meant it could never have caught
+          // that. PHASE 6b below asserts the seeded demo accounts can actually log in.
+          SEED_ON_STARTUP: 'true', FORCE_RESEED: 'false',
           // Never let a verification run touch a real provider — a unit test once sent a REAL
           // email through the developer's Gmail (2026-07-10). Blanking these forces log-only.
           RESEND_API_KEY: '', SMTP_HOST: '', SMTP_USER: '', SMTP_PASS: '',
           FEATURE_EMAIL_NOTIFICATIONS: 'false',
           ENABLE_SELF_PING: 'false',
+          // The gate legitimately authenticates far more than a human would from one IP:
+          // every role registers, every seeded demo account logs in, then Playwright does it
+          // all again through the UI. The production default (15 per 15 min) would 429 midway
+          // and surface as phantom failures. Defaults in app.ts are untouched — this is an
+          // opt-in override for the verification run only.
+          AUTH_RATE_LIMIT_MAX: '100000', AUTH_RATE_LIMIT_WINDOW_MS: '60000',
           PORT: String(port), NODE_ENV: 'development',
         },
       });
-      let serverLog = '';
       serverProc.stdout.on('data', d => { serverLog += d.toString(); });
       serverProc.stderr.on('data', d => { serverLog += d.toString(); });
       serverProc.on('error', e => { serverLog += `\nSPAWN ERROR: ${e.message}\n`; });
@@ -392,8 +482,40 @@ async function http(method, url, body, token) {
         fail('Server never became healthy against a real database.', detail);
       } else {
         ok();
-        // Let every deferred startup task finish before snapshotting.
-        await sleep(3000);
+
+        // ── PHASE 4b: the demo seed ──
+        // Seeding keeps running long after /health goes green, and every later phase races it
+        // unless we wait for the marker index.ts logs when it finishes.
+        step('PHASE 4b Demo seed applied cleanly');
+        const seed = await waitForSeedComplete(() => serverLog);
+        if (!seed.done) {
+          fail('Demo seed never finished within 5 minutes.',
+            ['SEED_ON_STARTUP=true is set on vetcare-dev and vetcare-demo, so this runs on every',
+             'boot there too. A seed that never completes leaves those environments half-populated.']);
+        } else if (seed.failed) {
+          const bad = serverLog.split('\n')
+            .filter(l => /Seed: ⚠/.test(l))
+            // Capture up to the winston metadata blob, NOT [^"]+ — Postgres messages contain quoted
+            // identifiers (relation "bookings"), so that pattern cut every error at the first quote
+            // and hid the constraint name that identifies the problem.
+            .map(l => (l.match(/Seed: ⚠ (.+?)(?= {"service")/) || [, l])[1].trim());
+          fail(`Demo seed applied with ${seed.failed} failed section(s) (${seed.succeeded} succeeded).`,
+            [...new Set(bad)].slice(0, 15).concat([
+              '',
+              'These sections are silently skipped on vetcare-dev and vetcare-demo too, so those',
+              'environments are running with incomplete demo data. Fix docker/seed-demo-data.sql.']));
+        } else {
+          ok(`${seed.succeeded} sections`);
+        }
+
+        // Even after the seed reports done, give the event loop a moment to drain before the
+        // browser phase drives it.
+        const quiet = await waitForServerQuiet(port);
+        if (!quiet) {
+          fail('Server never became idle after startup.',
+            ['Health stayed slow for 4 minutes — something is still saturating it.',
+             'Later phases would race it and fail misleadingly.']);
+        }
 
         step('PHASE 5  Schema drift after startup');
         const problems = diffSnapshots(baseline, snapshot('verifydb'));
@@ -466,6 +588,47 @@ async function http(method, url, body, token) {
       }
     }
 
+    // ── PHASE 6b: the seeded demo accounts ──
+    // vetcare-dev and vetcare-demo both run SEED_ON_STARTUP=true, so the demo dataset IS a
+    // production code path for them. A seed that fails to apply, or password hashes that never
+    // get fixed up, locks every demo account out — and no static check can see it. Credentials
+    // are read from frontend/e2e/constants.ts so this stays in step with the e2e suite that
+    // depends on exactly these accounts.
+    if (serverHealthy && port) {
+      step('PHASE 6b Seeded demo accounts can log in');
+      const base = `http://127.0.0.1:${port}/api/v1`;
+      let seeded = [];
+      try {
+        const src = fs.readFileSync(
+          path.join(ROOT, 'frontend', 'e2e', 'constants.ts'), 'utf8');
+        const block = src.slice(src.indexOf('export const USERS'), src.indexOf('} as const'));
+        seeded = [...block.matchAll(/email:\s*'([^']+)',\s*password:\s*'([^']+)'/g)]
+          .map(m => ({ email: m[1], password: m[2] }));
+      } catch (e) {
+        seeded = [];
+      }
+
+      if (seeded.length === 0) {
+        fail('Could not read demo credentials from frontend/e2e/constants.ts.',
+          ['If USERS was refactored, update PHASE 6b so seed verification keeps working.']);
+      } else {
+        const broken = [];
+        for (const u of seeded) {
+          const r = await http('POST', `${base}/auth/login`, { email: u.email, password: u.password });
+          if (r.status !== 200 || !r.json?.data?.token) {
+            broken.push(`${u.email}: HTTP ${r.status} ${r.json?.message || r.json?.error?.message || ''}`.trim());
+          }
+        }
+        if (broken.length) {
+          fail(`${broken.length}/${seeded.length} seeded demo account(s) cannot log in.`,
+            [...broken, '', 'The demo seed is a live code path — SEED_ON_STARTUP=true on both',
+              'vetcare-dev and vetcare-demo. These accounts are also what the e2e suite uses.']);
+        } else {
+          ok(`${seeded.length} accounts`);
+        }
+      }
+    }
+
     // ── PHASE 7: the browser ──
     if (serverHealthy && port) {
       const FRONTEND = path.join(ROOT, 'frontend');
@@ -513,6 +676,38 @@ async function http(method, url, body, token) {
           } else {
             const lines = out ? out.split('\n').filter(l => l.trim()).slice(-30)
               : [`(no output captured) ${e.message}`];
+
+            // A browser failure can mean "the app is wrong" OR "the server died underneath it",
+            // and those look identical from Playwright's side (navigation timeouts either way).
+            // Say which, every time — guessing at this cost several diagnostic cycles.
+            let alive = false;
+            try {
+              const r = await fetch(`http://127.0.0.1:${port}/api/v1/health`);
+              alive = r.status === 200;
+            } catch { alive = false; }
+            lines.push('');
+            lines.push(alive
+              ? 'Server was still healthy after the run — this is an app/test failure.'
+              : 'SERVER WAS NOT RESPONDING after the run — the failures above are a symptom, not the cause.');
+            // Keep the WHOLE server log: the interesting line (a stack trace, an OOM, a fatal)
+            // is rarely in the last 20, and DATA_DIR is deleted on teardown.
+            try {
+              const dump = path.join(os.tmpdir(), 'vetcare-runtime-verify-server.log');
+              fs.writeFileSync(dump, serverLog, 'utf8');
+              lines.push(`Full server log: ${dump}`);
+            } catch { /* best effort */ }
+            const fatal = serverLog.split('\n')
+              .filter(l => /error|fatal|unhandled|uncaught|heap out of memory|ECONNRESET/i.test(l))
+              .slice(-8);
+            if (fatal.length) {
+              lines.push('Server errors seen:');
+              lines.push(...fatal);
+            }
+            const tail = serverLog.split('\n').filter(Boolean).slice(-8);
+            if (tail.length) {
+              lines.push('Last server output:');
+              lines.push(...tail);
+            }
             fail('Browser journeys failed against the real app.', lines);
           }
         }

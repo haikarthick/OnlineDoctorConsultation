@@ -71,9 +71,19 @@ function keyGenerator(req: express.Request): string {
 }
 
 // Strict: auth endpoints (login / register / refresh)
+//
+// Limits are env-overridable but the DEFAULTS ARE UNCHANGED (15 attempts / 15 min / IP), so
+// production behaviour is exactly as before unless an operator opts in. The override exists
+// because automated verification legitimately performs many auths from one IP: the runtime gate
+// registers every role and logs in as every seeded demo account, and the e2e suite authenticates
+// far more than that. Without this, those runs fail with 429s that look like app bugs and
+// silently erode trust in the gate. Never set these on a customer-facing deployment.
+const AUTH_RATE_LIMIT_MAX = Number(process.env.AUTH_RATE_LIMIT_MAX) || 15;
+const AUTH_RATE_LIMIT_WINDOW_MS = Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000;
+
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 15,
+  windowMs: AUTH_RATE_LIMIT_WINDOW_MS,
+  max: AUTH_RATE_LIMIT_MAX,
   message: 'Too many authentication attempts. Please try again later.',
   standardHeaders: true,
   legacyHeaders: false,

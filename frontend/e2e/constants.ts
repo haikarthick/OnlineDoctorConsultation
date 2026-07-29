@@ -1,22 +1,42 @@
 /**
  * VetCare E2E — Test constants & demo credentials
  *
- * These match the seed data from docker/seed.sql.
- * When new roles or users are added to the seed, add them here.
+ * ⚠ SOURCE OF TRUTH: `backend/src/utils/fixDemoPasswords.ts` — but only because of WHEN it runs.
+ *
+ * Seeding a database is a two-step story and the order is what matters:
+ *   1. fixDemoPasswords ensures the demo users exist, then applies docker/seed-demo-data.sql,
+ *      whose INSERTs carry their OWN bcrypt hashes (Doctor@123 / Owner@123 / Farmer@123).
+ *   2. When the seed finishes it re-hashes every demo user back to the passwords listed in
+ *      fixDemoPasswords.ts (fixDemoPasswords.ts:308-312, "Fix passwords again after seed").
+ *
+ * So mid-seed the seed's own passwords work, and once seeding COMPLETES `Demo@123` wins. The
+ * settled state is the one that matters — and it is `Demo@123` for everyone except admin.
+ * Reading only the SQL hashes gives the wrong answer; that mid-seed race cost a diagnostic
+ * cycle here. To change a demo password, change fixDemoPasswords.ts.
+ *
+ * Three EMAILS here were also wrong — these accounts have never existed at all:
+ *     dr.sarah.bennett@vetcare.com   → really sarah.johnson@example.com
+ *     emily.davis@email.com          → really emily.davis@example.com
+ *     john.miller@greenpastures.com  → really tom.wilson@example.com
+ * Every fixture built on them failed to log in, so those specs failed on a login timeout rather
+ * than on anything they meant to test.
+ *
+ * Now guarded by PHASE 6b of the runtime gate, which waits for seeding to COMPLETE and then logs
+ * in as every account listed here — so this file cannot silently drift again.
  */
 
 export const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:5173'
 
-// ── Demo Credentials ────────────────────────────────────────
+// ── Demo Credentials (post-seed settled state; see header) ────
 export const USERS = {
   admin: { email: 'admin@vetcare.com', password: 'Admin@123', role: 'admin' as const },
-  vet1:  { email: 'dr.james.carter@vetcare.com', password: 'Doctor@123', role: 'veterinarian' as const },
-  vet2:  { email: 'dr.sarah.bennett@vetcare.com', password: 'Doctor@123', role: 'veterinarian' as const },
-  vet3:  { email: 'dr.michael.reyes@vetcare.com', password: 'Doctor@123', role: 'veterinarian' as const },
-  petOwner1: { email: 'emily.davis@email.com', password: 'Owner@123', role: 'pet_owner' as const },
-  petOwner2: { email: 'robert.chen@email.com', password: 'Owner@123', role: 'pet_owner' as const },
-  farmer1: { email: 'john.miller@greenpastures.com', password: 'Farmer@123', role: 'farmer' as const },
-  farmer2: { email: 'maria.garcia@sunrisefarm.com', password: 'Farmer@123', role: 'farmer' as const },
+  vet1:  { email: 'dr.james.carter@vetcare.com', password: 'Demo@123', role: 'veterinarian' as const },
+  vet2:  { email: 'sarah.johnson@example.com', password: 'Demo@123', role: 'veterinarian' as const },
+  vet3:  { email: 'dr.michael.reyes@vetcare.com', password: 'Demo@123', role: 'veterinarian' as const },
+  petOwner1: { email: 'emily.davis@example.com', password: 'Demo@123', role: 'pet_owner' as const },
+  petOwner2: { email: 'robert.chen@email.com', password: 'Demo@123', role: 'pet_owner' as const },
+  farmer1: { email: 'tom.wilson@example.com', password: 'Demo@123', role: 'farmer' as const },
+  farmer2: { email: 'maria.garcia@sunrisefarm.com', password: 'Demo@123', role: 'farmer' as const },
 } as const
 
 export type UserKey = keyof typeof USERS

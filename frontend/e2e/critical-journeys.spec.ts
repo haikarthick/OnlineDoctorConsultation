@@ -75,10 +75,53 @@ async function alwaysStartSignedOut(page: Page) {
   })
 }
 
-/** Opens the registration form from a guaranteed signed-out state. */
+/**
+ * Opens the registration form from a guaranteed signed-out state.
+ *
+ * `waitUntil: 'domcontentloaded'` rather than the default `'load'`: this app opens a socket.io
+ * connection and polls on boot, so the load event can stay pending long past the point the form
+ * is interactive. Waiting for it made this intermittently time out — with the selector already
+ * resolved and Playwright still "waiting for navigation to finish". The real readiness signal is
+ * the form being in the DOM, which is exactly what the next line waits for.
+ */
 async function openRegister(page: Page) {
-  await page.goto('/register')
-  await page.waitForSelector('input[name="role"]', { state: 'attached' })
+  await page.goto('/register', { waitUntil: 'domcontentloaded' })
+  await readRoles(page)
+}
+
+/**
+ * Returns the role values the form is offering, once that list has SETTLED.
+ *
+ * Two separate races make a naive read unreliable:
+ *  - `domcontentloaded` fires before React mounts, so a plain waitForSelector can pass against
+ *    a DOM that is about to be replaced and `evaluateAll` then returns [].
+ *  - the groomer option only appears after the async `/grooming/status` probe resolves, so an
+ *    early read silently sees a SHORTER list — the exact blind spot this suite exists to close.
+ *
+ * So: poll until at least the four always-present base roles exist, then require the count to
+ * hold steady across two consecutive reads before trusting it.
+ */
+async function readRoles(page: Page): Promise<string[]> {
+  const read = () => page.locator('input[name="role"]')
+    .evaluateAll(els => els.map(e => (e as HTMLInputElement).value))
+
+  let previous = -1
+  const deadline = Date.now() + 30_000
+  while (Date.now() < deadline) {
+    const current = await read().catch(() => [] as string[])
+    if (current.length >= 4 && current.length === previous) return current
+    previous = current.length
+    await page.waitForTimeout(250)
+  }
+  // Say WHAT page we are actually on. "0 options" is useless on its own — being bounced to
+  // /dashboard by a still-authenticated session looks identical to a form that never rendered.
+  const url = page.url()
+  let body = ''
+  try { body = (await page.locator('body').innerText()).replace(/\s+/g, ' ').slice(0, 300) } catch { /* nothing to read */ }
+  throw new Error(
+    `Role picker never settled — last saw ${previous} option(s) after 30s.\n` +
+    `  url:  ${url}\n` +
+    `  body: ${body || '(empty)'}`)
 }
 
 /**
@@ -114,9 +157,7 @@ test.describe('@critical', () => {
   test('the registration form offers at least the four base roles', async ({ page }) => {
     await alwaysStartSignedOut(page)
     await openRegister(page)
-    const roles = await page.locator('input[name="role"]').evaluateAll(
-      els => els.map(e => (e as HTMLInputElement).value)
-    )
+    const roles = await readRoles(page)
     // Guards against a silently-empty role picker, which would make registration impossible
     // while every API-level check still passed.
     expect(roles).toEqual(expect.arrayContaining(['pet_owner', 'farmer', 'veterinarian', 'corporate_admin']))
@@ -132,9 +173,7 @@ test.describe('@critical', () => {
     await alwaysStartSignedOut(page)
     await openRegister(page)
 
-    const roles = await page.locator('input[name="role"]').evaluateAll(
-      els => els.map(e => (e as HTMLInputElement).value)
-    )
+    const roles = await readRoles(page)
     expect(roles.length).toBeGreaterThan(0)
 
     const failures: string[] = []
