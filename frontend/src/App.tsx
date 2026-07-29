@@ -128,6 +128,7 @@ const GroomingProviderPublic = React.lazy(() => import('./pages/grooming/Groomin
 const BookGrooming = React.lazy(() => import('./pages/grooming/BookGrooming'))
 const MyGroomingOrders = React.lazy(() => import('./pages/grooming/MyGroomingOrders'))
 const GroomingOrdersBoard = React.lazy(() => import('./pages/grooming/GroomingOrdersBoard'))
+const GroomingSchedule = React.lazy(() => import('./pages/grooming/GroomingSchedule'))
 const GroomingOrderDetail = React.lazy(() => import('./pages/grooming/GroomingOrderDetail'))
 const GroomingEarnings = React.lazy(() => import('./pages/grooming/GroomingEarnings'))
 const GroomingPassport = React.lazy(() => import('./pages/grooming/GroomingPassport'))
@@ -423,6 +424,7 @@ function AppRoutes() {
       <Route path="/grooming/book" element={<RoleRoute path="/grooming/book"><AppLayout><RoutedPage Component={BookGrooming} /></AppLayout></RoleRoute>} />
       <Route path="/grooming/my-orders" element={<RoleRoute path="/grooming/my-orders"><AppLayout><RoutedPage Component={MyGroomingOrders} /></AppLayout></RoleRoute>} />
       <Route path="/grooming/orders" element={<RoleRoute path="/grooming/orders"><AppLayout><RoutedPage Component={GroomingOrdersBoard} /></AppLayout></RoleRoute>} />
+      <Route path="/grooming/schedule" element={<RoleRoute path="/grooming/schedule"><AppLayout><RoutedPage Component={GroomingSchedule} /></AppLayout></RoleRoute>} />
       <Route path="/grooming/order/:id" element={<RoleRoute path="/grooming/order/:id"><AppLayout><RoutedPage Component={GroomingOrderDetail} paramKey="id" /></AppLayout></RoleRoute>} />
       <Route path="/grooming/earnings" element={<RoleRoute path="/grooming/earnings"><AppLayout><RoutedPage Component={GroomingEarnings} /></AppLayout></RoleRoute>} />
       <Route path="/grooming/passport/:animalId" element={<RoleRoute path="/grooming/passport/:animalId"><AppLayout><RoutedPage Component={GroomingPassport} paramKey="animalId" /></AppLayout></RoleRoute>} />

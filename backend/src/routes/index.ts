@@ -5,6 +5,7 @@ import { requireNetworkAccess, NetworkAccessRequest, resolveNetworkAccess } from
 import { groomingEnabled } from '../middleware/grooming';
 import GroomingProviderService from '../services/grooming/GroomingProviderService';
 import GroomingOrderService from '../services/grooming/GroomingOrderService';
+import GroomingScheduleService from '../services/grooming/GroomingScheduleService';
 import GroomingSettlementService from '../services/grooming/GroomingSettlementService';
 import GroomingCareService from '../services/grooming/GroomingCareService';
 import GroomingDisputeService from '../services/grooming/GroomingDisputeService';
@@ -16,6 +17,7 @@ import {
   groomingResourceSchema, groomingServiceSchema, updateGroomingServiceSchema,
   groomingStaffSchema, groomingProviderRejectSchema,
   createGroomingOrderSchema, groomingCancelSchema, groomingAcceptSchema, groomingDeclineSchema,
+  groomingScheduleSchema, groomingDateOverrideSchema, groomingBlockedSlotSchema,
   groomingTransitionSchema, groomingAssignSchema, groomingIntakeSchema,
   groomingItemStatusSchema, groomingReportCardSchema, groomingSettleSchema,
   groomingVariableRequestSchema, groomingVariableRespondSchema,
@@ -5264,6 +5266,78 @@ router.put('/grooming/admin/providers/:id/reject', authMiddleware, roleMiddlewar
 router.put('/grooming/admin/providers/:id/suspend', authMiddleware, roleMiddleware(['admin']), groomingEnabled, validateBody(groomingProviderRejectSchema),
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingProviderService.adminSuspend(req.params.id, (req as any).userId, req.body.reason) });
+  }));
+
+// ── Availability & working hours (037) ──
+// Slot reads are PUBLIC (authMiddleware only, no provider membership): a customer must be able
+// to see when a salon is free before booking. They expose times and remaining capacity only —
+// never customer or order details.
+router.get('/grooming/providers/:id/availability', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({
+      success: true,
+      data: await GroomingScheduleService.getAvailability(req.params.id, String(req.query.date || ''), {
+        serviceId: req.query.serviceId ? String(req.query.serviceId) : undefined,
+        locationId: req.query.locationId ? String(req.query.locationId) : null,
+      }),
+    });
+  }));
+router.get('/grooming/providers/:id/availability/month', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({
+      success: true,
+      data: await GroomingScheduleService.getMonthAvailability(
+        req.params.id, Number(req.query.year), Number(req.query.month), {
+          serviceId: req.query.serviceId ? String(req.query.serviceId) : undefined,
+          locationId: req.query.locationId ? String(req.query.locationId) : null,
+        }),
+    });
+  }));
+
+// Weekly working hours — owner/manager only (enforced in the service).
+router.get('/grooming/providers/:id/schedules', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingScheduleService.listSchedules((req as any).userId, req.params.id) });
+  }));
+router.put('/grooming/providers/:id/schedules', authMiddleware, groomingEnabled, validateBody(groomingScheduleSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingScheduleService.saveSchedule((req as any).userId, req.params.id, req.body) });
+  }));
+router.delete('/grooming/providers/:id/schedules/:scheduleId', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    await GroomingScheduleService.deleteSchedule((req as any).userId, req.params.id, req.params.scheduleId);
+    res.json({ success: true });
+  }));
+
+// Date overrides — closures and one-off hours.
+router.get('/grooming/providers/:id/date-overrides', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingScheduleService.listOverrides(
+      (req as any).userId, req.params.id, req.query.from as string, req.query.to as string) });
+  }));
+router.put('/grooming/providers/:id/date-overrides', authMiddleware, groomingEnabled, validateBody(groomingDateOverrideSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingScheduleService.saveOverride((req as any).userId, req.params.id, req.body) });
+  }));
+router.delete('/grooming/providers/:id/date-overrides/:overrideId', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    await GroomingScheduleService.deleteOverride((req as any).userId, req.params.id, req.params.overrideId);
+    res.json({ success: true });
+  }));
+
+// Blocked ranges — breaks within an otherwise open day.
+router.get('/grooming/providers/:id/blocked-slots', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    res.json({ success: true, data: await GroomingScheduleService.listBlockedSlots((req as any).userId, req.params.id) });
+  }));
+router.post('/grooming/providers/:id/blocked-slots', authMiddleware, groomingEnabled, validateBody(groomingBlockedSlotSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(201).json({ success: true, data: await GroomingScheduleService.createBlockedSlot((req as any).userId, req.params.id, req.body) });
+  }));
+router.delete('/grooming/providers/:id/blocked-slots/:slotId', authMiddleware, groomingEnabled,
+  asyncHandler(async (req: Request, res: Response) => {
+    await GroomingScheduleService.deleteBlockedSlot((req as any).userId, req.params.id, req.params.slotId);
+    res.json({ success: true });
   }));
 
 // ── Orders (P2: customer booking + provider view) ──

@@ -3,6 +3,7 @@ import logger from '../../utils/logger';
 import { NotFoundError, ValidationError, ForbiddenError } from '../../utils/errors';
 import GroomingModuleConfig from './GroomingModuleConfig';
 import GroomingProviderService from './GroomingProviderService';
+import GroomingScheduleService from './GroomingScheduleService';
 
 /**
  * Grooming order lifecycle (P2): create → pay → confirmed, plus customer/provider reads and cancel.
@@ -15,7 +16,8 @@ const ORDER_SELECT = `
   o.id, o.order_number as "orderNumber", o.pet_owner_id as "petOwnerId", o.animal_id as "animalId",
   o.provider_id as "providerId", o.location_id as "locationId", o.primary_service_id as "primaryServiceId",
   o.service_mode as "serviceMode", o.scheduled_date as "scheduledDate",
-  o.time_slot_start as "timeSlotStart", o.time_slot_end as "timeSlotEnd", o.status,
+  o.time_slot_start as "timeSlotStart", o.time_slot_end as "timeSlotEnd",
+  o.duration_minutes as "durationMinutes", o.status,
   o.assigned_staff_id as "assignedStaffId", o.assigned_resource_id as "assignedResourceId",
   o.subtotal, o.addons_total as "addonsTotal", o.variable_total as "variableTotal",
   o.discount_total as "discountTotal", o.tax_total as "taxTotal", o.grand_total as "grandTotal",
@@ -72,6 +74,14 @@ class GroomingOrderService {
       if (a.rows.length === 0) throw new ForbiddenError('Animal does not belong to you');
     }
 
+    // Availability gate (037). Until now this method accepted ANY date/time string, so a
+    // customer could book 03:00 on a day the salon is shut, and two customers could hold the
+    // same station at the same minute. The UI reads getAvailability(), but the UI can be stale
+    // or bypassed, so this server-side check is the one that actually decides.
+    const durationMinutes = await GroomingScheduleService.assertSlotBookable(
+      data.providerId, data.scheduledDate, data.timeSlotStart,
+      { serviceId: data.serviceId, locationId: data.locationId || null });
+
     // ── Pricing (all ex-tax service value, then tax passthrough) ──
     const serviceValue = Number(svc.base_price) || 0;
     const addons: Array<{ name: string; price: number }> = Array.isArray(data.addons)
@@ -95,13 +105,17 @@ class GroomingOrderService {
     const result = await database.query(
       `INSERT INTO grooming_orders
          (order_number, pet_owner_id, animal_id, provider_id, location_id, primary_service_id, service_mode,
-          scheduled_date, time_slot_start, subtotal, addons_total, tax_total, grand_total, deposit_due,
+          scheduled_date, time_slot_start, time_slot_end, duration_minutes,
+          subtotal, addons_total, tax_total, grand_total, deposit_due,
           currency, commission_percent, commission_amount, handling_notes, owner_notes, status, expires_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,'payment_pending',
-               NOW() + ($20 || ' minutes')::interval)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,
+               to_char(($9::time + ($10 || ' minutes')::interval), 'HH24:MI'), $10,
+               $11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'payment_pending',
+               NOW() + ($21 || ' minutes')::interval)
        RETURNING id`,
       [genOrderNumber(), userId, data.animalId || null, data.providerId, data.locationId || null, data.serviceId,
-       data.serviceMode || 'premises', data.scheduledDate, data.timeSlotStart, serviceValue, addonsTotal,
+       data.serviceMode || 'premises', data.scheduledDate, data.timeSlotStart, String(durationMinutes),
+       serviceValue, addonsTotal,
        taxTotal, grandTotal, depositDue, currency, commissionPct, commissionAmount,
        data.handlingNotes || null, data.ownerNotes || null, String(holdMinutes)]);
     const orderId = result.rows[0].id;

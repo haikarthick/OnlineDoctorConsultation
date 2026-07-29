@@ -3009,6 +3009,68 @@ class ApiService {
     return response.data
   }
 
+  // ── Grooming availability & working hours (037) ──
+  /** Bookable slots for one provider/date. Sized to the service when one is given. */
+  async getGroomingAvailability(providerId: string, date: string, opts: { serviceId?: string; locationId?: string } = {}) {
+    const response = await this.client.get(`/grooming/providers/${providerId}/availability`, {
+      params: { date, serviceId: opts.serviceId, locationId: opts.locationId },
+    })
+    return response.data
+  }
+
+  /** Which days in a month have any capacity — drives the booking calendar. */
+  async getGroomingMonthAvailability(providerId: string, year: number, month: number, opts: { serviceId?: string; locationId?: string } = {}) {
+    const response = await this.client.get(`/grooming/providers/${providerId}/availability/month`, {
+      params: { year, month, serviceId: opts.serviceId, locationId: opts.locationId },
+    })
+    return response.data
+  }
+
+  async listGroomingSchedules(providerId: string) {
+    const response = await this.client.get(`/grooming/providers/${providerId}/schedules`)
+    return response.data
+  }
+
+  async saveGroomingSchedule(providerId: string, data: any) {
+    const response = await this.client.put(`/grooming/providers/${providerId}/schedules`, data)
+    return response.data
+  }
+
+  async deleteGroomingSchedule(providerId: string, scheduleId: string) {
+    const response = await this.client.delete(`/grooming/providers/${providerId}/schedules/${scheduleId}`)
+    return response.data
+  }
+
+  async listGroomingDateOverrides(providerId: string, from?: string, to?: string) {
+    const response = await this.client.get(`/grooming/providers/${providerId}/date-overrides`, { params: { from, to } })
+    return response.data
+  }
+
+  async saveGroomingDateOverride(providerId: string, data: any) {
+    const response = await this.client.put(`/grooming/providers/${providerId}/date-overrides`, data)
+    return response.data
+  }
+
+  async deleteGroomingDateOverride(providerId: string, overrideId: string) {
+    const response = await this.client.delete(`/grooming/providers/${providerId}/date-overrides/${overrideId}`)
+    return response.data
+  }
+
+  async listGroomingBlockedSlots(providerId: string) {
+    const response = await this.client.get(`/grooming/providers/${providerId}/blocked-slots`)
+    return response.data
+  }
+
+  async createGroomingBlockedSlot(providerId: string, data: any) {
+    const response = await this.client.post(`/grooming/providers/${providerId}/blocked-slots`, data)
+    return response.data
+  }
+
+  async deleteGroomingBlockedSlot(providerId: string, slotId: string) {
+    const response = await this.client.delete(`/grooming/providers/${providerId}/blocked-slots/${slotId}`)
+    return response.data
+  }
+
   /** Provider accepts a paid booking sitting at the acceptance gate → confirmed. */
   async acceptGroomingOrder(id: string, note?: string) {
     const response = await this.client.put(`/grooming/orders/${id}/accept`, { note })

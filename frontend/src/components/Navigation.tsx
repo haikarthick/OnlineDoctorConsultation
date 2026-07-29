@@ -134,6 +134,9 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
     { id: 'grooming-orders', label: t('nav.groomingOrders'), icon: '📋', path: '/grooming/orders',
       roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
+    // The grooming counterpart of the vet's "My Schedule" under Consultations.
+    { id: 'grooming-schedule', label: t('nav.groomingSchedule'), icon: '🗓️', path: '/grooming/schedule',
+      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
     { id: 'grooming-earnings', label: t('nav.groomingEarnings'), icon: '💰', path: '/grooming/earnings',
       roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
     { id: 'admin-grooming-providers', label: t('nav.groomingAdmin'), icon: '💈', path: '/admin/grooming-providers',

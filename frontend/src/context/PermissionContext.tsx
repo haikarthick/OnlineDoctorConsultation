@@ -131,7 +131,8 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   grooming_browse: ['/grooming/find', '/grooming/provider/:id'],
   grooming_book: ['/grooming/book'],
   grooming_my_orders: ['/grooming/my-orders'],
-  grooming_manage_bookings: ['/grooming/orders'],
+  // Working hours sit with booking management: whoever runs the diary sets when it is open.
+  grooming_manage_bookings: ['/grooming/orders', '/grooming/schedule'],
   grooming_earnings_view: ['/grooming/earnings'],
   // /grooming/order/:id is intentionally NOT mapped — shared by provider + customer, so it is
   // auth-only at the route layer and access is enforced per-order by the backend.
@@ -236,6 +237,7 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'grooming-find': 'grooming_browse',
   'grooming-my-orders': 'grooming_my_orders',
   'grooming-orders': 'grooming_manage_bookings',
+  'grooming-schedule': 'grooming_manage_bookings',
   'grooming-earnings': 'grooming_earnings_view',
 }
 

@@ -1932,6 +1932,44 @@ export const groomingCancelSchema = Joi.object({
   reason: shortText(500).optional().allow('', null),
 });
 
+// ─── Grooming availability / working hours (037) ─────────────
+// HH:MM, 24-hour. Deliberately strict: a malformed time parses to 0 in the slot engine and
+// would silently open the salon at midnight.
+const hhmm = Joi.string().pattern(/^([01]\d|2[0-3]):[0-5]\d$/).message('Time must be HH:MM (24-hour)');
+const isoDate = Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).message('Date must be YYYY-MM-DD');
+
+export const groomingScheduleSchema = Joi.object({
+  dayOfWeek: Joi.number().integer().min(0).max(6).required(),
+  locationId: uuid.optional().allow(null),
+  openTime: hhmm.required(),
+  closeTime: hhmm.required(),
+  slotIntervalMinutes: Joi.number().integer().min(5).max(480).optional(),
+  capacity: Joi.number().integer().min(1).max(100).optional(),
+  isActive: Joi.boolean().optional(),
+});
+
+export const groomingDateOverrideSchema = Joi.object({
+  overrideDate: isoDate.required(),
+  overrideType: Joi.string().valid('closed', 'custom_hours').required(),
+  locationId: uuid.optional().allow(null),
+  // Required together with custom_hours; the service re-checks and returns a readable error.
+  openTime: hhmm.optional().allow(null, ''),
+  closeTime: hhmm.optional().allow(null, ''),
+  slotIntervalMinutes: Joi.number().integer().min(5).max(480).optional().allow(null),
+  capacity: Joi.number().integer().min(1).max(100).optional().allow(null),
+  reason: shortText(500).optional().allow('', null),
+});
+
+export const groomingBlockedSlotSchema = Joi.object({
+  startTime: hhmm.required(),
+  endTime: hhmm.required(),
+  blockDate: isoDate.optional().allow(null, ''),
+  isRecurring: Joi.boolean().optional(),
+  recurringDay: Joi.number().integer().min(0).max(6).optional().allow(null),
+  locationId: uuid.optional().allow(null),
+  reason: shortText(500).optional().allow('', null),
+});
+
 // ─── Grooming provider acceptance gate (036) ─────────────────
 export const groomingAcceptSchema = Joi.object({
   note: shortText(500).optional().allow('', null),

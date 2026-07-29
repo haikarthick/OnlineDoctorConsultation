@@ -3736,6 +3736,75 @@ CREATE TABLE IF NOT EXISTS grooming_resources (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ── Grooming availability (migration 037) ──
+-- Mirrors the consultation scheduling tables, with two differences a salon needs and the
+-- doctor model cannot express: CAPACITY (several tables/stations serve concurrently) and
+-- per-service DURATION (occupancy is an interval, not one fixed slot length).
+-- location_id is nullable: NULL = the whole business, set = that branch only.
+CREATE TABLE IF NOT EXISTS grooming_schedules (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  location_id UUID REFERENCES grooming_locations(id) ON DELETE CASCADE,
+  day_of_week INT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+  open_time VARCHAR(5) NOT NULL,
+  close_time VARCHAR(5) NOT NULL,
+  slot_interval_minutes INT NOT NULL DEFAULT 30 CHECK (slot_interval_minutes BETWEEN 5 AND 480),
+  capacity INT NOT NULL DEFAULT 1 CHECK (capacity BETWEEN 1 AND 100),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- Partial indexes, not a plain UNIQUE: Postgres treats NULLs as distinct, which would allow
+-- unlimited duplicate business-wide rows for the same weekday.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_grooming_schedules_provider_day_loc
+  ON grooming_schedules (provider_id, location_id, day_of_week) WHERE location_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_grooming_schedules_provider_day_nolo
+  ON grooming_schedules (provider_id, day_of_week) WHERE location_id IS NULL;
+
+CREATE TABLE IF NOT EXISTS grooming_date_overrides (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  location_id UUID REFERENCES grooming_locations(id) ON DELETE CASCADE,
+  override_date DATE NOT NULL,
+  override_type VARCHAR(20) NOT NULL CHECK (override_type IN ('closed', 'custom_hours')),
+  open_time VARCHAR(5),
+  close_time VARCHAR(5),
+  slot_interval_minutes INT CHECK (slot_interval_minutes BETWEEN 5 AND 480),
+  capacity INT CHECK (capacity BETWEEN 1 AND 100),
+  reason TEXT,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_grooming_overrides_date_loc
+  ON grooming_date_overrides (provider_id, location_id, override_date) WHERE location_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_grooming_overrides_date_nolo
+  ON grooming_date_overrides (provider_id, override_date) WHERE location_id IS NULL;
+
+CREATE TABLE IF NOT EXISTS grooming_blocked_slots (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  location_id UUID REFERENCES grooming_locations(id) ON DELETE CASCADE,
+  block_date DATE,
+  start_time VARCHAR(5) NOT NULL,
+  end_time VARCHAR(5) NOT NULL,
+  is_recurring BOOLEAN DEFAULT false,
+  recurring_day INT CHECK (recurring_day BETWEEN 0 AND 6),
+  reason TEXT,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  -- Either a one-off on a date or a weekly recurrence — never neither, which would be a row
+  -- invisible to every lookup that silently blocks nothing.
+  CONSTRAINT grooming_blocked_slots_when_check CHECK (
+    (is_recurring = true AND recurring_day IS NOT NULL)
+    OR (is_recurring = false AND block_date IS NOT NULL)
+  )
+);
+CREATE INDEX IF NOT EXISTS idx_grooming_blocked_provider_date
+  ON grooming_blocked_slots (provider_id, block_date);
+CREATE INDEX IF NOT EXISTS idx_grooming_blocked_provider_recurring
+  ON grooming_blocked_slots (provider_id, recurring_day) WHERE is_recurring = true;
+
 CREATE TABLE IF NOT EXISTS grooming_provider_staff (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
@@ -3864,6 +3933,9 @@ CREATE TABLE IF NOT EXISTS grooming_orders (
   -- Still owed on this order: set when only a deposit was taken, and grown when the customer
   -- approves extra work mid-service. A balance checkout collects it.
   balance_due DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  -- How long this booking occupies a station, copied from the service at booking time so a
+  -- later price/duration edit cannot retroactively change what was already scheduled.
+  duration_minutes INT,
   -- Provider acceptance gate (see the status CHECK above).
   acceptance_deadline TIMESTAMP,
   accepted_at TIMESTAMP,
@@ -3878,6 +3950,10 @@ CREATE TABLE IF NOT EXISTS grooming_orders (
 CREATE INDEX IF NOT EXISTS idx_grooming_orders_acceptance_deadline
   ON grooming_orders (acceptance_deadline)
   WHERE status = 'pending_provider_acceptance';
+
+-- Occupancy lookups are always "this provider, this date, statuses that hold a slot".
+CREATE INDEX IF NOT EXISTS idx_grooming_orders_provider_date
+  ON grooming_orders (provider_id, scheduled_date);
 
 CREATE TABLE IF NOT EXISTS grooming_order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -126,7 +126,6 @@
         "src/pages/doctor/PrescriptionWriter.tsx",
         "src/pages/doctor/Prescriptions.tsx",
         "src/pages/doctor/VetEarnings.tsx",
-        "src/pages/grooming/BookGrooming.tsx",
         "src/pages/grooming/FindGrooming.tsx",
         "src/pages/grooming/GroomingEarnings.tsx",
         "src/pages/grooming/GroomingOrderDetail.tsx",

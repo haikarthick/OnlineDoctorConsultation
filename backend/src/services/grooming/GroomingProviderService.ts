@@ -1,4 +1,5 @@
 import database from '../../utils/database';
+import logger from '../../utils/logger';
 import { NotFoundError, ValidationError, ForbiddenError } from '../../utils/errors';
 
 /**
@@ -336,6 +337,17 @@ class GroomingProviderService {
       `UPDATE grooming_providers SET verification_status = 'verified', verified_by = $2, verified_at = NOW(),
               rejection_reason = NULL, updated_at = NOW() WHERE id = $1 RETURNING id`, [providerId, adminId]);
     if (r.rows.length === 0) throw new NotFoundError('GroomingProvider', providerId);
+
+    // A verified provider with no working hours is bookable on zero days, so it would look
+    // permanently closed to every customer until someone found the schedule screen — the most
+    // likely way a real booking is silently lost. Seed a default week; it is a no-op if the
+    // provider has already set their own. Non-blocking: verification must still succeed.
+    try {
+      const GroomingScheduleService = (await import('./GroomingScheduleService')).default;
+      await GroomingScheduleService.seedDefaultSchedule(providerId);
+    } catch (err: any) {
+      logger.warn('Default grooming schedule seed failed (non-blocking)', { providerId, error: err.message });
+    }
     return this.getProviderById(providerId);
   }
   async adminReject(providerId: string, adminId: string, reason: string): Promise<any> {

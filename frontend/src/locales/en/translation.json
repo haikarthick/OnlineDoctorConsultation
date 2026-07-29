@@ -217,7 +217,8 @@
     "groomingMyOrders": "My Grooming",
     "groomingOrders": "Grooming Orders",
     "groomingEarnings": "Grooming Earnings",
-    "groomingApply": "List Your Business"
+    "groomingApply": "List Your Business",
+    "groomingSchedule": "Working Hours"
   },
   "login": {
     "welcome": "Welcome back",
@@ -7772,7 +7773,14 @@
     "total": "Total",
     "demoPay": "Demo payment (no real charge)",
     "booking": "Booking…",
-    "confirmPay": "Confirm & Pay"
+    "confirmPay": "Confirm & Pay",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "minutes": "min",
+    "pickDateFirst": "Pick a date to see available times.",
+    "noSlots": "No times available on this date.",
+    "slotFull": "Fully booked",
+    "slotRange": "{{start}} – {{end}}"
   },
   "groomingOrders": {
     "cancelReason": "Reason for cancellation (optional):",
@@ -8020,6 +8028,56 @@
       "awaitingBody": "You have paid and the groomer has been notified. If they cannot take it, you will be refunded in full automatically.",
       "declinedTitle": "This booking could not be accepted",
       "declinedBody": "You have been refunded in full. You can book another provider any time."
+    }
+  },
+  "groomingSchedule": {
+    "title": "Working Hours & Availability",
+    "subtitle": "Customers can only book the times you open here. Closed days never appear.",
+    "noProvider": "Create your grooming business first.",
+    "goToProvider": "Go to my business",
+    "weeklyHours": "Weekly opening hours",
+    "capacityHint": "Capacity is how many pets you can handle at the same time — tables, stations or groomers working in parallel.",
+    "open": "Opens",
+    "close": "Closes",
+    "every": "Slot every",
+    "capacity": "Capacity",
+    "closed": "Closed",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "closeAfterOpen": "Closing time must be after opening time.",
+    "overridesTitle": "Specific dates",
+    "overridesHint": "Close a single date, or open it with different hours — holidays, events, a half day.",
+    "blocksTitle": "Breaks",
+    "blocksHint": "Block part of a day, either every week or once — lunch, cleaning, a delivery.",
+    "date": "Date",
+    "type": "What happens",
+    "reason": "Reason",
+    "reasonPlaceholder": "e.g. public holiday",
+    "blockReasonPlaceholder": "e.g. lunch break",
+    "closedAllDay": "Closed all day",
+    "customHours": "Different hours",
+    "add": "Add",
+    "remove": "Remove",
+    "noOverrides": "No date changes yet.",
+    "noBlocks": "No breaks yet.",
+    "pickDate": "Choose a date first.",
+    "repeats": "Repeats",
+    "everyWeek": "Every week",
+    "onceOnly": "Once only",
+    "day": "Day",
+    "from": "From",
+    "to": "To",
+    "everyDayName": "Every {{day}}",
+    "backToOrders": "Back to bookings",
+    "days": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
     }
   }
 }
