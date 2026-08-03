@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
+import { timingSafeEqual } from 'crypto';
 import logger from '../utils/logger';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
 import { requireNetworkAccess, NetworkAccessRequest, resolveNetworkAccess } from '../middleware/networkAccess';
@@ -2910,8 +2911,44 @@ router.get('/features', (_req, res) => {
   res.json({ success: true, data: getAllFeatureFlags() });
 });
 
-// ─── Emergency diagnostics (public — no auth required) ───────
-router.get('/debug/db-state', async (_req, res) => {
+// ─── Emergency diagnostics (break-glass token required) ──────
+/**
+ * These two endpoints exist for the case where a deploy left the database in a
+ * state the app cannot start against (the 2026-07-26 Render investigation). That
+ * is exactly the case where `authMiddleware` would be useless as the gate: if the
+ * schema is missing or wrong, nobody can log in to authorise the repair — so
+ * requiring a login would break the emergency they exist to solve.
+ *
+ * The gate is therefore a pre-shared secret in EMERGENCY_DIAGNOSTIC_TOKEN,
+ * compared in constant time. If that env var is unset the endpoints are disabled
+ * outright: fail closed, so an operator who never opted in is never exposed.
+ *
+ * Both respond 404 rather than 401/403 — an anonymous prober should not even be
+ * able to confirm the route exists.
+ *
+ * To use during an incident:
+ *   curl -H "x-emergency-token: $EMERGENCY_DIAGNOSTIC_TOKEN" .../api/v1/debug/db-state
+ */
+const emergencyGate = (req: Request, res: Response, next: NextFunction): void => {
+  const expected = process.env.EMERGENCY_DIAGNOSTIC_TOKEN || '';
+  const provided = req.get('x-emergency-token') || '';
+  const deny = (reason: string): void => {
+    logger.warn('Emergency diagnostic endpoint denied', { path: req.path, ip: req.ip, reason });
+    res.status(404).json({ success: false, error: 'Not found' });
+  };
+
+  // Unset (or trivially short) token means the break-glass path is not enabled.
+  if (expected.length < 16) return deny('EMERGENCY_DIAGNOSTIC_TOKEN unset or too short (min 16 chars)');
+
+  const a = Buffer.from(provided, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return deny('token mismatch');
+
+  logger.warn('Emergency diagnostic endpoint AUTHORISED via break-glass token', { path: req.path, ip: req.ip });
+  next();
+};
+
+router.get('/debug/db-state', emergencyGate, async (_req, res) => {
   try {
     const schema = process.env.DB_SCHEMA || 'public';
     const rows: Record<string, any> = {};
@@ -2944,7 +2981,7 @@ router.get('/debug/db-state', async (_req, res) => {
   }
 });
 
-router.post('/repair-schema', async (_req, res) => {
+router.post('/repair-schema', emergencyGate, async (_req, res) => {
   try {
     const result = await database.repairSchema();
     if (result.success) {
