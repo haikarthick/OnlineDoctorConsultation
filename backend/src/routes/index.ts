@@ -923,20 +923,11 @@ router.get('/hospital-networks/:id/dashboard', authMiddleware, asyncHandler((req
 router.get('/hospital-networks/:id/audit-logs', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getAuditLogs(req, res)));
 
 // Network Security Audit Log
-router.get('/hospital-networks/:id/security-audit', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+// viewAuditLogs is true for exactly corporate_admin / hospital_director /
+// compliance_officer / auditor and false for hospital_staff, so this reproduces
+// the previous hardcoded list precisely while gaining the expiry check.
+router.get('/hospital-networks/:id/security-audit', authMiddleware, requireNetworkAccess('viewAuditLogs'), asyncHandler(async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId;
-    const userRole = (req as any).userRole;
-    if (userRole !== 'admin') {
-      const memberRes = await database.query(
-        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-        [req.params.id, userId]
-      );
-      if (!memberRes.rows[0] || !['corporate_admin', 'hospital_director', 'compliance_officer', 'auditor'].includes(memberRes.rows[0].network_role)) {
-        res.status(403).json({ success: false, error: 'Insufficient permissions to view audit log' });
-        return;
-      }
-    }
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
     const result = await database.query(
@@ -2344,17 +2335,12 @@ router.post('/admin/network-role-permissions/reset', authMiddleware, roleMiddlew
 
 // ─── Network Custom Roles CRUD ─────────────────────────────────────────────────
 
-router.get('/hospital-networks/:id/roles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+// viewNetworkDetails is held by all five network roles, so this preserves the
+// previous "any active member" behaviour exactly while picking up the expiry
+// check, the admin-configurable matrix and the 404-for-non-members that the
+// hand-rolled query did not have.
+router.get('/hospital-networks/:id/roles', authMiddleware, requireNetworkAccess('viewNetworkDetails'), asyncHandler(async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId;
-    const userRole = (req as any).userRole;
-    if (userRole !== 'admin') {
-      const memberRes = await database.query(
-        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-        [req.params.id, userId]
-      );
-      if (!memberRes.rows[0]) { res.status(403).json({ success: false, error: 'Not a member of this network' }); return; }
-    }
     const roles = await NetworkRolePermissionService.getNetworkRoles(req.params.id);
     res.json({ success: true, data: roles });
   } catch (err: any) {
@@ -2362,19 +2348,15 @@ router.get('/hospital-networks/:id/roles', authMiddleware, asyncHandler(async (r
   }
 }));
 
-router.post('/hospital-networks/:id/roles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+// BEHAVIOUR CHANGE: the hand-rolled check admitted hospital_director, but the
+// permission matrix sets manageRolePermissions=false for that role. Creating a
+// custom role IS managing role permissions, so the inline list was granting a
+// capability the declared matrix denies. Deferring to the matrix removes that
+// escalation; a network that genuinely wants directors to manage roles can now
+// grant it there, which the hardcoded list never allowed.
+router.post('/hospital-networks/:id/roles', authMiddleware, requireNetworkAccess('manageRolePermissions'), asyncHandler(async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
-    const userRole = (req as any).userRole;
-    if (userRole !== 'admin') {
-      const memberRes = await database.query(
-        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-        [req.params.id, userId]
-      );
-      if (!memberRes.rows[0] || !['corporate_admin', 'hospital_director'].includes(memberRes.rows[0].network_role)) {
-        res.status(403).json({ success: false, error: 'Only corporate admins and hospital directors can create custom roles' }); return;
-      }
-    }
     const { roleKey, displayName, description, baseTemplate, icon } = req.body;
     if (!roleKey || !displayName || !baseTemplate) {
       res.status(400).json({ success: false, error: 'roleKey, displayName, and baseTemplate are required' }); return;
@@ -2389,19 +2371,10 @@ router.post('/hospital-networks/:id/roles', authMiddleware, asyncHandler(async (
   }
 }));
 
-router.put('/hospital-networks/:id/roles/:roleKey', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+// Same matrix deferral as the create route above — see the note there.
+router.put('/hospital-networks/:id/roles/:roleKey', authMiddleware, requireNetworkAccess('manageRolePermissions'), asyncHandler(async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
-    const userRole = (req as any).userRole;
-    if (userRole !== 'admin') {
-      const memberRes = await database.query(
-        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-        [req.params.id, userId]
-      );
-      if (!memberRes.rows[0] || !['corporate_admin', 'hospital_director'].includes(memberRes.rows[0].network_role)) {
-        res.status(403).json({ success: false, error: 'Insufficient permissions' }); return;
-      }
-    }
     const { displayName, description, baseTemplate, icon } = req.body;
     await NetworkRolePermissionService.updateCustomRole(req.params.id, req.params.roleKey, {
       displayName, description, baseTemplate, icon, updatedBy: userId,
@@ -2412,19 +2385,10 @@ router.put('/hospital-networks/:id/roles/:roleKey', authMiddleware, asyncHandler
   }
 }));
 
-router.delete('/hospital-networks/:id/roles/:roleKey', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+// corporate_admin is the only role with manageRolePermissions, so this matches
+// the previous hardcoded list exactly.
+router.delete('/hospital-networks/:id/roles/:roleKey', authMiddleware, requireNetworkAccess('manageRolePermissions'), asyncHandler(async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId;
-    const userRole = (req as any).userRole;
-    if (userRole !== 'admin') {
-      const memberRes = await database.query(
-        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-        [req.params.id, userId]
-      );
-      if (!memberRes.rows[0] || !['corporate_admin'].includes(memberRes.rows[0].network_role)) {
-        res.status(403).json({ success: false, error: 'Only corporate admins can delete custom roles' }); return;
-      }
-    }
     await NetworkRolePermissionService.deactivateCustomRole(req.params.id, req.params.roleKey);
     res.json({ success: true, message: 'Custom role deactivated' });
   } catch (err: any) {
