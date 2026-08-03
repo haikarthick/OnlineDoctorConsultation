@@ -6835,7 +6835,8 @@
       "history": "History",
       "reorders": "Reorders",
       "transfers": "Transfers",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "alerts": "अलर्ट"
     },
     "stats": {
       "pendingReviews": "लंबित समीक्षाएं",
@@ -7163,6 +7164,21 @@
     "receipt": {
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
+    },
+    "alerts": {
+      "expired": "समाप्त — वितरित न करें",
+      "noExpired": "कोई समाप्त स्टॉक नहीं।",
+      "expiredAgo": "समाप्त हुए",
+      "expiringSoon": "जल्द समाप्त हो रहा",
+      "noExpiring": "अगले 90 दिनों में कुछ भी समाप्त नहीं हो रहा।",
+      "daysLeft": "शेष दिन",
+      "outOfStock": "स्टॉक समाप्त",
+      "noOutOfStock": "कुछ भी स्टॉक से बाहर नहीं है।",
+      "runningLow": "कम हो रहा है",
+      "noLowStock": "कोई भी दवा पुनःक्रम बिंदु से नीचे नहीं है।",
+      "inStock": "स्टॉक में",
+      "reorderPoint": "पुनःक्रम बिंदु",
+      "reorder": "पुनःक्रम"
     }
   },
   "chat": {

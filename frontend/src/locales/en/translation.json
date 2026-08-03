@@ -6831,7 +6831,8 @@
       "reorders": "Reorders",
       "transfers": "Transfers",
       "analytics": "Analytics",
-      "settings": "Settings"
+      "settings": "Settings",
+      "alerts": "Alerts"
     },
     "stats": {
       "pendingReviews": "Pending Reviews",
@@ -7158,6 +7159,21 @@
     "receipt": {
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
+    },
+    "alerts": {
+      "expired": "Expired — do not dispense",
+      "noExpired": "No expired stock.",
+      "expiredAgo": "Expired",
+      "expiringSoon": "Expiring soon",
+      "noExpiring": "Nothing expiring in the next 90 days.",
+      "daysLeft": "Days left",
+      "outOfStock": "Out of stock",
+      "noOutOfStock": "Nothing is out of stock.",
+      "runningLow": "Running low",
+      "noLowStock": "No medication is below its reorder point.",
+      "inStock": "In stock",
+      "reorderPoint": "Reorder point",
+      "reorder": "Reorder"
     }
   },
   "chat": {

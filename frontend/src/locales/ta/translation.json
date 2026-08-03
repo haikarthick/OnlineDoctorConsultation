@@ -6835,7 +6835,8 @@
       "history": "History",
       "reorders": "Reorders",
       "transfers": "Transfers",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "alerts": "எச்சரிக்கைகள்"
     },
     "stats": {
       "pendingReviews": "Pending Reviews",
@@ -7163,6 +7164,21 @@
     "receipt": {
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
+    },
+    "alerts": {
+      "expired": "காலாவधि முடிந்தது — வழங்க வேண்டாம்",
+      "noExpired": "காலாவधि முடிந்த கையிருப்பு இல்லை.",
+      "expiredAgo": "காலாவधि முடிந்தது",
+      "expiringSoon": "விரைவில் காலாவधि முடிகிறது",
+      "noExpiring": "அடுத்த 90 நாட்களில் எதுவும் காலாவधि முடியவில்லை.",
+      "daysLeft": "மீதமுள்ள நாட்கள்",
+      "outOfStock": "கையிருப்பு இல்லை",
+      "noOutOfStock": "எதுவும் கையிருப்பில் இல்லாமல் இல்லை.",
+      "runningLow": "குறைந்து வருகிறது",
+      "noLowStock": "எந்த மருந்தும் மறுஆர்டர் புள்ளிக்குக் கீழே இல்லை.",
+      "inStock": "கையிருப்பில்",
+      "reorderPoint": "மறுஆர்டர் புள்ளி",
+      "reorder": "மறுஆர்டர்"
     }
   },
   "chat": {

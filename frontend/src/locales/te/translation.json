@@ -6856,7 +6856,8 @@
       "history": "History",
       "reorders": "Reorders",
       "transfers": "Transfers",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "alerts": "హెచ్చరికలు"
     },
     "stats": {
       "pendingReviews": "Pending Reviews",
@@ -7184,6 +7185,21 @@
     "receipt": {
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
+    },
+    "alerts": {
+      "expired": "గడువు ముగిసింది — పంపిణీ చేయవద్దు",
+      "noExpired": "గడువు ముగిసిన నిల్వ లేదు.",
+      "expiredAgo": "గడువు ముగిసింది",
+      "expiringSoon": "త్వరలో గడువు ముగుస్తుంది",
+      "noExpiring": "రాబోయే 90 రోజుల్లో దేని గడువూ ముగియడం లేదు.",
+      "daysLeft": "మిగిలిన రోజులు",
+      "outOfStock": "నిల్వ లేదు",
+      "noOutOfStock": "ఏదీ నిల్వ లేకుండా లేదు.",
+      "runningLow": "తగ్గిపోతోంది",
+      "noLowStock": "ఏ మందూ రీఆర్డర్ పాయింట్ కంటే తక్కువగా లేదు.",
+      "inStock": "నిల్వలో",
+      "reorderPoint": "రీఆర్డర్ పాయింట్",
+      "reorder": "రీఆర్డర్"
     }
   },
   "chat": {

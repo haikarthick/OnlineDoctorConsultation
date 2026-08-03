@@ -5755,7 +5755,8 @@
       "history": "History",
       "reorders": "Reorders",
       "transfers": "Transfers",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "alerts": "അലേർട്ടുകൾ"
     },
     "stats": {
       "pendingReviews": "Pending Reviews",
@@ -6083,6 +6084,21 @@
     "receipt": {
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
+    },
+    "alerts": {
+      "expired": "കാലാവധി കഴിഞ്ഞു — വിതരണം ചെയ്യരുത്",
+      "noExpired": "കാലാവധി കഴിഞ്ഞ സ്റ്റോക്ക് ഇല്ല.",
+      "expiredAgo": "കാലാവധി കഴിഞ്ഞു",
+      "expiringSoon": "ഉടൻ കാലാവധി തീരുന്നു",
+      "noExpiring": "അടുത്ത 90 ദിവസത്തിനുള്ളിൽ ഒന്നിന്റെയും കാലാവധി തീരുന്നില്ല.",
+      "daysLeft": "ബാക്കി ദിവസങ്ങൾ",
+      "outOfStock": "സ്റ്റോക്ക് തീർന്നു",
+      "noOutOfStock": "ഒന്നും സ്റ്റോക്ക് തീർന്നിട്ടില്ല.",
+      "runningLow": "കുറഞ്ഞു വരുന്നു",
+      "noLowStock": "ഒരു മരുന്നും റീഓർഡർ പോയിന്റിന് താഴെയല്ല.",
+      "inStock": "സ്റ്റോക്കിൽ",
+      "reorderPoint": "റീഓർഡർ പോയിന്റ്",
+      "reorder": "റീഓർഡർ"
     }
   },
   "herdMedical": {

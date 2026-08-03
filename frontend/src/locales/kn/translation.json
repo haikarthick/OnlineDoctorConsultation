@@ -6858,7 +6858,8 @@
       "history": "History",
       "reorders": "Reorders",
       "transfers": "Transfers",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "alerts": "ಎಚ್ಚರಿಕೆಗಳು"
     },
     "stats": {
       "pendingReviews": "Pending Reviews",
@@ -7186,6 +7187,21 @@
     "receipt": {
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
+    },
+    "alerts": {
+      "expired": "ಅವಧಿ ಮುಗಿದಿದೆ — ವಿತರಿಸಬೇಡಿ",
+      "noExpired": "ಅವಧಿ ಮುಗಿದ ದಾಸ್ತಾನು ಇಲ್ಲ.",
+      "expiredAgo": "ಅವಧಿ ಮುಗಿದಿದೆ",
+      "expiringSoon": "ಶೀಘ್ರದಲ್ಲೇ ಅವಧಿ ಮುಗಿಯುತ್ತದೆ",
+      "noExpiring": "ಮುಂದಿನ 90 ದಿನಗಳಲ್ಲಿ ಯಾವುದರ ಅವಧಿಯೂ ಮುಗಿಯುತ್ತಿಲ್ಲ.",
+      "daysLeft": "ಉಳಿದ ದಿನಗಳು",
+      "outOfStock": "ದಾಸ್ತಾನು ಖಾಲಿ",
+      "noOutOfStock": "ಯಾವುದೂ ದಾಸ್ತಾನು ಖಾಲಿಯಾಗಿಲ್ಲ.",
+      "runningLow": "ಕಡಿಮೆಯಾಗುತ್ತಿದೆ",
+      "noLowStock": "ಯಾವುದೇ ಔಷಧಿ ಮರುಕ್ರಮ ಬಿಂದುವಿಗಿಂತ ಕಡಿಮೆ ಇಲ್ಲ.",
+      "inStock": "ದಾಸ್ತಾನಿನಲ್ಲಿ",
+      "reorderPoint": "ಮರುಕ್ರಮ ಬಿಂದು",
+      "reorder": "ಮರುಕ್ರಮ"
     }
   },
   "chat": {

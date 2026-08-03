@@ -15,6 +15,7 @@ import MedicationCatalog from './MedicationCatalog'
 import DispensingHistory from './DispensingHistory'
 import ReordersManagement from './ReordersManagement'
 import MedicationTransfers from './MedicationTransfers'
+import PharmacyAlerts from './PharmacyAlerts'
 import PrescriptionReviewModal from './PrescriptionReviewModal'
 import DispensingModal from './DispensingModal'
 
@@ -72,11 +73,11 @@ interface Analytics {
   expiring_count: number
 }
 
-const TABS = ['overview', 'review', 'dispense', 'inventory', 'catalog', 'suppliers', 'history', 'reorders', 'transfers', 'analytics', 'settings'] as const
+const TABS = ['overview', 'review', 'dispense', 'inventory', 'alerts', 'catalog', 'suppliers', 'history', 'reorders', 'transfers', 'analytics', 'settings'] as const
 type Tab = typeof TABS[number]
 
 const TAB_ICONS: Record<Tab, string> = {
-  overview: '🏠', review: '📋', dispense: '✅', inventory: '📦',
+  overview: '🏠', review: '📋', dispense: '✅', inventory: '📦', alerts: '🔔',
   catalog: '💊', suppliers: '🏭', history: '📜', reorders: '🔄', transfers: '🚚',
   analytics: '📊', settings: '⚙️'
 }
@@ -238,12 +239,16 @@ export default function PharmacyDashboard() {
               <span className="stat-value">{summary?.ready_to_dispense ?? '—'}</span>
               <span className="stat-label">{t('pharmacy.stats.readyToDispense')}</span>
             </div>
-            <div className="pharmacy-stat-card danger si-3c1f81b9" onClick={() => setTab('inventory')}>
+            {/* These two link to Alerts, not Inventory: the inventory table lists
+                one row per batch, so a medication that has run out entirely has
+                nothing to show there and the count led to a page it was absent
+                from. */}
+            <div className="pharmacy-stat-card danger si-3c1f81b9" onClick={() => setTab('alerts')}>
               <span className="stat-icon">⚠️</span>
               <span className="stat-value">{summary?.low_stock_count ?? '—'}</span>
               <span className="stat-label">{t('pharmacy.stats.lowStock')}</span>
             </div>
-            <div className="pharmacy-stat-card warning si-3c1f81b9" onClick={() => setTab('inventory')}>
+            <div className="pharmacy-stat-card warning si-3c1f81b9" onClick={() => setTab('alerts')}>
               <span className="stat-icon">⏰</span>
               <span className="stat-value">{summary?.expiring_soon_count ?? '—'}</span>
               <span className="stat-label">{t('pharmacy.stats.expiringSoon')}</span>
@@ -371,6 +376,10 @@ export default function PharmacyDashboard() {
 
       {tab === 'inventory' && selectedPharmacy && (
         <PharmacyInventory pharmacyId={selectedPharmacy.id} networkId={networkId ?? ''} onRefresh={loadDashboard} />
+      )}
+
+      {tab === 'alerts' && selectedPharmacy && (
+        <PharmacyAlerts pharmacyId={selectedPharmacy.id} />
       )}
 
       {tab === 'catalog' && networkId && selectedPharmacy && (
