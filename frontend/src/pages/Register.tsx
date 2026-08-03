@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
@@ -10,9 +11,18 @@ interface RegisterProps {
   onGoHome?: () => void
 }
 
+/**
+ * Roles a landing page may preselect via ?role=. Deliberately a whitelist rather
+ * than trusting the query string — the value goes straight into the role field,
+ * and only self-registerable roles belong here.
+ */
+const PRESELECTABLE_ROLES = ['pet_owner', 'farmer', 'veterinarian', 'corporate_admin', 'groomer']
+
 export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
   const { register } = useAuth()
   const { t } = useTranslation()
+  const [searchParams] = useSearchParams()
+  const requestedRole = searchParams.get('role')
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,7 +30,9 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'pet_owner',
+    // "List your business" on the home page links here as ?role=groomer, so the
+    // visitor lands on the right form instead of having to find the role again.
+    role: requestedRole && PRESELECTABLE_ROLES.includes(requestedRole) ? requestedRole : 'pet_owner',
     // Vet-specific
     licenseNumber: '',
     yearsOfExperience: '',

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supportedLanguages } from '../i18n'
+import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
 import './Home.css'
 
 interface HomeProps {
@@ -10,11 +11,17 @@ interface HomeProps {
   onLogin?: () => void
 }
 
-const SECTION_IDS = ['hero', 'enterprises', 'hospitals', 'features', 'workflow', 'compliance', 'how-it-works', 'testimonials'] as const
+/**
+ * Base section order. 'grooming' is spliced in at runtime only when the module is
+ * live — Grooming & Spa is dark-launched behind `grooming.enabled`, and a nav
+ * entry that scrolls to a section that was never rendered is a dead link.
+ */
+const BASE_SECTION_IDS = ['hero', 'enterprises', 'hospitals', 'features', 'workflow', 'compliance', 'how-it-works', 'testimonials'] as const
 
 const NAV_KEY_MAP: Record<string, string> = {
   hero: 'home', enterprises: 'enterprises', hospitals: 'hospitals', features: 'features',
-  workflow: 'workflow', compliance: 'compliance', 'how-it-works': 'howItWorks', testimonials: 'testimonials'
+  workflow: 'workflow', compliance: 'compliance', 'how-it-works': 'howItWorks', testimonials: 'testimonials',
+  grooming: 'grooming'
 }
 
 export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomeProps) {
@@ -33,6 +40,17 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
   const langDropRef = useRef<HTMLDivElement>(null)
   const sectionsDropRef = useRef<HTMLDivElement>(null)
   const currentLang = supportedLanguages.find(l => l.code === i18n.language) || supportedLanguages[0]
+
+  const { enabled: groomingEnabled } = useGroomingEnabled()
+
+  // Grooming sits after 'features' — it is a service line, so it belongs with what
+  // the platform offers rather than after the compliance/workflow material.
+  const SECTION_IDS = useMemo(() => {
+    if (!groomingEnabled) return [...BASE_SECTION_IDS]
+    const ids = [...BASE_SECTION_IDS]
+    ids.splice(ids.indexOf('features') + 1, 0, 'grooming' as typeof BASE_SECTION_IDS[number])
+    return ids
+  }, [groomingEnabled])
 
   const sectionLabel = (id: string) => t(`home.nav.${NAV_KEY_MAP[id] || id}`)
 
@@ -88,7 +106,10 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       window.removeEventListener('scroll', handleScroll)
       observerRef.current?.disconnect()
     }
-  }, [handleScroll])
+    // SECTION_IDS is a dependency because the grooming section appears only once
+    // the feature probe resolves — without it the observer would never watch it
+    // and the nav would not highlight while scrolling through.
+  }, [handleScroll, SECTION_IDS])
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id)
@@ -497,6 +518,84 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
           ))}
         </div>
       </section>
+
+      {/* ── Grooming & Spa ──────────────────────────────────────────────
+          Rendered only when the module is live (dark-launched behind
+          `grooming.enabled`). Speaks to both sides of the marketplace: pet
+          owners looking to book, and grooming businesses looking to list.
+          Every claim below maps to something the module actually does —
+          the safety-escalation and passport copy in particular reflects
+          GroomingCareService, where groomers ESCALATE and never diagnose. */}
+      {groomingEnabled && (
+        <section className="grooming-home-section" id="grooming">
+          <h2 className="section-title">💈 {t('home.grooming.title')}</h2>
+          <p className="section-subtitle">{t('home.grooming.subtitle')}</p>
+
+          <div className="grooming-home-split">
+            {/* For pet owners */}
+            <div className="grooming-home-card grooming-home-card--owner">
+              <div className="grooming-home-card-head">
+                <span className="grooming-home-card-icon">🐕</span>
+                <div>
+                  <h3>{t('home.grooming.owners.title')}</h3>
+                  <p className="grooming-home-card-lede">{t('home.grooming.owners.lede')}</p>
+                </div>
+              </div>
+              <ul className="grooming-home-list">
+                {['verified', 'mobile', 'slots', 'passport', 'escalation', 'money'].map(key => (
+                  <li key={key}>
+                    <span className="grooming-home-list-icon">{t(`home.grooming.owners.points.${key}.icon`)}</span>
+                    <span>
+                      <strong>{t(`home.grooming.owners.points.${key}.title`)}</strong>
+                      {' — '}
+                      {t(`home.grooming.owners.points.${key}.desc`)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <button className="btn btn-primary btn-large" onClick={onGetStarted}>
+                💈 {t('home.grooming.owners.cta')}
+              </button>
+            </div>
+
+            {/* For grooming & spa businesses */}
+            <div className="grooming-home-card grooming-home-card--provider">
+              <div className="grooming-home-card-head">
+                <span className="grooming-home-card-icon">🏪</span>
+                <div>
+                  <h3>{t('home.grooming.providers.title')}</h3>
+                  <p className="grooming-home-card-lede">{t('home.grooming.providers.lede')}</p>
+                </div>
+              </div>
+              <ul className="grooming-home-list">
+                {['listing', 'diary', 'acceptance', 'earnings', 'invoicing', 'disputes'].map(key => (
+                  <li key={key}>
+                    <span className="grooming-home-list-icon">{t(`home.grooming.providers.points.${key}.icon`)}</span>
+                    <span>
+                      <strong>{t(`home.grooming.providers.points.${key}.title`)}</strong>
+                      {' — '}
+                      {t(`home.grooming.providers.points.${key}.desc`)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <button className="btn btn-secondary-outline btn-large" onClick={() => navigate('/register?role=groomer')}>
+                📝 {t('home.grooming.providers.cta')}
+              </button>
+              <p className="grooming-home-note">{t('home.grooming.providers.note')}</p>
+            </div>
+          </div>
+
+          {/* The differentiator, stated plainly */}
+          <div className="grooming-home-moat">
+            <span className="grooming-home-moat-icon">🩺</span>
+            <div>
+              <h4>{t('home.grooming.moat.title')}</h4>
+              <p>{t('home.grooming.moat.desc')}</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Advanced Enterprise Capabilities */}
       <section className="advanced-features-section">

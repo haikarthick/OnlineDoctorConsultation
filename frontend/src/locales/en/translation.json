@@ -376,7 +376,8 @@
       "compliance": "Compliance",
       "howItWorks": "How It Works",
       "testimonials": "Testimonials",
-      "sections": "Explore"
+      "sections": "Explore",
+      "grooming": "Grooming & Spa"
     },
     "registerHospital": "Register Hospital",
     "browseHospitals": "Browse Hospitals",
@@ -834,6 +835,89 @@
       "petOwners": "For Pet Owners",
       "enterprises": "For Enterprises",
       "veterinarians": "For Veterinarians"
+    },
+    "grooming": {
+      "title": "Grooming & Spa",
+      "subtitle": "Book a verified groomer, or grow your grooming business — on the same platform that looks after your pet’s health.",
+      "owners": {
+        "title": "For pet parents",
+        "lede": "Salon, spa and at-home grooming from businesses we have actually checked.",
+        "points": {
+          "verified": {
+            "icon": "✅",
+            "title": "Verified professionals",
+            "desc": "Every business is reviewed and approved before it can take a booking. You see legal name, GSTIN and contact details up front."
+          },
+          "mobile": {
+            "icon": "🚐",
+            "title": "At-home grooming",
+            "desc": "Filter for mobile groomers who come to your door — no carrier, no car, no stressed pet."
+          },
+          "slots": {
+            "icon": "📅",
+            "title": "Real availability",
+            "desc": "Live slots from the groomer’s own diary and station capacity. If you can pick it, it is genuinely free."
+          },
+          "passport": {
+            "icon": "📖",
+            "title": "Grooming Passport",
+            "desc": "Every visit builds a per-pet record — full history plus a non-medical S.C.E.N.T. wellness trend you can show your vet."
+          },
+          "escalation": {
+            "icon": "🩺",
+            "title": "A second pair of eyes",
+            "desc": "Groomers see your pet up close. Spot a lump, a limp or a skin problem and they raise a safety flag you can turn into a vet consult in a tap."
+          },
+          "money": {
+            "icon": "💳",
+            "title": "Clear money",
+            "desc": "Prices and deposits shown before you book. Cancel inside the policy window and refunds go back to source, or to your wallet if you prefer."
+          }
+        },
+        "cta": "Find a groomer near you"
+      },
+      "providers": {
+        "title": "For grooming & spa businesses",
+        "lede": "Salons, mobile groomers and pet spas — run the whole operation, not just the listing.",
+        "points": {
+          "listing": {
+            "icon": "🆓",
+            "title": "Free to list",
+            "desc": "No signup fee and no monthly charge. Create your profile, add services and pricing, and go live once verified."
+          },
+          "diary": {
+            "icon": "🗓️",
+            "title": "A diary that holds",
+            "desc": "Set working hours, per-day overrides and blocked slots, and how many pets you can handle at once. Double-booking is impossible by design."
+          },
+          "acceptance": {
+            "icon": "👍",
+            "title": "You accept the work",
+            "desc": "Bookings come to you to accept or decline first. Nothing lands in your diary that you did not agree to."
+          },
+          "earnings": {
+            "icon": "💰",
+            "title": "Earnings you can see",
+            "desc": "Every order shows gross, commission and net. Watch it move from clearing to available, then withdraw to your bank or wallet."
+          },
+          "invoicing": {
+            "icon": "🧾",
+            "title": "GST invoicing built in",
+            "desc": "Compliant invoices and credit notes are generated for you, including deposits, extras and balance-due amounts."
+          },
+          "disputes": {
+            "icon": "⚖️",
+            "title": "Fair dispute handling",
+            "desc": "If a customer raises an issue you get to respond, with a documented decision and a clear refund trail."
+          }
+        },
+        "cta": "List your business — free",
+        "note": "Register in minutes. Verification is per business, so you can set up your profile while the review is in progress."
+      },
+      "moat": {
+        "title": "Grooming that is connected to real veterinary care",
+        "desc": "A standalone grooming app ends at the appointment. Here, a groomer who spots something concerning raises a safety escalation, and you can book a licensed vet on the same platform, with the pet’s grooming history already attached. Groomers escalate — they never diagnose or prescribe. That boundary is enforced in the product, not just in policy."
+      }
     }
   },
   "dashboard": {

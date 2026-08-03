@@ -1596,3 +1596,179 @@
     padding: 4px 10px;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Grooming & Spa section
+   Rendered only when `grooming.enabled` is live. Two-column split so
+   the two audiences (pet owners / grooming businesses) read as equal
+   halves of one marketplace rather than a primary and an afterthought.
+   ══════════════════════════════════════════════════════════════ */
+.grooming-home-section {
+  padding: 80px 20px;
+  background: linear-gradient(135deg, #fdf4ff 0%, #f5f3ff 55%, #eef2ff 100%);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.grooming-home-split {
+  max-width: 1200px;
+  margin: 44px auto 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  align-items: stretch;
+}
+
+.grooming-home-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 32px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid #ece9fe;
+  box-shadow: 0 10px 30px rgba(76, 29, 149, 0.07);
+  /* min-width:0 stops long words from forcing the grid track wider than
+     the viewport, which is what produces horizontal page scroll. */
+  min-width: 0;
+}
+
+.grooming-home-card--owner { border-top: 4px solid #7c3aed; }
+.grooming-home-card--provider { border-top: 4px solid #0ea5e9; }
+
+.grooming-home-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.grooming-home-card-icon {
+  font-size: 34px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.grooming-home-card-head h3 {
+  margin: 0 0 4px;
+  font-size: 21px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.grooming-home-card-lede {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #6b7280;
+}
+
+.grooming-home-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.grooming-home-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #4b5563;
+  /* Long service names and URLs must wrap rather than overflow the card. */
+  overflow-wrap: anywhere;
+}
+
+.grooming-home-list li strong {
+  color: #1f2937;
+  font-weight: 650;
+}
+
+.grooming-home-list-icon {
+  font-size: 17px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.grooming-home-note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* The care-continuum claim — the one thing a standalone grooming
+   marketplace structurally cannot offer. */
+.grooming-home-moat {
+  max-width: 1200px;
+  margin: 28px auto 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px 28px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%);
+  color: #ffffff;
+}
+
+.grooming-home-moat-icon {
+  font-size: 30px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.grooming-home-moat h4 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.grooming-home-moat p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+@media (max-width: 1024px) {
+  .grooming-home-split {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  .grooming-home-section {
+    padding: 56px 16px;
+  }
+  .grooming-home-card {
+    padding: 26px 22px;
+  }
+  .grooming-home-moat {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 22px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grooming-home-card-head {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .grooming-home-card-head h3 {
+    font-size: 19px;
+  }
+  .grooming-home-list li,
+  .grooming-home-card-lede {
+    font-size: 14px;
+  }
+}
