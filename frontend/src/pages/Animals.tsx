@@ -332,12 +332,18 @@ const Animals: React.FC = () => {
 
     setPassportLoading(animal.id)
     try {
+      // `/medical-records/animal/:id` was never a registered route — it 404'd on
+      // every passport and the .catch() below turned that into "No medical
+      // records found" on a printed medical document. The real endpoint is the
+      // list route with an animalId filter, which returns { data: { records } }.
+      let vaccFailed = false
+      let medFailed = false
       const [vaccRes, medRes] = await Promise.all([
-        (apiService as any).get(`/vaccinations/animal/${animal.id}`).catch(() => ({ data: { vaccinations: [] } })),
-        (apiService as any).get(`/medical-records/animal/${animal.id}`).catch(() => ({ data: { records: [] } }))
+        (apiService as any).get(`/vaccinations/animal/${animal.id}`).catch(() => { vaccFailed = true; return null }),
+        (apiService as any).get(`/medical-records?animalId=${animal.id}&limit=100`).catch(() => { medFailed = true; return null })
       ])
-      const vaccinations: any[] = vaccRes?.data?.vaccinations || vaccRes?.data?.data || []
-      const records: any[] = medRes?.data?.records || medRes?.data?.data || []
+      const vaccinations: any[] = vaccRes?.data?.data?.vaccinations || vaccRes?.data?.vaccinations || (Array.isArray(vaccRes?.data?.data) ? vaccRes.data.data : []) || []
+      const records: any[] = medRes?.data?.data?.records || medRes?.data?.records || (Array.isArray(medRes?.data?.data) ? medRes.data.data : []) || []
 
       const microchipHtml = animal.microchipId
         ? '<div class="info-item"><span class="label">Microchip:</span> ' + animal.microchipId + '</div>'
@@ -348,7 +354,13 @@ const Animals: React.FC = () => {
         '<td>' + ((v.nextDueDate || v.next_due_date || '').split('T')[0] || 'N/A') + '</td>' +
         '<td>' + (v.batchNumber || v.batch_number || 'N/A') + '</td></tr>'
       ).join('')
-      const vaccHtml = vaccinations.length === 0
+      // A failed fetch must never render as "none found" on a medical document —
+      // an empty section has to mean "there are none", not "we could not ask".
+      const couldNotLoad = (what: string) =>
+        '<p style="color:#b91c1c;font-weight:600">⚠ ' + what + ' could not be loaded — this section is incomplete. Do not treat it as a complete record.</p>'
+      const vaccHtml = vaccFailed
+        ? couldNotLoad('Vaccination history')
+        : vaccinations.length === 0
         ? '<p style="color:#999">No vaccination records found</p>'
         : '<table><thead><tr><th>Vaccine</th><th>Date Administered</th><th>Next Due</th><th>Batch</th></tr></thead><tbody>' + vaccRowsHtml + '</tbody></table>'
       const medRowsHtml = records.map((r: any) =>
@@ -357,7 +369,9 @@ const Animals: React.FC = () => {
         '<td>' + (r.title || '') + '</td>' +
         '<td>' + (r.vetName || r.vet_name || 'N/A') + '</td></tr>'
       ).join('')
-      const medHtml = records.length === 0
+      const medHtml = medFailed
+        ? couldNotLoad('Medical history')
+        : records.length === 0
         ? '<p style="color:#999">No medical records found</p>'
         : '<table><thead><tr><th>Date</th><th>Type</th><th>Title</th><th>Veterinarian</th></tr></thead><tbody>' + medRowsHtml + '</tbody></table>'
 

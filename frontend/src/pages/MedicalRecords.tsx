@@ -212,8 +212,19 @@ const MedicalRecords: React.FC = () => {
     if (!selectedAnimal) { setCertificates([]); return }
     setCertsLoading(true)
     try {
-      const res = await (apiService as any).get(`/vet-certificates?animalId=${selectedAnimal}`)
-      setCertificates(res.data?.certificates || res.data?.items || res.data || [])
+      // `/vet-certificates` was never a registered route — this 404'd for every
+      // animal and the catch below rendered it as "no certificates", so the panel
+      // was permanently empty. The real route is /certificates/animal/:animalId.
+      const res = await (apiService as any).get(`/certificates/animal/${selectedAnimal}`)
+      const payload = res.data?.data ?? res.data
+      // Only ever hand an array to setCertificates — `res.data || []` previously
+      // could pass the whole { success, data } envelope through and blow up .map().
+      setCertificates(
+        Array.isArray(payload) ? payload
+        : Array.isArray(payload?.certificates) ? payload.certificates
+        : Array.isArray(payload?.items) ? payload.items
+        : []
+      )
     } catch { setCertificates([]) } finally { setCertsLoading(false) }
   }, [selectedAnimal])
 
