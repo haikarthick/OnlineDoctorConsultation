@@ -822,6 +822,10 @@ const HospitalNetworks: React.FC = () => {
   const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([])
   const [auditLoading, setAuditLoading] = useState(false)
   const [auditPage, setAuditPage] = useState(1)
+  // Network configuration change trail (distinct from the record-access trail)
+  const [securityAudit, setSecurityAudit] = useState<any[]>([])
+  const [securityAuditLoading, setSecurityAuditLoading] = useState(false)
+  const [securityAuditError, setSecurityAuditError] = useState('')
   const [auditTotal, setAuditTotal] = useState(0)
   const [auditRecordTypeFilter, setAuditRecordTypeFilter] = useState('')
   const [auditGrantedFilter, setAuditGrantedFilter] = useState<'all' | 'granted' | 'denied'>('all')
@@ -1046,6 +1050,26 @@ const HospitalNetworks: React.FC = () => {
     loadAuditStats(selectedNetwork.id)
     setAuditPage(1)
     setAuditSearch('')
+  }, [activeTab, selectedNetwork?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Configuration change trail. Requires the viewAuditLogs network action, so a
+  // 403/404 here is expected for roles without it — surfaced, not swallowed.
+  useEffect(() => {
+    if (activeTab !== 'audit' || !selectedNetwork) return
+    let cancelled = false
+    setSecurityAuditLoading(true)
+    setSecurityAuditError('')
+    apiService.getNetworkSecurityAudit(selectedNetwork.id, { limit: 50 })
+      .then(res => { if (!cancelled) setSecurityAudit(Array.isArray(res.data) ? res.data : []) })
+      .catch((e: any) => {
+        if (cancelled) return
+        setSecurityAudit([])
+        setSecurityAuditError(
+          e?.response?.data?.message || e?.response?.data?.error || e?.message || 'Failed to load'
+        )
+      })
+      .finally(() => { if (!cancelled) setSecurityAuditLoading(false) })
+    return () => { cancelled = true }
   }, [activeTab, selectedNetwork?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reload paginated table whenever tab/network/page/filter changes
@@ -2273,6 +2297,57 @@ const HospitalNetworks: React.FC = () => {
                   )}
                 </div>
               )}
+
+              {/* ── Configuration change trail ──────────────────────────
+                  The table above is the patient-record ACCESS trail (who read
+                  what). This is the CONFIGURATION trail (who changed roles,
+                  members and settings) — /hospital-networks/:id/security-audit,
+                  which had no caller at all despite being the only record of
+                  privilege changes in a network. */}
+              <div className="module-card si-af65fe13">
+                <div className="hn-panel-header">
+                  <h3>🛡️ {t('hospitalNetworks.securityAudit.title')}</h3>
+                </div>
+                <div className="card-body">
+                  <p className="module-form-helper si-676930d7">{t('hospitalNetworks.securityAudit.subtitle')}</p>
+                  {securityAuditLoading ? (
+                    <div className="loading-container"><div className="loading-spinner" /></div>
+                  ) : securityAuditError ? (
+                    <div className="module-alert error">⚠ {securityAuditError}</div>
+                  ) : securityAudit.length === 0 ? (
+                    <p className="empty-state">{t('hospitalNetworks.securityAudit.empty')}</p>
+                  ) : (
+                    <div className="data-table-container">
+                      <table className="data-table">
+                        <thead><tr>
+                          <th>{t('hospitalNetworks.securityAudit.when')}</th>
+                          <th>{t('hospitalNetworks.securityAudit.actor')}</th>
+                          <th>{t('hospitalNetworks.securityAudit.action')}</th>
+                          <th>{t('hospitalNetworks.securityAudit.target')}</th>
+                          <th>{t('hospitalNetworks.securityAudit.change')}</th>
+                          <th>{t('hospitalNetworks.securityAudit.ip')}</th>
+                        </tr></thead>
+                        <tbody>
+                          {securityAudit.map((a: any) => (
+                            <tr key={a.id}>
+                              <td>{a.createdAt ? new Date(a.createdAt).toLocaleString() : '—'}</td>
+                              <td>{a.actorName || '—'}</td>
+                              <td><span className="status-badge">{a.action}</span></td>
+                              <td>{a.targetType || '—'}</td>
+                              <td className="si-af971f42">
+                                {a.oldValue || a.newValue
+                                  ? `${a.oldValue ?? '—'} → ${a.newValue ?? '—'}`
+                                  : '—'}
+                              </td>
+                              <td>{a.ipAddress || '—'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
             </>
           )}
         </div>

@@ -6477,7 +6477,18 @@
     "selectDepartment": "विभाग चुनें",
     "customDepartment": "कस्टम विभाग",
     "noDepartment": "कोई विभाग नहीं",
-    "memberName": "Member Name"
+    "memberName": "Member Name",
+    "securityAudit": {
+      "title": "कॉन्फ़िगरेशन परिवर्तन",
+      "subtitle": "किसने भूमिकाएँ, सदस्य और नेटवर्क सेटिंग्स बदलीं। ऊपर के रिकॉर्ड-एक्सेस लॉग से अलग।",
+      "empty": "कोई कॉन्फ़िगरेशन परिवर्तन दर्ज नहीं।",
+      "when": "कब",
+      "actor": "द्वारा बदला गया",
+      "action": "क्रिया",
+      "target": "लक्ष्य",
+      "change": "परिवर्तन",
+      "ip": "आईपी पता"
+    }
   },
   "networkReferrals": {
     "title": "नेटवर्क रेफरल",
@@ -7159,7 +7170,12 @@
       "pendingReviews": "Pending Reviews",
       "lowStock": "Low Stock Items",
       "expiringSoon": "Expiring Soon",
-      "topMedications": "Top Medications by Volume"
+      "topMedications": "Top Medications by Volume",
+      "networkTitle": "इस नेटवर्क की सभी फ़ार्मेसी",
+      "pharmacy": "फ़ार्मेसी",
+      "revenue": "राजस्व",
+      "dispensings": "वितरण",
+      "thisPharmacy": "यह फ़ार्मेसी"
     },
     "receipt": {
       "preview": "Dispensing Receipt",

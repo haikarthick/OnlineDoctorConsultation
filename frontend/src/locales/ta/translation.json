@@ -6477,7 +6477,18 @@
     "selectDepartment": "துறை தேர்ந்தெடு",
     "customDepartment": "தனிப்பயன் துறை",
     "noDepartment": "துறை இல்லை",
-    "memberName": "Member Name"
+    "memberName": "Member Name",
+    "securityAudit": {
+      "title": "உள்ளமைவு மாற்றங்கள்",
+      "subtitle": "யார் பங்குகள், உறுப்பினர்கள் மற்றும் நெட்வொர்க் அமைப்புகளை மாற்றினார்கள். மேலே உள்ள பதிவு-அணுகல் பதிவிலிருந்து வேறுபட்டது.",
+      "empty": "உள்ளமைவு மாற்றங்கள் எதுவும் பதிவு செய்யப்படவில்லை.",
+      "when": "எப்போது",
+      "actor": "மாற்றியவர்",
+      "action": "செயல்",
+      "target": "இலக்கு",
+      "change": "மாற்றம்",
+      "ip": "IP முகவரி"
+    }
   },
   "networkReferrals": {
     "title": "நெட்வொர்க் பரிந்துரைகள்",
@@ -7159,7 +7170,12 @@
       "pendingReviews": "Pending Reviews",
       "lowStock": "Low Stock Items",
       "expiringSoon": "Expiring Soon",
-      "topMedications": "Top Medications by Volume"
+      "topMedications": "Top Medications by Volume",
+      "networkTitle": "இந்த நெட்வொர்க்கின் அனைத்து மருந்தகங்களும்",
+      "pharmacy": "மருந்தகம்",
+      "revenue": "வருவாய்",
+      "dispensings": "வழங்கல்கள்",
+      "thisPharmacy": "இந்த மருந்தகம்"
     },
     "receipt": {
       "preview": "Dispensing Receipt",

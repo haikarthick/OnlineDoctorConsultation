@@ -6472,7 +6472,18 @@
     "selectDepartment": "Select Department",
     "customDepartment": "Custom Department",
     "noDepartment": "No Department",
-    "memberName": "Member Name"
+    "memberName": "Member Name",
+    "securityAudit": {
+      "title": "Configuration changes",
+      "subtitle": "Who changed roles, members and network settings. Separate from the record-access log above.",
+      "empty": "No configuration changes recorded.",
+      "when": "When",
+      "actor": "Changed by",
+      "action": "Action",
+      "target": "Target",
+      "change": "Change",
+      "ip": "IP address"
+    }
   },
   "networkReferrals": {
     "title": "Network Referrals",
@@ -7154,7 +7165,12 @@
       "pendingReviews": "Pending Reviews",
       "lowStock": "Low Stock Items",
       "expiringSoon": "Expiring Soon",
-      "topMedications": "Top Medications by Volume"
+      "topMedications": "Top Medications by Volume",
+      "networkTitle": "All pharmacies in this network",
+      "pharmacy": "Pharmacy",
+      "revenue": "Revenue",
+      "dispensings": "Dispensings",
+      "thisPharmacy": "this pharmacy"
     },
     "receipt": {
       "preview": "Dispensing Receipt",

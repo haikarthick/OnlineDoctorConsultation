@@ -6498,7 +6498,18 @@
     "selectDepartment": "విభాగం ఎంచుకోండి",
     "customDepartment": "కస్టమ్ విభాగం",
     "noDepartment": "విభాగం లేదు",
-    "memberName": "Member Name"
+    "memberName": "Member Name",
+    "securityAudit": {
+      "title": "కాన్ఫిగరేషన్ మార్పులు",
+      "subtitle": "ఎవరు పాత్రలు, సభ్యులు మరియు నెట్‌వర్క్ సెట్టింగ్‌లను మార్చారు. పైన ఉన్న రికార్డ్-యాక్సెస్ లాగ్ నుండి వేరు.",
+      "empty": "కాన్ఫిగరేషన్ మార్పులు నమోదు కాలేదు.",
+      "when": "ఎప్పుడు",
+      "actor": "మార్చినవారు",
+      "action": "చర్య",
+      "target": "లక్ష్యం",
+      "change": "మార్పు",
+      "ip": "IP చిరునామా"
+    }
   },
   "networkReferrals": {
     "title": "నెట్‌వర్క్ రెఫరల్స్",
@@ -7180,7 +7191,12 @@
       "pendingReviews": "Pending Reviews",
       "lowStock": "Low Stock Items",
       "expiringSoon": "Expiring Soon",
-      "topMedications": "Top Medications by Volume"
+      "topMedications": "Top Medications by Volume",
+      "networkTitle": "ఈ నెట్‌వర్క్‌లోని అన్ని ఫార్మసీలు",
+      "pharmacy": "ఫార్మసీ",
+      "revenue": "ఆదాయం",
+      "dispensings": "పంపిణీలు",
+      "thisPharmacy": "ఈ ఫార్మసీ"
     },
     "receipt": {
       "preview": "Dispensing Receipt",

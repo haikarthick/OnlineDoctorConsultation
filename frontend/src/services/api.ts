@@ -2743,6 +2743,20 @@ class ApiService {
     const response = await this.client.get(`/hospital-networks/${networkId}/audit-logs`, { params: filters })
     return response.data
   }
+  /**
+   * Network CONFIGURATION change trail (who changed roles/members/settings),
+   * distinct from getNetworkAuditLogs above which is the patient-record ACCESS
+   * trail. Requires the viewAuditLogs network action.
+   */
+  async getNetworkSecurityAudit(networkId: string, params: { limit?: number; offset?: number } = {}) {
+    const response = await this.client.get(`/hospital-networks/${networkId}/security-audit`, { params })
+    return response.data
+  }
+  /** Per-pharmacy revenue and dispensing volume across a network. */
+  async getNetworkPharmacyReports(networkId: string, days = 30) {
+    const response = await this.client.get(`/networks/${networkId}/pharmacy-reports`, { params: { days } })
+    return response.data
+  }
   async getNetworkDashboard(networkId: string) {
     const response = await this.client.get(`/hospital-networks/${networkId}/dashboard`)
     return response.data

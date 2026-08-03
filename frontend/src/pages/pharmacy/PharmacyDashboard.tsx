@@ -73,6 +73,14 @@ interface Analytics {
   expiring_count: number
 }
 
+/** One row of /networks/:networkId/pharmacy-reports */
+interface NetworkPharmacyRow {
+  pharmacy_id: string
+  pharmacy_name: string
+  revenue: number
+  dispensing_count: number
+}
+
 const TABS = ['overview', 'review', 'dispense', 'inventory', 'alerts', 'catalog', 'suppliers', 'history', 'reorders', 'transfers', 'analytics', 'settings'] as const
 type Tab = typeof TABS[number]
 
@@ -94,6 +102,7 @@ export default function PharmacyDashboard() {
   const [pendingRx, setPendingRx] = useState<PendingPrescription[]>([])
   const [readyDispense, setReadyDispense] = useState<ReadyDispensing[]>([])
   const [analytics, setAnalytics] = useState<Analytics | null>(null)
+  const [networkReport, setNetworkReport] = useState<{ period_days: number; pharmacies: NetworkPharmacyRow[] } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [reviewTarget, setReviewTarget] = useState<PendingPrescription | null>(null)
@@ -142,9 +151,21 @@ export default function PharmacyDashboard() {
     } catch { /* non-fatal */ }
   }, [selectedPharmacy, analyticsDays])
 
+  // Network-wide comparison across every pharmacy in the network. The endpoint
+  // existed with no caller, so a network operator could only ever see one
+  // pharmacy at a time and had no way to compare them.
+  const loadNetworkReports = useCallback(async () => {
+    if (!networkId) return
+    try {
+      const res = await client.get(`/networks/${networkId}/pharmacy-reports?days=${analyticsDays}`)
+      setNetworkReport(res.data)
+    } catch { /* non-fatal — requires network membership */ }
+  }, [networkId, analyticsDays])
+
   useEffect(() => { loadPharmacies() }, [loadPharmacies])
   useEffect(() => { if (selectedPharmacy) loadDashboard() }, [selectedPharmacy, loadDashboard])
   useEffect(() => { if (tab === 'analytics' && selectedPharmacy) loadAnalytics() }, [tab, loadAnalytics])
+  useEffect(() => { if (tab === 'analytics' && networkId) loadNetworkReports() }, [tab, networkId, loadNetworkReports])
 
   useAutoRefresh('pharmacy', useCallback(() => {
     if (selectedPharmacy && tab === 'overview') loadDashboard()
@@ -477,6 +498,40 @@ export default function PharmacyDashboard() {
               </>
             )}
           </div>
+
+          {/* Network-wide comparison. Every other view on this page is scoped to
+              the one selected pharmacy; this is the only place a network
+              operator can see them side by side. */}
+          {networkReport && networkReport.pharmacies?.length > 0 && (
+            <div className="pharmacy-card">
+              <div className="pharmacy-card-header">
+                <h3>🌐 {t('pharmacy.analytics.networkTitle')}</h3>
+              </div>
+              <div className="table-scroll">
+                <table className="pharmacy-table">
+                  <thead>
+                    <tr>
+                      <th>{t('pharmacy.analytics.pharmacy')}</th>
+                      <th>{t('pharmacy.analytics.revenue')}</th>
+                      <th>{t('pharmacy.analytics.dispensings')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {networkReport.pharmacies.map(p => (
+                      <tr key={p.pharmacy_id} className={p.pharmacy_id === selectedPharmacy.id ? 'is-current' : undefined}>
+                        <td>
+                          {p.pharmacy_name}
+                          {p.pharmacy_id === selectedPharmacy.id && ` — ${t('pharmacy.analytics.thisPharmacy')}`}
+                        </td>
+                        <td>{formatCurrency(Number(p.revenue) || 0)}</td>
+                        <td>{p.dispensing_count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

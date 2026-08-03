@@ -5685,7 +5685,18 @@
     "selectDepartment": "വിഭാഗം തിരഞ്ഞെടുക്കുക",
     "customDepartment": "കസ്റ്റം വിഭാഗം",
     "noDepartment": "വിഭാഗം ഇല്ല",
-    "memberName": "Member Name"
+    "memberName": "Member Name",
+    "securityAudit": {
+      "title": "കോൺഫിഗറേഷൻ മാറ്റങ്ങൾ",
+      "subtitle": "ആരാണ് റോളുകൾ, അംഗങ്ങൾ, നെറ്റ്‌വർക്ക് ക്രമീകരണങ്ങൾ മാറ്റിയത്. മുകളിലെ റെക്കോർഡ്-ആക്സസ് ലോഗിൽ നിന്ന് വ്യത്യസ്തം.",
+      "empty": "കോൺഫിഗറേഷൻ മാറ്റങ്ങളൊന്നും രേഖപ്പെടുത്തിയിട്ടില്ല.",
+      "when": "എപ്പോൾ",
+      "actor": "മാറ്റിയത്",
+      "action": "പ്രവൃത്തി",
+      "target": "ലക്ഷ്യം",
+      "change": "മാറ്റം",
+      "ip": "IP വിലാസം"
+    }
   },
   "emailTemplates": {
     "title": "ഇമെയിൽ ടെംപ്ലേറ്റുകൾ",
@@ -6079,7 +6090,12 @@
       "pendingReviews": "Pending Reviews",
       "lowStock": "Low Stock Items",
       "expiringSoon": "Expiring Soon",
-      "topMedications": "Top Medications by Volume"
+      "topMedications": "Top Medications by Volume",
+      "networkTitle": "ഈ നെറ്റ്‌വർക്കിലെ എല്ലാ ഫാർമസികളും",
+      "pharmacy": "ഫാർമസി",
+      "revenue": "വരുമാനം",
+      "dispensings": "വിതരണങ്ങൾ",
+      "thisPharmacy": "ഈ ഫാർമസി"
     },
     "receipt": {
       "preview": "Dispensing Receipt",

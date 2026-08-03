@@ -6500,7 +6500,18 @@
     "selectDepartment": "ವಿಭಾಗ ಆಯ್ಕೆಮಾಡಿ",
     "customDepartment": "ಕಸ್ಟಮ್ ವಿಭಾಗ",
     "noDepartment": "ಯಾವುದೇ ವಿಭಾಗ ಇಲ್ಲ",
-    "memberName": "Member Name"
+    "memberName": "Member Name",
+    "securityAudit": {
+      "title": "ಸಂರಚನೆ ಬದಲಾವಣೆಗಳು",
+      "subtitle": "ಯಾರು ಪಾತ್ರಗಳು, ಸದಸ್ಯರು ಮತ್ತು ನೆಟ್‌ವರ್ಕ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿದರು. ಮೇಲಿನ ದಾಖಲೆ-ಪ್ರವೇಶ ಲಾಗ್‌ನಿಂದ ಪ್ರತ್ಯೇಕ.",
+      "empty": "ಯಾವುದೇ ಸಂರಚನೆ ಬದಲಾವಣೆ ದಾಖಲಾಗಿಲ್ಲ.",
+      "when": "ಯಾವಾಗ",
+      "actor": "ಬದಲಾಯಿಸಿದವರು",
+      "action": "ಕ್ರಿಯೆ",
+      "target": "ಗುರಿ",
+      "change": "ಬದಲಾವಣೆ",
+      "ip": "IP ವಿಳಾಸ"
+    }
   },
   "networkReferrals": {
     "title": "ನೆಟ್‌ವರ್ಕ್ ರೆಫರಲ್‌ಗಳು",
@@ -7182,7 +7193,12 @@
       "pendingReviews": "Pending Reviews",
       "lowStock": "Low Stock Items",
       "expiringSoon": "Expiring Soon",
-      "topMedications": "Top Medications by Volume"
+      "topMedications": "Top Medications by Volume",
+      "networkTitle": "ಈ ನೆಟ್‌ವರ್ಕ್‌ನ ಎಲ್ಲಾ ಔಷಧಾಲಯಗಳು",
+      "pharmacy": "ಔಷಧಾಲಯ",
+      "revenue": "ಆದಾಯ",
+      "dispensings": "ವಿತರಣೆಗಳು",
+      "thisPharmacy": "ಈ ಔಷಧಾಲಯ"
     },
     "receipt": {
       "preview": "Dispensing Receipt",
