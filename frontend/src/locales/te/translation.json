@@ -5891,11 +5891,19 @@
     "name": "ప్రమాణం పేరు",
     "disease": "వ్యాధి",
     "species": "జాతి",
-    "category": "వర్గం",
+    "category": {
+      "core": "ప్రధాన",
+      "nonCore": "ప్రధానేతర",
+      "mandatoryGovt": "తప్పనిసరి (ప్రభుత్వం)",
+      "legallyMandated": "చట్టబద్ధంగా తప్పనిసరి"
+    },
     "zoonotic": "జూనోటిక్",
     "boosterInterval": "బూస్టర్ (రోజులు)",
     "regulatory": "నిబంధన సంస్థ",
-    "status": "స్థితి",
+    "status": {
+      "active": "క్రియాశీల",
+      "archived": "ఆర్కైవ్ చేయబడింది"
+    },
     "actions": "చర్యలు",
     "active": "సక్రియం",
     "archived": "ఆర్కైవ్ చేసినది",
@@ -7940,7 +7948,10 @@
     "amount": "మొత్తం",
     "netPaid": "నికర చెల్లింపు",
     "method": "పద్ధతి",
-    "reference": "రిఫరెన్స్"
+    "reference": "రిఫరెన్స్",
+    "statement": "స్టేట్‌మెంట్",
+    "viewStatement": "స్టేట్‌మెంట్ చూడండి",
+    "statementTitle": "సెటిల్‌మెంట్ స్టేట్‌మెంట్"
   },
   "groomingItem": {
     "pending": "పెండింగ్",

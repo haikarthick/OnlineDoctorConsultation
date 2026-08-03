@@ -7927,7 +7927,10 @@
     "amount": "தொகை",
     "netPaid": "நிகர செலுத்தப்பட்டது",
     "method": "முறை",
-    "reference": "குறிப்பு"
+    "reference": "குறிப்பு",
+    "statement": "அறிக்கை",
+    "viewStatement": "அறிக்கையைப் பார்க்க",
+    "statementTitle": "தீர்வு அறிக்கை"
   },
   "groomingItem": {
     "pending": "நிலுவையில்",

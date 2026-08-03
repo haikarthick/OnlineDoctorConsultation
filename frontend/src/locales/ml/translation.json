@@ -7923,7 +7923,10 @@
     "amount": "തുക",
     "netPaid": "നെറ്റ് നൽകി",
     "method": "രീതി",
-    "reference": "റഫറൻസ്"
+    "reference": "റഫറൻസ്",
+    "statement": "സ്റ്റേറ്റ്മെന്റ്",
+    "viewStatement": "സ്റ്റേറ്റ്മെന്റ് കാണുക",
+    "statementTitle": "സെറ്റിൽമെന്റ് സ്റ്റേറ്റ്മെന്റ്"
   },
   "groomingItem": {
     "pending": "തീർപ്പാക്കാത്തത്",

@@ -7927,7 +7927,10 @@
     "amount": "राशि",
     "netPaid": "शुद्ध भुगतान",
     "method": "तरीका",
-    "reference": "संदर्भ"
+    "reference": "संदर्भ",
+    "statement": "विवरण",
+    "viewStatement": "विवरण देखें",
+    "statementTitle": "निपटान विवरण"
   },
   "groomingItem": {
     "pending": "लंबित",

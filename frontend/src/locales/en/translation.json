@@ -7922,7 +7922,10 @@
     "amount": "Amount",
     "netPaid": "Net paid",
     "method": "Method",
-    "reference": "Reference"
+    "reference": "Reference",
+    "statement": "Statement",
+    "viewStatement": "View statement",
+    "statementTitle": "Settlement statement"
   },
   "groomingItem": {
     "pending": "Pending",

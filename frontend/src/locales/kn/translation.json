@@ -5893,11 +5893,19 @@
     "name": "ಪ್ರಮಾಣ ಹೆಸರು",
     "disease": "ರೋಗ",
     "species": "ಪ್ರಾಣಿ ಜಾತಿ",
-    "category": "ವರ್ಗ",
+    "category": {
+      "core": "ಪ್ರಮುಖ",
+      "nonCore": "ಪ್ರಮುಖವಲ್ಲದ",
+      "mandatoryGovt": "ಕಡ್ಡಾಯ (ಸರ್ಕಾರಿ)",
+      "legallyMandated": "ಕಾನೂನುಬದ್ಧವಾಗಿ ಕಡ್ಡಾಯ"
+    },
     "zoonotic": "ಜೂನೋಟಿಕ್",
     "boosterInterval": "ಬೂಸ್ಟರ್ (ದಿನಗಳು)",
     "regulatory": "ನಿಯಾಮಕ ಸಂಸ್ಥೆ",
-    "status": "ಸ್ಥಿತಿ",
+    "status": {
+      "active": "ಸಕ್ರಿಯ",
+      "archived": "ಆರ್ಕೈವ್ ಮಾಡಲಾಗಿದೆ"
+    },
     "actions": "ಕ್ರಿಯೆಗಳು",
     "active": "ಸಕ್ರಿಯ",
     "archived": "ಸಂಗ್ರಹಿಸಲಾಗಿದೆ",
@@ -7942,7 +7950,10 @@
     "amount": "ಮೊತ್ತ",
     "netPaid": "ನಿವ್ವಳ ಪಾವತಿ",
     "method": "ವಿಧಾನ",
-    "reference": "ಉಲ್ಲೇಖ"
+    "reference": "ಉಲ್ಲೇಖ",
+    "statement": "ಹೇಳಿಕೆ",
+    "viewStatement": "ಹೇಳಿಕೆ ವೀಕ್ಷಿಸಿ",
+    "statementTitle": "ಇತ್ಯರ್ಥ ಹೇಳಿಕೆ"
   },
   "groomingItem": {
     "pending": "ಬಾಕಿ",
