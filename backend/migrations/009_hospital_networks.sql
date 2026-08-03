@@ -1,11 +1,11 @@
 -- Migration: 009_hospital_networks.sql
--- Description: Enterprise Hospital Network feature — Phase 1 Foundation
+-- Description: Enterprise Hospital Network feature - Phase 1 Foundation
 --   Tables: hospital_networks, hospital_network_members, hospital_network_feature_flags,
 --           animal_care_contexts, patient_data_consent, clinical_data_access_log
 -- Architecture: Completely separate from farm enterprises table.
 --   enterprises = farm domain only.  hospital_networks = clinical domain only.
 -- Data isolation: Hospital records are private by default (opt-in).
--- Audit: clinical_data_access_log is append-only — never delete rows from it.
+-- Audit: clinical_data_access_log is append-only - never delete rows from it.
 
 -- ── 36. HOSPITAL NETWORKS ──────────────────────────────────────
 CREATE TABLE IF NOT EXISTS hospital_networks (

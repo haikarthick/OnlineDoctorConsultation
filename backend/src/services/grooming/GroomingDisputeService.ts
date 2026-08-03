@@ -3,10 +3,10 @@ import { NotFoundError, ForbiddenError, ValidationError } from '../../utils/erro
 import GroomingProviderService from './GroomingProviderService';
 
 /**
- * P6 — grooming disputes & refunds. Owner raises a dispute on a completed order; provider/admin
+ * P6 - grooming disputes & refunds. Owner raises a dispute on a completed order; provider/admin
  * respond (resolve / partial refund / reject). A refund is recorded as a negative
  * 'refund_adjustment' entry on the dedicated grooming_earnings ledger so the provider's payable
- * balance drops without touching consultation finances (platform bears no cost — decision 12.2).
+ * balance drops without touching consultation finances (platform bears no cost - decision 12.2).
  */
 const DISPUTE_SELECT = `
   d.id, d.order_id as "orderId", d.raised_by as "raisedBy", d.reason, d.comments, d.images,
@@ -92,7 +92,7 @@ class GroomingDisputeService {
     const result = await database.transaction(async (client: any) => {
       // $2 is cast explicitly at BOTH uses. Assigned to a varchar column and compared against
       // string literals, Postgres deduced it as varchar in one place and text in the other and
-      // rejected the whole statement ("inconsistent types deduced for parameter $2" / 42P08) —
+      // rejected the whole statement ("inconsistent types deduced for parameter $2" / 42P08) -
       // which meant every dispute response 500'd and no dispute could ever be resolved.
       await client.query(
         `UPDATE grooming_disputes SET status = $2::varchar, resolution_note = COALESCE($3, resolution_note),

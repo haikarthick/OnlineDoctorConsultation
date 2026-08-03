@@ -14,7 +14,7 @@ export class MedicalRecordController {
     }
     const userName = req.body._userName || '';
 
-    // HIGH FIX-6: CRITICAL — force userId to authenticated user
+    // HIGH FIX-6: CRITICAL - force userId to authenticated user
     // Prevents attacker from passing ?userId=victim in request body
     const safeData = { ...req.body };
     delete safeData.userId; // Strip any caller-provided userId
@@ -32,7 +32,7 @@ export class MedicalRecordController {
     const isOwner = record.userId === (req as any).userId || record.createdBy === (req as any).userId;
     const isAdmin = (req as any).userRole === 'admin';
 
-    // Vets must have explicit booking/consultation with this animal — no blanket access
+    // Vets must have explicit booking/consultation with this animal - no blanket access
     let isVetWithAccess = false;
     if ((req as any).userRole === 'veterinarian' && record.animalId) {
       const vetResult = await database.query(

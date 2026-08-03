@@ -41,7 +41,7 @@ INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash,
   -- Farmers (password: Farmer@123)
   ('f0000000-0000-0000-0000-000000000001', 'tom.wilson@example.com',       'Tom',     'Wilson',   'farmer',       '+1-555-400-0001', '$2a$10$9lvpT/PhXramRLyjABSXfO7ks10U4KvWGlfYS6XZYeUNpTjuM.rtm', true, 'USR-FRM-001'),
   ('f0000000-0000-0000-0000-000000000002', 'maria.garcia@sunrisefarm.com','Maria',   'Garcia',   'farmer',       '+1-555-400-0002', '$2a$10$9lvpT/PhXramRLyjABSXfO7ks10U4KvWGlfYS6XZYeUNpTjuM.rtm', true, 'USR-FRM-002'),
-  -- Hospital Network Demo Users (password: Demo@123 — fixDemoPasswords corrects hash at startup)
+  -- Hospital Network Demo Users (password: Demo@123 - fixDemoPasswords corrects hash at startup)
   ('d0000000-0000-0000-0000-000000000001', 'netadmin@vetcare.com',         'Rajesh',  'Sharma',   'corporate_admin', '+91-98765-43210', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-CRP-001'),
   ('d0000000-0000-0000-0000-000000000002', 'branch.director@vetcare.com', 'Priya',   'Nair',     'veterinarian',    '+91-98765-43211', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-NET-002'),
   ('d0000000-0000-0000-0000-000000000003', 'staff.nurse@vetcare.com',     'Anitha',  'Kumar',    'hospital_staff',  '+91-98765-43212', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-NET-003'),
@@ -1618,19 +1618,19 @@ UPDATE animals SET
 WHERE id = 'aa000000-0000-0000-0000-000000000035';
 
 -- ============================================================
--- STEP 73: MORE ENTERPRISE ANIMALS – GREEN PASTURES DAIRY FARM
+-- STEP 73: MORE ENTERPRISE ANIMALS - GREEN PASTURES DAIRY FARM
 -- ============================================================
 INSERT INTO animals (id, owner_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id, ear_tag_id, registration_number, is_neutered, insurance_provider, insurance_policy_number, insurance_expiry, medical_notes, is_active, unique_id, enterprise_id, group_id, breeding_status, last_breeding_date, expected_due_date, current_weight, weight_unit, last_weighed_at, current_location_id) VALUES
   -- Holstein Milking Herd (group 001)
-  ('aa000000-0000-0000-0000-000000000036','f0000000-0000-0000-0000-000000000001','Bessie', 'Cattle','Holstein Friesian','2020-05-12','Female',610.0,'Black/White',NULL,'IA-HF-2020-036','NAAB-HF-2020-039',false,'Farm Bureau Mutual','FB-2025-4401','2027-05-12','Top milk producer – 42L/day. 3rd lactation. Dam of Misty (aa-038).',true,'ANI-COW-036','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000001','open',  NULL,         NULL,         610.0,'kg','2026-02-10','10000000-0000-0000-0000-000000000001'),
-  ('aa000000-0000-0000-0000-000000000037','f0000000-0000-0000-0000-000000000001','Clover', 'Cattle','Holstein Friesian','2021-08-22','Female',590.0,'Black/White',NULL,'IA-HF-2021-037','NAAB-HF-2021-043',false,'Farm Bureau Mutual','FB-2025-4402','2027-08-22','2nd lactation. Excellent somatic cell count – <100,000/mL.',true,'ANI-COW-037','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000001','bred',  '2025-10-05','2026-07-15',590.0,'kg','2026-02-10','10000000-0000-0000-0000-000000000001'),
+  ('aa000000-0000-0000-0000-000000000036','f0000000-0000-0000-0000-000000000001','Bessie', 'Cattle','Holstein Friesian','2020-05-12','Female',610.0,'Black/White',NULL,'IA-HF-2020-036','NAAB-HF-2020-039',false,'Farm Bureau Mutual','FB-2025-4401','2027-05-12','Top milk producer - 42L/day. 3rd lactation. Dam of Misty (aa-038).',true,'ANI-COW-036','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000001','open',  NULL,         NULL,         610.0,'kg','2026-02-10','10000000-0000-0000-0000-000000000001'),
+  ('aa000000-0000-0000-0000-000000000037','f0000000-0000-0000-0000-000000000001','Clover', 'Cattle','Holstein Friesian','2021-08-22','Female',590.0,'Black/White',NULL,'IA-HF-2021-037','NAAB-HF-2021-043',false,'Farm Bureau Mutual','FB-2025-4402','2027-08-22','2nd lactation. Excellent somatic cell count - <100,000/mL.',true,'ANI-COW-037','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000001','bred',  '2025-10-05','2026-07-15',590.0,'kg','2026-02-10','10000000-0000-0000-0000-000000000001'),
   ('aa000000-0000-0000-0000-000000000038','f0000000-0000-0000-0000-000000000001','Misty',  'Cattle','Holstein Friesian','2022-03-30','Female',545.0,'Black/White',NULL,'IA-HF-2022-038','NAAB-HF-2022-051',false,'Farm Bureau Mutual','FB-2025-4403','2028-03-30','1st calf heifer transitioning. Dam: Bessie. Growth index 110.',true,'ANI-COW-038','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000001','bred',  '2025-09-20','2026-06-30',545.0,'kg','2026-02-10','10000000-0000-0000-0000-000000000001'),
   ('aa000000-0000-0000-0000-000000000039','f0000000-0000-0000-0000-000000000001','Pearl',  'Cattle','Holstein Friesian','2019-11-10','Female',640.0,'Black/White',NULL,'IA-HF-2019-039','NAAB-HF-2019-027',false,'Farm Bureau Mutual','FB-2025-4404','2025-11-10','4th lactation. Dry cow therapy initiated Nov 2025. Due to freshen Apr 2026.',true,'ANI-COW-039','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000001','bred',  '2025-11-01','2026-04-10',640.0,'kg','2026-02-01','10000000-0000-0000-0000-000000000002'),
-  ('aa000000-0000-0000-0000-000000000040','f0000000-0000-0000-0000-000000000001','Flora',  'Cattle','Holstein Friesian','2023-01-14','Female',420.0,'Black/White',NULL,'IA-HF-2023-040',NULL,              false,NULL,            NULL,            NULL,         'Heifer – not yet bred. On heifer development program. Target breed weight 90% achieved.',true,'ANI-COW-040','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000003',NULL,    NULL,         NULL,         420.0,'kg','2026-01-28','10000000-0000-0000-0000-000000000002'),
-  ('aa000000-0000-0000-0000-000000000041','f0000000-0000-0000-0000-000000000001','Tara',   'Cattle','Holstein Friesian','2023-04-05','Female',395.0,'Black/White',NULL,'IA-HF-2023-041',NULL,              false,NULL,            NULL,            NULL,         'Heifer – confirmed pregnant by ultrasound. Due Jul 2026.',true,'ANI-COW-041','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000003','bred',  '2025-10-10','2026-07-20',395.0,'kg','2026-01-28','10000000-0000-0000-0000-000000000002'),
+  ('aa000000-0000-0000-0000-000000000040','f0000000-0000-0000-0000-000000000001','Flora',  'Cattle','Holstein Friesian','2023-01-14','Female',420.0,'Black/White',NULL,'IA-HF-2023-040',NULL,              false,NULL,            NULL,            NULL,         'Heifer - not yet bred. On heifer development program. Target breed weight 90% achieved.',true,'ANI-COW-040','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000003',NULL,    NULL,         NULL,         420.0,'kg','2026-01-28','10000000-0000-0000-0000-000000000002'),
+  ('aa000000-0000-0000-0000-000000000041','f0000000-0000-0000-0000-000000000001','Tara',   'Cattle','Holstein Friesian','2023-04-05','Female',395.0,'Black/White',NULL,'IA-HF-2023-041',NULL,              false,NULL,            NULL,            NULL,         'Heifer - confirmed pregnant by ultrasound. Due Jul 2026.',true,'ANI-COW-041','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000003','bred',  '2025-10-10','2026-07-20',395.0,'kg','2026-01-28','10000000-0000-0000-0000-000000000002'),
   -- Jersey Milking Herd (group 002)
-  ('aa000000-0000-0000-0000-000000000042','f0000000-0000-0000-0000-000000000001','Buttercup','Cattle','Jersey',          '2020-07-18','Female',430.0,'Fawn',       NULL,'IA-JR-2020-042','NAAB-JR-2020-088',false,'Farm Bureau Mutual','FB-2025-4405','2026-07-18','Premium cream producer. 6.2% butterfat – best in herd.',true,'ANI-COW-042','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000002','open',  NULL,         NULL,         430.0,'kg','2026-02-08','10000000-0000-0000-0000-000000000001'),
-  ('aa000000-0000-0000-0000-000000000043','f0000000-0000-0000-0000-000000000001','Honey',  'Cattle','Jersey',          '2021-09-03','Female',415.0,'Fawn/White', NULL,'IA-JR-2021-043','NAAB-JR-2021-094',false,'Farm Bureau Mutual','FB-2025-4406','2027-09-03','2nd lactation. Mild mastitis episode Jan 2026 – resolved with intramammary therapy.',true,'ANI-COW-043','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000002','bred',  '2025-11-12','2026-08-22',415.0,'kg','2026-02-08','10000000-0000-0000-0000-000000000001'),
+  ('aa000000-0000-0000-0000-000000000042','f0000000-0000-0000-0000-000000000001','Buttercup','Cattle','Jersey',          '2020-07-18','Female',430.0,'Fawn',       NULL,'IA-JR-2020-042','NAAB-JR-2020-088',false,'Farm Bureau Mutual','FB-2025-4405','2026-07-18','Premium cream producer. 6.2% butterfat - best in herd.',true,'ANI-COW-042','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000002','open',  NULL,         NULL,         430.0,'kg','2026-02-08','10000000-0000-0000-0000-000000000001'),
+  ('aa000000-0000-0000-0000-000000000043','f0000000-0000-0000-0000-000000000001','Honey',  'Cattle','Jersey',          '2021-09-03','Female',415.0,'Fawn/White', NULL,'IA-JR-2021-043','NAAB-JR-2021-094',false,'Farm Bureau Mutual','FB-2025-4406','2027-09-03','2nd lactation. Mild mastitis episode Jan 2026 - resolved with intramammary therapy.',true,'ANI-COW-043','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000002','bred',  '2025-11-12','2026-08-22',415.0,'kg','2026-02-08','10000000-0000-0000-0000-000000000001'),
   ('aa000000-0000-0000-0000-000000000044','f0000000-0000-0000-0000-000000000001','Maple',  'Cattle','Jersey',          '2022-05-20','Female',388.0,'Fawn',       NULL,'IA-JR-2022-044','NAAB-JR-2022-102',false,NULL,            NULL,            NULL,         '1st lactation. Excellent temperament. Sire: certified A2A2 Jersey bull.',true,'ANI-COW-044','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000002','open',  NULL,         NULL,         388.0,'kg','2026-02-08','10000000-0000-0000-0000-000000000001'),
   -- Herd Bull
   ('aa000000-0000-0000-0000-000000000045','f0000000-0000-0000-0000-000000000001','Titan',  'Cattle','Holstein Friesian','2020-02-28','Male',  890.0,'Black/White',NULL,'IA-HF-2020-045','NAAB-HF-2020-B102',false,'Farm Bureau Mutual','FB-2025-4407','2026-02-28','Primary stud bull. NAAB-certified. NM$ +450. Clean BSE certificate Jan 2026.',true,'ANI-COW-045','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000001','active',NULL,         NULL,         890.0,'kg','2026-02-01','10000000-0000-0000-0000-000000000002')
@@ -1639,9 +1639,9 @@ ON CONFLICT (id) DO NOTHING;
 -- Additional enterprise animals for enterprise 2 (Maria Garcia)
 INSERT INTO animals (id, owner_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id, ear_tag_id, registration_number, is_neutered, medical_notes, is_active, unique_id, enterprise_id, group_id, breeding_status, current_weight, weight_unit, last_weighed_at, current_location_id) VALUES
   ('aa000000-0000-0000-0000-000000000046','f0000000-0000-0000-0000-000000000002','Penny',   'Chicken','Rhode Island Red','2023-06-01','Female',3.4,'Reddish-brown',NULL,'NC-RIR-2023-046',NULL,false,'Production layer. Consistent 5-6 eggs/week. Annual Marek''s vaccine due.',true,'ANI-HEN-046','e0000000-0000-0000-0000-000000000002',NULL,'active',3.4,'kg','2026-01-15','10000000-0000-0000-0000-000000000007'),
-  ('aa000000-0000-0000-0000-000000000047','f0000000-0000-0000-0000-000000000002','Nelly',   'Goat',   'Saanen',         '2023-02-14','Female',60.0,'White',       NULL,'NC-SAA-2023-047','ADGA-SA-2023-4421',false,'1st freshening – producing 2.8L/day. Progressing well.',true,'ANI-GOT-047','e0000000-0000-0000-0000-000000000002',NULL,'open',60.0,'kg','2026-02-01','10000000-0000-0000-0000-000000000008'),
+  ('aa000000-0000-0000-0000-000000000047','f0000000-0000-0000-0000-000000000002','Nelly',   'Goat',   'Saanen',         '2023-02-14','Female',60.0,'White',       NULL,'NC-SAA-2023-047','ADGA-SA-2023-4421',false,'1st freshening - producing 2.8L/day. Progressing well.',true,'ANI-GOT-047','e0000000-0000-0000-0000-000000000002',NULL,'open',60.0,'kg','2026-02-01','10000000-0000-0000-0000-000000000008'),
   ('aa000000-0000-0000-0000-000000000048','f0000000-0000-0000-0000-000000000002','Billy',   'Goat',   'Boer',           '2022-11-05','Male',  82.0,'White/Brown', NULL,'NC-BOR-2022-048',NULL,              false,'Meat breed buck. Good conformation. Used for crossbreeding with Saanen does.',true,'ANI-GOT-048','e0000000-0000-0000-0000-000000000002',NULL,'active',82.0,'kg','2026-01-20','10000000-0000-0000-0000-000000000008'),
-  ('aa000000-0000-0000-0000-000000000049','f0000000-0000-0000-0000-000000000002','Duchess', 'Chicken','Rhode Island Red','2023-06-01','Female',3.3,'Reddish-brown',NULL,'NC-RIR-2023-049',NULL,false,'Flock bird. Good egg quality – grade A. Healthy.',true,'ANI-HEN-049','e0000000-0000-0000-0000-000000000002',NULL,'active',3.3,'kg','2026-01-15','10000000-0000-0000-0000-000000000007')
+  ('aa000000-0000-0000-0000-000000000049','f0000000-0000-0000-0000-000000000002','Duchess', 'Chicken','Rhode Island Red','2023-06-01','Female',3.3,'Reddish-brown',NULL,'NC-RIR-2023-049',NULL,false,'Flock bird. Good egg quality - grade A. Healthy.',true,'ANI-HEN-049','e0000000-0000-0000-0000-000000000002',NULL,'active',3.3,'kg','2026-01-15','10000000-0000-0000-0000-000000000007')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -1650,57 +1650,57 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO medical_records (id, user_id, animal_id, consultation_id, veterinarian_id, record_number, record_type, title, content, severity, status, medications, is_confidential, follow_up_date, tags, created_by) VALUES
   -- Green Pastures (enterprise 1) animals
   ('ff000000-0000-0000-0000-000000000006','f0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000036',NULL,'b0000000-0000-0000-0000-000000000001',
-   'MR-2026-00006','diagnosis','Annual Wellness – Bessie (Holstein)',
-   'Complete physical exam: BCS 3.5/5, temperature 38.6°C, HR 64bpm, good rumen motility. Hoof scoring 1/5 (excellent). Milk production 42L/day. CBC within normal limits. No respiratory, reproductive, or lameness issues. Udder health excellent – SCC 85,000/mL.',
+   'MR-2026-00006','diagnosis','Annual Wellness - Bessie (Holstein)',
+   'Complete physical exam: BCS 3.5/5, temperature 38.6°C, HR 64bpm, good rumen motility. Hoof scoring 1/5 (excellent). Milk production 42L/day. CBC within normal limits. No respiratory, reproductive, or lameness issues. Udder health excellent - SCC 85,000/mL.',
    'normal','active','[]',false,'2027-02-01',ARRAY['bovine','wellness','dairy'],'b0000000-0000-0000-0000-000000000001'),
 
   ('ff000000-0000-0000-0000-000000000007','f0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000043',NULL,'b0000000-0000-0000-0000-000000000001',
-   'MR-2026-00007','diagnosis','Mastitis Treatment – Honey (Jersey)',
+   'MR-2026-00007','diagnosis','Mastitis Treatment - Honey (Jersey)',
    'Quarter screening revealed elevated SCC in right rear quarter (1.2M/mL). CMT test 3+. Bacteria culture: Staphylococcus aureus. Intramammary infusion of cloxacillin initiated for 3 days. Milking management reviewed. Recommend dry cow therapy evaluation at end of lactation. Follow-up SCC in 2 weeks.',
-   'high','active','[{"name":"Cloxacillin","dosage":"500mg/tube","frequency":"BID x3 days","duration":"3 days","instructions":"Intramammary – strip quarter prior"}]',
+   'high','active','[{"name":"Cloxacillin","dosage":"500mg/tube","frequency":"BID x3 days","duration":"3 days","instructions":"Intramammary - strip quarter prior"}]',
    false,'2026-03-01',ARRAY['bovine','mastitis','udder-health'],'b0000000-0000-0000-0000-000000000001'),
 
   ('ff000000-0000-0000-0000-000000000008','f0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000039',NULL,'b0000000-0000-0000-0000-000000000001',
-   'MR-2026-00008','follow_up','Dry Cow Monitoring – Pearl',
-   'Pearl entered dry period Nov 2025. Dry cow therapy applied (Orbenin Extra). BCS at dry-off 3.8/5 – ideal. Udder showing normal involution. No signs of clinical mastitis. Colostrum quality expected to be high. Target freshening: April 10, 2026. Calving barn prepared.',
+   'MR-2026-00008','follow_up','Dry Cow Monitoring - Pearl',
+   'Pearl entered dry period Nov 2025. Dry cow therapy applied (Orbenin Extra). BCS at dry-off 3.8/5 - ideal. Udder showing normal involution. No signs of clinical mastitis. Colostrum quality expected to be high. Target freshening: April 10, 2026. Calving barn prepared.',
    'normal','active','[{"name":"Orbenin Extra","dosage":"one tube per quarter","frequency":"Single dose at dry-off","duration":"One time","instructions":"Administered at dry-off Nov 1"}]',
    false,'2026-04-10',ARRAY['bovine','dry-cow','transition'],'b0000000-0000-0000-0000-000000000001'),
 
   ('ff000000-0000-0000-0000-000000000009','f0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000045',NULL,'b0000000-0000-0000-0000-000000000001',
-   'MR-2026-00009','diagnosis','Annual BSE – Titan (Holstein Bull)',
-   'Breeding soundness evaluation (BSE): motility 75% (pass > 70%), morphology 82% (pass > 70%), concentration 1.4B/mL. Physical: body condition 3.0/5. Hoof care done – slight overgrowth right rear hoof addressed. Testosterone levels normal. Libido score 5/5. Certified satisfactory potential breeder for 2026 season.',
+   'MR-2026-00009','diagnosis','Annual BSE - Titan (Holstein Bull)',
+   'Breeding soundness evaluation (BSE): motility 75% (pass > 70%), morphology 82% (pass > 70%), concentration 1.4B/mL. Physical: body condition 3.0/5. Hoof care done - slight overgrowth right rear hoof addressed. Testosterone levels normal. Libido score 5/5. Certified satisfactory potential breeder for 2026 season.',
    'normal','active','[]',false,'2027-01-15',ARRAY['bovine','bull','bse','reproduction'],'b0000000-0000-0000-0000-000000000001'),
 
   ('ff000000-0000-0000-0000-000000000010','f0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000007',NULL,'b0000000-0000-0000-0000-000000000001',
-   'MR-2026-00010','diagnosis','Subclinical Ketosis Follow-Up – Daisy',
+   'MR-2026-00010','diagnosis','Subclinical Ketosis Follow-Up - Daisy',
    'Follow-up visit 10 days after initial diagnosis. BHB now 0.6 mmol/L (normal < 1.0). Milk production recovered to 36L/day. Appetite normal. Propylene glycol drench completed x5 days. Energy balance improving. Recommend monitoring BHB monthly for remainder of lactation. Consider rumen buffer supplementation.',
    'normal','active','[]',false,'2026-04-01',ARRAY['bovine','ketosis','metabolic'],'b0000000-0000-0000-0000-000000000001'),
 
   ('ff000000-0000-0000-0000-000000000011','f0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000037',NULL,'b0000000-0000-0000-0000-000000000001',
-   'MR-2026-00011','vaccination','Annual Vaccination Record – Clover',
+   'MR-2026-00011','vaccination','Annual Vaccination Record - Clover',
    'Annual vaccination completed: IBR/BVD/PI3 combination vaccine + leptospirosis 5-way. Also administered: Bovilis Scour + rotavirus booster. Clostridial 7-way updated. No adverse reactions. See vaccination record for lot numbers.',
    'normal','active','[]',false,NULL,ARRAY['bovine','vaccination','preventive'],'b0000000-0000-0000-0000-000000000001'),
 
   -- Enterprise 2 (Sunrise Farm - Maria Garcia) medical records
   ('ff000000-0000-0000-0000-000000000012','f0000000-0000-0000-0000-000000000002','aa000000-0000-0000-0000-000000000012',NULL,'b0000000-0000-0000-0000-000000000003',
-   'MR-2026-00012','diagnosis','CAE Status Test – Bella (Saanen)',
-   'Caprine Arthritis Encephalitis (CAE) serology: ELISA negative. Critical for maintaining CAE-negative herd status for premium milk sales. Test valid for 12 months. Hooves trimmed – mild overgrowth right rear. FAMACHA score 2 (acceptable). Worming not required at this time. Continue selenium supplementation.',
+   'MR-2026-00012','diagnosis','CAE Status Test - Bella (Saanen)',
+   'Caprine Arthritis Encephalitis (CAE) serology: ELISA negative. Critical for maintaining CAE-negative herd status for premium milk sales. Test valid for 12 months. Hooves trimmed - mild overgrowth right rear. FAMACHA score 2 (acceptable). Worming not required at this time. Continue selenium supplementation.',
    'normal','active','[]',false,'2027-01-20',ARRAY['caprine','cae','infectious-disease'],'b0000000-0000-0000-0000-000000000003'),
 
   ('ff000000-0000-0000-0000-000000000013','f0000000-0000-0000-0000-000000000002','aa000000-0000-0000-0000-000000000047',NULL,'b0000000-0000-0000-0000-000000000003',
-   'MR-2026-00013','diagnosis','First Freshening Assessment – Nelly',
-   'Nelly freshened naturally on Jan 28, 2026 with single buckling. Easy kidding – no intervention. Colostrum banked within 1 hour. Milk production at day 14: 2.8L/day, improving. Udder attachment excellent, no mastitis. Kid (not in system) sold at 3 weeks. Recommend re-breeding for second kidding by May 2026.',
+   'MR-2026-00013','diagnosis','First Freshening Assessment - Nelly',
+   'Nelly freshened naturally on Jan 28, 2026 with single buckling. Easy kidding - no intervention. Colostrum banked within 1 hour. Milk production at day 14: 2.8L/day, improving. Udder attachment excellent, no mastitis. Kid (not in system) sold at 3 weeks. Recommend re-breeding for second kidding by May 2026.',
    'normal','active','[]',false,'2026-04-15',ARRAY['caprine','freshening','reproduction'],'b0000000-0000-0000-0000-000000000003'),
 
   -- Enterprise 3 (Green Meadows - Thomas Green) medical records
   ('ff000000-0000-0000-0000-000000000014','f0000000-0000-0000-0000-000000000003','aa000000-0000-0000-0000-000000000027',NULL,'b0000000-0000-0000-0000-000000000001',
-   'MR-2026-00014','diagnosis','Pre-Lambing Check – Woolly (Merino)',
-   'Pre-lambing examination: BCS 3.5/5 (optimal for late pregnancy). Twin lambs confirmed by ultrasound on Jan 15. Udder development good. Vaginal tone 1/3 – approximately 3 weeks from lambing. Administered closantel for liver fluke prophylaxis. Bar VACC booster given for C. perfringens. Lambing kit assembled.',
+   'MR-2026-00014','diagnosis','Pre-Lambing Check - Woolly (Merino)',
+   'Pre-lambing examination: BCS 3.5/5 (optimal for late pregnancy). Twin lambs confirmed by ultrasound on Jan 15. Udder development good. Vaginal tone 1/3 - approximately 3 weeks from lambing. Administered closantel for liver fluke prophylaxis. Bar VACC booster given for C. perfringens. Lambing kit assembled.',
    'normal','active','[{"name":"Closantel","dosage":"2.5mL SC","frequency":"Single dose","duration":"One time","instructions":"Pre-lambing liver fluke prevention"}]',
    false,'2026-04-15',ARRAY['ovine','lambing','reproduction'],'b0000000-0000-0000-0000-000000000001'),
 
   ('ff000000-0000-0000-0000-000000000015','f0000000-0000-0000-0000-000000000003','aa000000-0000-0000-0000-000000000030',NULL,'b0000000-0000-0000-0000-000000000001',
-   'MR-2026-00015','surgery','Routine Castration & Ear Notching – Wilbur litter',
+   'MR-2026-00015','surgery','Routine Castration & Ear Notching - Wilbur litter',
    'Castration of Yorkshire boar piglets at 3 days post-farrowing using open technique. 12 piglets processed. Iron dextran injections administered. Ear notching for litter identification. All procedures using good hygiene and minimal stress handling. Post-op: no complications. Dam (Charlotte) doing well.',
    'normal','active','[]',false,NULL,ARRAY['porcine','surgery','piglet','management'],'b0000000-0000-0000-0000-000000000001')
 ON CONFLICT (id) DO NOTHING;
@@ -1725,7 +1725,7 @@ INSERT INTO vaccination_records (id, animal_id, vaccine_name, vaccine_type, date
   ('b175191a-0000-0000-0000-000000000012','aa000000-0000-0000-0000-000000000041','IBR/BVD/PI3 Combination (Triangle 10)','Core Cattle','2025-07-15','2026-07-15','5mL IM','TRI10-2025-2510','Merck Animal Health','b0000000-0000-0000-0000-000000000001','BVAX-2025-B041-A',NULL,true),
   -- Enterprise 2 goats
   ('b175191a-0000-0000-0000-000000000013','aa000000-0000-0000-0000-000000000012','CDT (C. perfringens + Tetanus)','Core Goat','2026-01-20','2027-01-20','2mL SC','CDT-2026-5521','Colorado Serum','b0000000-0000-0000-0000-000000000003','GVAX-2026-B012-A',NULL,true),
-  ('b175191a-0000-0000-0000-000000000014','aa000000-0000-0000-0000-000000000012','Soremouth (Orf) Vaccine','Non-Core Goat','2026-01-20','2027-01-20','scarification','ORF-2026-6612','Colorado Serum','b0000000-0000-0000-0000-000000000003','GVAX-2026-B012-B','Mild local reaction at scarification site – resolved in 3 days.',true),
+  ('b175191a-0000-0000-0000-000000000014','aa000000-0000-0000-0000-000000000012','Soremouth (Orf) Vaccine','Non-Core Goat','2026-01-20','2027-01-20','scarification','ORF-2026-6612','Colorado Serum','b0000000-0000-0000-0000-000000000003','GVAX-2026-B012-B','Mild local reaction at scarification site - resolved in 3 days.',true),
   ('b175191a-0000-0000-0000-000000000015','aa000000-0000-0000-0000-000000000047','CDT (C. perfringens + Tetanus)','Core Goat','2026-01-20','2027-01-20','2mL SC','CDT-2026-5521','Colorado Serum','b0000000-0000-0000-0000-000000000003','GVAX-2026-B047-A',NULL,true),
   -- Enterprise 3 sheep
   ('b175191a-0000-0000-0000-000000000016','aa000000-0000-0000-0000-000000000027','Ovivac-P Plus (Clostridial 5-way)','Core Sheep','2026-01-10','2027-01-10','2mL SC','OVP-2026-8801','MSD Animal Health','b0000000-0000-0000-0000-000000000001','SVAX-2026-S027-A',NULL,true),
@@ -1743,7 +1743,7 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 INSERT INTO allergy_records (id, animal_id, allergen, reaction, severity, identified_date, is_active, notes, reported_by) VALUES
   ('b40fd71e-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000043','Penicillin G (injectable)','Local swelling and wheal formation at injection site; mild urticaria on neck','severe','2025-08-15',true,'Reaction occurred within 15 minutes of IM penicillin. Treated with epinephrine and dexamethasone. Avoid all penicillin-class antibiotics. Use cephalosporins or fluoroquinolones as alternatives.','b0000000-0000-0000-0000-000000000003'),
-  ('b40fd71e-0000-0000-0000-000000000002','aa000000-0000-0000-0000-000000000027','Ivermectin (injectable formulation)','Transient neurological signs – ataxia, head pressing for 4 hours post-injection','moderate','2025-06-20',true,'Possible breed sensitivity (some Merino lines have MDR1-like sensitivity). Switched to doramectin at reduced dose. No further reactions.','b0000000-0000-0000-0000-000000000001'),
+  ('b40fd71e-0000-0000-0000-000000000002','aa000000-0000-0000-0000-000000000027','Ivermectin (injectable formulation)','Transient neurological signs - ataxia, head pressing for 4 hours post-injection','moderate','2025-06-20',true,'Possible breed sensitivity (some Merino lines have MDR1-like sensitivity). Switched to doramectin at reduced dose. No further reactions.','b0000000-0000-0000-0000-000000000001'),
   ('b40fd71e-0000-0000-0000-000000000003','aa000000-0000-0000-0000-000000000007','Amoxicillin-Clavulanate (oral)','Diarrhea and reduced feed intake lasting 5 days','moderate','2025-03-10',false,'Mild GI reaction. Resolved on discontinuation. Not life-threatening. Document for reference.','b0000000-0000-0000-0000-000000000001')
 ON CONFLICT (id) DO NOTHING;
 
@@ -1751,12 +1751,12 @@ ON CONFLICT (id) DO NOTHING;
 -- STEP 77: LAB RESULTS FOR ENTERPRISE ANIMALS
 -- ============================================================
 INSERT INTO lab_results (id, animal_id, consultation_id, test_name, test_category, test_date, result_value, normal_range, unit, is_abnormal, interpretation, status, lab_name, ordered_by, notes) VALUES
-  ('2247ddfd-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000036',NULL,'Milk SCC (Somatic Cell Count)','Udder Health','2026-02-10','85000','< 200,000','cells/mL',false,'Excellent udder health – well below threshold. Continue current management.','completed','Green Pastures On-Farm Lab','b0000000-0000-0000-0000-000000000001',NULL),
+  ('2247ddfd-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000036',NULL,'Milk SCC (Somatic Cell Count)','Udder Health','2026-02-10','85000','< 200,000','cells/mL',false,'Excellent udder health - well below threshold. Continue current management.','completed','Green Pastures On-Farm Lab','b0000000-0000-0000-0000-000000000001',NULL),
   ('2247ddfd-0000-0000-0000-000000000002','aa000000-0000-0000-0000-000000000043',NULL,'Milk SCC (Somatic Cell Count)','Udder Health','2026-01-25','1200000','< 200,000','cells/mL',true,'Markedly elevated SCC consistent with clinical mastitis. Confirms right rear quarter infection. See medical record MR-2026-00007.','completed','Green Pastures On-Farm Lab','b0000000-0000-0000-0000-000000000001','California Mastitis Test (CMT) 3+ confirmed'),
-  ('2247ddfd-0000-0000-0000-000000000003','aa000000-0000-0000-0000-000000000043',NULL,'Milk Culture & Sensitivity','Udder Health','2026-01-25','Staphylococcus aureus – susceptible to cephalosporins, resistant to penicillin','See report','N/A',true,'S. aureus mastitis. Penicillin resistance correlates with Honey''s known penicillin allergy. Use cephalosporin-based dry cow therapy at next dry-off.','completed','Iowa Vet Diagnostics','b0000000-0000-0000-0000-000000000001','Susceptibility: cefoperazone S, cephalexin S, cloxacillin I, penicillin R'),
+  ('2247ddfd-0000-0000-0000-000000000003','aa000000-0000-0000-0000-000000000043',NULL,'Milk Culture & Sensitivity','Udder Health','2026-01-25','Staphylococcus aureus - susceptible to cephalosporins, resistant to penicillin','See report','N/A',true,'S. aureus mastitis. Penicillin resistance correlates with Honey''s known penicillin allergy. Use cephalosporin-based dry cow therapy at next dry-off.','completed','Iowa Vet Diagnostics','b0000000-0000-0000-0000-000000000001','Susceptibility: cefoperazone S, cephalexin S, cloxacillin I, penicillin R'),
   ('2247ddfd-0000-0000-0000-000000000004','aa000000-0000-0000-0000-000000000039',NULL,'Blood Ketone (BHB)','Chemistry','2025-11-01','0.4','0.2-1.0','mmol/L',false,'Normal BHB at dry-off. No subclinical ketosis. Good energy reserves entering dry period.','completed','Iowa Vet Diagnostics','b0000000-0000-0000-0000-000000000001','Tested at dry-off'),
   ('2247ddfd-0000-0000-0000-000000000005','aa000000-0000-0000-0000-000000000007',NULL,'Blood Ketone (BHB) Follow-Up','Chemistry','2026-03-01','0.6','0.2-1.0','mmol/L',false,'BHB normalized. Recovery from subclinical ketosis complete. No further treatment needed.','completed','Iowa Vet Diagnostics','b0000000-0000-0000-0000-000000000001','Follow-up from MR-2026-00010'),
-  ('2247ddfd-0000-0000-0000-000000000006','aa000000-0000-0000-0000-000000000045',NULL,'Breeding Soundness Evaluation – Semen Analysis','Reproduction','2026-01-10','Motility 75%, Morphology 82%, Conc 1.4B/mL','Motility > 70%, Morph > 70%, Conc > 0.5B/mL','N/A',false,'Satisfactory potential breeder (SPB). All criteria met. Licensed for 2026 breeding season.','completed','Iowa Vet Diagnostics','b0000000-0000-0000-0000-000000000001','BSE report on file'),
+  ('2247ddfd-0000-0000-0000-000000000006','aa000000-0000-0000-0000-000000000045',NULL,'Breeding Soundness Evaluation - Semen Analysis','Reproduction','2026-01-10','Motility 75%, Morphology 82%, Conc 1.4B/mL','Motility > 70%, Morph > 70%, Conc > 0.5B/mL','N/A',false,'Satisfactory potential breeder (SPB). All criteria met. Licensed for 2026 breeding season.','completed','Iowa Vet Diagnostics','b0000000-0000-0000-0000-000000000001','BSE report on file'),
   ('2247ddfd-0000-0000-0000-000000000007','aa000000-0000-0000-0000-000000000012',NULL,'CAE (Caprine Arthritis Encephalitis) ELISA','Infectious Disease','2026-01-20','Negative','Negative','N/A',false,'No CAE antibodies detected. Herd maintains CAE-negative status for ADGA certification.','completed','NC State CVM Diagnostic Lab','b0000000-0000-0000-0000-000000000003',NULL),
   ('2247ddfd-0000-0000-0000-000000000008','aa000000-0000-0000-0000-000000000027',NULL,'FAMACHA Score + Fecal Egg Count','Parasitology','2026-01-10','FAMACHA 2; FEC 350 EPG','FAMACHA 1-2; FEC < 500 EPG','N/A',false,'Acceptable parasite burden. No deworming currently required. Re-check in 6 weeks.','completed','Vermont Sheep & Goat Lab','b0000000-0000-0000-0000-000000000001','FAMACHA score of 2 = slightly pale conjunctiva')
 ON CONFLICT (id) DO NOTHING;
@@ -1765,11 +1765,11 @@ ON CONFLICT (id) DO NOTHING;
 -- STEP 78: MORE HEALTH OBSERVATIONS FOR ALL ENTERPRISES
 -- ============================================================
 INSERT INTO health_observations (id, enterprise_id, animal_id, observer_id, observation_type, severity, title, description, body_temperature, heart_rate, respiratory_rate, symptoms, is_resolved, resolved_at) VALUES
-  ('abe3bbd1-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000043','f0000000-0000-0000-0000-000000000001','clinical','high','Mastitis – Honey (Right Rear Quarter)','Owner observed swelling and heat in right rear quarter. CMT test positive 3+. Reduced milk output from that quarter. Elevated SCC on prior milk test. Veterinarian notified immediately.',38.9,72,24,string_to_array('Mammary swelling, heat, pain on palpation, watery secretion, reduced milk', ', '),false,NULL),
-  ('abe3bbd1-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000039','f0000000-0000-0000-0000-000000000001','behavioral','normal','Pre-Calving Restlessness – Pearl','Animal showing signs of imminent calving: udder filling, vulval relaxation score 2/3, pelvic ligaments relaxed. Moved to calving pen. Close monitoring initiated - check every 2 hours.',38.7,68,20,string_to_array('Restless pacing, tail-head ligament relaxation, mammary engorgement', ', '),false,NULL),
-  ('abe3bbd1-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000007','b0000000-0000-0000-0000-000000000001','clinical','high','Subclinical Ketosis – Daisy','Milk production down 30% over 2 days. Slight ketotic smell on breath. Urine ketone strip 2+. BHB confirmed elevated at 1.8 mmol/L. Initiated propylene glycol therapy and IV dextrose.',39.8,76,28,string_to_array('Reduced feed intake, reduced milk production, ketotic odor, dull demeanor', ', '),true,'2026-02-28'),
-  ('abe3bbd1-0000-0000-0000-000000000013','e0000000-0000-0000-0000-000000000002','aa000000-0000-0000-0000-000000000012','f0000000-0000-0000-0000-000000000002','clinical','normal','Minor Hoof Overgrowth – Bella','Routine inspection revealed mild overgrowth of all 4 hooves. No lameness or foot rot. Trimming scheduled with mobile farrier. FAMACHA score 2. Condition score good.',38.6,80,22,string_to_array('Mild hoof overgrowth, no lameness', ', '),true,'2026-01-20'),
-  ('abe3bbd1-0000-0000-0000-000000000014','e0000000-0000-0000-0000-000000000003','aa000000-0000-0000-0000-000000000027','f0000000-0000-0000-0000-000000000003','clinical','normal','Wool Break Check – Woolly','Pre-lambing wool evaluation. Fleece staple length 82mm. No significant wool break (stress fiber). Minimal vegetable matter contamination. Grade: fine fleece, 18 micron estimate. Expected shearing weight: 5.2 kg. Clipping schedule set for post-lambing.',38.8,82,26,string_to_array('Wool evaluation – no clinical issues', ', '),true,'2026-01-25'),
+  ('abe3bbd1-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000043','f0000000-0000-0000-0000-000000000001','clinical','high','Mastitis - Honey (Right Rear Quarter)','Owner observed swelling and heat in right rear quarter. CMT test positive 3+. Reduced milk output from that quarter. Elevated SCC on prior milk test. Veterinarian notified immediately.',38.9,72,24,string_to_array('Mammary swelling, heat, pain on palpation, watery secretion, reduced milk', ', '),false,NULL),
+  ('abe3bbd1-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000039','f0000000-0000-0000-0000-000000000001','behavioral','normal','Pre-Calving Restlessness - Pearl','Animal showing signs of imminent calving: udder filling, vulval relaxation score 2/3, pelvic ligaments relaxed. Moved to calving pen. Close monitoring initiated - check every 2 hours.',38.7,68,20,string_to_array('Restless pacing, tail-head ligament relaxation, mammary engorgement', ', '),false,NULL),
+  ('abe3bbd1-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000007','b0000000-0000-0000-0000-000000000001','clinical','high','Subclinical Ketosis - Daisy','Milk production down 30% over 2 days. Slight ketotic smell on breath. Urine ketone strip 2+. BHB confirmed elevated at 1.8 mmol/L. Initiated propylene glycol therapy and IV dextrose.',39.8,76,28,string_to_array('Reduced feed intake, reduced milk production, ketotic odor, dull demeanor', ', '),true,'2026-02-28'),
+  ('abe3bbd1-0000-0000-0000-000000000013','e0000000-0000-0000-0000-000000000002','aa000000-0000-0000-0000-000000000012','f0000000-0000-0000-0000-000000000002','clinical','normal','Minor Hoof Overgrowth - Bella','Routine inspection revealed mild overgrowth of all 4 hooves. No lameness or foot rot. Trimming scheduled with mobile farrier. FAMACHA score 2. Condition score good.',38.6,80,22,string_to_array('Mild hoof overgrowth, no lameness', ', '),true,'2026-01-20'),
+  ('abe3bbd1-0000-0000-0000-000000000014','e0000000-0000-0000-0000-000000000003','aa000000-0000-0000-0000-000000000027','f0000000-0000-0000-0000-000000000003','clinical','normal','Wool Break Check - Woolly','Pre-lambing wool evaluation. Fleece staple length 82mm. No significant wool break (stress fiber). Minimal vegetable matter contamination. Grade: fine fleece, 18 micron estimate. Expected shearing weight: 5.2 kg. Clipping schedule set for post-lambing.',38.8,82,26,string_to_array('Wool evaluation - no clinical issues', ', '),true,'2026-01-25'),
   ('abe3bbd1-0000-0000-0000-000000000015','e0000000-0000-0000-0000-000000000003','aa000000-0000-0000-0000-000000000031','f0000000-0000-0000-0000-000000000003','reproductive','normal','Charlotte Pre-Farrowing Check','Sow showing nesting behavior and udder development indicating farrowing within 24 hours. Temperature dropped 0.8°C from baseline (farrowing sign). Moving to farrowing crate. Iron dextran prepared for piglets. Oxytocin on standby.',38.4,90,24,string_to_array('Nesting behavior, udder engorgement, temperature drop', ', '),false,NULL)
 ON CONFLICT (id) DO NOTHING;
 
@@ -1778,8 +1778,8 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 INSERT INTO treatment_campaigns (id, enterprise_id, group_id, campaign_type, name, description, product_used, dosage, target_count, completed_count, status, scheduled_date, started_at, completed_at, administered_by, cost, notes) VALUES
   ('217c3871-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000001','vaccination','Spring Cattle Vaccination Program 2026','Annual IBR/BVD/PI3 + Leptospirosis 5-way for entire Holstein milking herd. Pre-breeding vaccination to ensure reproductive immunity.','Triangle 10 + Spirovac 5','5mL IM + 4mL SC',42,42,'completed','2026-01-15','2026-01-15 09:00:00','2026-01-15 16:30:00','b0000000-0000-0000-0000-000000000001',840.00,'All 42 cows completed in one day. No adverse reactions. Records filed per USDA requirements.'),
-  ('217c3871-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000001','deworming','Periparturient Deworming – Pre-Calving Cows','Strategic deworming of cows 2-4 weeks prior to calving using macrocyclic lactones to reduce periparturient worm egg rise.','Dectomax Pour-On','0.5mL/10kg body weight topically',12,10,'in_progress','2026-02-01','2026-02-01 08:00:00',NULL,'f0000000-0000-0000-0000-000000000001',180.00,'2 cows still to be treated – awaiting calving confirmation for Pearl and Clover.'),
-  ('217c3871-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000002','hoof_trimming','Spring Hoof Trimming – Jersey Herd','Scheduled functional hoof trimming for Jersey milking herd to prevent lameness. Professional hoof trimmer engaged.','Professional Hoof Trim','N/A',15,15,'completed','2026-01-25','2026-01-25 07:00:00','2026-01-25 14:00:00','f0000000-0000-0000-0000-000000000001',750.00,'All 15 Jerseys trimmed. 3 cows had minor lesions dressed. Lameness score average improved from 2.1 to 1.3.'),
+  ('217c3871-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000001','deworming','Periparturient Deworming - Pre-Calving Cows','Strategic deworming of cows 2-4 weeks prior to calving using macrocyclic lactones to reduce periparturient worm egg rise.','Dectomax Pour-On','0.5mL/10kg body weight topically',12,10,'in_progress','2026-02-01','2026-02-01 08:00:00',NULL,'f0000000-0000-0000-0000-000000000001',180.00,'2 cows still to be treated - awaiting calving confirmation for Pearl and Clover.'),
+  ('217c3871-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','ab000000-0000-0000-0000-000000000002','hoof_trimming','Spring Hoof Trimming - Jersey Herd','Scheduled functional hoof trimming for Jersey milking herd to prevent lameness. Professional hoof trimmer engaged.','Professional Hoof Trim','N/A',15,15,'completed','2026-01-25','2026-01-25 07:00:00','2026-01-25 14:00:00','f0000000-0000-0000-0000-000000000001',750.00,'All 15 Jerseys trimmed. 3 cows had minor lesions dressed. Lameness score average improved from 2.1 to 1.3.'),
   ('217c3871-0000-0000-0000-000000000013','e0000000-0000-0000-0000-000000000002',NULL,'vaccination','Q1 2026 Poultry Health Protocol','Quarterly vaccination and deworming program for all laying flocks. Marek''s, Newcastle, IBD boosters.','Marek''s + ND + IBD combo','per label IM/eye drop',150,150,'completed','2026-01-10','2026-01-10 07:00:00','2026-01-10 12:00:00','b0000000-0000-0000-0000-000000000003',420.00,'Entire flock vaccinated without incident. Egg production maintained at 94% during event.'),
   ('217c3871-0000-0000-0000-000000000014','e0000000-0000-0000-0000-000000000003','ab000000-0000-0000-0000-000000000006','deworming','Pre-Lambing Targeted Selective Treatment (TST)','FAMACHA-guided deworming of Merino ewes with FAMACHA score 3+ prior to lambing to prevent barber''s pole worm impact on neonates.','Oral Moxidectin (Cydectin 0.1%)','0.2mg/kg bodyweight PO',12,12,'completed','2026-01-14','2026-01-14 09:00:00','2026-01-14 11:00:00','b0000000-0000-0000-0000-000000000001',132.00,'12 of 42 ewes treated (FAMACHA 3+). Drench resistance check scheduled for May 2026.')
 ON CONFLICT (id) DO NOTHING;
@@ -1789,7 +1789,7 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 INSERT INTO breeding_records (id, enterprise_id, dam_id, sire_id, breeding_method, breeding_date, expected_due_date, status, technician_id, pregnancy_confirmed, pregnancy_check_date, notes) VALUES
   ('e889a849-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000037','aa000000-0000-0000-0000-000000000045','ai','2025-10-05','2026-07-15','confirmed','b0000000-0000-0000-0000-000000000001',true,'2025-11-15','AI performed by Dr. Carter using Titan''s semen. Pregnancy confirmed by rectal palpation at 6 weeks. Strong single embryo. Projected calving Jul 2026.'),
-  ('e889a849-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000038','aa000000-0000-0000-0000-000000000045','ai','2025-09-20','2026-06-30','confirmed','b0000000-0000-0000-0000-000000000001',true,'2025-11-02','Misty''s first breeding. AI with Titan''s semen. Twin embryos at first check – one resorbed at 8 weeks. Single healthy calf expected Jun 30.'),
+  ('e889a849-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000038','aa000000-0000-0000-0000-000000000045','ai','2025-09-20','2026-06-30','confirmed','b0000000-0000-0000-0000-000000000001',true,'2025-11-02','Misty''s first breeding. AI with Titan''s semen. Twin embryos at first check - one resorbed at 8 weeks. Single healthy calf expected Jun 30.'),
   ('e889a849-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000009','aa000000-0000-0000-0000-000000000045','natural','2025-09-15','2026-03-25','confirmed','f0000000-0000-0000-0000-000000000001',true,'2025-10-20','Rosie bred naturally with Titan. First AI failed so switched to natural service. Pregnancy confirmed at 5 weeks via ultrasound.'),
   ('e889a849-0000-0000-0000-000000000013','e0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000043','aa000000-0000-0000-0000-000000000045','ai','2025-11-12','2026-08-22','confirmed','b0000000-0000-0000-0000-000000000001',true,'2025-12-20','Honey to calve August 2026. Conception rate achieved on second AI attempt. Following mastitis resolution.'),
   ('e889a849-0000-0000-0000-000000000014','e0000000-0000-0000-0000-000000000003','aa000000-0000-0000-0000-000000000027','aa000000-0000-0000-0000-000000000028','natural','2025-11-15','2026-04-15','confirmed','f0000000-0000-0000-0000-000000000003',true,'2025-12-10','Woolly bred with Baxter (Suffolk ram). Twins confirmed by ultrasound Dec 10. Excellent gestation progress. Lambing kit prepared.'),
@@ -1801,34 +1801,34 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 INSERT INTO financial_records (id, enterprise_id, record_type, category, description, amount, currency, transaction_date, recorded_by, notes) VALUES
   -- Enterprise 1 income
-  ('6c23db7d-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','income',  'milk_sales',   'February Bulk Milk Sales – Dairy Partners Cooperative',     28400.00,'USD','2026-02-28','f0000000-0000-0000-0000-000000000001','42 cows × avg 38L/day × 28 days × $0.64/L incentive pricing'),
-  ('6c23db7d-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','income',  'milk_sales',   'January Bulk Milk Sales – Dairy Partners Cooperative',      26800.00,'USD','2026-01-31','f0000000-0000-0000-0000-000000000001','Slight dip due to Daisy illness. 42 cows avg 36L/day × 31 days × $0.61/L'),
-  ('6c23db7d-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','income',  'cheese_sales', 'Artisan Cheese Sales – Green Pastures Farmers Market',       3840.00,'USD','2026-02-28','f0000000-0000-0000-0000-000000000001','48 kg aged cheddar @ $80/kg. February market'),
-  ('6c23db7d-0000-0000-0000-000000000013','e0000000-0000-0000-0000-000000000001','expense', 'feed',         'TMR Mix Components – Morrison Prairie Feed Co',            -8200.00,'USD','2026-02-15','f0000000-0000-0000-0000-000000000001','Corn silage, alfalfa hay, distillers grain, mineral mix for February'),
-  ('6c23db7d-0000-0000-0000-000000000014','e0000000-0000-0000-0000-000000000001','expense', 'veterinary',   'Herd Health Services – Dr. James Carter Feb 2026',          -2100.00,'USD','2026-02-20','f0000000-0000-0000-0000-000000000001','2 farm visits, ketosis treatment, mastitis treatment, pregnancy checks, BSE evaluation'),
-  ('6c23db7d-0000-0000-0000-000000000015','e0000000-0000-0000-0000-000000000001','expense', 'labor',        'Farm Staff Wages – February 2026',                          -9600.00,'USD','2026-02-28','f0000000-0000-0000-0000-000000000001','Tom Wilson + 3 part-time workers. Includes overtime for calving season coverage'),
-  ('6c23db7d-0000-0000-0000-000000000016','e0000000-0000-0000-0000-000000000001','expense', 'equipment',    'Milking Machine Maintenance & Parts – AgroTech Services',   -1450.00,'USD','2026-02-10','f0000000-0000-0000-0000-000000000001','Annual maintenance contract + pulsator replacement'),
+  ('6c23db7d-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','income',  'milk_sales',   'February Bulk Milk Sales - Dairy Partners Cooperative',     28400.00,'USD','2026-02-28','f0000000-0000-0000-0000-000000000001','42 cows × avg 38L/day × 28 days × $0.64/L incentive pricing'),
+  ('6c23db7d-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','income',  'milk_sales',   'January Bulk Milk Sales - Dairy Partners Cooperative',      26800.00,'USD','2026-01-31','f0000000-0000-0000-0000-000000000001','Slight dip due to Daisy illness. 42 cows avg 36L/day × 31 days × $0.61/L'),
+  ('6c23db7d-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','income',  'cheese_sales', 'Artisan Cheese Sales - Green Pastures Farmers Market',       3840.00,'USD','2026-02-28','f0000000-0000-0000-0000-000000000001','48 kg aged cheddar @ $80/kg. February market'),
+  ('6c23db7d-0000-0000-0000-000000000013','e0000000-0000-0000-0000-000000000001','expense', 'feed',         'TMR Mix Components - Morrison Prairie Feed Co',            -8200.00,'USD','2026-02-15','f0000000-0000-0000-0000-000000000001','Corn silage, alfalfa hay, distillers grain, mineral mix for February'),
+  ('6c23db7d-0000-0000-0000-000000000014','e0000000-0000-0000-0000-000000000001','expense', 'veterinary',   'Herd Health Services - Dr. James Carter Feb 2026',          -2100.00,'USD','2026-02-20','f0000000-0000-0000-0000-000000000001','2 farm visits, ketosis treatment, mastitis treatment, pregnancy checks, BSE evaluation'),
+  ('6c23db7d-0000-0000-0000-000000000015','e0000000-0000-0000-0000-000000000001','expense', 'labor',        'Farm Staff Wages - February 2026',                          -9600.00,'USD','2026-02-28','f0000000-0000-0000-0000-000000000001','Tom Wilson + 3 part-time workers. Includes overtime for calving season coverage'),
+  ('6c23db7d-0000-0000-0000-000000000016','e0000000-0000-0000-0000-000000000001','expense', 'equipment',    'Milking Machine Maintenance & Parts - AgroTech Services',   -1450.00,'USD','2026-02-10','f0000000-0000-0000-0000-000000000001','Annual maintenance contract + pulsator replacement'),
   -- Enterprise 2 income/expense
-  ('6c23db7d-0000-0000-0000-000000000017','e0000000-0000-0000-0000-000000000002','income',  'egg_sales',    'January Egg Sales – Local Grocery + Farmers Market',         2880.00,'USD','2026-01-31','f0000000-0000-0000-0000-000000000002','150 hens × avg 5.5 eggs/week × 4.3 weeks × $0.72/egg (market premium)'),
-  ('6c23db7d-0000-0000-0000-000000000018','e0000000-0000-0000-0000-000000000002','income',  'cheese_sales', 'Artisan Goat Cheese Sales – Jan 2026',                       1920.00,'USD','2026-01-31','f0000000-0000-0000-0000-000000000002','24 lb fresh chèvre + 6 lb aged crottin @ premium organic pricing'),
-  ('6c23db7d-0000-0000-0000-000000000019','e0000000-0000-0000-0000-000000000002','expense', 'feed',         'Layer Feed + Goat Mineral Supplement – Jan/Feb',           -1680.00,'USD','2026-02-05','f0000000-0000-0000-0000-000000000002','Purina Layena + Goat Mineral 12% + Selenium supplement'),
+  ('6c23db7d-0000-0000-0000-000000000017','e0000000-0000-0000-0000-000000000002','income',  'egg_sales',    'January Egg Sales - Local Grocery + Farmers Market',         2880.00,'USD','2026-01-31','f0000000-0000-0000-0000-000000000002','150 hens × avg 5.5 eggs/week × 4.3 weeks × $0.72/egg (market premium)'),
+  ('6c23db7d-0000-0000-0000-000000000018','e0000000-0000-0000-0000-000000000002','income',  'cheese_sales', 'Artisan Goat Cheese Sales - Jan 2026',                       1920.00,'USD','2026-01-31','f0000000-0000-0000-0000-000000000002','24 lb fresh chèvre + 6 lb aged crottin @ premium organic pricing'),
+  ('6c23db7d-0000-0000-0000-000000000019','e0000000-0000-0000-0000-000000000002','expense', 'feed',         'Layer Feed + Goat Mineral Supplement - Jan/Feb',           -1680.00,'USD','2026-02-05','f0000000-0000-0000-0000-000000000002','Purina Layena + Goat Mineral 12% + Selenium supplement'),
   -- Enterprise 3 income/expense
-  ('6c23db7d-0000-0000-0000-000000000020','e0000000-0000-0000-0000-000000000003','income',  'wool_sales',   'Merino Fleece Auction – Vermont Wool Exchange',              6240.00,'USD','2026-01-20','f0000000-0000-0000-0000-000000000003','48 fleeces × avg 4.8 kg × $27/kg premium fine wool'),
-  ('6c23db7d-0000-0000-0000-000000000021','e0000000-0000-0000-0000-000000000003','income',  'livestock_sales','Heritage Pork – Restaurant & Specialty Butcher Sales',    4800.00,'USD','2026-02-15','f0000000-0000-0000-0000-000000000003','2 Berkshire hogs × $2,400 each to specialty butcher'),
-  ('6c23db7d-0000-0000-0000-000000000022','e0000000-0000-0000-0000-000000000003','expense', 'veterinary',   'Herd Health & Pre-Lambing Vet Services – Feb 2026',        -1850.00,'USD','2026-02-20','f0000000-0000-0000-0000-000000000003','Pre-lambing exams, TST deworming, ultrasound pregnancy checks, piglet procedures')
+  ('6c23db7d-0000-0000-0000-000000000020','e0000000-0000-0000-0000-000000000003','income',  'wool_sales',   'Merino Fleece Auction - Vermont Wool Exchange',              6240.00,'USD','2026-01-20','f0000000-0000-0000-0000-000000000003','48 fleeces × avg 4.8 kg × $27/kg premium fine wool'),
+  ('6c23db7d-0000-0000-0000-000000000021','e0000000-0000-0000-0000-000000000003','income',  'livestock_sales','Heritage Pork - Restaurant & Specialty Butcher Sales',    4800.00,'USD','2026-02-15','f0000000-0000-0000-0000-000000000003','2 Berkshire hogs × $2,400 each to specialty butcher'),
+  ('6c23db7d-0000-0000-0000-000000000022','e0000000-0000-0000-0000-000000000003','expense', 'veterinary',   'Herd Health & Pre-Lambing Vet Services - Feb 2026',        -1850.00,'USD','2026-02-20','f0000000-0000-0000-0000-000000000003','Pre-lambing exams, TST deworming, ultrasound pregnancy checks, piglet procedures')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 82: MORE COMPLIANCE DOCUMENTS (all statuses)
 -- ============================================================
 INSERT INTO compliance_documents (id, enterprise_id, document_type, title, description, reference_number, issued_date, expiry_date, issuing_authority, status, verified_by, verified_at, is_active) VALUES
-  ('cd000000-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','organic_cert','USDA Organic Certification – Green Pastures Dairy Farm','Annual organic certification covering all milk production, feed, pasture, and input materials. NOP compliant.','USDA-ORG-IA-2026-0482','2026-01-01','2026-12-31','USDA National Organic Program','active','a0000000-0000-0000-0000-000000000001','2026-01-05',true),
-  ('cd000000-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','animal_welfare','Certified Humane® Raised & Handled – Dairy Cattle','Third-party animal welfare audit certification for all dairy cow housing, handling, feeding, and management practices.','CH-2026-IA-004821','2026-02-15','2027-02-14','Humane Farm Animal Care (HFAC)','active','a0000000-0000-0000-0000-000000000001','2026-02-20',true),
-  ('cd000000-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','fda_registration','FDA Food Facility Registration – Fluid Milk & Cheese','Biennial renewal of FDA food facility registration for on-farm cheese processing and fluid milk tank.','FDA-FFR-IA-2024-88821','2024-10-01','2026-12-31','U.S. Food & Drug Administration','expiring','a0000000-0000-0000-0000-000000000001','2024-10-05',true),
-  ('cd000000-0000-0000-0000-000000000013','e0000000-0000-0000-0000-000000000002','food_safety','USDA GAP (Good Agricultural Practices) Audit – Egg Production','Annual third-party food safety audit for egg handling, collection, grading, and packing.','USDA-GAP-NC-2025-0071','2025-09-15','2026-09-14','USDA Agricultural Marketing Service','active','a0000000-0000-0000-0000-000000000001','2025-09-20',true),
-  ('cd000000-0000-0000-0000-000000000014','e0000000-0000-0000-0000-000000000002','organic_cert','USDA Organic Certification – Goat Milk & Cheese','Organic certification for all goat milk and cheese production including feed, pasture, and health management.','USDA-ORG-NC-2026-1193','2026-01-01','2026-12-31','USDA National Organic Program','active','a0000000-0000-0000-0000-000000000001','2026-01-08',true),
-  ('cd000000-0000-0000-0000-000000000015','e0000000-0000-0000-0000-000000000003','animal_welfare','Animal Welfare Approved – Dairy Sheep & Heritage Pigs','AWA certification for Green Meadows covering outdoor access, humane treatment, slaughter practices for all certified species.','AWA-VT-2026-0331','2026-01-15','2027-01-14','A Greener World (AWA)','active','a0000000-0000-0000-0000-000000000001','2026-01-20',true),
-  ('cd000000-0000-0000-0000-000000000016','e0000000-0000-0000-0000-000000000003','state_license','Vermont Agency of Agriculture – Livestock Dealer License','State license required for movement and sale of sheep and pigs. Includes premises identification number.','VT-AAFM-LIC-2026-0331','2026-01-01','2026-12-31','Vermont Agency of Agriculture, Food and Markets','active','a0000000-0000-0000-0000-000000000001','2026-01-05',true)
+  ('cd000000-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','organic_cert','USDA Organic Certification - Green Pastures Dairy Farm','Annual organic certification covering all milk production, feed, pasture, and input materials. NOP compliant.','USDA-ORG-IA-2026-0482','2026-01-01','2026-12-31','USDA National Organic Program','active','a0000000-0000-0000-0000-000000000001','2026-01-05',true),
+  ('cd000000-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','animal_welfare','Certified Humane® Raised & Handled - Dairy Cattle','Third-party animal welfare audit certification for all dairy cow housing, handling, feeding, and management practices.','CH-2026-IA-004821','2026-02-15','2027-02-14','Humane Farm Animal Care (HFAC)','active','a0000000-0000-0000-0000-000000000001','2026-02-20',true),
+  ('cd000000-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','fda_registration','FDA Food Facility Registration - Fluid Milk & Cheese','Biennial renewal of FDA food facility registration for on-farm cheese processing and fluid milk tank.','FDA-FFR-IA-2024-88821','2024-10-01','2026-12-31','U.S. Food & Drug Administration','expiring','a0000000-0000-0000-0000-000000000001','2024-10-05',true),
+  ('cd000000-0000-0000-0000-000000000013','e0000000-0000-0000-0000-000000000002','food_safety','USDA GAP (Good Agricultural Practices) Audit - Egg Production','Annual third-party food safety audit for egg handling, collection, grading, and packing.','USDA-GAP-NC-2025-0071','2025-09-15','2026-09-14','USDA Agricultural Marketing Service','active','a0000000-0000-0000-0000-000000000001','2025-09-20',true),
+  ('cd000000-0000-0000-0000-000000000014','e0000000-0000-0000-0000-000000000002','organic_cert','USDA Organic Certification - Goat Milk & Cheese','Organic certification for all goat milk and cheese production including feed, pasture, and health management.','USDA-ORG-NC-2026-1193','2026-01-01','2026-12-31','USDA National Organic Program','active','a0000000-0000-0000-0000-000000000001','2026-01-08',true),
+  ('cd000000-0000-0000-0000-000000000015','e0000000-0000-0000-0000-000000000003','animal_welfare','Animal Welfare Approved - Dairy Sheep & Heritage Pigs','AWA certification for Green Meadows covering outdoor access, humane treatment, slaughter practices for all certified species.','AWA-VT-2026-0331','2026-01-15','2027-01-14','A Greener World (AWA)','active','a0000000-0000-0000-0000-000000000001','2026-01-20',true),
+  ('cd000000-0000-0000-0000-000000000016','e0000000-0000-0000-0000-000000000003','state_license','Vermont Agency of Agriculture - Livestock Dealer License','State license required for movement and sale of sheep and pigs. Includes premises identification number.','VT-AAFM-LIC-2026-0331','2026-01-01','2026-12-31','Vermont Agency of Agriculture, Food and Markets','active','a0000000-0000-0000-0000-000000000001','2026-01-05',true)
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -1837,7 +1837,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO workforce_tasks (id, enterprise_id, title, description, task_type, priority, status, assigned_to, created_by, location_id, checklist, due_date, estimated_hours, notes) VALUES
   ('23e0ea37-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','Prepare Calving Pen for Pearl','Deep clean and bed calving pen with fresh straw. Set up heat lamp, colostrum kit, and calving supplies. Post calving protocol checklist on barn wall.','facility','high','in_progress','f0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000004','["Clean and disinfect pen","Lay deep straw bedding 6 inches","Install heat lamp and test","Prepare calving kit (lubricant, ropes, iodine)","Stock colostrum replacer","Post calving checklist"]','2026-04-05',3.0,'Pearl is 14 days from due date. Calving pen should be ready by April 5 at latest.'),
   ('23e0ea37-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','Monthly Milk Production Report','Compile and submit February milk production data to Dairy Partners Cooperative. Include individual cow production, SCC results, and butterfat/protein percentages.','reporting','normal','completed','f0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001',NULL,'["Download DHIA herd test data","Calculate monthly totals per cow","Record SCC data by quarter","Compute butterfat and protein averages","Submit via cooperative portal","File physical copy"]','2026-03-05',2.0,NULL),
-  ('23e0ea37-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','Morning Milking – West Parlor (Feb 15)','Complete morning milking for Holstein and Jersey milking herds. Verify milk weights, flag any SCC alerts, record strip test results.','routine','normal','completed','f0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000005','["Pre-dip all teats","Attach milking units sequentially","Monitor flow rates and auto-detach","Post-dip and check teat condition","Record individual milk weights in DHIA","Note any abnormal secretions"]','2026-02-15',3.5,NULL),
+  ('23e0ea37-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','Morning Milking - West Parlor (Feb 15)','Complete morning milking for Holstein and Jersey milking herds. Verify milk weights, flag any SCC alerts, record strip test results.','routine','normal','completed','f0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000005','["Pre-dip all teats","Attach milking units sequentially","Monitor flow rates and auto-detach","Post-dip and check teat condition","Record individual milk weights in DHIA","Note any abnormal secretions"]','2026-02-15',3.5,NULL),
   ('23e0ea37-0000-0000-0000-000000000013','e0000000-0000-0000-0000-000000000002','Q1 Egg Grading & Market Packing','Grade and pack February farmer market eggs into 1-dozen cartons. Maintain cold chain documentation for GAP audit compliance.','processing','normal','completed','f0000000-0000-0000-0000-000000000002','f0000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000009','["Collect eggs from all nest boxes","Grade by size (Jumbo/XL/L)","Discard cracked or soiled eggs","Pack in clean cartons with GAP stamp","Log date, candler ID, worker ID","Refrigerate at 45°F within 1 hour"]','2026-02-28',4.0,NULL),
   ('23e0ea37-0000-0000-0000-000000000014','e0000000-0000-0000-0000-000000000003','Pre-Lambing Shed Preparation','Clean and prepare lambing shed for Merino ewes. Estimated 12 ewes to lamb in April. Set up individual lambing jugs.','facility','high','in_progress','f0000000-0000-0000-0000-000000000003','f0000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000012','["Power wash floor and walls","Apply lime to floor","Set up 5 individual lambing jugs 5x5ft","Install heat lamps","Stock lambing supplies (iodine, tube feeder, colostrum)","Post 24h watch schedule on door"]','2026-03-25',6.0,'First-time lambers should be in jugs within 2 hours of birth.')
 ON CONFLICT (id) DO NOTHING;
@@ -1854,89 +1854,89 @@ ON CONFLICT (id) DO NOTHING;
 -- STEP 84: MORE MARKETPLACE LISTINGS (all categories, ALL fields)
 -- ============================================================
 INSERT INTO marketplace_listings (id, enterprise_id, seller_id, title, description, category, listing_type, price, currency, quantity, unit, condition, images, location, tags, status, featured, views_count) VALUES
-  ('4331ba19-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','Premium Organic Whole Milk – 20L Weekly Subscription','USDA certified organic whole milk from Holstein and Jersey cows. A2/A2 tested. Non-homogenized for rich cream-top. Meets highest somatic cell count standards. Available in recurring weekly delivery or pickup.','food_products','service',48.00,'USD',20,'liters','new','["/uploads/market/milk-subscription.jpg","/uploads/market/milk-cows.jpg"]','Cedar Falls, Iowa, US',to_jsonb(ARRAY['organic','milk','A2','subscription','dairy']),'active',true,234),
-  ('4331ba19-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','Holstein Heifer Calf – Flora (3rd Generation Top Genetics)','Registered NAAB Holstein heifer, 12 months, dam average 42L/day (3x top 10%), sire NM$ +450. All vaccines current. BVD-PI tested negative. Excellent frame and feet scoring. Ideal for high-production dairy operations.','livestock','for_sale',4800.00,'USD',1,'head','new','["/uploads/market/flora-heifer.jpg"]','Cedar Falls, Iowa, US',to_jsonb(ARRAY['Holstein','heifer','genetics','registered']),'active',false,87),
-  ('4331ba19-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000002','f0000000-0000-0000-0000-000000000002','Farm-Fresh Free-Range Eggs – Dozen (Grade A)','Rhode Island Red free-range eggs. Hens on pasture minimum 6 hours/day. USDA GAP certified. No antibiotics, no hormones. Orange yolks from insect forage. Available at Asheville Market Saturday or local delivery.','food_products','for_sale',6.50,'USD',50,'dozen','new','["/uploads/market/eggs-fresh.jpg","/uploads/market/hen-pasture.jpg"]','Asheville, North Carolina, US',to_jsonb(ARRAY['eggs','free-range','organic','GAP-certified']),'active',true,412),
-  ('4331ba19-0000-0000-0000-000000000013','e0000000-0000-0000-0000-000000000002','f0000000-0000-0000-0000-000000000002','Raw Saanen Goat Milk – 4L Weekly Share','Raw certified goat milk from ADGA and CAE-negative Saanen herd. Rich in medium-chain fatty acids. Ideal for goat cheese, kefir, and soap making. Shares available for local pickup in Asheville.','food_products','service',22.00,'USD',10,'liters','new','["/uploads/market/goat-milk.jpg"]','Asheville, North Carolina, US',to_jsonb(ARRAY['goat-milk','raw','Saanen','CAE-negative']),'active',false,156),
-  ('4331ba19-0000-0000-0000-000000000014','e0000000-0000-0000-0000-000000000003','f0000000-0000-0000-0000-000000000003','Merino Raw Fleece – Fine Wool 18-20 Micron (2026 Clip)','Merino ewe fleece from Animal Welfare Approved flock. 2026 spring clip. 18-20 micron (spinning count 70s). Superwash-compatible. Average staple 85mm. Vegetable matter low (<0.5%). Skirted and vacuum packed. Ideal for hand spinning and premium yarn manufacturers.','agricultural_supplies','for_sale',32.00,'USD',40,'kg','new','["/uploads/market/merino-fleece.jpg","/uploads/market/spinning-yarn.jpg"]','Stowe, Vermont, US',to_jsonb(ARRAY['merino','wool','fine-fleece','spinning','AWA']),'active',true,98),
-  ('4331ba19-0000-0000-0000-000000000015','e0000000-0000-0000-0000-000000000003','f0000000-0000-0000-0000-000000000003','Heritage Berkshire Piglet Deposit – April 2026 Litter','Reserve a Berkshire piglet from Charlotte''s April 2026 litter. Wean at 8 weeks. All piglets will receive iron, standard vaccines, and ear notches. Premium heritage pork genetics. Option to raise to market weight with pastoral finishing program (add-on available).','livestock','for_sale',250.00,'USD',6,'head','new','["/uploads/market/berkshire-piglet.jpg"]','Stowe, Vermont, US',to_jsonb(ARRAY['Berkshire','piglet','heritage-pork','AWA']),'active',false,71)
+  ('4331ba19-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','Premium Organic Whole Milk - 20L Weekly Subscription','USDA certified organic whole milk from Holstein and Jersey cows. A2/A2 tested. Non-homogenized for rich cream-top. Meets highest somatic cell count standards. Available in recurring weekly delivery or pickup.','food_products','service',48.00,'USD',20,'liters','new','["/uploads/market/milk-subscription.jpg","/uploads/market/milk-cows.jpg"]','Cedar Falls, Iowa, US',to_jsonb(ARRAY['organic','milk','A2','subscription','dairy']),'active',true,234),
+  ('4331ba19-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','Holstein Heifer Calf - Flora (3rd Generation Top Genetics)','Registered NAAB Holstein heifer, 12 months, dam average 42L/day (3x top 10%), sire NM$ +450. All vaccines current. BVD-PI tested negative. Excellent frame and feet scoring. Ideal for high-production dairy operations.','livestock','for_sale',4800.00,'USD',1,'head','new','["/uploads/market/flora-heifer.jpg"]','Cedar Falls, Iowa, US',to_jsonb(ARRAY['Holstein','heifer','genetics','registered']),'active',false,87),
+  ('4331ba19-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000002','f0000000-0000-0000-0000-000000000002','Farm-Fresh Free-Range Eggs - Dozen (Grade A)','Rhode Island Red free-range eggs. Hens on pasture minimum 6 hours/day. USDA GAP certified. No antibiotics, no hormones. Orange yolks from insect forage. Available at Asheville Market Saturday or local delivery.','food_products','for_sale',6.50,'USD',50,'dozen','new','["/uploads/market/eggs-fresh.jpg","/uploads/market/hen-pasture.jpg"]','Asheville, North Carolina, US',to_jsonb(ARRAY['eggs','free-range','organic','GAP-certified']),'active',true,412),
+  ('4331ba19-0000-0000-0000-000000000013','e0000000-0000-0000-0000-000000000002','f0000000-0000-0000-0000-000000000002','Raw Saanen Goat Milk - 4L Weekly Share','Raw certified goat milk from ADGA and CAE-negative Saanen herd. Rich in medium-chain fatty acids. Ideal for goat cheese, kefir, and soap making. Shares available for local pickup in Asheville.','food_products','service',22.00,'USD',10,'liters','new','["/uploads/market/goat-milk.jpg"]','Asheville, North Carolina, US',to_jsonb(ARRAY['goat-milk','raw','Saanen','CAE-negative']),'active',false,156),
+  ('4331ba19-0000-0000-0000-000000000014','e0000000-0000-0000-0000-000000000003','f0000000-0000-0000-0000-000000000003','Merino Raw Fleece - Fine Wool 18-20 Micron (2026 Clip)','Merino ewe fleece from Animal Welfare Approved flock. 2026 spring clip. 18-20 micron (spinning count 70s). Superwash-compatible. Average staple 85mm. Vegetable matter low (<0.5%). Skirted and vacuum packed. Ideal for hand spinning and premium yarn manufacturers.','agricultural_supplies','for_sale',32.00,'USD',40,'kg','new','["/uploads/market/merino-fleece.jpg","/uploads/market/spinning-yarn.jpg"]','Stowe, Vermont, US',to_jsonb(ARRAY['merino','wool','fine-fleece','spinning','AWA']),'active',true,98),
+  ('4331ba19-0000-0000-0000-000000000015','e0000000-0000-0000-0000-000000000003','f0000000-0000-0000-0000-000000000003','Heritage Berkshire Piglet Deposit - April 2026 Litter','Reserve a Berkshire piglet from Charlotte''s April 2026 litter. Wean at 8 weeks. All piglets will receive iron, standard vaccines, and ear notches. Premium heritage pork genetics. Option to raise to market weight with pastoral finishing program (add-on available).','livestock','for_sale',250.00,'USD',6,'head','new','["/uploads/market/berkshire-piglet.jpg"]','Stowe, Vermont, US',to_jsonb(ARRAY['Berkshire','piglet','heritage-pork','AWA']),'active',false,71)
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 85: MORE WELLNESS SCORECARDS & REMINDERS (pet owners)
 -- ============================================================
 INSERT INTO wellness_scorecards (id, animal_id, owner_id, overall_score, nutrition_score, activity_score, vaccination_score, dental_score, weight_status, next_checkup, recommendations, risk_flags, assessed_by, assessed_at) VALUES
-  ('1025edf8-0000-0000-0000-000000000010','aa000000-0000-0000-0000-000000000004','c0000000-0000-0000-0000-000000000002',62,65,55,80,71,'overweight','2026-06-01',to_jsonb(ARRAY['Reduce caloric intake by 15% – switch to weight management formula','Increase exercise to 45 min/day structured activity','NSAIDs for joint comfort – continue meloxicam','Schedule follow-up X-ray for hip progression']),to_jsonb(ARRAY['Obesity risk – BCS 4/5','Osteoarthritis progression','Senior dog – annual bloodwork recommended']),'b0000000-0000-0000-0000-000000000001','2026-02-01'),
-  ('1025edf8-0000-0000-0000-000000000011','aa000000-0000-0000-0000-000000000019','c0000000-0000-0000-0000-000000000004',88,84,91,90,85,'healthy','2026-08-01',to_jsonb(ARRAY['Maintain current hypoallergenic diet','Continue professional grooming every 6 weeks','Routine joint x-rays at annual exam']),to_jsonb(ARRAY['Hypoallergenic breed – strict diet required']),'b0000000-0000-0000-0000-000000000004','2026-02-05'),
-  ('1025edf8-0000-0000-0000-000000000012','aa000000-0000-0000-0000-000000000021','c0000000-0000-0000-0000-000000000004',75,82,60,85,78,'healthy','2026-06-01',to_jsonb(ARRAY['Strict IVDD protocol – no jumping','Ramp access on all furniture','Continue gabapentin 50mg BID for 4 weeks','Physiotherapy assessment recommended']),to_jsonb(ARRAY['IVDD Stage 1 – active management required','Spine risk – no stairs']),'b0000000-0000-0000-0000-000000000001','2026-02-10'),
-  ('1025edf8-0000-0000-0000-000000000013','aa000000-0000-0000-0000-000000000016','c0000000-0000-0000-0000-000000000003',82,88,79,70,NULL,'healthy','2026-12-01',to_jsonb(ARRAY['Continue frozen prey feeding schedule – thaw 24h prior','Maintain hot side 88°F / cool side 78°F gradient','Annual fecal parasite exam recommended','Weigh monthly – target 1.5kg']),to_jsonb(ARRAY['Breeding-season anorexia – monitor weight']),'b0000000-0000-0000-0000-000000000004','2026-02-08')
+  ('1025edf8-0000-0000-0000-000000000010','aa000000-0000-0000-0000-000000000004','c0000000-0000-0000-0000-000000000002',62,65,55,80,71,'overweight','2026-06-01',to_jsonb(ARRAY['Reduce caloric intake by 15% - switch to weight management formula','Increase exercise to 45 min/day structured activity','NSAIDs for joint comfort - continue meloxicam','Schedule follow-up X-ray for hip progression']),to_jsonb(ARRAY['Obesity risk - BCS 4/5','Osteoarthritis progression','Senior dog - annual bloodwork recommended']),'b0000000-0000-0000-0000-000000000001','2026-02-01'),
+  ('1025edf8-0000-0000-0000-000000000011','aa000000-0000-0000-0000-000000000019','c0000000-0000-0000-0000-000000000004',88,84,91,90,85,'healthy','2026-08-01',to_jsonb(ARRAY['Maintain current hypoallergenic diet','Continue professional grooming every 6 weeks','Routine joint x-rays at annual exam']),to_jsonb(ARRAY['Hypoallergenic breed - strict diet required']),'b0000000-0000-0000-0000-000000000004','2026-02-05'),
+  ('1025edf8-0000-0000-0000-000000000012','aa000000-0000-0000-0000-000000000021','c0000000-0000-0000-0000-000000000004',75,82,60,85,78,'healthy','2026-06-01',to_jsonb(ARRAY['Strict IVDD protocol - no jumping','Ramp access on all furniture','Continue gabapentin 50mg BID for 4 weeks','Physiotherapy assessment recommended']),to_jsonb(ARRAY['IVDD Stage 1 - active management required','Spine risk - no stairs']),'b0000000-0000-0000-0000-000000000001','2026-02-10'),
+  ('1025edf8-0000-0000-0000-000000000013','aa000000-0000-0000-0000-000000000016','c0000000-0000-0000-0000-000000000003',82,88,79,70,NULL,'healthy','2026-12-01',to_jsonb(ARRAY['Continue frozen prey feeding schedule - thaw 24h prior','Maintain hot side 88°F / cool side 78°F gradient','Annual fecal parasite exam recommended','Weigh monthly - target 1.5kg']),to_jsonb(ARRAY['Breeding-season anorexia - monitor weight']),'b0000000-0000-0000-0000-000000000004','2026-02-08')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO wellness_reminders (id, animal_id, owner_id, reminder_type, title, description, due_date, status, priority, recurrence) VALUES
-  ('adb1e613-0000-0000-0000-000000000010','aa000000-0000-0000-0000-000000000004','c0000000-0000-0000-0000-000000000002','checkup','Senior Bloodwork – Max (Annual)','Annual comprehensive bloodwork panel for senior German Shepherd including CBC, chemistry, thyroid, urinalysis.','2026-06-10','pending','high','annual'),
-  ('adb1e613-0000-0000-0000-000000000011','aa000000-0000-0000-0000-000000000019','c0000000-0000-0000-0000-000000000004','grooming','Professional Grooming – Duke (Every 6 weeks)','Standard Poodle professional grooming appointment. Trim, blow-dry, ear cleaning, nail grind.','2026-03-15','pending','normal','every_6_weeks'),
-  ('adb1e613-0000-0000-0000-000000000012','aa000000-0000-0000-0000-000000000021','c0000000-0000-0000-0000-000000000004','medication','Oscar IVDD – Gabapentin refill due','Oscar gabapentin 50mg BID prescription runs out. Request refill from Dr. Carter.','2026-03-01','pending','high','monthly'),
-  ('adb1e613-0000-0000-0000-000000000013','aa000000-0000-0000-0000-000000000015','c0000000-0000-0000-0000-000000000003','dental','Snowball Dental Check – Holland Lop','Holland Lop rabbits are prone to malocclusion. Annual dental exam and molar spur check.','2026-08-14','pending','normal','annual'),
-  ('adb1e613-0000-0000-0000-000000000014','aa000000-0000-0000-0000-000000000022','c0000000-0000-0000-0000-000000000004','vaccination','Shadow Bengal – Rabies & FVRCP Annual','Annual vaccinations due – Rabies 1-year + FVRCP booster for Shadow.','2026-07-14','pending','high','annual')
+  ('adb1e613-0000-0000-0000-000000000010','aa000000-0000-0000-0000-000000000004','c0000000-0000-0000-0000-000000000002','checkup','Senior Bloodwork - Max (Annual)','Annual comprehensive bloodwork panel for senior German Shepherd including CBC, chemistry, thyroid, urinalysis.','2026-06-10','pending','high','annual'),
+  ('adb1e613-0000-0000-0000-000000000011','aa000000-0000-0000-0000-000000000019','c0000000-0000-0000-0000-000000000004','grooming','Professional Grooming - Duke (Every 6 weeks)','Standard Poodle professional grooming appointment. Trim, blow-dry, ear cleaning, nail grind.','2026-03-15','pending','normal','every_6_weeks'),
+  ('adb1e613-0000-0000-0000-000000000012','aa000000-0000-0000-0000-000000000021','c0000000-0000-0000-0000-000000000004','medication','Oscar IVDD - Gabapentin refill due','Oscar gabapentin 50mg BID prescription runs out. Request refill from Dr. Carter.','2026-03-01','pending','high','monthly'),
+  ('adb1e613-0000-0000-0000-000000000013','aa000000-0000-0000-0000-000000000015','c0000000-0000-0000-0000-000000000003','dental','Snowball Dental Check - Holland Lop','Holland Lop rabbits are prone to malocclusion. Annual dental exam and molar spur check.','2026-08-14','pending','normal','annual'),
+  ('adb1e613-0000-0000-0000-000000000014','aa000000-0000-0000-0000-000000000022','c0000000-0000-0000-0000-000000000004','vaccination','Shadow Bengal - Rabies & FVRCP Annual','Annual vaccinations due - Rabies 1-year + FVRCP booster for Shadow.','2026-07-14','pending','high','annual')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 86: MORE AI CHAT SESSIONS (Tom Wilson farm Q&A)
 -- ============================================================
 INSERT INTO ai_chat_sessions (id, enterprise_id, user_id, animal_id, title, context_type, status, message_count, last_message_at) VALUES
-  ('a8000000-0000-0000-0000-000000000006','e0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000039','Pearl Calving Protocol – April 2026','animal','active',4,NOW() - INTERVAL '2 hours'),
-  ('a8000000-0000-0000-0000-000000000007','e0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001',NULL,'Ketosis Prevention Strategy – Transition Cows','enterprise','active',6,NOW() - INTERVAL '1 day'),
-  ('a8000000-0000-0000-0000-000000000008','e0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000043','Honey Mastitis Management – S. aureus','animal','active',5,NOW() - INTERVAL '18 hours'),
-  ('a8000000-0000-0000-0000-000000000009',NULL,'b0000000-0000-0000-0000-000000000002','aa000000-0000-0000-0000-000000000003','Brachycephalic Airway Assessment – Coco','animal','active',3,NOW() - INTERVAL '3 days'),
-  ('a8000000-0000-0000-0000-000000000010',NULL,'c0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000001','Buddy Hip Dysplasia – Long-Term Management','animal','active',5,NOW() - INTERVAL '4 days')
+  ('a8000000-0000-0000-0000-000000000006','e0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000039','Pearl Calving Protocol - April 2026','animal','active',4,NOW() - INTERVAL '2 hours'),
+  ('a8000000-0000-0000-0000-000000000007','e0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001',NULL,'Ketosis Prevention Strategy - Transition Cows','enterprise','active',6,NOW() - INTERVAL '1 day'),
+  ('a8000000-0000-0000-0000-000000000008','e0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000043','Honey Mastitis Management - S. aureus','animal','active',5,NOW() - INTERVAL '18 hours'),
+  ('a8000000-0000-0000-0000-000000000009',NULL,'b0000000-0000-0000-0000-000000000002','aa000000-0000-0000-0000-000000000003','Brachycephalic Airway Assessment - Coco','animal','active',3,NOW() - INTERVAL '3 days'),
+  ('a8000000-0000-0000-0000-000000000010',NULL,'c0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000001','Buddy Hip Dysplasia - Long-Term Management','animal','active',5,NOW() - INTERVAL '4 days')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO ai_chat_messages (id, session_id, role, content, confidence, sources, tokens_used) VALUES
   (gen_random_uuid(),'a8000000-0000-0000-0000-000000000006','user','Pearl is my Holstein cow and she is due April 10. What are the exact signs I should watch for in the 48 hours before calving?',NULL,'[]',22),
-  (gen_random_uuid(),'a8000000-0000-0000-0000-000000000006','assistant','Great question – early recognition of pre-calving signs can make the difference between a smooth delivery and a complication. Here are **Pearl''s 48-hour calving signs** to monitor:\n\n**48-72 hours before calving:**\n- Udder fully filling with colostrum (very firm)\n- Vulva swelling and elongation\n- Tail-head ligaments softening (can insert 2 fingers on both sides)\n- Restless behavior: lying down/standing frequently\n- Off feed (reduced or no TMR intake)\n- Isolating from herd\n\n**2-6 hours before calving:**\n- Mucus discharge from vulva (thick, yellowish-white)\n- Frequent urination, tail switching\n- Stage 1 labor: repeated lying and rising, visible contraction waves\n- Amniotic sac visible at vulva\n\n**Intervention required if:**\n- Stage 2 labor >1 hour with no progress\n- Feet visible but no head after 30 min\n- Backwards (breech) presentation\n- Abnormal fetal posture\n\nAlways have Dr. Carter''s number ready. Pearl is a 4th-calver – she should know what to do, but her age increases dystocia risk slightly. Would you like guidance on assisted calving technique?',94.0,'["Bovine Parturition Atlas","Dairy Cattle Management - Iowa State Extension"]',245),
+  (gen_random_uuid(),'a8000000-0000-0000-0000-000000000006','assistant','Great question - early recognition of pre-calving signs can make the difference between a smooth delivery and a complication. Here are **Pearl''s 48-hour calving signs** to monitor:\n\n**48-72 hours before calving:**\n- Udder fully filling with colostrum (very firm)\n- Vulva swelling and elongation\n- Tail-head ligaments softening (can insert 2 fingers on both sides)\n- Restless behavior: lying down/standing frequently\n- Off feed (reduced or no TMR intake)\n- Isolating from herd\n\n**2-6 hours before calving:**\n- Mucus discharge from vulva (thick, yellowish-white)\n- Frequent urination, tail switching\n- Stage 1 labor: repeated lying and rising, visible contraction waves\n- Amniotic sac visible at vulva\n\n**Intervention required if:**\n- Stage 2 labor >1 hour with no progress\n- Feet visible but no head after 30 min\n- Backwards (breech) presentation\n- Abnormal fetal posture\n\nAlways have Dr. Carter''s number ready. Pearl is a 4th-calver - she should know what to do, but her age increases dystocia risk slightly. Would you like guidance on assisted calving technique?',94.0,'["Bovine Parturition Atlas","Dairy Cattle Management - Iowa State Extension"]',245),
   (gen_random_uuid(),'a8000000-0000-0000-0000-000000000006','user','What should I have in my calving kit for Pearl?',NULL,'[]',14),
   (gen_random_uuid(),'a8000000-0000-0000-0000-000000000006','assistant','Here''s your complete **calving kit checklist** for Pearl:\n\n**Sanitation:** 7% tincture of iodine (navel dipping), clean bucket and warm water, betadine surgical scrub, latex gloves (long OB type), hand soap\n\n**Obstetrical:** OB sleeve/lubricant (J-Lube or similar), calving ropes x2, calf puller (mechanical or Vink), clean towels x6\n\n**Neonatal care:** Digital thermometer, bulb syringe (clear airways), dry towels to vigorously rub calf, colostrum tube feeder (calf esophageal feeder), heat lamp and extension cord for cold nights\n\n**Medications (consult Dr. Carter for doses):** Oxytocin (if uterus not contracting), dextrose/calcium solution (milk fever prevention), selenium/vitamin E injectable, propylene glycol (energy support), electrolytes for abomasal bloat if calf weak\n\n**Record keeping:** Ear tags ready, birth weight scale (or tape), calving notebook. I can generate a calving report template for you!',92.0,'["Bovine Neonatal Care Guide","Iowa Beef Center Calving Manual"]',198),
   (gen_random_uuid(),'a8000000-0000-0000-0000-000000000007','user','3 of my transition cows developed ketosis last month. How do I prevent this in the spring calving group?',NULL,'[]',18),
-  (gen_random_uuid(),'a8000000-0000-0000-0000-000000000007','assistant','Losing 3 cows to ketosis in one month is a significant metabolic issue worth addressing proactively. Here''s your **transition cow ketosis prevention protocol** for the spring calving group:\n\n**Nutrition (3 weeks before calving):**\n- Reduce dietary energy in far-off dry cows (avoid overconditioned cows at dry-off – target BCS 3.25)\n- Begin close-up ration 3 weeks before calving: higher forage, add rumen-protected niacin (6g/cow/day)\n- Add propylene glycol 300mL/day per cow for 14 days pre-calving and 14 days post-calving\n- Ensure adequate vitamin E + selenium (key for transition)\n\n**Monitoring:**\n- BHB-test ALL cows at days 3, 7, 14 post-calving (Precision Xtra handheld ketone meter – costs ~$30)\n- Mark any cow with BHB >1.0 mmol/L for preventive treatment\n\n**Treatment trigger (subclinical ketosis BHB 1.0-2.9):**\n- Oral propylene glycol 300mL BID x5 days\n- Bump key (rumen bolus releasing niacin + propylene glycol)\n- Monitor appetite and milk production daily\n\n**Environmental factors:**\n- Ensure cows have adequate bunk space (30-inch minimum per cow)\n- Avoid overcrowding close-up pen (85% occupancy max)\n- Temperature stress worsens energy balance – shade and fans critical in warm weather\n\n**Expected impact:** With proper transition management, ketosis incidence should drop from 7% to <2%. Cost of prevention is ~$15/cow; cost of treatment is ~$300/cow. Want me to generate a transition cow monitoring schedule?',97.0,'["AABP Ketosis Prevention Guidelines","Cornell PRODAIRY Transition Cow Management"]',305),
+  (gen_random_uuid(),'a8000000-0000-0000-0000-000000000007','assistant','Losing 3 cows to ketosis in one month is a significant metabolic issue worth addressing proactively. Here''s your **transition cow ketosis prevention protocol** for the spring calving group:\n\n**Nutrition (3 weeks before calving):**\n- Reduce dietary energy in far-off dry cows (avoid overconditioned cows at dry-off - target BCS 3.25)\n- Begin close-up ration 3 weeks before calving: higher forage, add rumen-protected niacin (6g/cow/day)\n- Add propylene glycol 300mL/day per cow for 14 days pre-calving and 14 days post-calving\n- Ensure adequate vitamin E + selenium (key for transition)\n\n**Monitoring:**\n- BHB-test ALL cows at days 3, 7, 14 post-calving (Precision Xtra handheld ketone meter - costs ~$30)\n- Mark any cow with BHB >1.0 mmol/L for preventive treatment\n\n**Treatment trigger (subclinical ketosis BHB 1.0-2.9):**\n- Oral propylene glycol 300mL BID x5 days\n- Bump key (rumen bolus releasing niacin + propylene glycol)\n- Monitor appetite and milk production daily\n\n**Environmental factors:**\n- Ensure cows have adequate bunk space (30-inch minimum per cow)\n- Avoid overcrowding close-up pen (85% occupancy max)\n- Temperature stress worsens energy balance - shade and fans critical in warm weather\n\n**Expected impact:** With proper transition management, ketosis incidence should drop from 7% to <2%. Cost of prevention is ~$15/cow; cost of treatment is ~$300/cow. Want me to generate a transition cow monitoring schedule?',97.0,'["AABP Ketosis Prevention Guidelines","Cornell PRODAIRY Transition Cow Management"]',305),
   (gen_random_uuid(),'a8000000-0000-0000-0000-000000000008','user','Honey has S. aureus mastitis. She''s being treated with cloxacillin. What is the milk withdrawal period and will she recover fully?',NULL,'[]',20),
-  (gen_random_uuid(),'a8000000-0000-0000-0000-000000000008','assistant','Important question – here''s what you need to know about Honey''s S. aureus mastitis treatment:\n\n**Milk Withdrawal Period for Cloxacillin Intramammary:**\n- **Milk: 48-72 hours** after LAST treatment (verify with specific product label – Orbenin Quick, Dariclox, or similar)\n- **Meat: 28 days** if Honey were to be culled\n- **Document all treatments** in your farm drug log for USDA GAP audit compliance\n- Use separate milk bucket and label milk as "DISCARD" during withdrawal\n\n**Will Honey recover fully? (Honest answer for S. aureus)**\n- S. aureus mastitis has **only 30-40% bacteriological cure rate** with intramammary therapy during lactation\n- She IS penicillin-resistant (confirmed by culture), so cloxacillin is the right choice over amoxicillin\n- Higher cure rates with: early detection, young cows, <3 affected quarters, low cell count prior to infection – Honey has some favorable factors\n- If she doesn''t culture-cure by 30 days post-treatment, consider: **dry cow therapy** at her next dry-off (more effective for S. aureus), or culling evaluation if she becomes a chronic spreader\n\n**Watch for:** Clinical cure (normal secretion within 3-5 days) vs. bacteriological cure (no growth on follow-up culture at 14-21 days). Clinical cure is common even when bacteriological cure fails. I recommend a follow-up culture within 21 days of treatment.\n\nShould I set a reminder for Honey''s follow-up culture on March 15?',96.0,'["NMC Mastitis Control Guidelines","Cloxacillin product insert – Orbenin Quick","USDA AMS Milk Drug Residue Database"]',287),
+  (gen_random_uuid(),'a8000000-0000-0000-0000-000000000008','assistant','Important question - here''s what you need to know about Honey''s S. aureus mastitis treatment:\n\n**Milk Withdrawal Period for Cloxacillin Intramammary:**\n- **Milk: 48-72 hours** after LAST treatment (verify with specific product label - Orbenin Quick, Dariclox, or similar)\n- **Meat: 28 days** if Honey were to be culled\n- **Document all treatments** in your farm drug log for USDA GAP audit compliance\n- Use separate milk bucket and label milk as "DISCARD" during withdrawal\n\n**Will Honey recover fully? (Honest answer for S. aureus)**\n- S. aureus mastitis has **only 30-40% bacteriological cure rate** with intramammary therapy during lactation\n- She IS penicillin-resistant (confirmed by culture), so cloxacillin is the right choice over amoxicillin\n- Higher cure rates with: early detection, young cows, <3 affected quarters, low cell count prior to infection - Honey has some favorable factors\n- If she doesn''t culture-cure by 30 days post-treatment, consider: **dry cow therapy** at her next dry-off (more effective for S. aureus), or culling evaluation if she becomes a chronic spreader\n\n**Watch for:** Clinical cure (normal secretion within 3-5 days) vs. bacteriological cure (no growth on follow-up culture at 14-21 days). Clinical cure is common even when bacteriological cure fails. I recommend a follow-up culture within 21 days of treatment.\n\nShould I set a reminder for Honey''s follow-up culture on March 15?',96.0,'["NMC Mastitis Control Guidelines","Cloxacillin product insert - Orbenin Quick","USDA AMS Milk Drug Residue Database"]',287),
   (gen_random_uuid(),'a8000000-0000-0000-0000-000000000009','user','Coco (French Bulldog) is 3 years old and I''ve noticed louder snoring and sometimes she makes a reverse sneezing sound. Should I be worried?',NULL,'[]',22),
-  (gen_random_uuid(),'a8000000-0000-0000-0000-000000000009','assistant','These are very common signs of **Brachycephalic Obstructive Airway Syndrome (BOAS)** in French Bulldogs – a breed routinely affected due to their flat facial anatomy. This is something to take seriously, but it''s very manageable.\n\n**What''s likely happening:**\nFrench Bulldogs typically have some combination of: elongated soft palate (obstructs airway during breathing), stenotic nares (narrowed nostrils), and sometimes hypoplastic trachea. As dogs age and potentially gain weight, these can worsen.\n\n**Immediate assessment:**\nDr. Sarah Johnson has a brachycephalic airway appointment scheduled for Coco on Feb 25 – that''s the right next step. She''ll assess nare width, soft palate length, and laryngeal function.\n\n**Factors that worsen BOAS:**\n- Obesity (weight management is CRITICAL)\n- Heat and humidity (avoid exercise in temperatures >25°C)\n- Excitement and stress\n- Collar pressure (use a harness instead)\n\n**Potential treatment:**\nIf exam confirms significant BOAS: soft palate resection and nare widening surgery is highly effective and has a >90% improvement rate. Recovery is 2-3 weeks.\n\n**Warning signs to go to ER immediately:**\n- Blue/purple gums (cyanosis)\n- Collapse or loss of consciousness\n- Inability to breathe through nose or mouth\n- Continuous open-mouth breathing\n\nCoco''s scheduled appointment on Feb 25 is appropriate timing. No emergency action needed now unless signs worsen.',93.0,'["ACVS Brachycephalic Surgery Guidelines","BSAVA Respiratory Disease Manual","French Bulldog Club of America Health"]',258),
+  (gen_random_uuid(),'a8000000-0000-0000-0000-000000000009','assistant','These are very common signs of **Brachycephalic Obstructive Airway Syndrome (BOAS)** in French Bulldogs - a breed routinely affected due to their flat facial anatomy. This is something to take seriously, but it''s very manageable.\n\n**What''s likely happening:**\nFrench Bulldogs typically have some combination of: elongated soft palate (obstructs airway during breathing), stenotic nares (narrowed nostrils), and sometimes hypoplastic trachea. As dogs age and potentially gain weight, these can worsen.\n\n**Immediate assessment:**\nDr. Sarah Johnson has a brachycephalic airway appointment scheduled for Coco on Feb 25 - that''s the right next step. She''ll assess nare width, soft palate length, and laryngeal function.\n\n**Factors that worsen BOAS:**\n- Obesity (weight management is CRITICAL)\n- Heat and humidity (avoid exercise in temperatures >25°C)\n- Excitement and stress\n- Collar pressure (use a harness instead)\n\n**Potential treatment:**\nIf exam confirms significant BOAS: soft palate resection and nare widening surgery is highly effective and has a >90% improvement rate. Recovery is 2-3 weeks.\n\n**Warning signs to go to ER immediately:**\n- Blue/purple gums (cyanosis)\n- Collapse or loss of consciousness\n- Inability to breathe through nose or mouth\n- Continuous open-mouth breathing\n\nCoco''s scheduled appointment on Feb 25 is appropriate timing. No emergency action needed now unless signs worsen.',93.0,'["ACVS Brachycephalic Surgery Guidelines","BSAVA Respiratory Disease Manual","French Bulldog Club of America Health"]',258),
   (gen_random_uuid(),'a8000000-0000-0000-0000-000000000010','user','Buddy had his hip dysplasia diagnosis 4 months ago. What should I expect for the next 2-3 years?',NULL,'[]',18),
-  (gen_random_uuid(),'a8000000-0000-0000-0000-000000000010','assistant','Buddy''s hip dysplasia prognosis depends on severity and how well you manage it long-term. Since he was diagnosed with mild-moderate dysplasia at age 6, here''s your **2-3 year realistic outlook:**\n\n**Year 1 (2026) – Stabilization Phase:**\n- Pain management with Carprofen (current prescription) is appropriate\n- Dasuquin Advanced joint supplement should show benefits within 4-8 weeks\n- Weight management is THE most impactful intervention – every extra pound is 4-7 lbs of joint pressure\n- Physical therapy (hydrotherapy/swimming) can significantly slow progression\n- Repeat radiographs recommended in October 2026 to assess arthritis progression\n\n**Year 2-3 (2027-2028) – Monitoring Phase:**\n- If well-managed, Buddy can maintain good quality of life with medications\n- Signs to watch for: progressive stiffness, difficulty with stairs, reduced activity, muscle atrophy\n- If medical management inadequate: FHO (femoral head ostectomy) surgery or total hip replacement are options – both effective in Golden Retrievers\n\n**Daily management now:**\n- 20-30 min low-impact walks (avoid running/jumping)\n- Swimming or hydrotherapy if accessible\n- Non-slip flooring at home\n- Orthopedic dog bed (memory foam)\n- Avoid high-impact activities (ball chasing, stairs)\n\n**Good news:** Golden Retrievers are stoic and adapt well. Many dogs with Buddy''s level of dysplasia live full happy lives to 12-14 years with proper management. His follow-up appointment on April 15 will be key to adjusting his plan.',95.0,'["OFA Hip Dysplasia Management Guidelines","WSAVA Pain Management Guidelines","Journal of Veterinary Internal Medicine – CHD outcomes"]',312);
+  (gen_random_uuid(),'a8000000-0000-0000-0000-000000000010','assistant','Buddy''s hip dysplasia prognosis depends on severity and how well you manage it long-term. Since he was diagnosed with mild-moderate dysplasia at age 6, here''s your **2-3 year realistic outlook:**\n\n**Year 1 (2026) - Stabilization Phase:**\n- Pain management with Carprofen (current prescription) is appropriate\n- Dasuquin Advanced joint supplement should show benefits within 4-8 weeks\n- Weight management is THE most impactful intervention - every extra pound is 4-7 lbs of joint pressure\n- Physical therapy (hydrotherapy/swimming) can significantly slow progression\n- Repeat radiographs recommended in October 2026 to assess arthritis progression\n\n**Year 2-3 (2027-2028) - Monitoring Phase:**\n- If well-managed, Buddy can maintain good quality of life with medications\n- Signs to watch for: progressive stiffness, difficulty with stairs, reduced activity, muscle atrophy\n- If medical management inadequate: FHO (femoral head ostectomy) surgery or total hip replacement are options - both effective in Golden Retrievers\n\n**Daily management now:**\n- 20-30 min low-impact walks (avoid running/jumping)\n- Swimming or hydrotherapy if accessible\n- Non-slip flooring at home\n- Orthopedic dog bed (memory foam)\n- Avoid high-impact activities (ball chasing, stairs)\n\n**Good news:** Golden Retrievers are stoic and adapt well. Many dogs with Buddy''s level of dysplasia live full happy lives to 12-14 years with proper management. His follow-up appointment on April 15 will be key to adjusting his plan.',95.0,'["OFA Hip Dysplasia Management Guidelines","WSAVA Pain Management Guidelines","Journal of Veterinary Internal Medicine - CHD outcomes"]',312);
 
 -- ============================================================
 -- STEP 87: MORE NOTIFICATIONS FOR ALL USERS
 -- ============================================================
 INSERT INTO notifications (id, user_id, type, title, message, is_read, channel) VALUES
-  (gen_random_uuid(),'f0000000-0000-0000-0000-000000000001','health_alert','⚠ Vaccination Due – Holstein Herd (June)','IBR/BVD/PI3 annual booster is due for your Holstein Milking Herd in June 2026. Schedule with Dr. Carter to ensure compliance.','f','in_app'),
-  (gen_random_uuid(),'f0000000-0000-0000-0000-000000000001','calving_alert','🐮 Pearl – Calving in 14 Days','Your Holstein cow Pearl is due to calve on April 10, 2026. Prepare calving pen and calving kit. Monitor closely from April 5.','f','in_app'),
-  (gen_random_uuid(),'f0000000-0000-0000-0000-000000000001','health_alert','📋 Mastitis Follow-Up – Honey','Follow up milk culture for Honey (S. aureus mastitis) on March 15, 2026. Confirm bacteriological cure of right rear quarter.','f','in_app'),
+  (gen_random_uuid(),'f0000000-0000-0000-0000-000000000001','health_alert','⚠ Vaccination Due - Holstein Herd (June)','IBR/BVD/PI3 annual booster is due for your Holstein Milking Herd in June 2026. Schedule with Dr. Carter to ensure compliance.','f','in_app'),
+  (gen_random_uuid(),'f0000000-0000-0000-0000-000000000001','calving_alert','🐮 Pearl - Calving in 14 Days','Your Holstein cow Pearl is due to calve on April 10, 2026. Prepare calving pen and calving kit. Monitor closely from April 5.','f','in_app'),
+  (gen_random_uuid(),'f0000000-0000-0000-0000-000000000001','health_alert','📋 Mastitis Follow-Up - Honey','Follow up milk culture for Honey (S. aureus mastitis) on March 15, 2026. Confirm bacteriological cure of right rear quarter.','f','in_app'),
   (gen_random_uuid(),'f0000000-0000-0000-0000-000000000001','financial','💰 February Milk Payment Received','Dairy Partners Cooperative payment of $28,400.00 for February bulk milk sales has been processed to your bank account.','f','in_app'),
-  (gen_random_uuid(),'f0000000-0000-0000-0000-000000000002','health_alert','⚠ CDT Booster Due – Saanen Herd','Annual CDT (Clostridium + Tetanus) boosters for your Saanen dairy goats are due in January 2027. Schedule with Dr. Reyes.','f','in_app'),
-  (gen_random_uuid(),'c0000000-0000-0000-0000-000000000001','appointment','📅 Buddy – Follow-Up Appointment Apr 15','Reminder: Buddy''s hip dysplasia follow-up with Dr. Carter is on April 15, 2026 at 2:00 PM. Please arrive 10 minutes early.','f','in_app'),
-  (gen_random_uuid(),'c0000000-0000-0000-0000-000000000001','vaccination','💉 Whiskers – FVRCP Booster Due Mar 2026','Whiskers is due for her annual FVRCP booster this month. Book an appointment online or call VetCare Central.','f','in_app'),
-  (gen_random_uuid(),'b0000000-0000-0000-0000-000000000001','appointment','📋 New Consultation Request – Emily Davis','Emily Davis has booked a brachycephalic airway consultation for Coco (French Bulldog) on February 25, 2026 at 2:00 PM.','f','in_app'),
-  (gen_random_uuid(),'b0000000-0000-0000-0000-000000000001','farm_visit','🐄 Farm Visit Scheduled – Green Pastures','Farm visit scheduled for February 20, 2026 at Green Pastures Dairy Farm for herd health services and pregnancy checks.','t','in_app'),
-  (gen_random_uuid(),'a0000000-0000-0000-0000-000000000001','system','🏥 New Hospital Registration – Sunrise Rural','Sunrise Rural Animal Clinic has submitted verification documents for review. Accreditation docs uploaded.','f','in_app'),
-  (gen_random_uuid(),'c0000000-0000-0000-0000-000000000004','wellness','🐾 Oscar''s IVDD Cage Rest – Day 14 of 28','Oscar is halfway through cage rest for IVDD Stage 1. Continue strict movement restriction. Check for gait improvement.','f','in_app'),
-  (gen_random_uuid(),'f0000000-0000-0000-0000-000000000003','health_alert','🐑 Woolly – Lambing in ~21 Days','Merino ewe Woolly is due April 15, 2026 with twin lambs confirmed by ultrasound. Prepare lambing shed by March 25.','f','in_app')
+  (gen_random_uuid(),'f0000000-0000-0000-0000-000000000002','health_alert','⚠ CDT Booster Due - Saanen Herd','Annual CDT (Clostridium + Tetanus) boosters for your Saanen dairy goats are due in January 2027. Schedule with Dr. Reyes.','f','in_app'),
+  (gen_random_uuid(),'c0000000-0000-0000-0000-000000000001','appointment','📅 Buddy - Follow-Up Appointment Apr 15','Reminder: Buddy''s hip dysplasia follow-up with Dr. Carter is on April 15, 2026 at 2:00 PM. Please arrive 10 minutes early.','f','in_app'),
+  (gen_random_uuid(),'c0000000-0000-0000-0000-000000000001','vaccination','💉 Whiskers - FVRCP Booster Due Mar 2026','Whiskers is due for her annual FVRCP booster this month. Book an appointment online or call VetCare Central.','f','in_app'),
+  (gen_random_uuid(),'b0000000-0000-0000-0000-000000000001','appointment','📋 New Consultation Request - Emily Davis','Emily Davis has booked a brachycephalic airway consultation for Coco (French Bulldog) on February 25, 2026 at 2:00 PM.','f','in_app'),
+  (gen_random_uuid(),'b0000000-0000-0000-0000-000000000001','farm_visit','🐄 Farm Visit Scheduled - Green Pastures','Farm visit scheduled for February 20, 2026 at Green Pastures Dairy Farm for herd health services and pregnancy checks.','t','in_app'),
+  (gen_random_uuid(),'a0000000-0000-0000-0000-000000000001','system','🏥 New Hospital Registration - Sunrise Rural','Sunrise Rural Animal Clinic has submitted verification documents for review. Accreditation docs uploaded.','f','in_app'),
+  (gen_random_uuid(),'c0000000-0000-0000-0000-000000000004','wellness','🐾 Oscar''s IVDD Cage Rest - Day 14 of 28','Oscar is halfway through cage rest for IVDD Stage 1. Continue strict movement restriction. Check for gait improvement.','f','in_app'),
+  (gen_random_uuid(),'f0000000-0000-0000-0000-000000000003','health_alert','🐑 Woolly - Lambing in ~21 Days','Merino ewe Woolly is due April 15, 2026 with twin lambs confirmed by ultrasound. Prepare lambing shed by March 25.','f','in_app')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
 -- STEP 88: MORE WEIGHT HISTORY FOR ENTERPRISE ANIMALS
 -- ============================================================
 INSERT INTO weight_history (id, animal_id, weight, unit, notes, recorded_by, recorded_at) VALUES
-  ('49e4058d-0000-0000-0000-000000000020','aa000000-0000-0000-0000-000000000036',615.0,'kg','Monthly weight check – on target for high production Holstein','f0000000-0000-0000-0000-000000000001','2026-01-10'),
-  ('49e4058d-0000-0000-0000-000000000021','aa000000-0000-0000-0000-000000000036',610.0,'kg','Slight weight decrease – normal for peak lactation','f0000000-0000-0000-0000-000000000001','2026-02-10'),
-  ('49e4058d-0000-0000-0000-000000000022','aa000000-0000-0000-0000-000000000039',655.0,'kg','Dry cow period – good BCS 3.8/5 at dry-off','f0000000-0000-0000-0000-000000000001','2025-11-01'),
-  ('49e4058d-0000-0000-0000-000000000023','aa000000-0000-0000-0000-000000000039',640.0,'kg','Mid-dry period – normal weight maintenance','f0000000-0000-0000-0000-000000000001','2026-02-01'),
-  ('49e4058d-0000-0000-0000-000000000024','aa000000-0000-0000-0000-000000000045',895.0,'kg','Bull weight check – slightly above ideal. Reduce grain 0.5kg/day','f0000000-0000-0000-0000-000000000001','2026-01-10'),
-  ('49e4058d-0000-0000-0000-000000000025','aa000000-0000-0000-0000-000000000045',890.0,'kg','Weight management working – approaching target BCS 3.0','f0000000-0000-0000-0000-000000000001','2026-02-01'),
-  ('49e4058d-0000-0000-0000-000000000026','aa000000-0000-0000-0000-000000000040',390.0,'kg','Heifer development program – on target','f0000000-0000-0000-0000-000000000001','2026-01-01'),
+  ('49e4058d-0000-0000-0000-000000000020','aa000000-0000-0000-0000-000000000036',615.0,'kg','Monthly weight check - on target for high production Holstein','f0000000-0000-0000-0000-000000000001','2026-01-10'),
+  ('49e4058d-0000-0000-0000-000000000021','aa000000-0000-0000-0000-000000000036',610.0,'kg','Slight weight decrease - normal for peak lactation','f0000000-0000-0000-0000-000000000001','2026-02-10'),
+  ('49e4058d-0000-0000-0000-000000000022','aa000000-0000-0000-0000-000000000039',655.0,'kg','Dry cow period - good BCS 3.8/5 at dry-off','f0000000-0000-0000-0000-000000000001','2025-11-01'),
+  ('49e4058d-0000-0000-0000-000000000023','aa000000-0000-0000-0000-000000000039',640.0,'kg','Mid-dry period - normal weight maintenance','f0000000-0000-0000-0000-000000000001','2026-02-01'),
+  ('49e4058d-0000-0000-0000-000000000024','aa000000-0000-0000-0000-000000000045',895.0,'kg','Bull weight check - slightly above ideal. Reduce grain 0.5kg/day','f0000000-0000-0000-0000-000000000001','2026-01-10'),
+  ('49e4058d-0000-0000-0000-000000000025','aa000000-0000-0000-0000-000000000045',890.0,'kg','Weight management working - approaching target BCS 3.0','f0000000-0000-0000-0000-000000000001','2026-02-01'),
+  ('49e4058d-0000-0000-0000-000000000026','aa000000-0000-0000-0000-000000000040',390.0,'kg','Heifer development program - on target','f0000000-0000-0000-0000-000000000001','2026-01-01'),
   ('49e4058d-0000-0000-0000-000000000027','aa000000-0000-0000-0000-000000000040',420.0,'kg','Approaching breeding weight target (430kg for Holstein)','f0000000-0000-0000-0000-000000000001','2026-02-01'),
-  ('49e4058d-0000-0000-0000-000000000028','aa000000-0000-0000-0000-000000000027',64.0,'kg','Pre-lambing weight – twins confirmed – appropriate gain','f0000000-0000-0000-0000-000000000003','2026-01-15'),
-  ('49e4058d-0000-0000-0000-000000000029','aa000000-0000-0000-0000-000000000031',140.0,'kg','Sow pre-farrowing weight – on track','f0000000-0000-0000-0000-000000000003','2026-02-01')
+  ('49e4058d-0000-0000-0000-000000000028','aa000000-0000-0000-0000-000000000027',64.0,'kg','Pre-lambing weight - twins confirmed - appropriate gain','f0000000-0000-0000-0000-000000000003','2026-01-15'),
+  ('49e4058d-0000-0000-0000-000000000029','aa000000-0000-0000-0000-000000000031',140.0,'kg','Sow pre-farrowing weight - on track','f0000000-0000-0000-0000-000000000003','2026-02-01')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -1972,12 +1972,12 @@ SELECT
   (SELECT id FROM alert_rules WHERE enterprise_id = 'e0000000-0000-0000-0000-000000000001' LIMIT 1),
   'health',
   'high',
-  'Milk SCC Alert – Honey Exceeds Threshold',
+  'Milk SCC Alert - Honey Exceeds Threshold',
   'Somatic cell count for Honey (Jersey) measured at 1,200,000 cells/mL, exceeding the 200,000 threshold. Mastitis confirmed.',
   false,
   false
 WHERE EXISTS (SELECT 1 FROM alert_rules WHERE enterprise_id = 'e0000000-0000-0000-0000-000000000001' LIMIT 1)
-  AND NOT EXISTS (SELECT 1 FROM alert_events WHERE title = 'Milk SCC Alert – Honey Exceeds Threshold' LIMIT 1);
+  AND NOT EXISTS (SELECT 1 FROM alert_events WHERE title = 'Milk SCC Alert - Honey Exceeds Threshold' LIMIT 1);
 
 -- ============================================================
 -- STEP 91: MORE REPORT TEMPLATES & GENERATED REPORTS
@@ -1992,7 +1992,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO generated_reports (id, enterprise_id, name, report_type, format, parameters, result_data, row_count, status, generated_by) VALUES
   ('2ca7d331-0000-0000-0000-000000000010','e0000000-0000-0000-0000-000000000001','February 2026 Milk Production Report','production','json','{"month":"2026-02","include_dry_cows":false}','{"summary":{"total_cows":42,"total_milk_L":44688,"avg_per_cow_L":1064,"avg_SCC":118000,"avg_butterfat":3.9,"avg_protein":3.3},"top_producers":[{"name":"Bessie","yield_L":1176},{"name":"Daisy","yield_L":1008}]}',42,'completed','f0000000-0000-0000-0000-000000000001'),
   ('2ca7d331-0000-0000-0000-000000000011','e0000000-0000-0000-0000-000000000001','Q1 2026 Financial Summary','financial','pdf','{"quarter":"Q1-2026","currency":"USD"}','{"income":{"milk_sales":55200,"cheese_sales":7680,"total":62880},"expenses":{"feed":-16400,"labor":-19200,"veterinary":-4200,"equipment":-1450,"total":-41250},"net_profit":21630}',24,'completed','f0000000-0000-0000-0000-000000000001'),
-  ('2ca7d331-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','Herd Vaccination Status – Jan 2026','health','csv','{"date":"2026-01-15"}','{"vaccinated_today":42,"overdue":0,"upcoming_30_days":0,"compliance_pct":100}',42,'completed','b0000000-0000-0000-0000-000000000001')
+  ('2ca7d331-0000-0000-0000-000000000012','e0000000-0000-0000-0000-000000000001','Herd Vaccination Status - Jan 2026','health','csv','{"date":"2026-01-15"}','{"vaccinated_today":42,"overdue":0,"upcoming_30_days":0,"compliance_pct":100}',42,'completed','b0000000-0000-0000-0000-000000000001')
 ON CONFLICT (id) DO NOTHING;
 
 -- (end of seed data)
@@ -2893,37 +2893,37 @@ INSERT INTO vaccine_protocols (
 
 -- ── INDIA LIVESTOCK ──────────────────────────────────────────────
 
--- FMD (Foot and Mouth Disease) — cattle/buffalo/sheep/goat — mandatory biannual
+-- FMD (Foot and Mouth Disease) - cattle/buffalo/sheep/goat - mandatory biannual
 ('a9000000-0000-0000-0000-000000000001',
  'FMD Vaccine (O+A+Asia1)', 'Foot and Mouth Disease (FMD)',
  ARRAY['cattle','buffalo','sheep','goat','pig'], 'all', 12, NULL,
  'mandatory_govt', false, 12, 182, 1, 0,
  'intramuscular', '2 ml', 'Neck muscle',
  'DAHD (India)', 'DAHD Policy 2019, Animal Husbandry Commissioner Circular',
- 'May–June and November–December', 'IN',
+ 'May-June and November-December', 'IN',
  'Mandatory biannual vaccination drive under GoI FMD-CP. Trivalent O+A+Asia1 strains. Cold chain required.'),
 
--- Black Quarter (BQ / Blackleg) — cattle/buffalo — annual pre-monsoon
+-- Black Quarter (BQ / Blackleg) - cattle/buffalo - annual pre-monsoon
 ('a9000000-0000-0000-0000-000000000002',
  'BQ Vaccine (Black Quarter)', 'Black Quarter (Blackleg)',
  ARRAY['cattle','buffalo'], 'all', 6, NULL,
  'mandatory_govt', false, 6, 365, 1, 0,
  'subcutaneous', '2 ml', 'Shoulder',
  'DAHD (India)', 'DAHD Annual Vaccination Schedule',
- 'Pre-monsoon (April–May)', 'IN',
- 'Annual pre-monsoon vaccination. Particularly important for calves 6 months–3 years. Combined HS+BQ vaccines available.'),
+ 'Pre-monsoon (April-May)', 'IN',
+ 'Annual pre-monsoon vaccination. Particularly important for calves 6 months-3 years. Combined HS+BQ vaccines available.'),
 
--- Haemorrhagic Septicaemia (HS) — cattle/buffalo — annual pre-monsoon
+-- Haemorrhagic Septicaemia (HS) - cattle/buffalo - annual pre-monsoon
 ('a9000000-0000-0000-0000-000000000003',
  'HS Vaccine (Haemorrhagic Septicaemia)', 'Haemorrhagic Septicaemia (HS)',
  ARRAY['cattle','buffalo'], 'all', 6, NULL,
  'mandatory_govt', false, 6, 365, 1, 0,
  'subcutaneous', '2 ml', 'Shoulder',
  'DAHD (India)', 'DAHD Annual Vaccination Schedule',
- 'Pre-monsoon (April–May)', 'IN',
+ 'Pre-monsoon (April-May)', 'IN',
  'Annual pre-monsoon. High endemicity in India. Pasteurella multocida types B:2 and E:2. Often combined with BQ.'),
 
--- PPR (Peste des Petits Ruminants) — sheep/goat — once every 3 years
+-- PPR (Peste des Petits Ruminants) - sheep/goat - once every 3 years
 ('a9000000-0000-0000-0000-000000000004',
  'PPR Vaccine', 'Peste des Petits Ruminants (PPR)',
  ARRAY['sheep','goat'], 'all', 4, NULL,
@@ -2933,7 +2933,7 @@ INSERT INTO vaccine_protocols (
  'Any season', 'IN',
  'Single dose provides immunity for 3 years. National eradication programme target: 2030. OIE-listed disease.'),
 
--- Brucellosis S19 — heifers only (female cattle 4–8 months)
+-- Brucellosis S19 - heifers only (female cattle 4-8 months)
 ('a9000000-0000-0000-0000-000000000005',
  'Brucellosis S19 (Conjunctival)', 'Brucellosis (Contagious Abortion)',
  ARRAY['cattle'], 'female', 16, 32,
@@ -2941,19 +2941,19 @@ INSERT INTO vaccine_protocols (
  'intranasal', '2 ml', 'Conjunctival sac',
  'DAHD (India)', 'DAHD Brucellosis Control Programme',
  'Any season', 'IN',
- 'One-time vaccination for female calves 4–8 months only. Zoonotic — precautions required. Do NOT vaccinate pregnant animals.'),
+ 'One-time vaccination for female calves 4-8 months only. Zoonotic - precautions required. Do NOT vaccinate pregnant animals.'),
 
--- Anthrax — endemic areas, various species
+-- Anthrax - endemic areas, various species
 ('a9000000-0000-0000-0000-000000000006',
  'Anthrax Spore Vaccine', 'Anthrax',
  ARRAY['cattle','buffalo','sheep','goat','horse'], 'all', 8, NULL,
  'mandatory_govt', true, 8, 365, 1, 0,
  'subcutaneous', '1 ml', 'Shoulder or neck',
  'DAHD (India)', 'DAHD Regional Outbreak Protocol',
- 'Pre-monsoon (April–May)', 'IN',
- 'Annual vaccination in endemically affected districts. Sterne strain spore vaccine. Zoonotic — high risk.'),
+ 'Pre-monsoon (April-May)', 'IN',
+ 'Annual vaccination in endemically affected districts. Sterne strain spore vaccine. Zoonotic - high risk.'),
 
--- Rabies — all species, zoonotic, legally mandated
+-- Rabies - all species, zoonotic, legally mandated
 ('a9000000-0000-0000-0000-000000000007',
  'Rabies Vaccine (Annual)', 'Rabies',
  ARRAY['dog','cat','cattle','buffalo','sheep','goat','horse','rabbit'], 'all', 12, NULL,
@@ -2961,21 +2961,21 @@ INSERT INTO vaccine_protocols (
  'intramuscular', '1 ml', 'Neck muscle',
  'DAHD / AHL (India)', 'Prevention of Cruelty to Animals Act 1960, NHM Rabies Control',
  'Any season', 'IN',
- 'Annual booster mandatory for dogs and cats. Zoonotic — 100% fatal without prophylaxis. PrEP for high-risk exposure.'),
+ 'Annual booster mandatory for dogs and cats. Zoonotic - 100% fatal without prophylaxis. PrEP for high-risk exposure.'),
 
--- Etec/Rota Calf Scours — dairy calves
+-- Etec/Rota Calf Scours - dairy calves
 ('a9000000-0000-0000-0000-000000000008',
  'Calf Scours Vaccine (Rotavirus/Coronavirus/E.coli)', 'Calf Scours (Neonatal Diarrhea)',
  ARRAY['cattle','buffalo'], 'female', 28, NULL,
  'non_core', false, 28, 365, 1, 0,
  'intramuscular', '2 ml', 'Neck muscle',
  'Manufacturer / IVRI', 'IVRI Recommendations',
- 'Any season — vaccinate dry cows 3–6 weeks before calving', 'IN',
+ 'Any season - vaccinate dry cows 3-6 weeks before calving', 'IN',
  'Vaccinate dry cows. Colostral antibodies protect newborn calves. Recommended for intensive dairy farms.'),
 
 -- ── COMPANION ANIMALS ────────────────────────────────────────────
 
--- DA2PP (Core dogs) — distemper, adenovirus type 2, parvovirus, parainfluenza
+-- DA2PP (Core dogs) - distemper, adenovirus type 2, parvovirus, parainfluenza
 ('a9000000-0000-0000-0000-000000000009',
  'DA2PP (Core Dog Vaccine)', 'Canine Distemper / Parvovirus / Adenovirus-2 / Parainfluenza',
  ARRAY['dog'], 'all', 6, NULL,
@@ -2983,9 +2983,9 @@ INSERT INTO vaccine_protocols (
  'subcutaneous', '1 ml', 'Scruff of neck',
  'WSAVA', 'WSAVA Vaccination Guidelines 2022',
  'Any season', 'ALL',
- 'Puppy series: doses at 6–8wk, 10–12wk, 14–16wk, 18–20wk. First adult booster at 1 year, then every 3 years (triennial). Killed or MLV.'),
+ 'Puppy series: doses at 6-8wk, 10-12wk, 14-16wk, 18-20wk. First adult booster at 1 year, then every 3 years (triennial). Killed or MLV.'),
 
--- FVRCP (Core cats) — feline viral rhinotracheitis, calicivirus, panleukopenia
+-- FVRCP (Core cats) - feline viral rhinotracheitis, calicivirus, panleukopenia
 ('a9000000-0000-0000-0000-000000000010',
  'FVRCP (Core Cat Vaccine)', 'Feline Viral Rhinotracheitis / Calicivirus / Panleukopenia',
  ARRAY['cat'], 'all', 6, NULL,
@@ -2993,29 +2993,29 @@ INSERT INTO vaccine_protocols (
  'subcutaneous', '1 ml', 'Scruff of neck',
  'WSAVA', 'WSAVA Vaccination Guidelines 2022',
  'Any season', 'ALL',
- 'Kitten series: doses at 6–8wk, 10–12wk, 14–16wk. Adult booster at 1 year, then triennial. Panleukopenia immunity may last 7+ years.'),
+ 'Kitten series: doses at 6-8wk, 10-12wk, 14-16wk. Adult booster at 1 year, then triennial. Panleukopenia immunity may last 7+ years.'),
 
--- Bordetella (dogs) — kennel cough, non-core but recommended for social dogs
+-- Bordetella (dogs) - kennel cough, non-core but recommended for social dogs
 ('a9000000-0000-0000-0000-000000000011',
  'Bordetella (Kennel Cough)', 'Canine Infectious Respiratory Disease (Bordetella bronchiseptica)',
  ARRAY['dog'], 'all', 8, NULL,
  'non_core', false, 8, 365, 1, 0,
  'intranasal', '1 ml', 'Nasal instillation',
  'WSAVA', 'WSAVA Non-Core Vaccination Recommendations 2022',
- 'Any season — ideally 1–2 weeks before boarding/kennels', 'ALL',
+ 'Any season - ideally 1-2 weeks before boarding/kennels', 'ALL',
  'Annual. Recommended for dogs attending kennels, dog shows, doggy daycare. Intranasal preferred over injectable.'),
 
--- Leptospirosis (dogs) — non-core but recommended in India
+-- Leptospirosis (dogs) - non-core but recommended in India
 ('a9000000-0000-0000-0000-000000000012',
  'Leptospirosis (Lepto4)', 'Leptospirosis',
  ARRAY['dog'], 'all', 8, NULL,
  'non_core', true, 8, 365, 2, 21,
  'subcutaneous', '1 ml', 'Scruff of neck',
  'WSAVA', 'WSAVA Non-Core + DAHD Zoonotic Risk Assessment India',
- 'Any season — pre-monsoon ideal', 'ALL',
+ 'Any season - pre-monsoon ideal', 'ALL',
  'Annual. Zoonotic. High risk in India monsoon flooding areas. 2-dose primary series 3 weeks apart.'),
 
--- Feline Leukemia (FeLV) — non-core cats
+-- Feline Leukemia (FeLV) - non-core cats
 ('a9000000-0000-0000-0000-000000000013',
  'FeLV (Feline Leukemia Virus)', 'Feline Leukemia',
  ARRAY['cat'], 'all', 8, NULL,
@@ -3027,7 +3027,7 @@ INSERT INTO vaccine_protocols (
 
 -- ── EQUINE ───────────────────────────────────────────────────────
 
--- Equine Tetanus — annual
+-- Equine Tetanus - annual
 ('a9000000-0000-0000-0000-000000000014',
  'Equine Tetanus Toxoid', 'Tetanus (Clostridium tetani)',
  ARRAY['horse'], 'all', 12, NULL,
@@ -3037,17 +3037,17 @@ INSERT INTO vaccine_protocols (
  'Any season', 'ALL',
  'Annual core vaccination for all horses. Primary series: 2 doses 4 weeks apart. Foals: start at 3 months.'),
 
--- EHV-1/4 (Equine Herpesvirus) — biannual
+-- EHV-1/4 (Equine Herpesvirus) - biannual
 ('a9000000-0000-0000-0000-000000000015',
  'EHV-1/4 (Equine Herpesvirus)', 'Equine Herpesvirus Rhinopneumonitis',
  ARRAY['horse'], 'all', 12, NULL,
  'core', false, 12, 182, 1, 0,
  'intramuscular', '1 ml', 'Neck muscle',
  'BEVA / AAEP', 'BEVA Vaccination Guidelines 2023',
- 'Any season — booster every 6 months', 'ALL',
+ 'Any season - booster every 6 months', 'ALL',
  'Biannual. Particularly important for pregnant mares (booster at 5, 7, and 9 months gestation).'),
 
--- Equine Influenza — biannual
+-- Equine Influenza - biannual
 ('a9000000-0000-0000-0000-000000000016',
  'Equine Influenza', 'Equine Influenza',
  ARRAY['horse'], 'all', 24, NULL,
@@ -3055,11 +3055,11 @@ INSERT INTO vaccine_protocols (
  'intramuscular', '1 ml', 'Neck muscle',
  'BEVA / OIE', 'OIE Terrestrial Animal Health Code, BEVA Guidelines 2023',
  'Any season', 'ALL',
- 'Biannual. Primary series: 2 doses 3–6 weeks apart. Required for most competition events.'),
+ 'Biannual. Primary series: 2 doses 3-6 weeks apart. Required for most competition events.'),
 
 -- ── DOGS ─────────────────────────────────────────────────────
 
--- Rabies — dog — annual/triennial (required by law in most countries)
+-- Rabies - dog - annual/triennial (required by law in most countries)
 ('a9000000-0000-0000-0000-000000000020',
  'Rabies (Canine)', 'Rabies',
  ARRAY['dog'], 'all', 12, NULL,
@@ -3069,7 +3069,7 @@ INSERT INTO vaccine_protocols (
  'Any season', 'ALL',
  'Core vaccine. Legally mandatory in most countries. First dose at 12 weeks, booster at 1 year, then annually or every 3 years depending on vaccine label and local law.'),
 
--- DHPP (Distemper-Hepatitis-Parvovirus-Parainfluenza) — core puppy series
+-- DHPP (Distemper-Hepatitis-Parvovirus-Parainfluenza) - core puppy series
 ('a9000000-0000-0000-0000-000000000021',
  'DHPP (Distemper, Hepatitis, Parvo, Para-Influenza)', 'Canine Distemper / Hepatitis / Parvovirus / Parainfluenza',
  ARRAY['dog'], 'all', 6, NULL,
@@ -3079,27 +3079,27 @@ INSERT INTO vaccine_protocols (
  'Any season', 'ALL',
  'Core. Puppy series: 6, 9, 12 weeks then booster at 1 year, then every 3 years. Do not skip - parvovirus is highly fatal in unvaccinated puppies.'),
 
--- Bordetella (Kennel Cough) — annual
+-- Bordetella (Kennel Cough) - annual
 ('a9000000-0000-0000-0000-000000000022',
  'Bordetella bronchiseptica (Kennel Cough)', 'Infectious Tracheobronchitis',
  ARRAY['dog'], 'all', 8, NULL,
  'non_core', false, 8, 365, 1, 0,
  'intranasal', '1 ml', 'Intranasal',
  'WSAVA / AAHA', 'WSAVA Vaccination Guidelines 2022',
- 'Any season — required before boarding/kenneling', 'ALL',
+ 'Any season - required before boarding/kenneling', 'ALL',
  'Non-core but recommended for all social dogs. Intranasal preferred. Required by most boarding facilities and dog parks.'),
 
--- Leptospirosis — annual
+-- Leptospirosis - annual
 ('a9000000-0000-0000-0000-000000000023',
  'Leptospirosis (L4)', 'Leptospirosis',
  ARRAY['dog'], 'all', 8, NULL,
  'non_core', true, 8, 365, 2, 21,
  'subcutaneous', '1 ml', 'Left shoulder',
  'WSAVA / AAHA', 'WSAVA Vaccination Guidelines 2022',
- 'Any season — higher risk in monsoon/wet season', 'ALL',
+ 'Any season - higher risk in monsoon/wet season', 'ALL',
  'Zoonotic. Non-core but strongly recommended in endemic areas. Annual boosters required for maintained immunity. L4 covers 4 serovars.'),
 
--- Canine Influenza (H3N2/H3N8) — biannual
+-- Canine Influenza (H3N2/H3N8) - biannual
 ('a9000000-0000-0000-0000-000000000024',
  'Canine Influenza (H3N2/H3N8)', 'Canine Influenza',
  ARRAY['dog'], 'all', 6, NULL,
@@ -3111,7 +3111,7 @@ INSERT INTO vaccine_protocols (
 
 -- ── CATS ─────────────────────────────────────────────────────
 
--- Rabies (Feline) — annual
+-- Rabies (Feline) - annual
 ('a9000000-0000-0000-0000-000000000025',
  'Rabies (Feline)', 'Rabies',
  ARRAY['cat'], 'all', 12, NULL,
@@ -3121,7 +3121,7 @@ INSERT INTO vaccine_protocols (
  'Any season', 'ALL',
  'Core. Legally mandatory in most jurisdictions. Annual or 3-year vaccine depending on product label.'),
 
--- FVRCP (Feline Distemper+Calici+Herpes) — triennial
+-- FVRCP (Feline Distemper+Calici+Herpes) - triennial
 ('a9000000-0000-0000-0000-000000000026',
  'FVRCP (Feline Panleukopenia, Herpesvirus, Calicivirus)', 'Feline Panleukopenia / Herpesvirus / Calicivirus',
  ARRAY['cat'], 'all', 6, NULL,
@@ -3131,7 +3131,7 @@ INSERT INTO vaccine_protocols (
  'Any season', 'ALL',
  'Core. Kitten series at 6, 9, 12 weeks. Booster at 1 year then every 3 years. Highly effective. Panleukopenia (feline parvo) is often fatal without vaccination.'),
 
--- FeLV (Feline Leukemia) — annual
+-- FeLV (Feline Leukemia) - annual
 ('a9000000-0000-0000-0000-000000000027',
  'FeLV (Feline Leukemia Virus)', 'Feline Leukemia',
  ARRAY['cat'], 'all', 8, NULL,
@@ -3156,7 +3156,7 @@ INSERT INTO vaccine_protocol_changes (
 ('b9c00000-0000-0000-0000-000000000001',
  'a9000000-0000-0000-0000-000000000001',
  'booster_interval_days', '365', '182',
- 'GoI FMD-CP revised schedule — biannual vaccination proven more effective in high-endemic zones',
+ 'GoI FMD-CP revised schedule - biannual vaccination proven more effective in high-endemic zones',
  'DAHD Policy Notification 2019', '2019-04-01'),
 
 -- PPR change from biannual to triennial following DAHD efficacy data
@@ -3170,7 +3170,7 @@ INSERT INTO vaccine_protocol_changes (
 ('b9c00000-0000-0000-0000-000000000003',
  'a9000000-0000-0000-0000-000000000009',
  'booster_interval_days', '365', '1095',
- 'WSAVA 2022 guideline update — adult dog triennial CDV/CPV-2 revaccination after 1-year booster',
+ 'WSAVA 2022 guideline update - adult dog triennial CDV/CPV-2 revaccination after 1-year booster',
  'WSAVA Vaccination Guidelines 2022', '2022-03-01')
 
 ON CONFLICT (id) DO NOTHING;
@@ -3335,7 +3335,7 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 
 -- ═══════════════════════════════════════════════════════════
--- NETWORK 1: DemoVetGroup (APPROVED) — owned by netadmin@vetcare.com
+-- NETWORK 1: DemoVetGroup (APPROVED) - owned by netadmin@vetcare.com
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO hospital_networks (id, name, legal_name, registration_number, network_type, country, headquarters_address, headquarters_city, headquarters_state, contact_email, contact_phone, website, is_active, is_approved, approved_by, approved_at, id_prefix, created_by, metadata)
 VALUES (
@@ -3364,7 +3364,7 @@ VALUES (
   headquarters_address = EXCLUDED.headquarters_address, website = EXCLUDED.website, metadata = EXCLUDED.metadata;
 
 -- ═══════════════════════════════════════════════════════════
--- NETWORK 2: PawsCare Network (PENDING APPROVAL) — for admin to see in dashboard
+-- NETWORK 2: PawsCare Network (PENDING APPROVAL) - for admin to see in dashboard
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO hospital_networks (id, name, legal_name, registration_number, network_type, country, headquarters_city, headquarters_state, contact_email, contact_phone, is_active, is_approved, id_prefix, created_by, metadata)
 VALUES (
@@ -3401,7 +3401,7 @@ VALUES
 ON CONFLICT (network_id, hospital_id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- NETWORK MEMBERS — full role hierarchy
+-- NETWORK MEMBERS - full role hierarchy
 -- ═══════════════════════════════════════════════════════════
 
 -- Corporate Admin (network owner)
@@ -3416,7 +3416,7 @@ VALUES (
   'd0000000-0000-0000-0000-000000000001'
 ) ON CONFLICT (network_id, user_id) DO NOTHING;
 
--- Hospital Director (Priya Nair — manages branch hospital 1)
+-- Hospital Director (Priya Nair - manages branch hospital 1)
 INSERT INTO hospital_network_members (id, network_id, user_id, network_role, hospital_id, is_active, granted_at, granted_by)
 VALUES (
   'd6a3947f-0000-0000-0000-000000000002',
@@ -3442,7 +3442,7 @@ VALUES (
   'd0000000-0000-0000-0000-000000000001'
 ) ON CONFLICT (network_id, user_id) DO NOTHING;
 
--- Nurse (Anitha Kumar) — hospital_staff at branch 1
+-- Nurse (Anitha Kumar) - hospital_staff at branch 1
 INSERT INTO hospital_network_members (id, network_id, user_id, network_role, hospital_id, is_active, granted_at, granted_by)
 VALUES (
   'd6a3947f-0000-0000-0000-000000000004',
@@ -3455,7 +3455,7 @@ VALUES (
   'd0000000-0000-0000-0000-000000000001'
 ) ON CONFLICT (network_id, user_id) DO NOTHING;
 
--- Receptionist (Karthik Rajan) — hospital_staff at branch 1
+-- Receptionist (Karthik Rajan) - hospital_staff at branch 1
 INSERT INTO hospital_network_members (id, network_id, user_id, network_role, hospital_id, is_active, granted_at, granted_by)
 VALUES (
   'd6a3947f-0000-0000-0000-000000000005',
@@ -3468,7 +3468,7 @@ VALUES (
   'd0000000-0000-0000-0000-000000000001'
 ) ON CONFLICT (network_id, user_id) DO NOTHING;
 
--- Lab Tech (Meena Sundaram) — hospital_staff at branch 2
+-- Lab Tech (Meena Sundaram) - hospital_staff at branch 2
 INSERT INTO hospital_network_members (id, network_id, user_id, network_role, hospital_id, is_active, granted_at, granted_by)
 VALUES (
   'd6a3947f-0000-0000-0000-000000000006',
@@ -3482,7 +3482,7 @@ VALUES (
 ) ON CONFLICT (network_id, user_id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- STAFF POSITIONS — clinical roles at branches
+-- STAFF POSITIONS - clinical roles at branches
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO staff_positions (id, hospital_id, user_id, position, department, is_active, hired_date)
 VALUES
@@ -3505,11 +3505,11 @@ VALUES
 ON CONFLICT (network_id, feature_key) DO UPDATE SET is_enabled = EXCLUDED.is_enabled;
 
 -- ═══════════════════════════════════════════════════════════
--- PATIENT ENROLLMENT — demo animals enrolled in network
+-- PATIENT ENROLLMENT - demo animals enrolled in network
 -- ═══════════════════════════════════════════════════════════
--- animal_id values below are real `animals` rows (Buddy/Whiskers/Max — see STEP: ANIMALS).
+-- animal_id values below are real `animals` rows (Buddy/Whiskers/Max - see STEP: ANIMALS).
 -- Previously these referenced 'e0000000-...' ids, which only exist in the `enterprises`
--- table — the FK violation silently failed this whole INSERT (0 rows), so network
+-- table - the FK violation silently failed this whole INSERT (0 rows), so network
 -- patient enrollment never actually worked in the demo environment.
 INSERT INTO animal_care_contexts (id, animal_id, network_id, hospital_id, platform_unique_id, corporate_patient_id, visibility, enrolled_by, enrollment_status)
 VALUES
@@ -3529,7 +3529,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- CLINICAL DATA ACCESS LOG — sample audit trail entries
+-- CLINICAL DATA ACCESS LOG - sample audit trail entries
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO clinical_data_access_log (id, accessed_by, accessor_role, accessor_network_id, animal_id, record_type, access_type, consent_id, access_granted, denial_reason)
 VALUES
@@ -3541,7 +3541,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- INTER-HOSPITAL REFERRAL — sample referral between branch vets
+-- INTER-HOSPITAL REFERRAL - sample referral between branch vets
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO referrals (id, hospital_id, from_vet_id, to_vet_id, animal_id, reason, specialty_needed, priority, status, clinical_notes)
 VALUES (
@@ -3550,7 +3550,7 @@ VALUES (
   'd0000000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000002',
   'aa000000-0000-0000-0000-000000000001',
-  'Advanced diagnostic imaging required — suspected cruciate ligament tear',
+  'Advanced diagnostic imaging required - suspected cruciate ligament tear',
   'Orthopedic Surgery',
   'high',
   'accepted',
@@ -3558,7 +3558,7 @@ VALUES (
 ) ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- NETWORK REFERRALS — between branches within DemoVetGroup
+-- NETWORK REFERRALS - between branches within DemoVetGroup
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO network_referrals (id, network_id, from_hospital_id, to_hospital_id, from_vet_id, animal_id, reason, priority, status, clinical_notes, referral_type, created_by)
 VALUES
@@ -3568,7 +3568,7 @@ VALUES
    '2265ccba-0000-0000-0000-000000000002',
    'd0000000-0000-0000-0000-000000000002',
    'aa000000-0000-0000-0000-000000000001',
-   'Specialist ophthalmology consultation needed — bilateral cataracts suspected',
+   'Specialist ophthalmology consultation needed - bilateral cataracts suspected',
    'high', 'accepted',
    'Bilateral lens opacity noted on slit lamp exam. Intraocular pressure 18 mmHg bilateral. ERG recommended at Coimbatore branch.',
    'referral', 'd0000000-0000-0000-0000-000000000002'),
@@ -3578,7 +3578,7 @@ VALUES
    '2265ccba-0000-0000-0000-000000000001',
    'd0000000-0000-0000-0000-000000000002',
    'aa000000-0000-0000-0000-000000000002',
-   'Advanced dental procedure — root canal needed',
+   'Advanced dental procedure - root canal needed',
    'normal', 'pending',
    'Grade 4 periodontal disease, tooth #108 requires root canal or extraction. Refer to Chennai branch dental suite.',
    'referral', 'd0000000-0000-0000-0000-000000000002'),
@@ -3588,14 +3588,14 @@ VALUES
    '2265ccba-0000-0000-0000-000000000002',
    'd0000000-0000-0000-0000-000000000002',
    'aa000000-0000-0000-0000-000000000003',
-   'Patient transfer — owner relocating to Coimbatore',
+   'Patient transfer - owner relocating to Coimbatore',
    'normal', 'completed',
    'Owner moving permanently. Full records transferred. Last exam unremarkable.',
    'transfer', 'd0000000-0000-0000-0000-000000000001')
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- STAFF LEAVE REQUESTS — demo leave records
+-- STAFF LEAVE REQUESTS - demo leave records
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO staff_leave_requests (id, network_id, hospital_id, user_id, leave_type, start_date, end_date, reason, status, approved_by, approved_at)
 VALUES
@@ -3604,21 +3604,21 @@ VALUES
    '2265ccba-0000-0000-0000-000000000001',
    'd0000000-0000-0000-0000-000000000003',
    'annual', CURRENT_DATE + INTERVAL '7 days', CURRENT_DATE + INTERVAL '14 days',
-   'Annual family vacation — Ooty trip', 'approved',
+   'Annual family vacation - Ooty trip', 'approved',
    'd0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '2 days'),
   ('86d4007c-0000-0000-0000-000000000002',
    'dbf6f0de-0000-0000-0000-000000000001',
    '2265ccba-0000-0000-0000-000000000001',
    'd0000000-0000-0000-0000-000000000004',
    'sick', CURRENT_DATE - INTERVAL '3 days', CURRENT_DATE - INTERVAL '1 day',
-   'Flu — doctor advised 3 days rest', 'approved',
+   'Flu - doctor advised 3 days rest', 'approved',
    'd0000000-0000-0000-0000-000000000002', NOW() - INTERVAL '3 days'),
   ('86d4007c-0000-0000-0000-000000000003',
    'dbf6f0de-0000-0000-0000-000000000001',
    '2265ccba-0000-0000-0000-000000000002',
    'd0000000-0000-0000-0000-000000000005',
    'training', CURRENT_DATE + INTERVAL '21 days', CURRENT_DATE + INTERVAL '23 days',
-   'Advanced lab diagnostics certification course — TANUVAS', 'pending',
+   'Advanced lab diagnostics certification course - TANUVAS', 'pending',
    NULL, NULL),
   ('86d4007c-0000-0000-0000-000000000004',
    'dbf6f0de-0000-0000-0000-000000000001',
@@ -3630,7 +3630,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- QUEUE ENTRIES — today's patient queue for demo branches
+-- QUEUE ENTRIES - today's patient queue for demo branches
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO appointment_queue (id, hospital_id, animal_id, owner_id, status, priority, reason, triage_notes)
 VALUES
@@ -3650,12 +3650,12 @@ VALUES
    '2265ccba-0000-0000-0000-000000000002',
    'aa000000-0000-0000-0000-000000000003',
    'c0000000-0000-0000-0000-000000000002',
-   'waiting', 'normal', 'Post-surgery follow-up — spay',
+   'waiting', 'normal', 'Post-surgery follow-up - spay',
    'Day 10 post-op. Incision check and suture removal.')
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- INPATIENT ADMISSIONS — demo inpatient records
+-- INPATIENT ADMISSIONS - demo inpatient records
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO inpatient_admissions (id, hospital_id, animal_id, owner_id, admitted_by, admission_type, room_number, bed_number, status, care_instructions, special_needs)
 VALUES
@@ -3667,7 +3667,7 @@ VALUES
    'overnight_observation', 'R-101', 'B-1',
    'admitted',
    'IV fluid therapy (LRS 10ml/kg/hr), maropitant 1mg/kg SQ q24h, NPO 12h then bland diet',
-   'Acute gastroenteritis — suspected dietary indiscretion'),
+   'Acute gastroenteritis - suspected dietary indiscretion'),
   ('bcffa463-0000-0000-0000-000000000002',
    '2265ccba-0000-0000-0000-000000000002',
    'aa000000-0000-0000-0000-000000000003',
@@ -3676,11 +3676,11 @@ VALUES
    'surgery_recovery', 'R-201', 'B-1',
    'recovering',
    'Pain management: meloxicam 0.1mg/kg PO q24h x 5d. Activity restriction 14d. E-collar.',
-   'Post ovariohysterectomy — routine spay')
+   'Post ovariohysterectomy - routine spay')
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- PHARMACY MODULE — demo pharmacies, suppliers, medications
+-- PHARMACY MODULE - demo pharmacies, suppliers, medications
 -- ═══════════════════════════════════════════════════════════
 
 -- Demo Pharmacy (primary for DemoVetGroup network)
@@ -3796,7 +3796,7 @@ VALUES (
   'PHM-001'
 ) ON CONFLICT DO NOTHING;
 
--- Link demo pharmacist to demo network (network_role stays 'hospital_staff' — the
+-- Link demo pharmacist to demo network (network_role stays 'hospital_staff' - the
 -- network_role_check CHECK constraint only allows 5 fixed values; the pharmacist
 -- identity itself lives on users.role and staff_positions, not network_role)
 INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by)
@@ -3814,7 +3814,7 @@ VALUES ('2265ccba-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-0000000
 ON CONFLICT DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- NETWORK-ROUTED PRESCRIPTIONS — so the demo pharmacist's queue
+-- NETWORK-ROUTED PRESCRIPTIONS - so the demo pharmacist's queue
 -- (review / ready-to-dispense / history) is not empty on first login.
 -- Max (aa...004) is enrolled in the demo network (see animal_care_contexts above).
 -- ═══════════════════════════════════════════════════════════
@@ -3833,7 +3833,7 @@ VALUES
 
   ('ee000000-0000-0000-0000-000000000006', 'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', 'aa000000-0000-0000-0000-000000000004',
    '[{"name":"Meloxicam","dosage":"1.5mg","frequency":"Once daily","duration":"10 days","instructions":"Give with food"}]',
-   'Meloxicam — post-op pain management.', CURRENT_DATE + INTERVAL '30 days', true,
+   'Meloxicam - post-op pain management.', CURRENT_DATE + INTERVAL '30 days', true,
    'dbf6f0de-0000-0000-0000-000000000001', true, 'e8200b44-0000-0000-0000-000000000001', 'dispensed')
 ON CONFLICT (id) DO NOTHING;
 

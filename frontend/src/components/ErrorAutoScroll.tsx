@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 /**
  * Global component that auto-scrolls to error alerts when they appear anywhere in the DOM.
- * Renders nothing — just observes DOM mutations.
+ * Renders nothing - just observes DOM mutations.
  * Add once inside AppLayout to cover all pages.
  */
 const ErrorAutoScroll: React.FC = () => {

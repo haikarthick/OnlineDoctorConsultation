@@ -9,10 +9,10 @@ import {
 /**
  * Razorpay adapter (docs/PAYMENT_MODULE_PLAN.md P2).
  *
- * - Amounts cross this boundary in RUPEES; Razorpay's API works in PAISE —
+ * - Amounts cross this boundary in RUPEES; Razorpay's API works in PAISE -
  *   conversion happens ONLY here.
  * - Credentials come from payment_gateway_credentials (AES-256-GCM
- *   encrypted at rest, decrypted by PaymentCredentialsService) — the admin
+ *   encrypted at rest, decrypted by PaymentCredentialsService) - the admin
  *   UI never returns the plaintext secret via any GET response (§12 rule 6
  *   still holds: secrets are never readable in plaintext from an API call).
  * - Signature checks use timing-safe comparison.
@@ -91,7 +91,7 @@ export class RazorpayGateway implements PaymentGateway {
 
   verifyWebhookSignature(rawBody: string, signature: string): boolean {
     if (!this.webhookSecret) {
-      logger.error('RAZORPAY_WEBHOOK_SECRET not set — rejecting webhook');
+      logger.error('RAZORPAY_WEBHOOK_SECRET not set - rejecting webhook');
       return false;
     }
     const expected = crypto.createHmac('sha256', this.webhookSecret).update(rawBody).digest('hex');

@@ -5,7 +5,7 @@ import { NotFoundError, ValidationError, ForbiddenError } from '../../utils/erro
 /**
  * Grooming provider onboarding + management (P1).
  * Data isolation: every provider-scoped action goes through resolveProviderAccess()
- * (owner or active staff of THAT provider) — mirrors the network-hospital membership gate.
+ * (owner or active staff of THAT provider) - mirrors the network-hospital membership gate.
  * A network-branch entity can never be a grooming provider (platform ≠ network boundary).
  */
 
@@ -105,7 +105,7 @@ class GroomingProviderService {
       [result.rows[0].id, userId]
     );
     // Grant the groomer base role additively (union model) so the owner's grooming nav/permissions
-    // light up — works whether they were a fresh groomer, a vet, or a pet owner adding grooming.
+    // light up - works whether they were a fresh groomer, a vet, or a pet owner adding grooming.
     await database.query(
       `INSERT INTO user_roles (user_id, role, is_primary, granted_by) VALUES ($1, 'groomer', false, $1)
        ON CONFLICT (user_id, role) DO NOTHING`,
@@ -339,7 +339,7 @@ class GroomingProviderService {
     if (r.rows.length === 0) throw new NotFoundError('GroomingProvider', providerId);
 
     // A verified provider with no working hours is bookable on zero days, so it would look
-    // permanently closed to every customer until someone found the schedule screen — the most
+    // permanently closed to every customer until someone found the schedule screen - the most
     // likely way a real booking is silently lost. Seed a default week; it is a no-op if the
     // provider has already set their own. Non-blocking: verification must still succeed.
     try {

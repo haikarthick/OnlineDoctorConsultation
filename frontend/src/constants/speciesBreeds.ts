@@ -1,7 +1,7 @@
 // ─── Species & Breed master data (single source of truth) ───────────────────
 // India-focused breeds grouped by species. Used by the Animals module and the
 // Marketplace sell form so breed is always a picker, never free text
-// (master-data rule). Keep additions here — do not re-declare elsewhere.
+// (master-data rule). Keep additions here - do not re-declare elsewhere.
 
 export const BREED_DATABASE: Record<string, string[]> = {
   // ── Common Pets ──
@@ -83,16 +83,16 @@ export const SPECIES_CATEGORIES: Array<{ label: string; species: string[] }> = [
 // ─── Sex/reproductive class terms (single source of truth) ───────────────────
 // Species-correct terminology (Bull/Cow/Bullock, Ram/Ewe/Wether, etc.) instead
 // of generic Male/Female. Only covers species with verified source terminology
-// — everything else keeps the plain gender select. `impliedGender` drives the
+// - everything else keeps the plain gender select. `impliedGender` drives the
 // underlying gender field silently (never shown as its own control);
 // `canBePregnant`/`canProduceMilk` gate the pregnancy/lactation form fields.
-// Buffalo terms verified via web research (not assumed from Cattle) — no
+// Buffalo terms verified via web research (not assumed from Cattle) - no
 // attested Buffalo equivalent of Steer/Veal, so its castrated-male slot uses
 // a single "Buffalo Bullock" rather than forcing an unverified split.
 export interface AnimalClassTerm {
   value: string
   labelKey: string
-  /** Admin-typed plain-text label (master-data CRUD) — fallback when labelKey is empty. */
+  /** Admin-typed plain-text label (master-data CRUD) - fallback when labelKey is empty. */
   label?: string | null
   /** Admin-typed per-locale display overrides (migration 026). */
   labelHi?: string | null
@@ -191,7 +191,7 @@ export const EAR_TAG_SPECIES = ['Cattle', 'Buffalo', 'Sheep', 'Goat', 'Pig', 'Ho
 // ─── Marketplace species pickers ──────────────────────────────────────────
 // Curated subsets (not the full SPECIES_CATEGORIES list) for the Marketplace
 // sell form, keyed to canonical BREED_DATABASE names ('Cattle'/'Chicken', not
-// 'Cow'/'Poultry' — the previous local copies of these lists used the wrong
+// 'Cow'/'Poultry' - the previous local copies of these lists used the wrong
 // names, so breedsForSpecies() silently fell back to a generic ['Mixed
 // Breed', 'Other'] instead of the real curated breed list for anyone
 // listing a cattle or poultry animal).

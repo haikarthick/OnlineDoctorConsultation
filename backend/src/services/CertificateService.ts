@@ -79,7 +79,7 @@ class CertificateService {
        )
        RETURNING *`,
       [
-        `DRAFT-${Date.now()}`,  // Temporary placeholder — replaced on issue
+        `DRAFT-${Date.now()}`,  // Temporary placeholder - replaced on issue
         data.certificateType, vetId,
         data.petOwnerId || null, data.animalId || null,
         data.consultationId || null, data.bookingId || null, data.enterpriseId || null,

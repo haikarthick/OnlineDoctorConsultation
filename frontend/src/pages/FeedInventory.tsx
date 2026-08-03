@@ -278,8 +278,8 @@ const FeedInventory: React.FC = () => {
                           <td><span className={isLow ? 'text-danger' : 'text-success'}>{f.quantityInStock} {f.unit}</span></td>
                           <td>{f.minimumStockLevel} {f.unit}</td>
                           <td>${Number(f.costPerUnit).toFixed(2)}</td>
-                          <td>{f.expiryDate ? new Date(f.expiryDate).toLocaleDateString() : '–'}</td>
-                          <td>{f.storageLocation || '–'}</td>
+                          <td>{f.expiryDate ? new Date(f.expiryDate).toLocaleDateString() : '-'}</td>
+                          <td>{f.storageLocation || '-'}</td>
                           <td>{isLow ? <span className="badge badge-danger">{t('feedInventory.lowStock')}</span> : <span className="badge badge-success">{t('feedInventory.ok')}</span>}</td>
                           <td>
                             <button className="btn btn-sm" onClick={() => startEdit(f)}>{t('common.edit')}</button>

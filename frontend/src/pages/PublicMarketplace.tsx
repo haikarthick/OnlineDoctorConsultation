@@ -532,7 +532,7 @@ const PublicListingDetail: React.FC<{
           <div className="mp-detail-section mp-compliance-detail">
             <h3>⚖️ {t('marketplace.compliance.complianceTitle')}</h3>
             <div className="mp-detail-grid">
-              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.welfareStatus')}</span><span className="mp-detail-value">{welfareAtt ? '✅ ' + t('marketplace.compliance.attested') : '—'}</span></div>
+              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.welfareStatus')}</span><span className="mp-detail-value">{welfareAtt ? '✅ ' + t('marketplace.compliance.attested') : '-'}</span></div>
             </div>
             <div className="mp-compliance-info">{t('marketplace.compliance.detailDisclaimer')}</div>
           </div>
@@ -544,7 +544,7 @@ const PublicListingDetail: React.FC<{
           )}
         </div>
 
-        {/* Sidebar — Login Gate */}
+        {/* Sidebar - Login Gate */}
         <div className="mp-detail-sidebar">
           {listingType !== 'auction' ? (
             <div className="mp-buy-panel">

@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
   const isSupport = user?.role === 'support'
   const { enabled: groomingEnabled } = useGroomingEnabled()
 
-  // Pharmacist's home is the Pharmacy module — redirect immediately so they never see the generic dashboard
+  // Pharmacist's home is the Pharmacy module - redirect immediately so they never see the generic dashboard
   useEffect(() => {
     if (isPharmacist) {
       navigate('/pharmacy', { replace: true })
@@ -58,7 +58,7 @@ const Dashboard: React.FC = () => {
   }, [isPharmacist, navigate])
 
   // Same for a groomer-primary account: their home is the grooming business console, which doubles
-  // as the onboarding form for someone who just self-registered. Only when the module is live —
+  // as the onboarding form for someone who just self-registered. Only when the module is live -
   // otherwise every /grooming route 404s and the generic dashboard is the safer landing.
   // Users who hold 'groomer' as a SECONDARY role keep their own primary dashboard.
   useEffect(() => {
@@ -69,7 +69,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => { loadDashboardData() }, [])
 
-  // Vets who prescribe into a network pharmacy get a lightweight status tile — silent no-op for standalone vets
+  // Vets who prescribe into a network pharmacy get a lightweight status tile - silent no-op for standalone vets
   useEffect(() => {
     if (!isVeterinarian) return
     apiService.getVetPharmacyStats()
@@ -78,7 +78,7 @@ const Dashboard: React.FC = () => {
   }, [isVeterinarian])
 
   const loadDashboardData = async () => {
-    // Pharmacist is redirected to /pharmacy — skip all data loading
+    // Pharmacist is redirected to /pharmacy - skip all data loading
     if (isPharmacist) return
 
     // Corporate admin loads network stats instead of booking/consultation data
@@ -181,7 +181,7 @@ const Dashboard: React.FC = () => {
         const mode = b.bookingType === 'video_call' ? t('common.video') : t('common.inPerson')
         acts.push({
           type: t('common.booking'),
-          description: `${mode} ${t('common.with')} ${who} — ${b.reasonForVisit || t('common.consultation')}`,
+          description: `${mode} ${t('common.with')} ${who} - ${b.reasonForVisit || t('common.consultation')}`,
           time: b.scheduledDate ? formatDate(b.scheduledDate, { month: 'short', day: 'numeric' }) : '',
           status: b.status
         })
@@ -189,7 +189,7 @@ const Dashboard: React.FC = () => {
       consults.slice(0, 2).forEach((c: any) => {
         acts.push({
           type: t('common.consultation'),
-          description: `${c.animalType || t('common.animal')} — ${c.symptomDescription || t('common.generalConsultation')}`,
+          description: `${c.animalType || t('common.animal')} - ${c.symptomDescription || t('common.generalConsultation')}`,
           time: c.scheduledAt ? formatDate(c.scheduledAt, { month: 'short', day: 'numeric' }) : '',
           status: c.status
         })
@@ -218,7 +218,7 @@ const Dashboard: React.FC = () => {
    * ROLE-SPECIFIC CONFIGURATIONS
    * ════════════════════════════════════════════════════════ */
 
-  // Stat cards — different per role
+  // Stat cards - different per role
   const statCards = useMemo(() => {
     const base = [
       { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
@@ -270,10 +270,10 @@ const Dashboard: React.FC = () => {
       ]
     }
 
-    // Hospital staff: dedicated stat section renders separately below — no generic tiles
+    // Hospital staff: dedicated stat section renders separately below - no generic tiles
     if (isHospitalStaff) return []
 
-    // Pharmacist — redirected to /pharmacy, but guard against any fallthrough
+    // Pharmacist - redirected to /pharmacy, but guard against any fallthrough
     if (isPharmacist) {
       return [
         { label: t('pharmacy.stats.pendingReviews'), value: 0, icon: '📋', color: '#3949ab', path: '/pharmacy' },
@@ -283,7 +283,7 @@ const Dashboard: React.FC = () => {
     }
 
     // Platform support: the quick actions below are the navigation surface. No
-    // generic tiles rather than tiles of zeroes — support holds none of the
+    // generic tiles rather than tiles of zeroes - support holds none of the
     // permissions those counts describe.
     if (isSupport) return []
 
@@ -302,7 +302,7 @@ const Dashboard: React.FC = () => {
     return []
   }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, corpStats, vetPharmacyStats, t])
 
-  // Quick actions — role-specific
+  // Quick actions - role-specific
   const quickActions: QuickAction[] = useMemo(() => {
     if (isFarmer) {
       return [
@@ -361,7 +361,7 @@ const Dashboard: React.FC = () => {
       ]
     }
 
-    // Pharmacist — home is /pharmacy, redirect handles it but provide fallback actions
+    // Pharmacist - home is /pharmacy, redirect handles it but provide fallback actions
     if (isPharmacist) {
       return [
         { icon: '💊', label: t('pharmacy.tabs.overview'), path: '/pharmacy', color: '#3949ab', description: t('pharmacy.pendingReview') },
@@ -371,7 +371,7 @@ const Dashboard: React.FC = () => {
       ]
     }
 
-    // Platform support — exactly the pages its DEFAULT_ROLE_PERMISSIONS grant
+    // Platform support - exactly the pages its DEFAULT_ROLE_PERMISSIONS grant
     // (dispute_management, admin_cancellation_dashboard, settings). Anything
     // more would render a tile that RoleRoute bounces straight back here.
     if (isSupport) {
@@ -382,7 +382,7 @@ const Dashboard: React.FC = () => {
       ]
     }
 
-    // Admin — explicitly guarded, see the note on the stat cards above.
+    // Admin - explicitly guarded, see the note on the stat cards above.
     if (isAdmin) {
       return [
         { icon: '🛡️', label: t('dashboard.quickActions.adminPanel'), path: '/admin/dashboard', color: '#667eea', description: t('dashboard.quickActions.desc.systemOverview') },
@@ -444,7 +444,7 @@ const Dashboard: React.FC = () => {
                 <span>{stat.icon}</span>
               </div>
               <div className="stat-content">
-                <div className="stat-value">{loading ? '—' : stat.value}</div>
+                <div className="stat-value">{loading ? '-' : stat.value}</div>
                 <div className="stat-label">{stat.label}</div>
               </div>
             </div>
@@ -488,7 +488,7 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ── Pending Booking Approvals — vet/admin only ── */}
+      {/* ── Pending Booking Approvals - vet/admin only ── */}
       {hasPermission('dashboard_pending_approvals') && pendingBookings.length > 0 && (
         <div className="dashboard-alert-section">
           <div className="alert-card alert-warning">
@@ -505,7 +505,7 @@ const Dashboard: React.FC = () => {
                   const d = new Date(booking.scheduledDate + 'T' + (booking.timeSlotEnd || '23:59') + ':00')
                   return d < new Date()
                 })()
-                // Skip expired pending bookings — backend auto-transitions these to missed
+                // Skip expired pending bookings - backend auto-transitions these to missed
                 if (expired) return null
                 return (
                 <div key={booking.id} className="alert-item">

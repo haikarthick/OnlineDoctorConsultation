@@ -49,7 +49,7 @@ class DiseasePredictionService {
     );
   }
 
-  /** AI-style risk analysis dashboard — aggregated disease risk data */
+  /** AI-style risk analysis dashboard - aggregated disease risk data */
   async getRiskDashboard(enterpriseId: string): Promise<any> {
     const activePredictions = await database.query(
       `SELECT disease_name, AVG(risk_score) as avg_risk, MAX(risk_score) as max_risk, COUNT(*) as count

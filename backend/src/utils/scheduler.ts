@@ -79,7 +79,7 @@ export function startScheduler(): void {
   // Payment module: emergency confirm-window fast-track (every minute; cheap no-op query)
   setInterval(runEmergencyFastTrack, 60 * 1000);
 
-  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, pharmacy stock alerts every 24h, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min, grooming hold expiry every 5min');
+  logger.info('Scheduler started - expiry check every 24h, missed bookings every 15min, pharmacy stock alerts every 24h, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min, grooming hold expiry every 5min');
 }
 
 async function runExpiryCheck(): Promise<void> {
@@ -111,7 +111,7 @@ async function runPaymentHoldExpiry(): Promise<void> {
 }
 
 /**
- * Grooming's own hold expiry — separate job from the consultation one above on purpose: they
+ * Grooming's own hold expiry - separate job from the consultation one above on purpose: they
  * release different resources (grooming_orders vs bookings) under different settings, and one
  * module's schedule must never depend on the other's.
  */
@@ -126,7 +126,7 @@ async function runGroomingHoldExpiry(): Promise<void> {
 
 /**
  * Grooming acceptance gate: bookings the provider never accepted are auto-cancelled and the
- * customer refunded in full. Distinct from the hold expiry above — that one releases UNPAID
+ * customer refunded in full. Distinct from the hold expiry above - that one releases UNPAID
  * slots, this one returns money that was already collected.
  */
 async function runGroomingAcceptanceExpiry(): Promise<void> {
@@ -269,14 +269,14 @@ async function runPharmacyStockAlerts(): Promise<void> {
   }
 }
 
-/** Runs Monday 08:00 UTC — sends weekly digest to corporate_admin and hospital_director members */
+/** Runs Monday 08:00 UTC - sends weekly digest to corporate_admin and hospital_director members */
 async function scheduleWeeklyDigest(): Promise<void> {
   try {
     const now = new Date();
     // Day 1 = Monday in JS Date (0=Sunday)
     if (now.getUTCDay() !== 1 || now.getUTCHours() !== 8) return;
 
-    logger.info('[WeeklyDigest] Monday 08:00 UTC — sending network digests');
+    logger.info('[WeeklyDigest] Monday 08:00 UTC - sending network digests');
 
     const networksRes = await database.query(
       `SELECT id FROM hospital_networks WHERE is_active = true AND is_approved = true`

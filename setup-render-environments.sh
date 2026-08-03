@@ -65,7 +65,7 @@ declare -A SVC_NAME=( [dev]=vetcare-dev [prod]=vetcare-app )
 
 echo ""
 echo "══════════════════════════════════════════════════════════"
-echo "  VetCare — Free-Tier Render Setup (1 DB + 2 Services)"
+echo "  VetCare - Free-Tier Render Setup (1 DB + 2 Services)"
 echo "══════════════════════════════════════════════════════════"
 echo ""
 

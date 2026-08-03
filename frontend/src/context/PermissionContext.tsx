@@ -122,7 +122,7 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   // /grooming/provider is guarded by grooming_provider_apply, NOT grooming_provider_console.
   // The page is dual-purpose: it shows the "register your grooming business" onboarding form
   // when the caller has no provider, and the provider console when they do. Guarding it with
-  // the console permission created a catch-22 — only existing providers could reach the form
+  // the console permission created a catch-22 - only existing providers could reach the form
   // that makes you a provider. Every console holder also holds apply, and the console UI only
   // renders when the backend actually returns a provider for the caller.
   grooming_provider_apply: ['/grooming/provider'],
@@ -134,7 +134,7 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   // Working hours sit with booking management: whoever runs the diary sets when it is open.
   grooming_manage_bookings: ['/grooming/orders', '/grooming/schedule'],
   grooming_earnings_view: ['/grooming/earnings'],
-  // /grooming/order/:id is intentionally NOT mapped — shared by provider + customer, so it is
+  // /grooming/order/:id is intentionally NOT mapped - shared by provider + customer, so it is
   // auth-only at the route layer and access is enforced per-order by the backend.
 }
 

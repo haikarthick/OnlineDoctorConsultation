@@ -9,7 +9,7 @@ import NotificationService from '../NotificationService';
 /**
  * Grooming cancellation, refund and compensation engine.
  *
- * MODULE BOUNDARY — read before changing anything here.
+ * MODULE BOUNDARY - read before changing anything here.
  * This is grooming's own policy engine. It mirrors the SHAPE of the consultation engine
  * (PaymentOrchestrator.computeRefundPreview / refundForCancellation) so the platform behaves
  * consistently, but it shares no code, no settings keys and no ledger with it:
@@ -17,8 +17,8 @@ import NotificationService from '../NotificationService';
  *   - provider money moves on `grooming_earnings`, never `doctor_earnings`
  *   - order state lives on `grooming_orders`, never `bookings`
  * Changing a consultation window must not move a grooming one, and vice versa. The only shared
- * things are genuinely platform-level ledgers — `payments`, `wallets`, `wallet_transactions`,
- * `payment_events` — which are keyed by `payment_source = 'grooming'` and carry no consultation
+ * things are genuinely platform-level ledgers - `payments`, `wallets`, `wallet_transactions`,
+ * `payment_events` - which are keyed by `payment_source = 'grooming'` and carry no consultation
  * semantics.
  *
  * Policy matrix (all thresholds admin-editable):
@@ -36,7 +36,7 @@ export type GroomingCanceller =
   // Acceptance-gate outcomes (migration 036). Both return the customer 100% of what they paid:
   // the provider never accepted the booking, so no cancellation window or penalty applies to
   // the customer. They are kept distinct from 'provider' because that path also pays a goodwill
-  // bonus for breaking a COMMITTED appointment — nothing was committed here.
+  // bonus for breaking a COMMITTED appointment - nothing was committed here.
   | 'provider_declined' | 'acceptance_timeout';
 
 export interface GroomingRefundPreview {
@@ -97,7 +97,7 @@ class GroomingRefundService {
   }
 
   /**
-   * What the customer would get back — pure computation, no writes. Powers the cancel dialog so
+   * What the customer would get back - pure computation, no writes. Powers the cancel dialog so
    * the policy is shown before the customer commits, not explained afterwards.
    */
   async computeRefundPreview(orderId: string, canceller: GroomingCanceller): Promise<GroomingRefundPreview> {
@@ -112,7 +112,7 @@ class GroomingRefundService {
     const refundable = round2(Math.max(amountPaid - (Number(o.alreadyRefunded) || 0), 0));
     const cap = (n: number) => round2(Math.min(Math.max(n, 0), refundable));
 
-    // Acceptance gate: the booking was paid but never accepted, so the customer is made whole —
+    // Acceptance gate: the booking was paid but never accepted, so the customer is made whole -
     // full amount back, no processing charge, no window maths. Deliberately no goodwill bonus:
     // the money was held for minutes, not a broken commitment.
     if (canceller === 'provider_declined' || canceller === 'acceptance_timeout') {
@@ -135,7 +135,7 @@ class GroomingRefundService {
     const processingFlat = await GroomingModuleConfig.getCancellationProcessingFlatFee();
     const processingCharge = round2(gatewayFee + processingFlat);
 
-    // A no-show is the customer failing to turn up — same commercial outcome as cancelling with
+    // A no-show is the customer failing to turn up - same commercial outcome as cancelling with
     // no notice at all, so it deliberately skips the window maths.
     if (canceller === 'no_show') {
       return { hasPayment: true, amountPaid, refundAmount: 0, processingCharge: 0, goodwillBonus: 0, policy: 'customer_no_show' };
@@ -170,7 +170,7 @@ class GroomingRefundService {
    * Execute the policy: move the money, then reconcile the provider ledger.
    *
    * Returns null when there is nothing to refund (unpaid order), so callers can cancel freely
-   * without special-casing. Never throws for policy reasons — a zero refund is a valid outcome.
+   * without special-casing. Never throws for policy reasons - a zero refund is a valid outcome.
    */
   async refundForCancellation(orderId: string, canceller: GroomingCanceller, reason: string,
     destination?: 'wallet' | 'gateway'): Promise<GroomingRefundOutcome | null> {
@@ -184,7 +184,7 @@ class GroomingRefundService {
 
     // Gateway refunds go out BEFORE the ledger transaction, because an external side effect
     // cannot be rolled back with it. A failure here falls back to the wallet so the customer is
-    // never left with nothing — the same guarantee the consultation engine makes.
+    // never left with nothing - the same guarantee the consultation engine makes.
     let gatewayRefundAmount = 0;
     let walletRefundAmount = preview.refundAmount;
     if (dest === 'gateway' && preview.refundAmount > 0 && gatewayPaymentId && o.gateway && o.gateway !== 'demo') {
@@ -194,17 +194,17 @@ class GroomingRefundService {
         gatewayRefundAmount = preview.refundAmount;
         walletRefundAmount = 0;
       } catch (err: any) {
-        logger.error('Grooming gateway refund failed — falling back to wallet', { orderId, error: err.message });
+        logger.error('Grooming gateway refund failed - falling back to wallet', { orderId, error: err.message });
         gatewayRefundAmount = 0;
         walletRefundAmount = preview.refundAmount;
         dest = 'wallet';
       }
     } else if (dest === 'gateway') {
-      // Nothing to send to the gateway (demo mode, or no captured payment id) — wallet it is.
+      // Nothing to send to the gateway (demo mode, or no captured payment id) - wallet it is.
       dest = 'wallet';
     }
 
-    const clearanceNote = `${canceller} cancellation — ${preview.policy}`;
+    const clearanceNote = `${canceller} cancellation - ${preview.policy}`;
     try {
       await database.transaction(async (client: any) => {
         const locked = await client.query(
@@ -215,7 +215,7 @@ class GroomingRefundService {
         // finished with this payment and this call must not move money again.
         if (!lockedRow || !['completed', 'partially_refunded'].includes(lockedRow.status)) return;
 
-        // Cumulative, never overwritten — a prior dispute refund on the same payment must stay
+        // Cumulative, never overwritten - a prior dispute refund on the same payment must stay
         // counted, otherwise the ledger would under-report what was returned.
         const totalRefunded = round2(Number(lockedRow.refunded) + preview.refundAmount);
         const isFull = round2(totalRefunded + preview.processingCharge) >= round2(Number(lockedRow.amount));
@@ -263,7 +263,7 @@ class GroomingRefundService {
               [preview.goodwillBonus, walletId]);
             await client.query(
               `INSERT INTO wallet_transactions (id, wallet_id, type, amount, description, reference_id, reference_type, created_at)
-               VALUES ($1,$2,'bonus',$3,'Goodwill bonus — the groomer cancelled your appointment',$4,'grooming_order',NOW())`,
+               VALUES ($1,$2,'bonus',$3,'Goodwill bonus - the groomer cancelled your appointment',$4,'grooming_order',NOW())`,
               [uuidv4(), walletId, preview.goodwillBonus, orderId]);
           }
         }
@@ -291,7 +291,7 @@ class GroomingRefundService {
         } else if (canceller === 'acceptance_timeout') {
           // Letting a paid booking lapse without answering is an SLA failure, so the provider
           // carries the gateway fee the platform cannot recover on the refund. An explicit
-          // decline does NOT incur this — saying "we're full" promptly is legitimate, and
+          // decline does NOT incur this - saying "we're full" promptly is legitimate, and
           // charging for it would just train providers to stay silent instead.
           const fee = round2(Number(o.gatewayFee) || 0);
           if (fee > 0) {
@@ -299,7 +299,7 @@ class GroomingRefundService {
               `INSERT INTO grooming_earnings (provider_id, order_id, gross_amount, commission_amount, tax_amount, net_amount, entry_type, status, note)
                VALUES ($1,$2,0,0,0,$3,'penalty','available',$4)`,
               [o.provider_id, orderId, -fee,
-               `Acceptance window lapsed — non-recoverable gateway fee ${fee.toFixed(2)}`]);
+               `Acceptance window lapsed - non-recoverable gateway fee ${fee.toFixed(2)}`]);
           }
         } else if (preview.policy === 'customer_partial_window') {
           const retained = round2(Math.max(preview.amountPaid - preview.refundAmount - preview.processingCharge, 0));
@@ -309,7 +309,7 @@ class GroomingRefundService {
             await client.query(
               `INSERT INTO grooming_earnings (provider_id, order_id, gross_amount, commission_amount, tax_amount, net_amount, entry_type, status, note)
                VALUES ($1,$2,0,0,0,$3,'compensation','clearing',$4)`,
-              [o.provider_id, orderId, comp, `Late customer cancellation — ${sharePct}% of retained amount`]);
+              [o.provider_id, orderId, comp, `Late customer cancellation - ${sharePct}% of retained amount`]);
           }
         } else if (preview.policy === 'customer_no_refund_window' || preview.policy === 'customer_no_show') {
           const sharePct = await GroomingModuleConfig.getProviderShareOnNoShowPercent();
@@ -320,8 +320,8 @@ class GroomingRefundService {
                VALUES ($1,$2,0,0,0,$3,'compensation','clearing',$4)`,
               [o.provider_id, orderId, comp,
                preview.policy === 'customer_no_show'
-                 ? `Customer no-show — ${sharePct}% of net share`
-                 : `Very late customer cancellation — ${sharePct}% of net share`]);
+                 ? `Customer no-show - ${sharePct}% of net share`
+                 : `Very late customer cancellation - ${sharePct}% of net share`]);
           }
         }
 
@@ -330,7 +330,7 @@ class GroomingRefundService {
           `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
            VALUES ($1,$2,$2,NULL,$3)`,
           [orderId, o.status,
-           `Refund ${preview.refundAmount.toFixed(2)} (${preview.policy}, ${dest})${creditNote ? ` — credit note ${creditNote}` : ''} — ${clearanceNote}`]);
+           `Refund ${preview.refundAmount.toFixed(2)} (${preview.policy}, ${dest})${creditNote ? ` - credit note ${creditNote}` : ''} - ${clearanceNote}`]);
 
         try {
           await client.query(
@@ -344,7 +344,7 @@ class GroomingRefundService {
       });
     } catch (err: any) {
       if (gatewayRefundAmount > 0) {
-        logger.error('CRITICAL: grooming gateway refund issued but the ledger update failed — manual reconciliation needed',
+        logger.error('CRITICAL: grooming gateway refund issued but the ledger update failed - manual reconciliation needed',
           { orderId, paymentId: o.paymentId, gatewayRefundAmount });
       }
       logger.error('Grooming refund failed', { orderId, error: err.message });
@@ -359,7 +359,7 @@ class GroomingRefundService {
         await NotificationService.createNotification(
           o.pet_owner_id, 'payment', 'Grooming Refund Processed',
           dest === 'gateway'
-            ? `₹${preview.refundAmount.toFixed(2)} has been refunded to your original payment method. It can take 5–7 working days to appear.`
+            ? `₹${preview.refundAmount.toFixed(2)} has been refunded to your original payment method. It can take 5-7 working days to appear.`
             : `₹${preview.refundAmount.toFixed(2)} has been credited to your wallet${preview.goodwillBonus > 0 ? `, plus a ₹${preview.goodwillBonus.toFixed(2)} goodwill bonus` : ''}.`,
           'all', { orderId, refundAmount: preview.refundAmount });
       } catch { /* non-blocking */ }
@@ -370,7 +370,7 @@ class GroomingRefundService {
   }
 
   /**
-   * Discretionary refund agreed on a dispute — an amount a human decided, not a policy window.
+   * Discretionary refund agreed on a dispute - an amount a human decided, not a policy window.
    * Capped at whatever of the payment is still unrefunded, so repeated dispute responses can
    * never return more than was collected. The provider's ledger is debited by the same amount.
    */
@@ -394,7 +394,7 @@ class GroomingRefundService {
         await gateway.refund(gatewayPaymentId, refundAmount, { orderId, reason, kind: 'grooming_dispute' });
         gatewayRefundAmount = refundAmount; walletRefundAmount = 0;
       } catch (err: any) {
-        logger.error('Grooming dispute gateway refund failed — falling back to wallet', { orderId, error: err.message });
+        logger.error('Grooming dispute gateway refund failed - falling back to wallet', { orderId, error: err.message });
         dest = 'wallet';
       }
     } else if (dest === 'gateway') {
@@ -451,7 +451,7 @@ class GroomingRefundService {
       });
     } catch (err: any) {
       if (gatewayRefundAmount > 0) {
-        logger.error('CRITICAL: grooming dispute gateway refund issued but the ledger update failed — manual reconciliation needed',
+        logger.error('CRITICAL: grooming dispute gateway refund issued but the ledger update failed - manual reconciliation needed',
           { orderId, gatewayRefundAmount });
       }
       throw new DatabaseError('Dispute refund processing failed', { originalError: err.message });
@@ -476,7 +476,7 @@ class GroomingRefundService {
    * GST credit note for a refund (GRMCN/FY series, separate from the GRM invoice series).
    *
    * A refunded order previously kept its full-value GRM invoice standing, which does not survive
-   * a GST audit — the outward supply has to be reduced by a credit note referencing the original
+   * a GST audit - the outward supply has to be reduced by a credit note referencing the original
    * invoice. Numbering continues from the highest suffix issued, never COUNT(*), for the same
    * reason the invoice series does.
    */
@@ -513,14 +513,14 @@ class GroomingRefundService {
       [number, o.paymentId,
        JSON.stringify({ name: o.providerLegal || o.providerName || null, gstin: o.providerGstin || null, address: o.providerAddress || null }),
        JSON.stringify({ orderNumber: o.order_number, userId: o.pet_owner_id, againstInvoice: o.invoice_number || null, reason }),
-       JSON.stringify([{ name: `Refund — ${reason}`, qty: 1, unitPrice: valuePortion, taxPercent: taxRate, lineTotal: amount }]),
+       JSON.stringify([{ name: `Refund - ${reason}`, qty: 1, unitPrice: valuePortion, taxPercent: taxRate, lineTotal: amount }]),
        valuePortion, taxPortion, amount, sac, taxRate, o.currency || 'INR']);
     return number;
   }
 
   /**
    * A capture that arrived after the slot-hold already expired. Standard gateway practice is to
-   * return it in full rather than keep money for a slot the customer no longer holds — the order
+   * return it in full rather than keep money for a slot the customer no longer holds - the order
    * stays expired and the payment is refunded end to end.
    */
   async refundExpiredCapture(orderId: string, gatewayPaymentId: string): Promise<void> {
@@ -545,7 +545,7 @@ class GroomingRefundService {
         await gateway.refund(gatewayPaymentId, amount, { orderId, reason: 'slot_hold_expired', kind: 'grooming' });
         destination = 'gateway';
       } catch (err: any) {
-        logger.error('Grooming expired-capture gateway refund failed — crediting wallet instead', { orderId, error: err.message });
+        logger.error('Grooming expired-capture gateway refund failed - crediting wallet instead', { orderId, error: err.message });
       }
     }
 
@@ -572,7 +572,7 @@ class GroomingRefundService {
         await client.query(`UPDATE wallets SET balance = balance + $1, updated_at = NOW() WHERE id = $2`, [amount, walletId]);
         await client.query(
           `INSERT INTO wallet_transactions (id, wallet_id, type, amount, description, reference_id, reference_type, created_at)
-           VALUES ($1,$2,'refund',$3,'Grooming slot hold expired — payment returned',$4,'grooming_order',NOW())`,
+           VALUES ($1,$2,'refund',$3,'Grooming slot hold expired - payment returned',$4,'grooming_order',NOW())`,
           [uuidv4(), walletId, amount, orderId]);
       }
       const creditNote = await this.issueCreditNote(client,
@@ -580,7 +580,7 @@ class GroomingRefundService {
       await client.query(
         `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
          VALUES ($1,'payment_expired','payment_expired',NULL,$2)`,
-        [orderId, `Late capture refunded in full to ${destination}${creditNote ? ` — credit note ${creditNote}` : ''}`]);
+        [orderId, `Late capture refunded in full to ${destination}${creditNote ? ` - credit note ${creditNote}` : ''}`]);
     });
 
     try {
@@ -589,7 +589,7 @@ class GroomingRefundService {
         `Your booking slot had already expired when the payment completed, so the full amount has been returned to your ${destination === 'gateway' ? 'original payment method' : 'wallet'}. Please book again.`,
         'all', { orderId, refundAmount: amount });
     } catch { /* non-blocking */ }
-    logger.warn('Grooming late capture refunded — slot hold had expired', { orderId, amount, destination });
+    logger.warn('Grooming late capture refunded - slot hold had expired', { orderId, amount, destination });
   }
 }
 

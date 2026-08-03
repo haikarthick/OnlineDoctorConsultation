@@ -47,7 +47,7 @@ const FloatingChatWidget: React.FC = () => {
     }).catch(() => { /* ignore */ })
   }, [isAuthenticated])
 
-  // Build suggested prompts — personalized if pets exist
+  // Build suggested prompts - personalized if pets exist
   const suggestedPrompts = pets.length > 0
     ? [
         `How is ${pets[0].name} doing based on recent records? 📋`,
@@ -93,13 +93,13 @@ const FloatingChatWidget: React.FC = () => {
           const msgRes = await apiService.listChatMessages(existing.id)
           setMessages(msgRes.data || [])
         } catch {
-          // Could not load messages — still use the session
+          // Could not load messages - still use the session
         }
         setInitializing(false)
         return existing.id
       }
     } catch (listErr) {
-      // listSessions failed — fall through to create a new session
+      // listSessions failed - fall through to create a new session
       console.warn('[AI Chat] listSessions failed, will create new session:', getApiError(listErr))
     }
 

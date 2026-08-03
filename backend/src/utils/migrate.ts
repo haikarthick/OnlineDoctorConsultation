@@ -77,12 +77,12 @@ async function runMigrations() {
   // Escape hatch: if a fresh migration turns out to have broken something on
   // the real production DB in a way that wasn't caught in review, this lets
   // ops revert to the old tolerate-and-continue behavior via a Render env
-  // var flip — no code rollback/redeploy needed — while we fix it forward.
+  // var flip - no code rollback/redeploy needed - while we fix it forward.
   const failFast = (process.env.MIGRATIONS_FAIL_FAST || 'true').toLowerCase() !== 'false';
   try {
     // Connecting/reading migration state is kept separate from *running*
     // migrations below: a failure here means we couldn't even reach the DB
-    // (e.g. Render free-tier cold start — already retried extensively in the
+    // (e.g. Render free-tier cold start - already retried extensively in the
     // schema-setup step before this script gets here) and is NOT evidence of
     // a broken migration. render-start.sh treats this exit code (2) as
     // transient and tolerates it, same as the old behavior; it treats exit
@@ -123,7 +123,7 @@ async function runMigrations() {
         console.log(`  ✓ ${migration.name}`);
       } catch (err) {
         await client.query('ROLLBACK');
-        console.error(`  ✗ ${migration.name} — ROLLED BACK`);
+        console.error(`  ✗ ${migration.name} - ROLLED BACK`);
         console.error(`    Error: ${(err as Error).message}`);
         failedMigrations.push(migration.name);
       } finally {
@@ -138,14 +138,14 @@ async function runMigrations() {
       );
       if (failFast) {
         console.error(
-          '  Aborting deploy (MIGRATIONS_FAIL_FAST=true, the default) — the server will not start ' +
+          '  Aborting deploy (MIGRATIONS_FAIL_FAST=true, the default) - the server will not start ' +
           'against a partially-migrated schema. Set MIGRATIONS_FAIL_FAST=false to temporarily revert ' +
           'to the old tolerate-and-continue behavior while investigating.'
         );
         process.exitCode = 1;
         return;
       }
-      console.error('  MIGRATIONS_FAIL_FAST=false — continuing despite the failure(s) above.');
+      console.error('  MIGRATIONS_FAIL_FAST=false - continuing despite the failure(s) above.');
     } else {
       console.log(`\n✓ ${succeededCount} migration(s) applied successfully.`);
     }

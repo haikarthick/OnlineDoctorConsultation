@@ -163,12 +163,12 @@ const VetHospitalAdmin: React.FC = () => {
                     <div className="si-a734c257">{h.id.slice(0,8)}…</div>
                   </td>
                   <td>{HOSPITAL_TYPE_LABELS[h.hospitalType] || h.hospitalType}</td>
-                  <td>{h.city || '—'}{h.state ? `, ${h.state}` : ''}</td>
+                  <td>{h.city || '-'}{h.state ? `, ${h.state}` : ''}</td>
                   <td className="si-4b6b7fbc">{(h as any).totalDoctors ?? 0}</td>
                   <td>
                     {Number(h.rating) > 0
                       ? <span className="si-37c6b3a7">★ {Number(h.rating).toFixed(1)}</span>
-                      : <span className="si-d436f5f9">—</span>}
+                      : <span className="si-d436f5f9">-</span>}
                   </td>
                   <td>
                     <div className="si-b06973c0">

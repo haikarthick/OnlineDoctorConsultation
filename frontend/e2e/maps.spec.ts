@@ -3,7 +3,7 @@ import { test, expect } from './fixtures'
 /**
  * MAP TILE VERIFICATION E2E TESTS
  *
- * These tests go beyond smoke-testing page loads — they verify that
+ * These tests go beyond smoke-testing page loads - they verify that
  * Leaflet map tiles actually load from OpenStreetMap tile servers.
  *
  * Root cause caught: Helmet CSP or nginx CSP can silently block
@@ -46,11 +46,11 @@ async function assertMapTilesRendered(page: import('@playwright/test').Page) {
   expect(tileCount).toBeGreaterThanOrEqual(1)
 
   // Verify tile images actually loaded (naturalWidth > 0).
-  // CSP-blocked images render as broken — naturalWidth stays 0.
+  // CSP-blocked images render as broken - naturalWidth stays 0.
   const loadedTile = await tiles.first().evaluate(
     (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
   )
-  expect(loadedTile, 'Tile <img> exists but failed to load — likely blocked by CSP').toBe(true)
+  expect(loadedTile, 'Tile <img> exists but failed to load - likely blocked by CSP').toBe(true)
 }
 
 /**
@@ -91,7 +91,7 @@ async function assertTileNetworkRequests(page: import('@playwright/test').Page, 
 
 // ── Farmer sees map tiles on all 5 map pages ────────────────
 
-test.describe('Map Tiles — Farmer', () => {
+test.describe('Map Tiles - Farmer', () => {
   for (const { path, name } of MAP_PAGES) {
     test(`${name} (${path}) renders map tiles`, async ({ farmerPage: page }) => {
       await assertTileNetworkRequests(page, path)
@@ -102,7 +102,7 @@ test.describe('Map Tiles — Farmer', () => {
 
 // ── Admin sees map tiles on all 5 map pages ─────────────────
 
-test.describe('Map Tiles — Admin', () => {
+test.describe('Map Tiles - Admin', () => {
   for (const { path, name } of MAP_PAGES) {
     test(`${name} (${path}) renders map tiles`, async ({ adminPage: page }) => {
       await assertTileNetworkRequests(page, path)
@@ -113,7 +113,7 @@ test.describe('Map Tiles — Admin', () => {
 
 // ── Vet sees map tiles on Disease Prediction ─────────────────
 
-test.describe('Map Tiles — Veterinarian', () => {
+test.describe('Map Tiles - Veterinarian', () => {
   test('Disease Prediction (/disease-prediction) renders map tiles', async ({ vetPage: page }) => {
     await assertTileNetworkRequests(page, '/disease-prediction')
     await assertMapTilesRendered(page)
@@ -122,7 +122,7 @@ test.describe('Map Tiles — Veterinarian', () => {
 
 // ── CSP validation: no blocked resources in console ──────────
 
-test.describe('Map CSP — No blocked resources', () => {
+test.describe('Map CSP - No blocked resources', () => {
   test('no CSP violation on map page', async ({ farmerPage: page }) => {
     const cspViolations: string[] = []
 

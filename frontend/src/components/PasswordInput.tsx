@@ -5,7 +5,7 @@ import './PasswordInput.css'
 /**
  * Password field with the standard show/hide reveal toggle.
  *
- * Drop-in replacement for `<input type="password" …>` — every input prop is forwarded, so the
+ * Drop-in replacement for `<input type="password" …>` - every input prop is forwarded, so the
  * caller keeps its own id/name/placeholder/autoComplete/validation. `type` is owned by this
  * component and deliberately not accepted.
  *

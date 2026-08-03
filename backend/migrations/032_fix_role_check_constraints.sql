@@ -9,7 +9,7 @@
 --      failed with `users_role_check`. (Fixed in code: both blocks now build the list from the
 --      single SYSTEM_ROLES constant.)
 --
---   2. Migration 030 guarded its user_roles work with `to_regclass('public.user_roles')` — a
+--   2. Migration 030 guarded its user_roles work with `to_regclass('public.user_roles')` - a
 --      hardcoded schema. On the schema-scoped deployments (DB_SCHEMA=vetcare_dev / vetcare_demo)
 --      that resolves to NULL, so user_roles.role was never widened at all. Nothing surfaced it
 --      because nothing wrote 'groomer' to user_roles until GroomingProviderService.createProvider
@@ -21,7 +21,7 @@
 DO $$
 DECLARE r record;
 BEGIN
-  -- users.role — drop by introspection so any name drift is handled
+  -- users.role - drop by introspection so any name drift is handled
   FOR r IN SELECT conname FROM pg_constraint
            WHERE conrelid = 'users'::regclass AND contype = 'c'
              AND pg_get_constraintdef(oid) ILIKE '%(role)%' LOOP
@@ -31,7 +31,7 @@ BEGIN
     CHECK (role IN ('farmer','pet_owner','veterinarian','admin','corporate_admin',
                     'hospital_staff','pharmacist','groomer','support'));
 
-  -- user_roles.role — NOTE: schema-relative to_regclass, unlike 030's 'public.user_roles'
+  -- user_roles.role - NOTE: schema-relative to_regclass, unlike 030's 'public.user_roles'
   IF to_regclass('user_roles') IS NOT NULL THEN
     FOR r IN SELECT conname FROM pg_constraint
              WHERE conrelid = 'user_roles'::regclass AND contype = 'c'

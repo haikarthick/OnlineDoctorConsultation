@@ -4,7 +4,7 @@
 -- to master_species only. That left an inconsistency: an admin editing a species
 -- (parent) could translate it into all 6 languages, but its breeds and animal
 -- classes (children), plus marketplace categories/conditions, could not be
--- translated at all — an admin-added breed/class/category/condition showed the
+-- translated at all - an admin-added breed/class/category/condition showed the
 -- same single label in every language.
 --
 -- This adds the same 5 nullable per-locale columns to all four remaining tables so
@@ -16,7 +16,7 @@
 --     locale) and only falls back to the labelKey/i18n path or the English label/name
 --     when they're empty.
 -- For master_breeds the per-locale columns translate `name` (breeds have no labelKey);
--- the canonical English `name` remains the stored/value column — only display is localized.
+-- the canonical English `name` remains the stored/value column - only display is localized.
 
 ALTER TABLE master_breeds
   ADD COLUMN IF NOT EXISTS label_hi VARCHAR(150),

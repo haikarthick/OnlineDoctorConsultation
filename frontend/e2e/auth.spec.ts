@@ -6,7 +6,7 @@ import { USERS } from './constants'
  * Covers: Login, logout, registration, invalid credentials, session persistence
  */
 
-test.describe('Authentication — Login', () => {
+test.describe('Authentication - Login', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/login')
   })
@@ -64,7 +64,7 @@ test.describe('Authentication — Login', () => {
   })
 })
 
-test.describe('Authentication — Logout', () => {
+test.describe('Authentication - Logout', () => {
   test('should logout and redirect to login/home', async ({ page }) => {
     // Login
     await page.goto('/login')
@@ -86,7 +86,7 @@ test.describe('Authentication — Logout', () => {
   })
 })
 
-test.describe('Authentication — Registration', () => {
+test.describe('Authentication - Registration', () => {
   test('should display registration form with all fields', async ({ page }) => {
     await page.goto('/register')
     await expect(page.locator('#reg-firstName')).toBeVisible()
@@ -136,7 +136,7 @@ test.describe('Authentication — Registration', () => {
   })
 })
 
-test.describe('Authentication — Public Routes', () => {
+test.describe('Authentication - Public Routes', () => {
   test('home page loads for unauthenticated user', async ({ page }) => {
     await page.goto('/')
     await page.waitForLoadState('networkidle')

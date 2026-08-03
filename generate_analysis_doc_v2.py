@@ -106,7 +106,7 @@ def create_architecture_diagram():
     ax.set_ylim(0, 10)
     ax.axis('off')
     ax.set_facecolor('white')
-    ax.text(7, 9.7, 'VetCare Platform — Post-Integration Architecture (Global)', 
+    ax.text(7, 9.7, 'VetCare Platform - Post-Integration Architecture (Global)', 
             ha='center', va='center', fontsize=16, fontweight='bold', color='#1F4E79')
     frontend = FancyBboxPatch((0.3, 5.5), 13.4, 4, boxstyle="round,pad=0.1",
                                facecolor='#E8F4FD', edgecolor='#2E75B6', linewidth=2)
@@ -192,7 +192,7 @@ def create_global_platforms_map_diagram():
     ax.axis('off')
     ax.set_facecolor('white')
     
-    ax.text(7, 7.7, 'Global Livestock Platform Research — By Country', 
+    ax.text(7, 7.7, 'Global Livestock Platform Research - By Country', 
             ha='center', va='center', fontsize=15, fontweight='bold', color='#1F4E79')
     
     platforms = [
@@ -245,7 +245,7 @@ def create_marketplace_flow_diagram():
     ax.set_xlim(0, 14)
     ax.set_ylim(0, 8)
     ax.axis('off')
-    ax.text(7, 7.7, 'Enhanced Livestock Marketplace — Data Flow', 
+    ax.text(7, 7.7, 'Enhanced Livestock Marketplace - Data Flow', 
             ha='center', va='center', fontsize=15, fontweight='bold', color='#1F4E79')
     steps_sell = [
         ('1. Select Animal Type\nCow/Buffalo/Goat/Sheep', '#E91E63'),
@@ -318,7 +318,7 @@ def create_phase_timeline_diagram():
     ax.set_xlim(0, 14)
     ax.set_ylim(0, 9)
     ax.axis('off')
-    ax.text(7, 8.7, 'Implementation Roadmap — 5 Phases (Updated with Global Features)', ha='center', va='center',
+    ax.text(7, 8.7, 'Implementation Roadmap - 5 Phases (Updated with Global Features)', ha='center', va='center',
             fontsize=14, fontweight='bold', color='#1F4E79')
     phases = [
         {
@@ -410,7 +410,7 @@ def create_database_schema_diagram():
     ax.set_xlim(0, 14)
     ax.set_ylim(0, 11)
     ax.axis('off')
-    ax.text(7, 10.7, 'Database Schema — New & Extended Tables (Updated)', ha='center', va='center',
+    ax.text(7, 10.7, 'Database Schema - New & Extended Tables (Updated)', ha='center', va='center',
             fontsize=15, fontweight='bold', color='#1F4E79')
     def draw_table(ax, x, y, title, fields, color, width=3.2, field_height=0.18):
         total_h = 0.3 + len(fields) * field_height + 0.05
@@ -531,7 +531,7 @@ def create_permission_matrix_diagram():
     ax.set_xlim(0, 12)
     ax.set_ylim(0, 7)
     ax.axis('off')
-    ax.text(6, 6.7, 'Permission Matrix — New Features by Role (Updated)', ha='center', va='center',
+    ax.text(6, 6.7, 'Permission Matrix - New Features by Role (Updated)', ha='center', va='center',
             fontsize=14, fontweight='bold', color='#1F4E79')
     permissions = [
         'milk_recording', 'dairy_dashboard', 'community_forum', 'knowledge_hub',
@@ -639,7 +639,7 @@ def create_innovation_comparison_diagram():
     ax.set_xlim(0, 14)
     ax.set_ylim(0, 9)
     ax.axis('off')
-    ax.text(7, 8.7, 'Innovation Differentiators — VetCare vs All Competitors', 
+    ax.text(7, 8.7, 'Innovation Differentiators - VetCare vs All Competitors', 
             ha='center', va='center', fontsize=14, fontweight='bold', color='#1F4E79')
     features = [
         'AI-Verified Milk Yield',
@@ -683,7 +683,7 @@ def create_innovation_comparison_diagram():
                 fontsize=6.5, color='#C62828')
         ax.text(4.3, y + bar_h/2, feat, ha='right', va='center',
                 fontsize=7.5, fontweight='bold', color='#333')
-    ax.text(7, 0.4, 'All 14 innovations are EXCLUSIVE to VetCare — no single global competitor offers all of these together',
+    ax.text(7, 0.4, 'All 14 innovations are EXCLUSIVE to VetCare - no single global competitor offers all of these together',
             ha='center', va='center', fontsize=9, fontstyle='italic', color='#1F4E79',
             bbox=dict(boxstyle='round,pad=0.3', facecolor='#E8F4FD', edgecolor='#2E75B6'))
     return save_fig_to_bytes(fig)
@@ -724,7 +724,7 @@ def generate_document():
     
     source = doc.add_paragraph()
     source.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = source.add_run('Global Competitive Research — 15+ Platforms Across 8 Countries')
+    run = source.add_run('Global Competitive Research - 15+ Platforms Across 8 Countries')
     run.font.size = Pt(14)
     run.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
     run.font.name = 'Calibri'
@@ -746,14 +746,14 @@ def generate_document():
     toc_items = [
         '1. Executive Summary',
         '2. Research Sources Overview',
-        '   2.1  India — animall.in & pashushala.com',
-        '   2.2  USA — CattleRange, Breedr, Farmbrite, Herdwatch',
-        '   2.3  Australia — AuctionsPlus & StockLive',
-        '   2.4  Europe — Agriaffaires, CowManager, Connecterra, AGRIVI',
-        '   2.5  Turkey — MilkingCloud',
-        '   2.6  Global — Allflex/Merck, DairyGlobal',
+        '   2.1  India - animall.in & pashushala.com',
+        '   2.2  USA - CattleRange, Breedr, Farmbrite, Herdwatch',
+        '   2.3  Australia - AuctionsPlus & StockLive',
+        '   2.4  Europe - Agriaffaires, CowManager, Connecterra, AGRIVI',
+        '   2.5  Turkey - MilkingCloud',
+        '   2.6  Global - Allflex/Merck, DairyGlobal',
         '3. Global Platform Feature Matrix',
-        '4. Gap Analysis — VetCare vs Global Leaders',
+        '4. Gap Analysis - VetCare vs Global Leaders',
         '5. Architecture Diagram (Post-Integration)',
         '6. New Feature Specifications (from Global Research)',
         '   6.1  Live Online Auction System',
@@ -789,14 +789,14 @@ def generate_document():
     
     add_body_text(doc,
         'This document presents a comprehensive competitive analysis of 15+ livestock and farm management '
-        'platforms across 8 countries — India, USA, Australia, UK/Ireland, Netherlands, France/Europe, '
+        'platforms across 8 countries - India, USA, Australia, UK/Ireland, Netherlands, France/Europe, '
         'Turkey, and global providers. It identifies unique features from each platform and proposes their '
         'integration into VetCare with significant innovations that NO SINGLE competitor currently offers.')
     
     add_body_text(doc,
         'The VetCare platform already possesses a robust foundation with 50+ pages, 44 backend services, '
         '55+ routes, and 5 supported languages. The proposed enhancements will transform VetCare from a '
-        'veterinary consultation platform into a comprehensive global livestock ecosystem platform — '
+        'veterinary consultation platform into a comprehensive global livestock ecosystem platform - '
         'combining the best features from Indian marketplaces, Australian live auctions, European IoT '
         'monitoring, American farm management, and more.')
     
@@ -834,7 +834,7 @@ def generate_document():
     doc.add_page_break()
     
     # ── 2.1 INDIA ──
-    add_heading_styled(doc, '2.1 India — animall.in & pashushala.com', level=2)
+    add_heading_styled(doc, '2.1 India - animall.in & pashushala.com', level=2)
     
     add_heading_styled(doc, 'animall.in', level=3)
     add_body_text(doc,
@@ -843,9 +843,9 @@ def generate_document():
     features_animall = [
         'Livestock Buy/Sell Marketplace by location (cow, buffalo, heifer, bull)',
         'Multi-Step Sell Form with animal type, calving number, daily milk, price, photos (side + udder), GPS',
-        'Pashu Chat — Community forum for farmers ("1 Crore+ farmers trusted")',
+        'Pashu Chat - Community forum for farmers ("1 Crore+ farmers trusted")',
         'Video Tutorials ("How to buy from Animall", "How to sell")',
-        'Prime Listings — Featured/boosted animal listings for faster sales',
+        'Prime Listings - Featured/boosted animal listings for faster sales',
         'Tipping System, Nearby Animals discovery, Live Buyer Count',
     ]
     for feat in features_animall:
@@ -858,12 +858,12 @@ def generate_document():
         '"Most Trusted Livestock Marketplace" with detailed animal cards, AI integration, '
         'and multiple e-commerce verticals.')
     features_pashushala = [
-        'Rich Livestock Cards — Breed-specific IDs (SAH-1613, HF-2721), price, lactation, milk yield, pregnancy, location',
-        'PashuGuru.AI — AI-powered agricultural assistant',
-        'Aahar (Feed), Upchar (Medicine), Upkaran (Equipment), Utpad (Dairy Products) — 4 e-commerce verticals',
-        'SmartFeed — AI-based intelligent feed optimization',
-        'Pashu Vet — "Anytime Vet Support" consultation service',
-        'Partner Program — Rural entrepreneurship network',
+        'Rich Livestock Cards - Breed-specific IDs (SAH-1613, HF-2721), price, lactation, milk yield, pregnancy, location',
+        'PashuGuru.AI - AI-powered agricultural assistant',
+        'Aahar (Feed), Upchar (Medicine), Upkaran (Equipment), Utpad (Dairy Products) - 4 e-commerce verticals',
+        'SmartFeed - AI-based intelligent feed optimization',
+        'Pashu Vet - "Anytime Vet Support" consultation service',
+        'Partner Program - Rural entrepreneurship network',
         '"Hot Deal" + "Book Now" badges on premium listings',
     ]
     for feat in features_pashushala:
@@ -872,7 +872,7 @@ def generate_document():
     doc.add_paragraph()
     
     # ── 2.2 USA ──
-    add_heading_styled(doc, '2.2 USA — CattleRange, Breedr, Farmbrite, Herdwatch', level=2)
+    add_heading_styled(doc, '2.2 USA - CattleRange, Breedr, Farmbrite, Herdwatch', level=2)
     
     add_heading_styled(doc, 'cattlerange.com (USA)', level=3)
     add_body_text(doc,
@@ -881,10 +881,10 @@ def generate_document():
         'Cattle for Sale indexed by Breed, Cattle Class, and State',
         'Daily & Weekly Market Summaries with price indices (fed cattle, feeder cattle, cow-calf)',
         'Regional Cattle Auction Results by state with historical comparison',
-        'Cattle Calculators — Bred Heifer & Cow Value Estimator based on market data',
+        'Cattle Calculators - Bred Heifer & Cow Value Estimator based on market data',
         'Weekly Drought Monitor integration (map-based drought severity by county)',
-        'USDA Monthly Reports — Cold Storage, Livestock Slaughter, Cattle on Feed data',
-        'Production Sale Calendar — Upcoming auction events with calendar view',
+        'USDA Monthly Reports - Cold Storage, Livestock Slaughter, Cattle on Feed data',
+        'Production Sale Calendar - Upcoming auction events with calendar view',
         'Feeder & Stocker Cattle Marketings data with trend analysis',
         'Industry news categorization (MCOOL, Beef Imports, Processing, Wildfires)',
     ]
@@ -895,14 +895,14 @@ def generate_document():
     
     add_heading_styled(doc, 'breedr.co (UK/USA)', level=3)
     add_body_text(doc,
-        '"Powering the Future of Beef" — The world\'s most ambitious cattle management app. '
+        '"Powering the Future of Beef" - The world\'s most ambitious cattle management app. '
         'Tracks animals from conception to carcass, enabling supply chain optimization.')
     features_breedr = [
-        'Lifetime Cattle Tracking — Conception to carcass, every animal, every step',
-        'Supply Chain Collaboration — Independent producers collaborate within a supply chain',
-        'Premium Beef Programs — Exclusive calf buy-back, retained ownership, preferential pricing grids',
-        'Exponential Performance Gains — 30% feed conversion efficiency, 16% prime beef increase, $8/cwt premium',
-        'Operation Types — Seedstock, Cow-Calf, Calf Nursery, Feedyard, Packers & Retailers',
+        'Lifetime Cattle Tracking - Conception to carcass, every animal, every step',
+        'Supply Chain Collaboration - Independent producers collaborate within a supply chain',
+        'Premium Beef Programs - Exclusive calf buy-back, retained ownership, preferential pricing grids',
+        'Exponential Performance Gains - 30% feed conversion efficiency, 16% prime beef increase, $8/cwt premium',
+        'Operation Types - Seedstock, Cow-Calf, Calf Nursery, Feedyard, Packers & Retailers',
         'Smart Beef Supply Chain management with data-driven decision making',
         'Case Studies & Producer Community platform',
     ]
@@ -916,15 +916,15 @@ def generate_document():
         'All-in-one farm management software for multi-species and biodiverse farms. '
         'Trusted by 5,000+ farmers worldwide with 8,000+ app integrations.')
     features_farmbrite = [
-        'Livestock Management — End-to-end animal records, wellness, yields, analytics, herd management',
-        'Farm Accounting & Bookkeeping — Receipt capture, split transactions, invoices, bank import',
-        'Crop Planning & Management — Season planning from seed to sale',
-        'Farm Sales & eCommerce — Direct-to-consumer sales, POS, order management, fulfillment',
-        'Climate & Weather — Historic weather trends, satellite imagery for soil/livestock wellness',
-        'Farm Mapping — Customized farm map builder for compliance and planning',
-        '100+ Pre-built Reports — Operations, financial, and compliance reporting',
-        'Resource & Input Management — Equipment utilization tracking, maintenance schedules',
-        'Team Task Management — Kanban boards, recurring tasks, automated reminders',
+        'Livestock Management - End-to-end animal records, wellness, yields, analytics, herd management',
+        'Farm Accounting & Bookkeeping - Receipt capture, split transactions, invoices, bank import',
+        'Crop Planning & Management - Season planning from seed to sale',
+        'Farm Sales & eCommerce - Direct-to-consumer sales, POS, order management, fulfillment',
+        'Climate & Weather - Historic weather trends, satellite imagery for soil/livestock wellness',
+        'Farm Mapping - Customized farm map builder for compliance and planning',
+        '100+ Pre-built Reports - Operations, financial, and compliance reporting',
+        'Resource & Input Management - Equipment utilization tracking, maintenance schedules',
+        'Team Task Management - Kanban boards, recurring tasks, automated reminders',
         '8,000+ Zapier Integrations + Custom API',
     ]
     for feat in features_farmbrite:
@@ -937,14 +937,14 @@ def generate_document():
         'Livestock management software used by 22,000+ producers globally. '
         '3 solutions in one platform: Cattle, Sheep, Pasture.')
     features_herdwatch = [
-        'Cattle Management — Calving records, treatments, weights, breeding events, sales/purchases',
-        'Sheep Management — Lamb recording, flock health, breeding performance tracking',
-        'Pasture Management — Ranch mapping, fertilizer tracking, grazing tasks',
-        'Offline-first with sync — Works without internet, syncs when connected',
-        'Bluetooth EID Reader Integration — Connect to electronic ID readers and scale heads',
+        'Cattle Management - Calving records, treatments, weights, breeding events, sales/purchases',
+        'Sheep Management - Lamb recording, flock health, breeding performance tracking',
+        'Pasture Management - Ranch mapping, fertilizer tracking, grazing tasks',
+        'Offline-first with sync - Works without internet, syncs when connected',
+        'Bluetooth EID Reader Integration - Connect to electronic ID readers and scale heads',
         'Multi-device support (phone, tablet, laptop) with cloud sync',
-        'Breed Association Integration — Pedigree registrations, market declarations',
-        'Bulk data upload — Send records to support team for batch import',
+        'Breed Association Integration - Pedigree registrations, market declarations',
+        'Bulk data upload - Send records to support team for batch import',
         'Recently acquired VetDrive (veterinary practice management system)',
     ]
     for feat in features_herdwatch:
@@ -953,25 +953,25 @@ def generate_document():
     doc.add_page_break()
     
     # ── 2.3 AUSTRALIA ──
-    add_heading_styled(doc, '2.3 Australia — AuctionsPlus & StockLive', level=2)
+    add_heading_styled(doc, '2.3 Australia - AuctionsPlus & StockLive', level=2)
     
     add_heading_styled(doc, 'auctionsplus.com.au (Australia)', level=3)
     add_body_text(doc,
         "Australia's largest online livestock auction platform. 497+ upcoming auctions, "
         "24,488 head offered weekly, covering cattle, sheep, goats, equine, and machinery.")
     features_auctionsplus = [
-        'Live Online Auctions — Real-time bidding with Watch or Bid options per auction',
-        'Commodities — Cattle, Sheep, Goats, Equine, Machinery all on one platform',
-        'Feeder Cattle Listings — Dedicated section for feeder/stocker cattle',
-        'Trade Now — Instant purchase lots (no auction needed)',
-        'Livestock Finance (StockCo) — Integrated financing for livestock purchases',
-        'Trade & Finance Calculator — Calculate financing and trading costs',
-        'Livestock Assessors — Find accredited assessors by region',
-        'AuctionsPlus Young Cattle Indicator (AYCI) — Custom market index at 505c/kg',
-        'Weekly Market Reports — Detailed reports with clearance rates, value-over-reserve',
+        'Live Online Auctions - Real-time bidding with Watch or Bid options per auction',
+        'Commodities - Cattle, Sheep, Goats, Equine, Machinery all on one platform',
+        'Feeder Cattle Listings - Dedicated section for feeder/stocker cattle',
+        'Trade Now - Instant purchase lots (no auction needed)',
+        'Livestock Finance (StockCo) - Integrated financing for livestock purchases',
+        'Trade & Finance Calculator - Calculate financing and trading costs',
+        'Livestock Assessors - Find accredited assessors by region',
+        'AuctionsPlus Young Cattle Indicator (AYCI) - Custom market index at 505c/kg',
+        'Weekly Market Reports - Detailed reports with clearance rates, value-over-reserve',
         'Weather integration (temperature, wind, rain, cloud) on homepage',
         'Featured Lots with detailed breeding descriptions and pedigree data',
-        'Forward+ Sheep — Forward contract marketplace for sheep',
+        'Forward+ Sheep - Forward contract marketplace for sheep',
         'Biosecurity Awareness resources and compliance',
         'Mobile App (iOS & Android) for bidding on-the-go',
     ]
@@ -985,9 +985,9 @@ def generate_document():
         '"When you can\'t get to the auction, StockLive takes you there." '
         'Live-streamed livestock auctions across Australia (formerly Elite Livestock Auctions).')
     features_stocklive = [
-        'Live Video Auction Streaming — Watch real-time auction with video feed',
-        'Online Bidding — Bid remotely in real-time during live auctions',
-        'Auction Calendar — Upcoming auctions by date, state (NSW, QLD, VIC, etc.)',
+        'Live Video Auction Streaming - Watch real-time auction with video feed',
+        'Online Bidding - Bid remotely in real-time during live auctions',
+        'Auction Calendar - Upcoming auctions by date, state (NSW, QLD, VIC, etc.)',
         'Commercial & Seedstock categories',
         'Per-page auction results with breed details, weights, and lot descriptions',
     ]
@@ -997,20 +997,20 @@ def generate_document():
     doc.add_page_break()
     
     # ── 2.4 EUROPE ──
-    add_heading_styled(doc, '2.4 Europe — Agriaffaires, CowManager, Connecterra, AGRIVI', level=2)
+    add_heading_styled(doc, '2.4 Europe - Agriaffaires, CowManager, Connecterra, AGRIVI', level=2)
     
     add_heading_styled(doc, 'agriaffaires.co.uk (France/Europe)', level=3)
     add_body_text(doc,
         'Major European farm equipment marketplace present in 20+ countries with 20+ languages. '
         '208,684 classified ads with 15,000 new ads daily.')
     features_agriaffaires = [
-        'Livestock Equipment — Milking parlour, milk tanks, livestock trailers, head locks, water tanks, mixers',
-        'Animals & Feed section — Live animals, straw & forage, feed, board',
-        'Price Observatory — Average price trends tracking per equipment/animal category',
-        'Equipment Transport — Request quotation based on distance for purchases',
-        'Professional Directory — Searchable directory of agricultural businesses',
-        'Property Sales — Farm land and property marketplace',
-        'Geolocation Search — "All equipment around me" with radius filter',
+        'Livestock Equipment - Milking parlour, milk tanks, livestock trailers, head locks, water tanks, mixers',
+        'Animals & Feed section - Live animals, straw & forage, feed, board',
+        'Price Observatory - Average price trends tracking per equipment/animal category',
+        'Equipment Transport - Request quotation based on distance for purchases',
+        'Professional Directory - Searchable directory of agricultural businesses',
+        'Property Sales - Farm land and property marketplace',
+        'Geolocation Search - "All equipment around me" with radius filter',
         'Multi-country, multi-language support (20+ each)',
     ]
     for feat in features_agriaffaires:
@@ -1023,16 +1023,16 @@ def generate_document():
         'IoT-based cow monitoring system using ear sensors for lifetime monitoring '
         'from calf to cow. Headquartered in Netherlands, offices in USA.')
     features_cowmanager = [
-        'Ear Sensor Technology — Measures ear temperature + eating + rumination + activity patterns',
-        'Health Monitoring — Alerts up to 3 days before clinical illness signs, mastitis detection',
-        'Fertility/Heat Detection — Know exactly when cow is in heat, optimal insemination timing',
-        'Transition Monitoring — Track dry period to calving transition health',
-        'Nutrition Monitoring — Feed management optimization, heat stress prevention',
-        'Youngstock Monitor — Calf health management for future milk production',
-        '"Find My Cow" — Locator/Flash tools to find specific cows in herd within seconds',
-        'MultiView — Give staff, vets, nutritionists access to selected cow data',
-        '"Sort My Cow" — Automated cow separation with sorting gates for health/heat alerts',
-        'Auto-Drafting — Automated separation of cows with alerts from herd',
+        'Ear Sensor Technology - Measures ear temperature + eating + rumination + activity patterns',
+        'Health Monitoring - Alerts up to 3 days before clinical illness signs, mastitis detection',
+        'Fertility/Heat Detection - Know exactly when cow is in heat, optimal insemination timing',
+        'Transition Monitoring - Track dry period to calving transition health',
+        'Nutrition Monitoring - Feed management optimization, heat stress prevention',
+        'Youngstock Monitor - Calf health management for future milk production',
+        '"Find My Cow" - Locator/Flash tools to find specific cows in herd within seconds',
+        'MultiView - Give staff, vets, nutritionists access to selected cow data',
+        '"Sort My Cow" - Automated cow separation with sorting gates for health/heat alerts',
+        'Auto-Drafting - Automated separation of cows with alerts from herd',
     ]
     for feat in features_cowmanager:
         add_bullet(doc, feat)
@@ -1044,14 +1044,14 @@ def generate_document():
         'AI-powered dairy analytics platform that removes data silos and provides '
         'AI-driven decision support for farms, advisors, and enterprises.')
     features_connecterra = [
-        'Farm Data Analytics — Visualize, compare, analyze all farm data in one platform',
-        'AI Copilot — Weekly operational summaries powered by AI, delivered to inbox',
-        'Decision Support — Automatic impact analysis with AI-powered predictions',
-        'Scenario Modeling — Model different decision scenarios with AI predictions',
-        'Farm Timeline — Auto-track decisions and their outcomes over time',
-        'ROI Calculator — Calculate impact of every decision on key metrics',
-        'Multi-stakeholder — Solutions for farm leadership, dairy advisors, and enterprises',
-        'Data Integration — Connects with all existing farm management systems',
+        'Farm Data Analytics - Visualize, compare, analyze all farm data in one platform',
+        'AI Copilot - Weekly operational summaries powered by AI, delivered to inbox',
+        'Decision Support - Automatic impact analysis with AI-powered predictions',
+        'Scenario Modeling - Model different decision scenarios with AI predictions',
+        'Farm Timeline - Auto-track decisions and their outcomes over time',
+        'ROI Calculator - Calculate impact of every decision on key metrics',
+        'Multi-stakeholder - Solutions for farm leadership, dairy advisors, and enterprises',
+        'Data Integration - Connects with all existing farm management systems',
     ]
     for feat in features_connecterra:
         add_bullet(doc, feat)
@@ -1063,13 +1063,13 @@ def generate_document():
         'Comprehensive digital agriculture solutions supporting the entire agri-food value chain. '
         'Partners include Nestle, Kaufland. UN and FAO affiliated.')
     features_agrivi = [
-        'AGRIVI AI Engage — White-labeled WhatsApp/Viber AI agronomic advisor for farmer engagement',
-        'Farm Management Software (FMS) — Data-driven tools for agronomic and economic decisions',
-        'Food Traceability — Complete food production traceability from seed to shelves, QR code scanning',
-        'IoT Integration (Connect) — Weather stations, soil sensors, machinery data plug & play',
-        'ROI Calculator — Free farm digitalization assessment tool',
-        'Multi-Industry — Farms, Enterprise Farms, Cooperatives, Food & Beverages, Banks, Retail, Public Sector',
-        'Supply Chain Intelligence — Agriculture supply chain management for contracted farmers',
+        'AGRIVI AI Engage - White-labeled WhatsApp/Viber AI agronomic advisor for farmer engagement',
+        'Farm Management Software (FMS) - Data-driven tools for agronomic and economic decisions',
+        'Food Traceability - Complete food production traceability from seed to shelves, QR code scanning',
+        'IoT Integration (Connect) - Weather stations, soil sensors, machinery data plug & play',
+        'ROI Calculator - Free farm digitalization assessment tool',
+        'Multi-Industry - Farms, Enterprise Farms, Cooperatives, Food & Beverages, Banks, Retail, Public Sector',
+        'Supply Chain Intelligence - Agriculture supply chain management for contracted farmers',
     ]
     for feat in features_agrivi:
         add_bullet(doc, feat)
@@ -1077,21 +1077,21 @@ def generate_document():
     doc.add_page_break()
     
     # ── 2.5 TURKEY ──
-    add_heading_styled(doc, '2.5 Turkey — MilkingCloud', level=2)
+    add_heading_styled(doc, '2.5 Turkey - MilkingCloud', level=2)
     
     add_heading_styled(doc, 'milkingcloud.com (Turkey)', level=3)
     add_body_text(doc,
         'Cloud-based dairy and beef farm management platform with integrated IoT devices. '
         'Available in English, Spanish, French, Turkish and more.')
     features_milkingcloud = [
-        'Solutions — Dairy Farm, Beef Cattle/Feedlot, Cow-Calf Operations, Enterprise',
-        'Devices — Mastitis Detection Device (MastiPro), Calving Sensor (PartuSense), '
+        'Solutions - Dairy Farm, Beef Cattle/Feedlot, Cow-Calf Operations, Enterprise',
+        'Devices - Mastitis Detection Device (MastiPro), Calving Sensor (PartuSense), '
         'Heat Detection (M2Moo ear tag), Wash Quality Monitor (WashLog)',
-        'Modules — Dairy/Beef Cow Management, Group Management, Milk Yield Records, '
+        'Modules - Dairy/Beef Cow Management, Group Management, Milk Yield Records, '
         'Weight Monitoring, Feed Management, Milk Ration Management, Beef Ration Management, '
         'Health Management, Heat/Breeding Operations, Pregnancy/Gestation Monitoring',
-        'Freelance Veterinarian App — Multiple farms on single screen for traveling vets',
-        'Enterprise Solutions — Multi-farm corporate management capabilities',
+        'Freelance Veterinarian App - Multiple farms on single screen for traveling vets',
+        'Enterprise Solutions - Multi-farm corporate management capabilities',
     ]
     for feat in features_milkingcloud:
         add_bullet(doc, feat)
@@ -1099,21 +1099,21 @@ def generate_document():
     doc.add_paragraph()
     
     # ── 2.6 GLOBAL ──
-    add_heading_styled(doc, '2.6 Global — Allflex/Merck, DairyGlobal', level=2)
+    add_heading_styled(doc, '2.6 Global - Allflex/Merck, DairyGlobal', level=2)
     
-    add_heading_styled(doc, 'allflex.global (Merck — Global)', level=3)
+    add_heading_styled(doc, 'allflex.global (Merck - Global)', level=3)
     add_body_text(doc,
         '65 years of livestock identification experience. Global leader in RFID tags, '
         'visual tags, tissue sampling, and SenseHub monitoring systems.')
     features_allflex = [
-        'Visual ID Tags — Various colors, print options for cattle, sheep, goats, zoo, wildlife',
-        'Electronic ID (RFID) — Species-specific RFID tags for traceability programs',
-        'Tissue Sampling — Ear biopsies for health status, genomic insights, disease eradication',
-        'SenseHub Monitoring — Cow-Calf, Dairy, Feedlot, and Poultry monitoring systems',
-        'DataFlow II — Data management and flow for livestock intelligence',
-        'Milking Automation — Automated milking system integration',
-        'Tag Applicators + Readers — Hardware ecosystem for livestock identification',
-        'Compliance — Supports national traceability and biosecurity regulatory programs',
+        'Visual ID Tags - Various colors, print options for cattle, sheep, goats, zoo, wildlife',
+        'Electronic ID (RFID) - Species-specific RFID tags for traceability programs',
+        'Tissue Sampling - Ear biopsies for health status, genomic insights, disease eradication',
+        'SenseHub Monitoring - Cow-Calf, Dairy, Feedlot, and Poultry monitoring systems',
+        'DataFlow II - Data management and flow for livestock intelligence',
+        'Milking Automation - Automated milking system integration',
+        'Tag Applicators + Readers - Hardware ecosystem for livestock identification',
+        'Compliance - Supports national traceability and biosecurity regulatory programs',
     ]
     for feat in features_allflex:
         add_bullet(doc, feat)
@@ -1122,14 +1122,14 @@ def generate_document():
     
     add_heading_styled(doc, 'dairyglobal.net (Netherlands)', level=3)
     add_body_text(doc,
-        "Gateway to the global dairy industry — comprehensive dairy news, expert opinions, "
+        "Gateway to the global dairy industry - comprehensive dairy news, expert opinions, "
         "webinars, digital magazines, and outbreak monitoring.")
     features_dairyglobal = [
-        'Outbreak Updates — Real-time FMD (Foot-and-Mouth) and HPAI tracking globally',
-        'Global Dairy Market Prices — Live price data across global markets',
-        'Expert Opinions — Authored insights from industry leaders',
-        'Webinars & Digital Magazine — Educational content for dairy professionals',
-        'Focus Topics — Hoof health, Cows & Climate, Best practices',
+        'Outbreak Updates - Real-time FMD (Foot-and-Mouth) and HPAI tracking globally',
+        'Global Dairy Market Prices - Live price data across global markets',
+        'Expert Opinions - Authored insights from industry leaders',
+        'Webinars & Digital Magazine - Educational content for dairy professionals',
+        'Focus Topics - Hoof health, Cows & Climate, Best practices',
     ]
     for feat in features_dairyglobal:
         add_bullet(doc, feat)
@@ -1151,23 +1151,23 @@ def generate_document():
         ['Feature Category', 'India', 'USA', 'Australia', 'Europe', 'VetCare Status'],
         [
             ['Livestock Marketplace', 'animall, pashushala', 'Breedr', 'AuctionsPlus', 'Agriaffaires', 'Existing (enhance)'],
-            ['Live Online Auctions', '—', '—', 'AuctionsPlus, StockLive', '—', 'NEW'],
-            ['Herd/Cattle Management', '—', 'Herdwatch, Farmbrite', '—', 'CowManager', 'Existing (enhance)'],
-            ['Milk Recording/Dairy', 'pashushala (basic)', 'Farmbrite', '—', 'MilkingCloud', 'NEW'],
-            ['AI Advisory/Copilot', 'PashuGuru.AI', 'Connecterra Copilot', '—', 'AGRIVI AI', 'Existing (enhance)'],
-            ['IoT Sensor Monitoring', '—', '—', '—', 'CowManager, MilkingCloud', 'Existing (enhance)'],
-            ['Feed/Ration Management', 'SmartFeed', 'Farmbrite', '—', 'MilkingCloud', 'Existing (enhance)'],
-            ['Market Price Intelligence', '—', 'CattleRange', 'AuctionsPlus AYCI', '—', 'NEW'],
-            ['Weather/Drought Monitor', '—', 'CattleRange, Farmbrite', '—', 'AGRIVI Connect', 'NEW'],
-            ['Supply Chain Traceability', '—', 'Breedr', '—', 'AGRIVI Food', 'Existing (enhance)'],
-            ['RFID/EID Integration', '—', 'Herdwatch', '—', 'Allflex, CowManager', 'NEW'],
-            ['Farm eCommerce/Sales', '—', 'Farmbrite', '—', '—', 'NEW'],
-            ['Livestock Finance', '—', '—', 'AuctionsPlus StockCo', '—', 'NEW'],
-            ['Pasture Management', '—', 'Herdwatch, Farmbrite', '—', '—', 'NEW'],
-            ['Community Forum', 'Pashu Chat', '—', '—', '—', 'NEW'],
-            ['Farm Mapping', '—', 'Farmbrite', '—', '—', 'Existing (enhance)'],
-            ['Farm Accounting', '—', 'Farmbrite', '—', 'AGRIVI', 'NEW'],
-            ['Vet Practice Management', '—', '—', '—', 'MilkingCloud', 'Existing'],
+            ['Live Online Auctions', '-', '-', 'AuctionsPlus, StockLive', '-', 'NEW'],
+            ['Herd/Cattle Management', '-', 'Herdwatch, Farmbrite', '-', 'CowManager', 'Existing (enhance)'],
+            ['Milk Recording/Dairy', 'pashushala (basic)', 'Farmbrite', '-', 'MilkingCloud', 'NEW'],
+            ['AI Advisory/Copilot', 'PashuGuru.AI', 'Connecterra Copilot', '-', 'AGRIVI AI', 'Existing (enhance)'],
+            ['IoT Sensor Monitoring', '-', '-', '-', 'CowManager, MilkingCloud', 'Existing (enhance)'],
+            ['Feed/Ration Management', 'SmartFeed', 'Farmbrite', '-', 'MilkingCloud', 'Existing (enhance)'],
+            ['Market Price Intelligence', '-', 'CattleRange', 'AuctionsPlus AYCI', '-', 'NEW'],
+            ['Weather/Drought Monitor', '-', 'CattleRange, Farmbrite', '-', 'AGRIVI Connect', 'NEW'],
+            ['Supply Chain Traceability', '-', 'Breedr', '-', 'AGRIVI Food', 'Existing (enhance)'],
+            ['RFID/EID Integration', '-', 'Herdwatch', '-', 'Allflex, CowManager', 'NEW'],
+            ['Farm eCommerce/Sales', '-', 'Farmbrite', '-', '-', 'NEW'],
+            ['Livestock Finance', '-', '-', 'AuctionsPlus StockCo', '-', 'NEW'],
+            ['Pasture Management', '-', 'Herdwatch, Farmbrite', '-', '-', 'NEW'],
+            ['Community Forum', 'Pashu Chat', '-', '-', '-', 'NEW'],
+            ['Farm Mapping', '-', 'Farmbrite', '-', '-', 'Existing (enhance)'],
+            ['Farm Accounting', '-', 'Farmbrite', '-', 'AGRIVI', 'NEW'],
+            ['Vet Practice Management', '-', '-', '-', 'MilkingCloud', 'Existing'],
             ['Multi-language', 'Hindi only', 'English only', 'English only', '20+ (Agriaffaires)', 'Existing (5 langs)'],
         ],
         col_widths=[1.8, 1.3, 1.3, 1.3, 1.2])
@@ -1177,7 +1177,7 @@ def generate_document():
     # ═══════════════════════════════════════════════════════════════
     # 4. GAP ANALYSIS
     # ═══════════════════════════════════════════════════════════════
-    add_heading_styled(doc, '4. Gap Analysis — VetCare vs Global Leaders', level=1)
+    add_heading_styled(doc, '4. Gap Analysis - VetCare vs Global Leaders', level=1)
     
     add_heading_styled(doc, '4.1 Already Covered (Enhancement Only)', level=2)
     
@@ -1278,7 +1278,7 @@ def generate_document():
     add_body_text(doc, 'VetCare Innovation (Beyond Competitors):', bold=True, color=RGBColor(0x2E, 0x7D, 0x32))
     add_bullet(doc, 'AI-Verified Animal Data on auction lots (medical records, milk yield, vaccination history auto-attached)')
     add_bullet(doc, 'Video Call with Seller before bidding (not just video stream of sale)')
-    add_bullet(doc, 'Multi-language auction interface (5 languages) — AuctionsPlus is English only')
+    add_bullet(doc, 'Multi-language auction interface (5 languages) - AuctionsPlus is English only')
     
     doc.add_paragraph()
     
@@ -1294,20 +1294,20 @@ def generate_document():
     doc.add_paragraph()
     add_body_text(doc, 'VetCare Implementation:', bold=True)
     market_items = [
-        'Price Dashboard — Regional average prices by species, breed, age class, weight class',
-        'Price History Charts — Daily/weekly/monthly trend lines, seasonal patterns, YoY comparison',
-        'Market Reports — Auto-generated weekly summaries from VetCare platform transactions + external data',
-        'Cattle Value Calculator — Input: breed, age, weight, lactation, location -> Estimated fair market value',
-        'Price Alerts — Notify farmers when market price for their breed exceeds threshold',
-        'Market Benchmarking — Compare your listing price vs regional average (helps sellers price competitively)',
+        'Price Dashboard - Regional average prices by species, breed, age class, weight class',
+        'Price History Charts - Daily/weekly/monthly trend lines, seasonal patterns, YoY comparison',
+        'Market Reports - Auto-generated weekly summaries from VetCare platform transactions + external data',
+        'Cattle Value Calculator - Input: breed, age, weight, lactation, location -> Estimated fair market value',
+        'Price Alerts - Notify farmers when market price for their breed exceeds threshold',
+        'Market Benchmarking - Compare your listing price vs regional average (helps sellers price competitively)',
     ]
     for item in market_items:
         add_bullet(doc, item)
     
     doc.add_paragraph()
     add_body_text(doc, 'VetCare Innovation:', bold=True, color=RGBColor(0x2E, 0x7D, 0x32))
-    add_bullet(doc, 'AI Price Prediction — ML model predicts price trends based on Season + Breed + Region + Supply data')
-    add_bullet(doc, 'Embedded in Listing Flow — When seller creates listing, dashboard shows "Your price is X% above/below market"')
+    add_bullet(doc, 'AI Price Prediction - ML model predicts price trends based on Season + Breed + Region + Supply data')
+    add_bullet(doc, 'Embedded in Listing Flow - When seller creates listing, dashboard shows "Your price is X% above/below market"')
     
     doc.add_paragraph()
     
@@ -1323,20 +1323,20 @@ def generate_document():
     doc.add_paragraph()
     add_body_text(doc, 'VetCare Implementation:', bold=True)
     iot_items = [
-        'Sensor Dashboard — Real-time display of eating, rumination, activity, and temperature per animal',
-        'Health Alert Engine — 3-day early illness warning (rumination decline + temperature spike = flag)',
-        'Heat Detection — Automated fertility alerts with optimal insemination window',
-        'Calving Prediction — Sensor-based calving alert (PartuSense-style) with SMS/push notification',
-        'Mastitis Early Warning — Abnormal milking patterns + temperature = mastitis risk score',
-        '"Find My Cow" — GPS/locator within farm using sensor proximity data',
-        'Transition Monitoring — Track dry period to calving health metrics',
+        'Sensor Dashboard - Real-time display of eating, rumination, activity, and temperature per animal',
+        'Health Alert Engine - 3-day early illness warning (rumination decline + temperature spike = flag)',
+        'Heat Detection - Automated fertility alerts with optimal insemination window',
+        'Calving Prediction - Sensor-based calving alert (PartuSense-style) with SMS/push notification',
+        'Mastitis Early Warning - Abnormal milking patterns + temperature = mastitis risk score',
+        '"Find My Cow" - GPS/locator within farm using sensor proximity data',
+        'Transition Monitoring - Track dry period to calving health metrics',
     ]
     for item in iot_items:
         add_bullet(doc, item)
     
     doc.add_paragraph()
     add_body_text(doc, 'VetCare Innovation:', bold=True, color=RGBColor(0x2E, 0x7D, 0x32))
-    add_bullet(doc, 'IoT data feeds into Marketplace listings — Buyer sees "IoT-Verified: Health Score 95/100"')
+    add_bullet(doc, 'IoT data feeds into Marketplace listings - Buyer sees "IoT-Verified: Health Score 95/100"')
     add_bullet(doc, 'Disease Prediction AI uses IoT data + regional outbreak data for predictive alerts')
     add_bullet(doc, 'No competitor combines IoT ear sensor data WITH marketplace AND vet consultation in one platform')
     
@@ -1347,12 +1347,12 @@ def generate_document():
     add_body_text(doc, 'Source: CattleRange (drought monitor), Farmbrite (climate), AGRIVI (weather stations)  |  New feature', italic=True)
     
     weather_items = [
-        'Farm Weather Dashboard — Current conditions, 7-day forecast, historical trends for farm location',
-        'Drought Severity Map — Regional drought monitoring with impact on livestock feed availability',
-        'Heat Stress Alerts — When temperature-humidity index exceeds threshold, alert about livestock risk',
-        'Seasonal Feed Planning — Weather forecast integrated with Feed Inventory for proactive procurement',
-        'Satellite Imagery — Pasture health assessment via NDVI (Normalized Difference Vegetation Index)',
-        'Climate Risk Score — Rate farm locations for climate resilience (drought, flood, extreme heat risk)',
+        'Farm Weather Dashboard - Current conditions, 7-day forecast, historical trends for farm location',
+        'Drought Severity Map - Regional drought monitoring with impact on livestock feed availability',
+        'Heat Stress Alerts - When temperature-humidity index exceeds threshold, alert about livestock risk',
+        'Seasonal Feed Planning - Weather forecast integrated with Feed Inventory for proactive procurement',
+        'Satellite Imagery - Pasture health assessment via NDVI (Normalized Difference Vegetation Index)',
+        'Climate Risk Score - Rate farm locations for climate resilience (drought, flood, extreme heat risk)',
     ]
     for item in weather_items:
         add_bullet(doc, item)
@@ -1364,13 +1364,13 @@ def generate_document():
     add_body_text(doc, 'Source: Breedr (UK/USA)  |  Enhancement to Supply Chain module', italic=True)
     
     supply_items = [
-        'Lifetime Animal Timeline — Every event from conception to final processing in one view',
-        'Supply Chain Roles — Seedstock > Cow-Calf > Nursery > Feedyard > Packer/Retailer chain',
-        'Cross-Producer Collaboration — Independent producers share data within a supply chain',
-        'Calf Buy-Back Programs — Seedstock sellers offer buy-back agreements to cow-calf operators',
-        'Retained Ownership Models — Track animals through chain while maintaining breeder ownership',
-        'Performance Feedback Loop — Carcass data flows back to breeder for genetic improvement',
-        'Premium Pricing Grids — Data-driven preferential pricing for consistent quality producers',
+        'Lifetime Animal Timeline - Every event from conception to final processing in one view',
+        'Supply Chain Roles - Seedstock > Cow-Calf > Nursery > Feedyard > Packer/Retailer chain',
+        'Cross-Producer Collaboration - Independent producers share data within a supply chain',
+        'Calf Buy-Back Programs - Seedstock sellers offer buy-back agreements to cow-calf operators',
+        'Retained Ownership Models - Track animals through chain while maintaining breeder ownership',
+        'Performance Feedback Loop - Carcass data flows back to breeder for genetic improvement',
+        'Premium Pricing Grids - Data-driven preferential pricing for consistent quality producers',
     ]
     for item in supply_items:
         add_bullet(doc, item)
@@ -1385,11 +1385,11 @@ def generate_document():
     add_body_text(doc, 'Source: Herdwatch (Pasture), Farmbrite (Farm Mapping)  |  Enhancement to Geospatial', italic=True)
     
     pasture_items = [
-        'Interactive Farm Map Builder — Draw paddocks, buildings, water sources, lanes on satellite map',
-        'Grazing Rotation Planner — Track which paddock each group is in, plan rotation schedule',
-        'Fertilizer Application Tracking — Record what, when, how much applied per paddock',
-        'Pasture Task Management — Create tasks for fencing, mowing, spraying with due dates',
-        'Stocking Rate Calculator — Animals per hectare with carrying capacity recommendations',
+        'Interactive Farm Map Builder - Draw paddocks, buildings, water sources, lanes on satellite map',
+        'Grazing Rotation Planner - Track which paddock each group is in, plan rotation schedule',
+        'Fertilizer Application Tracking - Record what, when, how much applied per paddock',
+        'Pasture Task Management - Create tasks for fencing, mowing, spraying with due dates',
+        'Stocking Rate Calculator - Animals per hectare with carrying capacity recommendations',
     ]
     for item in pasture_items:
         add_bullet(doc, item)
@@ -1401,11 +1401,11 @@ def generate_document():
     add_body_text(doc, 'Source: AuctionsPlus StockCo (Australia)  |  New feature integrated with Marketplace', italic=True)
     
     finance_items = [
-        'Livestock Purchase Financing — Buyer applies for financing during auction/purchase flow',
-        'Trade & Finance Calculator — Estimate repayment schedule, interest, total cost before bidding',
-        'Financing Status Tracking — Dashboard showing active loans, payments due, balance',
-        'Partner Bank Integration — Connect with agricultural lenders/banks for loan processing',
-        'Credit Scoring — Platform activity and transaction history build a livestock credit score',
+        'Livestock Purchase Financing - Buyer applies for financing during auction/purchase flow',
+        'Trade & Finance Calculator - Estimate repayment schedule, interest, total cost before bidding',
+        'Financing Status Tracking - Dashboard showing active loans, payments due, balance',
+        'Partner Bank Integration - Connect with agricultural lenders/banks for loan processing',
+        'Credit Scoring - Platform activity and transaction history build a livestock credit score',
     ]
     for item in finance_items:
         add_bullet(doc, item)
@@ -1417,11 +1417,11 @@ def generate_document():
     add_body_text(doc, 'Source: Allflex (Global), Herdwatch (EID reader), CowManager  |  Enhancement to Animals module', italic=True)
     
     rfid_items = [
-        'EID Tag Registration — Register RFID/EID tag numbers against animal profiles',
-        'Bluetooth EID Reader Support — Scan tags via smartphone-connected reader',
-        'Batch Scanning — Scan multiple animals for weighing, treatment recording, movement',
-        'Traceability Compliance — Meet national livestock traceability regulatory requirements',
-        'Automatic Animal Lookup — Scan tag -> instant animal profile with full history',
+        'EID Tag Registration - Register RFID/EID tag numbers against animal profiles',
+        'Bluetooth EID Reader Support - Scan tags via smartphone-connected reader',
+        'Batch Scanning - Scan multiple animals for weighing, treatment recording, movement',
+        'Traceability Compliance - Meet national livestock traceability regulatory requirements',
+        'Automatic Animal Lookup - Scan tag -> instant animal profile with full history',
     ]
     for item in rfid_items:
         add_bullet(doc, item)
@@ -1433,12 +1433,12 @@ def generate_document():
     add_body_text(doc, 'Source: MilkingCloud (Turkey), Farmbrite (USA)  |  Enhancement to Feed Inventory', italic=True)
     
     ration_items = [
-        'Dairy Ration Formulation — Create balanced rations for milk production optimization',
-        'Beef Ration Management — Growth-optimized rations for feedlot cattle',
-        'Nutritional Requirements Engine — Species + breed + weight + production stage = daily nutrient targets',
-        'Ingredient Cost Optimizer — Least-cost ration that meets all nutritional requirements',
-        'Ration Templates — Pre-built rations for common breed/stage combinations',
-        'Feed Conversion Ratio Tracking — Measure efficiency (feed consumed vs output produced)',
+        'Dairy Ration Formulation - Create balanced rations for milk production optimization',
+        'Beef Ration Management - Growth-optimized rations for feedlot cattle',
+        'Nutritional Requirements Engine - Species + breed + weight + production stage = daily nutrient targets',
+        'Ingredient Cost Optimizer - Least-cost ration that meets all nutritional requirements',
+        'Ration Templates - Pre-built rations for common breed/stage combinations',
+        'Feed Conversion Ratio Tracking - Measure efficiency (feed consumed vs output produced)',
     ]
     for item in ration_items:
         add_bullet(doc, item)
@@ -1450,11 +1450,11 @@ def generate_document():
     add_body_text(doc, 'Source: Farmbrite (USA)  |  Enhancement to Marketplace', italic=True)
     
     ecom_items = [
-        'Farm Storefront — Each farmer gets a customizable online shop page',
-        'Point-of-Sale (POS) — In-person sales recording at farm gate or market',
-        'Order Management — Multi-channel order aggregation and fulfillment tracking',
-        'Pick & Pack Lists — Automated picklists integrated with inventory',
-        'Subscription Orders — Recurring delivery schedules for dairy products',
+        'Farm Storefront - Each farmer gets a customizable online shop page',
+        'Point-of-Sale (POS) - In-person sales recording at farm gate or market',
+        'Order Management - Multi-channel order aggregation and fulfillment tracking',
+        'Pick & Pack Lists - Automated picklists integrated with inventory',
+        'Subscription Orders - Recurring delivery schedules for dairy products',
     ]
     for item in ecom_items:
         add_bullet(doc, item)
@@ -1556,19 +1556,19 @@ def generate_document():
     add_styled_table(doc,
         ['Permission Key', 'pet_owner', 'farmer', 'vet', 'admin', 'Source'],
         [
-            ['milk_recording', '—', 'Y', 'Y', 'Y', 'India'],
-            ['dairy_dashboard', '—', 'Y', '—', 'Y', 'India'],
+            ['milk_recording', '-', 'Y', 'Y', 'Y', 'India'],
+            ['dairy_dashboard', '-', 'Y', '-', 'Y', 'India'],
             ['community_forum', 'Y', 'Y', 'Y', 'Y', 'India'],
             ['knowledge_hub', 'Y', 'Y', 'Y', 'Y', 'India'],
-            ['partner_network', '—', 'Y', '—', 'Y', 'India'],
+            ['partner_network', '-', 'Y', '-', 'Y', 'India'],
             ['medicine_store', 'Y', 'Y', 'Y', 'Y', 'India'],
-            ['equipment_store', '—', 'Y', '—', 'Y', 'India'],
-            ['dairy_products', 'Y', 'Y', '—', 'Y', 'India'],
-            ['boost_listing', 'Y', 'Y', '—', '—', 'India'],
-            ['market_intelligence', '—', 'Y', 'Y', 'Y', 'USA/AU'],
+            ['equipment_store', '-', 'Y', '-', 'Y', 'India'],
+            ['dairy_products', 'Y', 'Y', '-', 'Y', 'India'],
+            ['boost_listing', 'Y', 'Y', '-', '-', 'India'],
+            ['market_intelligence', '-', 'Y', 'Y', 'Y', 'USA/AU'],
             ['live_auctions', 'Y', 'Y', 'Y', 'Y', 'Australia'],
-            ['weather_climate', '—', 'Y', 'Y', 'Y', 'USA/EU'],
-            ['iot_monitoring', '—', 'Y', 'Y', 'Y', 'Netherlands'],
+            ['weather_climate', '-', 'Y', 'Y', 'Y', 'USA/EU'],
+            ['iot_monitoring', '-', 'Y', 'Y', 'Y', 'Netherlands'],
         ],
         col_widths=[1.5, 0.8, 0.8, 0.6, 0.6, 1.0])
     
@@ -1661,7 +1661,7 @@ def generate_document():
     
     doc.add_paragraph()
     
-    add_heading_styled(doc, 'Phase 1 — Core Revenue Drivers (HIGH)', level=2)
+    add_heading_styled(doc, 'Phase 1 - Core Revenue Drivers (HIGH)', level=2)
     add_styled_table(doc,
         ['#', 'Feature', 'Source', 'Complexity'],
         [
@@ -1671,7 +1671,7 @@ def generate_document():
         ])
     
     doc.add_paragraph()
-    add_heading_styled(doc, 'Phase 2 — Ecosystem Growth (HIGH-MEDIUM)', level=2)
+    add_heading_styled(doc, 'Phase 2 - Ecosystem Growth (HIGH-MEDIUM)', level=2)
     add_styled_table(doc,
         ['#', 'Feature', 'Source', 'Complexity'],
         [
@@ -1682,7 +1682,7 @@ def generate_document():
         ])
     
     doc.add_paragraph()
-    add_heading_styled(doc, 'Phase 3 — Platform Expansion (MEDIUM)', level=2)
+    add_heading_styled(doc, 'Phase 3 - Platform Expansion (MEDIUM)', level=2)
     add_styled_table(doc,
         ['#', 'Feature', 'Source', 'Complexity'],
         [
@@ -1693,7 +1693,7 @@ def generate_document():
         ])
     
     doc.add_paragraph()
-    add_heading_styled(doc, 'Phase 4 — Intelligence & IoT (MEDIUM)', level=2)
+    add_heading_styled(doc, 'Phase 4 - Intelligence & IoT (MEDIUM)', level=2)
     add_styled_table(doc,
         ['#', 'Feature', 'Source', 'Complexity'],
         [
@@ -1704,7 +1704,7 @@ def generate_document():
         ])
     
     doc.add_paragraph()
-    add_heading_styled(doc, 'Phase 5 — Polish & Scale (LOW)', level=2)
+    add_heading_styled(doc, 'Phase 5 - Polish & Scale (LOW)', level=2)
     add_styled_table(doc,
         ['#', 'Feature', 'Source', 'Complexity'],
         [
@@ -1742,7 +1742,7 @@ def generate_document():
     biz_impacts = [
         'Revenue Streams: Boost listings, marketplace commissions, auction fees, livestock finance commissions, partner commissions, subscription dairy, equipment rental commissions',
         'User Engagement: Community forum + milk recording create daily login habits; live auctions create event-based engagement',
-        'Trust & Verification: AI-verified milk yield, IoT-verified health scores, vaccination badges, RFID traceability — unprecedented buyer confidence',
+        'Trust & Verification: AI-verified milk yield, IoT-verified health scores, vaccination badges, RFID traceability - unprecedented buyer confidence',
         'Market Intelligence: Price benchmarking helps sellers price competitively and buyers make informed decisions',
         'Ecosystem Lock-in: 14+ interconnected modules create deep data value impossible to replicate on any single competitor',
         'Geographic Expansion: 5-language support (EN, HI, TA, TE, KN) means immediate reach across India; global feature set attracts international users',
@@ -1758,21 +1758,21 @@ def generate_document():
         'livestock marketplace with live auctions, dairy management, IoT sensor monitoring, '
         'AI-powered decision support, market price intelligence, weather/drought integration, '
         'conception-to-carcass supply chain, community forum, multi-vertical e-commerce '
-        '(medicine + equipment + dairy products), livestock finance, and full traceability — '
+        '(medicine + equipment + dairy products), livestock finance, and full traceability - '
         'all in a single integrated ecosystem with deep cross-module data flow in 5 languages.')
     
     doc.add_paragraph()
     add_body_text(doc,
         'No single competitor worldwide comes close to this level of integration:')
     comparison_items = [
-        'animall.in/pashushala.com (India) — Marketplace only, no IoT, no auctions, no weather, single language',
-        'AuctionsPlus (Australia) — Auctions only, no vet consultation, no IoT monitoring, no AI copilot',
-        'CowManager (Netherlands) — IoT only, no marketplace, no community, no auctions',
-        'Breedr (UK/USA) — Supply chain only, no vet consultation, no marketplace, no IoT dashboard',
-        'Farmbrite (USA) — Farm management only, no auctions, no vet consultation, no IoT sensors',
-        'Herdwatch (Ireland) — Herd management only, no marketplace, no AI copilot, no supply chain',
-        'Connecterra (Netherlands) — AI analytics only, no marketplace, no auctions, no e-commerce',
-        'MilkingCloud (Turkey) — Dairy IoT only, no marketplace, no community, no supply chain',
+        'animall.in/pashushala.com (India) - Marketplace only, no IoT, no auctions, no weather, single language',
+        'AuctionsPlus (Australia) - Auctions only, no vet consultation, no IoT monitoring, no AI copilot',
+        'CowManager (Netherlands) - IoT only, no marketplace, no community, no auctions',
+        'Breedr (UK/USA) - Supply chain only, no vet consultation, no marketplace, no IoT dashboard',
+        'Farmbrite (USA) - Farm management only, no auctions, no vet consultation, no IoT sensors',
+        'Herdwatch (Ireland) - Herd management only, no marketplace, no AI copilot, no supply chain',
+        'Connecterra (Netherlands) - AI analytics only, no marketplace, no auctions, no e-commerce',
+        'MilkingCloud (Turkey) - Dairy IoT only, no marketplace, no community, no supply chain',
     ]
     for item in comparison_items:
         add_bullet(doc, item)

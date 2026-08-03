@@ -136,7 +136,7 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
       const res = await apiService.getNetworkRoles(networkId);
       setCustomRoles((res.data || []).filter((r: any) => r.isCustom));
     } catch {
-      // silent — custom roles are additive
+      // silent - custom roles are additive
     }
   }, [networkId]);
 
@@ -252,7 +252,7 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
     // Admin mode: show toggle
     if (isPlatformOnly) {
       return (
-        <td key={role} className="nrm-cell nrm-cell-platform" title="Platform Admin Only — not configurable">
+        <td key={role} className="nrm-cell nrm-cell-platform" title="Platform Admin Only - not configurable">
           🔐
         </td>
       );

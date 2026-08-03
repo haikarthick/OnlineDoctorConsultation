@@ -11,7 +11,7 @@ function getCookie(name: string): string | null {
 // ─── Shared Axios client ──────────────────────────────────────────
 // This is THE single Axios instance + auth/CSRF/refresh interceptor stack
 // for the whole app. services/api/client.ts re-exports it rather than
-// creating its own — previously it duplicated all of this with a subtly
+// creating its own - previously it duplicated all of this with a subtly
 // different (weaker) 403/CSRF error-shape check, and its CSRF token cache
 // was a separate variable that never synced with this one, so a token
 // rotated on one client wasn't known to the other.
@@ -19,7 +19,7 @@ let sharedCsrfToken: string | null = null
 
 export const sharedClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 60000, // 60s — free-tier Render DB can take up to 30-90s to wake from sleep
+  timeout: 60000, // 60s - free-tier Render DB can take up to 30-90s to wake from sleep
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ sharedClient.interceptors.response.use(
           }
           return sharedClient.request(originalConfig)
         } catch {
-          // Refresh failed — logout
+          // Refresh failed - logout
         }
       }
       localStorage.removeItem('authToken')
@@ -117,7 +117,7 @@ export async function fetchCsrfToken(): Promise<void> {
 }
 
 // Fetch initial CSRF token
-fetchCsrfToken().catch(() => { /* silent — will retry on 403 */ })
+fetchCsrfToken().catch(() => { /* silent - will retry on 403 */ })
 
 class ApiService {
   private client: AxiosInstance = sharedClient
@@ -153,7 +153,7 @@ class ApiService {
     return response.data
   }
 
-  /** Generic HTTP GET — use for ad-hoc endpoints without a typed wrapper */
+  /** Generic HTTP GET - use for ad-hoc endpoints without a typed wrapper */
   async get(url: string, config?: { params?: Record<string, any> }) {
     return this.client.get(url, config)
   }
@@ -247,7 +247,7 @@ class ApiService {
   /**
    * Mark a confirmed/pending booking as a patient no-show (veterinarian or admin).
    * Sets status 'missed' and runs PaymentOrchestrator.settleMissedBooking, which
-   * compensates the doctor on paid bookings — so leaving this unwired meant the
+   * compensates the doctor on paid bookings - so leaving this unwired meant the
    * no-show rules in Admin Settings could never fire and that compensation never
    * happened.
    */
@@ -2351,7 +2351,7 @@ class ApiService {
     return response.data
   }
 
-  // ─── Marketplace Monetization — Admin ───────────────────────
+  // ─── Marketplace Monetization - Admin ───────────────────────
   async getMonetizationSettings() {
     const response = await this.client.get('/marketplace/admin/monetization/settings')
     return response.data
@@ -2387,7 +2387,7 @@ class ApiService {
     return response.data
   }
 
-  // ─── Marketplace Monetization — User ────────────────────────
+  // ─── Marketplace Monetization - User ────────────────────────
   async getUserSubscription() {
     const response = await this.client.get('/marketplace/subscription')
     return response.data
@@ -3051,7 +3051,7 @@ class ApiService {
     return response.data
   }
 
-  // ── Wallet withdrawals (038) — money out of the platform ──
+  // ── Wallet withdrawals (038) - money out of the platform ──
   async requestWalletWithdrawal(data: {
     amount: number; method?: string; accountName?: string; accountNumber?: string; ifsc?: string; upiId?: string
   }) {
@@ -3098,7 +3098,7 @@ class ApiService {
     return response.data
   }
 
-  /** Which days in a month have any capacity — drives the booking calendar. */
+  /** Which days in a month have any capacity - drives the booking calendar. */
   async getGroomingMonthAvailability(providerId: string, year: number, month: number, opts: { serviceId?: string; locationId?: string } = {}) {
     const response = await this.client.get(`/grooming/providers/${providerId}/availability/month`, {
       params: { year, month, serviceId: opts.serviceId, locationId: opts.locationId },

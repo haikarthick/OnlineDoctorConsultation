@@ -22,7 +22,7 @@ export function registerServiceWorker(): void {
 
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New content available — notify user
+              // New content available - notify user
               dispatchPWAEvent('sw-update-available', { registration });
             }
           });

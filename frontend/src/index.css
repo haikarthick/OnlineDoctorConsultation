@@ -45,7 +45,7 @@ button {
   font-size: 1em;
   font-weight: 600;
   font-family: inherit;
-  /* No global background or color — component-level classes/inline styles set these.
+  /* No global background or color - component-level classes/inline styles set these.
      This prevents white-text-on-white-background when a button overrides background
      but inherits the old color: white from here. */
   cursor: pointer;

@@ -6,19 +6,19 @@ import GroomingProviderService from './GroomingProviderService';
 /**
  * Grooming availability: working hours, date overrides, blocked ranges and bookable slots.
  *
- * The grooming counterpart of ScheduleService, kept SEPARATE per the module-separation rule —
+ * The grooming counterpart of ScheduleService, kept SEPARATE per the module-separation rule -
  * it reads grooming_schedules/grooming_date_overrides/grooming_blocked_slots and never touches
  * vet_schedules or bookings.
  *
  * Two things this does that the consultation engine cannot:
- *   CAPACITY — a slot is bookable while overlapping orders < capacity, not merely "unbooked".
+ *   CAPACITY - a slot is bookable while overlapping orders < capacity, not merely "unbooked".
  *              A salon with three tables sells the same 10:00 three times.
- *   DURATION — occupancy is the interval [start, start + service duration). A 120-minute full
+ *   DURATION - occupancy is the interval [start, start + service duration). A 120-minute full
  *              groom starting at 10:00 blocks a station until 12:00, so 10:30 and 11:00 are
  *              only offered if another station is free.
  *
  * Times are 'HH:MM' strings throughout, matching how grooming_orders already stores
- * time_slot_start — no timezone maths, because a salon's opening hours are local by definition.
+ * time_slot_start - no timezone maths, because a salon's opening hours are local by definition.
  */
 
 /** Statuses that still occupy a station. Terminal/failed states release the slot. */
@@ -100,7 +100,7 @@ class GroomingScheduleService {
     slotIntervalMinutes?: number; capacity?: number; isActive?: boolean;
   }): Promise<any> {
     await this.requireScheduleAdmin(userId, providerId);
-    if (!(data.dayOfWeek >= 0 && data.dayOfWeek <= 6)) throw new ValidationError('dayOfWeek must be 0–6');
+    if (!(data.dayOfWeek >= 0 && data.dayOfWeek <= 6)) throw new ValidationError('dayOfWeek must be 0-6');
     this.validateWindow(data.openTime, data.closeTime);
 
     const locationId = data.locationId || null;
@@ -228,7 +228,7 @@ class GroomingScheduleService {
     // Mirrors grooming_blocked_slots_when_check so the caller gets a readable error rather than
     // a raw constraint violation.
     if (recurring && !(typeof data.recurringDay === 'number' && data.recurringDay >= 0 && data.recurringDay <= 6))
-      throw new ValidationError('A recurring block needs recurringDay (0–6)');
+      throw new ValidationError('A recurring block needs recurringDay (0-6)');
     if (!recurring && !isValidDate(data.blockDate || ''))
       throw new ValidationError('A one-off block needs blockDate (YYYY-MM-DD)');
 
@@ -255,7 +255,7 @@ class GroomingScheduleService {
   /**
    * Slots for one provider/date, optionally sized to a specific service.
    *
-   * Public by design — a customer must see availability before committing to a booking. It
+   * Public by design - a customer must see availability before committing to a booking. It
    * exposes only times and remaining capacity, never customer or order details.
    */
   async getAvailability(providerId: string, date: string, opts: {
@@ -370,13 +370,13 @@ class GroomingScheduleService {
   }
 
   /**
-   * Which days in a month have any capacity — powers the booking calendar so a customer is not
+   * Which days in a month have any capacity - powers the booking calendar so a customer is not
    * made to click through empty dates one at a time.
    */
   async getMonthAvailability(providerId: string, year: number, month: number, opts: {
     serviceId?: string; locationId?: string | null;
   } = {}): Promise<Array<{ date: string; hasAvailability: boolean; closedReason?: string }>> {
-    if (!(month >= 1 && month <= 12)) throw new ValidationError('month must be 1–12');
+    if (!(month >= 1 && month <= 12)) throw new ValidationError('month must be 1-12');
     if (!(year >= 2000 && year <= 2100)) throw new ValidationError('year is out of range');
     const days = new Date(year, month, 0).getDate();
     const out: Array<{ date: string; hasAvailability: boolean; closedReason?: string }> = [];
@@ -422,7 +422,7 @@ class GroomingScheduleService {
   }
 
   /**
-   * Seed a sensible Mon–Sat 09:00–18:00 week so a newly verified provider is bookable straight
+   * Seed a sensible Mon-Sat 09:00-18:00 week so a newly verified provider is bookable straight
    * away. Without this a provider looks permanently closed until they find the schedule screen,
    * which is the single most likely way a real booking is lost.
    */
@@ -431,7 +431,7 @@ class GroomingScheduleService {
       `SELECT 1 FROM grooming_schedules WHERE provider_id = $1 LIMIT 1`, [providerId]);
     if (existing.rows.length > 0) return 0;
     let created = 0;
-    for (let day = 1; day <= 6; day++) { // Monday–Saturday; Sunday left closed
+    for (let day = 1; day <= 6; day++) { // Monday-Saturday; Sunday left closed
       await database.query(
         `INSERT INTO grooming_schedules (provider_id, day_of_week, open_time, close_time, slot_interval_minutes, capacity)
          VALUES ($1,$2,'09:00','18:00',30,1)`, [providerId, day]);

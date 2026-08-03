@@ -10,13 +10,13 @@ const ASSETS_DIR = path.join(__dirname, '..', 'dist', 'assets');
 
 // The entry chunk (index-*.js) loads on every single page view, so it gets
 // the tightest budget. Everything else is route-level or vendor code that
-// only loads when actually needed — 700KB raw is generous headroom over the
+// only loads when actually needed - 700KB raw is generous headroom over the
 // current largest (vendor-react at ~163KB) while still catching real bloat.
 const ENTRY_CHUNK_BUDGET = 600 * 1024;
 const OTHER_CHUNK_BUDGET = 700 * 1024;
 
 if (!fs.existsSync(ASSETS_DIR)) {
-  console.error(`[bundle-budget] ${ASSETS_DIR} not found — run "npm run build" first.`);
+  console.error(`[bundle-budget] ${ASSETS_DIR} not found - run "npm run build" first.`);
   process.exit(1);
 }
 
@@ -31,14 +31,14 @@ for (const file of files) {
     failed = true;
     console.error(
       `[bundle-budget] ${file} is ${(size / 1024).toFixed(1)}KB, exceeding the ${(budget / 1024).toFixed(0)}KB budget` +
-      (isEntry ? ' (entry chunk — loads on every page view)' : '')
+      (isEntry ? ' (entry chunk - loads on every page view)' : '')
     );
   }
 }
 
 if (failed) {
-  console.error('[bundle-budget] FAILED — see above. Run "ANALYZE=true npm run build" to inspect what changed.');
+  console.error('[bundle-budget] FAILED - see above. Run "ANALYZE=true npm run build" to inspect what changed.');
   process.exit(1);
 }
 
-console.log(`[bundle-budget] OK — ${files.length} chunk(s) checked, all within budget.`);
+console.log(`[bundle-budget] OK - ${files.length} chunk(s) checked, all within budget.`);

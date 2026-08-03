@@ -8,11 +8,11 @@ jest.mock('../../src/utils/database');
 describe('Payment module money math (docs/PAYMENT_MODULE_PLAN.md)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // PaymentModuleConfig caches settings with a 60s TTL — clear between tests
+    // PaymentModuleConfig caches settings with a 60s TTL - clear between tests
     PaymentModuleConfig.invalidate();
   });
 
-  describe('computeCommission (§5 — % + flat, snapshot semantics)', () => {
+  describe('computeCommission (§5 - % + flat, snapshot semantics)', () => {
     it('applies percent + flat: 15% + ₹20 on ₹500 → ₹95 commission, ₹405 net', () => {
       const { commission, doctorNet } = PaymentOrchestrator.computeCommission(500, 15, 20);
       expect(commission).toBe(95);
@@ -38,7 +38,7 @@ describe('Payment module money math (docs/PAYMENT_MODULE_PLAN.md)', () => {
     });
   });
 
-  describe('getEffectiveCommission (§5 — per-doctor override ?? global)', () => {
+  describe('getEffectiveCommission (§5 - per-doctor override ?? global)', () => {
     it('uses per-doctor overrides when set', async () => {
       (database.query as jest.Mock).mockImplementation(async (sql: string, params?: any[]) => {
         if (/FROM system_settings WHERE key = \$1/.test(sql)) {
@@ -166,7 +166,7 @@ describe('Payment module money math (docs/PAYMENT_MODULE_PLAN.md)', () => {
     });
   });
 
-  describe('DemoGateway (P0/P2 — simulated fee for D12 testing)', () => {
+  describe('DemoGateway (P0/P2 - simulated fee for D12 testing)', () => {
     it('captures with a simulated 2% fee', async () => {
       const gw = new DemoGateway();
       const order = await gw.createOrder(500, 'INR', 'receipt-1');

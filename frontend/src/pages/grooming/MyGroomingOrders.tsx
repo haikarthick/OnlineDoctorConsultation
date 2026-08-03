@@ -65,7 +65,7 @@ const MyGroomingOrders: React.FC<Props> = ({ onNavigate }) => {
     catch (e: any) { setErr(e?.response?.data?.message || e.message || 'Payment failed') } finally { setBusy(null) }
   }
 
-  // declined_by_provider is terminal and already refunded — offering Cancel on it would send the
+  // declined_by_provider is terminal and already refunded - offering Cancel on it would send the
   // customer into a dialog the server rejects, on an order that owes them nothing further.
   const cancellable = (s: string) => !['completed', 'closed', 'cancelled_by_customer', 'cancelled_by_provider', 'declined_by_provider', 'no_show', 'payment_expired'].includes(s)
 
@@ -113,7 +113,7 @@ const MyGroomingOrders: React.FC<Props> = ({ onNavigate }) => {
                       <div className="module-alert error acceptance-notice">
                         <strong>{t('groomingMyOrders.acceptance.declinedTitle')}</strong>
                         <p>
-                          {o.declineReason ? `“${o.declineReason}” — ` : ''}
+                          {o.declineReason ? `“${o.declineReason}” - ` : ''}
                           {t('groomingMyOrders.acceptance.declinedBody')}
                         </p>
                       </div>

@@ -229,7 +229,7 @@ export default function MedicationCatalog({ networkId }: Props) {
                       <span className="si-ecf1d5e5">{med.form}</span>
                       {med.strength && <small className="si-1a0c0bfa">{med.strength}</small>}
                     </td>
-                    <td>{med.supplier_name || <span className="si-c81ca09e">—</span>}</td>
+                    <td>{med.supplier_name || <span className="si-c81ca09e">-</span>}</td>
                     <td>{formatCurrency(med.unit_cost)}</td>
                     <td>{formatCurrency(med.selling_price)}</td>
                     <td>{med.reorder_point} {med.unit}</td>

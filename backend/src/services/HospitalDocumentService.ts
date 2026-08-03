@@ -150,7 +150,7 @@ export class HospitalDocumentService {
 
     const { docType, fileName, fileUrl, expiryDate } = dto;
 
-    // Upsert — if the doc type was rejected, the owner can re-upload
+    // Upsert - if the doc type was rejected, the owner can re-upload
     const result = await database.query(
       `INSERT INTO hospital_documents
          (id, hospital_id, doc_type, file_name, file_url, expiry_date, status, updated_at)
@@ -248,7 +248,7 @@ export class HospitalDocumentService {
       // Check if all required docs are now approved → activate hospital
       await this._checkAndActivate(hospitalId);
     } else {
-      // Rejected — push hospital back to under_review so owner sees rejection
+      // Rejected - push hospital back to under_review so owner sees rejection
       await database.query(
         `UPDATE vet_hospitals
          SET verification_status = 'rejected', is_verified = false, updated_at = NOW()
@@ -263,7 +263,7 @@ export class HospitalDocumentService {
         await NotificationService.createNotification(
           hospital.rows[0].owner_id,
           'hospital_doc_rejected',
-          `Document Rejected — ${DOC_LABELS[doc.docType as DocType] || doc.docType}`,
+          `Document Rejected - ${DOC_LABELS[doc.docType as DocType] || doc.docType}`,
           `Your ${DOC_LABELS[doc.docType as DocType] || doc.docType} for ${hospital.rows[0].name} was rejected.` +
           (dto.rejectionReason ? ` Reason: ${dto.rejectionReason}` : ' Please re-upload a valid document.'),
           'all',
@@ -336,7 +336,7 @@ export class HospitalDocumentService {
         await NotificationService.createNotification(
           row.owner_id,
           'hospital_doc_expiry_warning',
-          `Document Expiring Soon — ${label}`,
+          `Document Expiring Soon - ${label}`,
           `Your ${label} for ${row.hospital_name} will expire on ${row.expiry_date}. Please renew it before it lapses to avoid suspension.`,
           'all',
           { hospitalId: row.hospital_id, docType: row.doc_type, expiryDate: row.expiry_date },
@@ -370,7 +370,7 @@ export class HospitalDocumentService {
         await NotificationService.createNotification(
           row.owner_id,
           'hospital_auto_suspended',
-          `Hospital Suspended — Expired Document`,
+          `Hospital Suspended - Expired Document`,
           `Your hospital "${row.name}" has been suspended because the ${label} expired on ${row.expiry_date}. Please upload a renewed document and contact support for re-activation.`,
           'all',
           { hospitalId: row.id, docType: row.doc_type, expiryDate: row.expiry_date },
@@ -421,7 +421,7 @@ export class HospitalDocumentService {
         await NotificationService.createNotification(
           h.rows[0].owner_id,
           'hospital_under_review',
-          'Documents Submitted — Under Review',
+          'Documents Submitted - Under Review',
           `All required documents for "${h.rows[0].name}" have been submitted. Our team will review them within 2-3 business days. Your hospital account will be activated once approved.`,
           'all',
           { hospitalId },

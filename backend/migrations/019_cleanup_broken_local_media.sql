@@ -8,7 +8,7 @@
 
 -- jsonb_typeof guard: images is always written as a JSON array by the app
 -- (Joi-validated), but jsonb_array_elements_text() errors on any JSONB value
--- that isn't structurally an array — guard defensively rather than assume.
+-- that isn't structurally an array - guard defensively rather than assume.
 UPDATE marketplace_listings
 SET images = COALESCE(
   (SELECT jsonb_agg(elem) FROM jsonb_array_elements_text(images) AS elem WHERE elem NOT LIKE '/uploads/%'),

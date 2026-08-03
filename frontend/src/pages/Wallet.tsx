@@ -189,7 +189,7 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Withdrawals — the wallet's exit door. Without this, every refund credited here is
+      {/* Withdrawals - the wallet's exit door. Without this, every refund credited here is
           permanent store credit the customer can only ever spend back on the platform. */}
       <div className="card">
         <div className="card-header">

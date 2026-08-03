@@ -87,7 +87,7 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
   useEffect(() => { load() }, [load])
   useAutoRefresh('pharmacy-inventory', load, 30000)
 
-  // Low stock is measured per MEDICATION across all its batches, not per batch —
+  // Low stock is measured per MEDICATION across all its batches, not per batch -
   // see utils/pharmacyStock.ts for why and for the matching backend query.
   const stockByMed = useMemo(() => totalStockByMedication(items), [items])
   const isLowStock = useCallback(
@@ -111,7 +111,7 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
     // single batch's quantity against the medication-level reorder point (as this
     // did) flags every batch of a well-stocked medication: 5 batches x 10 units
     // against a reorder point of 20 reported 5 shortages on 50 units in hand.
-    // The backend's low-stock-alerts route is the reference for this — it does
+    // The backend's low-stock-alerts route is the reference for this - it does
     // `GROUP BY pm.id HAVING SUM(pi.quantity) <= pm.reorder_point`. Mirror it.
     if (filterMode === 'low') result = result.filter(isLowStock)
     if (filterMode === 'expiring') result = result.filter(i => {
@@ -264,13 +264,13 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
                         {[item.generic_name, item.form, item.strength].filter(Boolean).join(' · ')}
                       </small>
                     </td>
-                    <td className="si-e04e9204">{item.batch_number || '—'}</td>
+                    <td className="si-e04e9204">{item.batch_number || '-'}</td>
                     <td className={getStockClass(item)}>
                       <strong>{item.quantity}</strong> {item.unit}
                     </td>
                     <td className="si-d5d2428b">{item.min_stock_level} {item.unit}</td>
                     <td className={getStockClass(item)}>
-                      {item.expiry_date ? formatDate(item.expiry_date) : '—'}
+                      {item.expiry_date ? formatDate(item.expiry_date) : '-'}
                       {item.days_until_expiry !== null && item.days_until_expiry <= 30 && item.days_until_expiry >= 0 && (
                         <small className="si-3b0e4dc4">({item.days_until_expiry}d left)</small>
                       )}
@@ -323,7 +323,7 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
                     <option value="">{t('pharmacy.inventory.selectMedication')}</option>
                     {medications.map(m => (
                       <option key={m.id} value={m.id}>
-                        {m.name} {m.strength ? `(${m.strength})` : ''} — {m.form}
+                        {m.name} {m.strength ? `(${m.strength})` : ''} - {m.form}
                       </option>
                     ))}
                   </select>

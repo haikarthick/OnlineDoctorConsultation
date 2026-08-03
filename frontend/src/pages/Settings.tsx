@@ -566,7 +566,7 @@ const Settings: React.FC = () => {
 
         {/* Grooming & Spa: becoming a provider is ADDITIVE (createProvider grants the 'groomer'
             role alongside the existing one), so it deliberately does NOT go through the role-change
-            request below — that flow REPLACES users.role and would cost a pet owner access to
+            request below - that flow REPLACES users.role and would cost a pet owner access to
             their own animals. Hidden once they already run a business. */}
         {groomingEnabled && !hasPermission('grooming_provider_console') && (
           <div className="module-card si-7e63ec4f" style={{ maxWidth: 640 }}>
@@ -580,7 +580,7 @@ const Settings: React.FC = () => {
 
         {rcMsg && <div className={`module-alert ${rcMsg.includes('✓') || rcMsg.includes('submitted') || rcMsg.includes('cancel') ? 'success' : 'error'} si-7e63ec4f`}>{rcMsg}</div>}
 
-        {/* Approved — need to re-login */}
+        {/* Approved - need to re-login */}
         {approvedRequest && (
           <div className="module-alert success">
             <strong>{t('settings.roleChange.approvedTitle')}</strong>
@@ -612,7 +612,7 @@ const Settings: React.FC = () => {
               <div className="module-form-group">
                 <label className="module-label">{t('settings.roleChange.selectRole')}</label>
                 <select className="module-input" value={selectedNewRole} onChange={e => setSelectedNewRole(e.target.value)}>
-                  <option value="">— {t('settings.roleChange.selectRole')} —</option>
+                  <option value="">- {t('settings.roleChange.selectRole')} -</option>
                   {(['pet_owner', 'farmer', 'veterinarian', 'corporate_admin'] as const)
                     .filter(r => r !== user?.role)
                     .map(r => (
@@ -621,7 +621,7 @@ const Settings: React.FC = () => {
                 </select>
               </div>
             </div>
-            {/* Vet-specific details — shown only when requesting the veterinarian role, so
+            {/* Vet-specific details - shown only when requesting the veterinarian role, so
                 the admin can verify the license and provision the vet profile in one step. */}
             {isVetRequest && (
               <div className="module-alert si-e120eda2">
@@ -703,7 +703,7 @@ const Settings: React.FC = () => {
                       <td><span className={`badge badge-${r.status === 'approved' ? 'active' : r.status === 'rejected' ? 'danger' : 'pending'}`}>{r.status}</span></td>
                       <td className="si-756a9f21">{new Date(r.createdAt).toLocaleDateString()}</td>
                       <td className="si-756a9f21">
-                        {r.reviewedBy || '—'}
+                        {r.reviewedBy || '-'}
                         {r.rejectionReason && <div className="si-16697caf">{r.rejectionReason}</div>}
                       </td>
                     </tr>

@@ -163,7 +163,7 @@ const Animals: React.FC = () => {
   }
 
   const downloadTemplate = () => {
-    // animalClass is optional — species-correct terms like cattle_cow, cattle_bull,
+    // animalClass is optional - species-correct terms like cattle_cow, cattle_bull,
     // sheep_ewe, etc. (see ANIMAL_CLASS_TERMS in constants/speciesBreeds.ts); leave
     // blank for species without class terms, or to just use gender.
     const csv = 'name,species,breed,gender,animalClass,dateOfBirth,weight,color,microchipId\n' +
@@ -320,7 +320,7 @@ const Animals: React.FC = () => {
   const labelStyle = { fontSize: 12, fontWeight: 600 as const, color: '#4b5563', marginBottom: 4, display: 'block' }
 
   const handleDownloadPassport= async (animal: AnimalData) => {
-    // Open the window SYNCHRONOUSLY before any await — browsers block popups
+    // Open the window SYNCHRONOUSLY before any await - browsers block popups
     // opened after an async gap because they're no longer tied to the user gesture.
     const win = window.open('', '_blank')
     if (!win) {
@@ -332,7 +332,7 @@ const Animals: React.FC = () => {
 
     setPassportLoading(animal.id)
     try {
-      // `/medical-records/animal/:id` was never a registered route — it 404'd on
+      // `/medical-records/animal/:id` was never a registered route - it 404'd on
       // every passport and the .catch() below turned that into "No medical
       // records found" on a printed medical document. The real endpoint is the
       // list route with an animalId filter, which returns { data: { records } }.
@@ -354,10 +354,10 @@ const Animals: React.FC = () => {
         '<td>' + ((v.nextDueDate || v.next_due_date || '').split('T')[0] || 'N/A') + '</td>' +
         '<td>' + (v.batchNumber || v.batch_number || 'N/A') + '</td></tr>'
       ).join('')
-      // A failed fetch must never render as "none found" on a medical document —
+      // A failed fetch must never render as "none found" on a medical document -
       // an empty section has to mean "there are none", not "we could not ask".
       const couldNotLoad = (what: string) =>
-        '<p style="color:#b91c1c;font-weight:600">⚠ ' + what + ' could not be loaded — this section is incomplete. Do not treat it as a complete record.</p>'
+        '<p style="color:#b91c1c;font-weight:600">⚠ ' + what + ' could not be loaded - this section is incomplete. Do not treat it as a complete record.</p>'
       const vaccHtml = vaccFailed
         ? couldNotLoad('Vaccination history')
         : vaccinations.length === 0
@@ -811,7 +811,7 @@ const Animals: React.FC = () => {
                         <div style={{ fontWeight: 600, color: insExpired ? '#dc2626' : '#059669', marginBottom: 2 }}>
                           {insExpired ? t('animals.cardLabels.insuranceExpired') : `🛡️ ${t('animals.cardLabels.insured')}`}
                         </div>
-                        <div className="si-91a28c8c">{animal.insuranceProvider} — {animal.insurancePolicyNumber}</div>
+                        <div className="si-91a28c8c">{animal.insuranceProvider} - {animal.insurancePolicyNumber}</div>
                         {animal.insuranceExpiry && <div style={{ color: insExpired ? '#dc2626' : '#6b7280' }}>{t('animals.cardLabels.expires')} {formatDate(animal.insuranceExpiry)}</div>}
                       </div>
                     )}
@@ -862,7 +862,7 @@ const Animals: React.FC = () => {
                 <span className="si-0067e898">{speciesIcon(detailAnimal.species)}</span>
                 <div>
                   <div className="si-f0920f33">{detailAnimal.name}</div>
-                  <div className="si-e17c55f7">{speciesLabel(detailAnimal.species, t)}{detailAnimal.breed ? ` • ${breedLabel(detailAnimal.species, detailAnimal.breed)}` : ''} — {detailAnimal.uniqueId}</div>
+                  <div className="si-e17c55f7">{speciesLabel(detailAnimal.species, t)}{detailAnimal.breed ? ` • ${breedLabel(detailAnimal.species, detailAnimal.breed)}` : ''} - {detailAnimal.uniqueId}</div>
                 </div>
               </div>
               <button onClick={() => setDetailAnimal(null)} className="si-1b1a545b">✕</button>
@@ -964,8 +964,8 @@ const Animals: React.FC = () => {
                         <tr key={i}>
                           <td>{row.name}</td>
                           <td>{speciesLabel(row.species, t)}</td>
-                          <td>{row.breed || '—'}</td>
-                          <td>{row.gender || '—'}</td>
+                          <td>{row.breed || '-'}</td>
+                          <td>{row.gender || '-'}</td>
                         </tr>
                       ))}
                       {importPreview.length > 20 && (

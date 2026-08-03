@@ -165,7 +165,7 @@ const RoleBadge: React.FC<RoleBadgeProps> = ({ role }) => {
 // ─── NetworkTypeLabel ─────────────────────────────────────────────────────────
 interface NetworkTypeLabelProps { type?: string }
 const NetworkTypeLabel: React.FC<NetworkTypeLabelProps> = ({ type }) => {
-  const label = NETWORK_TYPES.find(t => t.value === type)?.label ?? type ?? '—'
+  const label = NETWORK_TYPES.find(t => t.value === type)?.label ?? type ?? '-'
   return <span>{label}</span>
 }
 
@@ -731,7 +731,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
             <div className="module-form-group">
               <label className="module-label">Assign to Branch Hospital <span className="si-f7764c70">(optional)</span></label>
               <select className="module-input" value={hospitalId} onChange={e => setHospitalId(e.target.value)}>
-                <option value="">— Not assigned to specific hospital —</option>
+                <option value="">- Not assigned to specific hospital -</option>
                 {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
               </select>
             </div>
@@ -1053,7 +1053,7 @@ const HospitalNetworks: React.FC = () => {
   }, [activeTab, selectedNetwork?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Configuration change trail. Requires the viewAuditLogs network action, so a
-  // 403/404 here is expected for roles without it — surfaced, not swallowed.
+  // 403/404 here is expected for roles without it - surfaced, not swallowed.
   useEffect(() => {
     if (activeTab !== 'audit' || !selectedNetwork) return
     let cancelled = false
@@ -1623,10 +1623,10 @@ const HospitalNetworks: React.FC = () => {
                       <td><NetworkTypeLabel type={network.networkType} /></td>
                       <td>
                         {[network.headquartersCity, network.headquartersState, network.country]
-                          .filter(Boolean).join(', ') || '—'}
+                          .filter(Boolean).join(', ') || '-'}
                       </td>
-                      <td>{network.memberCount ?? '—'}</td>
-                      <td>{network.hospitalCount ?? '—'}</td>
+                      <td>{network.memberCount ?? '-'}</td>
+                      <td>{network.hospitalCount ?? '-'}</td>
                       <td>
                         {network.isApproved
                           ? <span className="badge badge-success">{t('hospitalNetworks.status.approved')}</span>
@@ -1992,7 +1992,7 @@ const HospitalNetworks: React.FC = () => {
                                   <>
                                     <input type="time" className="hn-hours-input" value={h.open}
                                       onChange={e => setBrandingForm(f => ({ ...f, operatingHours: { ...f.operatingHours, [day]: { ...h, open: e.target.value } } }))} />
-                                    <span>–</span>
+                                    <span>-</span>
                                     <input type="time" className="hn-hours-input" value={h.close}
                                       onChange={e => setBrandingForm(f => ({ ...f, operatingHours: { ...f.operatingHours, [day]: { ...h, close: e.target.value } } }))} />
                                   </>
@@ -2232,7 +2232,7 @@ const HospitalNetworks: React.FC = () => {
                                 </span>
                               </td>
                               <td>
-                                <div className="hn-animal-name">{entry.animalName || '—'}</div>
+                                <div className="hn-animal-name">{entry.animalName || '-'}</div>
                                 {entry.animalUniqueId && (
                                   <div className="hn-animal-uid">{entry.animalUniqueId}</div>
                                 )}
@@ -2301,7 +2301,7 @@ const HospitalNetworks: React.FC = () => {
               {/* ── Configuration change trail ──────────────────────────
                   The table above is the patient-record ACCESS trail (who read
                   what). This is the CONFIGURATION trail (who changed roles,
-                  members and settings) — /hospital-networks/:id/security-audit,
+                  members and settings) - /hospital-networks/:id/security-audit,
                   which had no caller at all despite being the only record of
                   privilege changes in a network. */}
               <div className="module-card si-af65fe13">
@@ -2330,16 +2330,16 @@ const HospitalNetworks: React.FC = () => {
                         <tbody>
                           {securityAudit.map((a: any) => (
                             <tr key={a.id}>
-                              <td>{a.createdAt ? new Date(a.createdAt).toLocaleString() : '—'}</td>
-                              <td>{a.actorName || '—'}</td>
+                              <td>{a.createdAt ? new Date(a.createdAt).toLocaleString() : '-'}</td>
+                              <td>{a.actorName || '-'}</td>
                               <td><span className="status-badge">{a.action}</span></td>
-                              <td>{a.targetType || '—'}</td>
+                              <td>{a.targetType || '-'}</td>
                               <td className="si-af971f42">
                                 {a.oldValue || a.newValue
-                                  ? `${a.oldValue ?? '—'} → ${a.newValue ?? '—'}`
-                                  : '—'}
+                                  ? `${a.oldValue ?? '-'} → ${a.newValue ?? '-'}`
+                                  : '-'}
                               </td>
-                              <td>{a.ipAddress || '—'}</td>
+                              <td>{a.ipAddress || '-'}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -2497,7 +2497,7 @@ const HospitalNetworks: React.FC = () => {
                                   <td>
                                     {e.networkPatientId
                                       ? <span className="si-714eb092">{e.networkPatientId}</span>
-                                      : '—'}
+                                      : '-'}
                                   </td>
                                   <td>
                                     <span className={`badge badge-${e.enrollmentStatus === 'active' ? 'success' : e.enrollmentStatus === 'pending_consent' ? 'pending' : 'error'}`}>
@@ -2642,7 +2642,7 @@ const HospitalNetworks: React.FC = () => {
               </div>
               <div className="module-form-group">
                 <label className="module-label">{t('hospitalNetworks.detail.memberEmail', 'Email')}</label>
-                <input className="module-input" value={editingMember.userEmail || '—'} disabled />
+                <input className="module-input" value={editingMember.userEmail || '-'} disabled />
               </div>
               <div className="module-form-group">
                 <label className="module-label">{t('hospitalNetworks.detail.networkRole', 'Role')} <span className="si-4fb20e94">*</span></label>
@@ -2653,14 +2653,14 @@ const HospitalNetworks: React.FC = () => {
               <div className="module-form-group">
                 <label className="module-label">{t('hospitalNetworks.detail.hospital', 'Assigned Hospital')}</label>
                 <select className="module-input" value={editMemberForm.hospitalId} onChange={e => setEditMemberForm(p => ({ ...p, hospitalId: e.target.value }))}>
-                  <option value="">{t('common.none', '— None (Corporate Level) —')}</option>
+                  <option value="">{t('common.none', '- None (Corporate Level) -')}</option>
                   {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
                 </select>
               </div>
               <div className="module-form-group">
                 <label className="module-label">{t('hospitalNetworks.department', 'Department')}</label>
                 <select className="module-input" value={editMemberForm.department} onChange={e => setEditMemberForm(p => ({ ...p, department: e.target.value }))}>
-                  <option value="">{t('hospitalNetworks.noDepartment', '— No Department —')}</option>
+                  <option value="">{t('hospitalNetworks.noDepartment', '- No Department -')}</option>
                   {departments.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
@@ -2845,7 +2845,7 @@ const HospitalNetworks: React.FC = () => {
                     <div className="module-form-group">
                       <label className="module-label">{t('hospitalNetworks.patients.inviteSpecies')}</label>
                       <select className="module-input" value={inviteForm.animalSpecies} onChange={e => setInviteForm(f => ({ ...f, animalSpecies: e.target.value }))}>
-                        <option value="">—</option>
+                        <option value="">-</option>
                         <option value="dog">Dog</option>
                         <option value="cat">Cat</option>
                         <option value="cattle">Cattle</option>
@@ -2886,7 +2886,7 @@ const HospitalNetworks: React.FC = () => {
               ) : (
                 <form onSubmit={handleRegisterWalkIn}>
                   <p className="module-form-helper si-676930d7">
-                    {t('hospitalNetworks.patients.walkInHelperText', 'Register a walk-in patient for immediate treatment. No invite or account needed — patient can be given online access later.')}
+                    {t('hospitalNetworks.patients.walkInHelperText', 'Register a walk-in patient for immediate treatment. No invite or account needed. Patient can be given online access later.')}
                   </p>
                   <div className="module-form-group">
                     <label className="module-label">{t('hospitalNetworks.patients.invitePatientName', 'Patient Name')} <span className="hn-required">*</span></label>
@@ -2910,7 +2910,7 @@ const HospitalNetworks: React.FC = () => {
                     <div className="module-form-group">
                       <label className="module-label">{t('hospitalNetworks.patients.inviteSpecies', 'Species')} <span className="hn-required">*</span></label>
                       <select className="module-input" required value={walkInForm.animalSpecies} onChange={e => setWalkInForm(f => ({ ...f, animalSpecies: e.target.value }))}>
-                        <option value="">{t('common.select', '— Select —')}</option>
+                        <option value="">{t('common.select', '- Select -')}</option>
                         <option value="dog">Dog</option><option value="cat">Cat</option>
                         <option value="cattle">Cattle</option><option value="horse">Horse</option>
                         <option value="bird">Bird</option><option value="other">Other</option>
@@ -2925,7 +2925,7 @@ const HospitalNetworks: React.FC = () => {
                     <div className="module-form-group">
                       <label className="module-label">{t('hospitalNetworks.detail.hospital', 'Hospital')} <span className="hn-required">*</span></label>
                       <select className="module-input" required value={walkInForm.hospitalId} onChange={e => setWalkInForm(f => ({ ...f, hospitalId: e.target.value }))}>
-                        <option value="">{t('common.select', '— Select —')}</option>
+                        <option value="">{t('common.select', '- Select -')}</option>
                         {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
                       </select>
                     </div>
@@ -3040,7 +3040,7 @@ const HospitalNetworks: React.FC = () => {
                       </td>
                       <td>
                         {ref.toHospitalName}<br />
-                        <span className="si-655cd763">{ref.toVetName || '—'}</span>
+                        <span className="si-655cd763">{ref.toVetName || '-'}</span>
                       </td>
                       <td className="si-d83d7d70">{ref.reason}</td>
                       <td>
@@ -3299,9 +3299,9 @@ const HospitalNetworks: React.FC = () => {
                 <tbody>
                   {leaveRequests.map((lr: any) => (
                     <tr key={lr.id}>
-                      <td>{lr.userName || '—'}</td>
+                      <td>{lr.userName || '-'}</td>
                       <td><span className="module-badge">{lr.leave_type}</span></td>
-                      <td>{new Date(lr.start_date).toLocaleDateString()} – {new Date(lr.end_date).toLocaleDateString()}</td>
+                      <td>{new Date(lr.start_date).toLocaleDateString()} - {new Date(lr.end_date).toLocaleDateString()}</td>
                       <td>
                         <span className={`module-badge ${lr.status === 'approved' ? 'badge-success' : lr.status === 'rejected' ? 'badge-error' : 'badge-pending'}`}>
                           {lr.status}
@@ -3448,7 +3448,7 @@ const HospitalNetworks: React.FC = () => {
                   </div>
                   <div className="card-body">
                     {[...analyticsData.enrollmentTrend].reverse().map((item: any, i: number) => {
-                      const month = item.month ? new Date(item.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—'
+                      const month = item.month ? new Date(item.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '-'
                       const count = parseInt(item.count ?? 0)
                       const max = Math.max(...analyticsData.enrollmentTrend.map((r: any) => parseInt(r.count ?? 0)), 1)
                       return (

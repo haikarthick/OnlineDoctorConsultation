@@ -8,7 +8,7 @@
  * sat on the shelf.
  *
  * The backend's `/pharmacies/:id/low-stock-alerts` route is the reference
- * implementation — `GROUP BY pm.id HAVING SUM(pi.quantity) <= pm.reorder_point`.
+ * implementation - `GROUP BY pm.id HAVING SUM(pi.quantity) <= pm.reorder_point`.
  * These helpers mirror it so the UI and the API agree on what "low" means.
  */
 
@@ -33,10 +33,10 @@ export function totalStockByMedication(rows: readonly StockRow[]): Map<string, n
  * The threshold a medication is judged against. `reorder_point` is the primary
  * signal; `min_stock_level` is the fallback for medications that never had a
  * reorder point set. 0 is a legitimate threshold, so only null/undefined/NaN
- * fall through — `||` would have treated a deliberate 0 as "unset".
+ * fall through - `||` would have treated a deliberate 0 as "unset".
  */
 export function stockThreshold(row: Pick<StockRow, 'reorder_point' | 'min_stock_level'>): number {
-  // Note `Number(null)` is 0, which is finite — so null/undefined have to be
+  // Note `Number(null)` is 0, which is finite - so null/undefined have to be
   // ruled out before coercing, or an unset reorder point would read as a
   // deliberate threshold of 0 and nothing would ever be flagged.
   const num = (v: unknown): number | null => {
@@ -49,7 +49,7 @@ export function stockThreshold(row: Pick<StockRow, 'reorder_point' | 'min_stock_
 
 /**
  * Whether the medication this row belongs to is at or below its reorder point,
- * counting every batch of that medication — not just this one.
+ * counting every batch of that medication - not just this one.
  */
 export function isLowStock(row: StockRow, totals: Map<string, number>): boolean {
   return (totals.get(row.med_id) || 0) <= stockThreshold(row)

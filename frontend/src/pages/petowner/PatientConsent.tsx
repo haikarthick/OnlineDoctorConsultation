@@ -333,7 +333,7 @@ const PatientConsentPage: React.FC = () => {
     if (c.grantedToUserId)       return c.grantedToUserId
     if (c.grantedToHospitalId)   return c.grantedToHospitalId
     if (c.grantedToNetworkId)    return c.grantedToNetworkId
-    return '—'
+    return '-'
   }
 
   function permissionItems(c: PatientConsent) {
@@ -411,7 +411,7 @@ const PatientConsentPage: React.FC = () => {
           ) : (
             <>
               <div className="pc-consent-header">
-                <h2>{t('patientConsent.title')} — {selectedAnimal.name}</h2>
+                <h2>{t('patientConsent.title')} - {selectedAnimal.name}</h2>
                 <button className="module-btn primary" onClick={openModal}>
                   + {t('patientConsent.grantConsent')}
                 </button>
@@ -439,7 +439,7 @@ const PatientConsentPage: React.FC = () => {
                   <div className="pc-main-empty-icon">🛡️</div>
                   <div className="pc-main-empty-title">{t('patientConsent.noConsents')}</div>
                   <div className="pc-main-empty-desc">
-                    {t('patientConsent.noConsentsDesc')} — <strong>{selectedAnimal.name}</strong>.
+                    {t('patientConsent.noConsentsDesc')} - <strong>{selectedAnimal.name}</strong>.
                     Grant access only to trusted vets and hospitals.
                   </div>
                 </div>
@@ -598,7 +598,7 @@ const PatientConsentPage: React.FC = () => {
                     <Toggle checked={form.allowPrescriptions}      onChange={v => setForm(f => ({ ...f, allowPrescriptions: v }))}      label={t('patientConsent.permissions.prescriptions')} />
                     <Toggle checked={form.allowLabResults}         onChange={v => setForm(f => ({ ...f, allowLabResults: v }))}         label={t('patientConsent.permissions.labResults')} />
                     <Toggle checked={form.allowGeneticData}        onChange={v => setForm(f => ({ ...f, allowGeneticData: v }))}        label={t('patientConsent.permissions.geneticData')} />
-                    <Toggle checked={form.includeHospitalRecords}  onChange={v => setForm(f => ({ ...f, includeHospitalRecords: v }))}  label={t('patientConsent.permissions.hospitalRecords')} note="Private by default — only enable if needed" />
+                    <Toggle checked={form.includeHospitalRecords}  onChange={v => setForm(f => ({ ...f, includeHospitalRecords: v }))}  label={t('patientConsent.permissions.hospitalRecords')} note="Private by default - only enable if needed" />
                   </div>
                 </div>
 
@@ -712,7 +712,7 @@ const ConsentCard: React.FC<ConsentCardProps> = ({
         {!consent.isActive && consent.revokedAt && (
           <div className="pc-revoked-info">
             🚫 Revoked on {formatDate(consent.revokedAt)}
-            {consent.revokedReason && ' — ' + consent.revokedReason}
+            {consent.revokedReason && ' - ' + consent.revokedReason}
           </div>
         )}
 

@@ -18,7 +18,7 @@ const ACCOUNT_STATUS_MESSAGES: Record<string, string> = {
     'Your account has been temporarily restricted pending further review by our platform team. ' +
     'This measure has been taken to ensure the safety and integrity of the platform. ' +
     'If you believe this is an error or would like clarification, please contact us at ' +
-    'support@vetcare.com — we will be happy to assist you and aim to resolve this at the earliest. ' +
+    'support@vetcare.com - we will be happy to assist you and aim to resolve this at the earliest. ' +
     'Please quote your registered email address when contacting support.',
   suspended:
     'Your account has been deactivated. Please contact support@vetcare.com for further information.',
@@ -52,7 +52,7 @@ export class AuthController {
       try {
         existingUser = await UserService.getUserByEmail(email);
       } catch (dbErr: any) {
-        logger.error('Register: getUserByEmail failed — triggering self-heal', { error: dbErr.message });
+        logger.error('Register: getUserByEmail failed - triggering self-heal', { error: dbErr.message });
         try {
           await database.ensureSchemaPublic();
           await runDemoSeedIfEnabled();
@@ -105,7 +105,7 @@ export class AuthController {
 
       const isPending = (user as any).accountStatus === 'pending_approval';
 
-      // Pending users: do NOT issue tokens — they cannot use the app until approved
+      // Pending users: do NOT issue tokens - they cannot use the app until approved
       if (isPending) {
         res.status(201).json({
           success: true,
@@ -167,7 +167,7 @@ export class AuthController {
                 await database.ensureSchemaPublic();
                 await runDemoSeedIfEnabled();
               } catch (healErr: any) {
-                logger.warn('Login: self-heal step failed — will retry query anyway', { error: healErr.message });
+                logger.warn('Login: self-heal step failed - will retry query anyway', { error: healErr.message });
               }
             }
             await new Promise(r => setTimeout(r, 5000 * attempt));
@@ -188,7 +188,7 @@ export class AuthController {
         throw new UnauthorizedError('Invalid email or password');
       }
 
-      // Account status gate — checked AFTER password so we don't reveal account existence
+      // Account status gate - checked AFTER password so we don't reveal account existence
       const accountStatus = (user as any).accountStatus || 'active';
       if (accountStatus !== 'active') {
         const msg = ACCOUNT_STATUS_MESSAGES[accountStatus] || 'Your account is currently unavailable.';

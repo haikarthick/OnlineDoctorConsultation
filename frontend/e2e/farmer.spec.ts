@@ -25,14 +25,14 @@ import { test, expect } from './fixtures'
  * - Wallet, Settings
  */
 
-test.describe('Farmer — Dashboard', () => {
+test.describe('Farmer - Dashboard', () => {
   test('should load farmer dashboard', async ({ farmerPage: page }) => {
     await expect(page).toHaveURL(/\/dashboard/)
     await page.waitForLoadState('networkidle')
   })
 })
 
-test.describe('Farmer — Animals', () => {
+test.describe('Farmer - Animals', () => {
   test('should load animals page', async ({ farmerPage: page }) => {
     await page.goto('/animals')
     await page.waitForLoadState('networkidle')
@@ -50,7 +50,7 @@ test.describe('Farmer — Animals', () => {
   })
 })
 
-test.describe('Farmer — Enterprise Management', () => {
+test.describe('Farmer - Enterprise Management', () => {
   test('should load enterprise management page', async ({ farmerPage: page }) => {
     await page.goto('/enterprises')
     await page.waitForLoadState('networkidle')
@@ -65,7 +65,7 @@ test.describe('Farmer — Enterprise Management', () => {
   })
 })
 
-test.describe('Farmer — Animal Groups', () => {
+test.describe('Farmer - Animal Groups', () => {
   test('should load animal groups page', async ({ farmerPage: page }) => {
     await page.goto('/animal-groups')
     await page.waitForLoadState('networkidle')
@@ -73,7 +73,7 @@ test.describe('Farmer — Animal Groups', () => {
   })
 })
 
-test.describe('Farmer — Location Management', () => {
+test.describe('Farmer - Location Management', () => {
   test('should load locations page', async ({ farmerPage: page }) => {
     await page.goto('/locations')
     await page.waitForLoadState('networkidle')
@@ -81,7 +81,7 @@ test.describe('Farmer — Location Management', () => {
   })
 })
 
-test.describe('Farmer — Movement Log', () => {
+test.describe('Farmer - Movement Log', () => {
   test('should load movement log page', async ({ farmerPage: page }) => {
     await page.goto('/movement-log')
     await page.waitForLoadState('networkidle')
@@ -89,7 +89,7 @@ test.describe('Farmer — Movement Log', () => {
   })
 })
 
-test.describe('Farmer — Treatment Campaigns', () => {
+test.describe('Farmer - Treatment Campaigns', () => {
   test('should load campaigns page', async ({ farmerPage: page }) => {
     await page.goto('/campaigns')
     await page.waitForLoadState('networkidle')
@@ -97,7 +97,7 @@ test.describe('Farmer — Treatment Campaigns', () => {
   })
 })
 
-test.describe('Farmer — Herd Medical', () => {
+test.describe('Farmer - Herd Medical', () => {
   test('should load herd medical page', async ({ farmerPage: page }) => {
     await page.goto('/herd-medical')
     await page.waitForLoadState('networkidle')
@@ -105,7 +105,7 @@ test.describe('Farmer — Herd Medical', () => {
   })
 })
 
-test.describe('Farmer — Health Analytics', () => {
+test.describe('Farmer - Health Analytics', () => {
   test('should load health analytics page', async ({ farmerPage: page }) => {
     await page.goto('/health-analytics')
     await page.waitForLoadState('networkidle')
@@ -113,7 +113,7 @@ test.describe('Farmer — Health Analytics', () => {
   })
 })
 
-test.describe('Farmer — Breeding Manager', () => {
+test.describe('Farmer - Breeding Manager', () => {
   test('should load breeding manager page', async ({ farmerPage: page }) => {
     await page.goto('/breeding')
     await page.waitForLoadState('networkidle')
@@ -121,7 +121,7 @@ test.describe('Farmer — Breeding Manager', () => {
   })
 })
 
-test.describe('Farmer — Feed Inventory', () => {
+test.describe('Farmer - Feed Inventory', () => {
   test('should load feed inventory page', async ({ farmerPage: page }) => {
     await page.goto('/feed-inventory')
     await page.waitForLoadState('networkidle')
@@ -129,7 +129,7 @@ test.describe('Farmer — Feed Inventory', () => {
   })
 })
 
-test.describe('Farmer — Compliance Docs', () => {
+test.describe('Farmer - Compliance Docs', () => {
   test('should load compliance docs page', async ({ farmerPage: page }) => {
     await page.goto('/compliance')
     await page.waitForLoadState('networkidle')
@@ -137,7 +137,7 @@ test.describe('Farmer — Compliance Docs', () => {
   })
 })
 
-test.describe('Farmer — Financial Analytics', () => {
+test.describe('Farmer - Financial Analytics', () => {
   test('should load financial analytics page', async ({ farmerPage: page }) => {
     await page.goto('/financial')
     await page.waitForLoadState('networkidle')
@@ -145,7 +145,7 @@ test.describe('Farmer — Financial Analytics', () => {
   })
 })
 
-test.describe('Farmer — Alert Center', () => {
+test.describe('Farmer - Alert Center', () => {
   test('should load alert center page', async ({ farmerPage: page }) => {
     await page.goto('/alerts')
     await page.waitForLoadState('networkidle')
@@ -154,7 +154,7 @@ test.describe('Farmer — Alert Center', () => {
 })
 
 // ── Innovation Modules ──────────────────────────────────────
-test.describe('Farmer — Disease Prediction', () => {
+test.describe('Farmer - Disease Prediction', () => {
   test('should load disease prediction page', async ({ farmerPage: page }) => {
     await page.goto('/disease-prediction')
     await page.waitForLoadState('networkidle')
@@ -162,7 +162,7 @@ test.describe('Farmer — Disease Prediction', () => {
   })
 })
 
-test.describe('Farmer — Genomic Lineage', () => {
+test.describe('Farmer - Genomic Lineage', () => {
   test('should load genomic lineage page', async ({ farmerPage: page }) => {
     await page.goto('/genomic-lineage')
     await page.waitForLoadState('networkidle')
@@ -170,7 +170,7 @@ test.describe('Farmer — Genomic Lineage', () => {
   })
 })
 
-test.describe('Farmer — IoT Sensors', () => {
+test.describe('Farmer - IoT Sensors', () => {
   test('should load IoT sensors page', async ({ farmerPage: page }) => {
     await page.goto('/iot-sensors')
     await page.waitForLoadState('networkidle')
@@ -178,7 +178,7 @@ test.describe('Farmer — IoT Sensors', () => {
   })
 })
 
-test.describe('Farmer — Supply Chain', () => {
+test.describe('Farmer - Supply Chain', () => {
   test('should load supply chain page', async ({ farmerPage: page }) => {
     await page.goto('/supply-chain')
     await page.waitForLoadState('networkidle')
@@ -186,7 +186,7 @@ test.describe('Farmer — Supply Chain', () => {
   })
 })
 
-test.describe('Farmer — Workforce', () => {
+test.describe('Farmer - Workforce', () => {
   test('should load workforce page', async ({ farmerPage: page }) => {
     await page.goto('/workforce')
     await page.waitForLoadState('networkidle')
@@ -194,7 +194,7 @@ test.describe('Farmer — Workforce', () => {
   })
 })
 
-test.describe('Farmer — Report Builder', () => {
+test.describe('Farmer - Report Builder', () => {
   test('should load report builder page', async ({ farmerPage: page }) => {
     await page.goto('/report-builder')
     await page.waitForLoadState('networkidle')
@@ -203,7 +203,7 @@ test.describe('Farmer — Report Builder', () => {
 })
 
 // ── Intelligence Modules ────────────────────────────────────
-test.describe('Farmer — AI Copilot', () => {
+test.describe('Farmer - AI Copilot', () => {
   test('should load AI copilot page', async ({ farmerPage: page }) => {
     await page.goto('/ai-copilot')
     await page.waitForLoadState('networkidle')
@@ -211,7 +211,7 @@ test.describe('Farmer — AI Copilot', () => {
   })
 })
 
-test.describe('Farmer — Digital Twin', () => {
+test.describe('Farmer - Digital Twin', () => {
   test('should load digital twin page', async ({ farmerPage: page }) => {
     await page.goto('/digital-twin')
     await page.waitForLoadState('networkidle')
@@ -219,7 +219,7 @@ test.describe('Farmer — Digital Twin', () => {
   })
 })
 
-test.describe('Farmer — Marketplace', () => {
+test.describe('Farmer - Marketplace', () => {
   test('should load marketplace page', async ({ farmerPage: page }) => {
     await page.goto('/marketplace')
     await page.waitForLoadState('networkidle')
@@ -227,7 +227,7 @@ test.describe('Farmer — Marketplace', () => {
   })
 })
 
-test.describe('Farmer — Sustainability', () => {
+test.describe('Farmer - Sustainability', () => {
   test('should load sustainability page', async ({ farmerPage: page }) => {
     await page.goto('/sustainability')
     await page.waitForLoadState('networkidle')
@@ -235,7 +235,7 @@ test.describe('Farmer — Sustainability', () => {
   })
 })
 
-test.describe('Farmer — Wellness Portal', () => {
+test.describe('Farmer - Wellness Portal', () => {
   test('should load wellness portal', async ({ farmerPage: page }) => {
     await page.goto('/wellness')
     await page.waitForLoadState('networkidle')
@@ -243,7 +243,7 @@ test.describe('Farmer — Wellness Portal', () => {
   })
 })
 
-test.describe('Farmer — Geospatial Analytics', () => {
+test.describe('Farmer - Geospatial Analytics', () => {
   test('should load geospatial analytics page', async ({ farmerPage: page }) => {
     await page.goto('/geospatial')
     await page.waitForLoadState('networkidle')
@@ -252,7 +252,7 @@ test.describe('Farmer — Geospatial Analytics', () => {
 })
 
 // ── Shared Modules ──────────────────────────────────────────
-test.describe('Farmer — Consultations', () => {
+test.describe('Farmer - Consultations', () => {
   test('should load consultations page', async ({ farmerPage: page }) => {
     await page.goto('/consultations')
     await page.waitForLoadState('networkidle')
@@ -260,7 +260,7 @@ test.describe('Farmer — Consultations', () => {
   })
 })
 
-test.describe('Farmer — Find Doctor', () => {
+test.describe('Farmer - Find Doctor', () => {
   test('should load find doctor page', async ({ farmerPage: page }) => {
     await page.goto('/find-doctor')
     await page.waitForLoadState('networkidle')
@@ -268,7 +268,7 @@ test.describe('Farmer — Find Doctor', () => {
   })
 })
 
-test.describe('Farmer — Book Consultation', () => {
+test.describe('Farmer - Book Consultation', () => {
   test('should load booking page', async ({ farmerPage: page }) => {
     await page.goto('/book-consultation')
     await page.waitForLoadState('networkidle')
@@ -276,7 +276,7 @@ test.describe('Farmer — Book Consultation', () => {
   })
 })
 
-test.describe('Farmer — Medical Records', () => {
+test.describe('Farmer - Medical Records', () => {
   test('should load medical records page', async ({ farmerPage: page }) => {
     await page.goto('/medical-records')
     await page.waitForLoadState('networkidle')
@@ -284,7 +284,7 @@ test.describe('Farmer — Medical Records', () => {
   })
 })
 
-test.describe('Farmer — Prescriptions', () => {
+test.describe('Farmer - Prescriptions', () => {
   test('should load prescriptions page', async ({ farmerPage: page }) => {
     await page.goto('/prescriptions')
     await page.waitForLoadState('networkidle')
@@ -292,7 +292,7 @@ test.describe('Farmer — Prescriptions', () => {
   })
 })
 
-test.describe('Farmer — Vet Hospitals', () => {
+test.describe('Farmer - Vet Hospitals', () => {
   test('should load vet hospitals page', async ({ farmerPage: page }) => {
     await page.goto('/vet-hospitals')
     await page.waitForLoadState('networkidle')
@@ -300,7 +300,7 @@ test.describe('Farmer — Vet Hospitals', () => {
   })
 })
 
-test.describe('Farmer — Wallet', () => {
+test.describe('Farmer - Wallet', () => {
   test('should load wallet page', async ({ farmerPage: page }) => {
     await page.goto('/wallet')
     await page.waitForLoadState('networkidle')
@@ -308,7 +308,7 @@ test.describe('Farmer — Wallet', () => {
   })
 })
 
-test.describe('Farmer — Settings', () => {
+test.describe('Farmer - Settings', () => {
   test('should load settings page', async ({ farmerPage: page }) => {
     await page.goto('/settings')
     await page.waitForLoadState('networkidle')

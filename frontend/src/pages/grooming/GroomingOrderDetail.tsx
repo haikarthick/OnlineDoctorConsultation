@@ -94,7 +94,7 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
         </div>
       </div>
 
-      {/* Wellness nudge — S.C.E.N.T. flagged "vet advised" */}
+      {/* Wellness nudge - S.C.E.N.T. flagged "vet advised" */}
       {!isProvider && order.intake && SCENT_KEYS.some(k => order.intake[`scent${k}`] === 'vet_advised') && (
         <div className="module-alert error vet-advised-banner">
           <span>🩺 {t('groomingEsc.wellnessNudge')}</span>
@@ -211,7 +211,7 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
                 <div className="module-form-group scent-field" key={k}>
                   <label className="module-label">{t(`groomingDetail.scent${k}`)}</label>
                   <select className="module-input" value={intake[`scent${k}`] || ''} onChange={e => setIntake({ ...intake, [`scent${k}`]: e.target.value || null })}>
-                    <option value="">—</option>
+                    <option value="">-</option>
                     {SCENT_OPTS.map(o => <option key={o} value={o}>{t(`groomingScent.${o}`)}</option>)}
                   </select>
                 </div>

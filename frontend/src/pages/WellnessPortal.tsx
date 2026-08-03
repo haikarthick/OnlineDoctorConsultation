@@ -146,7 +146,7 @@ const WellnessPortal: React.FC = () => {
         <div>
           <div className="module-stats">
             <div className="stat-card"><div className="stat-value">{dashboard.summary?.totalAnimals || 0}</div><div className="stat-label">{t('wellnessPortal.stats.animals')}</div></div>
-            <div className="stat-card"><div className="stat-value" style={{ color: SCORE_COLORS(+dashboard.summary?.avgWellnessScore || 0) }}>{dashboard.summary?.avgWellnessScore || '—'}</div><div className="stat-label">{t('wellnessPortal.stats.avgScore')}</div></div>
+            <div className="stat-card"><div className="stat-value" style={{ color: SCORE_COLORS(+dashboard.summary?.avgWellnessScore || 0) }}>{dashboard.summary?.avgWellnessScore || '-'}</div><div className="stat-label">{t('wellnessPortal.stats.avgScore')}</div></div>
             <div className="stat-card"><div className="stat-value si-4fb20e94">{dashboard.summary?.overdueReminders || 0}</div><div className="stat-label">{t('wellnessPortal.stats.overdueReminders')}</div></div>
             <div className="stat-card"><div className="stat-value">{dashboard.summary?.upcomingReminders || 0}</div><div className="stat-label">{t('wellnessPortal.stats.upcoming')}</div></div>
           </div>

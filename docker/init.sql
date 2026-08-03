@@ -3,12 +3,12 @@
 -- ============================================================
 -- Fresh-install schema covering every table used by the application
 -- services (see backend/migrations/*.sql for the same schema built up
--- incrementally on already-deployed environments — keep both in sync when
+-- incrementally on already-deployed environments - keep both in sync when
 -- adding new tables/columns, since a migration alone is invisible to a
 -- brand new database that runs only this file).
 -- ============================================================
 
--- gen_random_uuid() is built into PostgreSQL 13+ — no extension required
+-- gen_random_uuid() is built into PostgreSQL 13+ - no extension required
 
 -- Extensions for geospatial proximity search (earthdistance requires cube)
 CREATE EXTENSION IF NOT EXISTS cube CASCADE;
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- ============================================================
--- 1b. HOSPITAL NETWORKS (defined early — referenced by many tables below)
+-- 1b. HOSPITAL NETWORKS (defined early - referenced by many tables below)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS hospital_networks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -182,7 +182,7 @@ CREATE TABLE IF NOT EXISTS consultations (
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   -- RESTRICT, not SET NULL: an animal with consultation history must not be deletable, and
   -- nulling the link would orphan the clinical record. database.ts's startup self-heal has
-  -- always forced RESTRICT here, so every deployed DB is already RESTRICT — this line used to
+  -- always forced RESTRICT here, so every deployed DB is already RESTRICT - this line used to
   -- say SET NULL and lost the fight on every boot. Kept aligned so the two cannot disagree.
   animal_id UUID REFERENCES animals(id) ON DELETE RESTRICT,
   animal_type VARCHAR(100) NOT NULL DEFAULT '',
@@ -627,7 +627,7 @@ CREATE TABLE IF NOT EXISTS payments (
   invoice_number VARCHAR(100),
   gateway VARCHAR(50) DEFAULT 'stripe',
   -- Which revenue stream this payment belongs to. The finance overview counts GMV by it and the
-  -- Razorpay webhook routes completion by it, so it must exist from a fresh install — it used to
+  -- Razorpay webhook routes completion by it, so it must exist from a fresh install - it used to
   -- be added only by the startup self-heal, which runs AFTER migrations.
   payment_source VARCHAR(30) DEFAULT 'consultation'
     CHECK (payment_source IN ('consultation', 'pharmacy', 'subscription', 'other', 'grooming')),
@@ -737,12 +737,12 @@ CREATE TABLE IF NOT EXISTS wallet_transactions (
 );
 
 -- ============================================================
--- 18b. WALLET WITHDRAWALS (migration 038) — money OUT of the platform
+-- 18b. WALLET WITHDRAWALS (migration 038) - money OUT of the platform
 -- ============================================================
 -- Without this the wallet is a one-way door: refunds land in it and can only ever be spent
 -- back on the platform. Separate from withdrawal_requests, which is keyed to doctor earnings
 -- and carries TDS/commission-invoice semantics that do not apply to handing a customer back
--- their own money. Only `balance` is withdrawable — `bonus_credits` is promotional.
+-- their own money. Only `balance` is withdrawable - `bonus_credits` is promotional.
 CREATE TABLE IF NOT EXISTS wallet_withdrawal_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -921,13 +921,13 @@ CREATE INDEX IF NOT EXISTS idx_system_settings_key ON system_settings(key);
 
 -- ============================================================
 -- NOTE: bookings_status_check is (re)created once, later in this file,
--- by the "46.2 bookings: payment lifecycle statuses" block — with the
+-- by the "46.2 bookings: payment lifecycle statuses" block - with the
 -- FULL, current status list ('missed' included). Do not add another
 -- ALTER TABLE ... ADD CONSTRAINT bookings_status_check block here: this
 -- file runs as one atomic statement, so an earlier block using a
 -- narrower status list than what real rows already contain (e.g. it's
 -- missing 'payment_pending'/'payment_expired'/'referred') aborts the
--- ENTIRE init.sql run on every existing DB that has such rows — which
+-- ENTIRE init.sql run on every existing DB that has such rows - which
 -- is exactly what took down the 2026-07-20 vetcare-dev deploy. If the
 -- status list ever needs to change, edit the single block at the
 -- "46.2 bookings" section below, in place, rather than adding a new one.
@@ -1434,7 +1434,7 @@ CREATE TABLE IF NOT EXISTS vaccine_protocols (
   -- Regulatory & labelling
   regulatory_body VARCHAR(255),
   regulatory_standard VARCHAR(500),
-  seasonal_window VARCHAR(100),            -- e.g. "Pre-monsoon (May–June)"
+  seasonal_window VARCHAR(100),            -- e.g. "Pre-monsoon (May-June)"
   country VARCHAR(50) DEFAULT 'ALL',
   -- Status
   is_active BOOLEAN DEFAULT true,
@@ -1503,7 +1503,7 @@ CREATE TABLE IF NOT EXISTS vaccine_certificate_log (
   generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- vaccination_records — add protocol / schedule FKs
+-- vaccination_records - add protocol / schedule FKs
 ALTER TABLE vaccination_records ADD COLUMN IF NOT EXISTS protocol_id UUID REFERENCES vaccine_protocols(id) ON DELETE SET NULL;
 ALTER TABLE vaccination_records ADD COLUMN IF NOT EXISTS schedule_id UUID REFERENCES vaccine_schedule(id) ON DELETE SET NULL;
 
@@ -1578,7 +1578,7 @@ CREATE TRIGGER update_vet_certificates_updated_at BEFORE UPDATE ON vet_certifica
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================
--- ENTERPRISE TABLES — Triggers & Indexes
+-- ENTERPRISE TABLES - Triggers & Indexes
 -- ============================================================
 DROP TRIGGER IF EXISTS update_enterprises_updated_at ON enterprises;
 CREATE TRIGGER update_enterprises_updated_at BEFORE UPDATE ON enterprises
@@ -1616,7 +1616,7 @@ CREATE INDEX IF NOT EXISTS idx_animals_group_id ON animals(group_id);
 CREATE INDEX IF NOT EXISTS idx_animals_status ON animals(status);
 
 -- ============================================================
--- HOSPITAL NETWORK TABLES (Phase 1 — Clinical Domain)
+-- HOSPITAL NETWORK TABLES (Phase 1 - Clinical Domain)
 -- NOTE: Completely separate from farm enterprises table.
 --       enterprises = farm domain, hospital_networks = clinical domain.
 -- ============================================================
@@ -1741,7 +1741,7 @@ CREATE TABLE IF NOT EXISTS patient_data_consent (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 41. CLINICAL DATA ACCESS LOG (immutable audit trail — append only, never delete)
+-- 41. CLINICAL DATA ACCESS LOG (immutable audit trail - append only, never delete)
 -- Every access to hospital-scoped clinical records is logged here.
 -- Corporate admin, hospital director access is ALWAYS logged.
 CREATE TABLE IF NOT EXISTS clinical_data_access_log (
@@ -1764,7 +1764,7 @@ CREATE TABLE IF NOT EXISTS clinical_data_access_log (
   access_granted BOOLEAN NOT NULL,
   denial_reason TEXT,
   accessed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-  -- NOTE: No updated_at — this table is append-only, never update or delete rows
+  -- NOTE: No updated_at - this table is append-only, never update or delete rows
 );
 
 -- 41b. NETWORK REFERRALS (inter-hospital referrals and patient transfers within a network)
@@ -1949,7 +1949,7 @@ CREATE TABLE IF NOT EXISTS hospital_staff_invites (
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
   invited_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   invitee_email VARCHAR(255) NOT NULL,
-  -- Nullable by design — the invite form labels this field "(optional)". database.ts's startup
+  -- Nullable by design - the invite form labels this field "(optional)". database.ts's startup
   -- self-heal has always run `ALTER COLUMN invitee_name DROP NOT NULL`, so deployed DBs are
   -- already nullable; this used to say NOT NULL and was silently undone on every boot.
   invitee_name VARCHAR(200),
@@ -2028,7 +2028,7 @@ CREATE INDEX IF NOT EXISTS idx_leave_requests_hospital ON staff_leave_requests(h
 -- FIX: these were only ever defined in backend/migrations/008_tier4_features.sql
 -- and never backported here, so listing_boosts/marketplace_inquiries/
 -- marketplace_transactions below (which FK-reference marketplace_listings)
--- made init.sql fail on any truly fresh database — rolling back the ENTIRE
+-- made init.sql fail on any truly fresh database - rolling back the ENTIRE
 -- script (incl. users/bookings/payments) since it runs as one implicit
 -- transaction. Mirrors migration 008 lines 81-134 exactly (idempotent).
 CREATE TABLE IF NOT EXISTS marketplace_listings (
@@ -2046,7 +2046,7 @@ CREATE TABLE IF NOT EXISTS marketplace_listings (
   condition VARCHAR(30) DEFAULT 'new',
   -- Animal attributes (also added idempotently by migration 008); required here because the
   -- idx_mp_listings_fts full-text index below references breed/species, and init.sql runs
-  -- atomically BEFORE migrations on a fresh DB — omitting them aborts the entire schema build.
+  -- atomically BEFORE migrations on a fresh DB - omitting them aborts the entire schema build.
   species VARCHAR(60),
   breed VARCHAR(100),
   images JSONB DEFAULT '[]',
@@ -2105,7 +2105,7 @@ CREATE INDEX IF NOT EXISTS idx_mp_orders_buyer ON marketplace_orders(buyer_id);
 CREATE INDEX IF NOT EXISTS idx_mp_orders_seller ON marketplace_orders(seller_id);
 CREATE INDEX IF NOT EXISTS idx_mp_orders_status ON marketplace_orders(status);
 
--- ─── Marketplace engagement (Phase 3) — mirrors backend/migrations/016_marketplace_engagement.sql ───
+-- ─── Marketplace engagement (Phase 3) - mirrors backend/migrations/016_marketplace_engagement.sql ───
 -- Buyer<->seller messaging threads, favorites/watchlist, saved searches with alerts.
 CREATE TABLE IF NOT EXISTS marketplace_threads (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -2260,7 +2260,7 @@ CREATE TABLE IF NOT EXISTS marketplace_transactions (
 );
 
 -- ============================================================
--- 46. USER ROLES (secondary roles — additive, does not replace users.role)
+-- 46. USER ROLES (secondary roles - additive, does not replace users.role)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS user_roles (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -2533,13 +2533,13 @@ ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_notes TEXT;
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS is_network_coordinated BOOLEAN DEFAULT false;
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS target_pharmacy_id UUID REFERENCES hospital_pharmacies(id) ON DELETE SET NULL;
 
--- Seed auction_enabled feature flag (disabled by default — legal review pending)
+-- Seed auction_enabled feature flag (disabled by default - legal review pending)
 INSERT INTO marketplace_monetization_settings (setting_key, is_enabled, description, category)
 VALUES ('auction_enabled', false, 'Enable or disable the auction feature platform-wide', 'feature')
 ON CONFLICT (setting_key) DO NOTHING;
 
 -- ============================================================
--- 46. PAYMENT MODULE (docs/PAYMENT_MODULE_PLAN.md — Phase P0)
+-- 46. PAYMENT MODULE (docs/PAYMENT_MODULE_PLAN.md - Phase P0)
 -- Mirrors backend/migrations/012_payment_module.sql. Idempotent.
 -- ============================================================
 
@@ -2571,7 +2571,7 @@ END $$;
 ALTER TABLE payments ALTER COLUMN currency SET DEFAULT 'INR';
 ALTER TABLE payments ALTER COLUMN gateway SET DEFAULT 'demo';
 CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
--- (idx_payments_status already created earlier in this file — see the
+-- (idx_payments_status already created earlier in this file - see the
 -- "FIX: bookings status CHECK" era section above)
 
 -- 46.2 bookings: payment lifecycle statuses + booking_type fix
@@ -2698,7 +2698,7 @@ INSERT INTO tax_codes (id, sac_code, label, rate_percent, is_active) VALUES
   (gen_random_uuid(), '998351', 'Veterinary services for pet animals (GST-exempt healthcare)', 0, true),
   (gen_random_uuid(), '998352', 'Veterinary services for livestock (GST-exempt healthcare)', 0, true),
   (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true),
-  (gen_random_uuid(), '300490', 'Pharmacy — dispensed veterinary medicaments (HSN 3004)', 12, true)
+  (gen_random_uuid(), '300490', 'Pharmacy - dispensed veterinary medicaments (HSN 3004)', 12, true)
 ON CONFLICT (sac_code) DO NOTHING;
 
 -- 46.10 invoices: immutable snapshots
@@ -2782,7 +2782,7 @@ CREATE TRIGGER update_tax_codes_updated_at BEFORE UPDATE ON tax_codes
 
 -- 46.14 payment_gateway_credentials: Razorpay key_id/key_secret/webhook_secret
 -- per environment (test/live), key_secret + webhook_secret AES-256-GCM
--- encrypted at rest (backend/src/utils/secretCrypto.ts) — never readable in
+-- encrypted at rest (backend/src/utils/secretCrypto.ts) - never readable in
 -- plaintext via any admin API response (§12 rule 6).
 CREATE TABLE IF NOT EXISTS payment_gateway_credentials (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -2807,13 +2807,13 @@ CREATE TRIGGER update_payment_gateway_credentials_updated_at BEFORE UPDATE ON pa
 -- 47. TIER 2/3/4 ADVANCED FEATURE TABLES
 -- ============================================================
 -- Backported from backend/migrations/006_tier2_features.sql,
--- 007_tier3_features.sql, 008_tier4_features.sql — these 31 tables existed
+-- 007_tier3_features.sql, 008_tier4_features.sql - these 31 tables existed
 -- only as migrations (applied to every live environment already) but were
 -- never mirrored into this fresh-install schema, so a brand new DB would
 -- 500 the moment any of these features were touched. marketplace_listings/
 -- bids/orders/monetization_settings/plans/subscriptions/listing_boosts/
 -- inquiries/transactions (9 of migration 008's 19 tables) already exist
--- above (§ marketplace) — not repeated here — but marketplace_listings was
+-- above (§ marketplace) - not repeated here - but marketplace_listings was
 -- still missing the entire livestock/compliance column block from 008,
 -- backported separately below since active Marketplace code depends on it.
 
@@ -3001,7 +3001,7 @@ CREATE TABLE IF NOT EXISTS alert_events (
 -- ─── 47.9 animals: extend with health/breeding fields (006) ────
 -- breeding_status/last_breeding_date/expected_due_date/current_weight/
 -- weight_unit/last_weighed_at/dam_id/sire_id/animal_class already exist
--- above in the main animals CREATE TABLE — only birth_weight/health_score
+-- above in the main animals CREATE TABLE - only birth_weight/health_score
 -- were actually missing.
 ALTER TABLE animals ADD COLUMN IF NOT EXISTS birth_weight DECIMAL(10,2);
 ALTER TABLE animals ADD COLUMN IF NOT EXISTS health_score INT DEFAULT 100;
@@ -3462,7 +3462,7 @@ CREATE TABLE IF NOT EXISTS geospatial_events (
 
 -- ─── 47.21 marketplace_listings: livestock + compliance columns (008) ──
 -- The base table already exists above (§ marketplace) but was missing this
--- entire block — active Marketplace.tsx/MarketplaceService.ts code reads
+-- entire block - active Marketplace.tsx/MarketplaceService.ts code reads
 -- and writes every one of these columns, so a fresh-install DB would 500 on
 -- the very first listing create/search.
 ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS species VARCHAR(60);
@@ -3495,7 +3495,7 @@ ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS terms_accepted BOOLEAN
 ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMPTZ;
 
 -- ─── 47.22 users: network_id/corporate_role (009 hospital networks) ────
--- Not from 006/007/008, but discovered missing during this same audit —
+-- Not from 006/007/008, but discovered missing during this same audit -
 -- hospital_networks (defined early in § 1b above) already existed as an FK
 -- target, but these two columns on users referencing it were never
 -- backported.
@@ -3530,10 +3530,10 @@ CREATE INDEX IF NOT EXISTS idx_geospatial_events_time ON geospatial_events(creat
 -- ============================================================
 -- 48. MASTER DATA (species, breeds, animal classes, marketplace categories/conditions)
 -- ============================================================
--- Backported from backend/migrations/022_master_data_tables.sql — admin-editable
+-- Backported from backend/migrations/022_master_data_tables.sql - admin-editable
 -- reference data that replaces the hardcoded TypeScript arrays previously in
 -- frontend/src/constants/speciesBreeds.ts and Marketplace.tsx's CATEGORY_KEYS/
--- condition options. Identity is matched by the `code`/`value` string columns —
+-- condition options. Identity is matched by the `code`/`value` string columns -
 -- animals.species, marketplace_listings.species/category/condition/animal_class stay
 -- plain VARCHAR (not FKs), matching existing behavior exactly.
 
@@ -3542,7 +3542,7 @@ CREATE TABLE IF NOT EXISTS master_species (
   code VARCHAR(50) UNIQUE NOT NULL,
   label VARCHAR(100) NOT NULL,
   -- i18n key resolved via resolveLabel() (same fallback pattern as
-  -- master_marketplace_categories/conditions) — see migration 024. NULL for a
+  -- master_marketplace_categories/conditions) - see migration 024. NULL for a
   -- newly admin-added species with no matching translation falls back to `label`.
   label_key VARCHAR(150),
   icon VARCHAR(10),
@@ -3552,11 +3552,11 @@ CREATE TABLE IF NOT EXISTS master_species (
   is_active BOOLEAN DEFAULT true,
   is_protected BOOLEAN DEFAULT false,
   -- Controls whether this species appears in the Marketplace "sell an animal" species
-  -- picker (Marketplace.tsx/PublicMarketplace.tsx) — see migration 023. Defaults false so
+  -- picker (Marketplace.tsx/PublicMarketplace.tsx) - see migration 023. Defaults false so
   -- newly admin-added species don't silently become sellable; the seed data below
   -- explicitly enables it for the species that were already in the old hardcoded picker.
   is_marketplace_eligible BOOLEAN NOT NULL DEFAULT false,
-  -- Per-locale label overrides (migration 025) — lets an admin type all 6 language
+  -- Per-locale label overrides (migration 025) - lets an admin type all 6 language
   -- labels directly when adding a species, no labelKey/i18n-file/deploy needed.
   -- Checked first by the frontend's speciesLabel() resolver; NULL falls back to
   -- the label_key/i18n-key path above, same as pre-seeded species always have.
@@ -3575,7 +3575,7 @@ CREATE TABLE IF NOT EXISTS master_breeds (
   name VARCHAR(150) NOT NULL,
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
-  -- Per-locale display overrides (migration 026) — translate `name`; NULL falls back to
+  -- Per-locale display overrides (migration 026) - translate `name`; NULL falls back to
   -- the canonical English name, which remains the stored/value column.
   label_hi VARCHAR(150),
   label_kn VARCHAR(150),
@@ -3598,7 +3598,7 @@ CREATE TABLE IF NOT EXISTS master_animal_classes (
   can_produce_milk BOOLEAN DEFAULT false,
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
-  -- Per-locale label overrides (migration 026) — NULL falls back to label_key/label.
+  -- Per-locale label overrides (migration 026) - NULL falls back to label_key/label.
   label_hi VARCHAR(150),
   label_kn VARCHAR(150),
   label_ml VARCHAR(150),
@@ -3618,7 +3618,7 @@ CREATE TABLE IF NOT EXISTS master_marketplace_categories (
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
   is_protected BOOLEAN DEFAULT false,
-  -- Per-locale label overrides (migration 026) — NULL falls back to label_key/label.
+  -- Per-locale label overrides (migration 026) - NULL falls back to label_key/label.
   label_hi VARCHAR(150),
   label_kn VARCHAR(150),
   label_ml VARCHAR(150),
@@ -3635,7 +3635,7 @@ CREATE TABLE IF NOT EXISTS master_marketplace_conditions (
   label VARCHAR(100),
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
-  -- Per-locale label overrides (migration 026) — NULL falls back to label_key/label.
+  -- Per-locale label overrides (migration 026) - NULL falls back to label_key/label.
   label_hi VARCHAR(150),
   label_kn VARCHAR(150),
   label_ml VARCHAR(150),
@@ -3828,7 +3828,7 @@ CREATE TABLE IF NOT EXISTS grooming_blocked_slots (
   reason TEXT,
   created_by UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  -- Either a one-off on a date or a weekly recurrence — never neither, which would be a row
+  -- Either a one-off on a date or a weekly recurrence - never neither, which would be a row
   -- invisible to every lookup that silently blocks nothing.
   CONSTRAINT grooming_blocked_slots_when_check CHECK (
     (is_recurring = true AND recurring_day IS NOT NULL)
@@ -4225,7 +4225,7 @@ INSERT INTO master_species (id, code, label, icon, category, has_ear_tag, sort_o
 ON CONFLICT (code) DO NOTHING;
 
 -- Marketplace eligibility backfill (migration 023): exactly the species that were already
--- in the old hardcoded MARKETPLACE_FARMER_SPECIES/MARKETPLACE_PET_OWNER_SPECIES arrays —
+-- in the old hardcoded MARKETPLACE_FARMER_SPECIES/MARKETPLACE_PET_OWNER_SPECIES arrays -
 -- preserves today's marketplace species picker contents exactly, nothing more.
 UPDATE master_species SET is_marketplace_eligible = true
 WHERE code IN ('Cattle', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Chicken', 'Dog', 'Cat', 'Rabbit', 'Other');
@@ -4704,7 +4704,7 @@ INSERT INTO master_animal_classes (id, species_id, value, label_key, implied_gen
   (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'cat_neuter', 'animalClass.cat_neuter', 'unknown', false, false, 40, true)
 ON CONFLICT (species_id, value) DO NOTHING;
 
--- Marketplace categories (generated from CATEGORY_KEYS, frontend/src/pages/Marketplace.tsx — skips the blank '' "all" filter entry)
+-- Marketplace categories (generated from CATEGORY_KEYS, frontend/src/pages/Marketplace.tsx - skips the blank '' "all" filter entry)
 INSERT INTO master_marketplace_categories (id, code, label_key, sort_order, is_active, is_protected) VALUES
   (gen_random_uuid(), 'animal', 'marketplace.categories.animals', 10, true, true),
   (gen_random_uuid(), 'feed', 'marketplace.categories.feed', 20, true, false),

@@ -3,8 +3,8 @@ import type { Page } from '@playwright/test'
 
 /**
  * Coverage for the two screens added with the grooming lifecycle work:
- *   /admin/payables    — "who do I owe" register (admin)
- *   /grooming/schedule — provider working hours & availability
+ *   /admin/payables    - "who do I owe" register (admin)
+ *   /grooming/schedule - provider working hours & availability
  *
  * Deliberately more than the auto-generated "loads without crash" stub. Both pages were built
  * from scratch, both render money or availability that other flows depend on, and both are
@@ -13,7 +13,7 @@ import type { Page } from '@playwright/test'
  * reach the user, and nothing throws in the console.
  */
 
-/** Namespaces these two screens actually use — a visible "payables.title" means a key failed. */
+/** Namespaces these two screens actually use - a visible "payables.title" means a key failed. */
 const I18N_NAMESPACES = [
   'nav', 'common', 'payables', 'groomingSchedule', 'groomingBook', 'groomingBoard',
 ]
@@ -24,7 +24,7 @@ const IGNORABLE_CONSOLE = [
   /Download the React DevTools/i,
   /\[vite\]/i,
   /favicon/i,
-  // Grooming routes 404 server-side while `grooming.enabled` is off — that is the dark-launch
+  // Grooming routes 404 server-side while `grooming.enabled` is off - that is the dark-launch
   // behaving correctly, not a page defect.
   /Failed to load resource.*40[0-4]/i,
 ]
@@ -46,7 +46,7 @@ async function findRawI18nKeys(page: Page): Promise<string[]> {
   return [...new Set(text.match(RAW_I18N_KEY) || [])]
 }
 
-test.describe('Admin — Payables register', () => {
+test.describe('Admin - Payables register', () => {
   test('/admin/payables renders for an admin with no raw keys or console errors', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -56,7 +56,7 @@ test.describe('Admin — Payables register', () => {
     await page.goto('/admin/payables')
     await page.waitForLoadState('domcontentloaded')
 
-    // Must not be bounced out — admin holds this route.
+    // Must not be bounced out - admin holds this route.
     await expect(page).not.toHaveURL(/\/login/)
     await expect(page.locator('.module-page').first()).toBeVisible({ timeout: 20_000 })
 
@@ -72,7 +72,7 @@ test.describe('Admin — Payables register', () => {
   })
 })
 
-test.describe('Grooming — Working hours', () => {
+test.describe('Grooming - Working hours', () => {
   test('/grooming/schedule renders without crashing or leaking raw keys', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()

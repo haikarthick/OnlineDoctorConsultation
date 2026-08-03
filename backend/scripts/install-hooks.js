@@ -16,7 +16,7 @@ const HOOKS_DIR = path.join(ROOT, '.git', 'hooks');
 // ── pre-push hook ────────────────────────────────────────────────────────────
 const PRE_PUSH_FILE = path.join(HOOKS_DIR, 'pre-push');
 const PRE_PUSH_CONTENT = `#!/bin/sh
-# VetCare pre-push hook — runs schema + TypeScript + memory-check validation
+# VetCare pre-push hook - runs schema + TypeScript + memory-check validation
 # Installed by: node backend/scripts/install-hooks.js
 
 echo ""
@@ -28,7 +28,7 @@ node scripts/pre-deploy.js
 
 if [ $? -ne 0 ]; then
   echo ""
-  echo "\\033[31m✗ Push blocked — fix the errors above before pushing.\\033[0m"
+  echo "\\033[31m✗ Push blocked - fix the errors above before pushing.\\033[0m"
   echo ""
   exit 1
 fi
@@ -37,7 +37,7 @@ fi
 // ── post-commit hook ─────────────────────────────────────────────────────────
 const POST_COMMIT_FILE = path.join(HOOKS_DIR, 'post-commit');
 const POST_COMMIT_CONTENT = `#!/bin/sh
-# VetCare post-commit hook — auto-logs commit to memories/repo/auto-commit-log.md
+# VetCare post-commit hook - auto-logs commit to memories/repo/auto-commit-log.md
 # Installed by: node backend/scripts/install-hooks.js
 
 node "$(git rev-parse --show-toplevel)/backend/scripts/post-commit-logger.js"

@@ -10,9 +10,9 @@
 -- Modelled on the consultation tables, with two deliberate differences that the doctor model
 -- cannot express and a spa genuinely needs:
 --
---   CAPACITY  — a doctor serves one patient at a time. A salon has several tables/stations, so
+--   CAPACITY  - a doctor serves one patient at a time. A salon has several tables/stations, so
 --               a slot is bookable while CONCURRENT orders < capacity, not merely "unbooked".
---   DURATION  — every consultation slot is one fixed slot_duration. Grooming services already
+--   DURATION  - every consultation slot is one fixed slot_duration. Grooming services already
 --               carry their own duration_minutes (nail trim 20, full groom 120), so occupancy
 --               is an interval [start, start+duration) and start times are offered on a finer
 --               slot_interval grid.

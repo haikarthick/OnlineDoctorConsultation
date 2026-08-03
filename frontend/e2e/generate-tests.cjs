@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 /**
- * VetCare E2E — Auto-Discovery Test Generator
+ * VetCare E2E - Auto-Discovery Test Generator
  *
  * Scans App.tsx for all routes and Navigation.tsx for menu items,
  * then generates test stubs for any route that doesn't have a test.
  *
  * Usage:
- *   node e2e/generate-tests.js          — show report
- *   node e2e/generate-tests.js --write  — write missing test file
+ *   node e2e/generate-tests.js          - show report
+ *   node e2e/generate-tests.js --write  - write missing test file
  *
  * Run this after adding new pages/routes to auto-create E2E test coverage.
  * Can be hooked into CI or pre-commit to enforce test coverage for new routes.
@@ -154,7 +154,7 @@ import { USERS } from './constants'
     const userKey = ROLE_USER_MAP[primaryRole] || 'admin'
     const pageName = route.path.split('/').filter(Boolean).join('-') || 'root'
 
-    stub += `test.describe('Auto-Discovered — ${route.path}', () => {
+    stub += `test.describe('Auto-Discovered - ${route.path}', () => {
   test('should load ${route.path} without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()

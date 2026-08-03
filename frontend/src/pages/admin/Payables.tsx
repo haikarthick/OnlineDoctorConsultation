@@ -15,7 +15,7 @@ interface Props { onNavigate?: (path: string) => void }
  *
  * Covers both vendor types because they have the same operational question and two different
  * mechanisms: grooming providers are paid by admin push, doctors by their own withdrawal
- * request — so a doctor with a balance and no request is a payable nobody is tracking.
+ * request - so a doctor with a balance and no request is a payable nobody is tracking.
  */
 const Payables: React.FC<Props> = () => {
   const { t } = useTranslation()
@@ -142,7 +142,7 @@ const Payables: React.FC<Props> = () => {
                     </td>
                     <td><strong>{formatCurrency(r.payableNow)}</strong></td>
                     <td>{formatCurrency(r.clearing)}</td>
-                    <td>{r.ageDays == null ? '—' : t('payables.days', { count: r.ageDays })}</td>
+                    <td>{r.ageDays == null ? '-' : t('payables.days', { count: r.ageDays })}</td>
                     <td>{r.lastSettledAt ? formatDateTime(r.lastSettledAt) : t('payables.never')}</td>
                     <td>
                       {r.missingPayoutDetails
@@ -185,7 +185,7 @@ const Payables: React.FC<Props> = () => {
                     </td>
                     <td><strong>{formatCurrency(r.available)}</strong></td>
                     <td>{formatCurrency(r.clearing)}</td>
-                    <td>{r.ageDays == null ? '—' : t('payables.days', { count: r.ageDays })}</td>
+                    <td>{r.ageDays == null ? '-' : t('payables.days', { count: r.ageDays })}</td>
                     <td>{r.lastSettledAt ? formatDateTime(r.lastSettledAt) : t('payables.never')}</td>
                     <td>
                       {r.pendingRequest

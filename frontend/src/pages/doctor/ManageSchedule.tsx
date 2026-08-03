@@ -333,7 +333,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
                     <div className="si-ed6d4afe">{t('manageSchedule.off')}</div>
                   ) : daySched.map(s => (
                     <div key={s.id} className="si-692258ce">
-                      <div className="si-b2cfcbec">{formatSlotTime(s.startTime)}–{formatSlotTime(s.endTime)}</div>
+                      <div className="si-b2cfcbec">{formatSlotTime(s.startTime)}-{formatSlotTime(s.endTime)}</div>
                       <div className="si-a213bf41">{s.slotDuration || s.slotDurationMinutes}min</div>
                     </div>
                   ))}
@@ -362,7 +362,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
                   </div>
                 </div>
                 <div className="si-9e38e1e1">
-                  <span>🕐 {formatSlotTime(daySched[0].startTime)} – {formatSlotTime(daySched[0].endTime)}</span>
+                  <span>🕐 {formatSlotTime(daySched[0].startTime)} - {formatSlotTime(daySched[0].endTime)}</span>
                   <span>⏱️ {daySched[0].slotDuration || daySched[0].slotDurationMinutes}{t('manageSchedule.minSlots')}</span>
                 </div>
               </div>
@@ -495,7 +495,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
                 <div key={b.id} className="card si-25d97c4a">
                   <div>
                     <strong>{t('manageSchedule.every')} {DAY_LABELS[b.recurringDay || '']}</strong>
-                    <span className="si-fddef076">🕐 {formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}</span>
+                    <span className="si-fddef076">🕐 {formatSlotTime(b.startTime)} - {formatSlotTime(b.endTime)}</span>
                     {b.reason && <span className="si-824a7a1e">({b.reason})</span>}
                   </div>
                   <button className="btn btn-sm btn-danger" onClick={() => handleDeleteBlock(b.id)}>✕</button>
@@ -513,8 +513,8 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
               {blockedSlots.filter(b => !b.isRecurring).map(b => (
                 <div key={b.id} className="card si-1ad6e65d">
                   <div>
-                    <strong>{b.blockDate ? new Date(b.blockDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '—'}</strong>
-                    <span className="si-fddef076">🕐 {formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}</span>
+                    <strong>{b.blockDate ? new Date(b.blockDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '-'}</strong>
+                    <span className="si-fddef076">🕐 {formatSlotTime(b.startTime)} - {formatSlotTime(b.endTime)}</span>
                     {b.reason && <span className="si-824a7a1e">({b.reason})</span>}
                   </div>
                   <button className="btn btn-sm btn-danger" onClick={() => handleDeleteBlock(b.id)}>✕</button>
@@ -566,7 +566,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
                     <span className={`badge ${h.holidayType === 'general' ? 'badge-active' : h.holidayType === 'emergency_closure' ? 'badge-danger' : 'badge-warning'} si-7984dfbc`}>
                       {(h.holidayType || '').replace('_', ' ')}
                     </span>
-                    {!h.isFullDay && <span className="si-824a7a1e">({formatSlotTime(h.startTime || '')}–{formatSlotTime(h.endTime || '')})</span>}
+                    {!h.isFullDay && <span className="si-824a7a1e">({formatSlotTime(h.startTime || '')}-{formatSlotTime(h.endTime || '')})</span>}
                   </div>
                   <button className="btn btn-sm btn-danger" onClick={() => handleDeleteHoliday(h.id)}>✕</button>
                 </div>

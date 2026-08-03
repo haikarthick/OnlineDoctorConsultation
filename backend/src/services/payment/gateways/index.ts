@@ -5,7 +5,7 @@ import PaymentModuleConfig from '../PaymentModuleConfig';
 import PaymentCredentialsService from '../PaymentCredentialsService';
 
 /**
- * Gateway factory — resolves the active adapter from `payment.gatewayMode`.
+ * Gateway factory - resolves the active adapter from `payment.gatewayMode`.
  * Credentials are fetched fresh each call (PaymentCredentialsService has its
  * own short TTL cache) rather than cached on a long-lived gateway instance,
  * so an admin updating credentials takes effect within the cache window

@@ -27,7 +27,7 @@ const CACHE_TTL_MS = 60 * 1000;
 /**
  * Razorpay credentials, stored encrypted in payment_gateway_credentials
  * (docs/PAYMENT_MODULE_PLAN.md §12 rule 6). Secrets are only ever decrypted
- * server-side for building the gateway's auth header — GET-style methods on
+ * server-side for building the gateway's auth header - GET-style methods on
  * this service return masked metadata only, never plaintext secrets.
  */
 class PaymentCredentialsService {
@@ -51,7 +51,7 @@ class PaymentCredentialsService {
     return row;
   }
 
-  /** For the gateway adapter only — decrypted, never exposed via any API response. */
+  /** For the gateway adapter only - decrypted, never exposed via any API response. */
   async getForGateway(environment: GatewayEnvironment): Promise<{ keyId: string; keySecret: string; webhookSecret: string }> {
     const row = await this.getRow(environment);
     if (!row?.keyId || !row?.keySecretEncrypted) {
@@ -64,18 +64,18 @@ class PaymentCredentialsService {
         webhookSecret: row.webhookSecretEncrypted ? decryptSecret(row.webhookSecretEncrypted) : '',
       };
     } catch (err: any) {
-      logger.error('Failed to decrypt stored Razorpay credentials — PAYMENT_CREDENTIALS_KEY may be missing or changed since they were saved', { environment, error: err.message });
+      logger.error('Failed to decrypt stored Razorpay credentials - PAYMENT_CREDENTIALS_KEY may be missing or changed since they were saved', { environment, error: err.message });
       throw new ServiceError('Razorpay', `${environment} credentials could not be decrypted. Re-save them in Admin → System Settings → Razorpay Credentials.`);
     }
   }
 
-  /** For webhook signature verification — only the webhook secret, decrypted. */
+  /** For webhook signature verification - only the webhook secret, decrypted. */
   async getWebhookSecret(environment: GatewayEnvironment): Promise<string> {
     const row = await this.getRow(environment);
     return row?.webhookSecretEncrypted ? decryptSecret(row.webhookSecretEncrypted) : '';
   }
 
-  /** For the admin UI — masked, safe to return from a GET endpoint. */
+  /** For the admin UI - masked, safe to return from a GET endpoint. */
   async getMaskedStatus(environment: GatewayEnvironment): Promise<MaskedCredentialStatus> {
     const row = await this.getRow(environment);
     return {
@@ -90,7 +90,7 @@ class PaymentCredentialsService {
 
   /**
    * Blank/omitted keySecret or webhookSecret means "keep the existing value"
-   * — admins shouldn't have to re-paste a secret just to change the Key Id.
+   * - admins shouldn't have to re-paste a secret just to change the Key Id.
    */
   async setCredentials(
     environment: GatewayEnvironment,

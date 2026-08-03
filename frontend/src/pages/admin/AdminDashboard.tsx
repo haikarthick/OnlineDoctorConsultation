@@ -46,7 +46,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
       const result = await apiService.getAdminPharmacyOverview()
       setPharmacyOverview(result?.data || null)
     } catch {
-      // non-fatal — pharmacy overview unavailable
+      // non-fatal - pharmacy overview unavailable
     }
   }
 
@@ -68,7 +68,7 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
       const result = await (apiService as any).get('/admin/revenue-trends?days=30')
       setRevenueTrends(result?.data?.data || null)
     } catch {
-      // non-fatal — revenue trends unavailable
+      // non-fatal - revenue trends unavailable
     }
   }
   useAutoRefresh(['dashboard', 'bookings', 'consultations', 'users'], loadStats)
@@ -176,7 +176,7 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
         </div>
       )}
 
-      {/* More Stats — row 3: approval queues */}
+      {/* More Stats - row 3: approval queues */}
       <div className="stats-grid si-54b5c5e0">
         <div className="stat-card" onClick={() => onNavigate('/admin/users')} style={{ cursor: 'pointer', borderLeft: (stats.pendingUserApprovals ?? 0) > 0 ? '4px solid #ef4444' : undefined }}
           title="User registrations awaiting approval">
@@ -306,7 +306,7 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
       {/* Revenue Trends */}
       {revenueTrends && (
         <div className="card si-b4c2d096">
-          <div className="card-header"><h2>📈 {t('adminDashboard.revenueTrends')} — {t('adminDashboard.last30Days')}</h2></div>
+          <div className="card-header"><h2>📈 {t('adminDashboard.revenueTrends')} - {t('adminDashboard.last30Days')}</h2></div>
           <div className="card-body">
             <div className="si-e1725f0f">
               {/* Top Earning Vets */}

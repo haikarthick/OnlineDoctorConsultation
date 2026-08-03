@@ -61,7 +61,7 @@ switch (type.toLowerCase()) {
     if (!id || !title) { console.error(`${RED}✗ bug requires: ID Title Symptom RootCause Fix Rule${RESET}`); process.exit(1); }
     
     const entry = `
-### ${id} — ${title}
+### ${id} - ${title}
 - **Logged:** ${timestamp()}
 - **Symptom:** ${symptom || 'Not specified'}
 - **Root Cause:** ${rootCause || 'Not specified'}
@@ -71,7 +71,7 @@ switch (type.toLowerCase()) {
 `;
     const filePath = path.join(MEMORIES, 'past-bugs.md');
     appendToFile(filePath, entry);
-    console.log(`${GREEN}✓ Bug logged to past-bugs.md: ${id} — ${title}${RESET}`);
+    console.log(`${GREEN}✓ Bug logged to past-bugs.md: ${id} - ${title}${RESET}`);
     break;
   }
 
@@ -80,7 +80,7 @@ switch (type.toLowerCase()) {
     if (!id || !title) { console.error(`${RED}✗ lesson requires: ID Title Context Lesson Apply-to${RESET}`); process.exit(1); }
     
     const entry = `
-### ${id} — ${title}
+### ${id} - ${title}
 - **Logged:** ${timestamp()}
 - **Context:** ${context || 'Not specified'}
 - **Lesson:** ${lesson || 'Not specified'}
@@ -89,7 +89,7 @@ switch (type.toLowerCase()) {
 `;
     const filePath = path.join(MEMORIES, 'lessons.md');
     appendToFile(filePath, entry);
-    console.log(`${GREEN}✓ Lesson logged to lessons.md: ${id} — ${title}${RESET}`);
+    console.log(`${GREEN}✓ Lesson logged to lessons.md: ${id} - ${title}${RESET}`);
     break;
   }
 

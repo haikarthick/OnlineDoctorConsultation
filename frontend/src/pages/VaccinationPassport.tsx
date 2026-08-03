@@ -109,7 +109,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
   const [activeTab, setActiveTab] = useState<'passport' | 'compliance' | 'history'>('passport')
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
-  // Passport data — keyed by animalId
+  // Passport data - keyed by animalId
   const [passports, setPassports] = useState<PassportAnimal[]>([])
   const [expandedAnimal, setExpandedAnimal] = useState<string | null>(null)
   const [expandedProtocol, setExpandedProtocol] = useState<string | null>(null)
@@ -142,7 +142,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
       // For all roles: load animals first, then fetch passport for each
       const animalsResp = await (apiService as any).client.get('/animals', { params: { limit: 100 } })
       const rawData = animalsResp.data?.data
-      // Backend always returns { data: { animals: [], total: n } } — extract the animals array
+      // Backend always returns { data: { animals: [], total: n } } - extract the animals array
       const animals: { id: string }[] = Array.isArray(rawData?.animals)
         ? rawData.animals
         : Array.isArray(rawData?.items) ? rawData.items  // legacy fallback
@@ -320,7 +320,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
               {animal.animalUniqueId && (
                 <div
                   className="vc-id-badge si-4af0b366"
-                  title={`VetCare ID — click to copy`}
+                  title={`VetCare ID - click to copy`}
                   onClick={(e) => {
                     e.stopPropagation()
                     const id = animal.animalUniqueId!
@@ -434,7 +434,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                               <tr key={dose.scheduleId}>
                                 <td>#{dose.doseNumber}</td>
                                 <td>{formatDate(dose.dueDate)}</td>
-                                <td>{dose.administeredAt ? formatDate(dose.administeredAt) : '—'}</td>
+                                <td>{dose.administeredAt ? formatDate(dose.administeredAt) : '-'}</td>
                                 <td><StatusBadge status={dose.status} t={t} /></td>
                               </tr>
                             ))}
@@ -481,7 +481,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                     {row.animalName}
                   </td>
                   <td>{speciesLabel(row.species, t)}</td>
-                  <td>{row.ownerName || '—'}</td>
+                  <td>{row.ownerName || '-'}</td>
                   <td>{row.totalProtocols}</td>
                   <td>
                     {row.totalProtocols === 0 ? (
@@ -528,7 +528,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
           <option value="">{t('vaccinationPassport.selectAnimal')}</option>
           {passports.map((a) => (
             <option key={a.animalId} value={a.animalId}>
-              {speciesIcon(a.species)} {a.animalName} ({speciesLabel(a.species, t)}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
+              {speciesIcon(a.species)} {a.animalName} ({speciesLabel(a.species, t)}){(isAdmin || isVet) && a.ownerName ? ` - ${a.ownerName}` : ''}
             </option>
           ))}
         </select>
@@ -548,9 +548,9 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                   {log.fileName && <span className="vp-cert-filename">{log.fileName}</span>}
                 </div>
                 <div className="vp-cert-meta">
-                  {t('vaccinationPassport.generatedBy')}: <strong>{log.generatedByName || '—'}</strong>
+                  {t('vaccinationPassport.generatedBy')}: <strong>{log.generatedByName || '-'}</strong>
                   &nbsp;·&nbsp;
-                  {log.generatedAt ? formatDate(log.generatedAt) : '—'}
+                  {log.generatedAt ? formatDate(log.generatedAt) : '-'}
                 </div>
               </div>
             </div>
@@ -566,7 +566,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
     (s, a) => s + a.protocols.reduce((ps, p) => ps + (p.overdueCount ?? 0), 0),
     0
   )
-  // Only average animals that actually have protocols — avoids misleading 100% when no protocols assigned
+  // Only average animals that actually have protocols - avoids misleading 100% when no protocols assigned
   const animalsWithProtocols = passports.filter(a => a.protocols.length > 0)
   const avgCompliance =
     animalsWithProtocols.length > 0

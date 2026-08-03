@@ -1,5 +1,5 @@
 /**
- * AnimalService unit tests — mock database.
+ * AnimalService unit tests - mock database.
  */
 import AnimalService from '../../src/services/AnimalService'
 import database from '../../src/utils/database'

@@ -168,11 +168,11 @@ router.post('/auth/logout', validateBody(logoutSchema), asyncHandler((req: Reque
 router.post('/auth/logout-all', authMiddleware, asyncHandler((req: Request, res: Response) => AuthController.logoutAll(req, res)));
 router.get('/auth/profile', authMiddleware, asyncHandler((req: Request, res: Response) => AuthController.getProfile(req, res)));
 
-// ─── Self-service Password Reset (public — no auth required) ─────────────────
+// ─── Self-service Password Reset (public - no auth required) ─────────────────
 //
 // Security model:
 //   • Raw 32-byte token is sent in the email link (64-char hex, 256-bit entropy)
-//   • Only the SHA-256 hash is stored in the DB — a DB leak cannot be used to reset accounts
+//   • Only the SHA-256 hash is stored in the DB - a DB leak cannot be used to reset accounts
 //   • Tokens expire after 1 hour and are single-use (deleted on successful reset)
 //   • Rate-limited: one email per address per 5 minutes (new request silently suppressed)
 //   • Email enumeration-safe: always returns HTTP 200 with the same message
@@ -186,7 +186,7 @@ router.post('/auth/forgot-password', validateBody(forgotPasswordSchema), asyncHa
 
   const { email } = req.body as { email: string };
 
-  // Always return the same response — prevents email enumeration
+  // Always return the same response - prevents email enumeration
   const safeResponse = () => res.json({
     success: true,
     message: 'If an account with that email exists, a password reset link has been sent.',
@@ -525,7 +525,7 @@ router.post('/animals', authMiddleware, validateBody(createAnimalSchema), asyncH
 }));
 router.get('/animals/search/by-uid', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.searchByUniqueId(req, res)));
 router.get('/animals', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.listAnimals(req, res)));
-// Access-check endpoint — frontend can call this before showing a "Request Access" button
+// Access-check endpoint - frontend can call this before showing a "Request Access" button
 router.get('/animals/:id/access-check', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
   const decision = await checkAnimalAccess(authReq.userId!, authReq.userRole!, req.params.id);
@@ -765,7 +765,7 @@ router.post('/hospital-networks/:id/approval-events', authMiddleware, roleMiddle
   const allowedTypes = ['submitted','under_review','info_requested','info_provided','approved','rejected','suspended','reactivated'];
   if (!allowedTypes.includes(eventType)) return res.status(400).json({ error: `eventType must be one of: ${allowedTypes.join(', ')}` });
   await addApprovalEvent(req.params.id, (req as any).userId, (req as any).userRole, eventType, notes);
-  // If approve/reject/suspend/reactivate — also update the network status
+  // If approve/reject/suspend/reactivate - also update the network status
   if (eventType === 'approved') {
     await database.query(
       `UPDATE hospital_networks SET is_approved = true, approved_by = $2, approved_at = NOW(), updated_at = NOW() WHERE id = $1`,
@@ -872,7 +872,7 @@ router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandle
     if (!canEditMembers) {
       return res.status(403).json({ success: false, message: 'You do not have permission to update members in this network' });
     }
-    // H5: hospital_director scope — can only edit members in their own branch hospital
+    // H5: hospital_director scope - can only edit members in their own branch hospital
     if (memberCheck.rows[0].network_role === 'hospital_director') {
       const directorHospitalId = memberCheck.rows[0]?.hospital_id as string | undefined;
       const hospitalIdCheck = directorHospitalId || (await database.query(
@@ -1195,7 +1195,7 @@ router.get('/hospital-networks/:id/analytics', authMiddleware, asyncHandler(asyn
     const userId = (req as any).userId;
     const userRole = (req as any).userRole;
     // Was a hardcoded role list that included auditor, whose networkDashboardStats
-    // matrix default is actually false — now honors the configurable matrix.
+    // matrix default is actually false - now honors the configurable matrix.
     const access = await resolveNetworkAccess(networkId, userId, userRole, 'networkDashboardStats');
     if (!access.allowed) {
       res.status(access.reason === 'not_member' ? 404 : 403).json({ success: false, message: 'Access denied' });
@@ -1221,7 +1221,7 @@ router.get('/hospital-networks/:id/compliance-report', authMiddleware, asyncHand
       res.status(400).json({ success: false, message: 'from and to date params are required' });
       return;
     }
-    // Matches matrix defaults exactly (hospital_director=false, others=true) — converted
+    // Matches matrix defaults exactly (hospital_director=false, others=true) - converted
     // to the matrix-driven check for consistency with the rest of this route family.
     const access = await resolveNetworkAccess(networkId, userId, userRole, 'exportComplianceReport');
     if (!access.allowed) {
@@ -1265,7 +1265,7 @@ router.post('/hospital-networks/:id/invite-walkin', authMiddleware, requireNetwo
   }
 }));
 
-// Direct walk-in patient registration — no invite needed, treatment starts immediately
+// Direct walk-in patient registration - no invite needed, treatment starts immediately
 router.post('/hospital-networks/:id/register-walkin', authMiddleware, requireNetworkAccess('walkInRegistration'), asyncHandler(async (req: Request, res: Response) => {
   try {
     const { hospitalId, patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalClass, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit, consentCollected, consentMethod } = req.body;
@@ -1273,7 +1273,7 @@ router.post('/hospital-networks/:id/register-walkin', authMiddleware, requireNet
       res.status(400).json({ success: false, message: 'patientName, animalName, animalSpecies, and hospitalId are required' }); return;
     }
 
-    // H3: Duplicate detection — microchip ID
+    // H3: Duplicate detection - microchip ID
     if (animalMicrochipId) {
       const existing = await database.query(
         `SELECT a.id, a.name, a.species, u.email as "ownerEmail"
@@ -1292,7 +1292,7 @@ router.post('/hospital-networks/:id/register-walkin', authMiddleware, requireNet
       }
     }
 
-    // H3: Duplicate detection — name + species + owner phone (fuzzy match)
+    // H3: Duplicate detection - name + species + owner phone (fuzzy match)
     if (animalName && patientPhone) {
       const fuzzy = await database.query(
         `SELECT a.id, a.name, a.species, u.first_name || ' ' || u.last_name as "ownerName", u.email as "ownerEmail"
@@ -1477,7 +1477,7 @@ router.post('/payments/verify', authMiddleware, validateBody(verifyPaymentSchema
   res.json({ success: true, message: 'Payment completed' });
 }));
 
-// Razorpay webhook (§12 rules 2–3): raw-body signature verification, no auth
+// Razorpay webhook (§12 rules 2-3): raw-body signature verification, no auth
 // middleware, idempotent on gateway event id. Always 200 for processed events
 // so Razorpay stops retrying; 400 only on signature failure.
 router.post('/webhooks/razorpay', asyncHandler(async (req: Request, res: Response) => {
@@ -1554,7 +1554,7 @@ router.get('/invoices/:id', authMiddleware, asyncHandler(async (req: Request, re
   res.json({ success: true, data: invoice });
 }));
 
-// Admin: SAC tax-code management (D13 — rate changes need zero code)
+// Admin: SAC tax-code management (D13 - rate changes need zero code)
 router.get('/admin/tax-codes', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
   const result = await database.query(
     `SELECT id, sac_code as "sacCode", label, rate_percent as "ratePercent", is_active as "isActive"
@@ -1604,7 +1604,7 @@ router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['a
       [from, to]
     ),
     // Pharmacy revenue has no platform commission split (it's the network's own dispensing
-    // revenue, not a consultation the platform brokered) — tracked separately from GMV/commission above.
+    // revenue, not a consultation the platform brokered) - tracked separately from GMV/commission above.
     database.query(
       `SELECT
          COALESCE(SUM(amount) FILTER (WHERE status = 'completed'), 0) as collected,
@@ -1958,7 +1958,7 @@ router.get('/payments/booking/:bookingId', authMiddleware, asyncHandler((req: Re
 router.get('/payments/gateway-settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => PaymentController.getGatewaySettings(req, res)));
 router.get('/payments/:id', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.getPayment(req, res)));
 
-// ─── Razorpay credentials (payment module — §12 rule 6: masked only, never plaintext) ───
+// ─── Razorpay credentials (payment module - §12 rule 6: masked only, never plaintext) ───
 router.get('/admin/razorpay-credentials', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
   const PaymentCredentialsService = (await import('../services/payment/PaymentCredentialsService')).default;
   const [test, live] = await Promise.all([
@@ -1985,7 +1985,7 @@ router.put('/admin/razorpay-credentials/:environment', authMiddleware, roleMiddl
 router.get('/wallet', authMiddleware, asyncHandler((req: Request, res: Response) => WalletController.getWallet(req, res)));
 router.get('/wallet/transactions', authMiddleware, asyncHandler((req: Request, res: Response) => WalletController.listTransactions(req, res)));
 
-// Wallet withdrawals (038) — the wallet's exit door. Any authenticated user may withdraw their
+// Wallet withdrawals (038) - the wallet's exit door. Any authenticated user may withdraw their
 // OWN balance; refunds land here and must not be trapped as permanent store credit.
 router.post('/wallet/withdrawals', authMiddleware, validateBody(walletWithdrawalRequestSchema),
   asyncHandler(async (req: Request, res: Response) => {
@@ -2206,7 +2206,7 @@ router.post('/admin/settings/test-email', authMiddleware, roleMiddleware(['admin
   try {
     const result = await emailService.send({
       to,
-      subject: 'VetCare — Test Email',
+      subject: 'VetCare - Test Email',
       html: `<div style="font-family:Arial,sans-serif;padding:24px"><h2>✅ Email is working!</h2><p>This is a test email from VetCare admin panel.</p><p>Sent at: ${new Date().toISOString()}</p><p>Dev redirect: ${devRedirect || 'off'}</p></div>`,
       text: `Email is working! Sent at: ${new Date().toISOString()}`,
     });
@@ -2214,7 +2214,7 @@ router.post('/admin/settings/test-email', authMiddleware, roleMiddleware(['admin
     const messages: Record<string, string> = {
       'resend': 'Test email sent via Resend (HTTP)',
       'smtp': 'Test email sent via SMTP',
-      'log-only': 'Email logged (no email provider available — add RESEND_API_KEY for delivery)',
+      'log-only': 'Email logged (no email provider available - add RESEND_API_KEY for delivery)',
     };
     res.json({ success: true, message: messages[mode] || 'Email processed', data: { messageId: result.messageId, mode, previewUrl: result.previewUrl || null, redirectedTo: devRedirect || null } });
   } catch (err: any) {
@@ -2371,7 +2371,7 @@ router.post('/hospital-networks/:id/roles', authMiddleware, requireNetworkAccess
   }
 }));
 
-// Same matrix deferral as the create route above — see the note there.
+// Same matrix deferral as the create route above - see the note there.
 router.put('/hospital-networks/:id/roles/:roleKey', authMiddleware, requireNetworkAccess('manageRolePermissions'), asyncHandler(async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
@@ -2589,10 +2589,10 @@ router.patch('/referrals/:id/status', authMiddleware, asyncHandler(async (req: R
   return StaffWorkflowController.updateReferralStatus(req, res);
 }));
 // Inpatient / Boarding
-// Network-aware inpatient access helper — membership check delegated to the same
+// Network-aware inpatient access helper - membership check delegated to the same
 // resolveNetworkAccess() core used by requireNetworkAccess/ensureNetworkAccess (see
 // [[feedback-network-hospital-change-approval]]); only the hospital→network resolution
-// is specific to this helper. Non-membership responds 404 (not 403) — anti-enumeration,
+// is specific to this helper. Non-membership responds 404 (not 403) - anti-enumeration,
 // consistent with VetHospitalService's getHospital/listDoctors pattern.
 async function checkInpatientNetworkAccess(req: Request, res: Response): Promise<boolean> {
   const userId = (req as any).userId;
@@ -2601,7 +2601,7 @@ async function checkInpatientNetworkAccess(req: Request, res: Response): Promise
   const hospitalId = req.params.hospitalId;
   const hospitalRes = await database.query(`SELECT branch_network_id FROM vet_hospitals WHERE id = $1`, [hospitalId]);
   const networkId = hospitalRes.rows[0]?.branch_network_id;
-  if (!networkId) return true; // standalone hospital — no network check needed
+  if (!networkId) return true; // standalone hospital - no network check needed
   const result = await resolveNetworkAccess(networkId, userId, userRole);
   if (!result.allowed) {
     res.status(404).json({ success: false, error: 'Hospital not found' });
@@ -2613,7 +2613,7 @@ async function checkInpatientNetworkAccess(req: Request, res: Response): Promise
 /**
  * Same network-membership check as checkInpatientNetworkAccess, but for
  * routes keyed by a resource id (queue entry, workflow case, referral,
- * staff position, inpatient admission) rather than :hospitalId directly —
+ * staff position, inpatient admission) rather than :hospitalId directly -
  * resolves the resource's hospital_id first, then checks membership if that
  * hospital is a network branch. Prevents a staffer from one network reading
  * or mutating another network's operational data by id.
@@ -2625,10 +2625,10 @@ async function checkResourceNetworkAccess(req: Request, res: Response, table: st
   const resourceId = req.params[idParam];
   const resourceRes = await database.query(`SELECT hospital_id FROM ${table} WHERE id = $1`, [resourceId]);
   const hospitalId = resourceRes.rows[0]?.hospital_id;
-  if (!hospitalId) return true; // not found here — let the controller 404 normally
+  if (!hospitalId) return true; // not found here - let the controller 404 normally
   const hospitalRes = await database.query(`SELECT branch_network_id FROM vet_hospitals WHERE id = $1`, [hospitalId]);
   const networkId = hospitalRes.rows[0]?.branch_network_id;
-  if (!networkId) return true; // standalone hospital — no network check needed
+  if (!networkId) return true; // standalone hospital - no network check needed
   const result = await resolveNetworkAccess(networkId, userId, userRole);
   if (!result.allowed) {
     res.status(404).json({ success: false, error: 'Resource not found' });
@@ -2747,7 +2747,7 @@ router.patch('/marketplace/admin/listings/:id/approve', authMiddleware, roleMidd
 router.patch('/marketplace/admin/listings/:id/reject', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.adminRejectMarketplaceListing(req, res)));
 router.patch('/marketplace/admin/listings/:id/hot-deal', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.adminToggleHotDeal(req, res)));
 router.patch('/marketplace/admin/listings/:id/featured', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.adminToggleFeatured(req, res)));
-// Marketplace Monetization — Admin
+// Marketplace Monetization - Admin
 router.get('/marketplace/admin/monetization/settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.getMonetizationSettings(req, res)));
 router.put('/marketplace/admin/monetization/settings/:key', authMiddleware, roleMiddleware(['admin']), validateBody(updateMonetizationSettingSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateMonetizationSetting(req, res)));
 router.get('/marketplace/admin/monetization/plans', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplacePlans(req, res)));
@@ -2755,7 +2755,7 @@ router.post('/marketplace/admin/monetization/plans', authMiddleware, roleMiddlew
 router.put('/marketplace/admin/monetization/plans/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMPlanSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateMarketplacePlan(req, res)));
 router.delete('/marketplace/admin/monetization/plans/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteMarketplacePlan(req, res)));
 router.get('/marketplace/admin/monetization/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.getMonetizationDashboard(req, res)));
-// Marketplace Monetization — User
+// Marketplace Monetization - User
 router.get('/marketplace/subscription', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getUserSubscription(req, res)));
 router.post('/marketplace/subscription', authMiddleware, validateBody(createSubscriptionSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createUserSubscription(req, res)));
 router.delete('/marketplace/subscription', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.cancelUserSubscription(req, res)));
@@ -2764,7 +2764,7 @@ router.post('/marketplace/listings/:listingId/inquiries', authMiddleware, valida
 router.get('/marketplace/inquiries', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceInquiries(req, res)));
 router.patch('/marketplace/inquiries/:id/respond', authMiddleware, validateBody(respondInquirySchema), asyncHandler((req: Request, res: Response) => Tier4Controller.respondToMarketplaceInquiry(req, res)));
 router.get('/marketplace/monetization-status', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getUserMonetizationStatus(req, res)));
-// Auction feature flag — readable by any authenticated user, writable by admin only
+// Auction feature flag - readable by any authenticated user, writable by admin only
 router.get('/marketplace/auction-enabled', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getAuctionEnabled(req, res)));
 router.put('/marketplace/admin/auction-enabled', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.setAuctionEnabled(req, res)));
 
@@ -2880,14 +2880,14 @@ router.get('/features', (_req, res) => {
  * These two endpoints exist for the case where a deploy left the database in a
  * state the app cannot start against (the 2026-07-26 Render investigation). That
  * is exactly the case where `authMiddleware` would be useless as the gate: if the
- * schema is missing or wrong, nobody can log in to authorise the repair — so
+ * schema is missing or wrong, nobody can log in to authorise the repair - so
  * requiring a login would break the emergency they exist to solve.
  *
  * The gate is therefore a pre-shared secret in EMERGENCY_DIAGNOSTIC_TOKEN,
  * compared in constant time. If that env var is unset the endpoints are disabled
  * outright: fail closed, so an operator who never opted in is never exposed.
  *
- * Both respond 404 rather than 401/403 — an anonymous prober should not even be
+ * Both respond 404 rather than 401/403 - an anonymous prober should not even be
  * able to confirm the route exists.
  *
  * To use during an incident:
@@ -2937,7 +2937,7 @@ router.get('/debug/db-state', emergencyGate, async (_req, res) => {
     try {
       const uc = await database.query(`SELECT COUNT(*)::int AS cnt FROM "${schema}".users`);
       rows.userCountInSchema = uc.rows[0]?.cnt;
-    } catch { rows.userCountInSchema = 'error — table likely missing'; }
+    } catch { rows.userCountInSchema = 'error - table likely missing'; }
 
     res.json({ status: 'ok', targetSchema: schema, ...rows });
   } catch (e: any) {
@@ -3068,7 +3068,7 @@ router.post('/admin/vaccine-protocols/:id/changes', authMiddleware, roleMiddlewa
   res.status(201).json({ success: true, data: change });
 }));
 
-// ─── Vaccine protocols — public read (authenticated) ─────────
+// ─── Vaccine protocols - public read (authenticated) ─────────
 router.get('/vaccine-protocols', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const { species, category, country } = req.query as Record<string, string>;
   const protocols = await VaccineProtocolService.listProtocols({ species, category, country, activeOnly: true });
@@ -3082,12 +3082,12 @@ router.get('/vaccine-protocols/:id', authMiddleware, asyncHandler(async (req: Re
 }));
 
 // ═══════════════════════════════════════════════════════════════════
-// Master Data — species, breeds, animal classes, marketplace categories/conditions.
+// Master Data - species, breeds, animal classes, marketplace categories/conditions.
 // Public read (active-only, powers dropdowns) + admin CRUD (archive/restore + delete
 // blocked while in use). Mirrors the vaccine-protocols route shape above.
 // ═══════════════════════════════════════════════════════════════════
 
-// ─── Public read (no auth — powers dropdowns on both authed pages and the
+// ─── Public read (no auth - powers dropdowns on both authed pages and the
 // unauthenticated PublicMarketplace; mirrors GET /settings/public's convention
 // for non-sensitive UI config that must load before/without login) ─────────
 router.get('/master-data/species', asyncHandler(async (_req: Request, res: Response) => {
@@ -3603,7 +3603,7 @@ router.post('/admin/networks/:id/unsuspend', authMiddleware, roleMiddleware(['ad
 // ─────────────────────────────────────────────────────────────────────────────
 
 // system_settings values are free-text editable (generic admin settings table,
-// not just the dedicated Pricing Settings page) — normalize case/whitespace so
+// not just the dedicated Pricing Settings page) - normalize case/whitespace so
 // a typo like 'True' doesn't silently disable visibility. See payment.enabled
 // incident (2026-07-06) for why this must never be a strict '=== "true"'.
 const isSettingTrue = (value: string | undefined | null): boolean =>
@@ -3770,7 +3770,7 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
   // CRITICAL: Wrap the entire accept flow in a transaction to prevent seat limit race conditions
   // Without this, two parallel accepts could both pass the seat check but exceed the limit when committed
   try {
-    // Direct db usage — transactions need explicit BEGIN/COMMIT
+    // Direct db usage - transactions need explicit BEGIN/COMMIT
     await db.query('BEGIN ISOLATION LEVEL SERIALIZABLE');
 
     // Re-check seat limit INSIDE the transaction (row-level lock prevents other accepts from executing in parallel)
@@ -3793,10 +3793,10 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
 
     const bcrypt = require('bcryptjs');
     const password_hash = await bcrypt.hash(password, 12);
-    // Derive system role from invited staff_position — pharmacist gets dedicated role
+    // Derive system role from invited staff_position - pharmacist gets dedicated role
     const staffPositionRoleMap: Record<string, string> = { pharmacist: 'pharmacist' };
     const assignedRole = staffPositionRoleMap[invite.staff_position] || 'hospital_staff';
-    // network_role must satisfy the DB check constraint — always 'hospital_staff' for position-based invites
+    // network_role must satisfy the DB check constraint - always 'hospital_staff' for position-based invites
     const networkRole = 'hospital_staff';
     const userResult = await db.query(
       `INSERT INTO users (email, first_name, last_name, phone, role, password_hash) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, email, first_name, last_name, role`,
@@ -3805,7 +3805,7 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
     const newUser = userResult.rows[0];
     await db.query(`INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (network_id, user_id) DO NOTHING`,
       [invite.network_id, newUser.id, networkRole, invite.hospital_id, invite.invited_by]);
-    // staff_positions may not have a unique constraint — use INSERT only if not exists
+    // staff_positions may not have a unique constraint - use INSERT only if not exists
     const existingPos = await db.query(`SELECT id FROM staff_positions WHERE hospital_id=$1 AND user_id=$2`, [invite.hospital_id, newUser.id]);
     if (existingPos.rows.length === 0 && invite.hospital_id) {
       await db.query(`INSERT INTO staff_positions (hospital_id, user_id, position) VALUES ($1,$2,$3)`,
@@ -3972,13 +3972,13 @@ router.delete('/hospital-networks/:id/staff-invites/:inviteId', authMiddleware, 
   res.json({ success: true });
 }));
 
-// G10 — Export audit logs as CSV
+// G10 - Export audit logs as CSV
 router.get('/hospital-networks/:id/audit-logs/export', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   const userId = (req as any).userId;
   const userRole = (req as any).userRole;
 
-  // Was previously "any member" — hospital_staff has viewAuditLogs=false in the matrix
+  // Was previously "any member" - hospital_staff has viewAuditLogs=false in the matrix
   // and should not be able to pull the raw clinical-access audit log via this endpoint.
   const access = await resolveNetworkAccess(networkId, userId, userRole, 'viewAuditLogs');
   if (!access.allowed) {
@@ -4011,14 +4011,14 @@ router.get('/hospital-networks/:id/audit-logs/export', authMiddleware, asyncHand
   res.send(headers + rows);
 }));
 
-// G11 — Network financial summary
+// G11 - Network financial summary
 router.get('/hospital-networks/:id/financial-summary', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   const userId = (req as any).userId;
   const userRole = (req as any).userRole;
   // Was previously a hardcoded ['corporate_admin','hospital_director','auditor'] list that bypassed
   // the admin-configurable financialAnalytics matrix entirely (matrix sets it false for both
-  // hospital_director and auditor) — now honors whatever the network's admin has actually configured.
+  // hospital_director and auditor) - now honors whatever the network's admin has actually configured.
   const access = await resolveNetworkAccess(networkId, userId, userRole, 'financialAnalytics');
   if (!access.allowed) {
     if (access.reason === 'not_member') return res.status(404).json({ success: false, error: 'Network not found' });
@@ -4028,7 +4028,7 @@ router.get('/hospital-networks/:id/financial-summary', authMiddleware, asyncHand
   res.json({ success: true, data: result });
 }));
 
-// G12 — Staff leave management
+// G12 - Staff leave management
 router.get('/hospital-networks/:id/leave-requests', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   const userId = (req as any).userId;
@@ -4078,7 +4078,7 @@ router.patch('/hospital-networks/:id/leave-requests/:requestId', authMiddleware,
   res.json({ success: true, data: result });
 }));
 
-// G13 — Patient transfers
+// G13 - Patient transfers
 router.post('/hospital-networks/:id/patient-transfers', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   const userId = (req as any).userId;
@@ -4668,7 +4668,7 @@ router.patch('/pharmacies/:pharmacyId/reorders/:reorderId', authMiddleware, asyn
   const { status, tracking_number, expected_delivery_date, notes } = req.body;
   const now = new Date().toISOString();
 
-  // Build SET clause with correctly indexed parameters — never hardcode index offsets
+  // Build SET clause with correctly indexed parameters - never hardcode index offsets
   const setParts: string[] = [];
   const params: any[] = [];
 
@@ -4677,7 +4677,7 @@ router.patch('/pharmacies/:pharmacyId/reorders/:reorderId', authMiddleware, asyn
   if (expected_delivery_date !== undefined){ setParts.push(`expected_delivery_date = $${params.push(expected_delivery_date || null)}`); }
   if (notes !== undefined)                 { setParts.push(`notes = $${params.push(notes || null)}`); }
 
-  // Status-specific timestamp columns — use correct column names from pharmacy_reorder_requests schema
+  // Status-specific timestamp columns - use correct column names from pharmacy_reorder_requests schema
   if (status === 'received')  { setParts.push(`received_at = $${params.push(now)}`); }
   if (status === 'shipped')   { setParts.push(`shipped_at = $${params.push(now)}`); }
   if (status === 'confirmed') { setParts.push(`confirmed_at = $${params.push(now)}`); }
@@ -4700,7 +4700,7 @@ router.patch('/pharmacies/:pharmacyId/reorders/:reorderId', authMiddleware, asyn
     const r = result.rows[0];
     database.query(
       `INSERT INTO pharmacy_stock_adjustments (pharmacy_id, med_id, adjustment_qty, adjustment_type, reason, adjusted_by)
-       VALUES ($1, $2, $3, 'add', 'Reorder received — add stock via Inventory tab', $4)`,
+       VALUES ($1, $2, $3, 'add', 'Reorder received - add stock via Inventory tab', $4)`,
       [req.params.pharmacyId, r.med_id, r.requested_qty, authReq.userId]
     ).catch(() => {});
   }
@@ -4736,7 +4736,7 @@ router.get('/pharmacies/:pharmacyId/pending-prescriptions', authMiddleware, asyn
   res.json(result.rows);
 }));
 
-// Submit prescription review — pharmacist or admin only, scoped to their network
+// Submit prescription review - pharmacist or admin only, scoped to their network
 router.post('/prescriptions/:prescriptionId/review', authMiddleware, roleMiddleware(['pharmacist', 'admin']), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   // Verify prescription exists and belongs to the pharmacist's network
@@ -4758,7 +4758,7 @@ router.post('/prescriptions/:prescriptionId/review', authMiddleware, roleMiddlew
   const validStatuses = ['approved', 'rejected', 'needs_clarification'];
   if (!validStatuses.includes(review_status)) return res.status(400).json({ success: false, message: 'Invalid review_status' });
   // Insert review record
-  // findings is TEXT[] — the frontend sends one free-text string, so wrap it as a
+  // findings is TEXT[] - the frontend sends one free-text string, so wrap it as a
   // single-element array; binding a bare JS string to an array column throws
   // "malformed array literal" in Postgres.
   await database.query(
@@ -4785,7 +4785,7 @@ router.post('/prescriptions/:prescriptionId/review', authMiddleware, roleMiddlew
           : `Pharmacist needs clarification on your prescription for ${rxRow.rows[0].animal_name || 'your patient'}.${suggested_modifications ? ' Note: ' + suggested_modifications : ''}`;
         const NSvc = (await import('../services/NotificationService')).default;
         await NSvc.createNotification(rxRow.rows[0].veterinarian_id, 'prescription',
-          review_status === 'rejected' ? 'Prescription Rejected' : 'Prescription — Clarification Needed',
+          review_status === 'rejected' ? 'Prescription Rejected' : 'Prescription - Clarification Needed',
           msg, 'all', { prescriptionId: req.params.prescriptionId });
       }
     } catch { /* non-fatal */ }
@@ -4882,7 +4882,7 @@ router.post('/dispensing', authMiddleware, asyncHandler(async (req: Request, res
   }
   // Update prescription to dispensed
   await database.query(`UPDATE prescriptions SET review_status = 'dispensed', updated_at = NOW() WHERE id = $1`, [prescription_id]);
-  // Create pharmacy payment record (pending — patient pays at counter or later)
+  // Create pharmacy payment record (pending - patient pays at counter or later)
   if (total_cost > 0) {
     try {
       const rxForBilling = await database.query(
@@ -4923,7 +4923,7 @@ router.post('/dispensing', authMiddleware, asyncHandler(async (req: Request, res
   res.status(201).json(record.rows[0]);
 }));
 
-// Update dispensing status — requires pharmacy membership
+// Update dispensing status - requires pharmacy membership
 router.patch('/dispensing/:dispensingId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const row = await database.query(
     `SELECT pharmacy_id FROM dispensing_records WHERE id = $1`,
@@ -4976,7 +4976,7 @@ router.get('/pharmacies/:pharmacyId/dispensing-history', authMiddleware, asyncHa
   res.json(result.rows);
 }));
 
-// Vet's own pharmacy stats (dashboard tile) — self-scoped, no guard needed
+// Vet's own pharmacy stats (dashboard tile) - self-scoped, no guard needed
 router.get('/vet/pharmacy-stats', authMiddleware, roleMiddleware(['veterinarian']), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const result = await database.query(
@@ -5052,7 +5052,7 @@ router.get('/pharmacies/:pharmacyId/analytics', authMiddleware, asyncHandler(asy
   });
 }));
 
-// Network-wide pharmacy report — network members only
+// Network-wide pharmacy report - network members only
 router.get('/networks/:networkId/pharmacy-reports', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const days = Math.min(Math.max(Number.parseInt(String(req.query.days), 10) || 30, 1), 365);
@@ -5316,7 +5316,7 @@ router.put('/grooming/admin/providers/:id/suspend', authMiddleware, roleMiddlewa
 
 // ── Availability & working hours (037) ──
 // Slot reads are PUBLIC (authMiddleware only, no provider membership): a customer must be able
-// to see when a salon is free before booking. They expose times and remaining capacity only —
+// to see when a salon is free before booking. They expose times and remaining capacity only -
 // never customer or order details.
 router.get('/grooming/providers/:id/availability', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
@@ -5340,7 +5340,7 @@ router.get('/grooming/providers/:id/availability/month', authMiddleware, groomin
     });
   }));
 
-// Weekly working hours — owner/manager only (enforced in the service).
+// Weekly working hours - owner/manager only (enforced in the service).
 router.get('/grooming/providers/:id/schedules', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingScheduleService.listSchedules((req as any).userId, req.params.id) });
@@ -5355,7 +5355,7 @@ router.delete('/grooming/providers/:id/schedules/:scheduleId', authMiddleware, g
     res.json({ success: true });
   }));
 
-// Date overrides — closures and one-off hours.
+// Date overrides - closures and one-off hours.
 router.get('/grooming/providers/:id/date-overrides', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingScheduleService.listOverrides(
@@ -5371,7 +5371,7 @@ router.delete('/grooming/providers/:id/date-overrides/:overrideId', authMiddlewa
     res.json({ success: true });
   }));
 
-// Blocked ranges — breaks within an otherwise open day.
+// Blocked ranges - breaks within an otherwise open day.
 router.get('/grooming/providers/:id/blocked-slots', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingScheduleService.listBlockedSlots((req as any).userId, req.params.id) });
@@ -5401,7 +5401,7 @@ router.get('/grooming/orders/:id', authMiddleware, groomingEnabled,
   }));
 // NOTE: the legacy POST /grooming/orders/:id/pay route was REMOVED. It was the demo-era
 // "mark it paid" shortcut and it confirmed an order, set amount_paid and credited the provider
-// WITHOUT taking any money — any customer could self-issue a free booking. Payment goes through
+// WITHOUT taking any money - any customer could self-issue a free booking. Payment goes through
 // /checkout + /confirm-payment (real gateway, verified capture) only.
 // Real gateway checkout (demo auto-verifies; Razorpay opens on the client) + GST invoice
 router.post('/grooming/orders/:id/checkout', authMiddleware, groomingEnabled,
@@ -5422,7 +5422,7 @@ router.post('/grooming/orders/:id/confirm-balance', authMiddleware, groomingEnab
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingPaymentService.confirmBalancePayment((req as any).userId, req.params.id, req.body || {}) });
   }));
-// What the customer gets back if they cancel now — grooming's own policy engine, shown in the
+// What the customer gets back if they cancel now - grooming's own policy engine, shown in the
 // cancel dialog before they commit (mirrors /payments/refund-preview for consultations).
 router.get('/grooming/orders/:id/refund-preview', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
@@ -5503,12 +5503,12 @@ router.get('/grooming/admin/providers/:id/earnings', authMiddleware, roleMiddlew
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingSettlementService.getEarningsAdmin(req.params.id) });
   }));
-// "Who do I owe, and how much" — the register that made manual settlement operable.
+// "Who do I owe, and how much" - the register that made manual settlement operable.
 router.get('/grooming/admin/payables', authMiddleware, roleMiddleware(['admin']), groomingEnabled,
   asyncHandler(async (_req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingSettlementService.adminPayables() });
   }));
-// Statement of exactly which earnings one payout covered — the provider's reconciliation view.
+// Statement of exactly which earnings one payout covered - the provider's reconciliation view.
 router.get('/grooming/settlements/:settlementId/statement', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     const isAdmin = ((req as any).userRoles || []).includes('admin');

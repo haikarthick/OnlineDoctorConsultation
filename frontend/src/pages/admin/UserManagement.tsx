@@ -72,7 +72,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
   const [processing, setProcessing] = useState<string | null>(null)
   const [showRoleModal, setShowRoleModal] = useState<User | null>(null)
   const [newRole, setNewRole] = useState('')
-  // Vet details when an admin assigns the veterinarian role directly — supplying a license
+  // Vet details when an admin assigns the veterinarian role directly - supplying a license
   // marks the provisioned vet_profiles row verified; leaving it blank still makes the vet
   // visible/bookable (unverified) so they never silently disappear from Find Doctor.
   const [roleVetLicense, setRoleVetLicense] = useState('')
@@ -410,7 +410,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
         profileImage: p.profileImage || '',
       })
     } catch {
-      // No vet profile — form stays empty
+      // No vet profile - form stays empty
     } finally {
       setVetLoading(false)
     }
@@ -856,7 +856,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       <button className="btn btn-sm btn-outline" onClick={() => { setShowResetPasswordModal(u); setResetPasswordValue(''); setResetPasswordMsg('') }}>
                         🔒 {t('userManagement.resetPasswordBtn')}
                       </button>
-                      {/* Account status actions — context-sensitive */}
+                      {/* Account status actions - context-sensitive */}
                       {u.accountStatus === 'pending_approval' ? (
                         <>
                           <button className="btn btn-sm btn-success" disabled={processing === u.id} onClick={() => handleApproveRegistration(u.id)}>
@@ -894,7 +894,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
         <div className="modal-overlay" onClick={() => setShowVetModal(null)}>
           <div className="modal si-fd563096" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>🩺 {t('userManagement.vetProfile')} — {showVetModal.firstName} {showVetModal.lastName}</h2>
+              <h2>🩺 {t('userManagement.vetProfile')} - {showVetModal.firstName} {showVetModal.lastName}</h2>
               <button className="modal-close" onClick={() => setShowVetModal(null)}>✕</button>
             </div>
             <div className="modal-body">
@@ -985,7 +985,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
         <div className="modal-overlay" onClick={() => setShowSecondaryRolesModal(null)}>
           <div className="modal si-f366f390" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>🔑 {t('userManagement.roles')} — {showSecondaryRolesModal.firstName} {showSecondaryRolesModal.lastName}</h2>
+              <h2>🔑 {t('userManagement.roles')} - {showSecondaryRolesModal.firstName} {showSecondaryRolesModal.lastName}</h2>
               <button className="modal-close" onClick={() => setShowSecondaryRolesModal(null)}>✕</button>
             </div>
             <div className="modal-body">
@@ -1102,7 +1102,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
         <div className="modal-overlay" onClick={() => setShowResetPasswordModal(null)}>
           <div className="modal si-25615047" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>🔒 {t('userManagement.resetPasswordTitle')} — {showResetPasswordModal.firstName} {showResetPasswordModal.lastName}</h2>
+              <h2>🔒 {t('userManagement.resetPasswordTitle')} - {showResetPasswordModal.firstName} {showResetPasswordModal.lastName}</h2>
               <button className="modal-close" onClick={() => setShowResetPasswordModal(null)}>✕</button>
             </div>
             <div className="modal-body">

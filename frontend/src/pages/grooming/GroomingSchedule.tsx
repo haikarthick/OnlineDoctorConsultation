@@ -248,7 +248,7 @@ const GroomingSchedule: React.FC<Props> = ({ onNavigate }) => {
                   <strong>{String(o.overrideDate).slice(0, 10)}</strong> ·{' '}
                   {o.overrideType === 'closed'
                     ? t('groomingSchedule.closedAllDay')
-                    : `${String(o.openTime).slice(0, 5)}–${String(o.closeTime).slice(0, 5)}`}
+                    : `${String(o.openTime).slice(0, 5)}-${String(o.closeTime).slice(0, 5)}`}
                   {o.reason ? ` · ${o.reason}` : ''}
                 </span>
                 <button className="btn btn-sm btn-outline" onClick={() => removeOverride(o.id)}>
@@ -317,7 +317,7 @@ const GroomingSchedule: React.FC<Props> = ({ onNavigate }) => {
                       ? t('groomingSchedule.everyDayName', { day: t(`groomingSchedule.days.${DAY_KEYS[b.recurringDay]}`) })
                       : String(b.blockDate).slice(0, 10)}
                   </strong>
-                  {' · '}{String(b.startTime).slice(0, 5)}–{String(b.endTime).slice(0, 5)}
+                  {' · '}{String(b.startTime).slice(0, 5)}-{String(b.endTime).slice(0, 5)}
                   {b.reason ? ` · ${b.reason}` : ''}
                 </span>
                 <button className="btn btn-sm btn-outline" onClick={() => removeBlock(b.id)}>

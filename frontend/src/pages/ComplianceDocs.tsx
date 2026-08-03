@@ -213,11 +213,11 @@ const ComplianceDocs: React.FC = () => {
                         <tr key={d.id} className={isExpired ? 'row-danger' : isExpiring ? 'row-warning' : ''}>
                           <td><strong>{d.title}</strong></td>
                           <td>{(d.documentType || '').replace(/_/g, ' ')}</td>
-                          <td>{d.documentNumber || '–'}</td>
-                          <td>{d.issuingAuthority || '–'}</td>
-                          <td>{d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : '–'}</td>
+                          <td>{d.documentNumber || '-'}</td>
+                          <td>{d.issuingAuthority || '-'}</td>
+                          <td>{d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : '-'}</td>
                           <td><span className="badge" style={{ background: STATUS_COLORS[d.status] || '#888' }}>{(d.status || '').replace(/_/g, ' ')}</span></td>
-                          <td>{d.verifiedAt ? `✅ ${d.verifiedByName || ''}` : '—'}</td>
+                          <td>{d.verifiedAt ? `✅ ${d.verifiedByName || ''}` : '-'}</td>
                           <td>
                             <button className="btn btn-sm" onClick={() => startEdit(d)}>{t('complianceDocs.table.edit')}</button>
                             {!d.verifiedAt && <button className="btn btn-sm btn-success" onClick={() => handleVerify(d.id)}>{t('complianceDocs.table.verify')}</button>}

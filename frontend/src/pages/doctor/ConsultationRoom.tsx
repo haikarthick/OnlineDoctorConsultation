@@ -256,7 +256,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       } catch { /* no existing session */ }
 
       if (existingSession) {
-        // Skip ended sessions — allow creating a new one
+        // Skip ended sessions - allow creating a new one
         if (existingSession.status === 'ended') {
           setSession(existingSession)
           loadMessages(existingSession.id)
@@ -272,11 +272,11 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         } else if (existingSession.status === 'waiting') {
           // Start polling to detect when patient starts/joins
           startSessionPolling(existingSession.id)
-          // Also start message polling — patient might chat while waiting
+          // Also start message polling - patient might chat while waiting
           startMessagePolling(existingSession.id)
         }
       } else {
-        // No session exists — check consultation status before creating one
+        // No session exists - check consultation status before creating one
         try {
           const consultRes = await apiService.getConsultation(conId)
           const consult = consultRes.data
@@ -379,7 +379,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         try {
           const res2 = await apiService.getVideoSessionByConsultation(conId)
           if (res2.data && res2.data.id !== sessionId) {
-            // A different session was created — switch to that one
+            // A different session was created - switch to that one
             if (sessionPollRef.current) { clearInterval(sessionPollRef.current); sessionPollRef.current = null }
             setSession(res2.data)
             if (res2.data.status === 'active') {
@@ -744,7 +744,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
           <h1>{t('consultationRoom.title')}</h1>
           <p className="page-subtitle">
             {session?.status === 'active' ? (
-              <span className="si-1c396c88">🔴 {t('consultationRoom.live')} — {formatDuration(callDuration)}</span>
+              <span className="si-1c396c88">🔴 {t('consultationRoom.live')} - {formatDuration(callDuration)}</span>
             ) : t('consultationRoom.waitingForSession')}
           </p>
         </div>
@@ -943,8 +943,8 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                     </div>
                     <div className="si-9ac294d9">
                       {speciesLabel(animalInfo.species, t)}{animalInfo.breed ? ` / ${animalInfo.breed}` : ''}
-                      {animalInfo.age ? ` — ${animalInfo.age}` : ''}
-                      {animalInfo.weight ? ` — ${animalInfo.weight}kg` : ''}
+                      {animalInfo.age ? ` - ${animalInfo.age}` : ''}
+                      {animalInfo.weight ? ` - ${animalInfo.weight}kg` : ''}
                     </div>
                     {animalInfo.uniqueId && <div className="si-b1a83cef">ID: {animalInfo.uniqueId}</div>}
                     {(animalInfo.enterpriseName || animalInfo.enterprise_name) && (
@@ -1132,7 +1132,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                 <label className="si-0402f865">Network <span className="si-f84f41a5">*</span></label>
                 <select className="si-c8d05a40" required
                   value={referralForm.networkId} onChange={e => setReferralForm(f => ({ ...f, networkId: e.target.value, toHospitalId: '' }))}>
-                  <option value="">— Select Network —</option>
+                  <option value="">- Select Network -</option>
                   {networksList.map((n: any) => <option key={n.id} value={n.id}>{n.name}</option>)}
                 </select>
               </div>
@@ -1144,7 +1144,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                 <select className="si-c8d05a40" required
                   disabled={!referralForm.networkId}
                   value={referralForm.toHospitalId} onChange={e => setReferralForm(f => ({ ...f, toHospitalId: e.target.value }))}>
-                  <option value="">— Select Hospital —</option>
+                  <option value="">- Select Hospital -</option>
                   {networkHospitals.map((h: any) => <option key={h.id} value={h.id}>{h.name}</option>)}
                 </select>
               </div>

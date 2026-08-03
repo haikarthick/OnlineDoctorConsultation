@@ -294,8 +294,8 @@ export default function NetworkSubscriptions() {
                     <td><strong>{plan.name}</strong>{plan.description && <div className="plan-desc">{plan.description}</div>}</td>
                     <td>{plan.maxSeats ?? '∞'}</td>
                     <td>{plan.maxHospitals ?? '∞'}</td>
-                    <td>{plan.priceMonthly != null ? formatCurrency(plan.priceMonthly) : '—'}</td>
-                    <td>{plan.priceAnnually != null ? formatCurrency(plan.priceAnnually) : '—'}</td>
+                    <td>{plan.priceMonthly != null ? formatCurrency(plan.priceMonthly) : '-'}</td>
+                    <td>{plan.priceAnnually != null ? formatCurrency(plan.priceAnnually) : '-'}</td>
                     <td>
                       <span className={`module-badge ${plan.isPublished ? 'badge-success' : 'badge-pending'}`}>
                         {plan.isPublished ? '🟢 Published' : '🔴 Hidden'}
@@ -332,7 +332,7 @@ export default function NetworkSubscriptions() {
               <div className="module-form-group">
                 <label className="module-label">Subscription Plan</label>
                 <select className="module-input" value={subForm.planId} onChange={e => setSubForm(f => ({ ...f, planId: e.target.value }))}>
-                  <option value="">— No plan —</option>
+                  <option value="">- No plan -</option>
                   {plans.map(p => <option key={p.id} value={p.id}>{p.name} (max {p.maxSeats ?? '∞'} seats)</option>)}
                 </select>
               </div>

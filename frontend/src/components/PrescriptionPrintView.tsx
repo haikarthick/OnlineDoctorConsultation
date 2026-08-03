@@ -203,13 +203,13 @@ const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, on
             <div className="rx-info-row">
               <span className="rx-info-label">{t('prescriptionPrint.patient')}:</span>
               <span className="rx-info-value">
-                <strong>{rx.animalName || '—'}</strong>
+                <strong>{rx.animalName || '-'}</strong>
                 {rx.animalSpecies && ` (${rx.animalSpecies}${rx.animalBreed ? ', ' + rx.animalBreed : ''})`}
               </span>
             </div>
             <div className="rx-info-row">
               <span className="rx-info-label">{t('prescriptionPrint.owner')}:</span>
-              <span className="rx-info-value">{rx.petOwnerName || '—'}</span>
+              <span className="rx-info-value">{rx.petOwnerName || '-'}</span>
             </div>
 
             {(rx.animalAge || rx.animalGender) && (
@@ -241,7 +241,7 @@ const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, on
             <div className="rx-info-row">
               <span className="rx-info-label">{t('prescriptionPrint.doctor')}:</span>
               <span className="rx-info-value">
-                <strong>Dr. {rx.vetName || '—'}</strong>
+                <strong>Dr. {rx.vetName || '-'}</strong>
               </span>
             </div>
             {rx.vetLicense && (
@@ -318,9 +318,9 @@ const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, on
                     <td><span className="rx-med-name">{med.name}</span></td>
                     <td>{med.dosage}</td>
                     <td>{med.frequency}</td>
-                    <td>{med.route || '—'}</td>
-                    <td>{med.duration || '—'}</td>
-                    <td style={{ fontSize: '8.5pt', color: '#4a5568' }}>{med.instructions || '—'}</td>
+                    <td>{med.route || '-'}</td>
+                    <td>{med.duration || '-'}</td>
+                    <td style={{ fontSize: '8.5pt', color: '#4a5568' }}>{med.instructions || '-'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -349,7 +349,7 @@ const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, on
               </div>
               <div className="rx-section-body" style={{ fontSize: '9pt' }}>
                 {t('prescriptionPrint.forwardedTo', { pharmacy: rx.pharmacyName || t('prescriptionPrint.networkPharmacy') })}
-                {rx.reviewStatus && REVIEW_STATUS_KEY[rx.reviewStatus] && ` — ${t(`prescriptions.pharmacy.${REVIEW_STATUS_KEY[rx.reviewStatus]}`)}`}
+                {rx.reviewStatus && REVIEW_STATUS_KEY[rx.reviewStatus] && ` - ${t(`prescriptions.pharmacy.${REVIEW_STATUS_KEY[rx.reviewStatus]}`)}`}
               </div>
             </div>
           )}
@@ -366,7 +366,7 @@ const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, on
             </div>
             <div className="rx-signature-block">
               <div className="rx-signature-line" />
-              <p className="rx-signature-name">Dr. {rx.vetName || '—'}</p>
+              <p className="rx-signature-name">Dr. {rx.vetName || '-'}</p>
               {rx.vetLicense && (
                 <p className="rx-signature-reg">{t('prescriptionPrint.regNo')}: {rx.vetLicense}</p>
               )}

@@ -99,7 +99,7 @@ class GroomingOrderService {
     const depositDue = svc.payment_rule === 'deposit' ? (Number(svc.deposit_amount) || 0) : grandTotal;
     const currency = svc.currency || await GroomingModuleConfig.getCurrency();
 
-    // Slot-hold window — an unpaid order past this is released by the grooming expiry job.
+    // Slot-hold window - an unpaid order past this is released by the grooming expiry job.
     const holdMinutes = await GroomingModuleConfig.getHoldMinutes();
 
     const result = await database.query(
@@ -209,7 +209,7 @@ class GroomingOrderService {
     await this.addHistory(orderId, order.status, newStatus, userId, reason || undefined);
 
     // Refund + provider-ledger reconciliation (reverses the clearing earning, applies the
-    // penalty/compensation entries). Grooming's own engine — see GroomingRefundService's module
+    // penalty/compensation entries). Grooming's own engine - see GroomingRefundService's module
     // boundary note; nothing here may reach into the consultation refund path.
     const GroomingRefundService = (await import('./GroomingRefundService')).default;
     await GroomingRefundService.refundForCancellation(
@@ -284,7 +284,7 @@ class GroomingOrderService {
       const NotificationService = (await import('../NotificationService')).default;
       await NotificationService.createNotification(
         order.petOwnerId, 'booking', 'Your grooming appointment is confirmed',
-        `Good news — your booking ${order.orderNumber} has been confirmed by the groomer. `
+        `Good news - your booking ${order.orderNumber} has been confirmed by the groomer. `
         + `We'll remind you before your appointment.`,
         'all', { orderId });
     } catch { /* non-blocking */ }
@@ -334,7 +334,7 @@ class GroomingOrderService {
       await NotificationService.createNotification(
         order.petOwnerId, 'booking', 'Your grooming booking could not be accepted',
         `Unfortunately the groomer could not take booking ${order.orderNumber} (${reason.trim()}). `
-        + `You have not been charged — a full refund is on its way. `
+        + `You have not been charged - a full refund is on its way. `
         + `You can book another provider from Find Grooming & Spa.`,
         'all', { orderId });
     } catch { /* non-blocking */ }
@@ -343,7 +343,7 @@ class GroomingOrderService {
 
   /**
    * Sweep bookings whose acceptance window lapsed: full refund to the customer, SLA counter on
-   * the provider. Runs from the grooming scheduler — see GroomingPaymentService.expireStaleHolds
+   * the provider. Runs from the grooming scheduler - see GroomingPaymentService.expireStaleHolds
    * for the sibling job that releases UNPAID holds.
    *
    * Each order is handled independently so one failure cannot strand the rest of the batch.
@@ -374,7 +374,7 @@ class GroomingOrderService {
         await database.query(
           `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
            VALUES ($1,'pending_provider_acceptance','declined_by_provider',NULL,
-                   'Acceptance window lapsed — auto-cancelled and refunded')`, [row.id]);
+                   'Acceptance window lapsed - auto-cancelled and refunded')`, [row.id]);
         await database.query(
           `UPDATE grooming_providers
               SET total_acceptance_timeouts = COALESCE(total_acceptance_timeouts, 0) + 1,
@@ -387,7 +387,7 @@ class GroomingOrderService {
           await NotificationService.createNotification(
             row.pet_owner_id, 'booking', 'Your grooming booking was cancelled and refunded',
             `The groomer did not confirm booking ${row.order_number} in time, so we've cancelled it `
-            + `and refunded you in full. Sorry about that — you can book another provider from `
+            + `and refunded you in full. Sorry about that - you can book another provider from `
             + `Find Grooming & Spa.`,
             'all', { orderId: row.id });
         } catch { /* non-blocking */ }
@@ -407,7 +407,7 @@ class GroomingOrderService {
     if (!allowed.includes(toStatus)) throw new ValidationError(`Cannot move from ${order.status} to ${toStatus}`);
     const stampCompleted = toStatus === 'completed';
     // An order cannot be completed while money is still owed on it. This is what makes the
-    // balance leg enforceable rather than advisory — approved extras must be collected.
+    // balance leg enforceable rather than advisory - approved extras must be collected.
     if (stampCompleted && Number(order.balanceDue || 0) > 0) {
       throw new ValidationError(
         `This order still has ${Number(order.balanceDue).toFixed(2)} outstanding. Collect the balance before completing it.`);
@@ -505,7 +505,7 @@ class GroomingOrderService {
       [orderId, Array.isArray(data.afterPhotos) ? data.afterPhotos : [], data.productsUsed || null,
        data.aftercareNotes || null, data.summary || null, data.nextRecommendedDate || null, userId]);
     // Completing via report card if not already terminal. declined_by_provider is terminal and
-    // already refunded — completing it would resurrect a cancelled, refunded booking. A booking
+    // already refunded - completing it would resurrect a cancelled, refunded booking. A booking
     // still sitting at the acceptance gate has not been accepted, let alone performed, so it is
     // excluded too: the report card records work, and no work can have happened yet.
     if (!['completed', 'closed', 'cancelled_by_customer', 'cancelled_by_provider',
@@ -561,7 +561,7 @@ class GroomingOrderService {
   }
 
   /** Owner approves or declines the extra work; order returns to in_progress. Approving adds the
-   *  line to balance_due — it is NOT paid here; GroomingPaymentService collects it. */
+   *  line to balance_due - it is NOT paid here; GroomingPaymentService collects it. */
   async respondVariableItem(userId: string, orderId: string, itemId: string, approve: boolean): Promise<any> {
     const { order, isOwner } = await this.resolveOrderAccess(userId, orderId);
     if (!isOwner) throw new ForbiddenError('Only the customer can approve extra work');
@@ -584,7 +584,7 @@ class GroomingOrderService {
         await client.query(
           `UPDATE grooming_order_items SET approval_status = 'approved', status = 'completed', updated_at = NOW() WHERE id = $1`, [itemId]);
         // Approving extra work makes it OWED, not paid. This used to add the line to amount_paid
-        // and immediately credit the provider while collecting nothing — the platform paid out
+        // and immediately credit the provider while collecting nothing - the platform paid out
         // money it never took, and the history note even claimed "approved & paid". The earning
         // and the supplementary GST invoice are now booked by GroomingPaymentService when the
         // balance is actually collected.
@@ -597,7 +597,7 @@ class GroomingOrderService {
         await client.query(
           `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
            VALUES ($1,'awaiting_approval','in_progress',$2,$3)`,
-          [orderId, userId, `Extra work approved — ${lineTotal.toFixed(2)} added to the balance due`]);
+          [orderId, userId, `Extra work approved - ${lineTotal.toFixed(2)} added to the balance due`]);
       } else {
         await client.query(
           `UPDATE grooming_order_items SET approval_status = 'declined', status = 'skipped', updated_at = NOW() WHERE id = $1`, [itemId]);

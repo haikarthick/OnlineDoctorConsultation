@@ -95,7 +95,7 @@ class WithdrawalService {
     }
   }
 
-  /** Doctor cancels their own pending request — rows unlock. */
+  /** Doctor cancels their own pending request - rows unlock. */
   async cancelRequest(doctorId: string, withdrawalId: string): Promise<void> {
     const res = await database.query(
       `UPDATE withdrawal_requests SET status = 'cancelled', updated_at = NOW()
@@ -271,12 +271,12 @@ class WithdrawalService {
   }
 
   /**
-   * Doctors the platform currently OWES money to — the positive counterpart of
+   * Doctors the platform currently OWES money to - the positive counterpart of
    * adminNegativeBalances() above, which only ever surfaced doctors in deficit.
    *
    * Same gap the grooming module had (see GroomingSettlementService.adminPayables): payouts are
-   * doctor-initiated, so a doctor who never opens the withdrawal screen — or who sits below the
-   * minimum threshold — accrues a balance nobody is watching. There was no view that answered
+   * doctor-initiated, so a doctor who never opens the withdrawal screen - or who sits below the
+   * minimum threshold - accrues a balance nobody is watching. There was no view that answered
    * "who are we behind on paying". `pendingRequest` marks the ones already in the queue so an
    * admin does not pay the same balance twice via a discretionary payout.
    */

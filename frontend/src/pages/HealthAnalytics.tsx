@@ -245,8 +245,8 @@ const HealthAnalytics: React.FC = () => {
                           <td>{o.title}</td>
                           <td>{o.observationType}</td>
                           <td><span className="badge" style={{ background: SEVERITY_COLORS[o.severity] }}>{o.severity}</span></td>
-                          <td>{o.animalName || '–'}</td>
-                          <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '–'}</td>
+                          <td>{o.animalName || '-'}</td>
+                          <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '-'}</td>
                           <td>{!o.isResolved && <button className="btn btn-sm btn-success" onClick={() => handleResolve(o.id)}>{t('healthAnalytics.resolve')}</button>}</td>
                         </tr>
                       ))}
@@ -293,9 +293,9 @@ const HealthAnalytics: React.FC = () => {
                         <td>{o.title}</td>
                         <td>{o.observationType}</td>
                         <td><span className="badge" style={{ background: SEVERITY_COLORS[o.severity] }}>{o.severity}</span></td>
-                        <td>{o.animalName || '–'}</td>
+                        <td>{o.animalName || '-'}</td>
                         <td>{o.isResolved ? t('healthAnalytics.headers.resolved') : t('healthAnalytics.headers.open')}</td>
-                        <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '–'}</td>
+                        <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '-'}</td>
                         <td>{!o.isResolved && <button className="btn btn-sm btn-success" onClick={() => handleResolve(o.id)}>{t('healthAnalytics.resolve')}</button>}</td>
                       </tr>
                     ))}

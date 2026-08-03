@@ -4,7 +4,7 @@ import { NotFoundError, ValidationError } from '../utils/errors';
 import NotificationService from './NotificationService';
 
 /**
- * Customer wallet withdrawals — the wallet's exit door (migration 038).
+ * Customer wallet withdrawals - the wallet's exit door (migration 038).
  *
  * Refunds used to land in the in-house wallet with no way out: withdrawal_requests is
  * veterinarian-only and the wallet API was read-only. A customer whose booking was cancelled
@@ -16,7 +16,7 @@ import NotificationService from './NotificationService';
  * is therefore always the truthfully spendable amount.
  *
  * Only `balance` is withdrawable. `bonus_credits` is promotional (goodwill for a provider
- * cancellation) and is deliberately excluded — otherwise the platform would be handing out cash.
+ * cancellation) and is deliberately excluded - otherwise the platform would be handing out cash.
  */
 
 const MIN_WITHDRAWAL_KEY = 'wallet.withdrawal.minAmount';
@@ -87,7 +87,7 @@ class WalletWithdrawalService {
 
       await client.query(
         `INSERT INTO wallet_transactions (wallet_id, type, amount, description, reference_id, reference_type)
-         VALUES ($1,'withdrawal',$2,'Withdrawal requested — pending payout',$3,'wallet_withdrawal')`,
+         VALUES ($1,'withdrawal',$2,'Withdrawal requested - pending payout',$3,'wallet_withdrawal')`,
         [wallet.id, amount, request.id]);
 
       logger.info('Wallet withdrawal requested', { userId, amount, requestId: request.id });
@@ -102,7 +102,7 @@ class WalletWithdrawalService {
     return r.rows;
   }
 
-  /** Customer withdraws their own request while it is still untouched — money goes straight back. */
+  /** Customer withdraws their own request while it is still untouched - money goes straight back. */
   async cancelMine(userId: string, id: string): Promise<void> {
     await database.transaction(async (client: any) => {
       const r = await client.query(
@@ -112,7 +112,7 @@ class WalletWithdrawalService {
       const req = r.rows[0];
       if (req.status !== 'requested')
         throw new ValidationError('Only a request that has not been reviewed yet can be cancelled.');
-      await this.returnToWallet(client, req, 'Withdrawal cancelled — amount returned');
+      await this.returnToWallet(client, req, 'Withdrawal cancelled - amount returned');
       await client.query(
         `UPDATE wallet_withdrawal_requests SET status = 'cancelled', updated_at = NOW() WHERE id = $1`, [id]);
     });
@@ -174,7 +174,7 @@ class WalletWithdrawalService {
 
       // The money was debited at request time, so rejecting MUST put it back or the customer
       // silently loses it.
-      await this.returnToWallet(client, req, `Withdrawal rejected — amount returned (${reason.trim()})`);
+      await this.returnToWallet(client, req, `Withdrawal rejected - amount returned (${reason.trim()})`);
       await client.query(
         `UPDATE wallet_withdrawal_requests SET status = 'rejected', reviewed_by = $1, reviewed_at = NOW(),
                 rejection_reason = $2, updated_at = NOW() WHERE id = $3`, [adminId, reason.trim(), id]);

@@ -583,7 +583,7 @@
   color: #f59e0b;
 }
 
-/* Search + Filter Bar — used by admin pages */
+/* Search + Filter Bar - used by admin pages */
 .search-filter-bar {
   display: flex;
   gap: 10px;
@@ -1641,7 +1641,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   MODULE DESIGN SYSTEM — FULL CANONICAL SET
+   MODULE DESIGN SYSTEM - FULL CANONICAL SET
    All classes below are authoritative. Pages that import ONLY
    modules.css (not ModulePage.css) will get full design-system
    styling. Add new design-system classes HERE, not in ModulePage.css.
@@ -1693,7 +1693,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   /* The card owns its inner spacing. Without this, content placed directly in a
-     module-card sat flush against the border — 107 of 120 usages across 28 pages
+     module-card sat flush against the border - 107 of 120 usages across 28 pages
      did exactly that, and it is most obvious on forms, where inputs ran edge to
      edge (grooming provider onboarding). Cards that compose a self-padding block
      opt out below. */
@@ -1701,7 +1701,7 @@
 }
 
 /* A card built from card-header/card-body, wrapping a full-bleed data table, or
-   nesting a module-content already manages its own padding — and the header's
+   nesting a module-content already manages its own padding - and the header's
    bottom border and the table both have to reach the card edge, which an outer
    padding would inset. Higher specificity than the rule above, so this wins
    regardless of stylesheet order. */
@@ -1711,7 +1711,7 @@
 .module-card:has(> .module-content),
 .module-card:has(> .modal-body),
 /* .module-form is itself a card in ModulePage.css (white background, 28px
-   padding, its own border) — a card nested in a card must not gain a third
+   padding, its own border) - a card nested in a card must not gain a third
    inset. */
 .module-card:has(> .module-form),
 /* HospitalNetworks builds its panels from this header; some of those cards
@@ -1994,7 +1994,7 @@ textarea.module-input {
 /* ══════════════════════════════════════════════════════════════
    ACTION-REQUIRED QUEUE
    Generic treatment for "someone is waiting on you and there is a
-   deadline" — introduced for the grooming provider acceptance gate,
+   deadline" - introduced for the grooming provider acceptance gate,
    but deliberately module-neutral so any queue can reuse it.
    ══════════════════════════════════════════════════════════════ */
 .action-required-list {
@@ -2049,7 +2049,7 @@ textarea.module-input {
   margin: 8px 0 0;
 }
 
-/* Inline reason capture — a destructive confirm that needs a typed justification. */
+/* Inline reason capture - a destructive confirm that needs a typed justification. */
 .reason-prompt {
   margin-top: 10px;
   display: grid;
@@ -2222,7 +2222,7 @@ textarea.module-input {
   cursor: pointer;
   transition: box-shadow 0.2s, transform 0.2s;
 }
-/* CSS hover, not JS onMouseEnter — the handlers it replaces skipped keyboard focus entirely. */
+/* CSS hover, not JS onMouseEnter - the handlers it replaces skipped keyboard focus entirely. */
 .provider-card:hover,
 .provider-card:focus-within {
   box-shadow: var(--shadow-lg);
@@ -2328,7 +2328,7 @@ textarea.module-input {
 }
 .history-list li:last-child { border-bottom: none; }
 
-/* A button that reads as inline text — used where a row navigates but must stay keyboard-usable. */
+/* A button that reads as inline text - used where a row navigates but must stay keyboard-usable. */
 .link-button {
   background: none;
   border: none;
@@ -2418,7 +2418,7 @@ textarea.module-input {
 /* ══════════════════════════════════════════════════════════════
    ORDER STATUS CHIPS
    One class per state, replacing a per-page hardcoded hex map.
-   Every state the grooming machine can reach has an entry — a
+   Every state the grooming machine can reach has an entry - a
    missing one renders as an unlabelled grey pill.
    ══════════════════════════════════════════════════════════════ */
 .status-chip { font-weight: 700; }

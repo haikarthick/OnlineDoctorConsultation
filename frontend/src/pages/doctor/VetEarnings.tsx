@@ -311,9 +311,9 @@ const VetEarnings: React.FC = () => {
                   <tbody>
                     {statement.map((row) => (
                       <tr key={row.id} className="si-c20fa118">
-                        <td className="si-85d1aad6">{row.createdAt ? formatDate(row.createdAt) : '—'}</td>
+                        <td className="si-85d1aad6">{row.createdAt ? formatDate(row.createdAt) : '-'}</td>
                         <td className="si-6032b198">{String(t(`earningsLedger.types.${row.type}`, row.type))}</td>
-                        <td className="si-6032b198">{row.patientName || '—'}{row.animalName ? ` (${row.animalName})` : ''}</td>
+                        <td className="si-6032b198">{row.patientName || '-'}{row.animalName ? ` (${row.animalName})` : ''}</td>
                         <td className="si-2d673c2a">{formatCurrency(parseFloat(String(row.grossAmount || 0)))}</td>
                         <td className="si-2d673c2a">{formatCurrency(parseFloat(String(row.commissionAmount || 0)))}</td>
                         <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 600, color: parseFloat(String(row.netAmount)) < 0 ? '#dc2626' : '#111827' }}>
@@ -412,9 +412,9 @@ const VetEarnings: React.FC = () => {
                       {recent.map(r => (
                         <tr key={r.id}>
                           <td>{formatDate(r.date)}</td>
-                          <td>{r.patientOwnerName || '—'}</td>
-                          <td>{r.animalName || '—'}</td>
-                          <td>{r.amount ? formatCurrency(r.amount) : '—'}</td>
+                          <td>{r.patientOwnerName || '-'}</td>
+                          <td>{r.animalName || '-'}</td>
+                          <td>{r.amount ? formatCurrency(r.amount) : '-'}</td>
                           <td><span className={`badge badge-${r.bookingStatus}`}>{r.bookingStatus}</span></td>
                         </tr>
                       ))}

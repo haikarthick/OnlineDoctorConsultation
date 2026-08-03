@@ -7,7 +7,7 @@ import { NotFoundError, ValidationError } from '../utils/errors';
  * Versioned legal documents + provable user consent
  * (docs/PAYMENT_MODULE_PLAN.md §17).
  *
- * Published document versions are immutable — editing always creates a new
+ * Published document versions are immutable - editing always creates a new
  * version row. The user_policy_acceptances table is append-only: the server-
  * side row (version, timestamp, IP, user-agent) is the legal proof, not the UI
  * checkbox.
@@ -89,7 +89,7 @@ class LegalService {
       try {
         const active = await this.getActiveDocument(docType);
         version = active.version;
-      } catch { /* no published doc yet — record acceptance of version 1 placeholder */ }
+      } catch { /* no published doc yet - record acceptance of version 1 placeholder */ }
       await database.query(
         `INSERT INTO user_policy_acceptances
            (id, user_id, user_email, doc_type, version, context, ip_address, user_agent, accepted_at)

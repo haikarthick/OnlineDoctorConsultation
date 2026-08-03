@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
 
 /**
- * Public policy page (docs/PAYMENT_MODULE_PLAN.md §17.1) — renders the active
+ * Public policy page (docs/PAYMENT_MODULE_PLAN.md §17.1) - renders the active
  * version of a legal document. Linked from registration, checkout, footers,
  * and required to be live for Razorpay merchant KYC.
  */
@@ -48,7 +48,7 @@ export default function PolicyPage() {
             <h1 className="si-e57614ee">{doc.title}</h1>
             <p className="si-bc7c0248">
               {t('policy.version')} {doc.version} · {t('policy.effectiveFrom')}{' '}
-              {doc.effectiveFrom ? new Date(doc.effectiveFrom).toLocaleDateString() : '—'}
+              {doc.effectiveFrom ? new Date(doc.effectiveFrom).toLocaleDateString() : '-'}
             </p>
             <div className="si-3fcc6b1f">
               {doc.content}

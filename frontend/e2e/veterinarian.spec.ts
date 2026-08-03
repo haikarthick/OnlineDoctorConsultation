@@ -24,14 +24,14 @@ import { test, expect } from './fixtures'
  * - Settings
  */
 
-test.describe('Veterinarian — Dashboard', () => {
+test.describe('Veterinarian - Dashboard', () => {
   test('should load vet dashboard', async ({ vetPage: page }) => {
     await expect(page).toHaveURL(/\/dashboard/)
     await page.waitForLoadState('networkidle')
   })
 })
 
-test.describe('Veterinarian — Manage Schedule', () => {
+test.describe('Veterinarian - Manage Schedule', () => {
   test('should load schedule management page', async ({ vetPage: page }) => {
     await page.goto('/doctor/manage-schedule')
     await page.waitForLoadState('networkidle')
@@ -46,7 +46,7 @@ test.describe('Veterinarian — Manage Schedule', () => {
     const tabs = page.locator('[role="tab"], .tab-btn, .schedule-tab, button.tab')
     const count = await tabs.count()
     // Should have at least 2 tabs
-    expect(count).toBeGreaterThanOrEqual(0) // relaxed — depends on exact UI
+    expect(count).toBeGreaterThanOrEqual(0) // relaxed - depends on exact UI
   })
 
   test('should allow toggling schedule days', async ({ vetPage: page }) => {
@@ -62,7 +62,7 @@ test.describe('Veterinarian — Manage Schedule', () => {
   })
 })
 
-test.describe('Veterinarian — Consultations', () => {
+test.describe('Veterinarian - Consultations', () => {
   test('should load consultations list', async ({ vetPage: page }) => {
     await page.goto('/consultations')
     await page.waitForLoadState('networkidle')
@@ -70,7 +70,7 @@ test.describe('Veterinarian — Consultations', () => {
   })
 })
 
-test.describe('Veterinarian — Prescriptions', () => {
+test.describe('Veterinarian - Prescriptions', () => {
   test('should load prescriptions list', async ({ vetPage: page }) => {
     await page.goto('/doctor/prescriptions')
     await page.waitForLoadState('networkidle')
@@ -78,7 +78,7 @@ test.describe('Veterinarian — Prescriptions', () => {
   })
 })
 
-test.describe('Veterinarian — My Reviews', () => {
+test.describe('Veterinarian - My Reviews', () => {
   test('should load reviews page', async ({ vetPage: page }) => {
     await page.goto('/doctor/reviews')
     await page.waitForLoadState('networkidle')
@@ -86,7 +86,7 @@ test.describe('Veterinarian — My Reviews', () => {
   })
 })
 
-test.describe('Veterinarian — Medical Records', () => {
+test.describe('Veterinarian - Medical Records', () => {
   test('should load medical records', async ({ vetPage: page }) => {
     await page.goto('/medical-records')
     await page.waitForLoadState('networkidle')
@@ -94,7 +94,7 @@ test.describe('Veterinarian — Medical Records', () => {
   })
 })
 
-test.describe('Veterinarian — Vet Hospital Manage', () => {
+test.describe('Veterinarian - Vet Hospital Manage', () => {
   test('should load hospital management page', async ({ vetPage: page }) => {
     await page.goto('/vet-hospitals/manage')
     await page.waitForLoadState('networkidle')
@@ -102,7 +102,7 @@ test.describe('Veterinarian — Vet Hospital Manage', () => {
   })
 })
 
-test.describe('Veterinarian — Vet Hospitals Browse', () => {
+test.describe('Veterinarian - Vet Hospitals Browse', () => {
   test('should load vet hospitals listing', async ({ vetPage: page }) => {
     await page.goto('/vet-hospitals')
     await page.waitForLoadState('networkidle')
@@ -110,7 +110,7 @@ test.describe('Veterinarian — Vet Hospitals Browse', () => {
   })
 })
 
-test.describe('Veterinarian — Hospital Workflow', () => {
+test.describe('Veterinarian - Hospital Workflow', () => {
   test('should load hospital workflow page', async ({ vetPage: page }) => {
     await page.goto('/hospital-workflow')
     await page.waitForLoadState('networkidle')
@@ -118,7 +118,7 @@ test.describe('Veterinarian — Hospital Workflow', () => {
   })
 })
 
-test.describe('Veterinarian — Inpatient Management', () => {
+test.describe('Veterinarian - Inpatient Management', () => {
   test('should load inpatient management page', async ({ vetPage: page }) => {
     await page.goto('/inpatient')
     await page.waitForLoadState('networkidle')
@@ -126,7 +126,7 @@ test.describe('Veterinarian — Inpatient Management', () => {
   })
 })
 
-test.describe('Veterinarian — Herd Medical', () => {
+test.describe('Veterinarian - Herd Medical', () => {
   test('should load herd medical page', async ({ vetPage: page }) => {
     await page.goto('/herd-medical')
     await page.waitForLoadState('networkidle')
@@ -134,7 +134,7 @@ test.describe('Veterinarian — Herd Medical', () => {
   })
 })
 
-test.describe('Veterinarian — Health Analytics', () => {
+test.describe('Veterinarian - Health Analytics', () => {
   test('should load health analytics page', async ({ vetPage: page }) => {
     await page.goto('/health-analytics')
     await page.waitForLoadState('networkidle')
@@ -142,7 +142,7 @@ test.describe('Veterinarian — Health Analytics', () => {
   })
 })
 
-test.describe('Veterinarian — Campaigns', () => {
+test.describe('Veterinarian - Campaigns', () => {
   test('should load treatment campaigns page', async ({ vetPage: page }) => {
     await page.goto('/campaigns')
     await page.waitForLoadState('networkidle')
@@ -150,7 +150,7 @@ test.describe('Veterinarian — Campaigns', () => {
   })
 })
 
-test.describe('Veterinarian — Disease Prediction', () => {
+test.describe('Veterinarian - Disease Prediction', () => {
   test('should load disease prediction page', async ({ vetPage: page }) => {
     await page.goto('/disease-prediction')
     await page.waitForLoadState('networkidle')
@@ -158,7 +158,7 @@ test.describe('Veterinarian — Disease Prediction', () => {
   })
 })
 
-test.describe('Veterinarian — Report Builder', () => {
+test.describe('Veterinarian - Report Builder', () => {
   test('should load report builder page', async ({ vetPage: page }) => {
     await page.goto('/report-builder')
     await page.waitForLoadState('networkidle')
@@ -166,7 +166,7 @@ test.describe('Veterinarian — Report Builder', () => {
   })
 })
 
-test.describe('Veterinarian — AI Copilot', () => {
+test.describe('Veterinarian - AI Copilot', () => {
   test('should load AI copilot', async ({ vetPage: page }) => {
     await page.goto('/ai-copilot')
     await page.waitForLoadState('networkidle')
@@ -174,7 +174,7 @@ test.describe('Veterinarian — AI Copilot', () => {
   })
 })
 
-test.describe('Veterinarian — Marketplace', () => {
+test.describe('Veterinarian - Marketplace', () => {
   test('should load marketplace', async ({ vetPage: page }) => {
     await page.goto('/marketplace')
     await page.waitForLoadState('networkidle')
@@ -182,7 +182,7 @@ test.describe('Veterinarian — Marketplace', () => {
   })
 })
 
-test.describe('Veterinarian — Wellness', () => {
+test.describe('Veterinarian - Wellness', () => {
   test('should load wellness portal', async ({ vetPage: page }) => {
     await page.goto('/wellness')
     await page.waitForLoadState('networkidle')
@@ -190,7 +190,7 @@ test.describe('Veterinarian — Wellness', () => {
   })
 })
 
-test.describe('Veterinarian — Alerts', () => {
+test.describe('Veterinarian - Alerts', () => {
   test('should load alerts page', async ({ vetPage: page }) => {
     await page.goto('/alerts')
     await page.waitForLoadState('networkidle')
@@ -198,7 +198,7 @@ test.describe('Veterinarian — Alerts', () => {
   })
 })
 
-test.describe('Veterinarian — Holiday Management', () => {
+test.describe('Veterinarian - Holiday Management', () => {
   test('should load holiday management page', async ({ vetPage: page }) => {
     await page.goto('/admin/holidays')
     await page.waitForLoadState('networkidle')
@@ -206,7 +206,7 @@ test.describe('Veterinarian — Holiday Management', () => {
   })
 })
 
-test.describe('Veterinarian — Wallet', () => {
+test.describe('Veterinarian - Wallet', () => {
   test('should load wallet page', async ({ vetPage: page }) => {
     await page.goto('/wallet')
     await page.waitForLoadState('networkidle')
@@ -214,7 +214,7 @@ test.describe('Veterinarian — Wallet', () => {
   })
 })
 
-test.describe('Veterinarian — Settings', () => {
+test.describe('Veterinarian - Settings', () => {
   test('should load settings page with profile fields', async ({ vetPage: page }) => {
     await page.goto('/settings')
     await page.waitForLoadState('networkidle')

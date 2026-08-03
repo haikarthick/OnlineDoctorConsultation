@@ -188,7 +188,7 @@ export class AnimalService {
     }
   }
 
-  // Search animal by VC unique ID — cross-module lookup
+  // Search animal by VC unique ID - cross-module lookup
   async searchByUniqueId(uid: string): Promise<Animal | null> {
     try {
       const res = await database.query(

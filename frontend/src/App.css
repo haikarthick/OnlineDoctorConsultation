@@ -24,7 +24,7 @@ body {
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
-  /* No overflow here – body scrolls for public pages; .layout-main scrolls for dashboard */
+  /* No overflow here - body scrolls for public pages; .layout-main scrolls for dashboard */
 }
 
 button {
@@ -79,7 +79,7 @@ input, textarea, select {
   background: #999;
 }
 
-/* layout-content padding is owned by Layout.css – no extra overflow here */
+/* layout-content padding is owned by Layout.css - no extra overflow here */
 .layout-content {
   flex: 1;
 }
@@ -127,7 +127,7 @@ input, textarea, select {
   }
 }
 
-/* Screen-reader only utility – visually hidden but accessible to assistive technology */
+/* Screen-reader only utility - visually hidden but accessible to assistive technology */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -140,7 +140,7 @@ input, textarea, select {
   border: 0;
 }
 
-/* Reduced motion – respect user preference */
+/* Reduced motion - respect user preference */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

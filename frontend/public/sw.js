@@ -58,7 +58,7 @@ self.addEventListener('fetch', (event) => {
 
   // Only handle same-origin requests. Cross-origin third-party resources
   // (Razorpay checkout.js, CDN scripts, etc.) must go straight to the
-  // network — intercepting them here re-runs their fetch inside the worker,
+  // network - intercepting them here re-runs their fetch inside the worker,
   // which can fail/produce a misleading synthetic response (e.g. cacheFirst's
   // 503 fallback below) instead of the real browser-level result. There's
   // also no benefit to offline-caching a third-party payment script.

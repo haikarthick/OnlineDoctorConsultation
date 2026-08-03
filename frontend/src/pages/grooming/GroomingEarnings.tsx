@@ -133,7 +133,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
               <tbody>
                 {entries.map(e => (
                   <tr key={e.id}>
-                    <td>{e.orderNumber || '—'}</td>
+                    <td>{e.orderNumber || '-'}</td>
                     <td>{formatCurrency(Number(e.grossAmount))}</td>
                     <td>-{formatCurrency(Number(e.commissionAmount))}</td>
                     <td>{formatCurrency(Number(e.netAmount))}</td>
@@ -155,14 +155,14 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
               <tbody>
                 {settlements.map(s => (
                   <tr key={s.id}>
-                    <td>{s.settledAt ? new Date(s.settledAt).toLocaleDateString() : '—'}</td>
+                    <td>{s.settledAt ? new Date(s.settledAt).toLocaleDateString() : '-'}</td>
                     <td>{formatCurrency(Number(s.amount))}</td>
                     <td>{formatCurrency(Number(s.tdsAmount))}</td>
                     <td>{formatCurrency(Number(s.netPaid))}</td>
                     <td>{s.method}</td>
-                    <td>{s.reference || '—'}</td>
+                    <td>{s.reference || '-'}</td>
                     <td>
-                      {/* The payout amount alone is not reconcilable — the provider needs to see
+                      {/* The payout amount alone is not reconcilable - the provider needs to see
                           WHICH bookings it covered. */}
                       <button className="btn btn-sm btn-outline" disabled={busy === s.id}
                         onClick={() => openStatement(s.id)}>
@@ -186,8 +186,8 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
               <div className="metric-row">
                 <div><span className="field-caption">{t('groomingEarnings.netPaid')}</span><div><strong>{formatCurrency(Number(statement.netPaid))}</strong></div></div>
                 <div><span className="field-caption">TDS</span><div>{formatCurrency(Number(statement.tdsAmount))}</div></div>
-                <div><span className="field-caption">{t('groomingEarnings.reference')}</span><div>{statement.reference || '—'}</div></div>
-                <div><span className="field-caption">{t('groomingEarnings.date')}</span><div>{statement.settledAt ? new Date(statement.settledAt).toLocaleDateString() : '—'}</div></div>
+                <div><span className="field-caption">{t('groomingEarnings.reference')}</span><div>{statement.reference || '-'}</div></div>
+                <div><span className="field-caption">{t('groomingEarnings.date')}</span><div>{statement.settledAt ? new Date(statement.settledAt).toLocaleDateString() : '-'}</div></div>
               </div>
               {statement.notes && <p className="slot-hint">{statement.notes}</p>}
               <div className="data-table-container">
@@ -203,7 +203,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
                   <tbody>
                     {(statement.lines || []).map((l: any) => (
                       <tr key={l.id}>
-                        <td>{l.orderNumber || '—'}</td>
+                        <td>{l.orderNumber || '-'}</td>
                         <td>{formatCurrency(Number(l.grossAmount))}</td>
                         <td>-{formatCurrency(Number(l.commissionAmount))}</td>
                         <td>{formatCurrency(Number(l.netAmount))}</td>

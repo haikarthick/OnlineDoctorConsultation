@@ -212,12 +212,12 @@ const MedicalRecords: React.FC = () => {
     if (!selectedAnimal) { setCertificates([]); return }
     setCertsLoading(true)
     try {
-      // `/vet-certificates` was never a registered route — this 404'd for every
+      // `/vet-certificates` was never a registered route - this 404'd for every
       // animal and the catch below rendered it as "no certificates", so the panel
       // was permanently empty. The real route is /certificates/animal/:animalId.
       const res = await (apiService as any).get(`/certificates/animal/${selectedAnimal}`)
       const payload = res.data?.data ?? res.data
-      // Only ever hand an array to setCertificates — `res.data || []` previously
+      // Only ever hand an array to setCertificates - `res.data || []` previously
       // could pass the whole { success, data } envelope through and blow up .map().
       setCertificates(
         Array.isArray(payload) ? payload
@@ -476,7 +476,7 @@ const MedicalRecords: React.FC = () => {
             <option value="">{t('medicalRecords.allAnimals')}</option>
             {filteredAnimals.map((a: any) => (
               <option key={a.id} value={a.id}>
-                {a.uniqueId || a.unique_id || ''} {a.name} — {speciesLabel(a.species, t)}{a.breed ? ` / ${a.breed}` : ''}{(isAdmin || isVet) && a.ownerName ? ` · ${a.ownerName}` : ''}
+                {a.uniqueId || a.unique_id || ''} {a.name} - {speciesLabel(a.species, t)}{a.breed ? ` / ${a.breed}` : ''}{(isAdmin || isVet) && a.ownerName ? ` · ${a.ownerName}` : ''}
               </option>
             ))}
           </select>
@@ -517,7 +517,7 @@ const MedicalRecords: React.FC = () => {
         </div>
       )}
 
-      {/* Tabs — responsive pill navigation */}
+      {/* Tabs - responsive pill navigation */}
       <div className="med-tabs">
         {TAB_ITEMS.map(tab => (
           <button
@@ -663,7 +663,7 @@ const MedicalRecords: React.FC = () => {
                     <div className="record-details">
                       <h4>{Array.isArray(rx.medications) ? rx.medications.map((m: any) => m.name).join(', ') : t('medicalRecords.prescriptionsTab.medication')}</h4>
                       {Array.isArray(rx.medications) && rx.medications.map((med: any, mi: number) => (
-                        <p key={mi}><strong>{med.name}</strong>{med.dosage ? ` — ${med.dosage}` : ''}{med.frequency ? `, ${med.frequency}` : ''}{med.duration ? ` for ${med.duration}` : ''}</p>
+                        <p key={mi}><strong>{med.name}</strong>{med.dosage ? ` - ${med.dosage}` : ''}{med.frequency ? `, ${med.frequency}` : ''}{med.duration ? ` for ${med.duration}` : ''}</p>
                       ))}
                       {rx.diagnosis && <p className="si-76a355c2"><strong>{t('medicalRecords.prescriptionsTab.diagnosis')}</strong> {rx.diagnosis}</p>}
                       {rx.instructions && <p className="text-muted">📝 {rx.instructions}</p>}
@@ -676,8 +676,8 @@ const MedicalRecords: React.FC = () => {
                         <p className="text-muted">
                           💊 {rx.pharmacyName || t('medicalRecords.prescriptionsTab.networkPharmacy')}
                           {rx.dispensingStatus
-                            ? ` — ${t('medicalRecords.prescriptionsTab.dispensedOn', { date: fmtDate(rx.dispensedAt || '') })}`
-                            : ` — ${t(`medicalRecords.prescriptionsTab.reviewStatus.${rx.reviewStatus}`, rx.reviewStatus || '')}`}
+                            ? ` - ${t('medicalRecords.prescriptionsTab.dispensedOn', { date: fmtDate(rx.dispensedAt || '') })}`
+                            : ` - ${t(`medicalRecords.prescriptionsTab.reviewStatus.${rx.reviewStatus}`, rx.reviewStatus || '')}`}
                         </p>
                       )}
                     <div className="record-actions">
@@ -1105,9 +1105,9 @@ const MedicalRecords: React.FC = () => {
                                   {ref.type === 'network' ? t('medicalRecords.networkReferral') : t('medicalRecords.platformReferral')}
                                 </span>
                               </td>
-                              <td className="si-0a803082">{ref.fromVetName || '—'}</td>
+                              <td className="si-0a803082">{ref.fromVetName || '-'}</td>
                               <td className="si-0a803082">
-                                {ref.toHospitalName || ref.toVetName || '—'}
+                                {ref.toHospitalName || ref.toVetName || '-'}
                               </td>
                               <td className="si-633ac59d">{ref.reason}</td>
                               <td>
@@ -1178,7 +1178,7 @@ const MedicalRecords: React.FC = () => {
                           <td className="si-19925664">{cert.certificateNumber || cert.certificate_number}</td>
                           <td>{cert.certificateType || cert.certificate_type}</td>
                           <td>{formatDate(cert.issuedDate || cert.issued_date || cert.createdAt || cert.created_at)}</td>
-                          <td>{cert.validUntil || cert.valid_until ? formatDate(cert.validUntil || cert.valid_until) : '—'}</td>
+                          <td>{cert.validUntil || cert.valid_until ? formatDate(cert.validUntil || cert.valid_until) : '-'}</td>
                           <td><span className={`module-badge badge-${cert.status}`}>{cert.status}</span></td>
                         </tr>
                       ))}
@@ -1239,7 +1239,7 @@ const MedicalRecords: React.FC = () => {
                   </p>
                 )}
 
-                {/* Protocol Selector — primary integration point */}
+                {/* Protocol Selector - primary integration point */}
                 <ModalField label={t('medicalRecords.modals.selectProtocol')}>
                   {loadingProtocols ? (
                     <div className="si-2bffca72">{t('common.loading')}</div>

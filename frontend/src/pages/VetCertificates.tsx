@@ -329,37 +329,37 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
                   <tr key={cert.id}>
                     <td>
                       <code className="si-fde700bf">
-                        {cert.certificateNumber.startsWith('DRAFT') ? '—' : cert.certificateNumber}
+                        {cert.certificateNumber.startsWith('DRAFT') ? '-' : cert.certificateNumber}
                       </code>
                     </td>
                     <td className="si-756a9f21">{certTypeLabel(cert.certificateType)}</td>
                     <td>
-                      {cert.animalName || '—'}
+                      {cert.animalName || '-'}
                       {cert.animalSpecies && <div className="si-be928573">{cert.animalSpecies}</div>}
                       {cert.animalUniqueId && <div className="si-8ff90223">{cert.animalUniqueId}</div>}
                     </td>
                     {isFarmerOrAdmin && (
                       <td style={{ fontSize: 12, color: cert.enterpriseName ? '#374151' : '#9ca3af' }}>
-                        {cert.enterpriseName || '—'}
+                        {cert.enterpriseName || '-'}
                       </td>
                     )}
                     {(isAdmin || !isVet) && (
                       <td className="si-756a9f21">
                         {cert.vetFirstName || cert.vetLastName
                           ? `Dr. ${[cert.vetFirstName, cert.vetLastName].filter(Boolean).join(' ')}`
-                          : '—'}
+                          : '-'}
                       </td>
                     )}
                     {(isAdmin || isVet) && (
                       <td className="si-756a9f21">
-                        {[cert.ownerFirstName, cert.ownerLastName].filter(Boolean).join(' ') || '—'}
+                        {[cert.ownerFirstName, cert.ownerLastName].filter(Boolean).join(' ') || '-'}
                       </td>
                     )}
                     <td className="si-756a9f21">
-                      {cert.issuedAt ? formatDate(cert.issuedAt) : '—'}
+                      {cert.issuedAt ? formatDate(cert.issuedAt) : '-'}
                     </td>
                     <td className="si-756a9f21">
-                      {cert.validUntil ? formatDate(cert.validUntil) : '—'}
+                      {cert.validUntil ? formatDate(cert.validUntil) : '-'}
                     </td>
                     <td>{statusBadge(cert.status)}</td>
                     <td>
@@ -516,7 +516,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
             <h3 className="si-d1f4710f">🚫 {t('vetCertificates.revoke')}</h3>
             <p className="si-751c1b0d">
               {t('vetCertificates.confirmRevoke')}<br />
-              <strong>{certTypeLabel(revokeTarget.certificateType)}</strong> — {revokeTarget.certificateNumber}
+              <strong>{certTypeLabel(revokeTarget.certificateType)}</strong> - {revokeTarget.certificateNumber}
             </p>
             <div className="module-form-group">
               <label className="module-label">{t('vetCertificates.revokeReason')} *</label>

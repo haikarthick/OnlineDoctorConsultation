@@ -2,7 +2,7 @@
 --
 -- Grooming had no customer refund path at all: cancelling a paid order left the payment
 -- 'completed' with refund_amount 0 and never returned money, and a dispute "refund" only booked a
--- negative provider-ledger entry. It also had no hold expiry — grooming.holdMinutes was read by
+-- negative provider-ledger entry. It also had no hold expiry - grooming.holdMinutes was read by
 -- nothing, so unpaid orders held their slot forever.
 --
 -- These columns are grooming's OWN. The consultation module keeps its refund/hold state on

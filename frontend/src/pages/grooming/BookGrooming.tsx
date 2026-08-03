@@ -51,7 +51,7 @@ const BookGrooming: React.FC<Props> = ({ onNavigate }) => {
   const [consentPhoto, setConsentPhoto] = useState(true)
 
   // Real availability, replacing a hardcoded TIMES array that had no connection to the
-  // provider's actual hours — it offered 09:00–17:00 on every provider, every day, forever.
+  // provider's actual hours - it offered 09:00-17:00 on every provider, every day, forever.
   const [slots, setSlots] = useState<Slot[]>([])
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [closedReason, setClosedReason] = useState('')

@@ -112,8 +112,8 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ onNavig
                 <tr key={c.id}>
                   <td><code className="si-756a9f21">{c.id.slice(0, 8)}</code></td>
                   <td>{c.title || t('consultationManagement.untitled')}</td>
-                  <td>{c.petOwnerName || '—'}</td>
-                  <td>{c.vetName || '—'}</td>
+                  <td>{c.petOwnerName || '-'}</td>
+                  <td>{c.vetName || '-'}</td>
                   <td>
                     <span style={{
                       display: 'inline-flex', alignItems: 'center', gap: 4,

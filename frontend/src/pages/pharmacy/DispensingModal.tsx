@@ -309,7 +309,7 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
                               <option value="">{t('pharmacy.dispense.selectInventory')}</option>
                               {inventory.map(i => (
                                 <option key={i.id} value={i.id}>
-                                  {i.med_name} {i.strength} — Batch {i.batch_number} (Qty: {i.quantity})
+                                  {i.med_name} {i.strength} - Batch {i.batch_number} (Qty: {i.quantity})
                                   {i.expiry_date ? ` Exp: ${new Date(i.expiry_date).toLocaleDateString()}` : ''}
                                 </option>
                               ))}

@@ -80,7 +80,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
     if (!disputeModal) return
     const payload: any = { status: disputeStatus }
     if (disputeNote.trim()) payload.resolutionNote = disputeNote.trim()
-    // Only send a refund when the outcome is a partial refund — the backend
+    // Only send a refund when the outcome is a partial refund - the backend
     // books it as a negative earnings adjustment against the provider.
     if (disputeStatus === 'partially_refunded') {
       const amt = Number(disputeRefund)
@@ -129,7 +129,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
           <button key={s} className={`module-tab${filter === s ? ' active' : ''}`} onClick={() => setFilter(s)}>{t(`groomingAdmin.tab.${s}`)}</button>
         ))}
         {/* The open-dispute count was already shown in the metric strip above with
-            no way to act on it — /grooming/admin/disputes had no caller at all. */}
+            no way to act on it - /grooming/admin/disputes had no caller at all. */}
         <button className={`module-tab${filter === 'disputes' ? ' active' : ''}`} onClick={() => setFilter('disputes')}>
           ⚖️ {t('groomingAdmin.tab.disputes')}
           {(report?.disputes?.open || 0) > 0 && <span className="tab-badge">{report.disputes.open}</span>}
@@ -154,15 +154,15 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
                     {disputes.map(d => (
                       <tr key={d.id}>
                         <td>
-                          <strong>{d.orderNumber || '—'}</strong>
+                          <strong>{d.orderNumber || '-'}</strong>
                           <div className="si-48a0b045">{formatCurrency(Number(d.grandTotal || 0))}</div>
                         </td>
-                        <td>{d.providerName || '—'}<div className="si-48a0b045">{d.customerEmail || ''}</div></td>
+                        <td>{d.providerName || '-'}<div className="si-48a0b045">{d.customerEmail || ''}</div></td>
                         <td className="si-af971f42">
                           <div>{d.reason}</div>
                           {d.comments && <div className="slot-hint">{d.comments}</div>}
                         </td>
-                        <td>{d.requestedResolution || '—'}</td>
+                        <td>{d.requestedResolution || '-'}</td>
                         <td><span className={`status-badge status-${d.status}`}>{t(`groomingAdmin.disputes.st.${d.status}`)}</span></td>
                         <td>
                           <div className="order-row-actions">
@@ -217,7 +217,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
             </div>
           )}
 
-      {/* Earnings ledger — what is actually owed, before committing a payout */}
+      {/* Earnings ledger - what is actually owed, before committing a payout */}
       {earningsFor && (
         <div className="modal-overlay" onClick={() => setEarningsFor(null)}>
           <div className="modal si-3196bd33" onClick={e => e.stopPropagation()}>
@@ -266,7 +266,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
               </p>
               <div className="form-group">
                 <label className="form-label">{t('groomingAdmin.disputes.reason')}</label>
-                <p>{disputeModal.reason}{disputeModal.comments ? ` — ${disputeModal.comments}` : ''}</p>
+                <p>{disputeModal.reason}{disputeModal.comments ? ` - ${disputeModal.comments}` : ''}</p>
               </div>
               <div className="form-group">
                 <label className="form-label">{t('groomingAdmin.disputes.outcome')}</label>

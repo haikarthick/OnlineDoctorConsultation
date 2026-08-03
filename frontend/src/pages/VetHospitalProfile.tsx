@@ -180,7 +180,7 @@ const VetHospitalProfile: React.FC = () => {
             </div>
           </div>
 
-          {/* Trust & Verification section — always visible to public */}
+          {/* Trust & Verification section - always visible to public */}
           <div className="card trust-section">
             <div className="trust-header">
               <h3 className="si-44087c4b">🛡 Trust & Verification</h3>
@@ -192,7 +192,7 @@ const VetHospitalProfile: React.FC = () => {
               <>
                 <p className="trust-desc">
                   This hospital has been independently verified by VetCare. All compliance documents
-                  have been reviewed and approved by our team — so you can be confident this is a
+                  have been reviewed and approved by our team - so you can be confident this is a
                   legitimate, licensed facility.
                 </p>
                 <div className="trust-docs-grid">
@@ -210,7 +210,7 @@ const VetHospitalProfile: React.FC = () => {
             ) : (
               <p className="trust-desc pending">
                 This hospital's compliance documents are currently being reviewed by the VetCare team.
-                Verification is typically completed within 2–3 business days.
+                Verification is typically completed within 2-3 business days.
               </p>
             )}
           </div>
@@ -295,7 +295,7 @@ const VetHospitalProfile: React.FC = () => {
                         {(svc.priceMin || svc.priceMax) && (
                           <div className="vh-service-price">
                             {svc.priceMin && svc.priceMax && svc.priceMin !== svc.priceMax
-                              ? `${formatCurrency(svc.priceMin)} – ${formatCurrency(svc.priceMax)}`
+                              ? `${formatCurrency(svc.priceMin)} - ${formatCurrency(svc.priceMax)}`
                               : `${formatCurrency(svc.priceMin || svc.priceMax || 0)}`}
                           </div>
                         )}

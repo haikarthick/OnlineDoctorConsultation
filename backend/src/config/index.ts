@@ -73,7 +73,7 @@ export const config = {
         }
         // No trusted cross-origin is configured. Fail closed: never reflect an
         // arbitrary request origin while credentials are enabled. Same-origin
-        // requests (the backend serves the frontend) are unaffected — browsers
+        // requests (the backend serves the frontend) are unaffected - browsers
         // do not apply CORS to them.
         return false as any;
       }

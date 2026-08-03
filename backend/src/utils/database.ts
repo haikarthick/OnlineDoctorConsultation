@@ -9,7 +9,7 @@ import RefreshTokenService from '../services/RefreshTokenService';
 import VetHospitalService from '../services/VetHospitalService';
 
 /**
- * Summarize query params for logging without leaking values — params can carry
+ * Summarize query params for logging without leaking values - params can carry
  * medical notes, prescriptions, or other patient/contact data.
  */
 function describeParams(params?: any[]): Array<{ type: string; length?: number }> | undefined {
@@ -68,12 +68,12 @@ types.setTypeParser(700, (val: string) => parseFloat(val));
 types.setTypeParser(701, (val: string) => parseFloat(val));
 
 /**
- * Canonical system-role list — the ONLY place the legacy self-heal below may get roles from.
+ * Canonical system-role list - the ONLY place the legacy self-heal below may get roles from.
  *
  * The self-heal blocks unconditionally DROP and re-ADD users.role / user_roles.role CHECK
  * constraints on every startup. They used to carry their own inlined copies of this list, which
  * silently fell behind: migration 030 correctly widened the constraints to include
- * 'groomer'/'support', then the next boot clobbered it back to the pre-grooming 7 — so groomer
+ * 'groomer'/'support', then the next boot clobbered it back to the pre-grooming 7 - so groomer
  * registration failed with `users_role_check` on every already-deployed environment while a
  * freshly-seeded local DB looked fine.
  *
@@ -88,7 +88,7 @@ const SYSTEM_ROLES = [
 const SYSTEM_ROLES_SQL = SYSTEM_ROLES.map(r => `'${r}'`).join(', ');
 
 /**
- * Canonical invoice types — same anti-drift rule as SYSTEM_ROLES above.
+ * Canonical invoice types - same anti-drift rule as SYSTEM_ROLES above.
  * The self-heal was still rebuilding invoices_invoice_type_check without 'grooming', so every
  * grooming GST invoice (GRM series) would have been rejected in production the same way
  * groomer registration was. Caught by scripts/runtime-verify.js.
@@ -98,7 +98,7 @@ const INVOICE_TYPES = ['consultation', 'commission', 'pharmacy', 'grooming', 'gr
 const INVOICE_TYPES_SQL = INVOICE_TYPES.map(t => `'${t}'`).join(', ');
 
 /**
- * Canonical payment sources — same anti-drift rule as SYSTEM_ROLES / INVOICE_TYPES above.
+ * Canonical payment sources - same anti-drift rule as SYSTEM_ROLES / INVOICE_TYPES above.
  * `payment_source` is what separates the revenue streams: the finance overview counts GMV
  * WHERE payment_source = 'consultation', and the Razorpay webhook routes completion by it.
  * A grooming payment left labelled 'consultation' is both wrong money and wrong routing.
@@ -109,7 +109,7 @@ const PAYMENT_SOURCES_SQL = PAYMENT_SOURCES.map(s => `'${s}'`).join(', ');
 
 /**
  * The last three enumerated CHECK lists the self-heal still rebuilt from its own inline copies.
- * Extracted 2026-07-28 after verifying each was byte-identical to docker/init.sql §46.1/§46.2 —
+ * Extracted 2026-07-28 after verifying each was byte-identical to docker/init.sql §46.1/§46.2 -
  * a hazard removal, not a behaviour change. With these, NO constraint value list remains inlined
  * in the self-heal, so it can no longer fall behind a migration the way the role list did.
  *   payments.status       → docker/init.sql §46.1
@@ -217,13 +217,13 @@ class PostgresDatabase {
    * Applies any pending SQL migration files from backend/migrations/*.sql.
    * Uses the server's own pool (which has the correct search_path set via
    * connection options), so this is far more reliable than running a separate
-   * node process. Errors are caught and logged — startup is never blocked.
+   * node process. Errors are caught and logged - startup is never blocked.
    */
   private async runSQLMigrations(): Promise<void> {
     try {
       const migDir = path.join(__dirname, '..', '..', 'migrations');
       if (!fs.existsSync(migDir)) {
-        logger.info('No migrations directory — skipping SQL migration runner');
+        logger.info('No migrations directory - skipping SQL migration runner');
         return;
       }
 
@@ -267,18 +267,18 @@ class PostgresDatabase {
           client.release();
         }
       }
-      // This runner deliberately never throws — the server has already bound its
+      // This runner deliberately never throws - the server has already bound its
       // port by the time it runs (see index.ts's startServer), and that process is
       // designed to stay up and self-heal rather than crash over a DB issue once
       // live. The actual deploy gate is render-start.sh's separate, earlier
       // `node dist/utils/migrate.js` step, which DOES abort the deploy on a
-      // genuine migration failure (MIGRATIONS_FAIL_FAST, default true) — by the
+      // genuine migration failure (MIGRATIONS_FAIL_FAST, default true) - by the
       // time this in-process runner executes, `pending` should normally be empty.
       // This aggregate line exists so a failure here (e.g. this runner disagreeing
       // with the CLI runner about pending state) is impossible to miss in logs.
       if (failed.length > 0) {
         logger.error(
-          `SQL migrations: ${failed.length}/${pending.length} FAILED — server is running with a partially-migrated schema`,
+          `SQL migrations: ${failed.length}/${pending.length} FAILED - server is running with a partially-migrated schema`,
           { failed }
         );
       } else {
@@ -296,11 +296,11 @@ class PostgresDatabase {
   // EXISTS / ALTER TABLE ADD COLUMN IF NOT EXISTS statements run on every
   // startup, many wrapped in a bare `.catch(() => {})` that silently
   // swallows failures. It predates backend/migrations/ and is kept only
-  // for schema that already depends on it — it is NOT tracked, NOT
+  // for schema that already depends on it - it is NOT tracked, NOT
   // versioned, and NOT covered by MIGRATIONS_FAIL_FAST.
   //
   // Do not add new schema changes here. Use `npm run migrate:create <name>`
-  // to add a new file under backend/migrations/ instead — that path is
+  // to add a new file under backend/migrations/ instead - that path is
   // transactional, tracked in _migrations, and (via render-start.sh's
   // separate migrate.js deploy step) actually blocks a bad deploy instead
   // of silently shipping a partially-migrated schema.
@@ -320,7 +320,7 @@ class PostgresDatabase {
     // are self-sufficient for a FRESH database. Flip it on a real environment only after
     // confirming that environment's schema matches a freshly-built one.
     if (String(process.env.DISABLE_LEGACY_SELFHEAL).toLowerCase() === 'true') {
-      logger.warn('Legacy schema self-heal SKIPPED (DISABLE_LEGACY_SELFHEAL=true) — ' +
+      logger.warn('Legacy schema self-heal SKIPPED (DISABLE_LEGACY_SELFHEAL=true) - ' +
         'schema is whatever init.sql + backend/migrations produced.');
       return;
     }
@@ -345,15 +345,15 @@ class PostgresDatabase {
       );
       const { has_users, has_bookings } = check.rows[0];
       if (!has_users || !has_bookings) {
-        logger.info(`Partial or missing schema (users=${has_users}, bookings=${has_bookings}) — running init.sql...`);
+        logger.info(`Partial or missing schema (users=${has_users}, bookings=${has_bookings}) - running init.sql...`);
         const initSqlPath = path.join(__dirname, '../../../docker/init.sql');
         if (fs.existsSync(initSqlPath)) {
           const sql = fs.readFileSync(initSqlPath, 'utf8');
-          // Use client.query (simple query protocol) — supports multi-statement SQL
+          // Use client.query (simple query protocol) - supports multi-statement SQL
           await client.query(sql);
           logger.info('Schema created/repaired successfully from init.sql');
         } else {
-          logger.warn('init.sql not found at ' + initSqlPath + ' — skipping schema creation');
+          logger.warn('init.sql not found at ' + initSqlPath + ' - skipping schema creation');
         }
       } else {
         logger.info('Database schema healthy (users + bookings found)');
@@ -396,7 +396,7 @@ class PostgresDatabase {
           await client.query(stmt);
           statementsRun++;
         } catch (e: any) {
-          // Ignore "already exists" errors — those are fine for IF NOT EXISTS statements
+          // Ignore "already exists" errors - those are fine for IF NOT EXISTS statements
           if (!e.message?.includes('already exists') && !e.message?.includes('duplicate')) {
             errors.push(`[stmt ${statementsRun + 1}] ${e.message}`);
           }
@@ -417,7 +417,7 @@ class PostgresDatabase {
   }
 
   /**
-   * Payment module (Phase P0) safety net — mirrors backend/migrations/012_payment_module.sql
+   * Payment module (Phase P0) safety net - mirrors backend/migrations/012_payment_module.sql
    * and docker/init.sql section 46. Runs idempotent DDL so existing DBs whose migration
    * runner failed silently still converge on the payment-module schema.
    */
@@ -599,7 +599,7 @@ class PostgresDatabase {
         (gen_random_uuid(), '998351', 'Veterinary services for pet animals (GST-exempt healthcare)', 0, true),
         (gen_random_uuid(), '998352', 'Veterinary services for livestock (GST-exempt healthcare)', 0, true),
         (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true),
-        (gen_random_uuid(), '300490', 'Pharmacy — dispensed veterinary medicaments (HSN 3004)', 12, true)
+        (gen_random_uuid(), '300490', 'Pharmacy - dispensed veterinary medicaments (HSN 3004)', 12, true)
       ON CONFLICT (sac_code) DO NOTHING
     `).catch((e: any) => logger.warn('tax_codes seed failed', { error: e.message }));
 
@@ -689,7 +689,7 @@ class PostgresDatabase {
       `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reschedule_count INTEGER NOT NULL DEFAULT 0`
     ).catch(() => { /* column may already exist */ });
 
-    // Payment module (Phase P0) — safety net mirroring migrations/012_payment_module.sql
+    // Payment module (Phase P0) - safety net mirroring migrations/012_payment_module.sql
     try {
       await this.ensurePaymentModuleSchema();
     } catch (e: any) {
@@ -729,7 +729,7 @@ class PostgresDatabase {
     ]);
 
     // Expand vet_certificates CHECK constraint to include 4 farm/enterprise certificate types
-    // added after initial deployment. Postgres cannot ALTER a CHECK inline — must drop+recreate.
+    // added after initial deployment. Postgres cannot ALTER a CHECK inline - must drop+recreate.
     await this.pool.query(`
       ALTER TABLE vet_certificates
         DROP CONSTRAINT IF EXISTS vet_certificates_certificate_type_check
@@ -758,7 +758,7 @@ class PostgresDatabase {
        )`
     ).catch(() => { /* table may already exist */ });
 
-    // Ensure vet_certificates table exists (safety net — must run AFTER enterprises is guaranteed)
+    // Ensure vet_certificates table exists (safety net - must run AFTER enterprises is guaranteed)
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS vet_certificates (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -817,12 +817,12 @@ class PostgresDatabase {
       `ALTER TABLE hospital_networks ADD COLUMN IF NOT EXISTS id_prefix VARCHAR(10)`
     ).catch(() => {});
 
-    // Ensure created_by column exists on hospital_networks (critical — approve + corporate dashboard queries use it)
+    // Ensure created_by column exists on hospital_networks (critical - approve + corporate dashboard queries use it)
     await this.pool.query(
       `ALTER TABLE hospital_networks ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES users(id) ON DELETE SET NULL`
     ).catch(() => {});
 
-    // Account status system — account_status replaces is_active as the primary login gate
+    // Account status system - account_status replaces is_active as the primary login gate
     await this.pool.query(
       `ALTER TABLE users ADD COLUMN IF NOT EXISTS account_status VARCHAR(20) NOT NULL DEFAULT 'active'`
     ).catch(() => {});
@@ -944,7 +944,7 @@ class PostgresDatabase {
     }
 
     // animal_class is filtered/grouped on in MarketplaceService's search + aggregation
-    // queries (both marketplace_listings and animals) with no backing index — added here
+    // queries (both marketplace_listings and animals) with no backing index - added here
     // as a safety net for DBs that predate this column on marketplace_listings too.
     await this.pool.query(`ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_class VARCHAR(30)`).catch(() => {});
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_marketplace_listings_animal_class ON marketplace_listings(animal_class)`).catch(() => {});
@@ -1279,7 +1279,7 @@ class PostgresDatabase {
       )
     `).catch(() => {});
 
-    // Extend users.role CHECK constraint — full list set below after hospital_staff tables (line ~837)
+    // Extend users.role CHECK constraint - full list set below after hospital_staff tables (line ~837)
     // (skipping partial update here to avoid overwriting the complete constraint)
     // role_change_requests table safety net
     await this.pool.query(`
@@ -1400,7 +1400,7 @@ class PostgresDatabase {
       ).catch(() => {});
     }
 
-    // Also ensure users.role CHECK covers every system role (see SYSTEM_ROLES — never inline
+    // Also ensure users.role CHECK covers every system role (see SYSTEM_ROLES - never inline
     // the list here again, it is what silently reverted migration 030 on every boot)
     await this.pool.query(`
       ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check
@@ -1410,7 +1410,7 @@ class PostgresDatabase {
         CHECK (role IN (${SYSTEM_ROLES_SQL}))
     `).catch(() => {});
 
-    // Marketplace performance indexes — critical for free-tier Render cold-start
+    // Marketplace performance indexes - critical for free-tier Render cold-start
     // These are idempotent (CREATE INDEX IF NOT EXISTS) so safe to run on every startup
     const marketplaceIndexes = [
       `CREATE INDEX IF NOT EXISTS idx_marketplace_listings_status_approved ON marketplace_listings(status, admin_approved)`,
@@ -1422,7 +1422,7 @@ class PostgresDatabase {
       await this.pool.query(ddl).catch(() => {});
     }
 
-    // Enterprise alignment — add enterprise context to clinical tables
+    // Enterprise alignment - add enterprise context to clinical tables
     const enterpriseAlignmentDDL = [
       `ALTER TABLE inpatient_admissions ADD COLUMN IF NOT EXISTS enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL`,
       `ALTER TABLE inpatient_admissions ADD COLUMN IF NOT EXISTS group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL`,
@@ -1539,7 +1539,7 @@ class PostgresDatabase {
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_leave_requests_user ON staff_leave_requests(user_id)`).catch(() => {});
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_leave_requests_hospital ON staff_leave_requests(hospital_id)`).catch(() => {});
 
-    // Missing FK indexes — prevent full table scans on common JOINs
+    // Missing FK indexes - prevent full table scans on common JOINs
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_consultations_animal_id ON consultations(animal_id)`).catch(() => {});
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_bookings_animal_id ON bookings(animal_id)`).catch(() => {});
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_bookings_consultation_id ON bookings(consultation_id)`).catch(() => {});
@@ -1585,7 +1585,7 @@ class PostgresDatabase {
     // Make invitee_name optional on hospital_staff_invites (label says "(optional)")
     await this.pool.query(`ALTER TABLE hospital_staff_invites ALTER COLUMN invitee_name DROP NOT NULL`).catch(() => {});
 
-    // Network Custom Roles table (safety net — canonical schema is in init.sql)
+    // Network Custom Roles table (safety net - canonical schema is in init.sql)
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS network_custom_roles (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1604,7 +1604,7 @@ class PostgresDatabase {
     `).catch(() => {});
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_ncr_network ON network_custom_roles(network_id)`).catch(() => {});
 
-    // Make users.phone nullable — hospital_staff registering via invite may not have a phone
+    // Make users.phone nullable - hospital_staff registering via invite may not have a phone
     await this.pool.query(`ALTER TABLE users ALTER COLUMN phone DROP NOT NULL`).catch(() => {});
 
     // Add unique constraint to staff_positions if not exists (needed for ON CONFLICT)
@@ -1718,7 +1718,7 @@ class PostgresDatabase {
     // P6-NOTIFICATIONS: digest preference column on users
     await this.pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS digest_emails_enabled BOOLEAN DEFAULT true`).catch(() => {});
 
-    // H2: Safety-net — medical_records.consultation_id (already in init.sql but may be missing on older DBs)
+    // H2: Safety-net - medical_records.consultation_id (already in init.sql but may be missing on older DBs)
     await this.pool.query(`ALTER TABLE medical_records ADD COLUMN IF NOT EXISTS consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL`).catch(() => {});
 
     // H6: invite_status on hospital_network_members for pending/active invite flow
@@ -1801,7 +1801,7 @@ class PostgresDatabase {
     await this.pool.query(`ALTER TABLE hospital_network_members ADD COLUMN IF NOT EXISTS department VARCHAR(100)`).catch(() => {});
 
     // ── PHARMACY MODULE (safety net for existing DBs) ──────────────────────
-    // Pharmacy tables — created if not exists (idempotent)
+    // Pharmacy tables - created if not exists (idempotent)
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS hospital_pharmacies (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1950,14 +1950,14 @@ class PostgresDatabase {
       await this.pool.query(ddl).catch(() => {});
     }
 
-    // Keep users.role CHECK aligned with SYSTEM_ROLES (do not inline the list — see above)
+    // Keep users.role CHECK aligned with SYSTEM_ROLES (do not inline the list - see above)
     await this.pool.query(`ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check`).catch(() => {});
     await this.pool.query(`
       ALTER TABLE users ADD CONSTRAINT users_role_check
         CHECK (role IN (${SYSTEM_ROLES_SQL}))
     `).catch(() => {});
 
-    // Same for the additive user_roles table — this one is what blocks createProvider()'s
+    // Same for the additive user_roles table - this one is what blocks createProvider()'s
     // 'groomer' grant when it falls behind
     await this.pool.query(`ALTER TABLE user_roles DROP CONSTRAINT IF EXISTS user_roles_role_check`).catch(() => {});
     await this.pool.query(`
@@ -1976,7 +1976,7 @@ class PostgresDatabase {
     // Add dispensing_id and payment_source to payments (link dispensing to payment system)
     await this.pool.query(`ALTER TABLE payments ADD COLUMN IF NOT EXISTS dispensing_id UUID REFERENCES dispensing_records(id) ON DELETE SET NULL`).catch(() => {});
     await this.pool.query(`ALTER TABLE payments ADD COLUMN IF NOT EXISTS payment_source VARCHAR(30) DEFAULT 'consultation'`).catch(() => {});
-    // payment_source CHECK — derive from PAYMENT_SOURCES and REBUILD it, never inline the list
+    // payment_source CHECK - derive from PAYMENT_SOURCES and REBUILD it, never inline the list
     // behind an IF NOT EXISTS. The old guarded form could only ever create the constraint, so a
     // migration that widened it was invisible here and a widened value stayed rejected forever.
     await this.pool.query(`ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_payment_source_check`).catch(() => {});
@@ -1995,7 +1995,7 @@ class PostgresDatabase {
     // GSTIN on the pharmacy entity itself (issuer of the pharmacy invoice, distinct from the network's own GSTIN)
     await this.pool.query(`ALTER TABLE hospital_pharmacies ADD COLUMN IF NOT EXISTS gstin VARCHAR(20)`).catch(() => {});
 
-    // invoice_type CHECK — derive from INVOICE_TYPES, never inline the list (this block used to
+    // invoice_type CHECK - derive from INVOICE_TYPES, never inline the list (this block used to
     // hardcode 3 values and silently dropped 'grooming' back off on every boot)
     await this.pool.query(`ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_invoice_type_check`).catch(() => {});
     await this.pool.query(`

@@ -57,7 +57,7 @@ class GroomingPaymentService {
     const currency = o.currency || await GroomingModuleConfig.getCurrency();
     const gateway = await getActiveGateway();
 
-    // Reuse the order's existing pending payment row rather than stacking a new one per click —
+    // Reuse the order's existing pending payment row rather than stacking a new one per click -
     // repeated checkouts otherwise leave orphaned 'pending' rows that no longer match any order.
     let paymentId: string | null = null;
     if (o.payment_id) {
@@ -96,12 +96,12 @@ class GroomingPaymentService {
     const o = await this.loadOwnedOrder(userId, orderId);
     if (o.status === 'confirmed') return { orderId, status: 'confirmed', invoiceNumber: o.invoice_number, alreadyPaid: true };
     // The customer paid, but the slot hold had already lapsed by the time the callback arrived.
-    // Refuse the booking AND return the money — never both keep the payment and drop the slot.
+    // Refuse the booking AND return the money - never both keep the payment and drop the slot.
     if (o.status === 'payment_expired') {
       const GroomingRefundService = (await import('./GroomingRefundService')).default;
       const lateId = body.gatewayPaymentId || o.gateway_payment_id || '';
       await GroomingRefundService.refundExpiredCapture(orderId, lateId);
-      throw new ValidationError('This booking expired before the payment completed. The full amount has been refunded — please book again.');
+      throw new ValidationError('This booking expired before the payment completed. The full amount has been refunded - please book again.');
     }
     if (o.status !== 'payment_pending') throw new ValidationError('Order is not awaiting payment');
 
@@ -116,7 +116,7 @@ class GroomingPaymentService {
     const payRow = await database.query(`SELECT amount FROM payments WHERE id = $1`, [o.payment_id]);
     const payAmount = Number(payRow.rows[0]?.amount) || Number(o.grand_total);
 
-    // A signature only proves the callback came from the gateway — it does not prove the money
+    // A signature only proves the callback came from the gateway - it does not prove the money
     // was captured, nor how much. Consultations already re-read the capture (PaymentOrchestrator
     // .completeRazorpayCheckout); grooming did not, so a signed callback for an authorised-then-
     // failed payment would still have confirmed the booking and credited the provider.
@@ -135,7 +135,7 @@ class GroomingPaymentService {
   }
 
   /**
-   * Gateway-driven completion for a grooming payment — used by the Razorpay webhook and the
+   * Gateway-driven completion for a grooming payment - used by the Razorpay webhook and the
    * reconciliation sweep, where there is no browser callback to verify. Both callers have already
    * established authenticity (webhook signature / direct gateway read), so this only resolves the
    * payment back to its order and runs the same idempotent finalisation.
@@ -148,7 +148,7 @@ class GroomingPaymentService {
       return;
     }
     // The slot was already released before this capture landed. Keeping the money for a slot the
-    // customer no longer holds is not an option — return it in full instead of confirming.
+    // customer no longer holds is not an option - return it in full instead of confirming.
     if (r.rows[0].status === 'payment_expired') {
       const GroomingRefundService = (await import('./GroomingRefundService')).default;
       await GroomingRefundService.refundExpiredCapture(r.rows[0].id, gatewayPaymentId);
@@ -160,7 +160,7 @@ class GroomingPaymentService {
   }
 
   /**
-   * Slot-hold expiry (grooming's own — consultations expire via
+   * Slot-hold expiry (grooming's own - consultations expire via
    * PaymentOrchestrator.expireStalePaymentHolds against `bookings`, and the two must stay apart).
    *
    * Releases orders that were never paid for within grooming.holdMinutes. Only touches orders
@@ -200,7 +200,7 @@ class GroomingPaymentService {
   }
 
   /**
-   * Human-readable booking facts for notification copy — pet, service, provider, customer and a
+   * Human-readable booking facts for notification copy - pet, service, provider, customer and a
    * formatted date/time. Read outside the confirming transaction on purpose: notifications are
    * best-effort and must never widen the row lock or fail the payment. Every field degrades to a
    * sensible phrase so the copy still reads correctly when a column is null.
@@ -230,7 +230,7 @@ class GroomingPaymentService {
       if (r.rows.length === 0) return fallback;
       const x = r.rows[0];
 
-      // scheduled_date is a DATE — render it in a stable, unambiguous form rather than an ISO
+      // scheduled_date is a DATE - render it in a stable, unambiguous form rather than an ISO
       // timestamp, which is what a groomer scanning a phone notification actually needs.
       let whenLine = fallback.whenLine;
       if (x.scheduledDate) {
@@ -279,8 +279,8 @@ class GroomingPaymentService {
    * The single transactional completion path for the FIRST collection on an order (full amount or
    * deposit). Locks the order row FIRST and re-checks its status inside the transaction, so
    * concurrent confirms (double-click, browser retry, webhook racing the callback) collapse to
-   * exactly one earning and one GST invoice. Checking the status before the transaction — as this
-   * used to — let 8 parallel calls book 6 earnings and 6 invoices.
+   * exactly one earning and one GST invoice. Checking the status before the transaction - as this
+   * used to - let 8 parallel calls book 6 earnings and 6 invoices.
    *
    * Only what was actually COLLECTED is credited and invoiced. Anything still owed becomes
    * balance_due and is billed by a supplementary invoice when collected.
@@ -291,7 +291,7 @@ class GroomingPaymentService {
     const clearanceDays = await GroomingModuleConfig.getClearanceDays();
     const sac = await GroomingModuleConfig.getSacCode();
     const prefix = await GroomingModuleConfig.getInvoicePrefix();
-    // Acceptance gate (036): payment no longer confirms the booking on its own — the provider
+    // Acceptance gate (036): payment no longer confirms the booking on its own - the provider
     // must accept it. autoAccept restores the old behaviour for operators who want it.
     const autoAccept = await GroomingModuleConfig.isAutoAcceptEnabled();
     const acceptanceWindowMinutes = await GroomingModuleConfig.getAcceptanceWindowMinutes();
@@ -306,7 +306,7 @@ class GroomingPaymentService {
       const o = lockRes.rows[0];
 
       // Idempotency guard: a retry must collapse onto whichever post-payment state this order
-      // already reached, not just 'confirmed' — otherwise a double-click on a gated order falls
+      // already reached, not just 'confirmed' - otherwise a double-click on a gated order falls
       // through to the 'not awaiting payment' error instead of returning the first result.
       if (o.status === 'confirmed' || o.status === 'pending_provider_acceptance') {
         return { orderId, status: o.status, invoiceNumber: o.invoice_number, alreadyPaid: true };
@@ -349,10 +349,10 @@ class GroomingPaymentService {
         `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
          VALUES ($1,'payment_pending',$4,$2,$3)`,
         [orderId, opts.actorUserId,
-         (balanceDue > 0 ? `Deposit received (${opts.mode}) — balance ${balanceDue.toFixed(2)} due`
+         (balanceDue > 0 ? `Deposit received (${opts.mode}) - balance ${balanceDue.toFixed(2)} due`
                          : `Payment received (${opts.mode})`)
          + (paidStatus === 'pending_provider_acceptance'
-              ? ` — awaiting provider acceptance (${acceptanceWindowMinutes} min)` : ''),
+              ? ` - awaiting provider acceptance (${acceptanceWindowMinutes} min)` : ''),
          paidStatus]);
 
       const items = await client.query(
@@ -396,7 +396,7 @@ class GroomingPaymentService {
     });
 
     // Both sides hear about it once the money is booked. Previously nobody was told a grooming
-    // order had been paid — the provider had no signal that a booking even existed.
+    // order had been paid - the provider had no signal that a booking even existed.
     if (result && result.notify) {
       const n = result.notify;
       if (!result.alreadyPaid) {
@@ -406,20 +406,20 @@ class GroomingPaymentService {
         const ctx = await this.loadNotificationContext(orderId);
         const gated = result.status === 'pending_provider_acceptance';
         const balanceNote = result.balanceDue > 0
-          ? ` A balance of ${ctx.currencySymbol}${result.balanceDue.toFixed(2)} is due before your appointment can be completed —`
+          ? ` A balance of ${ctx.currencySymbol}${result.balanceDue.toFixed(2)} is due before your appointment can be completed -`
             + ` you can pay it from My Grooming Bookings.`
           : '';
         try {
           await NotificationService.createNotification(
             n.customerId, 'payment',
-            gated ? 'Payment received — waiting for the groomer to confirm' : 'Grooming booking confirmed',
+            gated ? 'Payment received - waiting for the groomer to confirm' : 'Grooming booking confirmed',
             gated
               // Do not tell the customer they are confirmed when they are not. The gate can still
               // end in a full refund, and promising confirmation here is what would make that
               // refund feel like a broken promise rather than a normal outcome.
               ? `We've received your payment for ${ctx.serviceLine}${ctx.petLine} at ${ctx.providerName} on ${ctx.whenLine}. `
                 + `${ctx.providerName} now has ${ctx.acceptanceWindowLabel} to confirm the appointment. `
-                + `We'll let you know as soon as they do — and if they can't take it, you'll be refunded in full automatically. `
+                + `We'll let you know as soon as they do - and if they can't take it, you'll be refunded in full automatically. `
                 + `Booking reference ${n.orderNumber}, invoice ${result.invoiceNumber}.${balanceNote}`
               : `Your booking for ${ctx.serviceLine}${ctx.petLine} at ${ctx.providerName} on ${ctx.whenLine} is confirmed. `
                 + `Booking reference ${n.orderNumber}, invoice ${result.invoiceNumber}.${balanceNote}`,
@@ -429,8 +429,8 @@ class GroomingPaymentService {
           if (n.providerOwnerId) {
             await NotificationService.createNotification(
               n.providerOwnerId, 'booking',
-              gated ? `Action needed — accept or decline by ${ctx.acceptanceDeadlineLabel}`
-                    : `New booking — ${ctx.whenLine}`,
+              gated ? `Action needed - accept or decline by ${ctx.acceptanceDeadlineLabel}`
+                    : `New booking - ${ctx.whenLine}`,
               gated
                 ? `${ctx.customerName} has booked and paid for ${ctx.serviceLine}${ctx.petLine} on ${ctx.whenLine}. `
                   + `Open booking ${n.orderNumber} and accept it to confirm the appointment, or decline if you can't take it. `
@@ -448,7 +448,7 @@ class GroomingPaymentService {
   }
 
   /**
-   * Balance collection — the money leg for approved extra work and for the remainder after a
+   * Balance collection - the money leg for approved extra work and for the remainder after a
    * deposit. Creates its OWN payments row (an order can have several), linked by
    * payments.grooming_order_id the same way consultations link by booking_id.
    */
@@ -548,7 +548,7 @@ class GroomingPaymentService {
         `UPDATE grooming_orders SET amount_paid = amount_paid + $2, balance_due = $3, updated_at = NOW() WHERE id = $1`,
         [orderId, collected, Math.max(newBalance, 0)]);
 
-      // Credit whatever of this order's net has not been credited yet — self-correcting, so it
+      // Credit whatever of this order's net has not been credited yet - self-correcting, so it
       // stays right however the order was split across deposit and extras.
       const grossTotal = Number(o.subtotal) + Number(o.addons_total) + Number(o.variable_total);
       const netTotal = +(grossTotal - Number(o.commission_amount)).toFixed(2);
@@ -590,7 +590,7 @@ class GroomingPaymentService {
       await client.query(
         `INSERT INTO grooming_order_status_history (order_id, from_status, to_status, changed_by, note)
          VALUES ($1,$2,$2,$3,$4)`,
-        [orderId, o.status, actorUserId, `Balance ${collected.toFixed(2)} collected (${mode}) — invoice ${invoiceNumber}`]);
+        [orderId, o.status, actorUserId, `Balance ${collected.toFixed(2)} collected (${mode}) - invoice ${invoiceNumber}`]);
       try {
         await client.query(
           `INSERT INTO payment_events (id, payment_id, event_type, from_status, to_status, actor_user_id, payload, created_at)
@@ -606,8 +606,8 @@ class GroomingPaymentService {
    * Race-safe sequential GRM/FY invoice number (separate series from consultation VC/…).
    *
    * Continues from the HIGHEST suffix already issued, never from COUNT(*). Counting rows
-   * assumes the series is a contiguous 1..N; the moment it has a gap — one invoice deleted,
-   * a partial clean_start_launch.sql, any manual cleanup — COUNT(*)+1 lands on a number that
+   * assumes the series is a contiguous 1..N; the moment it has a gap - one invoice deleted,
+   * a partial clean_start_launch.sql, any manual cleanup - COUNT(*)+1 lands on a number that
    * already exists and the UNIQUE index on invoice_number aborts the whole confirm transaction.
    * That surfaced as a bare 500 on payment confirmation with the customer already charged at
    * the gateway, and it never self-heals: every later attempt recomputes the same taken number.

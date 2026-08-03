@@ -51,7 +51,7 @@ const GroomingPassport: React.FC<Props> = ({ onNavigate, animalId }) => {
             const ui = v ? SCENT_UI[v] : null
             return (
               <div key={c} className={`scent-tile ${ui ? ui.cls : 'is-unknown'}`}>
-                <div className="scent-tile-icon">{ui ? ui.icon : '—'}</div>
+                <div className="scent-tile-icon">{ui ? ui.icon : '-'}</div>
                 <div className="scent-tile-label">{t(`groomingDetail.scent${c[0].toUpperCase()}${c.slice(1)}`)}</div>
                 <div className="scent-tile-value">{v ? t(`groomingScent.${v}`) : t('groomingPassport.noData')}</div>
               </div>
@@ -75,7 +75,7 @@ const GroomingPassport: React.FC<Props> = ({ onNavigate, animalId }) => {
           <ul className="history-list">
             {orders.map((o: any) => (
               <li key={o.id}>
-                {/* A real button, not a click handler on a span — the row navigates, so it must
+                {/* A real button, not a click handler on a span - the row navigates, so it must
                     be reachable and activatable from the keyboard. */}
                 <button type="button" className="link-button" onClick={() => onNavigate(`/grooming/order/${o.id}`)}>
                   💈 <strong>{o.serviceName}</strong> · {o.providerName} · {o.scheduledDate}

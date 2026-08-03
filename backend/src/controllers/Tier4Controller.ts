@@ -306,7 +306,7 @@ class Tier4Controller {
     }
   }
 
-  // ── Deal handshake (free classifieds — settlement happens off-platform) ──
+  // ── Deal handshake (free classifieds - settlement happens off-platform) ──
 
   async confirmMarketplaceDeal(req: Request, res: Response) {
     try {
@@ -820,10 +820,10 @@ class Tier4Controller {
 
   async createUserSubscription(req: Request, res: Response) {
     try {
-      // Marketplace is free for end users — paid plans stay dark unless the
+      // Marketplace is free for end users - paid plans stay dark unless the
       // platform admin explicitly enables them
       const enabled = await monetizationService.isFeatureEnabled('subscription_plans');
-      if (!enabled) return res.status(403).json({ error: { message: 'Subscription plans are not available — the marketplace is free to use.' } });
+      if (!enabled) return res.status(403).json({ error: { message: 'Subscription plans are not available - the marketplace is free to use.' } });
       const userId = (req as any).userId;
       const data = await monetizationService.createSubscription(userId, req.body.planId);
       res.status(201).json({ data });
@@ -842,7 +842,7 @@ class Tier4Controller {
     try {
       // Boosts stay dark while the marketplace is free for end users
       const enabled = await monetizationService.isFeatureEnabled('listing_boost');
-      if (!enabled) return res.status(403).json({ error: { message: 'Listing boosts are not available — the marketplace is free to use.' } });
+      if (!enabled) return res.status(403).json({ error: { message: 'Listing boosts are not available - the marketplace is free to use.' } });
       const userId = (req as any).userId;
       // Ownership guard: you can only boost your own listing
       const listing = await marketplaceService.getListing(req.params.id, userId);

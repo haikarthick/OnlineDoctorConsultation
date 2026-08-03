@@ -5,7 +5,7 @@ import app from '../../src/app';
  * Guards the break-glass gate on the two emergency diagnostic endpoints.
  *
  * Until 2026-08-03 both of these were registered with an explicit
- * "public — no auth required" comment and no gate of any kind, on a router
+ * "public - no auth required" comment and no gate of any kind, on a router
  * mounted unconditionally at /api/v1. That meant any anonymous caller could
  * read the entire schema layout (GET /debug/db-state) or replay all of
  * docker/init.sql as DDL and reseed the demo passwords (POST /repair-schema)
@@ -82,7 +82,7 @@ describe('Integration - emergency diagnostics break-glass gate', () => {
       const res = await request(app)
         .get('/api/v1/debug/db-state')
         .set('x-emergency-token', TOKEN);
-      // 200 with a live DB, 500 without — either way it reached the handler,
+      // 200 with a live DB, 500 without - either way it reached the handler,
       // which is what distinguishes it from the 404 the gate returns.
       expect(res.status).not.toBe(404);
     });

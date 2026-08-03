@@ -3,12 +3,12 @@
 -- Bug: a user who requested a role change to 'veterinarian' and was approved by an
 -- admin ended up with users.role='veterinarian' but NO vet_profiles row. Find Doctor
 -- (and availability search) INNER JOIN vet_profiles, so the approved vet was invisible
--- to patients, while User Management (LEFT JOIN) still listed them — the exact symptom
+-- to patients, while User Management (LEFT JOIN) still listed them - the exact symptom
 -- reported for drathiselvamphd@gmail.com (originally a farmer, role-changed to vet).
 --
 -- Root cause: PUT /admin/role-change-requests/:id/approve only ran `UPDATE users SET role`
 -- and never provisioned the satellite vet_profiles row, and the request itself carried no
--- license/vet details for the admin to review — unlike normal vet registration, which
+-- license/vet details for the admin to review - unlike normal vet registration, which
 -- requires a license number and creates vet_profiles at signup.
 --
 -- Fix: role-change requests now carry a JSONB payload of the role-specific details

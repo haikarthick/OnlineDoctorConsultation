@@ -246,7 +246,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
                   <td><code className="si-756a9f21">{p.invoiceNumber || p.id.slice(0, 8)}</code></td>
                   <td><strong>{formatCurrency(p.amount / 100)}</strong></td>
                   <td>{formatCurrency((p.taxAmount || 0) / 100)}</td>
-                  <td>{p.paymentMethod || '—'}</td>
+                  <td>{p.paymentMethod || '-'}</td>
                   <td>{getStatusBadge(p.status)}</td>
                   <td>{formatDate(p.createdAt || '')}</td>
                   <td>

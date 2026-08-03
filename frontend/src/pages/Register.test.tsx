@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import Register from './Register'
 
 /**
- * Register reads ?role= via useSearchParams, so it needs a Router — which it
+ * Register reads ?role= via useSearchParams, so it needs a Router - which it
  * always has in the real app (App.tsx renders it inside the route tree).
  * `initialPath` lets a test drive the query string.
  */
@@ -19,7 +19,7 @@ vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ register: mockRegister }),
 }))
 
-// Keep the module-flag probe out of the test — the real hook hits GET /grooming/status.
+// Keep the module-flag probe out of the test - the real hook hits GET /grooming/status.
 vi.mock('../hooks/useGroomingEnabled', () => ({
   useGroomingEnabled: () => mockGroomingEnabled(),
 }))
@@ -166,7 +166,7 @@ describe('Register form validation', () => {
 
     await waitFor(() => expect(mockRegister).toHaveBeenCalledTimes(1))
     expect(mockRegister).toHaveBeenCalledWith(expect.objectContaining({ role: 'groomer' }))
-    // groomer is NOT an approval-gated role — no licence field, no review banner
+    // groomer is NOT an approval-gated role - no licence field, no review banner
     expect(screen.queryByText('Account Review Required')).toBeNull()
   })
 
@@ -182,7 +182,7 @@ describe('Register form validation', () => {
     })
 
     it('falls back to pet_owner when the grooming module is disabled', () => {
-      // The existing guard effect must still win — otherwise a stale link would
+      // The existing guard effect must still win - otherwise a stale link would
       // submit a role the backend rejects.
       mockGroomingEnabled.mockReturnValue({ enabled: false, loading: false })
       render(<Register onSwitchToLogin={onSwitchToLogin} />, '/register?role=groomer')

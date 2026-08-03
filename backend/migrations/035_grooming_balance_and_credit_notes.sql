@@ -2,7 +2,7 @@
 --
 -- Three gaps this closes:
 --  1. Mid-service extras (variable items) were approved, added to grand_total, credited to the
---     provider and marked "paid" — while collecting nothing. There was no balance leg at all.
+--     provider and marked "paid" - while collecting nothing. There was no balance leg at all.
 --  2. Deposit-rule services could not be part-paid safely for the same reason.
 --  3. A refunded grooming order kept its full-value GRM invoice; GST needs a credit note.
 --

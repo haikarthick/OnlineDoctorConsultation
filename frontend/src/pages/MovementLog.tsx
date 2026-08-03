@@ -106,7 +106,7 @@ const MovementLog: React.FC = () => {
     } catch (err: any) { setError(err.response?.data?.error?.message || t('movementLog.toasts.failed')) }
   }
 
-  const formatDate = (d: string) => d ? new Date(d).toLocaleString() : '–'
+  const formatDate = (d: string) => d ? new Date(d).toLocaleString() : '-'
 
   return (
     <div className="module-page">
@@ -174,10 +174,10 @@ const MovementLog: React.FC = () => {
                       <span>{MOVEMENT_TYPE_ICONS[mov.movementType] || '🔄'}</span>{' '}
                       <span className="badge">{MOVEMENT_TYPE_LABELS[mov.movementType] || mov.movementType}</span>
                     </td>
-                    <td className="si-1e6cf2e2">{mov.animalName || mov.groupName || '—'}</td>
-                    <td className="si-1e6cf2e2">{mov.fromLocationName || '—'}</td>
-                    <td className="si-1e6cf2e2">{mov.toLocationName || '—'}</td>
-                    <td className="si-64c8f9db">{mov.reason || '—'}</td>
+                    <td className="si-1e6cf2e2">{mov.animalName || mov.groupName || '-'}</td>
+                    <td className="si-1e6cf2e2">{mov.fromLocationName || '-'}</td>
+                    <td className="si-1e6cf2e2">{mov.toLocationName || '-'}</td>
+                    <td className="si-64c8f9db">{mov.reason || '-'}</td>
                     <td className="si-1e6cf2e2">
                       <span className="badge" style={{ background: statusColors[status] || '#94a3b8', color: '#fff', fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>
                         {t(`movements.${status}`, status)}
@@ -205,7 +205,7 @@ const MovementLog: React.FC = () => {
                             </button>
                           </>
                         ) : (
-                          <span className="si-93f5e4c5">—</span>
+                          <span className="si-93f5e4c5">-</span>
                         )}
                       </td>
                     )}

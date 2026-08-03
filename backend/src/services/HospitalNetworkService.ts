@@ -262,7 +262,7 @@ export class HospitalNetworkService {
     const params: any[] = [];
     let idx = 1;
 
-    // I-3: Data scoping — every non-admin role only sees networks they own or are an active member of.
+    // I-3: Data scoping - every non-admin role only sees networks they own or are an active member of.
     // (Previously only corporate_admin was scoped, leaking the full network directory to vets/staff.)
     if (filters.userId && filters.userRole && filters.userRole !== 'admin') {
       params.push(filters.userId);
@@ -272,7 +272,7 @@ export class HospitalNetworkService {
       ))`);
       idx++;
     }
-    // admin sees all networks — no additional filter
+    // admin sees all networks - no additional filter
 
     if (filters.isApproved !== undefined) {
       conditions.push(`hn.is_approved = $${idx++}`);
@@ -1214,7 +1214,7 @@ export class HospitalNetworkService {
   }
 
   // Direct walk-in registration: Staff registers patient on-site, treatment starts immediately.
-  // No invite or consent needed — patient is enrolled as 'active' with 'walkin' visibility.
+  // No invite or consent needed - patient is enrolled as 'active' with 'walkin' visibility.
   // If the patient later wants online portal access, staff can send an invite separately.
   async registerWalkInPatientDirect(data: {
     networkId: string; hospitalId: string; registeredBy: string;
@@ -1291,7 +1291,7 @@ export class HospitalNetworkService {
       );
       const animalId = animalRes.rows[0].id;
 
-      // Enroll — active if consent was collected, pending_consent otherwise
+      // Enroll - active if consent was collected, pending_consent otherwise
       const enrollmentStatus = data.consentCollected === true ? 'active' : 'pending_consent';
       const networkPatientId = await this.generateNetworkPatientId(data.networkId, data.animalSpecies);
       const contextRes = await database.query(
@@ -1925,7 +1925,7 @@ export class HospitalNetworkService {
   ): Promise<any> {
     // WHERE network_id = $networkId is the fix: without it, a director/corporate_admin of
     // ANY network could approve/reject/cancel a leave request belonging to a DIFFERENT
-    // network just by supplying that request's id — the caller's authority was only ever
+    // network just by supplying that request's id - the caller's authority was only ever
     // checked against the URL's :id, never against the request row's own network_id.
     const extraFields = status === 'approved' ? ', approved_by = $5, approved_at = NOW()' : '';
     const result = await database.query(
@@ -1958,7 +1958,7 @@ export class HospitalNetworkService {
     );
     if (toCheck.rows.length === 0) throw new ValidationError('Destination hospital is not in this network');
 
-    // Was a bare "is an active member" check — compliance_officer/auditor have
+    // Was a bare "is an active member" check - compliance_officer/auditor have
     // patientTransfers=false in the matrix but could still hit this route. Now checks the
     // actual matrix action, same as every other network-gated mutation.
     const access = await resolveNetworkAccess(data.networkId, data.createdBy, data.createdByRole, 'patientTransfers');
@@ -2145,7 +2145,7 @@ export class HospitalNetworkService {
     );
     if (transfer.rows.length === 0) throw new NotFoundError('Patient transfer');
 
-    // Was a bare "is an active member" check — now checks the patientTransfers matrix
+    // Was a bare "is an active member" check - now checks the patientTransfers matrix
     // action, same as createPatientTransfer, so compliance_officer/auditor (false in the
     // matrix) can't complete a transfer even though they could see it exists.
     const access = await resolveNetworkAccess(transfer.rows[0].network_id, userId, userRole, 'patientTransfers');

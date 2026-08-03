@@ -1,7 +1,7 @@
 /**
- * VetCare E2E — Test constants & demo credentials
+ * VetCare E2E - Test constants & demo credentials
  *
- * ⚠ SOURCE OF TRUTH: `backend/src/utils/fixDemoPasswords.ts` — but only because of WHEN it runs.
+ * ⚠ SOURCE OF TRUTH: `backend/src/utils/fixDemoPasswords.ts` - but only because of WHEN it runs.
  *
  * Seeding a database is a two-step story and the order is what matters:
  *   1. fixDemoPasswords ensures the demo users exist, then applies docker/seed-demo-data.sql,
@@ -10,11 +10,11 @@
  *      fixDemoPasswords.ts (fixDemoPasswords.ts:308-312, "Fix passwords again after seed").
  *
  * So mid-seed the seed's own passwords work, and once seeding COMPLETES `Demo@123` wins. The
- * settled state is the one that matters — and it is `Demo@123` for everyone except admin.
+ * settled state is the one that matters - and it is `Demo@123` for everyone except admin.
  * Reading only the SQL hashes gives the wrong answer; that mid-seed race cost a diagnostic
  * cycle here. To change a demo password, change fixDemoPasswords.ts.
  *
- * Three EMAILS here were also wrong — these accounts have never existed at all:
+ * Three EMAILS here were also wrong - these accounts have never existed at all:
  *     dr.sarah.bennett@vetcare.com   → really sarah.johnson@example.com
  *     emily.davis@email.com          → really emily.davis@example.com
  *     john.miller@greenpastures.com  → really tom.wilson@example.com
@@ -22,7 +22,7 @@
  * than on anything they meant to test.
  *
  * Now guarded by PHASE 6b of the runtime gate, which waits for seeding to COMPLETE and then logs
- * in as every account listed here — so this file cannot silently drift again.
+ * in as every account listed here - so this file cannot silently drift again.
  */
 
 export const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:5173'

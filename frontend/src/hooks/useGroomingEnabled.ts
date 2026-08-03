@@ -8,7 +8,7 @@ import apiService from '../services/api'
  * unauthenticated Register page can use it too. The result is cached in a module-level promise:
  * the flag cannot change within a page session, and several components need it at once.
  *
- * Fails closed — if the probe errors the module stays hidden, which matches the backend, where
+ * Fails closed - if the probe errors the module stays hidden, which matches the backend, where
  * every other /grooming route 404s while the flag is off.
  */
 let cachedProbe: Promise<boolean> | null = null
@@ -22,7 +22,7 @@ export function probeGroomingEnabled(): Promise<boolean> {
   return cachedProbe
 }
 
-/** Test/HMR escape hatch — drops the cached probe so the next call refetches. */
+/** Test/HMR escape hatch - drops the cached probe so the next call refetches. */
 export function resetGroomingEnabledCache(): void {
   cachedProbe = null
 }

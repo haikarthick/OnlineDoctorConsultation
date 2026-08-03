@@ -61,7 +61,7 @@ export default function StockAdjustmentModal({ pharmacyId, item, onClose, onDone
         </div>
 
         <div className="si-b5128f08">
-          <strong>{item.medication_name || item.med_name}</strong> — {t('pharmacy.table.batch')}: {item.batch_number}
+          <strong>{item.medication_name || item.med_name}</strong> - {t('pharmacy.table.batch')}: {item.batch_number}
           <br />
           <span className="si-50edd4e9">{t('pharmacy.stock.currentQty')}: {item.quantity} {item.unit}</span>
         </div>

@@ -1,4 +1,4 @@
--- Migration 029: Pet Wellness / Grooming & Spa module — schema foundation (P0)
+-- Migration 029: Pet Wellness / Grooming & Spa module - schema foundation (P0)
 --
 -- Platform-level grooming/spa marketplace. Strictly SEPARATE from network hospitals
 -- (a network branch can never be a grooming provider) and from the consultation
@@ -332,7 +332,7 @@ CREATE TABLE IF NOT EXISTS grooming_disputes (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ── 48.8 Earnings & MANUAL settlement (dedicated — NOT doctor_earnings; no escrow) ──
+-- ── 48.8 Earnings & MANUAL settlement (dedicated - NOT doctor_earnings; no escrow) ──
 CREATE TABLE IF NOT EXISTS grooming_settlements (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,

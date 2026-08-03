@@ -13,10 +13,10 @@ import {
   AnimalClassTerm,
 } from '../constants/speciesBreeds'
 
-// Fallback marketplace-eligible species list — union of the old hardcoded farmer/pet-owner
+// Fallback marketplace-eligible species list - union of the old hardcoded farmer/pet-owner
 // arrays, used only until the live master-data fetch resolves (see loadMasterData below).
 // The admin-configurable is_marketplace_eligible flag (migration 023) replaces both arrays
-// with a single flag per species — see MEMORY.md / marketplace species-picker note.
+// with a single flag per species - see MEMORY.md / marketplace species-picker note.
 const FALLBACK_MARKETPLACE_ELIGIBLE_SPECIES = Array.from(new Set([...MARKETPLACE_FARMER_SPECIES, ...MARKETPLACE_PET_OWNER_SPECIES]))
 
 /** Same deterministic transform as migration 024's SQL backfill (lower + non-alnum -> _),
@@ -29,7 +29,7 @@ const FALLBACK_SPECIES_LABEL_KEYS: Record<string, string> = Object.fromEntries(
   Object.keys(FALLBACK_SPECIES_ICONS).map(code => [code, deriveLabelKey(code)])
 )
 
-// Fallback marketplace categories/conditions — mirrors the pre-migration hardcoded
+// Fallback marketplace categories/conditions - mirrors the pre-migration hardcoded
 // CATEGORY_KEYS/condition <option>s in Marketplace.tsx, used only until the live
 // master-data fetch resolves (see loadMasterData below).
 const FALLBACK_MARKETPLACE_CATEGORIES: MasterMarketplaceCategory[] = [
@@ -55,7 +55,7 @@ const LOCALE_LABEL_FIELD: Record<string, keyof LocaleLabels> = {
   hi: 'labelHi', kn: 'labelKn', ml: 'labelMl', ta: 'labelTa', te: 'labelTe',
 }
 /** The admin-typed override for `lang` on a row, or null. English has no per-locale
- *  column — its override is the plain `label`/`name`, handled by callers. */
+ *  column - its override is the plain `label`/`name`, handled by callers. */
 function localeOverride(item: LocaleLabels, lang: string): string | null {
   const field = LOCALE_LABEL_FIELD[lang]
   return field ? ((item[field] as string | null | undefined) || null) : null
@@ -86,10 +86,10 @@ interface MasterDataContextType {
   classTermsForSpecies: (species: string) => AnimalClassTerm[]
   findClassTerm: (species: string, value: string) => AnimalClassTerm | undefined
   earTagSpecies: string[]
-  /** Species codes eligible for the Marketplace "sell an animal" picker — admin-configurable
+  /** Species codes eligible for the Marketplace "sell an animal" picker - admin-configurable
    *  via master-data CRUD (is_marketplace_eligible), not a hardcoded list. */
   marketplaceEligibleSpecies: string[]
-  /** Translated species display name — replaces rendering the raw species code directly
+  /** Translated species display name - replaces rendering the raw species code directly
    *  (e.g. "Buffalo") which never translated regardless of locale. Falls back to the raw
    *  code if no translation key resolves (defensive; every seeded species has one). */
   speciesLabel: (species: string | undefined, t: TFunction) => string
@@ -110,7 +110,7 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
   const [earTagSpecies, setEarTagSpecies] = useState<string[]>(FALLBACK_EAR_TAG_SPECIES)
   const [marketplaceEligibleSpecies, setMarketplaceEligibleSpecies] = useState<string[]>(FALLBACK_MARKETPLACE_ELIGIBLE_SPECIES)
   const [speciesLabelKeys, setSpeciesLabelKeys] = useState<Record<string, string>>(FALLBACK_SPECIES_LABEL_KEYS)
-  /** Per-locale label overrides admins typed directly on a species row (migration 025) —
+  /** Per-locale label overrides admins typed directly on a species row (migration 025) -
    *  keyed by species code, then by locale ('hi'/'kn'/'ml'/'ta'/'te'; 'en' comes from `label`).
    *  Checked before the labelKey/i18n-key path in speciesLabel() below. */
   const [speciesTranslatedLabels, setSpeciesTranslatedLabels] = useState<Record<string, Record<string, string>>>({})
@@ -134,7 +134,7 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
       const categories: any[] = categoriesRes.data?.data || []
       const conditions: any[] = conditionsRes.data?.data || []
 
-      if (species.length === 0) return // API not ready / empty DB — keep fallback defaults
+      if (species.length === 0) return // API not ready / empty DB - keep fallback defaults
 
       // Rebuild grouped SPECIES_CATEGORIES shape from the flat species list
       const byCategory = new Map<string, string[]>()
@@ -191,7 +191,7 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
         setMarketplaceConditions(conditions.sort((a, b) => a.sortOrder - b.sortOrder).map((c: any) => ({ code: c.code, labelKey: c.labelKey, label: c.label, ...pickLocaleFields(c) })))
       }
     } catch {
-      // Silently keep fallback defaults — matches SettingsContext's load-failure behavior
+      // Silently keep fallback defaults - matches SettingsContext's load-failure behavior
     }
   }, [])
 

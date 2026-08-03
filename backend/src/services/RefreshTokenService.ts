@@ -2,7 +2,7 @@
  * Refresh Token Service
  * =====================
  * Manages opaque refresh tokens stored in the database.
- * Supports token rotation — each refresh issues a new pair (access + refresh)
+ * Supports token rotation - each refresh issues a new pair (access + refresh)
  * and revokes the old refresh token.
  */
 import { v4 as uuidv4 } from 'uuid';

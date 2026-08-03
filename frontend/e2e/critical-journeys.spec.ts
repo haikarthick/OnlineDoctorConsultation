@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test'
 
 /**
- * Critical UI journeys — the browser layer of the runtime gate.
+ * Critical UI journeys - the browser layer of the runtime gate.
  * ────────────────────────────────────────────────────────────
  * Run automatically as PHASE 7 of `backend/scripts/runtime-verify.js`, against the ephemeral
  * stack it builds: throwaway Postgres → real migrations → real compiled server serving the real
@@ -10,7 +10,7 @@ import { test, expect, Page } from '@playwright/test'
  *
  * WHY THIS FILE EXISTS, separate from the rest of e2e/:
  * the other specs need a pre-seeded, already-running app and are not wired into any gate.
- * These tests bring their own data — they register their users through the actual form — so
+ * These tests bring their own data - they register their users through the actual form - so
  * they can run on a database that is seconds old and still assert something meaningful.
  *
  * The gap being closed: runtime-verify PHASE 6 proves the API accepts each role. It cannot see
@@ -32,7 +32,7 @@ const RAW_I18N_KEY = new RegExp(`\\b(${I18N_NAMESPACES.join('|')})\\.[a-zA-Z][a-
 
 /**
  * Console noise that is not a defect: dev-tools chatter, React Router's v7 pre-announcements,
- * and network failures for genuinely optional things. Anything else fails the test — a thrown
+ * and network failures for genuinely optional things. Anything else fails the test - a thrown
  * `.map is not a function` is exactly the class of bug this is here to catch.
  */
 const IGNORABLE_CONSOLE = [
@@ -63,7 +63,7 @@ async function findRawI18nKeys(page: Page): Promise<string[]> {
 /**
  * Guarantees every navigation starts signed out, WITHOUT an extra page.goto.
  *
- * The obvious approach — goto('/'), clear localStorage, goto('/register') — is racy: the SPA
+ * The obvious approach - goto('/'), clear localStorage, goto('/register') - is racy: the SPA
  * begins its own client-side redirect after the first load and interrupts the second
  * navigation ("interrupted by another navigation to /"). An init script runs before any app
  * code on every navigation, so the app simply boots unauthenticated the first time. One
@@ -80,7 +80,7 @@ async function alwaysStartSignedOut(page: Page) {
  *
  * `waitUntil: 'domcontentloaded'` rather than the default `'load'`: this app opens a socket.io
  * connection and polls on boot, so the load event can stay pending long past the point the form
- * is interactive. Waiting for it made this intermittently time out — with the selector already
+ * is interactive. Waiting for it made this intermittently time out - with the selector already
  * resolved and Playwright still "waiting for navigation to finish". The real readiness signal is
  * the form being in the DOM, which is exactly what the next line waits for.
  */
@@ -96,7 +96,7 @@ async function openRegister(page: Page) {
  *  - `domcontentloaded` fires before React mounts, so a plain waitForSelector can pass against
  *    a DOM that is about to be replaced and `evaluateAll` then returns [].
  *  - the groomer option only appears after the async `/grooming/status` probe resolves, so an
- *    early read silently sees a SHORTER list — the exact blind spot this suite exists to close.
+ *    early read silently sees a SHORTER list - the exact blind spot this suite exists to close.
  *
  * So: poll until at least the four always-present base roles exist, then require the count to
  * hold steady across two consecutive reads before trusting it.
@@ -113,19 +113,19 @@ async function readRoles(page: Page): Promise<string[]> {
     previous = current.length
     await page.waitForTimeout(250)
   }
-  // Say WHAT page we are actually on. "0 options" is useless on its own — being bounced to
+  // Say WHAT page we are actually on. "0 options" is useless on its own - being bounced to
   // /dashboard by a still-authenticated session looks identical to a form that never rendered.
   const url = page.url()
   let body = ''
   try { body = (await page.locator('body').innerText()).replace(/\s+/g, ' ').slice(0, 300) } catch { /* nothing to read */ }
   throw new Error(
-    `Role picker never settled — last saw ${previous} option(s) after 30s.\n` +
+    `Role picker never settled - last saw ${previous} option(s) after 30s.\n` +
     `  url:  ${url}\n` +
     `  body: ${body || '(empty)'}`)
 }
 
 /**
- * The role radios are visually hidden behind styled `label.role-option` cards — clicking the
+ * The role radios are visually hidden behind styled `label.role-option` cards - clicking the
  * label is what a real user does, and what actually works. `.check()` on the input fails
  * because Playwright (correctly) refuses to interact with a non-visible element.
  */
@@ -164,8 +164,8 @@ test.describe('@critical', () => {
   })
 
   /**
-   * THE regression test for 2026-07-27. Enumerates the roles the UI actually renders — not a
-   * hardcoded list — and drives each one through the real form. A role that the database will
+   * THE regression test for 2026-07-27. Enumerates the roles the UI actually renders - not a
+   * hardcoded list - and drives each one through the real form. A role that the database will
    * reject fails here with the server's own message, at the exact point a user would hit it.
    */
   test('every role the UI offers can be registered through the form', async ({ page }) => {
@@ -232,7 +232,7 @@ test.describe('@critical', () => {
 
   test('the password reveal toggle actually reveals and re-masks', async ({ page }) => {
     // These tests share a browser context and run serially, so the previous test leaves this
-    // one signed IN — and /register redirects an authenticated user straight to the dashboard,
+    // one signed IN - and /register redirects an authenticated user straight to the dashboard,
     // detaching the field mid-interaction. Sign out first, then wait for the real form.
     await alwaysStartSignedOut(page)
     await openRegister(page)

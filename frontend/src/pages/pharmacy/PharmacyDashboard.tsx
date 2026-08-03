@@ -159,7 +159,7 @@ export default function PharmacyDashboard() {
     try {
       const res = await client.get(`/networks/${networkId}/pharmacy-reports?days=${analyticsDays}`)
       setNetworkReport(res.data)
-    } catch { /* non-fatal — requires network membership */ }
+    } catch { /* non-fatal - requires network membership */ }
   }, [networkId, analyticsDays])
 
   useEffect(() => { loadPharmacies() }, [loadPharmacies])
@@ -252,12 +252,12 @@ export default function PharmacyDashboard() {
           <div className="pharmacy-stats">
             <div className="pharmacy-stat-card warning si-3c1f81b9" onClick={() => setTab('review')}>
               <span className="stat-icon">📋</span>
-              <span className="stat-value">{summary?.pending_reviews ?? '—'}</span>
+              <span className="stat-value">{summary?.pending_reviews ?? '-'}</span>
               <span className="stat-label">{t('pharmacy.stats.pendingReviews')}</span>
             </div>
             <div className="pharmacy-stat-card success si-3c1f81b9" onClick={() => setTab('dispense')}>
               <span className="stat-icon">✅</span>
-              <span className="stat-value">{summary?.ready_to_dispense ?? '—'}</span>
+              <span className="stat-value">{summary?.ready_to_dispense ?? '-'}</span>
               <span className="stat-label">{t('pharmacy.stats.readyToDispense')}</span>
             </div>
             {/* These two link to Alerts, not Inventory: the inventory table lists
@@ -266,17 +266,17 @@ export default function PharmacyDashboard() {
                 from. */}
             <div className="pharmacy-stat-card danger si-3c1f81b9" onClick={() => setTab('alerts')}>
               <span className="stat-icon">⚠️</span>
-              <span className="stat-value">{summary?.low_stock_count ?? '—'}</span>
+              <span className="stat-value">{summary?.low_stock_count ?? '-'}</span>
               <span className="stat-label">{t('pharmacy.stats.lowStock')}</span>
             </div>
             <div className="pharmacy-stat-card warning si-3c1f81b9" onClick={() => setTab('alerts')}>
               <span className="stat-icon">⏰</span>
-              <span className="stat-value">{summary?.expiring_soon_count ?? '—'}</span>
+              <span className="stat-value">{summary?.expiring_soon_count ?? '-'}</span>
               <span className="stat-label">{t('pharmacy.stats.expiringSoon')}</span>
             </div>
             <div className="pharmacy-stat-card info si-3c1f81b9" onClick={() => setTab('reorders')}>
               <span className="stat-icon">🔄</span>
-              <span className="stat-value">{summary?.pending_reorders ?? '—'}</span>
+              <span className="stat-value">{summary?.pending_reorders ?? '-'}</span>
               <span className="stat-label">{t('pharmacy.stats.pendingReorders')}</span>
             </div>
             <div className="pharmacy-stat-card primary">
@@ -315,13 +315,13 @@ export default function PharmacyDashboard() {
                     {pendingRx.slice(0, 5).map(rx => (
                       <tr key={rx.id}>
                         <td>
-                          <strong>{rx.pet_name || '—'}</strong>
+                          <strong>{rx.pet_name || '-'}</strong>
                           {rx.animal_species && <small className="si-1a0c0bfa">{speciesLabel(rx.animal_species, t)}</small>}
                         </td>
-                        <td>{rx.owner_name || '—'}</td>
-                        <td>{rx.vet_name || '—'}</td>
-                        <td className="si-cf8f70f1">{rx.medication_names || '—'}</td>
-                        <td className="si-86931177">{rx.created_at ? new Date(rx.created_at).toLocaleDateString() : '—'}</td>
+                        <td>{rx.owner_name || '-'}</td>
+                        <td>{rx.vet_name || '-'}</td>
+                        <td className="si-cf8f70f1">{rx.medication_names || '-'}</td>
+                        <td className="si-86931177">{rx.created_at ? new Date(rx.created_at).toLocaleDateString() : '-'}</td>
                         <td>
                           <button type="button" className="module-btn small primary" onClick={() => setReviewTarget(rx)}>
                             {t('pharmacy.actions.review')}
@@ -367,11 +367,11 @@ export default function PharmacyDashboard() {
                     {readyDispense.slice(0, 5).map(rx => (
                       <tr key={rx.id}>
                         <td>
-                          <strong>{rx.pet_name || '—'}</strong>
+                          <strong>{rx.pet_name || '-'}</strong>
                           {rx.animal_species && <small className="si-1a0c0bfa">{speciesLabel(rx.animal_species, t)}</small>}
                         </td>
-                        <td>{rx.owner_name || '—'}</td>
-                        <td className="si-4a370a4e">{rx.medication_names || '—'}</td>
+                        <td>{rx.owner_name || '-'}</td>
+                        <td className="si-4a370a4e">{rx.medication_names || '-'}</td>
                         <td>
                           <button type="button" className="module-btn small primary" onClick={() => setDispenseTarget(rx)}>
                             {t('pharmacy.actions.dispense')}
@@ -521,7 +521,7 @@ export default function PharmacyDashboard() {
                       <tr key={p.pharmacy_id} className={p.pharmacy_id === selectedPharmacy.id ? 'is-current' : undefined}>
                         <td>
                           {p.pharmacy_name}
-                          {p.pharmacy_id === selectedPharmacy.id && ` — ${t('pharmacy.analytics.thisPharmacy')}`}
+                          {p.pharmacy_id === selectedPharmacy.id && ` - ${t('pharmacy.analytics.thisPharmacy')}`}
                         </td>
                         <td>{formatCurrency(Number(p.revenue) || 0)}</td>
                         <td>{p.dispensing_count}</td>

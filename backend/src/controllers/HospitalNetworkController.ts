@@ -260,7 +260,7 @@ class HospitalNetworkController {
     // Delegates the membership + action-matrix check to the same core resolveNetworkAccess()
     // used by the requireNetworkAccess middleware and the resource-id-keyed checks in
     // routes/index.ts, rather than re-querying hospital_network_members independently here.
-    // Non-membership throws NotFoundError (404) — an unauthorized caller should not be able
+    // Non-membership throws NotFoundError (404) - an unauthorized caller should not be able
     // to confirm a network exists just by probing ids.
     if (userRole === 'admin') return;
 

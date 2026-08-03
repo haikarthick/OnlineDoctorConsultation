@@ -33,7 +33,7 @@ export interface AccessDecision {
 
 /**
  * Check whether a user can access a given animal's clinical data.
- * Returns an AccessDecision without throwing — callers decide whether to block.
+ * Returns an AccessDecision without throwing - callers decide whether to block.
  */
 export async function checkAnimalAccess(
   userId: string,
@@ -41,7 +41,7 @@ export async function checkAnimalAccess(
   animalId: string
 ): Promise<AccessDecision> {
   try {
-    // Step 1 — Is this animal tagged as private to a hospital network?
+    // Step 1 - Is this animal tagged as private to a hospital network?
     const contextRes = await database.query(
       `SELECT acc.id, acc.network_id, acc.hospital_id, acc.visibility, a.owner_id
        FROM animal_care_contexts acc
@@ -52,23 +52,23 @@ export async function checkAnimalAccess(
     );
 
     if (contextRes.rows.length === 0) {
-      // Not a private hospital animal — no isolation needed
+      // Not a private hospital animal - no isolation needed
       return { allowed: true, isPrivate: false, accessType: 'public' };
     }
 
     const ctx = contextRes.rows[0];
 
-    // Step 2 — Admin always passes
+    // Step 2 - Admin always passes
     if (userRole === 'admin') {
       return { allowed: true, isPrivate: true, accessType: 'admin', networkId: ctx.network_id };
     }
 
-    // Step 3 — Owner always passes
+    // Step 3 - Owner always passes
     if (ctx.owner_id === userId) {
       return { allowed: true, isPrivate: true, accessType: 'owner', networkId: ctx.network_id };
     }
 
-    // Step 3.5 — Vet with confirmed booking for this animal can access
+    // Step 3.5 - Vet with confirmed booking for this animal can access
     if (userRole === 'veterinarian') {
       const bookingAccess = await database.query(
         `SELECT id FROM bookings 
@@ -81,7 +81,7 @@ export async function checkAnimalAccess(
       }
     }
 
-    // Step 4 — Network member check (any active member of the owning network)
+    // Step 4 - Network member check (any active member of the owning network)
     if (ctx.network_id) {
       const memberRes = await database.query(
         `SELECT id FROM hospital_network_members
@@ -94,7 +94,7 @@ export async function checkAnimalAccess(
       }
     }
 
-    // Step 5 — Patient consent check:
+    // Step 5 - Patient consent check:
     //   granted_to_user_id = userId  (direct vet grant)
     //   OR granted_to_hospital_id = hospital the vet belongs to
     //   OR granted_to_network_id = network the vet belongs to
@@ -131,7 +131,7 @@ export async function checkAnimalAccess(
       };
     }
 
-    // Step 6 — No valid path: deny
+    // Step 6 - No valid path: deny
     return {
       allowed: false,
       isPrivate: true,
@@ -140,11 +140,11 @@ export async function checkAnimalAccess(
       accessType: 'public',
     };
   } catch (error: any) {
-    // Fail CLOSED on DB error — a check failure must not grant access to private clinical data.
+    // Fail CLOSED on DB error - a check failure must not grant access to private clinical data.
     // Legitimate users experience a temporary block during DB outages; that is the correct
     // trade-off for clinical record privacy.
-    logger.error('hospitalDataIsolation: access check failed — failing closed', { error: error.message, animalId, userId });
-    return { allowed: false, isPrivate: true, reason: 'Access check failed — please retry shortly', accessType: 'public' };
+    logger.error('hospitalDataIsolation: access check failed - failing closed', { error: error.message, animalId, userId });
+    return { allowed: false, isPrivate: true, reason: 'Access check failed - please retry shortly', accessType: 'public' };
   }
 }
 
@@ -229,7 +229,7 @@ export function requireAnimalAccess(
     else if (sourceType === 'body') animalId = req.body[sourceKey];
 
     if (!animalId) {
-      // No animal ID — can't check isolation, pass through
+      // No animal ID - can't check isolation, pass through
       return next();
     }
 

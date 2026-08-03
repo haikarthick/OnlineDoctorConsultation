@@ -21,7 +21,7 @@ import { test, expect } from './fixtures'
  * - All shared pages (dashboard, consultations, etc.)
  */
 
-test.describe('Admin — Admin Dashboard', () => {
+test.describe('Admin - Admin Dashboard', () => {
   test('should load admin dashboard', async ({ adminPage: page }) => {
     await page.goto('/admin/dashboard')
     await page.waitForLoadState('networkidle')
@@ -36,7 +36,7 @@ test.describe('Admin — Admin Dashboard', () => {
   })
 })
 
-test.describe('Admin — User Management', () => {
+test.describe('Admin - User Management', () => {
   test('should load user management page', async ({ adminPage: page }) => {
     await page.goto('/admin/users')
     await page.waitForLoadState('networkidle')
@@ -63,7 +63,7 @@ test.describe('Admin — User Management', () => {
   })
 })
 
-test.describe('Admin — Consultation Management', () => {
+test.describe('Admin - Consultation Management', () => {
   test('should load consultation management page', async ({ adminPage: page }) => {
     await page.goto('/admin/consultations')
     await page.waitForLoadState('networkidle')
@@ -71,7 +71,7 @@ test.describe('Admin — Consultation Management', () => {
   })
 })
 
-test.describe('Admin — Payment Management', () => {
+test.describe('Admin - Payment Management', () => {
   test('should load payment management page', async ({ adminPage: page }) => {
     await page.goto('/admin/payments')
     await page.waitForLoadState('networkidle')
@@ -79,7 +79,7 @@ test.describe('Admin — Payment Management', () => {
   })
 })
 
-test.describe('Admin — Review Moderation', () => {
+test.describe('Admin - Review Moderation', () => {
   test('should load review moderation page', async ({ adminPage: page }) => {
     await page.goto('/admin/reviews')
     await page.waitForLoadState('networkidle')
@@ -87,7 +87,7 @@ test.describe('Admin — Review Moderation', () => {
   })
 })
 
-test.describe('Admin — System Settings', () => {
+test.describe('Admin - System Settings', () => {
   test('should load system settings page', async ({ adminPage: page }) => {
     await page.goto('/admin/settings')
     await page.waitForLoadState('networkidle')
@@ -95,7 +95,7 @@ test.describe('Admin — System Settings', () => {
   })
 })
 
-test.describe('Admin — Audit Logs', () => {
+test.describe('Admin - Audit Logs', () => {
   test('should load audit logs page', async ({ adminPage: page }) => {
     await page.goto('/admin/audit-logs')
     await page.waitForLoadState('networkidle')
@@ -110,7 +110,7 @@ test.describe('Admin — Audit Logs', () => {
   })
 })
 
-test.describe('Admin — Permission Management', () => {
+test.describe('Admin - Permission Management', () => {
   test('should load permission management page', async ({ adminPage: page }) => {
     await page.goto('/admin/permissions')
     await page.waitForLoadState('networkidle')
@@ -118,7 +118,7 @@ test.describe('Admin — Permission Management', () => {
   })
 })
 
-test.describe('Admin — Medical Record Management', () => {
+test.describe('Admin - Medical Record Management', () => {
   test('should load medical record management page', async ({ adminPage: page }) => {
     await page.goto('/admin/medical-records')
     await page.waitForLoadState('networkidle')
@@ -126,7 +126,7 @@ test.describe('Admin — Medical Record Management', () => {
   })
 })
 
-test.describe('Admin — Compliance Dashboard', () => {
+test.describe('Admin - Compliance Dashboard', () => {
   test('should load HIPAA compliance dashboard', async ({ adminPage: page }) => {
     await page.goto('/admin/compliance')
     await page.waitForLoadState('networkidle')
@@ -134,7 +134,7 @@ test.describe('Admin — Compliance Dashboard', () => {
   })
 })
 
-test.describe('Admin — Vet Hospital Admin', () => {
+test.describe('Admin - Vet Hospital Admin', () => {
   test('should load vet hospital admin page', async ({ adminPage: page }) => {
     await page.goto('/admin/vet-hospitals')
     await page.waitForLoadState('networkidle')
@@ -142,7 +142,7 @@ test.describe('Admin — Vet Hospital Admin', () => {
   })
 })
 
-test.describe('Admin — Staff Settings', () => {
+test.describe('Admin - Staff Settings', () => {
   test('should load staff settings page', async ({ adminPage: page }) => {
     await page.goto('/admin/staff-settings')
     await page.waitForLoadState('networkidle')
@@ -150,7 +150,7 @@ test.describe('Admin — Staff Settings', () => {
   })
 })
 
-test.describe('Admin — Cancellation Dashboard', () => {
+test.describe('Admin - Cancellation Dashboard', () => {
   test('should load cancellation dashboard', async ({ adminPage: page }) => {
     await page.goto('/admin/cancellation-dashboard')
     await page.waitForLoadState('networkidle')
@@ -158,7 +158,7 @@ test.describe('Admin — Cancellation Dashboard', () => {
   })
 })
 
-test.describe('Admin — Holiday Management', () => {
+test.describe('Admin - Holiday Management', () => {
   test('should load holiday management page', async ({ adminPage: page }) => {
     await page.goto('/admin/holidays')
     await page.waitForLoadState('networkidle')
@@ -167,7 +167,7 @@ test.describe('Admin — Holiday Management', () => {
 })
 
 // ── Admin can access ALL shared pages ───────────────────────
-test.describe('Admin — Shared Pages Access', () => {
+test.describe('Admin - Shared Pages Access', () => {
   const sharedRoutes = [
     '/dashboard',
     '/consultations',

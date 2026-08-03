@@ -13,7 +13,7 @@ interface RegisterProps {
 
 /**
  * Roles a landing page may preselect via ?role=. Deliberately a whitelist rather
- * than trusting the query string — the value goes straight into the role field,
+ * than trusting the query string - the value goes straight into the role field,
  * and only self-registerable roles belong here.
  */
 const PRESELECTABLE_ROLES = ['pet_owner', 'farmer', 'veterinarian', 'corporate_admin', 'groomer']
@@ -54,7 +54,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
   const isVet = formData.role === 'veterinarian'
   const isCorporate = formData.role === 'corporate_admin'
   const isGroomer = formData.role === 'groomer'
-  // groomer self-registers ACTIVE — verification happens per business, not per account
+  // groomer self-registers ACTIVE - verification happens per business, not per account
   // (migration 030 + UserService.createUser's pendingRoles list).
   const isPendingRole = isVet || isCorporate
 
@@ -281,7 +281,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
               </div>
             )}
 
-            {/* Groomer next-steps notice — the account is active immediately; it is the BUSINESS
+            {/* Groomer next-steps notice - the account is active immediately; it is the BUSINESS
                 that needs admin verification before it becomes publicly searchable. */}
             {isGroomer && (
               <div className="hospital-callout" role="note">
@@ -341,7 +341,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
               </div>
             </div>
 
-            {/* §17.2: policy acknowledgement — required before account creation */}
+            {/* §17.2: policy acknowledgement - required before account creation */}
             <label className="si-98a162b5">
               <input
                 type="checkbox"

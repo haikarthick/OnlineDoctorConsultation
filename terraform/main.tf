@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════
-#  VetCare Platform — Terraform Infrastructure (AWS)
+#  VetCare Platform - Terraform Infrastructure (AWS)
 #  Provisions: VPC, RDS, ElastiCache, ECS Fargate, ALB, ACM, S3
 # ═══════════════════════════════════════════════════════════════
 
@@ -13,7 +13,7 @@ terraform {
     }
   }
 
-  # Remote state — uncomment and configure for your team
+  # Remote state - uncomment and configure for your team
   # backend "s3" {
   #   bucket         = "vetcare-terraform-state"
   #   key            = "prod/terraform.tfstate"
@@ -694,7 +694,7 @@ resource "aws_s3_bucket_public_access_block" "uploads" {
 # ─── Outputs ──────────────────────────────────────────────────
 
 output "alb_dns_name" {
-  description = "ALB DNS name — point your domain CNAME here"
+  description = "ALB DNS name - point your domain CNAME here"
   value       = aws_lb.main.dns_name
 }
 

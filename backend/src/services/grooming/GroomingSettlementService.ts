@@ -82,7 +82,7 @@ class GroomingSettlementService {
   }
 
   /**
-   * THE PAYABLES REGISTER — "who do I owe, and how much, right now".
+   * THE PAYABLES REGISTER - "who do I owe, and how much, right now".
    *
    * This did not exist. adminReconciliation() returned platform-wide totals only, and the
    * per-provider earnings route needed a providerId the admin had to already know. With manual
@@ -175,7 +175,7 @@ class GroomingSettlementService {
    * Admin records a manual payout: pays out all currently-available earnings for the provider.
    *
    * A payment reference is now REQUIRED. Manual settlement means the money moves outside this
-   * system, so the reference is the only evidence that it happened — without it neither side can
+   * system, so the reference is the only evidence that it happened - without it neither side can
    * prove a payout, and the provider was previously told nothing at all.
    */
   async adminSettle(adminId: string, providerId: string, data: { method?: string; reference?: string; tdsAmount?: number; notes?: string }): Promise<any> {
@@ -188,7 +188,7 @@ class GroomingSettlementService {
          WHERE provider_id = $1 AND status = 'available' FOR UPDATE`, [providerId]);
       if (avail.rows.length === 0) throw new ValidationError('No available earnings to settle');
       const amount = +avail.rows.reduce((s: number, r: any) => s + Number(r.net_amount), 0).toFixed(2);
-      // TDS defaults to the configured grooming rate rather than 0 — an admin who forgets to type
+      // TDS defaults to the configured grooming rate rather than 0 - an admin who forgets to type
       // a figure was previously paying out gross and under-withholding. An explicit tdsAmount
       // (including 0) still wins, so a manual override remains possible.
       const tds = data.tdsAmount !== undefined && data.tdsAmount !== null
@@ -216,7 +216,7 @@ class GroomingSettlementService {
 
     // Tell the provider they have been paid, with the evidence. Previously nothing was sent at
     // all: money left the platform and the vendor had no way to know it had happened, which is
-    // what makes a manual settlement process fall apart in practice. Non-blocking — the payout
+    // what makes a manual settlement process fall apart in practice. Non-blocking - the payout
     // is already recorded and must not be rolled back by a notification failure.
     try {
       const owner = await database.query(
@@ -225,7 +225,7 @@ class GroomingSettlementService {
       const ownerUserId = owner.rows[0]?.ownerUserId;
       if (ownerUserId) {
         const NotificationService = (await import('../NotificationService')).default;
-        const period = `${new Date(settlement.periodFrom).toLocaleDateString('en-IN')}–${new Date(settlement.periodTo).toLocaleDateString('en-IN')}`;
+        const period = `${new Date(settlement.periodFrom).toLocaleDateString('en-IN')}-${new Date(settlement.periodTo).toLocaleDateString('en-IN')}`;
         const tdsLine = Number(settlement.tdsAmount) > 0
           ? ` after ${Number(settlement.tdsAmount).toFixed(2)} TDS withheld` : '';
         await NotificationService.createNotification(

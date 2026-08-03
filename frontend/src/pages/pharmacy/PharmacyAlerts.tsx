@@ -16,7 +16,7 @@ import { useAutoRefresh } from '../../hooks/useAutoRefresh'
  *   - already-expired stock was mixed in with everything else rather than called
  *     out as unusable.
  *
- * These two endpoints answer both questions properly — low-stock aggregates per
+ * These two endpoints answer both questions properly - low-stock aggregates per
  * medication with a LEFT JOIN (so zero-stock medications are included), and
  * expiry returns anything within 90 days including already-expired batches.
  */
@@ -117,9 +117,9 @@ export default function PharmacyAlerts({ pharmacyId, onReorder }: Props) {
                 {expired.map(e => (
                   <tr key={e.id}>
                     <td>{e.med_name} {e.strength ? `(${e.strength})` : ''}</td>
-                    <td>{e.batch_number || '—'}</td>
+                    <td>{e.batch_number || '-'}</td>
                     <td>{e.quantity} {e.unit}</td>
-                    <td>{e.expiry_date ? formatDate(new Date(e.expiry_date)) : '—'}</td>
+                    <td>{e.expiry_date ? formatDate(new Date(e.expiry_date)) : '-'}</td>
                     <td><span className="pharm-badge expired">{Math.abs(e.days_until_expiry ?? 0)}d</span></td>
                   </tr>
                 ))}
@@ -152,9 +152,9 @@ export default function PharmacyAlerts({ pharmacyId, onReorder }: Props) {
                 {expiringSoon.map(e => (
                   <tr key={e.id}>
                     <td>{e.med_name} {e.strength ? `(${e.strength})` : ''}</td>
-                    <td>{e.batch_number || '—'}</td>
+                    <td>{e.batch_number || '-'}</td>
                     <td>{e.quantity} {e.unit}</td>
-                    <td>{e.expiry_date ? formatDate(new Date(e.expiry_date)) : '—'}</td>
+                    <td>{e.expiry_date ? formatDate(new Date(e.expiry_date)) : '-'}</td>
                     <td>
                       <span className={`pharm-badge ${(e.days_until_expiry ?? 0) <= 30 ? 'expiring' : 'ok'}`}>
                         {e.days_until_expiry ?? 0}d

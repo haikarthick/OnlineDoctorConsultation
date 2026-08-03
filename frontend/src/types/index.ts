@@ -1428,7 +1428,7 @@ export interface MarketplaceOrder {
   shippingAddress: Record<string, any>
   trackingNumber?: string
   notes?: string
-  // Deal handshake (free classifieds — settlement happens off-platform)
+  // Deal handshake (free classifieds - settlement happens off-platform)
   buyerConfirmedAt?: string
   buyer_confirmed_at?: string
   sellerConfirmedAt?: string

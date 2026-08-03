@@ -6,7 +6,7 @@ import './ModulePage.css'
 import '../styles/modules.css'
 
 /**
- * Payments & Receipts page (docs/PAYMENT_MODULE_PLAN.md §10 — patient/farmer).
+ * Payments & Receipts page (docs/PAYMENT_MODULE_PLAN.md §10 - patient/farmer).
  * Lists the user's payments with status and opens a printable receipt.
  */
 export default function PaymentsHistory() {
@@ -94,7 +94,7 @@ export default function PaymentsHistory() {
                   )}
                 </div>
                 <div className="si-c3b93ebb">
-                  {p.createdAt ? new Date(p.createdAt).toLocaleString() : '—'}
+                  {p.createdAt ? new Date(p.createdAt).toLocaleString() : '-'}
                   {p.transactionId ? ` · ${p.transactionId}` : ''}
                 </div>
                 {parseFloat(String(p.refundAmount || 0)) > 0 && (
@@ -126,11 +126,11 @@ export default function PaymentsHistory() {
               <div className="si-c3b93ebb">{receipt.transactionId || receipt.id}</div>
             </div>
             <div className="si-134fc453">
-              <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.patient')}</span><strong>{receipt.patientName || '—'}</strong></div>
+              <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.patient')}</span><strong>{receipt.patientName || '-'}</strong></div>
               {receipt.paymentSource === 'pharmacy' ? (
-                <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.pharmacy')}</span><strong>{receipt.pharmacyName || '—'}</strong></div>
+                <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.pharmacy')}</span><strong>{receipt.pharmacyName || '-'}</strong></div>
               ) : (
-                <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.doctor')}</span><strong>{receipt.doctorName || '—'}</strong></div>
+                <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.doctor')}</span><strong>{receipt.doctorName || '-'}</strong></div>
               )}
               {receipt.animalName && (
                 <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.animal')}</span><strong>{receipt.animalName}</strong></div>
@@ -141,13 +141,13 @@ export default function PaymentsHistory() {
                   <ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>
                     {receipt.medicationLines.map((li: any, idx: number) => (
                       <li key={idx} style={{ fontSize: 13 }}>
-                        {li.name} — {li.quantity} {li.unit} × {formatCurrency(parseFloat(String(li.unitPrice || 0)))} = <strong>{formatCurrency(parseFloat(String(li.lineTotal || 0)))}</strong>
+                        {li.name} - {li.quantity} {li.unit} × {formatCurrency(parseFloat(String(li.unitPrice || 0)))} = <strong>{formatCurrency(parseFloat(String(li.lineTotal || 0)))}</strong>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
-              <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.date')}</span><strong>{receipt.paidAt ? new Date(receipt.paidAt).toLocaleString() : '—'}</strong></div>
+              <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.date')}</span><strong>{receipt.paidAt ? new Date(receipt.paidAt).toLocaleString() : '-'}</strong></div>
               {parseFloat(String(receipt.walletAmountUsed || 0)) > 0 && (
                 <div className="si-34ec0bf0"><span className="si-23033f05">{t('payment.walletApplied')}</span><strong>{formatCurrency(parseFloat(String(receipt.walletAmountUsed)))}</strong></div>
               )}

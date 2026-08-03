@@ -1,11 +1,11 @@
 # ─────────────────────────────────────────────────────────────
-# Render.com Blueprint  —  Two-Environment Setup
+# Render.com Blueprint  -  Two-Environment Setup
 # ─────────────────────────────────────────────────────────────
 # DEV  → branch: develop → vetcare-dev  → schema: vetcare_dev  → Render Postgres
 # DEMO → branch: demo    → vetcare-demo → schema: vetcare_demo → Neon PostgreSQL
 #
 # DATABASE_URL for vetcare-demo is set via GitHub Actions (setup-demo-env.yml)
-# using the Render API — do NOT add fromDatabase here for demo.
+# using the Render API - do NOT add fromDatabase here for demo.
 #
 # To apply:
 #   1. Go to https://dashboard.render.com/select-repo?type=blueprint
@@ -55,7 +55,7 @@ services:
       - key: PAYMENT_CREDENTIALS_KEY
         sync: false
       # Set STORAGE_DRIVER=cloudinary to enable Cloudinary-backed marketplace
-      # image/video uploads (fixes images/video vanishing on every deploy —
+      # image/video uploads (fixes images/video vanishing on every deploy -
       # Render's free-tier disk is ephemeral). Requires CLOUDINARY_URL
       # (cloudinary://<api_key>:<api_secret>@<cloud_name>, from the Cloudinary
       # dashboard) to also be set below. Leave STORAGE_DRIVER unset/'local' to
@@ -66,7 +66,7 @@ services:
         sync: false
 
   # ── DEMO Environment ────────────────────────────────────
-  # DATABASE_URL is Neon PostgreSQL — set via GitHub Actions setup-demo-env.yml
+  # DATABASE_URL is Neon PostgreSQL - set via GitHub Actions setup-demo-env.yml
   # All sensitive env vars managed via GitHub Secrets → Render API
   - type: web
     name: vetcare-demo
@@ -88,7 +88,7 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
-      # Was missing on demo — CLOUDINARY_URL alone does nothing without this; the storage
+      # Was missing on demo - CLOUDINARY_URL alone does nothing without this; the storage
       # driver defaulted to 'local' (Render's ephemeral disk), so demo marketplace
       # images/video were still being silently wiped on every deploy even after the
       # Cloudinary migration shipped for dev. See STORAGE_DRIVER comment on vetcare-dev above.

@@ -3,9 +3,9 @@ import { NotFoundError, ForbiddenError, ValidationError } from '../../utils/erro
 import GroomingProviderService from './GroomingProviderService';
 
 /**
- * P5 — the care-continuum moat: groomer→vet safety escalation and the per-pet Grooming Passport
+ * P5 - the care-continuum moat: groomer→vet safety escalation and the per-pet Grooming Passport
  * (grooming history + non-medical S.C.E.N.T. wellness trend + "vet-advised" nudges). Groomers only
- * ESCALATE — they never diagnose/prescribe (enforced by role perms; no medical writes here).
+ * ESCALATE - they never diagnose/prescribe (enforced by role perms; no medical writes here).
  */
 class GroomingCareService {
   private async loadOrder(orderId: string): Promise<any> {

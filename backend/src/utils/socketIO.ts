@@ -1,5 +1,5 @@
 /**
- * Socket.io server setup — real-time events for the VetCare platform.
+ * Socket.io server setup - real-time events for the VetCare platform.
  *
  * Events emitted by the server:
  *   - notification          → new notification for a user

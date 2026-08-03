@@ -8,7 +8,7 @@ export interface MasterSpecies {
   code: string;
   label: string;
   labelKey: string | null;
-  /** Per-locale label overrides — admin-typed, take priority over labelKey when present. */
+  /** Per-locale label overrides - admin-typed, take priority over labelKey when present. */
   labelHi: string | null;
   labelKn: string | null;
   labelMl: string | null;
@@ -156,7 +156,7 @@ async function assertUnused(query: string, params: any[], entityLabel: string): 
   const result = await database.query(query, params);
   const count = parseInt(result.rows[0]?.count || '0', 10);
   if (count > 0) {
-    throw new ConflictError(`Cannot delete ${entityLabel} — it is currently used by ${count} existing record(s). Deactivate it instead.`);
+    throw new ConflictError(`Cannot delete ${entityLabel} - it is currently used by ${count} existing record(s). Deactivate it instead.`);
   }
 }
 
@@ -269,7 +269,7 @@ class MasterDataService {
     }
 
     // animals.breed / marketplace_listings.breed are denormalized text, not FKs (same
-    // reasoning as animal_class — see migration 022's header comment). A bare rename here
+    // reasoning as animal_class - see migration 022's header comment). A bare rename here
     // used to leave every existing row holding the old breed string, silently orphaned
     // from the catalog with no error. Renaming now cascades the same text change to every
     // referencing row in the same transaction, so the catalog and the data never drift.
@@ -463,7 +463,7 @@ class MasterDataService {
     if (!row.rows[0]) throw new NotFoundError('Marketplace category', id);
     const { code, is_protected } = row.rows[0];
     if (is_protected) {
-      throw new ConflictError(`Cannot delete '${code}' — this category is protected because core marketplace logic depends on its exact code. Deactivate it instead if you need to hide it.`);
+      throw new ConflictError(`Cannot delete '${code}' - this category is protected because core marketplace logic depends on its exact code. Deactivate it instead if you need to hide it.`);
     }
     await assertUnused('SELECT COUNT(*) AS count FROM marketplace_listings WHERE category = $1', [code], 'this category');
     await database.query('DELETE FROM master_marketplace_categories WHERE id = $1', [id]);

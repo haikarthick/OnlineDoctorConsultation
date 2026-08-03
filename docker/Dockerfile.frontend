@@ -1,4 +1,4 @@
-# Build stage – compile Vite / React app
+# Build stage - compile Vite / React app
 FROM node:18-alpine AS builder
 
 WORKDIR /app
@@ -12,7 +12,7 @@ COPY frontend/ .
 # Build production bundle (no source maps)
 RUN GENERATE_SOURCEMAP=false npm run build
 
-# Serve stage – lightweight nginx
+# Serve stage - lightweight nginx
 FROM nginx:1.25-alpine
 
 # Security: remove default configs and server tokens

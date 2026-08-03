@@ -367,7 +367,7 @@
   /* Hide the entire app shell */
   body > * { visibility: hidden !important; display: none !important; }
 
-  /* The overlay is a fixed overlay — render it as the only visible element */
+  /* The overlay is a fixed overlay - render it as the only visible element */
   .cert-overlay { display: flex !important; visibility: visible !important;
     position: fixed !important; inset: 0 !important;
     background: none !important; padding: 0 !important; }

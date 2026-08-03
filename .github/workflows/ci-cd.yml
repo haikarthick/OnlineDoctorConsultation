@@ -1,4 +1,4 @@
-name: CI/CD Pipeline — Build, Test & Deploy
+name: CI/CD Pipeline - Build, Test & Deploy
 
 on:
   push:
@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   # ═════════════════════════════════════════════
-  #  1. Backend — Lint + Test + Coverage
+  #  1. Backend - Lint + Test + Coverage
   # ═════════════════════════════════════════════
   backend-test:
     name: Backend Tests
@@ -80,7 +80,7 @@ jobs:
           path: backend/coverage/
 
   # ═════════════════════════════════════════════
-  #  2. Frontend — Lint + Build + TypeCheck
+  #  2. Frontend - Lint + Build + TypeCheck
   # ═════════════════════════════════════════════
   frontend-test:
     name: Frontend Build & Lint
@@ -112,10 +112,10 @@ jobs:
           path: frontend/dist/
 
   # ═════════════════════════════════════════════
-  #  2a. Runtime Verification — the only job that RUNS anything
+  #  2a. Runtime Verification - the only job that RUNS anything
   # ═════════════════════════════════════════════
   # Every other job here is static: lint, jest-with-mocks, tsc, vite build. None of them
-  # execute a line of SQL or boot the server — which is exactly how a fully broken feature
+  # execute a line of SQL or boot the server - which is exactly how a fully broken feature
   # shipped green on 2026-07-27. The local pre-push hook runs this same gate, but a hook can
   # be bypassed with `git push --no-verify`; this job is what makes it unskippable, and
   # `resolve-env` (which gates deploy) depends on it.
@@ -134,7 +134,7 @@ jobs:
             disable_selfheal: ''
           # The retirement check. Proves docker/init.sql + backend/migrations are SUFFICIENT on
           # their own for a fresh database. If someone adds schema only to database.ts's
-          # self-heal — which the file's own header forbids — this leg goes red while the other
+          # self-heal - which the file's own header forbids - this leg goes red while the other
           # stays green, which names the mistake precisely.
           - mode: self-heal OFF (migrations must suffice)
             disable_selfheal: 'true'
@@ -148,7 +148,7 @@ jobs:
 
       # The harness creates its OWN throwaway cluster with initdb (so it can control the exact
       # startup sequence), which needs the postgresql SERVER package, not just the client.
-      # initdb refuses to run as root — GitHub runners execute as the non-root `runner` user.
+      # initdb refuses to run as root - GitHub runners execute as the non-root `runner` user.
       - name: Install PostgreSQL server
         run: |
           sudo apt-get update
@@ -184,7 +184,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          # Must be unique per matrix leg — two jobs uploading the same artifact name collide.
+          # Must be unique per matrix leg - two jobs uploading the same artifact name collide.
           name: runtime-verify-playwright-${{ strategy.job-index }}
           path: |
             frontend/test-results/
@@ -386,7 +386,7 @@ jobs:
           esac
 
           if [ -z "$HOOK_URL" ]; then
-            echo "⚠️  No deploy hook configured for $ENV — skipping deployment."
+            echo "⚠️  No deploy hook configured for $ENV - skipping deployment."
             echo "    Set the RENDER_DEPLOY_HOOK_$(echo $ENV | tr a-z A-Z) secret in GitHub."
             exit 0
           fi

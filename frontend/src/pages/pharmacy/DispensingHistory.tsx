@@ -92,7 +92,7 @@ export default function DispensingHistory({ pharmacyId }: Props) {
     try {
       const arr = Array.isArray(raw) ? raw : JSON.parse(raw)
       return arr.map((m: any) => m?.name || m).join(', ')
-    } catch { return '—' }
+    } catch { return '-' }
   }
 
   const openReceipt = (r: DispensingRecord) => {
@@ -165,9 +165,9 @@ export default function DispensingHistory({ pharmacyId }: Props) {
                   return (
                     <tr key={r.id}>
                       <td>
-                        <strong>{r.animal_name || '—'}</strong>
+                        <strong>{r.animal_name || '-'}</strong>
                         {r.animal_species && <small className="si-1a0c0bfa">{speciesLabel(r.animal_species, t)}</small>}
-                        <small className="si-40d2db53">👤 {r.owner_name || '—'}</small>
+                        <small className="si-40d2db53">👤 {r.owner_name || '-'}</small>
                       </td>
                       <td className="si-d83d7d70">
                         <span className="si-315ca681">{parseMedNames(r.prescription_medications)}</span>
@@ -194,7 +194,7 @@ export default function DispensingHistory({ pharmacyId }: Props) {
                         {formatCurrency(r.total_cost)}
                       </td>
                       <td className="si-f2dbbee4">
-                        {r.pharmacist_name || '—'}
+                        {r.pharmacist_name || '-'}
                         {r.received_by && <small className="si-1a0c0bfa">Rcvd by: {r.received_by}</small>}
                       </td>
                       <td>

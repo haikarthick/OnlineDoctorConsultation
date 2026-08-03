@@ -161,7 +161,7 @@
             "forbid": [
               {
                 "propName": "style",
-                "message": "LEGACY INLINE-STYLE DEBT — this list must only ever shrink. Do NOT add files to it. Replace these with modules.css classes when you next touch this file, then delete the file from the allowlist in .eslintrc.json. Regenerate the current offender list with: grep -rl 'style={{' --include=*.tsx src"
+                "message": "LEGACY INLINE-STYLE DEBT - this list must only ever shrink. Do NOT add files to it. Replace these with modules.css classes when you next touch this file, then delete the file from the allowlist in .eslintrc.json. Regenerate the current offender list with: grep -rl 'style={{' --include=*.tsx src"
               }
             ]
           }

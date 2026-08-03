@@ -183,18 +183,18 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
                       <React.Fragment key={rec.id}>
                         <tr onClick={() => setExpandedId(expandedId === rec.id ? null : rec.id)}
                           style={{ cursor: 'pointer', background: expandedId === rec.id ? '#f0f4ff' : undefined }}>
-                          <td><code className="si-0ca383e1">{rec.recordNumber || '—'}</code></td>
+                          <td><code className="si-0ca383e1">{rec.recordNumber || '-'}</code></td>
                           <td><span title={typeInfo.label}>{typeInfo.icon} {typeInfo.label}</span></td>
                           <td className="si-11b14278">{rec.title}</td>
                           <td>
-                            {rec.animalName || '—'}
+                            {rec.animalName || '-'}
                             {rec.animalUniqueId && <div className="si-323dcf2c">{rec.animalUniqueId}</div>}
                           </td>
                           <td>
-                            {rec.ownerName || '—'}
+                            {rec.ownerName || '-'}
                             {rec.ownerUniqueId && <div className="si-95a3275e">{rec.ownerUniqueId}</div>}
                           </td>
-                          <td>{rec.veterinarianName || '—'}</td>
+                          <td>{rec.veterinarianName || '-'}</td>
                           <td>
                             {rec.severity && (
                               <span style={{ padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600,
@@ -293,12 +293,12 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
                             {log.action}
                           </span>
                         </td>
-                        <td>{log.recordType || '—'}</td>
-                        <td><code className="si-6af9d82f">{log.recordId ? log.recordId.substring(0, 8) + '...' : '—'}</code></td>
-                        <td>{log.performedByName || log.performedBy || '—'}</td>
+                        <td>{log.recordType || '-'}</td>
+                        <td><code className="si-6af9d82f">{log.recordId ? log.recordId.substring(0, 8) + '...' : '-'}</code></td>
+                        <td>{log.performedByName || log.performedBy || '-'}</td>
                         <td className="si-756a9f21">{fmtDateTime(log.createdAt || log.performedAt)}</td>
                         <td className="si-28a2a588">
-                          {log.details ? (typeof log.details === 'string' ? log.details : JSON.stringify(log.details).substring(0, 80)) : '—'}
+                          {log.details ? (typeof log.details === 'string' ? log.details : JSON.stringify(log.details).substring(0, 80)) : '-'}
                         </td>
                       </tr>
                       {expandedId === log.id && log.details && (

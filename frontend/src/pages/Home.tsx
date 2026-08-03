@@ -13,7 +13,7 @@ interface HomeProps {
 
 /**
  * Base section order. 'grooming' is spliced in at runtime only when the module is
- * live — Grooming & Spa is dark-launched behind `grooming.enabled`, and a nav
+ * live - Grooming & Spa is dark-launched behind `grooming.enabled`, and a nav
  * entry that scrolls to a section that was never rendered is a dead link.
  */
 const BASE_SECTION_IDS = ['hero', 'enterprises', 'hospitals', 'features', 'workflow', 'compliance', 'how-it-works', 'testimonials'] as const
@@ -43,7 +43,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
 
   const { enabled: groomingEnabled } = useGroomingEnabled()
 
-  // Grooming sits after 'features' — it is a service line, so it belongs with what
+  // Grooming sits after 'features' - it is a service line, so it belongs with what
   // the platform offers rather than after the compliance/workflow material.
   const SECTION_IDS = useMemo(() => {
     if (!groomingEnabled) return [...BASE_SECTION_IDS]
@@ -107,7 +107,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       observerRef.current?.disconnect()
     }
     // SECTION_IDS is a dependency because the grooming section appears only once
-    // the feature probe resolves — without it the observer would never watch it
+    // the feature probe resolves - without it the observer would never watch it
     // and the nav would not highlight while scrolling through.
   }, [handleScroll, SECTION_IDS])
 
@@ -523,7 +523,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
           Rendered only when the module is live (dark-launched behind
           `grooming.enabled`). Speaks to both sides of the marketplace: pet
           owners looking to book, and grooming businesses looking to list.
-          Every claim below maps to something the module actually does —
+          Every claim below maps to something the module actually does -
           the safety-escalation and passport copy in particular reflects
           GroomingCareService, where groomers ESCALATE and never diagnose. */}
       {groomingEnabled && (
@@ -547,7 +547,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
                     <span className="grooming-home-list-icon">{t(`home.grooming.owners.points.${key}.icon`)}</span>
                     <span>
                       <strong>{t(`home.grooming.owners.points.${key}.title`)}</strong>
-                      {' — '}
+                      {' - '}
                       {t(`home.grooming.owners.points.${key}.desc`)}
                     </span>
                   </li>
@@ -573,7 +573,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
                     <span className="grooming-home-list-icon">{t(`home.grooming.providers.points.${key}.icon`)}</span>
                     <span>
                       <strong>{t(`home.grooming.providers.points.${key}.title`)}</strong>
-                      {' — '}
+                      {' - '}
                       {t(`home.grooming.providers.points.${key}.desc`)}
                     </span>
                   </li>

@@ -6,7 +6,7 @@ import HttpBackend from 'i18next-http-backend'
 // English stays statically bundled (it's the fallback language, so it must
 // be available with zero network round-trip and zero risk of a raw-key
 // flash). The other 5 locales are fetched lazily via i18next-http-backend
-// from public/locales/{{lng}}/translation.json — each is 400-500KB, and
+// from public/locales/{{lng}}/translation.json - each is 400-500KB, and
 // bundling all 6 into the JS entry chunk regardless of the user's chosen
 // language used to account for ~85% of the initial bundle size.
 import en from '../locales/en/translation.json'

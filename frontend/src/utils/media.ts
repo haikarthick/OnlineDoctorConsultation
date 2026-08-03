@@ -2,14 +2,14 @@
  * Cloudinary responsive-delivery helpers for marketplace listing media.
  *
  * Listing images/videos are uploaded already optimized (auto format/quality,
- * capped at 1600px — see backend/src/utils/storage.ts CloudinaryStorage), but
+ * capped at 1600px - see backend/src/utils/storage.ts CloudinaryStorage), but
  * a 1600px image is still overkill for a small grid-card thumbnail on a phone.
- * These helpers add an on-the-fly transformation on top of the stored asset —
+ * These helpers add an on-the-fly transformation on top of the stored asset -
  * no extra upload, just a differently-sized derivative served from the same
  * Cloudinary URL, which is what makes "one photo, many device sizes" cheap.
  *
  * URLs that aren't from Cloudinary (legacy /uploads/ paths from before this
- * driver existed) pass through unchanged — this must never throw on those.
+ * driver existed) pass through unchanged - this must never throw on those.
  */
 
 const CLOUDINARY_UPLOAD_MARKER = '/upload/'

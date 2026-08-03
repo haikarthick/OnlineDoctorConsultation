@@ -13,7 +13,7 @@ import { test, expect } from './fixtures'
 
 // ── Sidebar Navigation ─────────────────────────────────────
 
-test.describe('Sidebar — Toggle & State', () => {
+test.describe('Sidebar - Toggle & State', () => {
   test('sidebar toggle button collapses/expands sidebar', async ({ farmerPage: page }) => {
     // Sidebar should be visible on dashboard
     const sidebar = page.locator('nav, .sidebar, .nav-sidebar')
@@ -52,7 +52,7 @@ test.describe('Sidebar — Toggle & State', () => {
 
 // ── Consultations Tab Switching ────────────────────────────
 
-test.describe('Consultations — Tabs & Filters', () => {
+test.describe('Consultations - Tabs & Filters', () => {
   test('tab switching between Bookings and Consultations', async ({ petOwnerPage: page }) => {
     await page.goto('/consultations')
     await page.waitForLoadState('networkidle')
@@ -90,7 +90,7 @@ test.describe('Consultations — Tabs & Filters', () => {
 
 // ── Medical Records Tabs ───────────────────────────────────
 
-test.describe('Medical Records — Tabs', () => {
+test.describe('Medical Records - Tabs', () => {
   test('tab switching loads different content sections', async ({ petOwnerPage: page }) => {
     await page.goto('/medical-records')
     await page.waitForLoadState('networkidle')
@@ -124,7 +124,7 @@ test.describe('Medical Records — Tabs', () => {
 
 // ── Wellness Portal Tabs ───────────────────────────────────
 
-test.describe('Wellness Portal — Tabs', () => {
+test.describe('Wellness Portal - Tabs', () => {
   test('tab switching between Dashboard, Scorecards, Reminders', async ({ petOwnerPage: page }) => {
     await page.goto('/wellness')
     await page.waitForLoadState('networkidle')
@@ -144,7 +144,7 @@ test.describe('Wellness Portal — Tabs', () => {
 
 // ── Marketplace Tabs ───────────────────────────────────────
 
-test.describe('Marketplace — Tabs', () => {
+test.describe('Marketplace - Tabs', () => {
   test('tab switching between Dashboard, Browse, Create, Orders', async ({ farmerPage: page }) => {
     await page.goto('/marketplace')
     await page.waitForLoadState('networkidle')
@@ -164,7 +164,7 @@ test.describe('Marketplace — Tabs', () => {
 
 // ── Health Analytics Tabs ──────────────────────────────────
 
-test.describe('Health Analytics — Tabs & Enterprise Selector', () => {
+test.describe('Health Analytics - Tabs & Enterprise Selector', () => {
   test('tab switching works', async ({ farmerPage: page }) => {
     await page.goto('/health-analytics')
     await page.waitForLoadState('networkidle')
@@ -191,7 +191,7 @@ test.describe('Health Analytics — Tabs & Enterprise Selector', () => {
 
 // ── Schedule Management Tabs (Vet) ─────────────────────────
 
-test.describe('Schedule Management — Tabs', () => {
+test.describe('Schedule Management - Tabs', () => {
   test('tab switching between Weekly, Calendar, Blocks, Holidays', async ({ vetPage: page }) => {
     await page.goto('/doctor/manage-schedule')
     await page.waitForLoadState('networkidle')
@@ -211,7 +211,7 @@ test.describe('Schedule Management — Tabs', () => {
 
 // ── Breeding Manager Tabs (Farmer) ─────────────────────────
 
-test.describe('Breeding Manager — Tabs', () => {
+test.describe('Breeding Manager - Tabs', () => {
   test('tab switching works', async ({ farmerPage: page }) => {
     await page.goto('/breeding')
     await page.waitForLoadState('networkidle')
@@ -227,7 +227,7 @@ test.describe('Breeding Manager — Tabs', () => {
 
 // ── Dashboard Stat Cards ───────────────────────────────────
 
-test.describe('Dashboard — Stat Card Navigation', () => {
+test.describe('Dashboard - Stat Card Navigation', () => {
   test('stat cards are rendered with data', async ({ petOwnerPage: page }) => {
     await page.goto('/dashboard')
     await page.waitForLoadState('networkidle')

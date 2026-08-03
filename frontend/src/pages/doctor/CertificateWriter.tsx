@@ -237,7 +237,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           .filter((c: any) => c.petOwnerId === selectedOwnerId || c.pet_owner_id === selectedOwnerId)
           .map((c: any) => ({
             id: c.id,
-            label: `${c.animalName || 'Consultation'} — ${formatDate(c.scheduledAt || c.scheduled_at || c.createdAt || c.created_at)}`,
+            label: `${c.animalName || 'Consultation'} - ${formatDate(c.scheduledAt || c.scheduled_at || c.createdAt || c.created_at)}`,
           }))
         )
       } catch { setConsultations([]) }
@@ -491,7 +491,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                 value={selectedEnterpriseId}
                 onChange={e => setSelectedEnterpriseId(e.target.value)}
               >
-                <option value="">— {t('certificateWriter.noEnterprise')} —</option>
+                <option value="">- {t('certificateWriter.noEnterprise')} -</option>
                 {enterpriseOptions.map(e => (
                   <option key={e.id} value={e.id}>{e.name}</option>
                 ))}
@@ -522,7 +522,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
             )}
           </div>
 
-          {/* Animal select — shown when owner selected OR enterprise selected for farm certs */}
+          {/* Animal select - shown when owner selected OR enterprise selected for farm certs */}
           {(selectedOwnerId || (CERT_TYPES_FARM.includes(certType) && selectedEnterpriseId)) && (
             <div className="module-form-group">
               <label className="module-label">
@@ -538,7 +538,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                   value={selectedAnimalId}
                   onChange={e => setSelectedAnimalId(e.target.value)}
                 >
-                  <option value="">{isHerd ? `— ${t('certificateWriter.optionalForHerd')} —` : t('certificateWriter.selectAnimal')}</option>
+                  <option value="">{isHerd ? `- ${t('certificateWriter.optionalForHerd')} -` : t('certificateWriter.selectAnimal')}</option>
                   {animals.map(a => (
                     <option key={a.id} value={a.id}>
                       {a.uniqueId ? `[${a.uniqueId}] ` : ''}{a.name} ({speciesLabel(a.species, t)}{a.breed ? ', ' + a.breed : ''})
@@ -562,7 +562,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                 value={selectedConsultationId}
                 onChange={e => setSelectedConsultationId(e.target.value)}
               >
-                <option value="">— None —</option>
+                <option value="">- None -</option>
                 {consultations.map(c => (
                   <option key={c.id} value={c.id}>{c.label}</option>
                 ))}
@@ -605,7 +605,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           <div className="cw-step-summary">
             <strong className="cw-summary-name">{certTypeLabel(certType)}</strong>
             {selectedAnimalId && animals.find(a => a.id === selectedAnimalId) && (
-              <span> — {animals.find(a => a.id === selectedAnimalId)?.name}</span>
+              <span> - {animals.find(a => a.id === selectedAnimalId)?.name}</span>
             )}
             <span className="cw-summary-owner">({selectedOwner?.name || ''})</span>
           </div>
@@ -682,7 +682,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                 <div className="module-form-group">
                   <label className="module-label">{t('certificateWriter.breedingSoundness')}</label>
                   <select className="module-input" value={breedingSoundness} onChange={e => setBreedingSoundness(e.target.value)}>
-                    <option value="">— Select —</option>
+                    <option value="">- Select -</option>
                     <option value="Sound">Sound</option>
                     <option value="Questionable">Questionable</option>
                     <option value="Unsound">Unsound</option>
@@ -691,7 +691,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                 <div className="module-form-group">
                   <label className="module-label">{t('certificateWriter.pregnancyStatus')}</label>
                   <select className="module-input" value={pregnancyStatus} onChange={e => setPregnancyStatus(e.target.value)}>
-                    <option value="">— Select —</option>
+                    <option value="">- Select -</option>
                     <option value="Pregnant">Pregnant</option>
                     <option value="Not Pregnant">Not Pregnant</option>
                     <option value="Undetermined">Undetermined</option>
@@ -753,7 +753,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
               <div className="module-form-group">
                 <label className="module-label">{t('certificateWriter.movementPurpose')}</label>
                 <select className="module-input" value={movementPurpose} onChange={e => setMovementPurpose(e.target.value)}>
-                  <option value="">— Select purpose —</option>
+                  <option value="">- Select purpose -</option>
                   <option value="Sale">Sale</option>
                   <option value="Slaughter">Slaughter</option>
                   <option value="Export">Export</option>
@@ -784,7 +784,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                 <div className="module-form-group">
                   <label className="module-label">{t('certificateWriter.herdSpecies')}</label>
                   <select className="module-input" value={herdSpecies} onChange={e => setHerdSpecies(e.target.value)}>
-                    <option value="">— Select species —</option>
+                    <option value="">- Select species -</option>
                     <option value="Cattle">Cattle / Bovine</option>
                     <option value="Sheep">Sheep</option>
                     <option value="Goat">Goat</option>
@@ -798,7 +798,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                 <div className="module-form-group">
                   <label className="module-label">{t('certificateWriter.herdPurpose')}</label>
                   <select className="module-input" value={herdPurpose} onChange={e => setHerdPurpose(e.target.value)}>
-                    <option value="">— Select purpose —</option>
+                    <option value="">- Select purpose -</option>
                     <option value="Dairy">Dairy Production</option>
                     <option value="Meat">Meat Production</option>
                     <option value="Breeding">Breeding Stock</option>
@@ -862,15 +862,15 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
               </div>
               <div>
                 <div className="cw-review-label">{t('certificateWriter.reviewAnimal')}</div>
-                <div className="cw-review-value">{animals.find(a => a.id === selectedAnimalId)?.name || '—'}</div>
+                <div className="cw-review-value">{animals.find(a => a.id === selectedAnimalId)?.name || '-'}</div>
               </div>
               <div>
                 <div className="cw-review-label">{t('certificateWriter.reviewOwner')}</div>
-                <div className="cw-review-value">{selectedOwner?.name || '—'}</div>
+                <div className="cw-review-value">{selectedOwner?.name || '-'}</div>
               </div>
               <div>
                 <div className="cw-review-label">{t('certificateWriter.reviewExamDate')}</div>
-                <div className="cw-review-value">{examinationDate ? formatDate(examinationDate) : '—'}</div>
+                <div className="cw-review-value">{examinationDate ? formatDate(examinationDate) : '-'}</div>
               </div>
               <div>
                 <div className="cw-review-label">{t('certificateWriter.reviewValidUntil')}</div>

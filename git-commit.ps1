@@ -106,7 +106,7 @@ Write-Host "  Commit: $commitHash" -ForegroundColor Gray
 Write-Host "  Branch: $branch" -ForegroundColor Gray
 Write-Host "  Files:  $total changed" -ForegroundColor Gray
 
-# Push (default behavior — use -NoPush to skip)
+# Push (default behavior - use -NoPush to skip)
 if (-not $NoPush) {
     Write-Host ""
     Write-Host "Pushing to origin/$branch..." -ForegroundColor Cyan

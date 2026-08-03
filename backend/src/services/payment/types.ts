@@ -1,6 +1,6 @@
 /**
  * Payment module shared types (docs/PAYMENT_MODULE_PLAN.md §3).
- * All amounts are in INR rupees (DECIMAL(10,2) semantics), NOT paise —
+ * All amounts are in INR rupees (DECIMAL(10,2) semantics), NOT paise -
  * gateway adapters convert to paise internally where their API requires it.
  */
 
@@ -37,7 +37,7 @@ export interface GatewayPaymentStatus {
   gatewayPaymentId: string;
   status: 'created' | 'authorized' | 'captured' | 'refunded' | 'failed';
   amount: number;
-  /** Actual fee the gateway charged on this payment (rupees) — basis for D12 fee recovery */
+  /** Actual fee the gateway charged on this payment (rupees) - basis for D12 fee recovery */
   fee: number;
   method?: string;
 }
@@ -61,6 +61,6 @@ export interface PaymentGateway {
   /** Issue a (full or partial) refund against a captured gateway payment. */
   refund(gatewayPaymentId: string, amount: number, notes?: Record<string, string>): Promise<GatewayRefund>;
 
-  /** Fetch current gateway-side status of a payment — used by the reconciliation sweep. */
+  /** Fetch current gateway-side status of a payment - used by the reconciliation sweep. */
   fetchPayment(gatewayPaymentId: string): Promise<GatewayPaymentStatus>;
 }

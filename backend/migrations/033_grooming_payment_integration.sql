@@ -14,7 +14,7 @@
 -- invoices.invoice_type.
 
 -- payment_source historically existed only because the startup self-heal added it, and that runs
--- AFTER migrations — so on a fresh install this migration would otherwise reference a column that
+-- AFTER migrations - so on a fresh install this migration would otherwise reference a column that
 -- does not exist yet. init.sql now declares it; this keeps the upgrade path self-sufficient.
 ALTER TABLE payments ADD COLUMN IF NOT EXISTS payment_source VARCHAR(30) DEFAULT 'consultation';
 

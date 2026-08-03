@@ -3,7 +3,7 @@ import { test, expect } from './fixtures'
 /**
  * DATA RENDERING & CONTENT VERIFICATION TESTS
  *
- * Tests that verify actual data renders correctly — not just page loads:
+ * Tests that verify actual data renders correctly - not just page loads:
  * - Dashboard displays real stats/counts
  * - Tables render actual rows with expected columns
  * - Badge/status colors & text match data
@@ -12,9 +12,9 @@ import { test, expect } from './fixtures'
  * - API response data appears in the DOM
  */
 
-// ── Dashboard — Data Rendering ─────────────────────────────
+// ── Dashboard - Data Rendering ─────────────────────────────
 
-test.describe('Dashboard — Data Rendering', () => {
+test.describe('Dashboard - Data Rendering', () => {
   test('pet owner dashboard shows stat counts (numbers)', async ({ petOwnerPage: page }) => {
     await page.goto('/dashboard')
     await page.waitForLoadState('networkidle')
@@ -45,9 +45,9 @@ test.describe('Dashboard — Data Rendering', () => {
   })
 })
 
-// ── User Management — Table Content ────────────────────────
+// ── User Management - Table Content ────────────────────────
 
-test.describe('Admin Users — Table Content', () => {
+test.describe('Admin Users - Table Content', () => {
   test('user table has expected columns', async ({ adminPage: page }) => {
     await page.goto('/admin/users')
     await page.waitForLoadState('networkidle')
@@ -70,17 +70,17 @@ test.describe('Admin Users — Table Content', () => {
     await page.goto('/admin/users')
     await page.waitForLoadState('networkidle')
 
-    // Seed data has 8 demo users — table should show them
+    // Seed data has 8 demo users - table should show them
     const rows = page.locator('table tbody tr, [class*="user-row"], [class*="user-card"], [class*="table-row"]')
     const count = await rows.count()
-    // Allow for pagination — at least some users should show
+    // Allow for pagination - at least some users should show
     expect(count).toBeGreaterThan(0)
   })
 })
 
-// ── Find Doctor — Vet Card Content ─────────────────────────
+// ── Find Doctor - Vet Card Content ─────────────────────────
 
-test.describe('Find Doctor — Vet Card Content', () => {
+test.describe('Find Doctor - Vet Card Content', () => {
   test('vet cards show doctor name and Dr. prefix', async ({ petOwnerPage: page }) => {
     await page.goto('/find-doctor')
     await page.waitForLoadState('networkidle')
@@ -109,9 +109,9 @@ test.describe('Find Doctor — Vet Card Content', () => {
   })
 })
 
-// ── Animals — Card/Row Content ─────────────────────────────
+// ── Animals - Card/Row Content ─────────────────────────────
 
-test.describe('Animals — Data Display', () => {
+test.describe('Animals - Data Display', () => {
   test('animal cards show species and breed', async ({ petOwnerPage: page }) => {
     await page.goto('/animals')
     await page.waitForLoadState('networkidle')
@@ -133,9 +133,9 @@ test.describe('Animals — Data Display', () => {
   })
 })
 
-// ── Consultations — Booking Status Badges ──────────────────
+// ── Consultations - Booking Status Badges ──────────────────
 
-test.describe('Consultations — Status Badges', () => {
+test.describe('Consultations - Status Badges', () => {
   test('booking cards show status badge with correct text', async ({ petOwnerPage: page }) => {
     await page.goto('/consultations')
     await page.waitForLoadState('networkidle')
@@ -159,9 +159,9 @@ test.describe('Consultations — Status Badges', () => {
   })
 })
 
-// ── Wallet — Currency & Transaction Rendering ──────────────
+// ── Wallet - Currency & Transaction Rendering ──────────────
 
-test.describe('Wallet — Currency Display', () => {
+test.describe('Wallet - Currency Display', () => {
   test('balance cards show formatted currency values', async ({ petOwnerPage: page }) => {
     await page.goto('/wallet')
     await page.waitForLoadState('networkidle')
@@ -186,9 +186,9 @@ test.describe('Wallet — Currency Display', () => {
   })
 })
 
-// ── Medical Records — Tab Content ──────────────────────────
+// ── Medical Records - Tab Content ──────────────────────────
 
-test.describe('Medical Records — Content', () => {
+test.describe('Medical Records - Content', () => {
   test('medical records page shows animal selector or prompt', async ({ petOwnerPage: page }) => {
     await page.goto('/medical-records')
     await page.waitForLoadState('networkidle')
@@ -210,9 +210,9 @@ test.describe('Medical Records — Content', () => {
   })
 })
 
-// ── Vet Hospitals — Content Rendering ──────────────────────
+// ── Vet Hospitals - Content Rendering ──────────────────────
 
-test.describe('Vet Hospitals — Content', () => {
+test.describe('Vet Hospitals - Content', () => {
   test('hospital cards show name and type', async ({ petOwnerPage: page }) => {
     await page.goto('/vet-hospitals')
     await page.waitForLoadState('networkidle')
@@ -255,7 +255,7 @@ test.describe('Loading States', () => {
 
 // ── Compliance / HIPAA Page ────────────────────────────────
 
-test.describe('Admin Compliance — Content', () => {
+test.describe('Admin Compliance - Content', () => {
   test('HIPAA compliance dashboard loads with metrics', async ({ adminPage: page }) => {
     await page.goto('/admin/compliance')
     await page.waitForLoadState('networkidle')
@@ -265,9 +265,9 @@ test.describe('Admin Compliance — Content', () => {
   })
 })
 
-// ── Permission Management — Matrix ─────────────────────────
+// ── Permission Management - Matrix ─────────────────────────
 
-test.describe('Admin Permissions — Content', () => {
+test.describe('Admin Permissions - Content', () => {
   test('permission page shows role-permission matrix', async ({ adminPage: page }) => {
     await page.goto('/admin/permissions')
     await page.waitForLoadState('networkidle')

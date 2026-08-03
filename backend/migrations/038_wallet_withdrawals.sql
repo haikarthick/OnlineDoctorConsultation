@@ -3,12 +3,12 @@
 -- Refunds defaulted to the in-house wallet, and there was NO way for a customer to get that
 -- money back out: withdrawal_requests is veterinarian-only (it settles doctor_earnings), and
 -- WalletController exposed only getWallet + listTransactions. A customer whose booking was
--- cancelled therefore received permanent store credit rather than a refund — money they could
+-- cancelled therefore received permanent store credit rather than a refund - money they could
 -- only ever spend back on this platform. That is a consumer-protection exposure, not a UX gap.
 --
 -- Two changes close it, per the owner decision:
 --   1. Refunds now default to the ORIGINAL PAYMENT METHOD (a settings default, applied in
---      GroomingModuleConfig — no schema change needed).
+--      GroomingModuleConfig - no schema change needed).
 --   2. This table gives the wallet a real exit for balances that are already there, for
 --      goodwill credits, and for gateway refunds that fail and fall back to the wallet.
 --

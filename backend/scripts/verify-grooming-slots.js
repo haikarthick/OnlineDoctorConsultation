@@ -12,7 +12,7 @@
  *
  * Run: npm run verify:slots   (from backend/; requires a local PostgreSQL, or set PGBIN)
  *
- * Kept separate from verify:runtime deliberately — that gate proves the SCHEMA survives a real
+ * Kept separate from verify:runtime deliberately - that gate proves the SCHEMA survives a real
  * boot; this one proves the booking LOGIC on top of it is correct.
  */
 const { execFileSync, spawn } = require('child_process');
@@ -56,7 +56,7 @@ function run(cmd, args, opts = {}) {
  * Kill the postmaster AND its children.
  *
  * child.kill() only signals the postmaster. PostgreSQL 18 spawns io_worker children, and on
- * Windows those SURVIVE their parent — so every run of this script used to leak an orphaned
+ * Windows those SURVIVE their parent - so every run of this script used to leak an orphaned
  * postgres.exe that nothing ever reaped. taskkill /T walks the tree; this is the same helper
  * runtime-verify.js already used, which is why that gate never leaked and this one did.
  */
@@ -85,7 +85,7 @@ function psqlFile(db, file) {
 let failures = 0;
 function check(name, cond, detail) {
   if (cond) console.log(`  \x1b[32m✓\x1b[0m ${name}`);
-  else { failures++; console.log(`  \x1b[31m✗ ${name}\x1b[0m${detail ? ` — ${detail}` : ''}`); }
+  else { failures++; console.log(`  \x1b[31m✗ ${name}\x1b[0m${detail ? ` - ${detail}` : ''}`); }
 }
 
 (async () => {
@@ -177,7 +177,7 @@ function check(name, cond, detail) {
     const P = '33333333-3333-3333-3333-333333333333';
     const S = '44444444-4444-4444-4444-444444444444';
 
-    // 1. baseline — 120-min service on a 09:00-18:00 day, 30-min grid
+    // 1. baseline - 120-min service on a 09:00-18:00 day, 30-min grid
     let a = await svc.getAvailability(P, DATE, { serviceId: S });
     check('open day yields slots', a.slots.length > 0, `got ${a.slots.length}`);
     check('first slot is 09:00', a.slots[0]?.startTime === '09:00', a.slots[0]?.startTime);
@@ -186,14 +186,14 @@ function check(name, cond, detail) {
       a.slots[a.slots.length - 1]?.endTime === '18:00', a.slots[a.slots.length - 1]?.endTime);
     check('capacity reported', a.capacity === 2, String(a.capacity));
 
-    // 2. closed day — Sunday has no schedule row
+    // 2. closed day - Sunday has no schedule row
     const sun = new Date(d); sun.setDate(sun.getDate() + 4); // Wed +4 = Sunday
     const SUN = `${sun.getFullYear()}-${String(sun.getMonth() + 1).padStart(2, '0')}-${String(sun.getDate()).padStart(2, '0')}`;
     a = await svc.getAvailability(P, SUN, { serviceId: S });
     check('closed weekday yields no slots with a reason',
       a.slots.length === 0 && !!a.closedReason, a.closedReason);
 
-    // 3. one booking at 10:00 (10:00-12:00) — capacity 2, so still bookable
+    // 3. one booking at 10:00 (10:00-12:00) - capacity 2, so still bookable
     await db.query(`INSERT INTO grooming_orders
       (order_number, pet_owner_id, provider_id, primary_service_id, scheduled_date, time_slot_start,
        duration_minutes, status)

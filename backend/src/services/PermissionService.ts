@@ -210,7 +210,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'patient_consent_manage',
     // Wallet
     'wallet',
-    // Grooming & Spa — vets may run a grooming/spa arm (provider_type 'veterinarian'/'clinic').
+    // Grooming & Spa - vets may run a grooming/spa arm (provider_type 'veterinarian'/'clinic').
     // Console/ops permissions arrive with the 'groomer' role that createProvider() grants.
     'grooming_provider_apply',
     // Actions
@@ -290,7 +290,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Core pages
     'dashboard', 'settings',
     'dashboard_stats', 'dashboard_quick_actions',
-    // Hospital Network — full management access
+    // Hospital Network - full management access
     'hospital_network_manage', 'hospital_network_view', 'hospital_network_audit',
     // Hospital operations oversight (network admin supervises ops)
     'hospital_workflow', 'inpatient_manage', 'hospital_browse', 'hospital_manage',
@@ -302,7 +302,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'ai_copilot',
     // Wallet
     'wallet',
-    // Pharmacy — full access for corporate admin
+    // Pharmacy - full access for corporate admin
     'pharmacy_view_dashboard', 'pharmacy_review_prescriptions',
     'pharmacy_dispense_medications', 'pharmacy_manage_inventory',
     'pharmacy_manage_stock', 'pharmacy_request_medications',
@@ -314,11 +314,11 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
   hospital_staff: [
     // Core
     'dashboard', 'settings',
-    // Hospital workflow — staff's primary work area
+    // Hospital workflow - staff's primary work area
     'hospital_workflow', 'inpatient_manage',
     // Read access to relevant hospital data
     'hospital_browse', 'hospital_manage',
-    // Hospital Network — view access for their assigned network
+    // Hospital Network - view access for their assigned network
     'hospital_network_view',
     // Dashboard widgets
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
@@ -328,7 +328,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard', 'settings',
     // Hospital access
     'hospital_browse', 'hospital_network_view',
-    // Pharmacy — full working permissions
+    // Pharmacy - full working permissions
     'pharmacy_view_dashboard',
     'pharmacy_review_prescriptions',
     'pharmacy_dispense_medications',
@@ -394,13 +394,13 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
   groomer: [
     // Core
     'dashboard', 'settings', 'wallet',
-    // Grooming provider workspace — 'grooming_provider_apply' is required too: a user who
+    // Grooming provider workspace - 'grooming_provider_apply' is required too: a user who
     // self-registers AS a groomer has no provider row yet and must be able to open the same
     // /grooming/provider route to complete business onboarding.
     'grooming_provider_apply', 'grooming_provider_console',
     'grooming_manage_services', 'grooming_manage_bookings',
     'grooming_intake_write', 'grooming_staff_manage', 'grooming_earnings_view',
-    // NOTE: deliberately NO medical-write permissions — groomers escalate, never diagnose.
+    // NOTE: deliberately NO medical-write permissions - groomers escalate, never diagnose.
     // Dashboard widgets
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
     'dashboard_upcoming_bookings',
@@ -557,7 +557,7 @@ class PermissionService {
     logger.info('role_permissions table ensured');
   }
 
-  /** Seed default permissions — inserts any missing permissions (safe to re-run) */
+  /** Seed default permissions - inserts any missing permissions (safe to re-run) */
   async seedDefaults(): Promise<void> {
     logger.info('Syncing default role permissions...');
     let changed = 0;
@@ -608,7 +608,7 @@ class PermissionService {
     return DEFAULT_ROLE_PERMISSIONS[role] || [];
   }
 
-  /** Get full permission matrix — all roles with all permissions (for admin UI) */
+  /** Get full permission matrix - all roles with all permissions (for admin UI) */
   async getFullPermissionMatrix(): Promise<Record<string, Record<string, boolean>>> {
     const result = await database.query(
       'SELECT role, permission, is_enabled FROM role_permissions ORDER BY role, permission'

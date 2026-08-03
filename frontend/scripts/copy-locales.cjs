@@ -1,6 +1,6 @@
 // Copies non-English locale files into public/locales so i18next-http-backend
 // can fetch them lazily at runtime instead of them being statically bundled
-// into the main JS chunk. src/locales remains the single source of truth —
+// into the main JS chunk. src/locales remains the single source of truth -
 // this script keeps public/locales in sync with it. English stays statically
 // imported in src/i18n/index.ts (small + it's the fallback language, so it
 // must be available with zero network round-trip).

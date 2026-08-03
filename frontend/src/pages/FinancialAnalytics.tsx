@@ -255,12 +255,12 @@ const FinancialAnalytics: React.FC = () => {
                   <tbody>
                     {records.map(r => (
                       <tr key={r.id}>
-                        <td>{r.transactionDate ? formatDate(r.transactionDate) : '–'}</td>
+                        <td>{r.transactionDate ? formatDate(r.transactionDate) : '-'}</td>
                         <td><span className="badge" style={{ background: TYPE_COLORS[r.recordType] }}>{r.recordType}</span></td>
                         <td>{(r.category || '').replace(/_/g, ' ')}</td>
                         <td className={r.recordType === 'income' ? 'text-success' : 'text-danger'}>{formatCurrency(r.amount)}</td>
-                        <td>{r.description || '–'}</td>
-                        <td>{r.referenceNumber || '–'}</td>
+                        <td>{r.description || '-'}</td>
+                        <td>{r.referenceNumber || '-'}</td>
                         <td>
                           <button className="btn btn-sm" onClick={() => startEdit(r)}>{t('common.edit')}</button>
                           <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r.id)}>{t('common.delete')}</button>

@@ -41,7 +41,7 @@ const MasterDataManagement: React.FC = () => {
 
   // Per-locale translators for the 5 non-English languages, so the edit form can
   // show each row's *currently effective* built-in translation (resolved from that
-  // language's i18n bundle via label_key) as a placeholder — otherwise seeded rows,
+  // language's i18n bundle via label_key) as a placeholder - otherwise seeded rows,
   // whose per-locale override columns are NULL, look empty and admins can't tell what
   // the animal is actually called in Tamil/Hindi/etc. Only 'en' is bundled up front
   // (see i18n/index.ts), so the other bundles are force-loaded once here.
@@ -79,14 +79,14 @@ const MasterDataManagement: React.FC = () => {
       const v = i18n.getFixedT(locale)(key)
       if (v && v !== key) return v
     }
-    // Breeds have no labelKey — their English value is `name`.
+    // Breeds have no labelKey - their English value is `name`.
     return (formData.label as string) || (formData.name as string) || ''
   }, [formData.labelKey, formData.label, formData.name, i18n, localeReady])
 
   /** The shared per-locale label input block, reused by all five entity forms. */
   const renderLocaleLabelInputs = () => (
     <>
-      <p className="module-hint">{t('masterData.perLocaleLabelsHint', 'Optional — add a translation for any language below. Left blank, that language uses the built-in translation (shown greyed inside each box).')}</p>
+      <p className="module-hint">{t('masterData.perLocaleLabelsHint', 'Optional - add a translation for any language below. Left blank, that language uses the built-in translation (shown greyed inside each box).')}</p>
       {LOCALE_LABEL_FIELDS.map(({ locale, field, col }) => {
         const builtin = builtinLabelFor(locale)
         return (
@@ -126,7 +126,7 @@ const MasterDataManagement: React.FC = () => {
         const res = await apiService.adminListMasterMarketplaceConditions()
         setConditionRows(res.data || [])
       }
-      // Species list is needed by every tab (breeds/classes scoping, species dropdown) — keep it fresh.
+      // Species list is needed by every tab (breeds/classes scoping, species dropdown) - keep it fresh.
       if (tab !== 'species') {
         const sres = await apiService.adminListMasterSpecies()
         setSpeciesRows(sres.data || [])
@@ -224,7 +224,7 @@ const MasterDataManagement: React.FC = () => {
       setSuccess(t('masterData.deletedSuccess', 'Deleted'))
       load()
     } catch (e: any) {
-      setError(e?.response?.data?.error?.message || e?.response?.data?.message || t('masterData.deleteBlocked', 'Could not delete — it may still be in use'))
+      setError(e?.response?.data?.error?.message || e?.response?.data?.message || t('masterData.deleteBlocked', 'Could not delete: it may still be in use'))
     }
   }
 
@@ -242,7 +242,7 @@ const MasterDataManagement: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <h1>{t('masterData.title', 'Master Data')}</h1>
-        <p>{t('masterData.subtitle', 'Manage species, breeds, animal classes, and marketplace dropdown values — no code deploy needed.')}</p>
+        <p>{t('masterData.subtitle', 'Manage species, breeds, animal classes, and marketplace dropdown values, no code deploy needed.')}</p>
       </div>
 
       {error && <div className="module-alert error">{error}<button onClick={() => setError('')}>×</button></div>}
@@ -260,7 +260,7 @@ const MasterDataManagement: React.FC = () => {
         <div className="module-form-group" style={{ maxWidth: 320, marginTop: 16 }}>
           <label className="module-label">{t('masterData.filterBySpecies', 'Species')}</label>
           <select className="module-input" value={scopeSpeciesId} onChange={e => setScopeSpeciesId(e.target.value)}>
-            <option value="">{t('masterData.selectSpeciesPrompt', '— Select a species —')}</option>
+            <option value="">{t('masterData.selectSpeciesPrompt', 'Select a species')}</option>
             {speciesRows.map(s => <option key={s.id} value={s.id}>{s.icon || ''} {s.label}</option>)}
           </select>
         </div>
@@ -300,9 +300,9 @@ const MasterDataManagement: React.FC = () => {
                   <td>{row.icon || '🐾'}</td>
                   <td>{row.code}</td>
                   <td>{row.label}</td>
-                  <td>{row.category || '—'}</td>
-                  <td>{row.hasEarTag ? '✓' : '—'}</td>
-                  <td>{row.isMarketplaceEligible ? '✓' : '—'}</td>
+                  <td>{row.category || '-'}</td>
+                  <td>{row.hasEarTag ? '✓' : '-'}</td>
+                  <td>{row.isMarketplaceEligible ? '✓' : '-'}</td>
                   <td><span className={`module-badge ${row.isActive ? 'badge-success' : 'badge-error'}`}>{row.isActive ? t('common.active') : t('common.inactive')}</span></td>
                   <td>
                     <button className="module-btn small" onClick={() => openEdit(row)}>{t('common.edit')}</button>
@@ -328,8 +328,8 @@ const MasterDataManagement: React.FC = () => {
                   <td>{row.value}</td>
                   <td>{resolveLabel(row, t)}</td>
                   <td>{row.impliedGender}</td>
-                  <td>{row.canBePregnant ? '✓' : '—'}</td>
-                  <td>{row.canProduceMilk ? '✓' : '—'}</td>
+                  <td>{row.canBePregnant ? '✓' : '-'}</td>
+                  <td>{row.canProduceMilk ? '✓' : '-'}</td>
                   <td><span className={`module-badge ${row.isActive ? 'badge-success' : 'badge-error'}`}>{row.isActive ? t('common.active') : t('common.inactive')}</span></td>
                   <td>
                     <button className="module-btn small" onClick={() => openEdit(row)}>{t('common.edit')}</button>
@@ -341,7 +341,7 @@ const MasterDataManagement: React.FC = () => {
               {tab === 'categories' && categoryRows.map(row => (
                 <tr key={row.id} className={!row.isActive ? 'inactive-row' : ''}>
                   <td>{row.icon || '📦'}</td>
-                  <td>{row.code} {row.isProtected && <span className="module-badge badge-pending" title={t('masterData.protectedHint', 'Protected — core logic depends on this code')}>🔒</span>}</td>
+                  <td>{row.code} {row.isProtected && <span className="module-badge badge-pending" title={t('masterData.protectedHint', 'Protected: core logic depends on this code')}>🔒</span>}</td>
                   <td>{resolveLabel(row, t)}</td>
                   <td><span className={`module-badge ${row.isActive ? 'badge-success' : 'badge-error'}`}>{row.isActive ? t('common.active') : t('common.inactive')}</span></td>
                   <td>
@@ -371,7 +371,7 @@ const MasterDataManagement: React.FC = () => {
             (tab === 'categories' && categoryRows.length === 0) ||
             (tab === 'conditions' && conditionRows.length === 0)) && (
             <div className="module-loading">
-              {needsSpeciesScope && !scopeSpeciesId ? t('masterData.selectSpeciesPrompt', '— Select a species —') : t('masterData.noEntries', 'No entries yet')}
+              {needsSpeciesScope && !scopeSpeciesId ? t('masterData.selectSpeciesPrompt', 'Select a species') : t('masterData.noEntries', 'No entries yet')}
             </div>
           )}
         </div>

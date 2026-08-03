@@ -1,20 +1,20 @@
 import { defineConfig, devices } from '@playwright/test'
 
 /**
- * VetCare Platform — Playwright E2E Configuration
+ * VetCare Platform - Playwright E2E Configuration
  *
  * Usage:
- *   npm run test:e2e              — headless (CI-friendly)
- *   npm run test:e2e:headed       — visible browser
- *   npm run test:e2e:ui           — Playwright UI mode
- *   npm run test:e2e -- --grep "login" — run specific tests
+ *   npm run test:e2e              - headless (CI-friendly)
+ *   npm run test:e2e:headed       - visible browser
+ *   npm run test:e2e:ui           - Playwright UI mode
+ *   npm run test:e2e -- --grep "login" - run specific tests
  */
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: false,           // Run serially — tests share server state
+  fullyParallel: false,           // Run serially - tests share server state
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 1,                     // Single worker — shared DB
+  workers: 1,                     // Single worker - shared DB
   reporter: [
     ['html', { open: 'never' }],
     ['list'],
@@ -32,10 +32,10 @@ export default defineConfig({
   },
 
   projects: [
-    // Auth setup — runs first, saves storage state for each role
+    // Auth setup - runs first, saves storage state for each role
     { name: 'auth-setup', testDir: './e2e', testMatch: 'global-setup.ts' },
 
-    // Main tests — run against Chromium
+    // Main tests - run against Chromium
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },

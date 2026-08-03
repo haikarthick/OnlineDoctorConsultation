@@ -246,8 +246,8 @@
     },
     "trust": "Trusted by 3,000+ enterprises & 500+ hospitals",
     "hospitalStaffTitle": "Hospital or Clinic Staff?",
-    "hospitalStaffDesc": "Login with your Veterinarian account — your hospital dashboard is inside.",
-    "dbWakingUp": "Database is waking up — retrying automatically in {{countdown}}s…",
+    "hospitalStaffDesc": "Login with your Veterinarian account. Your hospital dashboard is inside.",
+    "dbWakingUp": "Database is waking up, retrying automatically in {{countdown}}s…",
     "dbWakingUpNote": "This is normal on first visit. Please wait.",
     "success": "✓ Login successful! Redirecting...",
     "error": "Login failed",
@@ -319,7 +319,7 @@
     "roleCorporateAdmin": "Hospital Network",
     "roleCorporateAdminDesc": "Manage multi-hospital networks & staff",
     "corporateAdminCalloutTitle": "Setting up a Hospital Network?",
-    "corporateAdminCalloutBody": "As a Hospital Network Admin, you can create and manage multiple hospital branches, onboard doctors and staff, monitor performance, and manage network-wide patient care — all from your dedicated dashboard.",
+    "corporateAdminCalloutBody": "As a Hospital Network Admin, you can create and manage multiple hospital branches, onboard doctors and staff, monitor performance, and manage network-wide patient care, all from your dedicated dashboard.",
     "createAccountBtn": "Create Account",
     "creatingAccount": "Creating Account...",
     "alreadyMember": "Already a member?",
@@ -354,14 +354,14 @@
     "roleGroomer": "Grooming Provider",
     "roleGroomerDesc": "Offer grooming & spa services",
     "groomerNoticeTitle": "Next: register your business",
-    "groomerNoticeBody": "Your account is active right away. After signing in, add your business details and service menu — our team verifies every business before it appears in customer search."
+    "groomerNoticeBody": "Your account is active right away. After signing in, add your business details and service menu. Our team verifies every business before it appears in customer search."
   },
   "home": {
     "signIn": "Sign In",
     "getStarted": "Get Started Free",
     "heroTitle": "The Complete Platform for Animal Health & Enterprise Management",
-    "heroSubtitle": "From a single pet to 10,000-head livestock operations — VetCare delivers 24/7 veterinary consultations, AI-powered disease prediction, IoT monitoring, and full enterprise management in one unified platform.",
-    "ctaPrimary": "Start Free — Pet Owner",
+    "heroSubtitle": "From a single pet to 10,000-head livestock operations, VetCare delivers 24/7 veterinary consultations, AI-powered disease prediction, IoT monitoring, and full enterprise management in one unified platform.",
+    "ctaPrimary": "Start Free: Pet Owner",
     "ctaEnterprise": "🏢 Enterprise Sign Up",
     "ctaVet": "Join as Veterinarian",
     "guarantees": "✓ Free for pet owners • ✓ 30-day enterprise trial • ✓ No credit card required",
@@ -390,7 +390,7 @@
     "heroCard2Title": "Campaign: 94% done",
     "heroCard2Sub": "FMD Vaccination drive",
     "heroCard3Title": "Live Consult",
-    "heroCard3Sub": "Dr. Wilson — now",
+    "heroCard3Sub": "Dr. Wilson, now",
     "heroBadge": "Enterprise Animal Care",
     "stats": {
       "petOwners": "Pet Owners",
@@ -416,7 +416,7 @@
       "sanctuaries": "Sanctuaries"
     },
     "hospitalTitle": "Vet Hospital Network",
-    "hospitalSubtitle": "Create, manage and grow your veterinary hospital — all in one platform",
+    "hospitalSubtitle": "Create, manage and grow your veterinary hospital, all in one platform",
     "hospitalStats": {
       "hospitals": "Hospitals",
       "doctorsNetworked": "Doctors Networked",
@@ -439,7 +439,7 @@
     },
     "hospitalCta": {
       "title": "Ready to put your hospital online?",
-      "desc": "Register as a Veterinarian — then create your hospital profile from your dashboard in minutes. Add your team, set services and start accepting bookings today.",
+      "desc": "Register as a Veterinarian. Then create your hospital profile from your dashboard in minutes. Add your team, set services and start accepting bookings today.",
       "step1": "Register as Vet",
       "step2": "Create Hospital",
       "step3": "Add Doctors",
@@ -609,7 +609,7 @@
       },
       "5": {
         "title": "Report Builder",
-        "desc": "Generate 7 types of cross-module reports on demand — from animal census to sensor analytics — with export capabilities"
+        "desc": "Generate 7 types of cross-module reports on demand (from animal census to sensor analytics) with export capabilities"
       }
     },
     "intelligenceTitle": "Futuristic Intelligence",
@@ -668,7 +668,7 @@
       },
       "4": {
         "title": "12+ Staff Positions",
-        "desc": "Vet technicians, nurses, surgeons, lab techs, pharmacists, anesthesiologists — all mapped to departments with role-based access"
+        "desc": "Vet technicians, nurses, surgeons, lab techs, pharmacists, anesthesiologists, all mapped to departments with role-based access"
       },
       "5": {
         "title": "Workflow Analytics",
@@ -702,7 +702,7 @@
       },
       "4": {
         "title": "PHI Access Monitoring",
-        "desc": "Real-time dashboard tracking who accessed Protected Health Information — medical records, prescriptions, lab results, and scans"
+        "desc": "Real-time dashboard tracking who accessed Protected Health Information: medical records, prescriptions, lab results, and scans"
       },
       "5": {
         "title": "Compliance Dashboard",
@@ -795,7 +795,7 @@
       },
       "1": {
         "name": "Robert Hargrove",
-        "role": "Dairy Farm Owner — 2,400 head",
+        "role": "Dairy Farm Owner, 2,400 head",
         "text": "Managing treatment campaigns across 3 farms used to take a week of paperwork. Now it's done in minutes with full traceability."
       },
       "2": {
@@ -806,16 +806,16 @@
       "3": {
         "name": "Maria Chen",
         "role": "Zoo Operations Director",
-        "text": "Location tracking, species grouping and campaign management for our 800+ animals across 40 enclosures — all in one place."
+        "text": "Location tracking, species grouping and campaign management for our 800+ animals across 40 enclosures, all in one place."
       },
       "4": {
         "name": "Dr. Priya Nair",
-        "role": "Director — City Paws Veterinary Hospital",
+        "role": "Director, City Paws Veterinary Hospital",
         "text": "We set up our hospital profile, added 8 doctors across 4 departments and went live in one afternoon. Bookings started the same day. VetCare is the best thing to happen to our clinic."
       },
       "5": {
         "name": "Thomas Eriksen",
-        "role": "Compliance Officer — Nordic Farms Group",
+        "role": "Compliance Officer, Nordic Farms Group",
         "text": "The HIPAA-grade audit logging and PHI access monitoring gave our compliance team full confidence. Every record access is tracked, and the real-time dashboard makes audit preparation effortless."
       }
     },
@@ -838,7 +838,7 @@
     },
     "grooming": {
       "title": "Grooming & Spa",
-      "subtitle": "Book a verified groomer, or grow your grooming business — on the same platform that looks after your pet’s health.",
+      "subtitle": "Book a verified groomer, or grow your grooming business, on the same platform that looks after your pet’s health.",
       "owners": {
         "title": "For pet parents",
         "lede": "Salon, spa and at-home grooming from businesses we have actually checked.",
@@ -851,7 +851,7 @@
           "mobile": {
             "icon": "🚐",
             "title": "At-home grooming",
-            "desc": "Filter for mobile groomers who come to your door — no carrier, no car, no stressed pet."
+            "desc": "Filter for mobile groomers who come to your door, no carrier, no car, no stressed pet."
           },
           "slots": {
             "icon": "📅",
@@ -861,7 +861,7 @@
           "passport": {
             "icon": "📖",
             "title": "Grooming Passport",
-            "desc": "Every visit builds a per-pet record — full history plus a non-medical S.C.E.N.T. wellness trend you can show your vet."
+            "desc": "Every visit builds a per-pet record: full history plus a non-medical S.C.E.N.T. wellness trend you can show your vet."
           },
           "escalation": {
             "icon": "🩺",
@@ -878,7 +878,7 @@
       },
       "providers": {
         "title": "For grooming & spa businesses",
-        "lede": "Salons, mobile groomers and pet spas — run the whole operation, not just the listing.",
+        "lede": "Salons, mobile groomers and pet spas: run the whole operation, not just the listing.",
         "points": {
           "listing": {
             "icon": "🆓",
@@ -911,12 +911,12 @@
             "desc": "If a customer raises an issue you get to respond, with a documented decision and a clear refund trail."
           }
         },
-        "cta": "List your business — free",
+        "cta": "List your business, free",
         "note": "Register in minutes. Verification is per business, so you can set up your profile while the review is in progress."
       },
       "moat": {
         "title": "Grooming that is connected to real veterinary care",
-        "desc": "A standalone grooming app ends at the appointment. Here, a groomer who spots something concerning raises a safety escalation, and you can book a licensed vet on the same platform, with the pet’s grooming history already attached. Groomers escalate — they never diagnose or prescribe. That boundary is enforced in the product, not just in policy."
+        "desc": "A standalone grooming app ends at the appointment. Here, a groomer who spots something concerning raises a safety escalation, and you can book a licensed vet on the same platform, with the pet’s grooming history already attached. Groomers escalate. They never diagnose or prescribe. That boundary is enforced in the product, not just in policy."
       }
     }
   },
@@ -930,7 +930,7 @@
       "hospitalStaff": "Here's your hospital workflow overview",
       "corporateAdmin": "Hospital network administration overview",
       "pharmacist": "Redirecting to your Pharmacy module...",
-      "support": "Platform support — disputes and cancellations"
+      "support": "Platform support: disputes and cancellations"
     },
     "pendingBookings": "🔔 Pending Booking Confirmations",
     "recentActivity": "Recent Activity",
@@ -1185,7 +1185,7 @@
       "originalLabel": "⚠️ Original Appointment",
       "selectDoctor": "Select Doctor",
       "selectDoctorOptional": "Select Doctor (optional)",
-      "keepCurrentDoctor": "— Keep current doctor —",
+      "keepCurrentDoctor": "Keep current doctor",
       "currentDoctor": "(current)",
       "loadingDoctors": "Loading doctors...",
       "dateLabel": "Select New Date *",
@@ -1196,10 +1196,10 @@
       "confirming": "Rescheduling...",
       "confirmBtn": "✓ Confirm Reschedule",
       "rescheduleCount": "📊 Reschedule {{current}} of {{max}} allowed",
-      "doctorConfirmedNoShow": "🩺 Doctor confirmed but did not attend — you may reschedule with any available doctor. No reschedule limit applies.",
-      "doctorNoConfirm": "🩺 Doctor did not confirm in time — you may reschedule with any available doctor. No reschedule limit applies.",
-      "patientNoShowNoLimit": "🙋 Patient no-show — you may reschedule (no limit configured).",
-      "patientNoShowLimit": "🙋 Patient no-show — reschedule {{current}} of {{max}} allowed.",
+      "doctorConfirmedNoShow": "🩺 Doctor confirmed but did not attend. You may reschedule with any available doctor. No reschedule limit applies.",
+      "doctorNoConfirm": "🩺 Doctor did not confirm in time. You may reschedule with any available doctor. No reschedule limit applies.",
+      "patientNoShowNoLimit": "🙋 Patient no-show. You may reschedule (no limit configured).",
+      "patientNoShowLimit": "🙋 Patient no-show. Reschedule {{current}} of {{max}} allowed.",
       "expiredPendingNotice": "⚠️ The original appointment time has passed without doctor confirmation. You may select a different doctor for faster availability."
     },
     "noMatchAppointments": "No appointments match this filter",
@@ -1267,7 +1267,7 @@
       "title": "Mark patient as no-show?",
       "warning": "This closes the booking as missed. On a paid booking the doctor is compensated under the no-show policy, and the appointment counts against the patient’s reschedule allowance. It cannot be undone.",
       "tooltip": "The patient did not attend this appointment",
-      "forBooking": "{{animal}} — {{date}} at {{time}}",
+      "forBooking": "{{animal}}, {{date}} at {{time}}",
       "confirm": "Confirm no-show"
     }
   },
@@ -1640,7 +1640,7 @@
       "dispensedOn": "Dispensed {{date}}",
       "reviewStatus": {
         "pending_review": "Awaiting pharmacist review",
-        "approved_for_dispensing": "Approved — awaiting dispensing",
+        "approved_for_dispensing": "Approved, awaiting dispensing",
         "rejected": "Rejected by pharmacist",
         "needs_clarification": "Pharmacist requested clarification"
       }
@@ -1970,7 +1970,7 @@
     },
     "becomeGroomer": {
       "title": "Offer grooming & spa services",
-      "desc": "Register a grooming business and start taking bookings. This is added to your existing account — you keep your current role and everything in it.",
+      "desc": "Register a grooming business and start taking bookings. This is added to your existing account. You keep your current role and everything in it.",
       "btn": "Register my business"
     }
   },
@@ -2061,7 +2061,7 @@
     "manageAnimals": "🐾 Manage Animals",
     "bookConsultation": "📅 Book Consultation",
     "manage": {
-      "title": "🐾 Manage Animals — {{name}}",
+      "title": "🐾 Manage Animals, {{name}}",
       "inGroup": "✅ Animals in this group ({{count}})",
       "emptyGroup": "No animals in this group yet. Assign animals from your registered list below, or",
       "registerAnimal": "register a new animal",
@@ -2167,7 +2167,7 @@
       "reason": "Reason",
       "notes": "Notes",
       "groupDefault": "None",
-      "locationDefault": "—",
+      "locationDefault": "-",
       "recordBtn": "Record Movement"
     },
     "validation": {
@@ -2241,7 +2241,7 @@
     "pageDescription": "Manage medical records, vaccinations, lab results and allergies for your herd",
     "loading": "Loading...",
     "selectEnterprise": "Select Enterprise",
-    "selectEnterpriseOption": "— Select an enterprise —",
+    "selectEnterpriseOption": "Select an enterprise",
     "selectEnterprisePrompt": "Please select an enterprise above to view and manage herd medical records",
     "allGroups": "All Groups",
     "selectAnimal": "Select Animal",
@@ -2251,7 +2251,7 @@
       "vet": "Veterinarian",
       "farmer": "Farmer",
       "petOwner": "Pet Owner",
-      "adminPerms": "Full access — view, create, manage, and archive all records",
+      "adminPerms": "Full access: view, create, manage, and archive all records",
       "vetPerms": "Create and manage records; view all herd data",
       "farmerPerms": "Create records; view your enterprise's medical data",
       "petOwnerPerms": "View records for your own animals"
@@ -2286,7 +2286,7 @@
       "addRecord": "Add Record",
       "allTypes": "All Types",
       "allSeverities": "All Severities",
-      "showing": "Showing {{from}}–{{to}} of {{total}}",
+      "showing": "Showing {{from}}-{{to}} of {{total}}",
       "prev": "Previous",
       "next": "Next",
       "archive": "Archive",
@@ -2402,7 +2402,7 @@
       "resultPlaceholder": "e.g. 5.2",
       "unit": "Unit",
       "normalRange": "Normal Range",
-      "normalRangePlaceholder": "e.g. 4.5–6.5",
+      "normalRangePlaceholder": "e.g. 4.5-6.5",
       "interpretation": "Interpretation",
       "interpretationPlaceholder": "e.g. Normal",
       "labName": "Lab Name",
@@ -2682,8 +2682,8 @@
       "noExpired": "No expired documents!",
       "byType": "By Document Type",
       "byStatus": "By Status",
-      "expiresPrefix": "– expires",
-      "expiredPrefix": "– expired",
+      "expiresPrefix": "- expires",
+      "expiredPrefix": "- expired",
       "typeHeader": "Type",
       "countHeader": "Count"
     },
@@ -3003,7 +3003,7 @@
     "logEvent": "+ Log Event",
     "emptyBatches": "No batches",
     "emptyEvents": "No traceability events",
-    "emptyQR": "No QR codes generated yet — create one from a batch",
+    "emptyQR": "No QR codes generated yet, create one from a batch",
     "failedVerify": "Failed to verify event",
     "failedQR": "Failed to generate QR code",
     "batchStatusDist": "Batch Status Distribution",
@@ -3178,7 +3178,7 @@
       "hiUser": "Hi {{name}}! 👋 I'm AI Buddy",
       "hiGuest": "Hi there! 👋 I'm AI Buddy",
       "iKnowAbout": "I know about",
-      "askMeAnything": "— ask me anything!",
+      "askMeAnything": "ask me anything!",
       "askMeAnythingGeneral": "Ask me anything about pet health, symptoms, nutrition, or veterinary care!",
       "askAiBuddy": "Ask AI Buddy...",
       "thinking": "Thinking...",
@@ -3400,7 +3400,7 @@
         "reviewPublish": "Review & Publish"
       },
       "basicInfoTitle": "📝 Basic Information",
-      "basicInfoDesc": "Start with the essentials — give your listing a clear title and choose the right category.",
+      "basicInfoDesc": "Start with the essentials: give your listing a clear title and choose the right category.",
       "animalDetailsTitle": "🐄 Animal Details",
       "animalDetailsDesc": "Provide breed, age, weight and production details to help seekers find your listing.",
       "healthCertsTitle": "🏥 Health & Certification",
@@ -3442,7 +3442,7 @@
       "autoPopulateTitle": "Auto-Fill from Your Animal",
       "autoPopulateHint": "Select one of your registered animals to auto-fill the listing with their profile, health, and breed details.",
       "selectAnimal": "Select an animal to auto-fill details",
-      "manualEntry": "— Manual Entry —",
+      "manualEntry": "Manual Entry",
       "autoPopulated": "Animal details auto-filled!",
       "fieldsAutoFilled": "Fields auto-filled from your animal's profile. You can edit any field below.",
       "imagesTitle": "Listing Images",
@@ -3458,7 +3458,7 @@
       "priceHintFair": "Fairly priced",
       "useMyLocation": "Use my current location",
       "locating": "Getting location…",
-      "locationSet": "Coordinates set — enables Near Me search",
+      "locationSet": "Coordinates set, enables Near Me search",
       "locationCaptured": "Location captured for this listing",
       "locationGeoHint": "Adding coordinates lets nearby buyers find your listing with “Near Me”.",
       "videoLabel": "Listing video (optional)",
@@ -3466,9 +3466,9 @@
       "removeVideo": "Remove video",
       "videoUploaded": "Video uploaded",
       "videoHint": "A short video builds trust and gets more responses.",
-      "imageTooLarge": "Image is too large — max {{maxMb}}MB",
-      "videoTooLarge": "Video is too large — max {{maxMb}}MB",
-      "videoTooLong": "Video is too long — max {{maxSec}} seconds",
+      "imageTooLarge": "Image is too large: max {{maxMb}}MB",
+      "videoTooLarge": "Video is too large: max {{maxMb}}MB",
+      "videoTooLong": "Video is too long: max {{maxSec}} seconds",
       "uploadingVideo": "Uploading video...",
       "videoLimits": "Max {{maxSec}} seconds, up to {{maxMb}}MB"
     },
@@ -3614,7 +3614,7 @@
       "welfareAttestation": "🛡️ I attest that the animal(s) listed are healthy, well-cared-for, and not subjected to cruelty as per the Prevention of Cruelty to Animals Act, 1960",
       "welfareHint": "This attestation is required under the Prevention of Cruelty to Animals Act, 1960 (PCA Act). By checking this, you confirm the animal is in good health and has been treated humanely.",
       "legalTitle": "Legal Compliance & Terms",
-      "legalDisclaimer": "This platform operates as an animal classifieds board in compliance with Indian animal welfare laws. All listings must comply with the Prevention of Cruelty to Animals Act, 1960, the PCA (Dog Breeding & Marketing) Rules, 2017, and the PCA (Pet Shop) Rules, 2018. VetCare does not facilitate direct sales — all transactions occur offline between parties.",
+      "legalDisclaimer": "This platform operates as an animal classifieds board in compliance with Indian animal welfare laws. All listings must comply with the Prevention of Cruelty to Animals Act, 1960, the PCA (Dog Breeding & Marketing) Rules, 2017, and the PCA (Pet Shop) Rules, 2018. VetCare does not facilitate direct sales. All transactions occur offline between parties.",
       "termsAccept": "⚖️ I accept the Terms & Conditions and confirm this listing complies with all applicable animal welfare laws of India",
       "breederNote": "As a registered breeder, your PCA registration certificate number will be displayed on your listing. Admin may verify your registration status. Listing without valid registration may be rejected per Rule 3 of PCA (Dog Breeding & Marketing) Rules, 2017.",
       "complianceTitle": "Compliance & Welfare",
@@ -3624,7 +3624,7 @@
       "accepted": "Accepted",
       "verified": "Verified",
       "detailDisclaimer": "This listing is published on an animal classifieds board. VetCare does not facilitate direct sales. All transactions occur offline. Comply with PCA Act 1960 and applicable state regulations.",
-      "adoptDontShop": "🐾 Adopt, Don't Shop — Consider adopting from shelters and rescue organizations"
+      "adoptDontShop": "🐾 Adopt, Don't Shop: Consider adopting from shelters and rescue organizations"
     },
     "monetization": {
       "subtabs": {
@@ -3718,13 +3718,13 @@
     "deal": {
       "reserveTitle": "Reserve & Deal Directly",
       "reserveNow": "Reserve This Listing",
-      "reserveSuccess": "Reserved! The seller has been notified — connect, inspect, and settle directly with them.",
+      "reserveSuccess": "Reserved! The seller has been notified. Connect, inspect, and settle directly with them.",
       "submittedForReview": "Listing submitted! It will appear publicly after admin review.",
-      "howStep1": "Reserve the listing — the seller is notified",
+      "howStep1": "Reserve the listing: the seller is notified",
       "howStep2": "Connect and inspect the animal in person",
       "howStep3": "Pay the seller directly (cash / your own UPI)",
       "howStep4": "Both confirm here to complete the deal",
-      "freeNote": "This marketplace is 100% free — VetCare never handles the payment. Settle directly with the other party.",
+      "freeNote": "This marketplace is 100% free. VetCare never handles the payment. Settle directly with the other party.",
       "tabNote": "Deals are settled directly between buyer and seller. After you meet and settle, both parties confirm here to complete the deal.",
       "currentlyReserved": "Currently reserved by a buyer",
       "actionsCol": "Deal Actions",
@@ -3735,7 +3735,7 @@
       "waitingOther": "Waiting for the other party",
       "otherConfirmed": "Other party confirmed",
       "cancelDeal": "Cancel",
-      "dealCancelled": "Reservation cancelled — the listing is live again.",
+      "dealCancelled": "Reservation cancelled. The listing is live again.",
       "dealDone": "Deal completed",
       "paymentMethod": "Payment method…",
       "pm": {
@@ -3774,8 +3774,8 @@
       "mySearch": "My search",
       "applySearch": "Apply",
       "allListings": "All listings",
-      "alertsOn": "Alerts on — tap to mute",
-      "alertsOff": "Alerts off — tap to enable"
+      "alertsOn": "Alerts on: tap to mute",
+      "alertsOff": "Alerts off: tap to enable"
     },
     "pageOf": "Page {{current}} of {{total}}",
     "report": {
@@ -3786,7 +3786,7 @@
       "details": "Details (optional)",
       "detailsPlaceholder": "Anything that helps us review this…",
       "submit": "Submit report",
-      "submitted": "Thanks — your report was submitted for review.",
+      "submitted": "Thanks, your report was submitted for review.",
       "resolved": "Report updated.",
       "adminTitle": "Reported listings",
       "filterOpen": "Open reports",
@@ -3814,7 +3814,7 @@
     },
     "services": {
       "vetCheckTitle": "Pre-purchase vet check",
-      "vetCheckDesc": "Book a licensed vet to examine this animal before you commit — health, age and soundness verified.",
+      "vetCheckDesc": "Book a licensed vet to examine this animal before you commit: health, age and soundness verified.",
       "bookVetCheck": "Book a pre-purchase vet check",
       "transportDesc": "Need help moving the animal?",
       "arrangeTransport": "Arrange transport"
@@ -4150,7 +4150,7 @@
     "generalVeterinarian": "General Veterinarian",
     "perSession": "per session",
     "findingNextDate": "Finding next available date...",
-    "nextAvailableAutoSelected": "Next available date auto-selected — change if needed",
+    "nextAvailableAutoSelected": "Next available date auto-selected, change if needed",
     "reasonTooShort": "Reason for visit must be at least 3 characters",
     "noPetsRegistered": "No pets registered yet",
     "addPet": "Register a Pet",
@@ -4310,8 +4310,8 @@
     "noMessages": "No messages yet",
     "startConversation": "Start the conversation",
     "typeMessage": "Type a message...",
-    "cameraUnavailableAudioOnly": "Camera unavailable — switching to audio-only mode",
-    "cameraAndMicUnavailable": "Camera and microphone unavailable — switching to chat-only mode",
+    "cameraUnavailableAudioOnly": "Camera unavailable, switching to audio-only mode",
+    "cameraAndMicUnavailable": "Camera and microphone unavailable, switching to chat-only mode",
     "failedToCreateVideoRoom": "Failed to create video room",
     "failedToInitialize": "Failed to initialize video consultation",
     "failedToStartSession": "Failed to start video session",
@@ -4471,7 +4471,7 @@
       "sentToPharmacy": "Sent to Pharmacy",
       "readyForPickup": "Ready for Pickup",
       "outForDelivery": "Out for Delivery",
-      "issueContactVet": "Issue — Contact Your Vet",
+      "issueContactVet": "Issue: Contact Your Vet",
       "pendingUpdate": "Pending Vet Update",
       "autoRouted": "Will be sent to",
       "selectNetwork": "Route prescription to which pharmacy network?",
@@ -4523,7 +4523,7 @@
   },
   "patientQueue": {
     "title": "Patient Queue",
-    "subtitle": "Manage incoming booking requests — confirm bookings, then start consultations",
+    "subtitle": "Manage incoming booking requests: confirm bookings, then start consultations",
     "refresh": "Refresh",
     "pending": "Pending",
     "confirmed": "Confirmed",
@@ -4622,8 +4622,8 @@
     "historyTab": "History",
     "notesTab": "Notes",
     "rx": "Rx",
-    "cameraUnavailableAudioOnly": "Camera unavailable — switching to audio-only mode",
-    "cameraAndMicUnavailable": "Camera and microphone unavailable — switching to chat-only mode",
+    "cameraUnavailableAudioOnly": "Camera unavailable, switching to audio-only mode",
+    "cameraAndMicUnavailable": "Camera and microphone unavailable, switching to chat-only mode",
     "failedToCreateVideoSession": "Failed to create video session",
     "failedToInitializeRoom": "Failed to initialize consultation room",
     "failedToStartCall": "Failed to start call",
@@ -4710,7 +4710,7 @@
     "reasonPlaceholder": "e.g., Conference, Personal leave, Half day...",
     "saveOverride": "Save Override",
     "vacationLeave": "Set Vacation / Leave",
-    "vacationInfo": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled — please manage them separately.",
+    "vacationInfo": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled. Please manage them separately.",
     "startDate": "Start Date",
     "endDate": "End Date",
     "vacationReasonPlaceholder": "e.g., Annual leave, Conference, Personal...",
@@ -4761,7 +4761,7 @@
     "copyToAllEmpty": "Copy to all empty days",
     "minSlots": "min slots",
     "custom": "Custom",
-    "vacationInfoText": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled — please manage them separately.",
+    "vacationInfoText": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled. Please manage them separately.",
     "daysWillBeMarked": "{{count}} day(s) will be marked unavailable"
   },
   "adminRoleRequests": {
@@ -5534,7 +5534,7 @@
       "backToSearch": "Back to Search",
       "registerAndContinue": "Register & Continue",
       "registering": "Registering...",
-      "or": "— or —",
+      "or": "or",
       "requiredFields": "Owner name, animal name, and species are required.",
       "registerFailed": "Walk-in registration failed. Please try again.",
       "searchRequired": "Required: Type an animal name and select a patient from the dropdown to enable check-in.",
@@ -5621,8 +5621,8 @@
     "heartRateLabel": "Heart Rate",
     "weightLabel": "Weight",
     "notesLabel": "Notes",
-    "normalTempHint": "Normal: 100–102.5°F",
-    "normalHrHint": "Normal: 60–160 bpm",
+    "normalTempHint": "Normal: 100-102.5°F",
+    "normalHrHint": "Normal: 60-160 bpm",
     "weightUnit": "in kg",
     "vitalsErrorNegative": "Vitals cannot be zero or negative. Please enter valid positive values.",
     "vitalsHistory": "Vitals History",
@@ -5645,7 +5645,7 @@
   },
   "publicMarketplace": {
     "heroTitle": "Browse Animals for Sale",
-    "heroSubtitle": "Discover animals available for sale — no login required. Sign in to contact sellers, place bids, or list your own.",
+    "heroSubtitle": "Discover animals available for sale, no login required. Sign in to contact sellers, place bids, or list your own.",
     "stats": {
       "activeListings": "Active Listings",
       "species": "Species",
@@ -5675,7 +5675,7 @@
     },
     "homeCta": {
       "title": "Buy & Sell Marketplace",
-      "subtitle": "Browse animals available for sale, farm equipment, feed and veterinary supplies — completely free, no login needed.",
+      "subtitle": "Browse animals available for sale, farm equipment, feed and veterinary supplies, completely free, no login needed.",
       "livestock": "Animals",
       "feed": "Feed & Nutrition",
       "equipment": "Equipment",
@@ -5710,7 +5710,7 @@
     "loadMore": "Load More"
   },
   "acceptInvite": {
-    "noToken": "Invalid invitation link — no token provided",
+    "noToken": "Invalid invitation link: no token provided",
     "invalidInvite": "Invalid or expired invitation",
     "failedToAccept": "Failed to accept invitation",
     "passwordMinLength": "Password must be at least 8 characters",
@@ -6385,7 +6385,7 @@
     "form": {
       "idPrefix": "Network ID Prefix",
       "idPrefixHint": "2-10 uppercase letters/numbers. Used to generate patient IDs like PREFIX-DOG-26-000001",
-      "chooseHospital": "— Choose a hospital —",
+      "chooseHospital": "Choose a hospital",
       "pasteUserId": "Paste user UUID"
     },
     "networkPatientId": "Network Patient ID",
@@ -6421,12 +6421,12 @@
       "searchMinChars": "Type at least 2 characters to search",
       "noResults": "No patients found",
       "requestEnrollment": "Request Enrollment",
-      "enrollmentRequested": "Enrollment request sent — patient will be notified to approve",
+      "enrollmentRequested": "Enrollment request sent. Patient will be notified to approve",
       "inviteWalkIn": "Invite Walk-in Patient",
       "registerWalkIn": "Register Walk-In",
       "registerWalkInTitle": "Register Walk-In Patient",
       "walkInSuccess": "Patient registered!",
-      "walkInHelperText": "Register a walk-in patient for immediate treatment. No invite or account needed — patient can be given online access later.",
+      "walkInHelperText": "Register a walk-in patient for immediate treatment. No invite or account needed. Patient can be given online access later.",
       "inviteForOnlineAccess": "Invite for Online Access",
       "registerNow": "Register & Start Treatment",
       "reasonForVisit": "Reason for Visit",
@@ -6460,7 +6460,7 @@
       "searchHelper": "Search for existing platform users to send enrollment requests. Patients must accept before their data becomes visible to network staff.",
       "consentCollected": "Consent Collected",
       "consentCollectedHint": "Patient has given consent for this network",
-      "consentPendingWarning": "Consent pending — limited data access until patient grants consent"
+      "consentPendingWarning": "Consent pending: limited data access until patient grants consent"
     },
     "audit": {
       "title": "Audit & Compliance",
@@ -6586,8 +6586,8 @@
     "clinicalNotesPlaceholder": "Include relevant history, current condition, and what you need from the receiving hospital...",
     "reasonPlaceholder": "e.g., Specialist consultation needed, surgical intervention required...",
     "hospitalsLoadFailed": "Failed to load network hospitals list",
-    "selectHospital": "— Select hospital —",
-    "selectVet": "— Select vet (optional) —",
+    "selectHospital": "Select hospital",
+    "selectVet": "Select vet (optional)",
     "sending": "Sending Referral...",
     "send": "Send Referral",
     "accept": "Accept Referral",
@@ -6855,7 +6855,7 @@
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
     "preferenceSaved": "Notification preferences saved",
-    "loadFailed": "Couldn't load your saved notification preferences — showing defaults"
+    "loadFailed": "Couldn't load your saved notification preferences, showing defaults"
   },
   "emailTemplates": {
     "title": "Email Templates",
@@ -7113,7 +7113,7 @@
       "available": "Available",
       "loadingInventory": "Loading pharmacy inventory...",
       "inventoryLoadError": "Could not load pharmacy inventory",
-      "stockWarningError": "Cannot dispense — one or more quantities exceed available stock",
+      "stockWarningError": "Cannot dispense: one or more quantities exceed available stock",
       "unmatchedWarning": "Some medications are not matched to inventory items",
       "selectInventoryWarning": "Select a batch for this medication"
     },
@@ -7261,7 +7261,7 @@
       "print": "Print Receipt"
     },
     "alerts": {
-      "expired": "Expired — do not dispense",
+      "expired": "Expired: do not dispense",
       "noExpired": "No expired stock.",
       "expiredAgo": "Expired",
       "expiringSoon": "Expiring soon",
@@ -7295,7 +7295,7 @@
   },
   "payment": {
     "title": "Complete Your Payment",
-    "testModeNotice": "Test mode — no real money will be charged.",
+    "testModeNotice": "Test mode: no real money will be charged.",
     "slotHeldFor": "Slot held for",
     "consultationFee": "Consultation fee",
     "useWallet": "Use wallet balance",
@@ -7369,7 +7369,7 @@
     "view": "View",
     "newVersion": "New version",
     "publishTitle": "Publish new version",
-    "publishHint": "Publishing creates a new immutable version. Tick re-acceptance only for material changes — users will be blocked at next login until they accept.",
+    "publishHint": "Publishing creates a new immutable version. Tick re-acceptance only for material changes. Users will be blocked at next login until they accept.",
     "docTitle": "Title",
     "docContent": "Content",
     "requireReacceptance": "Require all affected users to re-accept this version",
@@ -7390,7 +7390,7 @@
     "locked": "In withdrawal",
     "withdrawn": "Withdrawn",
     "clearingHint": "Becomes available {{days}} day(s) after consultation",
-    "negativeHint": "Negative balance — recovered automatically from your next earnings",
+    "negativeHint": "Negative balance: recovered automatically from your next earnings",
     "withdrawalThreshold": "Progress to minimum withdrawal",
     "thresholdReached": "You can request a withdrawal now.",
     "thresholdHint": "Withdrawal unlocks when your available balance reaches the minimum.",
@@ -7419,11 +7419,11 @@
   },
   "commissionAdmin": {
     "title": "Commission Rules",
-    "subtitle": "Per-doctor commission overrides — blank fields use the global default",
+    "subtitle": "Per-doctor commission overrides, blank fields use the global default",
     "globalSettings": "Global defaults",
     "globalInfo": "Global default: {{percent}}% + {{flat}} flat fee per paid booking. Change it in System Settings (commission.defaultPercent / commission.flatFee).",
-    "globalsLoadFailed": "Failed to load the current global commission defaults — showing fallback values",
-    "saved": "Override saved. Applies to new payments only — past payments keep their snapshot.",
+    "globalsLoadFailed": "Failed to load the current global commission defaults, showing fallback values",
+    "saved": "Override saved. Applies to new payments only. Past payments keep their snapshot.",
     "saveFailed": "Failed to save the override.",
     "searchPlaceholder": "Search doctor by name or email…",
     "noDoctors": "No doctors found.",
@@ -7431,11 +7431,11 @@
     "colFee": "Fee",
     "colPercentOverride": "% override",
     "colFlatOverride": "Flat override",
-    "snapshotNote": "Commission is snapshotted at payment time — changing overrides never rewrites past payments."
+    "snapshotNote": "Commission is snapshotted at payment time, changing overrides never rewrites past payments."
   },
   "withdrawals": {
     "title": "Withdrawals",
-    "payoutOnFile": "Payout details on file — you can request a withdrawal of your full available balance.",
+    "payoutOnFile": "Payout details on file. You can request a withdrawal of your full available balance.",
     "payoutMissing": "Add your bank account or UPI details to enable withdrawals.",
     "payoutDetails": "Payout details",
     "requestButton": "Request withdrawal",
@@ -7486,7 +7486,7 @@
   },
   "referrals": {
     "title": "Referrals",
-    "subtitlePatient": "Referrals from your doctors — accept, choose another doctor, or take a refund",
+    "subtitlePatient": "Referrals from your doctors: accept, choose another doctor, or take a refund",
     "subtitleVet": "Refer patients to other doctors and track referral outcomes",
     "referButton": "Refer a patient",
     "empty": "No referrals yet.",
@@ -7497,16 +7497,16 @@
     "chooseAnother": "Choose another doctor",
     "refund": "Refund",
     "acceptTitle": "Accept referral",
-    "acceptHint": "Pick a slot with the doctor. What you already paid moves with you automatically — you only pay any difference.",
+    "acceptHint": "Pick a slot with the doctor. What you already paid moves with you automatically. You only pay any difference.",
     "selectDoctor": "Select a doctor…",
     "noSlots": "No slots available on this date. Try another date.",
     "confirmAccept": "Continue",
     "refundTitle": "Take a refund instead",
     "refundHint": "You get a full refund plus a goodwill bonus because the doctor was unavailable.",
     "refundToWallet": "Instant refund to wallet",
-    "refundToSource": "Refund to original payment method (5–7 days)",
+    "refundToSource": "Refund to original payment method (5-7 days)",
     "refunded": "Refund processed.",
-    "accepted": "Referral completed — your new booking is in place.",
+    "accepted": "Referral completed. Your new booking is in place.",
     "created": "Referral sent. The patient has been notified.",
     "actionFailed": "Action failed.",
     "deadlineIn": "Act within {{hours}}h",
@@ -7533,7 +7533,7 @@
   },
   "taxAdmin": {
     "title": "Tax & GST",
-    "subtitle": "SAC rates apply to future invoices only — past invoices are immutable snapshots. Platform GSTIN, legal name and invoice prefix live in System Settings (tax.*).",
+    "subtitle": "SAC rates apply to future invoices only. Past invoices are immutable snapshots. Platform GSTIN, legal name and invoice prefix live in System Settings (tax.*).",
     "colLabel": "Service",
     "colRate": "GST rate",
     "rateSaved": "Rate saved. Applies to invoices issued from now on.",
@@ -7566,14 +7566,14 @@
     "doctorAvailable": "Doctor earnings available",
     "doctorLocked": "In withdrawal",
     "walletLiability": "Patient wallet liability",
-    "walletLiabilityHint": "money owed to customers — not platform revenue",
+    "walletLiabilityHint": "money owed to customers: not platform revenue",
     "tdsTitle": "TDS register (selected range)",
     "tdsDeducted": "TDS deducted",
     "tdsCount": "{{count}} settlement(s)",
     "netPaidToDoctors": "Net paid to doctors",
     "healthTitle": "Payment health",
     "stuckPending": "Stuck pending payments",
-    "stuckPendingHint": "pending > 1h — reconciliation retries daily",
+    "stuckPendingHint": "pending > 1h: reconciliation retries daily",
     "openHolds": "Open payment holds"
   },
   "animalClass": {
@@ -7631,7 +7631,7 @@
   },
   "masterData": {
     "title": "Master Data",
-    "subtitle": "Manage species, breeds, animal classes, and marketplace dropdown values — no code deploy needed.",
+    "subtitle": "Manage species, breeds, animal classes, and marketplace dropdown values, no code deploy needed.",
     "tabs": {
       "species": "Species",
       "breeds": "Breeds",
@@ -7640,16 +7640,16 @@
       "conditions": "Marketplace Conditions"
     },
     "filterBySpecies": "Species",
-    "selectSpeciesPrompt": "— Select a species —",
+    "selectSpeciesPrompt": "Select a species",
     "addNew": "Add New",
     "editEntry": "Edit Entry",
     "reactivate": "Reactivate",
     "noEntries": "No entries yet",
-    "protectedHint": "Protected — core logic depends on this code",
+    "protectedHint": "Protected: core logic depends on this code",
     "labelKeyHint": "Leave blank to keep the built-in translation",
-    "perLocaleLabelsHint": "Optional — add a translated label for any language below. Left blank, that language uses the built-in translation (shown greyed inside each box).",
+    "perLocaleLabelsHint": "Optional: add a translated label for any language below. Left blank, that language uses the built-in translation (shown greyed inside each box).",
     "confirmDelete": "Delete this entry? This cannot be undone.",
-    "deleteBlocked": "Could not delete — it may still be in use",
+    "deleteBlocked": "Could not delete: it may still be in use",
     "updatedSuccess": "Updated successfully",
     "createdSuccess": "Created successfully",
     "archivedSuccess": "Deactivated",
@@ -7673,11 +7673,11 @@
       "canBePregnant": "Can be pregnant",
       "canProduceMilk": "Can produce milk",
       "marketplaceEligible": "Sellable on Marketplace",
-      "labelHi": "Label (Hindi — हिन्दी)",
-      "labelKn": "Label (Kannada — ಕನ್ನಡ)",
-      "labelMl": "Label (Malayalam — മലയാളം)",
-      "labelTa": "Label (Tamil — தமிழ்)",
-      "labelTe": "Label (Telugu — తెలుగు)"
+      "labelHi": "Label (Hindi / हिन्दी)",
+      "labelKn": "Label (Kannada / ಕನ್ನಡ)",
+      "labelMl": "Label (Malayalam / മലയാളം)",
+      "labelTa": "Label (Tamil / தமிழ்)",
+      "labelTe": "Label (Telugu / తెలుగు)"
     },
     "currentlyShowing": "Currently showing: {{value}}"
   },
@@ -7938,7 +7938,7 @@
     "pickDateFirst": "Pick a date to see available times.",
     "noSlots": "No times available on this date.",
     "slotFull": "Fully booked",
-    "slotRange": "{{start}} – {{end}}"
+    "slotRange": "{{start}} - {{end}}"
   },
   "groomingOrders": {
     "cancelReason": "Reason for cancellation (optional):",
@@ -7970,11 +7970,11 @@
       "gateway": "to original payment method"
     },
     "policy": {
-      "customer_free_window": "Cancelled well before the appointment — full refund less the processing charge.",
-      "customer_partial_window": "Cancelled close to the appointment — partial refund under the cancellation policy.",
-      "customer_no_refund_window": "Cancelled too close to the appointment — no refund is due.",
-      "customer_no_show": "Marked as a no-show — no refund is due.",
-      "provider_cancel_full_refund": "Cancelled by the groomer — full refund plus a goodwill bonus."
+      "customer_free_window": "Cancelled well before the appointment: full refund less the processing charge.",
+      "customer_partial_window": "Cancelled close to the appointment: partial refund under the cancellation policy.",
+      "customer_no_refund_window": "Cancelled too close to the appointment: no refund is due.",
+      "customer_no_show": "Marked as a no-show: no refund is due.",
+      "provider_cancel_full_refund": "Cancelled by the groomer: full refund plus a goodwill bonus."
     }
   },
   "groomingStatus": {
@@ -7998,7 +7998,7 @@
     "disputed": "Disputed",
     "closed": "Closed",
     "pending_provider_acceptance": "Awaiting confirmation",
-    "declined_by_provider": "Declined — refunded"
+    "declined_by_provider": "Declined: refunded"
   },
   "groomingBoard": {
     "title": "Manage Orders",
@@ -8197,7 +8197,7 @@
     "noProvider": "Create your grooming business first.",
     "goToProvider": "Go to my business",
     "weeklyHours": "Weekly opening hours",
-    "capacityHint": "Capacity is how many pets you can handle at the same time — tables, stations or groomers working in parallel.",
+    "capacityHint": "Capacity is how many pets you can handle at the same time: tables, stations or groomers working in parallel.",
     "open": "Opens",
     "close": "Closes",
     "every": "Slot every",
@@ -8208,9 +8208,9 @@
     "saved": "Saved",
     "closeAfterOpen": "Closing time must be after opening time.",
     "overridesTitle": "Specific dates",
-    "overridesHint": "Close a single date, or open it with different hours — holidays, events, a half day.",
+    "overridesHint": "Close a single date, or open it with different hours: holidays, events, a half day.",
     "blocksTitle": "Breaks",
-    "blocksHint": "Block part of a day, either every week or once — lunch, cleaning, a delivery.",
+    "blocksHint": "Block part of a day, either every week or once: lunch, cleaning, a delivery.",
     "date": "Date",
     "type": "What happens",
     "reason": "Reason",
@@ -8261,7 +8261,7 @@
     "reference": "Ref",
     "status": {
       "requested": "Pending review",
-      "approved": "Approved — payout in progress",
+      "approved": "Approved: payout in progress",
       "settled": "Paid",
       "rejected": "Not approved",
       "cancelled": "Cancelled"
@@ -8270,9 +8270,9 @@
   "payables": {
     "title": "Payables",
     "subtitle": "Who the platform owes right now, and what has been paid.",
-    "groomingPayable": "Grooming — payable now",
-    "groomingClearing": "Grooming — clearing",
-    "doctorPayable": "Doctors — payable now",
+    "groomingPayable": "Grooming: payable now",
+    "groomingClearing": "Grooming: clearing",
+    "doctorPayable": "Doctors: payable now",
     "blocked": "Blocked payouts",
     "blockedHint": "Missing bank/UPI details",
     "groomingTab": "Grooming providers",
@@ -8292,7 +8292,7 @@
     "noPayoutDetails": "No payout details",
     "noPayoutDetailsHint": "This provider has not saved bank or UPI details yet.",
     "recordPayout": "Record payout",
-    "recordPayoutFor": "Record payout — {{name}}",
+    "recordPayoutFor": "Record payout: {{name}}",
     "payoutExplainer": "This marks {{amount}} as paid and tells the provider, with your reference as evidence. Send the money first, then record it here.",
     "method": "Paid by",
     "bankTransfer": "Bank transfer",
@@ -8308,6 +8308,6 @@
     "paidAndNotified": "Payout recorded and {{name}} has been notified.",
     "inQueue": "Withdrawal requested",
     "noRequestYet": "Not requested yet",
-    "doctorsHint": "Doctors are paid when they request a withdrawal. Anyone marked \"Not requested yet\" is owed money but has not asked — settle from the Settlements screen if they need paying now."
+    "doctorsHint": "Doctors are paid when they request a withdrawal. Anyone marked \"Not requested yet\" is owed money but has not asked. Settle from the Settlements screen if they need paying now."
   }
 }

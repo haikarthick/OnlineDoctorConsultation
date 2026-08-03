@@ -1,5 +1,5 @@
 /**
- * ConsultationService unit tests — mock database.
+ * ConsultationService unit tests - mock database.
  */
 import ConsultationService from '../../src/services/ConsultationService'
 import database from '../../src/utils/database'

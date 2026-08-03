@@ -336,7 +336,7 @@ export const createVaccinationSchema = Joi.object({
   dosage: shortText(100).optional().allow('', null),
   reactionNotes: longText(2000).optional().allow('', null),
   certificateNumber: shortText(100).optional().allow('', null),
-  // Protocol linkage — when vet selects a protocol from the master list,
+  // Protocol linkage - when vet selects a protocol from the master list,
   // this ID triggers auto-assignment in animal_vaccine_assignments so the
   // vaccination shows on the Vaccination Passport page.
   protocolId: uuid.optional(),
@@ -406,14 +406,14 @@ export const createPaymentSchema = Joi.object({
 });
 
 // ── Payment module (docs/PAYMENT_MODULE_PLAN.md §9) ──────────
-// NOTE: no client-supplied amounts anywhere — prices are server-derived.
+// NOTE: no client-supplied amounts anywhere - prices are server-derived.
 export const checkoutPaymentSchema = Joi.object({
   useWallet: Joi.boolean().optional().default(false),
 });
 
 export const verifyPaymentSchema = Joi.object({
   paymentId: requiredUuid,
-  // Razorpay fields (P2) — optional in demo mode
+  // Razorpay fields (P2) - optional in demo mode
   gatewayOrderId: Joi.string().max(255).optional().allow('', null),
   gatewayPaymentId: Joi.string().max(255).optional().allow('', null),
   gatewaySignature: Joi.string().max(512).optional().allow('', null),
@@ -476,7 +476,7 @@ export const toggleUserStatusSchema = Joi.object({
   isActive: Joi.boolean().required(),
 });
 
-// Vet details captured when a user takes the veterinarian role — used both by the self-serve
+// Vet details captured when a user takes the veterinarian role - used both by the self-serve
 // role-change request (licenseNumber required there) and the admin direct role change
 // (licenseNumber optional there). Provisions/updates the vet_profiles satellite row.
 const roleChangeVetProfileSchema = Joi.object({
@@ -1141,7 +1141,7 @@ const livestockFields = {
   pregnancyMonth: Joi.number().integer().min(0).max(12).optional().allow(null),
   vaccinationStatus: Joi.string().valid('fully_vaccinated', 'partially_vaccinated', 'not_vaccinated', 'unknown').optional(),
   healthCertificate: Joi.boolean().optional(),
-  // listingTier / isHotDeal are admin-granted promotion flags — sellers cannot
+  // listingTier / isHotDeal are admin-granted promotion flags - sellers cannot
   // set them, so they are intentionally absent (stripUnknown drops them)
   linkedAnimalId: Joi.string().uuid().optional().allow('', null),
   auctionEndTime: Joi.string().optional().allow('', null),
@@ -1209,7 +1209,7 @@ export const updateOrderStatusSchema = Joi.object({
   status: Joi.string().valid('pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded').required(),
 });
 
-// Deal handshake (free classifieds — money settles off-platform between the parties)
+// Deal handshake (free classifieds - money settles off-platform between the parties)
 export const confirmDealSchema = Joi.object({
   paymentMethod: Joi.string().valid('cash', 'upi', 'bank_transfer', 'other').optional().allow('', null),
 });
@@ -1941,8 +1941,8 @@ export const walletWithdrawalRequestSchema = Joi.object({
   accountName: shortText(255).optional().allow('', null),
   // .message() must attach directly to the rule it overrides. Chaining it after .allow()
   // throws "Cannot apply rules to empty ruleset" at MODULE LOAD, which tsc cannot see and
-  // which takes the whole server down on boot — caught by npm run verify:runtime.
-  accountNumber: Joi.string().pattern(/^\d{6,20}$/).message('Account number must be 6–20 digits')
+  // which takes the whole server down on boot - caught by npm run verify:runtime.
+  accountNumber: Joi.string().pattern(/^\d{6,20}$/).message('Account number must be 6-20 digits')
     .optional().allow('', null),
   ifsc: Joi.string().pattern(/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/).message('Enter a valid IFSC code')
     .optional().allow('', null),
@@ -1993,7 +1993,7 @@ export const groomingAcceptSchema = Joi.object({
   note: shortText(500).optional().allow('', null),
 });
 
-// A decline triggers a full refund and is shown to the customer, so — unlike cancel — the
+// A decline triggers a full refund and is shown to the customer, so - unlike cancel - the
 // reason is required and may not be blank.
 export const groomingDeclineSchema = Joi.object({
   reason: shortText(500).required(),
@@ -2045,7 +2045,7 @@ export const groomingReportCardSchema = Joi.object({
 
 export const groomingSettleSchema = Joi.object({
   method: Joi.string().valid('bank_transfer', 'upi', 'other').optional(),
-  // Required, not optional. Settlement is manual — the money moves outside this system, so the
+  // Required, not optional. Settlement is manual - the money moves outside this system, so the
   // reference is the ONLY evidence it happened, and it is what the provider is told.
   reference: shortText(120).required(),
   tdsAmount: positiveNumber.max(1000000).optional(),

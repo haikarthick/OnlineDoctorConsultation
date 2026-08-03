@@ -14,10 +14,10 @@ import { describe, it, expect } from 'vitest'
  *     en has nested objects, so t('vaccineProtocol.status.active') and the five
  *     sibling keys could not resolve at all on the Vaccine Protocol admin page.
  *
- * Uses import.meta.glob rather than fs/path so it needs no @types/node — the
+ * Uses import.meta.glob rather than fs/path so it needs no @types/node - the
  * frontend deliberately does not depend on Node typings.
  *
- * Edit src/locales — public/locales is generated from it by copy-locales.cjs.
+ * Edit src/locales - public/locales is generated from it by copy-locales.cjs.
  */
 
 const LOCALES = ['en', 'hi', 'kn', 'ml', 'ta', 'te'] as const
@@ -100,7 +100,7 @@ describe('translation keys used in source', () => {
     while ((m = re.exec(src))) {
       const key = m[1]
       // A trailing dot means the call builds the key from a variable
-      // (`t('x.statuses.' + s)`) — the literal prefix is not a key itself.
+      // (`t('x.statuses.' + s)`) - the literal prefix is not a key itself.
       if (key.endsWith('.') || !key.includes('.')) continue
       if (!used.has(key)) used.set(key, [])
       used.get(key)!.push(filePath)

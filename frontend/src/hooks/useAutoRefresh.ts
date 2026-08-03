@@ -2,11 +2,11 @@ import { useEffect, useRef, useCallback } from 'react'
 import { useSocket } from '../context/SocketContext'
 
 /**
- * useAutoRefresh — silent background data refresh for any component.
+ * useAutoRefresh - silent background data refresh for any component.
  *
  * Combines:
- *   1. Interval polling (default 30s) — always-on fallback
- *   2. Socket.io data:refresh push — instant update when server emits
+ *   1. Interval polling (default 30s) - always-on fallback
+ *   2. Socket.io data:refresh push - instant update when server emits
  *
  * Usage:
  *   useAutoRefresh(['bookings', 'dashboard'], loadData)

@@ -463,7 +463,7 @@ const AICopilot: React.FC = () => {
                     <div className="si-fc4388e2">🩻</div>
                     <div className="si-a71f4610">Click to upload scan image</div>
                     <div className="si-b95e40ca">X-ray, MRI, Ultrasound, CT, or clinical photo</div>
-                    <div className="si-3277a787">JPEG, PNG, WebP — Max 10MB</div>
+                    <div className="si-3277a787">JPEG, PNG, WebP - Max 10MB</div>
                   </div>
                 )}
               </div>

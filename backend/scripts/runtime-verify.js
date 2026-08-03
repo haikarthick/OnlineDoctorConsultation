@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Runtime Verification — the gate that actually RUNS things.
+ * Runtime Verification - the gate that actually RUNS things.
  * ─────────────────────────────────────────────────────────
  * Every other pre-deploy check is static: `tsc` proves types compile, vitest proves mocked
  * units behave, `vite build` proves the bundle links. None of them execute one line of SQL or
@@ -11,25 +11,25 @@
  * This script closes that gap by building a throwaway PostgreSQL exactly the way production
  * gets built, then driving the real server over real HTTP.
  *
- *   PHASE 1  fresh-install path — docker/init.sql applied as ONE transaction (production's
+ *   PHASE 1  fresh-install path - docker/init.sql applied as ONE transaction (production's
  *            atomic apply: any single error wipes the whole schema)
- *   PHASE 2  upgrade path — every backend/migrations/*.sql on top, in order, each in its own
+ *   PHASE 2  upgrade path - every backend/migrations/*.sql on top, in order, each in its own
  *            transaction, exactly like the real runner
  *   PHASE 3  schema snapshot taken here, BEFORE the server has ever connected
  *   PHASE 4  boot the real compiled server (backend/dist) against that database
- *   PHASE 5  DRIFT CHECK — re-snapshot and fail if the server's startup self-heal CHANGED or
+ *   PHASE 5  DRIFT CHECK - re-snapshot and fail if the server's startup self-heal CHANGED or
  *            REMOVED anything the migrations established. This is the generic form of the
  *            2026-07-27 bug and catches the entire class, not just roles.
- *   PHASE 6  HTTP smoke — register every self-registerable role, log in, read permissions.
+ *   PHASE 6  HTTP smoke - register every self-registerable role, log in, read permissions.
  *            The role list is PARSED FROM validation.ts so it cannot drift from the source
  *            of truth: add a role there and this test automatically covers it.
- *   PHASE 7  BROWSER — Playwright drives the real SPA the server is serving. PHASE 6 proves
+ *   PHASE 7  BROWSER - Playwright drives the real SPA the server is serving. PHASE 6 proves
  *            the API accepts a role; only this proves the SCREEN offers it, the form submits,
  *            and the app the user lands in renders (no raw i18n keys, no console errors).
  *
  * Run: npm run verify:runtime  (from backend/)
  *
- * Requires a local PostgreSQL. If one cannot be found this FAILS LOUDLY rather than skipping —
+ * Requires a local PostgreSQL. If one cannot be found this FAILS LOUDLY rather than skipping -
  * a check that silently no-ops is how this class of bug reaches production in the first place.
  * Genuine emergency override: SKIP_RUNTIME_VERIFY=1 (say so in the commit message).
  */
@@ -48,8 +48,8 @@ const SCHEMA = 'vetcare_dev'; // deployments are schema-scoped; `public` would h
 
 /**
  * --full: seed the demo dataset and run the ENTIRE e2e suite (462 tests) instead of just the
- * @critical journeys. Far too slow for a push gate, but it gives the older specs — which need a
- * seeded, already-running app and were wired to nothing — a real way to be executed on demand:
+ * @critical journeys. Far too slow for a push gate, but it gives the older specs - which need a
+ * seeded, already-running app and were wired to nothing - a real way to be executed on demand:
  *   cd backend && npm run verify:runtime:full
  */
 const FULL = process.argv.includes('--full');
@@ -75,7 +75,7 @@ function findPgBin() {
       candidates.push(`${drive}\\Program Files\\PostgreSQL\\${major}\\bin`);
     }
   }
-  // POSIX — enumerate whatever major versions are actually installed (newest first) rather
+  // POSIX - enumerate whatever major versions are actually installed (newest first) rather
   // than guessing, so a CI runner that ships PG 17 or 18 is found without editing this list.
   try {
     const base = '/usr/lib/postgresql';
@@ -117,7 +117,7 @@ let pgProc = null;
 let PG_LOG = null;
 // Held open for the server's stdout/stderr. MUST be closed before the data dir is deleted:
 // while this fd is open, Node itself has a handle on postgres.log, so rmSync fails on Windows
-// no matter how many times it retries — which is why every run used to strand its cluster.
+// no matter how many times it retries - which is why every run used to strand its cluster.
 let PG_LOG_FD = null;
 let serverProc = null;
 
@@ -169,7 +169,7 @@ async function startCluster() {
 
   // Debian/Ubuntu builds are compiled with a default unix_socket_directories of
   // /var/run/postgresql, which does not exist (or is not writable) for an unprivileged CI
-  // user — postgres then exits immediately at startup. Point it at our own temp directory.
+  // user - postgres then exits immediately at startup. Point it at our own temp directory.
   // Windows has no unix sockets, so the option is POSIX-only.
   if (process.platform !== 'win32') {
     args.push('-c', `unix_socket_directories=${dataPath}`);
@@ -199,10 +199,10 @@ async function startCluster() {
 function stopEverything() {
   // KEEP_DB=1 leaves the cluster running so a failing run can actually be inspected.
   // Without this, the only evidence of what the database looked like is gone the moment the
-  // gate exits — which turns every seed/FK question into guesswork.
+  // gate exits - which turns every seed/FK question into guesswork.
   if (process.env.KEEP_DB === '1' && DATA_DIR) {
     killTree(serverProc);
-    console.log(`\n  ${YELLOW}KEEP_DB=1 — cluster left running for inspection${RESET}`);
+    console.log(`\n  ${YELLOW}KEEP_DB=1 - cluster left running for inspection${RESET}`);
     console.log(`  psql -h 127.0.0.1 -p ${PG_PORT} -U postgres -d verifydb`);
     console.log(`  data dir: ${DATA_DIR}`);
     console.log(`  stop it with: taskkill /pid ${pgProc && pgProc.pid} /T /F\n`);
@@ -228,7 +228,7 @@ function stopEverything() {
       }
     }
     if (!removed) {
-      console.log(`  ${YELLOW}note:${RESET} could not delete ${DATA_DIR} — remove it manually.`);
+      console.log(`  ${YELLOW}note:${RESET} could not delete ${DATA_DIR} - remove it manually.`);
     }
   }
 }
@@ -256,13 +256,13 @@ function snapshot(db) {
 }
 
 /**
- * Compares two snapshots. ADDITIONS are fine — the legacy self-heal legitimately creates
+ * Compares two snapshots. ADDITIONS are fine - the legacy self-heal legitimately creates
  * objects that init.sql predates. CHANGES and REMOVALS are not: those mean startup code
  * overwrote what a tracked migration established, which is invisible in every static check
  * and in the migration log.
  */
 /**
- * Element ORDER inside `= ANY (ARRAY[...])` carries no meaning — a rebuilt CHECK listing the
+ * Element ORDER inside `= ANY (ARRAY[...])` carries no meaning - a rebuilt CHECK listing the
  * same values in a different order is semantically identical. Sort them so the diff reports
  * only genuine changes (a value added or, far more dangerously, dropped).
  */
@@ -296,7 +296,7 @@ function registerableRoles() {
   // The register schema's role field, e.g.
   //   role: Joi.string().valid('pet_owner', 'farmer', ..., 'groomer').default('pet_owner')
   const m = src.match(/role:\s*Joi\.string\(\)\s*\.valid\(([^)]*)\)\s*\.default\(/);
-  if (!m) throw new Error('Could not parse the registration role list from validation.ts — ' +
+  if (!m) throw new Error('Could not parse the registration role list from validation.ts - ' +
     'if the schema was refactored, update registerableRoles() so this stays in sync.');
   const roles = [...m[1].matchAll(/'([a-z_]+)'/g)].map(x => x[1]);
   if (roles.length === 0) throw new Error('Parsed an empty role list from validation.ts');
@@ -308,7 +308,7 @@ function registerableRoles() {
  *
  * SEED_ON_STARTUP=true (set on vetcare-dev and vetcare-demo) makes fixDemoPasswords apply
  * large chunks of docker/seed-demo-data.sql through the app pool, long after /health goes
- * green. While that runs the server is effectively unavailable — navigations time out and the
+ * green. While that runs the server is effectively unavailable - navigations time out and the
  * browser phase fails for reasons that have nothing to do with the app. index.ts logs a
  * definitive marker when it is done, so wait for that rather than guessing.
  *
@@ -331,7 +331,7 @@ async function waitForSeedComplete(getLog, budgetMs = 300000) {
  * Waits until the server is not just UP but IDLE.
  *
  * Health can go green long before startup work has finished. Demo seeding in particular keeps
- * running in the background, saturating the DB and the event loop — requests then queue for
+ * running in the background, saturating the DB and the event loop - requests then queue for
  * tens of seconds and Playwright reports navigation timeouts that look like app bugs. Requiring
  * several consecutive FAST health responses waits that storm out without needing to know
  * anything about what the server is busy with.
@@ -385,7 +385,7 @@ async function http(method, url, body, token) {
 
   const distEntry = path.join(BACKEND, 'dist', 'index.js');
   if (!fs.existsSync(distEntry)) {
-    log(`${RED}✗ backend/dist not built — run \`npm run build\` in backend/ first.${RESET}\n`);
+    log(`${RED}✗ backend/dist not built - run \`npm run build\` in backend/ first.${RESET}\n`);
     process.exit(1);
   }
 
@@ -414,7 +414,7 @@ async function http(method, url, body, token) {
       psql('verifydb', scoped, { file: true, singleTx: true });
       ok();
     } catch (e) {
-      fail('init.sql failed — a fresh deploy would end up with NO schema at all (atomic apply).',
+      fail('init.sql failed - a fresh deploy would end up with NO schema at all (atomic apply).',
         String(e.stderr || e.message).split('\n').filter(Boolean).slice(0, 12));
     }
 
@@ -462,10 +462,10 @@ async function http(method, url, body, token) {
           MOCK_DB: 'false', MOCK_REDIS: 'true',
                     // Seeding is ON for every run, not just --full: SEED_ON_STARTUP=true is set on BOTH
           // live environments (vetcare-dev and vetcare-demo), so a broken demo seed breaks them
-          // both — and the gate used to run with it off, which meant it could never have caught
+          // both - and the gate used to run with it off, which meant it could never have caught
           // that. PHASE 6b below asserts the seeded demo accounts can actually log in.
           SEED_ON_STARTUP: 'true', FORCE_RESEED: 'false',
-          // Never let a verification run touch a real provider — a unit test once sent a REAL
+          // Never let a verification run touch a real provider - a unit test once sent a REAL
           // email through the developer's Gmail (2026-07-10). Blanking these forces log-only.
           RESEND_API_KEY: '', SMTP_HOST: '', SMTP_USER: '', SMTP_PASS: '',
           FEATURE_EMAIL_NOTIFICATIONS: 'false',
@@ -478,7 +478,7 @@ async function http(method, url, body, token) {
           // The gate legitimately authenticates far more than a human would from one IP:
           // every role registers, every seeded demo account logs in, then Playwright does it
           // all again through the UI. The production default (15 per 15 min) would 429 midway
-          // and surface as phantom failures. Defaults in app.ts are untouched — this is an
+          // and surface as phantom failures. Defaults in app.ts are untouched - this is an
           // opt-in override for the verification run only.
           AUTH_RATE_LIMIT_MAX: '100000', AUTH_RATE_LIMIT_WINDOW_MS: '60000',
           PORT: String(port), NODE_ENV: 'development',
@@ -519,7 +519,7 @@ async function http(method, url, body, token) {
         } else if (seed.failed) {
           const bad = serverLog.split('\n')
             .filter(l => /Seed: ⚠/.test(l))
-            // Capture up to the winston metadata blob, NOT [^"]+ — Postgres messages contain quoted
+            // Capture up to the winston metadata blob, NOT [^"]+ - Postgres messages contain quoted
             // identifiers (relation "bookings"), so that pattern cut every error at the first quote
             // and hid the constraint name that identifies the problem.
             .map(l => (l.match(/Seed: ⚠ (.+?)(?= {"service")/) || [, l])[1].trim());
@@ -537,7 +537,7 @@ async function http(method, url, body, token) {
         const quiet = await waitForServerQuiet(port);
         if (!quiet) {
           fail('Server never became idle after startup.',
-            ['Health stayed slow for 4 minutes — something is still saturating it.',
+            ['Health stayed slow for 4 minutes - something is still saturating it.',
              'Later phases would race it and fail misleadingly.']);
         }
 
@@ -589,7 +589,7 @@ async function http(method, url, body, token) {
           problems.push(`role '${role}' cannot register: ${detail}`);
           continue;
         }
-        // Roles needing admin approval get no token — that is correct, not a failure.
+        // Roles needing admin approval get no token - that is correct, not a failure.
         if (!reg.json?.data?.token) continue;
 
         const login = await http('POST', `${base}/auth/login`, { email, password: 'Password1' });
@@ -601,7 +601,7 @@ async function http(method, url, body, token) {
         if (perms.status !== 200 || !Array.isArray(perms.json?.data?.permissions)) {
           problems.push(`role '${role}' cannot read its permissions (HTTP ${perms.status})`);
         } else if (perms.json.data.permissions.length === 0) {
-          problems.push(`role '${role}' resolves to ZERO permissions — it would see an empty app`);
+          problems.push(`role '${role}' resolves to ZERO permissions - it would see an empty app`);
         }
       }
 
@@ -615,7 +615,7 @@ async function http(method, url, body, token) {
     // ── PHASE 6b: the seeded demo accounts ──
     // vetcare-dev and vetcare-demo both run SEED_ON_STARTUP=true, so the demo dataset IS a
     // production code path for them. A seed that fails to apply, or password hashes that never
-    // get fixed up, locks every demo account out — and no static check can see it. Credentials
+    // get fixed up, locks every demo account out - and no static check can see it. Credentials
     // are read from frontend/e2e/constants.ts so this stays in step with the e2e suite that
     // depends on exactly these accounts.
     if (serverHealthy && port) {
@@ -645,7 +645,7 @@ async function http(method, url, body, token) {
         }
         if (broken.length) {
           fail(`${broken.length}/${seeded.length} seeded demo account(s) cannot log in.`,
-            [...broken, '', 'The demo seed is a live code path — SEED_ON_STARTUP=true on both',
+            [...broken, '', 'The demo seed is a live code path - SEED_ON_STARTUP=true on both',
               'vetcare-dev and vetcare-demo. These accounts are also what the e2e suite uses.']);
         } else {
           ok(`${seeded.length} accounts`);
@@ -660,7 +660,7 @@ async function http(method, url, body, token) {
 
       if (!fs.existsSync(distIndex)) {
         step('PHASE 7  Browser journeys');
-        fail('frontend/dist is missing — the server has no SPA to serve.',
+        fail('frontend/dist is missing - the server has no SPA to serve.',
           ['Run `npm run build` in frontend/ first (the pre-deploy gate does this as check #2).']);
       } else {
         // The grooming module is dark-launched; switch it on so the browser pass covers the
@@ -671,14 +671,14 @@ async function http(method, url, body, token) {
             INSERT INTO system_settings (key, value, description)
             VALUES ('grooming.enabled', 'true', 'enabled by runtime-verify PHASE 7')
             ON CONFLICT (key) DO UPDATE SET value = 'true';`);
-        } catch { /* settings table shape differs — the browser pass still runs without it */ }
+        } catch { /* settings table shape differs - the browser pass still runs without it */ }
 
         step(`PHASE 7  Browser journeys (${FULL ? 'FULL e2e suite' : 'critical journeys'} vs the real SPA)`);
         try {
           // --retries=0: a gate must be deterministic. Retries would hide a genuinely flaky
           // journey behind a green tick, which is how a check stops being trustworthy.
           // Invoke Playwright's CLI through node directly. `npx` needs a shell on Windows
-          // (deprecated + unescaped args) and `npx.cmd` is not reliably spawnable — both fail
+          // (deprecated + unescaped args) and `npx.cmd` is not reliably spawnable - both fail
           // with EMPTY stdout/stderr, which makes a real test failure look like a mystery.
           const cli = path.join(FRONTEND, 'node_modules', '@playwright', 'test', 'cli.js');
           execFileSync(process.execPath, [cli, 'test', ...(FULL ? [] : ['--grep', '@critical']), '--reporter', 'list', '--retries=0'], {
@@ -703,7 +703,7 @@ async function http(method, url, body, token) {
 
             // A browser failure can mean "the app is wrong" OR "the server died underneath it",
             // and those look identical from Playwright's side (navigation timeouts either way).
-            // Say which, every time — guessing at this cost several diagnostic cycles.
+            // Say which, every time - guessing at this cost several diagnostic cycles.
             let alive = false;
             try {
               const r = await fetch(`http://127.0.0.1:${port}/api/v1/health`);
@@ -711,8 +711,8 @@ async function http(method, url, body, token) {
             } catch { alive = false; }
             lines.push('');
             lines.push(alive
-              ? 'Server was still healthy after the run — this is an app/test failure.'
-              : 'SERVER WAS NOT RESPONDING after the run — the failures above are a symptom, not the cause.');
+              ? 'Server was still healthy after the run - this is an app/test failure.'
+              : 'SERVER WAS NOT RESPONDING after the run - the failures above are a symptom, not the cause.');
             // Keep the WHOLE server log: the interesting line (a stack trace, an OOM, a fatal)
             // is rarely in the last 20, and DATA_DIR is deleted on teardown.
             try {
@@ -746,7 +746,7 @@ async function http(method, url, body, token) {
   log('');
   if (failed) {
     log(`${RED}━━━ RUNTIME VERIFICATION FAILED ━━━${RESET}`);
-    log(`${YELLOW}These are real failures against a real database — they WILL happen on deploy.${RESET}\n`);
+    log(`${YELLOW}These are real failures against a real database - they WILL happen on deploy.${RESET}\n`);
     process.exit(1);
   }
   log(`${GREEN}━━━ RUNTIME VERIFICATION PASSED ━━━${RESET}\n`);

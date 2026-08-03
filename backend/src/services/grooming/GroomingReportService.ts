@@ -3,7 +3,7 @@ import { NotFoundError } from '../../utils/errors';
 import GroomingProviderService from './GroomingProviderService';
 
 /**
- * P7 — grooming reports. Provider report (own business) and platform report (admin), including the
+ * P7 - grooming reports. Provider report (own business) and platform report (admin), including the
  * two moat metrics: grooming→consultation escalation rate and wellness-nudge conversion.
  */
 class GroomingReportService {
@@ -22,7 +22,7 @@ class GroomingReportService {
     const earn = await database.query(
       `SELECT status, COALESCE(SUM(net_amount),0) AS total FROM grooming_earnings WHERE provider_id = $1 GROUP BY status`, [providerId]);
     const byService = await database.query(
-      `SELECT COALESCE(gs.name,'—') AS name, COUNT(*)::int AS count, COALESCE(SUM(o.grand_total),0) AS revenue
+      `SELECT COALESCE(gs.name,'-') AS name, COUNT(*)::int AS count, COALESCE(SUM(o.grand_total),0) AS revenue
        FROM grooming_orders o LEFT JOIN grooming_services gs ON gs.id = o.primary_service_id
        WHERE o.provider_id = $1 AND o.status NOT IN ('draft','payment_pending','payment_expired')
        GROUP BY gs.name ORDER BY revenue DESC LIMIT 10`, [providerId]);

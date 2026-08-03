@@ -500,7 +500,7 @@ const AnimalTimeline: React.FC = () => {
           <h1>📅 {t('timeline.title', 'Animal Life Timeline')}</h1>
           <p className="tl-subtitle">
             {t('timeline.showing', 'Showing')} {filteredEvents.length !== events.length ? `${filteredEvents.length} of` : ''} {events.length} {t('timeline.events', 'events')}
-            {selectedAnimal && <> — <strong>{selectedAnimal.name}</strong> ({speciesLabel(selectedAnimal.species, t)})</>}
+            {selectedAnimal && <> - <strong>{selectedAnimal.name}</strong> ({speciesLabel(selectedAnimal.species, t)})</>}
           </p>
         </div>
         <div className="tl-toolbar">
@@ -508,7 +508,7 @@ const AnimalTimeline: React.FC = () => {
             {animals.length === 0 && <option value="">No animals</option>}
             {animals.map(a => (
               <option key={a.id} value={a.id}>
-                {a.name} ({speciesLabel(a.species, t)}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
+                {a.name} ({speciesLabel(a.species, t)}){(isAdmin || isVet) && a.ownerName ? ` - ${a.ownerName}` : ''}
               </option>
             ))}
           </select>
@@ -677,7 +677,7 @@ const AnimalTimeline: React.FC = () => {
 
               {/* Distribution bar */}
               <div className="tl-dist-bar-wrap">
-                <span className="tl-dist-label">Showing: {new Date(viewStartMs).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} – {new Date(viewStartMs + daysVisible * 86400000).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} · {daysVisible} day(s) · {filteredEvents.length} item(s)</span>
+                <span className="tl-dist-label">Showing: {new Date(viewStartMs).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} - {new Date(viewStartMs + daysVisible * 86400000).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} · {daysVisible} day(s) · {filteredEvents.length} item(s)</span>
                 <div className="tl-dist-bar">
                   {minimapSegments.map(seg => (
                     <div key={seg.label} className="tl-dist-seg" style={{ width: `${seg.pct}%`, background: seg.color }} title={`${seg.label} (${Math.round(seg.pct)}%)`} />

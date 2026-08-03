@@ -8,7 +8,7 @@
 --
 -- Owner decision: money is collected FIRST (unchanged funnel), and the order then parks in
 -- pending_provider_acceptance. A decline or an expired acceptance window triggers a FULL
--- no-fault refund through the grooming refund engine — the customer is never penalised for a
+-- no-fault refund through the grooming refund engine - the customer is never penalised for a
 -- provider's choice.
 --
 -- These columns are grooming's OWN (module-separation rule): consultations track the same idea

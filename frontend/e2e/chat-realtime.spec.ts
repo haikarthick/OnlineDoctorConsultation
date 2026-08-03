@@ -12,7 +12,7 @@ import { test, expect } from './fixtures'
  * - Socket connection (presence indicators)
  */
 
-// ── Chat Widget — Toggle ──────────────────────────────────
+// ── Chat Widget - Toggle ──────────────────────────────────
 
 test.describe('Floating Chat Widget', () => {
   test('chat bubble is visible for authenticated users', async ({ petOwnerPage: page }) => {
@@ -181,9 +181,9 @@ test.describe('Floating Chat Widget', () => {
   })
 })
 
-// ── Chat Widget — Not visible for unauthenticated ──────────
+// ── Chat Widget - Not visible for unauthenticated ──────────
 
-test.describe('Chat Widget — Auth Guard', () => {
+test.describe('Chat Widget - Auth Guard', () => {
   test('chat bubble is NOT visible on login page', async ({ page }) => {
     await page.goto('/login')
     await page.waitForLoadState('networkidle')

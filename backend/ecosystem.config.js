@@ -42,7 +42,7 @@ module.exports = {
       min_uptime: '10s',
       restart_delay: 4000,
 
-      // Watch (disabled in production — use pm2 reload for deploys)
+      // Watch (disabled in production - use pm2 reload for deploys)
       watch: false,
     },
   ],

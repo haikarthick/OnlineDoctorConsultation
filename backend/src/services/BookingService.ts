@@ -24,8 +24,8 @@ class BookingService {
 
     // 1. Mark CONFIRMED bookings as missed whose scheduled window has passed.
     // Determines missed_by:
-    //   'patient'  — video session created (doctor opened room) but stuck in 'waiting'
-    //   'doctor'   — no video session created at all (doctor never started the room)
+    //   'patient'  - video session created (doctor opened room) but stuck in 'waiting'
+    //   'doctor'   - no video session created at all (doctor never started the room)
     // Skips bookings whose consultation is already completed or in_progress.
     const confirmedResult = await database.query(
       `UPDATE bookings AS b
@@ -55,7 +55,7 @@ class BookingService {
       [dateStr, timeStr]
     );
 
-    // 2. Mark PENDING bookings as missed — doctor never confirmed before time passed.
+    // 2. Mark PENDING bookings as missed - doctor never confirmed before time passed.
     // Always missed_by = 'doctor' (vet's responsibility to confirm).
     const pendingResult = await database.query(
       `UPDATE bookings AS b
@@ -152,7 +152,7 @@ class BookingService {
     }
 
     // Network-hospital branches are independent SaaS tenants with zero
-    // integration into this platform's booking/payment pipeline — their
+    // integration into this platform's booking/payment pipeline - their
     // patients are handled entirely through the hospital's own internal
     // workflow (walk-in registration, workflow_cases, inpatient admission),
     // never through bookings/payments. An independent doctor's own
@@ -163,12 +163,12 @@ class BookingService {
         [data.hospitalId]
       );
       if (hospRes.rows[0]?.is_network_branch) {
-        throw new ValidationError('This doctor\'s hospital manages its own bookings directly — please contact the hospital.');
+        throw new ValidationError('This doctor\'s hospital manages its own bookings directly - please contact the hospital.');
       }
     }
 
     // Check for conflicting bookings (payment_pending holds the slot; released
-    // statuses — cancelled/rescheduled/payment_expired/referred — do not block)
+    // statuses - cancelled/rescheduled/payment_expired/referred - do not block)
     const conflicts = await database.query(
       `SELECT id FROM bookings WHERE veterinarian_id = $1 AND scheduled_date = $2
        AND time_slot_start = $3 AND status NOT IN ('cancelled', 'rescheduled', 'payment_expired', 'referred')`,
@@ -273,11 +273,11 @@ class BookingService {
   }
 
   async listBookings(userId: string, role: string, params: { limit?: number; offset?: number; status?: string }): Promise<PaginatedResponse<Booking>> {
-    // Auto-mark missed bookings before listing (non-blocking — listing must succeed even if marking fails)
+    // Auto-mark missed bookings before listing (non-blocking - listing must succeed even if marking fails)
     try {
       await this.markMissedBookings();
     } catch (err: any) {
-      logger.warn('markMissedBookings failed — continuing with listing', { error: err.message });
+      logger.warn('markMissedBookings failed - continuing with listing', { error: err.message });
     }
 
     const limit = params.limit || 10;
@@ -436,7 +436,7 @@ class BookingService {
         // Payment module refund engine (D12 matrix; D7 destination choice)
         await PaymentOrchestrator.refundForCancellation(id, booking.petOwnerId, cancellerRole || 'admin', reason, refundDestination);
       } else {
-        // Legacy path (flag off — kept for exact pre-module behavior)
+        // Legacy path (flag off - kept for exact pre-module behavior)
         const payment = await PaymentService.getPaymentByBooking(id);
         if (payment) {
           const paymentAmount = parseFloat(String(payment.amount));
@@ -453,7 +453,7 @@ class BookingService {
                 const bonusPercent = parseInt(await this.getSetting('cancellation.goodwillBonusPercent', '10'), 10);
                 if (bonusPercent > 0) {
                   const bonusAmount = Math.round(paymentAmount * bonusPercent) / 100;
-                  await WalletService.addBonus(booking.petOwnerId, bonusAmount, `Goodwill bonus — doctor cancelled your appointment`, id, 'booking');
+                  await WalletService.addBonus(booking.petOwnerId, bonusAmount, `Goodwill bonus - doctor cancelled your appointment`, id, 'booking');
                 }
               }
             }
@@ -524,12 +524,12 @@ class BookingService {
     const hoursUntilAppt = (appointmentTime.getTime() - Date.now()) / (1000 * 60 * 60);
 
     if (hoursUntilAppt >= freeWindowHours) {
-      return { refundAmount: paymentAmount, reason: `Full refund — cancelled ${Math.floor(hoursUntilAppt)}h before appointment` };
+      return { refundAmount: paymentAmount, reason: `Full refund - cancelled ${Math.floor(hoursUntilAppt)}h before appointment` };
     } else if (hoursUntilAppt >= partialWindowHours) {
       const refund = Math.round(paymentAmount * partialPercent) / 100;
-      return { refundAmount: refund, reason: `Partial refund (${partialPercent}%) — cancelled ${Math.floor(hoursUntilAppt)}h before appointment` };
+      return { refundAmount: refund, reason: `Partial refund (${partialPercent}%) - cancelled ${Math.floor(hoursUntilAppt)}h before appointment` };
     } else {
-      return { refundAmount: 0, reason: 'No refund — cancelled too close to appointment time' };
+      return { refundAmount: 0, reason: 'No refund - cancelled too close to appointment time' };
     }
   }
 
@@ -640,7 +640,7 @@ class BookingService {
        oldBooking.symptoms || null, oldBooking.notes || null, id, newRescheduleCount, confirmedAt, now, now]
     );
 
-    // Payment module (§4.2 rule 5): a completed payment follows the booking —
+    // Payment module (§4.2 rule 5): a completed payment follows the booking -
     // re-link it to the new row so no second charge happens on reschedule.
     try {
       const relinked = await database.query(

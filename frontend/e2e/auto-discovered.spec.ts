@@ -13,7 +13,7 @@ import { USERS } from './constants'
  * TODO: Expand these stubs with specific assertions for each page.
  */
 
-test.describe('Auto-Discovered — /accept-invite', () => {
+test.describe('Auto-Discovered - /accept-invite', () => {
   test('should load /accept-invite without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -27,7 +27,7 @@ test.describe('Auto-Discovered — /accept-invite', () => {
   })
 })
 
-test.describe('Auto-Discovered — /animal-timeline', () => {
+test.describe('Auto-Discovered - /animal-timeline', () => {
   test('should load /animal-timeline without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -41,7 +41,7 @@ test.describe('Auto-Discovered — /animal-timeline', () => {
   })
 })
 
-test.describe('Auto-Discovered — /doctor/prescriptions/new', () => {
+test.describe('Auto-Discovered - /doctor/prescriptions/new', () => {
   test('should load /doctor/prescriptions/new without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -55,7 +55,7 @@ test.describe('Auto-Discovered — /doctor/prescriptions/new', () => {
   })
 })
 
-test.describe('Auto-Discovered — /vaccination-passport', () => {
+test.describe('Auto-Discovered - /vaccination-passport', () => {
   test('should load /vaccination-passport without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -69,7 +69,7 @@ test.describe('Auto-Discovered — /vaccination-passport', () => {
   })
 })
 
-test.describe('Auto-Discovered — /admin/vaccine-protocols', () => {
+test.describe('Auto-Discovered - /admin/vaccine-protocols', () => {
   test('should load /admin/vaccine-protocols without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -83,7 +83,7 @@ test.describe('Auto-Discovered — /admin/vaccine-protocols', () => {
   })
 })
 
-test.describe('Auto-Discovered — /admin/prescription-settings', () => {
+test.describe('Auto-Discovered - /admin/prescription-settings', () => {
   test('should load /admin/prescription-settings without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -139,7 +139,7 @@ test.describe('Auto-Discovered - /admin/certificate-settings', () => {
   })
 })
 
-test.describe('Auto-Discovered — /hospital-networks', () => {
+test.describe('Auto-Discovered - /hospital-networks', () => {
   test('should load /hospital-networks without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -153,7 +153,7 @@ test.describe('Auto-Discovered — /hospital-networks', () => {
   })
 })
 
-test.describe('Auto-Discovered — /patient-consent', () => {
+test.describe('Auto-Discovered - /patient-consent', () => {
   test('should load /patient-consent without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -167,7 +167,7 @@ test.describe('Auto-Discovered — /patient-consent', () => {
   })
 })
 
-test.describe('Auto-Discovered — /network-memberships', () => {
+test.describe('Auto-Discovered - /network-memberships', () => {
   test('should load /network-memberships without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -248,7 +248,7 @@ test.describe('Auto-Discovered — /network-memberships', () => {
   })
 })
 
-test.describe('Auto-Discovered — /forgot-password', () => {
+test.describe('Auto-Discovered - /forgot-password', () => {
   test('should load /forgot-password without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -260,7 +260,7 @@ test.describe('Auto-Discovered — /forgot-password', () => {
   })
 })
 
-test.describe('Auto-Discovered — /reset-password', () => {
+test.describe('Auto-Discovered - /reset-password', () => {
   test('should load /reset-password without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -273,7 +273,7 @@ test.describe('Auto-Discovered — /reset-password', () => {
 })
 
 
-test.describe('Auto-Discovered — /payments', () => {
+test.describe('Auto-Discovered - /payments', () => {
   test('should load /payments without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -287,7 +287,7 @@ test.describe('Auto-Discovered — /payments', () => {
   })
 })
 
-test.describe('Auto-Discovered — /admin/legal-policies', () => {
+test.describe('Auto-Discovered - /admin/legal-policies', () => {
   test('should load /admin/legal-policies without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -302,7 +302,7 @@ test.describe('Auto-Discovered — /admin/legal-policies', () => {
 })
 
 
-test.describe('Auto-Discovered — /admin/commission-settings', () => {
+test.describe('Auto-Discovered - /admin/commission-settings', () => {
   test('should load /admin/commission-settings without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -317,7 +317,7 @@ test.describe('Auto-Discovered — /admin/commission-settings', () => {
 })
 
 
-test.describe('Auto-Discovered — /admin/settlements', () => {
+test.describe('Auto-Discovered - /admin/settlements', () => {
   test('should load /admin/settlements without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -332,7 +332,7 @@ test.describe('Auto-Discovered — /admin/settlements', () => {
 })
 
 
-test.describe('Auto-Discovered — /referrals', () => {
+test.describe('Auto-Discovered - /referrals', () => {
   test('should load /referrals without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -347,7 +347,7 @@ test.describe('Auto-Discovered — /referrals', () => {
 })
 
 
-test.describe('Auto-Discovered — /admin/finance-reports', () => {
+test.describe('Auto-Discovered - /admin/finance-reports', () => {
   test('should load /admin/finance-reports without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -361,7 +361,7 @@ test.describe('Auto-Discovered — /admin/finance-reports', () => {
   })
 })
 
-test.describe('Auto-Discovered — /admin/master-data', () => {
+test.describe('Auto-Discovered - /admin/master-data', () => {
   test('should load /admin/master-data without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -375,7 +375,7 @@ test.describe('Auto-Discovered — /admin/master-data', () => {
   })
 })
 
-test.describe('Auto-Discovered — /grooming/provider', () => {
+test.describe('Auto-Discovered - /grooming/provider', () => {
   test('should load /grooming/provider without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -389,7 +389,7 @@ test.describe('Auto-Discovered — /grooming/provider', () => {
   })
 })
 
-test.describe('Auto-Discovered — /admin/grooming-providers', () => {
+test.describe('Auto-Discovered - /admin/grooming-providers', () => {
   test('should load /admin/grooming-providers without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -403,7 +403,7 @@ test.describe('Auto-Discovered — /admin/grooming-providers', () => {
   })
 })
 
-test.describe('Auto-Discovered — /grooming/find', () => {
+test.describe('Auto-Discovered - /grooming/find', () => {
   test('should load /grooming/find without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -417,7 +417,7 @@ test.describe('Auto-Discovered — /grooming/find', () => {
   })
 })
 
-test.describe('Auto-Discovered — /grooming/book', () => {
+test.describe('Auto-Discovered - /grooming/book', () => {
   test('should load /grooming/book without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -431,7 +431,7 @@ test.describe('Auto-Discovered — /grooming/book', () => {
   })
 })
 
-test.describe('Auto-Discovered — /grooming/my-orders', () => {
+test.describe('Auto-Discovered - /grooming/my-orders', () => {
   test('should load /grooming/my-orders without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -445,7 +445,7 @@ test.describe('Auto-Discovered — /grooming/my-orders', () => {
   })
 })
 
-test.describe('Auto-Discovered — /grooming/orders', () => {
+test.describe('Auto-Discovered - /grooming/orders', () => {
   test('should load /grooming/orders without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
@@ -459,7 +459,7 @@ test.describe('Auto-Discovered — /grooming/orders', () => {
   })
 })
 
-test.describe('Auto-Discovered — /grooming/earnings', () => {
+test.describe('Auto-Discovered - /grooming/earnings', () => {
   test('should load /grooming/earnings without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()

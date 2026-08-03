@@ -2,10 +2,10 @@
  * HospitalDocumentController
  *
  * Routes handled:
- *   POST   /vet-hospitals/:id/documents          — upload a document (vet owner)
- *   GET    /vet-hospitals/:id/documents          — list docs for a hospital
- *   PUT    /vet-hospitals/:id/documents/:docId/review  — admin review (approve/reject)
- *   GET    /vet-hospitals/admin/pending          — admin: list hospitals pending verification
+ *   POST   /vet-hospitals/:id/documents          - upload a document (vet owner)
+ *   GET    /vet-hospitals/:id/documents          - list docs for a hospital
+ *   PUT    /vet-hospitals/:id/documents/:docId/review  - admin review (approve/reject)
+ *   GET    /vet-hospitals/admin/pending          - admin: list hospitals pending verification
  */
 
 import { Response } from 'express';

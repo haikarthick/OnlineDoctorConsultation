@@ -122,7 +122,7 @@ export class AuditService {
     }
   }
 
-  /** HIPAA Compliance Dashboard — aggregate stats */
+  /** HIPAA Compliance Dashboard - aggregate stats */
   async getComplianceDashboard(): Promise<any> {
     try {
       // Total audit events (last 30 days)
@@ -211,7 +211,7 @@ export class AuditService {
     }
   }
 
-  /** Get PHI access log — who accessed medical data */
+  /** Get PHI access log - who accessed medical data */
   async getPhiAccessLog(limit: number = 50, offset: number = 0, filters: any = {}): Promise<any> {
     try {
       const conditions = [

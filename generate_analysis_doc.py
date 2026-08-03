@@ -120,7 +120,7 @@ def create_architecture_diagram():
     ax.set_facecolor('white')
     
     # Title
-    ax.text(7, 9.7, 'VetCare Platform — Post-Integration Architecture', 
+    ax.text(7, 9.7, 'VetCare Platform - Post-Integration Architecture', 
             ha='center', va='center', fontsize=16, fontweight='bold', color='#1F4E79')
     
     # Frontend box
@@ -226,7 +226,7 @@ def create_marketplace_flow_diagram():
     ax.set_ylim(0, 8)
     ax.axis('off')
     
-    ax.text(7, 7.7, 'Enhanced Livestock Marketplace — Data Flow', 
+    ax.text(7, 7.7, 'Enhanced Livestock Marketplace - Data Flow', 
             ha='center', va='center', fontsize=15, fontweight='bold', color='#1F4E79')
     
     # Sell flow (left)
@@ -291,7 +291,7 @@ def create_marketplace_flow_diagram():
     mapbox = FancyBboxPatch((7.5, 2.0), 6, 1.0, boxstyle="round,pad=0.05",
                              facecolor='#E8F5E9', edgecolor='#2E7D32', linewidth=1.5)
     ax.add_patch(mapbox)
-    ax.text(10.5, 2.7, 'Map View — Nearby Animals', ha='center', va='center',
+    ax.text(10.5, 2.7, 'Map View - Nearby Animals', ha='center', va='center',
             fontsize=9, fontweight='bold', color='#2E7D32')
     ax.text(10.5, 2.3, '10km / 25km / 50km / 100km radius', ha='center',
             va='center', fontsize=8, color='#555')
@@ -317,7 +317,7 @@ def create_phase_timeline_diagram():
     ax.set_ylim(0, 7)
     ax.axis('off')
     
-    ax.text(7, 6.7, 'Implementation Roadmap — 4 Phases', ha='center', va='center',
+    ax.text(7, 6.7, 'Implementation Roadmap - 4 Phases', ha='center', va='center',
             fontsize=15, fontweight='bold', color='#1F4E79')
     
     phases = [
@@ -420,7 +420,7 @@ def create_database_schema_diagram():
     ax.set_ylim(0, 9)
     ax.axis('off')
     
-    ax.text(7, 8.7, 'Database Schema — New & Extended Tables', ha='center', va='center',
+    ax.text(7, 8.7, 'Database Schema - New & Extended Tables', ha='center', va='center',
             fontsize=15, fontweight='bold', color='#1F4E79')
     
     def draw_table(ax, x, y, title, fields, color, width=3.8, field_height=0.2):
@@ -532,7 +532,7 @@ def create_permission_matrix_diagram():
     ax.set_ylim(0, 6)
     ax.axis('off')
     
-    ax.text(6, 5.7, 'Permission Matrix — New Features by Role', ha='center', va='center',
+    ax.text(6, 5.7, 'Permission Matrix - New Features by Role', ha='center', va='center',
             fontsize=14, fontweight='bold', color='#1F4E79')
     
     permissions = [
@@ -675,7 +675,7 @@ def create_innovation_comparison_diagram():
     ax.set_ylim(0, 7)
     ax.axis('off')
     
-    ax.text(6.5, 6.7, 'Innovation Differentiators — VetCare vs Competitors', 
+    ax.text(6.5, 6.7, 'Innovation Differentiators - VetCare vs Competitors', 
             ha='center', va='center', fontsize=14, fontweight='bold', color='#1F4E79')
     
     features = [
@@ -722,7 +722,7 @@ def create_innovation_comparison_diagram():
                 fontsize=8.5, fontweight='bold', color='#333')
     
     # Legend
-    ax.text(6.5, 0.4, 'All 10 innovations are EXCLUSIVE to VetCare — neither competitor offers any of these',
+    ax.text(6.5, 0.4, 'All 10 innovations are EXCLUSIVE to VetCare - neither competitor offers any of these',
             ha='center', va='center', fontsize=9, fontstyle='italic', color='#1F4E79',
             bbox=dict(boxstyle='round,pad=0.3', facecolor='#E8F4FD', edgecolor='#2E75B6'))
     
@@ -789,7 +789,7 @@ def generate_document():
     toc_items = [
         '1. Executive Summary',
         '2. Research Sources Overview',
-        '3. Gap Analysis — Existing vs New Features',
+        '3. Gap Analysis - Existing vs New Features',
         '4. Architecture Diagram (Post-Integration)',
         '5. Detailed Feature Specifications',
         '   5.1  Livestock Marketplace Enhancement',
@@ -828,7 +828,7 @@ def generate_document():
     
     add_body_text(doc, 
         'This document presents a comprehensive analysis of features from two leading Indian livestock '
-        'platforms — animall.in and pashushala.com — and proposes their integration into the VetCare platform '
+        'platforms - animall.in and pashushala.com - and proposes their integration into the VetCare platform '
         'with significant improvements and innovations that neither competitor currently offers.')
     
     add_body_text(doc,
@@ -867,14 +867,14 @@ def generate_document():
     
     add_body_text(doc, 'Key Features Discovered:', bold=True)
     features_animall = [
-        'Livestock Buy/Sell Marketplace — Browse cattle (cow, buffalo, heifer, bull) by location',
-        'Multi-Step Sell Form — Animal type → calving number → daily milk → price → photos (side + udder) → GPS location',
-        'Pashu Chat — Community forum for farmers (requires phone login), "1 Crore+ farmers trusted"',
-        'Video Tutorials — "How to buy from Animall", "How to sell", "How to sell in 1 day"',
-        'Prime Listings — Featured/boosted animal listings for faster sales',
-        'Tipping System — Users can tip the platform',
-        'Nearby Animals — Location-based discovery with radius filters',
-        'Live Buyer Count — Shows real-time number of interested buyers',
+        'Livestock Buy/Sell Marketplace - Browse cattle (cow, buffalo, heifer, bull) by location',
+        'Multi-Step Sell Form - Animal type → calving number → daily milk → price → photos (side + udder) → GPS location',
+        'Pashu Chat - Community forum for farmers (requires phone login), "1 Crore+ farmers trusted"',
+        'Video Tutorials - "How to buy from Animall", "How to sell", "How to sell in 1 day"',
+        'Prime Listings - Featured/boosted animal listings for faster sales',
+        'Tipping System - Users can tip the platform',
+        'Nearby Animals - Location-based discovery with radius filters',
+        'Live Buyer Count - Shows real-time number of interested buyers',
         'Categories: Cow, Buffalo, Prime, Heifer, Young Female Buffalo, Male Buffalo, Bull, Other',
     ]
     for feat in features_animall:
@@ -884,21 +884,21 @@ def generate_document():
     
     add_heading_styled(doc, '2.2 pashushala.com', level=2)
     add_body_text(doc,
-        '"Most Trusted Livestock Marketplace" — More comprehensive than animall.in with detailed animal '
+        '"Most Trusted Livestock Marketplace" - More comprehensive than animall.in with detailed animal '
         'cards, AI integration, and multiple e-commerce verticals.')
     
     add_body_text(doc, 'Key Features Discovered:', bold=True)
     features_pashushala = [
-        'Rich Livestock Cards — Breed-specific IDs (SAH-1613, HF-2721), price, lactation/biyat number, daily milk (L/day), pregnancy status+months, district/state, age, weight',
-        'PashuGuru.AI — AI-powered agricultural assistant for livestock management',
-        'Aahar (Feed/Nutrition) — Feed products marketplace and recommendations',
-        'Upchar (Medicine/Treatment) — Veterinary medicine e-commerce',
-        'Upkaran (Tools/Equipment) — Farm equipment marketplace',
-        'Utpad (Products) — Dairy products marketplace (milk, ghee, butter)',
-        'SmartFeed — AI-based intelligent feed optimization',
-        'Pashu Vet — "Anytime Vet Support" veterinary consultation service',
-        'Rural Entrepreneurship Network — Community for rural entrepreneurs',
-        'Partner Program — "Grow Your Business - Join As Partner"',
+        'Rich Livestock Cards - Breed-specific IDs (SAH-1613, HF-2721), price, lactation/biyat number, daily milk (L/day), pregnancy status+months, district/state, age, weight',
+        'PashuGuru.AI - AI-powered agricultural assistant for livestock management',
+        'Aahar (Feed/Nutrition) - Feed products marketplace and recommendations',
+        'Upchar (Medicine/Treatment) - Veterinary medicine e-commerce',
+        'Upkaran (Tools/Equipment) - Farm equipment marketplace',
+        'Utpad (Products) - Dairy products marketplace (milk, ghee, butter)',
+        'SmartFeed - AI-based intelligent feed optimization',
+        'Pashu Vet - "Anytime Vet Support" veterinary consultation service',
+        'Rural Entrepreneurship Network - Community for rural entrepreneurs',
+        'Partner Program - "Grow Your Business - Join As Partner"',
         '"Hot Deal" + "Book Now" badges on premium listings',
         'Species: Cows (Sahiwal, HF, Gir, Jersey, Hariyana, Desi), Buffaloes (Murrah, Banni, Jafarabadi), Goats (Sirohi), Heifers',
     ]
@@ -910,7 +910,7 @@ def generate_document():
     # ═════════════════════════════════════════════════════════════════════
     # 3. GAP ANALYSIS
     # ═════════════════════════════════════════════════════════════════════
-    add_heading_styled(doc, '3. Gap Analysis — Existing vs New Features', level=1)
+    add_heading_styled(doc, '3. Gap Analysis - Existing vs New Features', level=1)
     
     add_heading_styled(doc, '3.1 Already Covered (Needs Enhancement Only)', level=2)
     
@@ -922,7 +922,7 @@ def generate_document():
             ['PashuGuru.AI', 'AI Copilot (4 tools: chat, drugs, symptoms, scan)', 'Add livestock-specific prompts (feed optimization, breeding advice)'],
             ['Pashu Vet (Anytime Support)', 'Vet Hospitals + Consultations + Video', 'Add emergency quick-connect and 24/7 badge'],
             ['Breed Database', 'Animals with Gir, Sahiwal, Murrah, etc.', 'Add breed-specific attribute templates'],
-            ['Multi-language', '5 languages (EN, HI, TA, TE, KN)', 'Already ahead of competitors — no change needed'],
+            ['Multi-language', '5 languages (EN, HI, TA, TE, KN)', 'Already ahead of competitors - no change needed'],
             ['Financial Tracking', 'Financial Analytics (income/expense)', 'Add auto milk-sales revenue tracking'],
         ])
     
@@ -1047,7 +1047,7 @@ def generate_document():
     # ── 5.2 Milk Recording ──
     add_heading_styled(doc, '5.2 Milk Recording & Dairy Dashboard', level=2)
     add_body_text(doc, 'Source: Both platforms (daily milk yield is the most important livestock metric)', italic=True)
-    add_body_text(doc, 'New module — no existing equivalent', italic=True)
+    add_body_text(doc, 'New module - no existing equivalent', italic=True)
     
     doc.add_paragraph()
     add_body_text(doc, 'A) Milk Recording', bold=True)
@@ -1138,10 +1138,10 @@ def generate_document():
     doc.add_paragraph()
     add_body_text(doc, 'B) Expert Badges', bold=True)
     badges = [
-        'Veterinarian Badge — automatically assigned for vet role users',
-        'Top Contributor — based on engagement score (posts, helpful votes)',
-        'Verified Farmer — linked to enterprise verification',
-        'Admin/Moderator — for content moderation team',
+        'Veterinarian Badge - automatically assigned for vet role users',
+        'Top Contributor - based on engagement score (posts, helpful votes)',
+        'Verified Farmer - linked to enterprise verification',
+        'Admin/Moderator - for content moderation team',
     ]
     for badge in badges:
         add_bullet(doc, badge)
@@ -1177,12 +1177,12 @@ def generate_document():
     
     doc.add_paragraph()
     smart_feed_items = [
-        'Feed Recommendation Engine — Input: animal profile (species, breed, weight, age, lactation stage, pregnancy, daily milk, health conditions) → Output: daily diet plan (feed type → quantity → frequency → cost)',
-        'Feed Cost Optimizer — Input: available inventory + market prices → Output: least-cost balanced ration meeting nutritional requirements',
-        'Seasonal Adjustments — Summer/winter/monsoon-specific recommended changes',
-        'Goal-based Optimization — Maximize milk yield, weight gain, or reproductive health',
-        'Substitution Suggestions — When a feed is low-stock, suggest alternatives',
-        'Feed Impact Tracker — Change feed → measure milk yield impact over 7/14/30 days',
+        'Feed Recommendation Engine - Input: animal profile (species, breed, weight, age, lactation stage, pregnancy, daily milk, health conditions) → Output: daily diet plan (feed type → quantity → frequency → cost)',
+        'Feed Cost Optimizer - Input: available inventory + market prices → Output: least-cost balanced ration meeting nutritional requirements',
+        'Seasonal Adjustments - Summer/winter/monsoon-specific recommended changes',
+        'Goal-based Optimization - Maximize milk yield, weight gain, or reproductive health',
+        'Substitution Suggestions - When a feed is low-stock, suggest alternatives',
+        'Feed Impact Tracker - Change feed → measure milk yield impact over 7/14/30 days',
     ]
     for item in smart_feed_items:
         add_bullet(doc, item)
@@ -1372,31 +1372,31 @@ def generate_document():
     
     add_heading_styled(doc, '6.2 Extended Existing Tables (2)', level=2)
     
-    add_body_text(doc, 'marketplace_listings — New Columns:', bold=True)
+    add_body_text(doc, 'marketplace_listings - New Columns:', bold=True)
     mp_cols = [
-        'breed VARCHAR — Animal breed from breed database',
-        'species VARCHAR — Cow, Buffalo, Goat, Sheep, etc.',
-        'lactation_number INT — Calving/biyat number',
-        'daily_milk_yield_liters DECIMAL — Average daily production',
-        'pregnancy_status VARCHAR — Not pregnant / Pregnant',
-        'pregnancy_months INT — Months pregnant (if applicable)',
-        'animal_age_months INT — Age in months',
-        'animal_weight_kg DECIMAL — Current weight',
-        'location_district, location_state VARCHAR — Seller location',
-        'listing_tier ENUM (basic/silver/gold) — Boost level',
-        'is_hot_deal BOOLEAN — System-flagged competitive price',
-        'linked_animal_id FK → animals — Links to registered animal',
+        'breed VARCHAR - Animal breed from breed database',
+        'species VARCHAR - Cow, Buffalo, Goat, Sheep, etc.',
+        'lactation_number INT - Calving/biyat number',
+        'daily_milk_yield_liters DECIMAL - Average daily production',
+        'pregnancy_status VARCHAR - Not pregnant / Pregnant',
+        'pregnancy_months INT - Months pregnant (if applicable)',
+        'animal_age_months INT - Age in months',
+        'animal_weight_kg DECIMAL - Current weight',
+        'location_district, location_state VARCHAR - Seller location',
+        'listing_tier ENUM (basic/silver/gold) - Boost level',
+        'is_hot_deal BOOLEAN - System-flagged competitive price',
+        'linked_animal_id FK → animals - Links to registered animal',
     ]
     for col in mp_cols:
         add_bullet(doc, col)
     
     doc.add_paragraph()
-    add_body_text(doc, 'animals — New Columns:', bold=True)
+    add_body_text(doc, 'animals - New Columns:', bold=True)
     animal_cols = [
-        'current_lactation_number INT — Current lactation cycle number',
-        'last_calving_date DATE — Most recent calving event',
-        'daily_milk_yield DECIMAL — Latest recorded daily yield',
-        'lactation_status ENUM (active/dry/not_applicable) — Current status',
+        'current_lactation_number INT - Current lactation cycle number',
+        'last_calving_date DATE - Most recent calving event',
+        'daily_milk_yield DECIMAL - Latest recorded daily yield',
+        'lactation_status ENUM (active/dry/not_applicable) - Current status',
     ]
     for col in animal_cols:
         add_bullet(doc, col)
@@ -1415,10 +1415,10 @@ def generate_document():
     doc.add_paragraph()
     add_body_text(doc, 'Files to update:', bold=True)
     files_list = [
-        'backend/src/services/PermissionService.ts — DEFAULT_ROLE_PERMISSIONS + PERMISSION_CATEGORIES',
-        'frontend/src/context/PermissionContext.tsx — PERMISSION_ROUTE_MAP, ROUTE_PERMISSION_MAP, NAV_PERMISSION_MAP',
-        'frontend/src/components/Navigation.tsx — menuItems array (roles + section)',
-        'frontend/src/App.tsx — <RoleRoute path="..."> with matching path key',
+        'backend/src/services/PermissionService.ts - DEFAULT_ROLE_PERMISSIONS + PERMISSION_CATEGORIES',
+        'frontend/src/context/PermissionContext.tsx - PERMISSION_ROUTE_MAP, ROUTE_PERMISSION_MAP, NAV_PERMISSION_MAP',
+        'frontend/src/components/Navigation.tsx - menuItems array (roles + section)',
+        'frontend/src/App.tsx - <RoleRoute path="..."> with matching path key',
     ]
     for f in files_list:
         add_bullet(doc, f)
@@ -1436,15 +1436,15 @@ def generate_document():
     add_styled_table(doc,
         ['Permission Key', 'pet_owner', 'farmer', 'veterinarian', 'admin'],
         [
-            ['milk_recording', '—', '✓', '✓', '✓'],
-            ['dairy_dashboard', '—', '✓', '—', '✓'],
+            ['milk_recording', '-', '✓', '✓', '✓'],
+            ['dairy_dashboard', '-', '✓', '-', '✓'],
             ['community_forum', '✓', '✓', '✓', '✓'],
             ['knowledge_hub', '✓', '✓', '✓', '✓'],
-            ['partner_network', '—', '✓', '—', '✓'],
+            ['partner_network', '-', '✓', '-', '✓'],
             ['medicine_store', '✓', '✓', '✓', '✓'],
-            ['equipment_store', '—', '✓', '—', '✓'],
-            ['dairy_products', '✓', '✓', '—', '✓'],
-            ['boost_listing', '✓', '✓', '—', '—'],
+            ['equipment_store', '-', '✓', '-', '✓'],
+            ['dairy_products', '✓', '✓', '-', '✓'],
+            ['boost_listing', '✓', '✓', '-', '-'],
         ])
     
     doc.add_page_break()
@@ -1533,7 +1533,7 @@ def generate_document():
     
     doc.add_paragraph()
     
-    add_heading_styled(doc, 'Phase 1 — Core Revenue Drivers (HIGH Priority)', level=2)
+    add_heading_styled(doc, 'Phase 1 - Core Revenue Drivers (HIGH Priority)', level=2)
     add_styled_table(doc,
         ['#', 'Feature', 'New Pages', 'Backend Changes', 'Complexity'],
         [
@@ -1544,7 +1544,7 @@ def generate_document():
     
     doc.add_paragraph()
     
-    add_heading_styled(doc, 'Phase 2 — Ecosystem Growth (MEDIUM Priority)', level=2)
+    add_heading_styled(doc, 'Phase 2 - Ecosystem Growth (MEDIUM Priority)', level=2)
     add_styled_table(doc,
         ['#', 'Feature', 'Changes', 'Complexity'],
         [
@@ -1555,7 +1555,7 @@ def generate_document():
     
     doc.add_paragraph()
     
-    add_heading_styled(doc, 'Phase 3 — Platform Expansion (MEDIUM Priority)', level=2)
+    add_heading_styled(doc, 'Phase 3 - Platform Expansion (MEDIUM Priority)', level=2)
     add_styled_table(doc,
         ['#', 'Feature', 'Changes', 'Complexity'],
         [
@@ -1567,7 +1567,7 @@ def generate_document():
     
     doc.add_paragraph()
     
-    add_heading_styled(doc, 'Phase 4 — Polish & Scale (LOW Priority)', level=2)
+    add_heading_styled(doc, 'Phase 4 - Polish & Scale (LOW Priority)', level=2)
     add_styled_table(doc,
         ['#', 'Feature', 'Changes', 'Complexity'],
         [
@@ -1603,9 +1603,9 @@ def generate_document():
     biz_impacts = [
         'Revenue Streams: Boost listings (Silver/Gold tiers), marketplace transactions, partner commissions, subscription dairy deliveries',
         'User Engagement: Community forum creates sticky daily usage; milk recording creates daily login habit',
-        'Trust & Verification: AI-verified milk yield, vaccination badges, IoT-verified weight, genomic profiles — all build buyer confidence',
+        'Trust & Verification: AI-verified milk yield, vaccination badges, IoT-verified weight, genomic profiles - all build buyer confidence',
         'Ecosystem Lock-in: Deep integration between modules means switching to a competitor loses all interconnected data',
-        'Market Positioning: From "veterinary consultation app" to "complete livestock ecosystem platform" — competing directly with animall + pashushala while offering 10 exclusive innovations neither has',
+        'Market Positioning: From "veterinary consultation app" to "complete livestock ecosystem platform" - competing directly with animall + pashushala while offering 10 exclusive innovations neither has',
         'Geographic Expansion: Multi-language support (5 languages) means immediate reach across India vs Hindi-only competitors',
     ]
     for impact in biz_impacts:
@@ -1617,7 +1617,7 @@ def generate_document():
     add_body_text(doc, 
         'VetCare will be the ONLY platform that combines veterinary consultation, livestock marketplace, '
         'dairy management, AI-powered recommendations, community forum, e-commerce (medicine + equipment + '
-        'dairy products), and full traceability — all in a single integrated ecosystem with deep cross-module '
+        'dairy products), and full traceability - all in a single integrated ecosystem with deep cross-module '
         'data flow. Neither animall.in nor pashushala.com comes close to this level of integration.')
     
     doc.add_paragraph()
@@ -1626,7 +1626,7 @@ def generate_document():
     # Footer
     footer_p = doc.add_paragraph()
     footer_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = footer_p.add_run('— End of Document —')
+    run = footer_p.add_run('- End of Document -')
     run.font.size = Pt(12)
     run.font.color.rgb = RGBColor(0x99, 0x99, 0x99)
     run.font.name = 'Calibri'

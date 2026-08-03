@@ -123,12 +123,12 @@
 }
 
 /* ══════════════════════════════════════════
-   RESPONSIVE — 4-tier mandatory
+   RESPONSIVE - 4-tier mandatory
    ══════════════════════════════════════════ */
 
-/* 1200px — nothing changes, table is still wide */
+/* 1200px - nothing changes, table is still wide */
 
-/* 768px — hide text labels, show icons only with tooltip */
+/* 768px - hide text labels, show icons only with tooltip */
 @media (max-width: 768px) {
   .cert-action-btn span {
     display: none;
@@ -146,7 +146,7 @@
   }
 }
 
-/* 640px — buttons slightly smaller */
+/* 640px - buttons slightly smaller */
 @media (max-width: 640px) {
   .cert-action-btn {
     padding: 5px 6px;
@@ -157,7 +157,7 @@
   }
 }
 
-/* 480px — stack actions vertically if needed */
+/* 480px - stack actions vertically if needed */
 @media (max-width: 480px) {
   .cert-actions {
     flex-direction: column;

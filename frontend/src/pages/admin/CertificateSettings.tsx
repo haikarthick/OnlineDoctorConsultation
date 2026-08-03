@@ -241,7 +241,7 @@ const CertificateSettings: React.FC<CertificateSettingsProps> = ({ onNavigate })
           <code className="si-12e63293">
             {values['cert.autoNumberPrefix'] || 'VC'}-{new Date().getFullYear()}-00001
           </code>
-          {' '}— auto-assigned when a vet issues a certificate.
+          {' '}- auto-assigned when a vet issues a certificate.
         </p>
       </div>
 
@@ -348,7 +348,7 @@ const CertificateSettings: React.FC<CertificateSettingsProps> = ({ onNavigate })
               className="si-4e0924aa"
             >✕</button>
             <h2 className="si-7d04053f">
-              {t('certificateSettings.preview')} — Certificate Letterhead
+              {t('certificateSettings.preview')} - Certificate Letterhead
             </h2>
 
             <div className="si-1c52eabb">

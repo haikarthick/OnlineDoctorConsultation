@@ -187,7 +187,7 @@ class PaymentOrchestrator {
     const mode = gateway.mode;
 
     if (payableNow <= 0) {
-      // Wallet fully covers — complete immediately (still goes through the
+      // Wallet fully covers - complete immediately (still goes through the
       // same transactional completion path; walletApplied re-validated inside)
       await database.query(
         `UPDATE payments SET wallet_amount_used = $1, updated_at = NOW() WHERE id = $2`,
@@ -222,7 +222,7 @@ class PaymentOrchestrator {
   }
 
   /**
-   * Step 2 (demo mode): the simulated checkout succeeded — capture and complete.
+   * Step 2 (demo mode): the simulated checkout succeeded - capture and complete.
    * P2 replaces the trust model with Razorpay signature verification + webhook.
    */
   async completeDemoCheckout(userId: string, paymentId: string): Promise<void> {
@@ -295,7 +295,7 @@ class PaymentOrchestrator {
   }
 
   /**
-   * P2: Razorpay webhook (§12 rules 2–3). Signature verified against the raw
+   * P2: Razorpay webhook (§12 rules 2-3). Signature verified against the raw
    * body; idempotent via unique gateway_event_id on payment_events.
    */
   async handleRazorpayWebhook(rawBody: string, signature: string, eventId: string | null): Promise<{ handled: boolean; reason?: string }> {
@@ -324,7 +324,7 @@ class PaymentOrchestrator {
     }
 
     // Refund events carry payload.refund.entity (which references a PAYMENT id), not
-    // payload.payment.entity — resolving them by order id alone would silently drop every one.
+    // payload.payment.entity - resolving them by order id alone would silently drop every one.
     const refundPaymentRef = event?.payload?.refund?.entity?.payment_id;
     if (!gatewayOrderId && !refundPaymentRef) return { handled: true, reason: 'no_order_ref' };
     const payRes = gatewayOrderId
@@ -343,7 +343,7 @@ class PaymentOrchestrator {
     if (eventType === 'payment.captured' || eventType === 'order.paid') {
       if (p.status !== 'completed') {
         const fee = entity?.fee ? Math.round(entity.fee) / 100 : 0;
-        // Completion is per revenue stream. completeCapturedPayment is the CONSULTATION path —
+        // Completion is per revenue stream. completeCapturedPayment is the CONSULTATION path -
         // it snapshots a vet commission, flips a booking and issues a VC invoice, none of which
         // apply to a grooming order. Routing by payment_source keeps the streams from
         // contaminating each other now that grooming rows are visible to this lookup at all.
@@ -363,7 +363,7 @@ class PaymentOrchestrator {
     }
     // Refunds issued from the Razorpay dashboard never touch our refund code, so without this the
     // ledger silently disagrees with the gateway. Our OWN refunds also fire these events, hence
-    // the "only record what we have not already recorded" guard — it must not double-count.
+    // the "only record what we have not already recorded" guard - it must not double-count.
     if (eventType === 'refund.processed' || eventType === 'refund.created') {
       const refundEntity = event?.payload?.refund?.entity;
       const refundedTotal = refundEntity?.amount ? Math.round(refundEntity.amount) / 100 : 0;
@@ -405,7 +405,7 @@ class PaymentOrchestrator {
 
   /**
    * P2 reconciliation sweep (§9): payments stuck in 'pending' are re-checked
-   * against the gateway — captures that lost their webhook get completed,
+   * against the gateway - captures that lost their webhook get completed,
    * definitively failed ones get marked failed.
    */
   async reconcilePendingPayments(): Promise<number> {
@@ -426,7 +426,7 @@ class PaymentOrchestrator {
         const attempts = await rzp.fetchOrderPayments(p.gateway_order_id);
         const captured = attempts.find((a: any) => a.status === 'captured');
         if (captured) {
-          // Same per-stream routing as the webhook — see handleRazorpayWebhook.
+          // Same per-stream routing as the webhook - see handleRazorpayWebhook.
           if (p.payment_source === 'grooming') {
             const GroomingPaymentService = (await import('../grooming/GroomingPaymentService')).default;
             await GroomingPaymentService.completeFromGateway(p.id, captured.gatewayPaymentId);
@@ -498,7 +498,7 @@ class PaymentOrchestrator {
         );
       }
 
-      // Commission snapshot (D4 — locked at payment time)
+      // Commission snapshot (D4 - locked at payment time)
       const gross = parseFloat(String(p.amount));
       const { percent, flat } = await this.getEffectiveCommission(p.payee_id);
       const { commission, doctorNet } = this.computeCommission(gross, percent, flat);
@@ -570,7 +570,7 @@ class PaymentOrchestrator {
   }
 
   /**
-   * Refund preview for the cancel dialog (§10 policy transparency) — pure computation.
+   * Refund preview for the cancel dialog (§10 policy transparency) - pure computation.
    */
   async computeRefundPreview(bookingId: string, cancellerRole: string): Promise<{
     hasPayment: boolean; paymentAmount: number; refundAmount: number;
@@ -659,8 +659,8 @@ class PaymentOrchestrator {
           const gateway = await getActiveGateway();
           await gateway.refund(payRes.rows[0].gateway_payment_id, gatewayRefundAmount, { bookingId, reason });
         } catch (err: any) {
-          // Gateway refund failed — fall back to wallet so the patient is never stranded
-          logger.error('Gateway refund failed — falling back to wallet destination', { paymentId, error: err.message });
+          // Gateway refund failed - fall back to wallet so the patient is never stranded
+          logger.error('Gateway refund failed - falling back to wallet destination', { paymentId, error: err.message });
           walletRefundAmount = preview.refundAmount;
           gatewayRefundAmount = 0;
           destination = 'wallet';
@@ -687,7 +687,7 @@ class PaymentOrchestrator {
       }
 
       if (walletRefundAmount > 0 || preview.bonusAmount > 0) {
-        // wallet credit (refund) — inline, transactional
+        // wallet credit (refund) - inline, transactional
         const wRes = await client.query(
           `SELECT id FROM wallets WHERE user_id = $1 FOR UPDATE`, [petOwnerId]
         );
@@ -720,7 +720,7 @@ class PaymentOrchestrator {
           );
           await client.query(
             `INSERT INTO wallet_transactions (id, wallet_id, type, amount, description, reference_id, reference_type, created_at)
-             VALUES ($1, $2, 'bonus', $3, 'Goodwill bonus — doctor cancelled your appointment', $4, 'booking', NOW())`,
+             VALUES ($1, $2, 'bonus', $3, 'Goodwill bonus - doctor cancelled your appointment', $4, 'booking', NOW())`,
             [uuidv4(), walletId, preview.bonusAmount, bookingId]
           );
         }
@@ -738,14 +738,14 @@ class PaymentOrchestrator {
       logger.error('refundForCancellation failed', { bookingId, gatewayRefundAmount, error: err });
       if (gatewayRefundAmount > 0) {
         // CRITICAL: gateway refund already went out but the ledger update failed
-        logger.error('CRITICAL: gateway refund issued but DB update failed — manual reconciliation needed', { paymentId, bookingId, gatewayRefundAmount });
+        logger.error('CRITICAL: gateway refund issued but DB update failed - manual reconciliation needed', { paymentId, bookingId, gatewayRefundAmount });
       }
       throw new DatabaseError('Refund processing failed', { originalError: err });
     } finally {
       client.release();
     }
 
-    // ── D9/D12/D6 compensation matrix — ledger entries after the money moved ──
+    // ── D9/D12/D6 compensation matrix - ledger entries after the money moved ──
     try {
       const EarningsService = (await import('./EarningsService')).default;
       if (cancellerRole === 'veterinarian') {
@@ -766,16 +766,16 @@ class PaymentOrchestrator {
         await EarningsService.createCompensation({
           doctorId, bookingId, paymentId,
           type: 'cancel_compensation', amount: comp,
-          reason: `Late patient cancellation — ${sharePct}% of retained amount`,
+          reason: `Late patient cancellation - ${sharePct}% of retained amount`,
         });
       } else if (preview.policy === 'patient_no_refund_window') {
-        // D6: cancelled inside the no-refund window — doctor gets his net share
+        // D6: cancelled inside the no-refund window - doctor gets his net share
         const sharePct = await PaymentModuleConfig.getDoctorShareOnPatientNoShowPercent();
         const comp = round2(doctorEarningSnapshot * sharePct / 100);
         await EarningsService.createCompensation({
           doctorId, bookingId, paymentId,
           type: 'no_show_compensation', amount: comp,
-          reason: `Very late patient cancellation — ${sharePct}% of net share`,
+          reason: `Very late patient cancellation - ${sharePct}% of net share`,
         });
       }
     } catch (err: any) {
@@ -809,7 +809,7 @@ class PaymentOrchestrator {
          ORDER BY p.created_at DESC LIMIT 1`,
         [bookingId]
       );
-      if (res.rows.length === 0) return; // unpaid booking — nothing to settle
+      if (res.rows.length === 0) return; // unpaid booking - nothing to settle
       const row = res.rows[0];
 
       if (missedBy === 'doctor') {
@@ -828,7 +828,7 @@ class PaymentOrchestrator {
         await EarningsService.createCompensation({
           doctorId: row.veterinarian_id, bookingId, paymentId: row.id,
           type: 'no_show_compensation', amount: comp,
-          reason: `Patient no-show — ${sharePct}% of net share`,
+          reason: `Patient no-show - ${sharePct}% of net share`,
         });
       }
     } catch (err: any) {
@@ -880,7 +880,7 @@ class PaymentOrchestrator {
   }
 
   /** Receipt payload (P1 basic receipts). Handles both consultation (booking-linked) and
-   *  pharmacy (dispensing-linked) payments — the two payment_source values that carry
+   *  pharmacy (dispensing-linked) payments - the two payment_source values that carry
    *  their own line-item context instead of a booking. */
   async getReceipt(paymentId: string, requesterId: string, requesterRole: string): Promise<any> {
     const res = await database.query(

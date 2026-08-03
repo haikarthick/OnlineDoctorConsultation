@@ -9,7 +9,7 @@ interface Props { onNavigate: (path: string) => void }
 
 type Tab = 'overview' | 'services' | 'locations' | 'resources' | 'staff'
 
-// Icon only — the colours live in modules.css as .verification-chip modifiers, so a status
+// Icon only - the colours live in modules.css as .verification-chip modifiers, so a status
 // looks the same everywhere it is rendered instead of per-page hex.
 const STATUS_ICON: Record<string, string> = {
   pending: '⏳', verified: '✓', rejected: '✕', suspended: '⏸',
@@ -51,7 +51,7 @@ const GroomingProvider: React.FC<Props> = () => {
       const res = await apiService.createGroomingProvider(form)
       setProvider(res.data)
       // createProvider() grants the 'groomer' role in the DB, and authMiddleware reads roles live
-      // on every request — so refetching permissions here lights up the provider nav (console,
+      // on every request - so refetching permissions here lights up the provider nav (console,
       // orders, earnings) immediately, with no re-login.
       await reloadPermissions()
       flash(t('grooming.created'))

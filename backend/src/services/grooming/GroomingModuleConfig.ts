@@ -22,7 +22,7 @@ class GroomingModuleConfig {
       this.cache.set(key, { value, fetchedAt: Date.now() });
       return value;
     } catch (err: any) {
-      logger.warn('GroomingModuleConfig read failed — using cached/default', { key, error: err.message });
+      logger.warn('GroomingModuleConfig read failed - using cached/default', { key, error: err.message });
       return hit?.value ?? null;
     }
   }
@@ -46,7 +46,7 @@ class GroomingModuleConfig {
     return v === null || v === '' ? def : v;
   }
 
-  /** Master flag — false = module invisible/inert. */
+  /** Master flag - false = module invisible/inert. */
   async isEnabled(): Promise<boolean> { return this.getBoolean('grooming.enabled', false); }
 
   async getCurrency(): Promise<string> { return this.getString('grooming.currency', 'INR'); }
@@ -94,13 +94,13 @@ class GroomingModuleConfig {
   async getProviderShareOnNoShowPercent(): Promise<number> { return this.getNumber('grooming.compensation.providerShareOnNoShowPercent', 100); }
   /** Prefix for the grooming GST credit-note series issued on refunds (separate from GRM). */
   async getCreditNotePrefix(): Promise<string> { return this.getString('grooming.creditNotePrefix', 'GRMCN'); }
-  /** TDS percentage withheld on grooming provider payouts (own key — not the consultation one). */
+  /** TDS percentage withheld on grooming provider payouts (own key - not the consultation one). */
   async getTdsRatePercent(): Promise<number> { return this.getNumber('grooming.settlement.tdsRatePercent', 0); }
   /**
    * Default refund destination: 'gateway' (back to the original payment method) or 'wallet'.
    *
    * Defaults to GATEWAY. It used to default to 'wallet', which meant a cancelled booking was
-   * repaid as store credit the customer had no way to withdraw — their money could only ever be
+   * repaid as store credit the customer had no way to withdraw - their money could only ever be
    * spent back on this platform. Returning it to source is the correct default; the wallet
    * remains available as an explicit customer choice, and as the fallback when a gateway refund
    * fails (see GroomingRefundService), which is exactly why wallet withdrawals now exist.

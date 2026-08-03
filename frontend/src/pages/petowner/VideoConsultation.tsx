@@ -68,7 +68,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
     try { sessionStorage.setItem(cacheKey, JSON.stringify(msgs)) } catch { /* quota */ }
   }
 
-  // Start the camera & microphone — with graceful fallback
+  // Start the camera & microphone - with graceful fallback
   const startLocalStream = useCallback(async () => {
     setCameraError('')
 
@@ -103,7 +103,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
     } catch (err: any) {
 }
 
-    // Attempt 3: No media at all — still allow chat
+    // Attempt 3: No media at all - still allow chat
     setMediaMode('none')
     setStreamToSend(null)
     setIsCameraOff(true)
@@ -275,7 +275,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
         try {
           const res2 = await apiService.getVideoSessionByConsultation(conId)
           if (res2.data && res2.data.id !== sessionId) {
-            // A different session was created — switch to it
+            // A different session was created - switch to it
             if (sessionPollRef.current) { clearInterval(sessionPollRef.current); sessionPollRef.current = null }
             setSession(res2.data)
             if (res2.data.status === 'active') {
@@ -639,7 +639,7 @@ setError(t('videoConsultation.failedToStartRecording'))
           <p className="page-subtitle">
             {session?.status === 'active' ? (
               <span className="si-e5391e22">
-                🔴 {t('videoConsultation.live')} — {formatDuration(callDuration)}
+                🔴 {t('videoConsultation.live')} - {formatDuration(callDuration)}
               </span>
             ) : session?.status === 'waiting' ? (
               t('videoConsultation.waitingForDoctor')
@@ -729,7 +729,7 @@ setError(t('videoConsultation.failedToStartRecording'))
               </div>
             )}
 
-            {/* Self view — real camera feed or status indicator */}
+            {/* Self view - real camera feed or status indicator */}
             <div className="video-self" style={isCameraOff || mediaMode !== 'video' ? {} : { padding: 0, overflow: 'hidden' }}>
               {isCameraOff || mediaMode !== 'video' ? (
                 <span className="si-ecda976e">

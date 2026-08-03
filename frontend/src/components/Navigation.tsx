@@ -90,7 +90,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
   }, [currentPath])
 
   /* ════════════════════════════════════════════════════════
-   * MENU DEFINITIONS — properly grouped by module/section
+   * MENU DEFINITIONS - properly grouped by module/section
    * ════════════════════════════════════════════════════════ */
   const menuItems: MenuItem[] = [
     // ── Dashboard (always first, ungrouped) ──
@@ -121,14 +121,14 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
     { id: 'grooming-my-orders', label: t('nav.groomingMyOrders'), icon: '📅', path: '/grooming/my-orders',
       roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
-    // Self-service onboarding entry. Same path as the console below — the page renders the
+    // Self-service onboarding entry. Same path as the console below - the page renders the
     // "create your business" form until a provider exists. Hidden once the user actually holds
     // grooming_provider_console (see the filter below) so the two never show at once.
     { id: 'grooming-apply', label: t('nav.groomingApply'), icon: '🏪', path: '/grooming/provider',
       roles: ['pet_owner', 'farmer', 'veterinarian'], section: 'Grooming & Spa' },
     // pet_owner/farmer are listed on the provider items because createProvider() grants the
     // 'groomer' role in the DB but the cached login payload keeps their original role until they
-    // re-login. The permission check below is the real gate — it reads live DB roles — so a
+    // re-login. The permission check below is the real gate - it reads live DB roles - so a
     // customer who has not registered a business still never sees these.
     { id: 'grooming-provider', label: t('nav.groomingProvider'), icon: '💈', path: '/grooming/provider',
       roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
@@ -251,7 +251,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-commission', label: t('nav.commissionSettings'), icon: '🪙', path: '/admin/commission-settings',
       roles: ['admin'], section: 'Finance' },
-    // Payables answers "who do I owe"; Settlements is the withdrawal queue. Payables first —
+    // Payables answers "who do I owe"; Settlements is the withdrawal queue. Payables first -
     // it is the screen an admin opens to decide what to pay, before actioning anything.
     { id: 'admin-payables', label: t('nav.payables'), icon: '💸', path: '/admin/payables',
       roles: ['admin'], section: 'Finance' },
@@ -305,7 +305,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'], section: 'Preferences' }
   ]
 
-  // Filter by role AND permission — supports multi-role users (P4-HIGH1)
+  // Filter by role AND permission - supports multi-role users (P4-HIGH1)
   const filteredMenuItems = menuItems.filter(item => {
     const userRoles = user?.roles && user.roles.length > 0 ? user.roles : (user?.role ? [user.role] : [])
     if (!item.roles.some(r => userRoles.includes(r as UserRole))) return false
@@ -319,14 +319,14 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
         && networks.length === 0) {
       return false
     }
-    // Grooming onboarding CTA disappears once the user owns/staffs a provider — from then on the
+    // Grooming onboarding CTA disappears once the user owns/staffs a provider - from then on the
     // "My Grooming Business" console entry covers the same route.
     if (item.id === 'grooming-apply' && hasPermission('grooming_provider_console')) {
       return false
     }
     // Dark launch: while `grooming.enabled` is off every /grooming route 404s server-side, so the
     // whole section is hidden rather than leading users into dead pages. Permissions alone can't
-    // do this — the flag is a runtime setting, not a role.
+    // do this - the flag is a runtime setting, not a role.
     if (item.section === 'Grooming & Spa' && !groomingEnabled) {
       return false
     }
@@ -348,7 +348,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     return groups
   }, [filteredMenuItems])
 
-  // Track collapsed sections — start with advanced sections collapsed
+  // Track collapsed sections - start with advanced sections collapsed
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
     'Innovation': true,
     'Intelligence': true,
@@ -477,7 +477,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
           )}
         </div>
 
-        {/* Menu Items — grouped by section */}
+        {/* Menu Items - grouped by section */}
         <div className="nav-menu" ref={navMenuRef} role="menubar" aria-label="Navigation menu">
           {groupedMenuItems.map((group) => {
             const isMainSection = group.section === 'Main'

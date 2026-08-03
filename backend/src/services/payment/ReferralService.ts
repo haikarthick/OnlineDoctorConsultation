@@ -133,7 +133,7 @@ class ReferralService {
     try {
       await NotificationService.createNotification(
         c.user_id, 'booking', 'Specialist Referral',
-        'Your doctor has referred you to a specialist for further care. You can book the specialist from Find Doctor — the referral history stays linked to your records.',
+        'Your doctor has referred you to a specialist for further care. You can book the specialist from Find Doctor - the referral history stays linked to your records.',
         'all', { referralId: id, consultationId }
       );
     } catch { /* non-blocking */ }
@@ -154,7 +154,7 @@ class ReferralService {
     const targetVetId = params.veterinarianId || referral.to_vet_id;
     if (!targetVetId) throw new ValidationError('Choose a doctor to continue.');
     if (targetVetId === referral.from_vet_id) {
-      throw new ValidationError('The referring doctor is unavailable — please choose a different doctor.');
+      throw new ValidationError('The referring doctor is unavailable - please choose a different doctor.');
     }
     const rechosen = !!(params.veterinarianId && params.veterinarianId !== referral.to_vet_id);
 
@@ -195,9 +195,9 @@ class ReferralService {
   /** Patient declines → doctor-cancellation treatment on the original booking (D9). */
   async declineReferral(patientId: string, referralId: string, destination: 'wallet' | 'gateway' = 'wallet'): Promise<any> {
     const referral = await this.getActionableReferral(patientId, referralId);
-    // Restore booking to a refundable state marker is unnecessary — refund works off payments
+    // Restore booking to a refundable state marker is unnecessary - refund works off payments
     const outcome = await PaymentOrchestrator.refundForCancellation(
-      referral.booking_id, patientId, 'veterinarian', 'Referral declined — original doctor unavailable', destination
+      referral.booking_id, patientId, 'veterinarian', 'Referral declined - original doctor unavailable', destination
     );
     await database.query(
       `UPDATE referrals SET transfer_status = 'refunded', status = 'declined', updated_at = NOW() WHERE id = $1`,
@@ -228,14 +228,14 @@ class ReferralService {
     for (const r of stale.rows) {
       try {
         await PaymentOrchestrator.refundForCancellation(
-          r.booking_id, r.pet_owner_id, 'veterinarian', 'Referral expired without action — auto refund', 'wallet'
+          r.booking_id, r.pet_owner_id, 'veterinarian', 'Referral expired without action - auto refund', 'wallet'
         );
         await database.query(
           `UPDATE referrals SET transfer_status = 'expired', status = 'cancelled', updated_at = NOW() WHERE id = $1`,
           [r.id]
         );
         await NotificationService.createNotification(
-          r.pet_owner_id, 'payment', 'Referral Expired — Refund Issued',
+          r.pet_owner_id, 'payment', 'Referral Expired - Refund Issued',
           'You did not act on a referral in time, so a full refund plus goodwill bonus has been credited to your wallet.',
           'all', { referralId: r.id }
         ).catch(() => {});
@@ -251,7 +251,7 @@ class ReferralService {
   /**
    * Emergency fast-track (§4.5, D11): paid emergency bookings the doctor
    * hasn't confirmed within booking.emergencyConfirmMinutes are converted
-   * into an open referral offer (patient picks another doctor or refunds —
+   * into an open referral offer (patient picks another doctor or refunds -
    * costs on the non-responding doctor).
    */
   async expireEmergencyConfirmations(): Promise<number> {
@@ -300,7 +300,7 @@ class ReferralService {
     return count;
   }
 
-  /** Referral lists (§4.4 history — all personas). */
+  /** Referral lists (§4.4 history - all personas). */
   async listForUser(userId: string, role: string): Promise<any[]> {
     const base = `
       SELECT r.id, r.referral_type as "referralType", r.reason, r.status,

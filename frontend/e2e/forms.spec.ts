@@ -13,7 +13,7 @@ import { loginAs } from './fixtures'
  * - Hospital registration form validation
  */
 
-test.describe('Form Validation — Login', () => {
+test.describe('Form Validation - Login', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/login')
   })
@@ -42,7 +42,7 @@ test.describe('Form Validation — Login', () => {
   })
 })
 
-test.describe('Form Validation — Registration', () => {
+test.describe('Form Validation - Registration', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/register')
   })
@@ -113,7 +113,7 @@ test.describe('Form Validation — Registration', () => {
   })
 })
 
-test.describe('Form Validation — Settings/Profile', () => {
+test.describe('Form Validation - Settings/Profile', () => {
   test('pet_owner settings form loads with pre-filled data', async ({ page }) => {
     await loginAs(page, 'petOwner1')
     await page.goto('/settings')
@@ -139,7 +139,7 @@ test.describe('Form Validation — Settings/Profile', () => {
   })
 })
 
-test.describe('Form Validation — Animal Form', () => {
+test.describe('Form Validation - Animal Form', () => {
   test('animal form validates name field', async ({ page }) => {
     await loginAs(page, 'petOwner1')
     await page.goto('/animals')
@@ -163,7 +163,7 @@ test.describe('Form Validation — Animal Form', () => {
   })
 })
 
-test.describe('Form Validation — Vet Hospital Form', () => {
+test.describe('Form Validation - Vet Hospital Form', () => {
   test('hospital registration form should exist for vets', async ({ page }) => {
     await loginAs(page, 'vet1')
     await page.goto('/vet-hospitals')

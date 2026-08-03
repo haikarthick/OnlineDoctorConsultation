@@ -27,7 +27,7 @@ export async function payGroomingOrderFlow(orderId: string, deposit = false): Pr
 }
 
 /**
- * Pays an order's outstanding balance — the remainder after a deposit, or extra work the customer
+ * Pays an order's outstanding balance - the remainder after a deposit, or extra work the customer
  * approved mid-service. Same gateway mechanics, different endpoints and its own payments row.
  */
 export async function payGroomingBalanceFlow(orderId: string): Promise<any> {

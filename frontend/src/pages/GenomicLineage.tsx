@@ -213,14 +213,14 @@ const GenomicLineagePage: React.FC = () => {
                   {profiles.map(p => (
                     <tr key={p.id}>
                       <td>{p.animalName || (p as any).animal_name || p.animalId}</td>
-                      <td>{p.species ? speciesLabel(p.species, t) : '—'}</td>
-                      <td>{p.sireName || (p as any).sire_name || '—'}</td>
-                      <td>{p.damName || (p as any).dam_name || '—'}</td>
+                      <td>{p.species ? speciesLabel(p.species, t) : '-'}</td>
+                      <td>{p.sireName || (p as any).sire_name || '-'}</td>
+                      <td>{p.damName || (p as any).dam_name || '-'}</td>
                       <td>{p.generation || (p as any).generation}</td>
                       <td style={{ color: +(p.inbreedingCoefficient || (p as any).inbreeding_coefficient) > 0.0625 ? '#ef4444' : 'inherit' }}>
                         {(+(p.inbreedingCoefficient || (p as any).inbreeding_coefficient || 0)).toFixed(4)}
                       </td>
-                      <td>{(p.breedPurityPct || (p as any).breed_purity_pct) ? `${p.breedPurityPct || (p as any).breed_purity_pct}%` : '—'}</td>
+                      <td>{(p.breedPurityPct || (p as any).breed_purity_pct) ? `${p.breedPurityPct || (p as any).breed_purity_pct}%` : '-'}</td>
                     </tr>
                   ))}
                   {!profiles.length && <tr><td colSpan={7} className="empty-cell">{t('genomicLineage.noProfiles')}</td></tr>}

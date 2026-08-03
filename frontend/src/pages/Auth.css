@@ -8,7 +8,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
   position: relative;
   overflow-x: hidden;
-  /* overflow-y intentionally unset – body scroll handles auth pages */
+  /* overflow-y intentionally unset - body scroll handles auth pages */
 }
 
 .auth-page::before {
@@ -385,7 +385,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   REGISTER PAGE — Modern Compact Layout
+   REGISTER PAGE - Modern Compact Layout
    ═══════════════════════════════════════════════════════════ */
 
 .register-page,
@@ -875,7 +875,7 @@
 }
 
 /* ═══════════════════════════════════════════════
-   LOGIN PAGE — Matching Modern Side-Panel Layout
+   LOGIN PAGE - Matching Modern Side-Panel Layout
    ═══════════════════════════════════════════════ */
 .login-wrapper {
   display: flex;
