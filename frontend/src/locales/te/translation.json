@@ -1047,7 +1047,8 @@
       "log": "📋 లాగ్",
       "view": "📋 చూడు",
       "review": "⭐ సమీక్ష",
-      "details": "📋 వివరాలు"
+      "details": "📋 వివరాలు",
+      "markNoShow": "హాజరుకాలేదని గుర్తించు"
     },
     "emptyAppointments": "రాబోయే అపాయింట్‌మెంట్లు లేవు",
     "appointmentHint": "మీ శ్రద్ధ అవసరమైన అపాయింట్‌మెంట్లు ఇక్కడ కనిపిస్తాయి",
@@ -1176,7 +1177,15 @@
     },
     "joinWindowTooltip": "Available {{minutes}} minutes before the appointment.",
     "viewActionHistory": "View action history",
-    "viewCancellationDetails": "View cancellation details"
+    "viewCancellationDetails": "View cancellation details",
+    "failedToMarkNoShow": "ఈ బుకింగ్‌ను హాజరుకానిదిగా గుర్తించలేకపోయాము.",
+    "noShow": {
+      "title": "రోగి హాజరుకాలేదని గుర్తించాలా?",
+      "warning": "ఇది బుకింగ్‌ను తప్పిపోయినదిగా మూసివేస్తుంది. చెల్లించిన బుకింగ్‌లో హాజరుకాని విధానం ప్రకారం వైద్యుడికి పరిహారం అందుతుంది, మరియు ఈ అపాయింట్‌మెంట్ రోగి యొక్క రీషెడ్యూల్ పరిమితిలో లెక్కించబడుతుంది. దీన్ని రద్దు చేయలేరు.",
+      "tooltip": "రోగి ఈ అపాయింట్‌మెంట్‌కు హాజరుకాలేదు",
+      "forBooking": "{{animal}} — {{date}} న {{time}}",
+      "confirm": "హాజరుకాలేదని నిర్ధారించు"
+    }
   },
   "animals": {
     "pageTitles": {

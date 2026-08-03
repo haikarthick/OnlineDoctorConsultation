@@ -1047,7 +1047,8 @@
       "log": "📋 Log",
       "view": "📋 View",
       "review": "⭐ Review",
-      "details": "📋 Details"
+      "details": "📋 Details",
+      "markNoShow": "ಗೈರುಹಾಜರಿ ಗುರುತಿಸಿ"
     },
     "emptyAppointments": "No upcoming appointments",
     "appointmentHint": "Appointments requiring your attention will appear here",
@@ -1176,7 +1177,15 @@
     },
     "joinWindowTooltip": "Available {{minutes}} minutes before the appointment.",
     "viewActionHistory": "View action history",
-    "viewCancellationDetails": "View cancellation details"
+    "viewCancellationDetails": "View cancellation details",
+    "failedToMarkNoShow": "ಈ ಬುಕಿಂಗ್ ಅನ್ನು ಗೈರುಹಾಜರಿ ಎಂದು ಗುರುತಿಸಲಾಗಲಿಲ್ಲ.",
+    "noShow": {
+      "title": "ರೋಗಿಯನ್ನು ಗೈರುಹಾಜರಿ ಎಂದು ಗುರುತಿಸುವುದೇ?",
+      "warning": "ಇದು ಬುಕಿಂಗ್ ಅನ್ನು ತಪ್ಪಿಹೋದದ್ದು ಎಂದು ಮುಚ್ಚುತ್ತದೆ. ಪಾವತಿಸಿದ ಬುಕಿಂಗ್‌ನಲ್ಲಿ ಗೈರುಹಾಜರಿ ನೀತಿಯ ಅಡಿಯಲ್ಲಿ ವೈದ್ಯರಿಗೆ ಪರಿಹಾರ ನೀಡಲಾಗುತ್ತದೆ ಮತ್ತು ಈ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ರೋಗಿಯ ಮರುನಿಗದಿ ಮಿತಿಗೆ ಎಣಿಸಲಾಗುತ್ತದೆ. ಇದನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.",
+      "tooltip": "ರೋಗಿಯು ಈ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗೆ ಹಾಜರಾಗಲಿಲ್ಲ",
+      "forBooking": "{{animal}} — {{date}} ರಂದು {{time}}",
+      "confirm": "ಗೈರುಹಾಜರಿ ದೃಢೀಕರಿಸಿ"
+    }
   },
   "animals": {
     "pageTitles": {

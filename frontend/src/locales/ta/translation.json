@@ -1047,7 +1047,8 @@
       "log": "📋 பதிவு",
       "view": "📋 பார்",
       "review": "⭐ மதிப்பீடு",
-      "details": "📋 விவரங்கள்"
+      "details": "📋 விவரங்கள்",
+      "markNoShow": "வரவில்லை எனக் குறிக்க"
     },
     "emptyAppointments": "வரவிருக்கும் சந்திப்புகள் இல்லை",
     "appointmentHint": "உங்கள் கவனிப்பு தேவைப்படும் சந்திப்புகள் இங்கே தோன்றும்",
@@ -1176,7 +1177,15 @@
     },
     "joinWindowTooltip": "Available {{minutes}} minutes before the appointment.",
     "viewActionHistory": "View action history",
-    "viewCancellationDetails": "View cancellation details"
+    "viewCancellationDetails": "View cancellation details",
+    "failedToMarkNoShow": "இந்த முன்பதிவை வரவில்லை எனக் குறிக்க முடியவில்லை.",
+    "noShow": {
+      "title": "நோயாளி வரவில்லை எனக் குறிக்கவா?",
+      "warning": "இது முன்பதிவைத் தவறியதாக மூடும். கட்டணம் செலுத்திய முன்பதிவில் வராமை கொள்கையின் கீழ் மருத்துவருக்கு இழப்பீடு வழங்கப்படும், மேலும் இந்த சந்திப்பு நோயாளியின் மறுதிட்டமிடல் வரம்பில் கணக்கிடப்படும். இதை மீட்டமைக்க முடியாது.",
+      "tooltip": "நோயாளி இந்த சந்திப்பில் கலந்துகொள்ளவில்லை",
+      "forBooking": "{{animal}} — {{date}} அன்று {{time}}",
+      "confirm": "வராததை உறுதிப்படுத்து"
+    }
   },
   "animals": {
     "pageTitles": {

@@ -52,6 +52,17 @@ const isExpiredPending = (b: BookingRow): boolean => {
   return d < new Date()
 }
 
+/**
+ * Whether the booked slot has finished (browser local time).
+ * A no-show can only be judged after the appointment window has closed — the
+ * backend accepts confirmed/pending bookings at any time, so the UI is what
+ * stops a slot being written off while the patient could still turn up.
+ */
+const hasSlotEnded = (b: BookingRow): boolean => {
+  const end = new Date(b.scheduledDate + 'T' + b.timeSlotEnd + ':00')
+  return end < new Date()
+}
+
 /** Check if a user can reschedule (within limit) */
 const canReschedule = (b: BookingRow, maxReschedules: number, patientNoShowLimit: number): boolean => {
   // Expired pending → always allowed (not user's fault)
@@ -127,6 +138,9 @@ const Consultations: React.FC = () => {
     show: false, bookingId: '', reason: ''
   })
   const [cancelError, setCancelError] = useState('')
+  const [noShowModal, setNoShowModal] = useState<BookingRow | null>(null)
+  const [noShowError, setNoShowError] = useState('')
+  const [noShowSaving, setNoShowSaving] = useState(false)
 
   // Action Log modal state
   const [actionLogBookingId, setActionLogBookingId] = useState<string | null>(null)
@@ -195,6 +209,28 @@ const Consultations: React.FC = () => {
     try { await apiService.confirmBooking(id); loadData() }
     catch (err: any) { setError(err?.response?.data?.error?.message || t('consultations.failedToConfirm')) }
     finally { setActionLoading(null) }
+  }
+
+  // Marking a no-show moves money (PaymentOrchestrator.settleMissedBooking
+  // compensates the doctor on paid bookings) and caps the patient's remaining
+  // reschedules, so it asks for confirmation rather than firing on one click.
+  const handleMarkNoShow = async () => {
+    const b = noShowModal
+    if (!b) return
+    setNoShowSaving(true)
+    setNoShowError('')
+    try {
+      await apiService.markBookingNoShow(b.id)
+      setNoShowModal(null)
+      loadData()
+    } catch (err: any) {
+      setNoShowError(
+        err?.response?.data?.error?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        t('consultations.failedToMarkNoShow')
+      )
+    } finally { setNoShowSaving(false) }
   }
 
   const handleCancelBooking = async (id?: string) => {
@@ -633,6 +669,19 @@ const Consultations: React.FC = () => {
                     {isAdmin && b.status === 'pending' && !isExpiredPending(b) && (
                       <button className="btn-small si-0e51a69a" disabled={actionLoading === b.id} onClick={() => handleConfirmBooking(b.id)}>{actionLoading === b.id ? '⏳' : t('consultations.actions.confirm')}</button>
                     )}
+                    {/* Patient no-show. Vet/admin only, and only once the slot has
+                        ended — the backend allows it earlier, so this is the guard
+                        that stops a slot being written off while the patient could
+                        still arrive. */}
+                    {(isVet || isAdmin) && (b.status === 'confirmed' || b.status === 'pending') && hasSlotEnded(b) && (
+                      <button
+                        className="btn-small btn-warning"
+                        onClick={() => { setNoShowModal(b); setNoShowError('') }}
+                        title={t('consultations.noShow.tooltip')}
+                      >
+                        🙋 {t('consultations.actions.markNoShow')}
+                      </button>
+                    )}
                     <button className="btn-small si-1827a52c" onClick={() => openActionLog(b.id)} title={t('consultations.viewActionHistory')}>{t('consultations.actions.log')}</button>
                   </div>
                 </div>
@@ -1058,6 +1107,49 @@ const Consultations: React.FC = () => {
         </div>
         )
       })()}
+
+      {/* No-show confirmation. Deliberately a dialog and not a one-click action:
+          confirming settles the booking as missed, triggers doctor compensation
+          on paid bookings, and counts against the patient's reschedule limit. */}
+      {noShowModal && (
+        <div className="si-10f9485f" onClick={() => { setNoShowModal(null); setNoShowError('') }}>
+          <div className="si-b6bf627f" onClick={e => e.stopPropagation()}>
+            <div className="si-101fd1d0">
+              <h2 className="si-670df8d2">{t('consultations.noShow.title')}</h2>
+              <button type="button" onClick={() => { setNoShowModal(null); setNoShowError('') }}
+                className="si-60f45c55">✕</button>
+            </div>
+            <div className="si-941430f8">
+              {t('consultations.noShow.warning')}
+            </div>
+            <p className="slot-hint">
+              {t('consultations.noShow.forBooking', {
+                animal: noShowModal.animalName || '—',
+                date: formatDate(new Date(noShowModal.scheduledDate)),
+                time: formatSlotTime(noShowModal.timeSlotStart),
+              })}
+            </p>
+            {noShowError && (
+              <div className="si-919b5437">
+                ⚠ {noShowError}
+              </div>
+            )}
+            <div className="si-7be0b9bd">
+              <button
+                type="button"
+                onClick={() => { setNoShowModal(null); setNoShowError('') }}
+                className="si-60c838b7"
+              >{t('common.cancel')}</button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                disabled={noShowSaving}
+                onClick={handleMarkNoShow}
+              >{noShowSaving ? '⏳' : t('consultations.noShow.confirm')}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

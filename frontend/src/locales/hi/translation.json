@@ -1047,7 +1047,8 @@
       "log": "📋 लॉग",
       "view": "📋 देखें",
       "review": "⭐ समीक्षा",
-      "details": "📋 विवरण"
+      "details": "📋 विवरण",
+      "markNoShow": "अनुपस्थित चिह्नित करें"
     },
     "emptyAppointments": "कोई आगामी अपॉइंटमेंट नहीं",
     "appointmentHint": "आपके ध्यान की आवश्यकता वाले अपॉइंटमेंट यहाँ दिखाई देंगे",
@@ -1176,7 +1177,15 @@
     },
     "joinWindowTooltip": "Available {{minutes}} minutes before the appointment.",
     "viewActionHistory": "View action history",
-    "viewCancellationDetails": "View cancellation details"
+    "viewCancellationDetails": "View cancellation details",
+    "failedToMarkNoShow": "इस बुकिंग को अनुपस्थित के रूप में चिह्नित नहीं किया जा सका।",
+    "noShow": {
+      "title": "रोगी को अनुपस्थित चिह्नित करें?",
+      "warning": "इससे बुकिंग छूटी हुई के रूप में बंद हो जाएगी। भुगतान की गई बुकिंग पर डॉक्टर को अनुपस्थिति नीति के तहत मुआवज़ा मिलता है, और यह अपॉइंटमेंट रोगी की पुनर्निर्धारण सीमा में गिना जाएगा। इसे पूर्ववत नहीं किया जा सकता।",
+      "tooltip": "रोगी इस अपॉइंटमेंट में उपस्थित नहीं हुआ",
+      "forBooking": "{{animal}} — {{date}} को {{time}} बजे",
+      "confirm": "अनुपस्थिति की पुष्टि करें"
+    }
   },
   "animals": {
     "pageTitles": {

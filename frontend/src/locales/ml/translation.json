@@ -1047,7 +1047,8 @@
       "log": "📋 ലോഗ്",
       "view": "📋 കാണുക",
       "review": "⭐ അവലോകനം",
-      "details": "📋 വിശദാംശങ്ങൾ"
+      "details": "📋 വിശദാംശങ്ങൾ",
+      "markNoShow": "ഹാജരാകാത്തത് രേഖപ്പെടുത്തുക"
     },
     "emptyAppointments": "വരാനിരിക്കുന്ന അപ്പോയിന്റ്മെന്റുകൾ ഇല്ല",
     "appointmentHint": "നിങ്ങളുടെ ശ്രദ്ധ ആവശ്യമുള്ള അപ്പോയിന്റ്മെന്റുകൾ ഇവിടെ ദൃശ്യമാകും",
@@ -1176,7 +1177,15 @@
     },
     "joinWindowTooltip": "Available {{minutes}} minutes before the appointment.",
     "viewActionHistory": "View action history",
-    "viewCancellationDetails": "View cancellation details"
+    "viewCancellationDetails": "View cancellation details",
+    "failedToMarkNoShow": "ഈ ബുക്കിംഗ് ഹാജരാകാത്തതായി രേഖപ്പെടുത്താനായില്ല.",
+    "noShow": {
+      "title": "രോഗി ഹാജരായില്ല എന്ന് രേഖപ്പെടുത്തണോ?",
+      "warning": "ഇത് ബുക്കിംഗ് നഷ്ടപ്പെട്ടതായി അടയ്ക്കും. പണമടച്ച ബുക്കിംഗിൽ ഹാജരാകാത്ത നയപ്രകാരം ഡോക്ടർക്ക് നഷ്ടപരിഹാരം ലഭിക്കും, കൂടാതെ ഈ അപ്പോയിന്റ്മെന്റ് രോഗിയുടെ പുനഃക്രമീകരണ പരിധിയിൽ കണക്കാക്കും. ഇത് പഴയപടിയാക്കാനാവില്ല.",
+      "tooltip": "രോഗി ഈ അപ്പോയിന്റ്മെന്റിൽ ഹാജരായില്ല",
+      "forBooking": "{{animal}} — {{date}} {{time}}-ന്",
+      "confirm": "ഹാജരാകാത്തത് സ്ഥിരീകരിക്കുക"
+    }
   },
   "animals": {
     "pageTitles": {

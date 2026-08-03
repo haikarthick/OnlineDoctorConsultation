@@ -244,6 +244,18 @@ class ApiService {
     return response.data
   }
 
+  /**
+   * Mark a confirmed/pending booking as a patient no-show (veterinarian or admin).
+   * Sets status 'missed' and runs PaymentOrchestrator.settleMissedBooking, which
+   * compensates the doctor on paid bookings — so leaving this unwired meant the
+   * no-show rules in Admin Settings could never fire and that compensation never
+   * happened.
+   */
+  async markBookingNoShow(id: string) {
+    const response = await this.client.put(`/bookings/${id}/no-show`)
+    return response.data
+  }
+
   async rescheduleBooking(id: string, data: { scheduledDate: string; timeSlotStart: string; timeSlotEnd: string; veterinarianId?: string }) {
     const response = await this.client.put(`/bookings/${id}/reschedule`, data)
     return response.data

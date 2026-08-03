@@ -1047,7 +1047,8 @@
       "log": "📋 Log",
       "view": "📋 View",
       "review": "⭐ Review",
-      "details": "📋 Details"
+      "details": "📋 Details",
+      "markNoShow": "Mark no-show"
     },
     "emptyAppointments": "No upcoming appointments",
     "appointmentHint": "Appointments requiring your attention will appear here",
@@ -1176,7 +1177,15 @@
     },
     "joinWindowTooltip": "Available {{minutes}} minutes before the appointment.",
     "viewActionHistory": "View action history",
-    "viewCancellationDetails": "View cancellation details"
+    "viewCancellationDetails": "View cancellation details",
+    "failedToMarkNoShow": "Could not mark this booking as a no-show.",
+    "noShow": {
+      "title": "Mark patient as no-show?",
+      "warning": "This closes the booking as missed. On a paid booking the doctor is compensated under the no-show policy, and the appointment counts against the patient’s reschedule allowance. It cannot be undone.",
+      "tooltip": "The patient did not attend this appointment",
+      "forBooking": "{{animal}} — {{date}} at {{time}}",
+      "confirm": "Confirm no-show"
+    }
   },
   "animals": {
     "pageTitles": {
