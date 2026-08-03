@@ -845,7 +845,8 @@
       "farmer": "Here's your farm management overview",
       "hospitalStaff": "Here's your hospital workflow overview",
       "corporateAdmin": "Hospital network administration overview",
-      "pharmacist": "Redirecting to your Pharmacy module..."
+      "pharmacist": "Redirecting to your Pharmacy module...",
+      "support": "Platform support — disputes and cancellations"
     },
     "pendingBookings": "🔔 Pending Booking Confirmations",
     "recentActivity": "Recent Activity",
@@ -956,7 +957,9 @@
         "networkHealthInsights": "Network health analytics",
         "manageSettings": "Manage settings",
         "patientQueue": "Manage patient queue",
-        "inpatientBoarding": "Manage inpatient cases"
+        "inpatientBoarding": "Manage inpatient cases",
+        "resolveDisputes": "Review and resolve customer disputes",
+        "cancellationOversight": "Monitor cancellations and refunds"
       },
       "hospitalNetworks": "Hospital Networks",
       "settings": "Settings",

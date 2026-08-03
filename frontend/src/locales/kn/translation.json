@@ -845,7 +845,8 @@
       "farmer": "ನಿಮ್ಮ ಕೃಷಿ ನಿರ್ವಹಣೆ ಅವಲೋಕನ ಇಲ್ಲಿದೆ",
       "corporateAdmin": "Hospital network administration overview",
       "hospitalStaff": "ಇಲ್ಲಿ ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ವರ್ಕ್‌ಫ್ಲೋ ಅವಲೋಕನ ಇದೆ",
-      "pharmacist": "Redirecting to your Pharmacy module..."
+      "pharmacist": "Redirecting to your Pharmacy module...",
+      "support": "ವೇದಿಕೆ ಬೆಂಬಲ — ವಿವಾದಗಳು ಮತ್ತು ರದ್ದತಿಗಳು"
     },
     "pendingBookings": "🔔 ಬಾಕಿ ಬುಕಿಂಗ್ ಖಚಿತೀಕರಣಗಳು",
     "recentActivity": "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ",
@@ -956,7 +957,9 @@
         "networkHealthInsights": "Network health analytics",
         "manageSettings": "Manage settings",
         "patientQueue": "Manage patient queue",
-        "inpatientBoarding": "Manage inpatient cases"
+        "inpatientBoarding": "Manage inpatient cases",
+        "resolveDisputes": "ಗ್ರಾಹಕರ ವಿವಾದಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಪರಿಹರಿಸಿ",
+        "cancellationOversight": "ರದ್ದತಿಗಳು ಮತ್ತು ಮರುಪಾವತಿಗಳನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ"
       },
       "hospitalNetworks": "Hospital Networks",
       "settings": "Settings",

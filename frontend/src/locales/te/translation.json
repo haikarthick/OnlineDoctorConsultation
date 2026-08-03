@@ -845,7 +845,8 @@
       "farmer": "మీ ఫారం నిర్వహణ అవలోకనం ఇక్కడ ఉంది",
       "corporateAdmin": "Hospital network administration overview",
       "hospitalStaff": "ఇక్కడ మీ ఆసుపత్రి వర్క్‌ఫ్లో అవలోకనం ఉంది",
-      "pharmacist": "Redirecting to your Pharmacy module..."
+      "pharmacist": "Redirecting to your Pharmacy module...",
+      "support": "ప్లాట్‌ఫారమ్ మద్దతు — వివాదాలు మరియు రద్దులు"
     },
     "pendingBookings": "🔔 పెండింగ్ బుకింగ్ నిర్ధారణలు",
     "recentActivity": "ఇటీవలి కార్యకలాపం",
@@ -956,7 +957,9 @@
         "networkHealthInsights": "Network health analytics",
         "manageSettings": "Manage settings",
         "patientQueue": "Manage patient queue",
-        "inpatientBoarding": "Manage inpatient cases"
+        "inpatientBoarding": "Manage inpatient cases",
+        "resolveDisputes": "కస్టమర్ వివాదాలను సమీక్షించి పరిష్కరించండి",
+        "cancellationOversight": "రద్దులు మరియు రీఫండ్‌లను పర్యవేక్షించండి"
       },
       "hospitalNetworks": "Hospital Networks",
       "settings": "Settings",

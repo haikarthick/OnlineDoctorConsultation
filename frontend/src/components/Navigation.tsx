@@ -261,10 +261,14 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Finance' },
     { id: 'admin-reviews', label: t('nav.reviewModeration'), icon: '⚖️', path: '/admin/reviews',
       roles: ['admin'], section: 'Administration' },
+    // 'support' holds dispute_management and admin_cancellation_dashboard in
+    // DEFAULT_ROLE_PERMISSIONS, so RoleRoute already lets it open both of these.
+    // Without the role listed here there was simply no link to them, leaving the
+    // role with two reachable pages and no way to reach either.
     { id: 'admin-disputes', label: t('disputeManagement.title'), icon: '⚖️', path: '/admin/disputes',
-      roles: ['admin'], section: 'Administration' },
+      roles: ['admin', 'support'], section: 'Administration' },
     { id: 'admin-cancellation-dashboard', label: t('nav.cancellations'), icon: '📊', path: '/admin/cancellation-dashboard',
-      roles: ['admin'], section: 'Administration' },
+      roles: ['admin', 'support'], section: 'Administration' },
     { id: 'admin-medical-records', label: t('nav.medicalRecords'), icon: '📋', path: '/admin/medical-records',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-audit', label: t('nav.auditLogs'), icon: '📜', path: '/admin/audit-logs',

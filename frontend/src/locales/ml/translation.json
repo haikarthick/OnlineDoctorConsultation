@@ -845,7 +845,8 @@
       "farmer": "നിങ്ങളുടെ ഫാം മാനേജ്മെന്റ് അവലോകനം ഇതാ",
       "hospitalStaff": "Here's your hospital workflow overview",
       "corporateAdmin": "Hospital network administration overview",
-      "pharmacist": "Redirecting to your Pharmacy module..."
+      "pharmacist": "Redirecting to your Pharmacy module...",
+      "support": "പ്ലാറ്റ്ഫോം പിന്തുണ — തർക്കങ്ങളും റദ്ദാക്കലുകളും"
     },
     "pendingBookings": "🔔 തീർപ്പാക്കാത്ത ബുക്കിംഗ് സ്ഥിരീകരണങ്ങൾ",
     "recentActivity": "സമീപകാല പ്രവർത്തനങ്ങൾ",
@@ -955,7 +956,9 @@
         "networkHealthInsights": "Network health analytics",
         "manageSettings": "Manage settings",
         "patientQueue": "Manage patient queue",
-        "inpatientBoarding": "Manage inpatient cases"
+        "inpatientBoarding": "Manage inpatient cases",
+        "resolveDisputes": "ഉപഭോക്തൃ തർക്കങ്ങൾ അവലോകനം ചെയ്ത് പരിഹരിക്കുക",
+        "cancellationOversight": "റദ്ദാക്കലുകളും റീഫണ്ടുകളും നിരീക്ഷിക്കുക"
       },
       "hospitalNetworks": "Hospital Networks",
       "settings": "Settings",

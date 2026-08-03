@@ -845,7 +845,8 @@
       "farmer": "आपकी कृषि प्रबंधन अवलोकन",
       "corporateAdmin": "Hospital network administration overview",
       "hospitalStaff": "यहाँ आपके अस्पताल का कार्यप्रवाह अवलोकन है",
-      "pharmacist": "Redirecting to your Pharmacy module..."
+      "pharmacist": "Redirecting to your Pharmacy module...",
+      "support": "प्लेटफ़ॉर्म सहायता — विवाद और रद्दीकरण"
     },
     "pendingBookings": "🔔 लंबित बुकिंग पुष्टिकरण",
     "recentActivity": "हाल की गतिविधि",
@@ -956,7 +957,9 @@
         "networkHealthInsights": "Network health analytics",
         "manageSettings": "Manage settings",
         "patientQueue": "Manage patient queue",
-        "inpatientBoarding": "Manage inpatient cases"
+        "inpatientBoarding": "Manage inpatient cases",
+        "resolveDisputes": "ग्राहक विवादों की समीक्षा और समाधान करें",
+        "cancellationOversight": "रद्दीकरण और धनवापसी की निगरानी करें"
       },
       "hospitalNetworks": "Hospital Networks",
       "settings": "Settings",

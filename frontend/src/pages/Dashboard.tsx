@@ -47,6 +47,7 @@ const Dashboard: React.FC = () => {
   const isCorporateAdmin = user?.role === 'corporate_admin'
   const isPharmacist = user?.role === 'pharmacist'
   const isGroomer = user?.role === 'groomer'
+  const isSupport = user?.role === 'support'
   const { enabled: groomingEnabled } = useGroomingEnabled()
 
   // Pharmacist's home is the Pharmacy module — redirect immediately so they never see the generic dashboard
@@ -281,14 +282,25 @@ const Dashboard: React.FC = () => {
       ]
     }
 
-    // Admin
-    return [
-      { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
-      { label: t('dashboard.stats.consultations'), value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
-      { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
-      { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
-    ]
-  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, corpStats, vetPharmacyStats, t])
+    // Platform support: the quick actions below are the navigation surface. No
+    // generic tiles rather than tiles of zeroes — support holds none of the
+    // permissions those counts describe.
+    if (isSupport) return []
+
+    // Admin. Explicitly guarded: this used to be the bare fallback, so every
+    // role without a branch above (support) silently inherited the admin tiles
+    // and quick actions and got redirected back here on clicking any of them.
+    if (isAdmin) {
+      return [
+        { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
+        { label: t('dashboard.stats.consultations'), value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
+        { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
+        { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
+      ]
+    }
+
+    return []
+  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, corpStats, vetPharmacyStats, t])
 
   // Quick actions — role-specific
   const quickActions: QuickAction[] = useMemo(() => {
@@ -359,17 +371,36 @@ const Dashboard: React.FC = () => {
       ]
     }
 
-    // Admin
+    // Platform support — exactly the pages its DEFAULT_ROLE_PERMISSIONS grant
+    // (dispute_management, admin_cancellation_dashboard, settings). Anything
+    // more would render a tile that RoleRoute bounces straight back here.
+    if (isSupport) {
+      return [
+        { icon: '⚖️', label: t('disputeManagement.title'), path: '/admin/disputes', color: '#667eea', description: t('dashboard.quickActions.desc.resolveDisputes') },
+        { icon: '📊', label: t('nav.cancellations'), path: '/admin/cancellation-dashboard', color: '#f59e0b', description: t('dashboard.quickActions.desc.cancellationOversight') },
+        { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
+      ]
+    }
+
+    // Admin — explicitly guarded, see the note on the stat cards above.
+    if (isAdmin) {
+      return [
+        { icon: '🛡️', label: t('dashboard.quickActions.adminPanel'), path: '/admin/dashboard', color: '#667eea', description: t('dashboard.quickActions.desc.systemOverview') },
+        { icon: '👥', label: t('dashboard.quickActions.users'), path: '/admin/users', color: '#8b5cf6', description: t('dashboard.quickActions.desc.userManagement') },
+        { icon: '🩺', label: t('dashboard.quickActions.viewConsultations'), path: '/admin/consultations', color: '#10b981', description: t('dashboard.quickActions.desc.allConsultations') },
+        { icon: '💳', label: t('dashboard.quickActions.payments'), path: '/admin/payments', color: '#f59e0b', description: t('dashboard.quickActions.desc.paymentManagement') },
+        { icon: '⚖️', label: t('dashboard.quickActions.reviews'), path: '/admin/reviews', color: '#06b6d4', description: t('dashboard.quickActions.desc.reviewModeration') },
+        { icon: '📜', label: t('dashboard.quickActions.auditLogs'), path: '/admin/audit-logs', color: '#ef4444', description: t('dashboard.quickActions.desc.systemActivity') },
+        { icon: '🏥', label: t('dashboard.quickActions.hospitalMgmt'), path: '/admin/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.hospitalOversight') },
+      ]
+    }
+
+    // Only reached by a role added to the backend without a branch here. An
+    // empty action list is honest; the admin list was not.
     return [
-      { icon: '🛡️', label: t('dashboard.quickActions.adminPanel'), path: '/admin/dashboard', color: '#667eea', description: t('dashboard.quickActions.desc.systemOverview') },
-      { icon: '👥', label: t('dashboard.quickActions.users'), path: '/admin/users', color: '#8b5cf6', description: t('dashboard.quickActions.desc.userManagement') },
-      { icon: '🩺', label: t('dashboard.quickActions.viewConsultations'), path: '/admin/consultations', color: '#10b981', description: t('dashboard.quickActions.desc.allConsultations') },
-      { icon: '💳', label: t('dashboard.quickActions.payments'), path: '/admin/payments', color: '#f59e0b', description: t('dashboard.quickActions.desc.paymentManagement') },
-      { icon: '⚖️', label: t('dashboard.quickActions.reviews'), path: '/admin/reviews', color: '#06b6d4', description: t('dashboard.quickActions.desc.reviewModeration') },
-      { icon: '📜', label: t('dashboard.quickActions.auditLogs'), path: '/admin/audit-logs', color: '#ef4444', description: t('dashboard.quickActions.desc.systemActivity') },
-      { icon: '🏥', label: t('dashboard.quickActions.hospitalMgmt'), path: '/admin/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.hospitalOversight') },
+      { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
     ]
-  }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, t])
+  }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, t])
 
   // Subtitle per role
   const subtitle = useMemo(() => {
@@ -380,8 +411,9 @@ const Dashboard: React.FC = () => {
     if (isHospitalStaff) return t('dashboard.subtitles.hospitalStaff')
     if (isCorporateAdmin) return t('dashboard.subtitles.corporateAdmin')
     if (isPharmacist) return t('dashboard.subtitles.pharmacist')
+    if (isSupport) return t('dashboard.subtitles.support')
     return t('dashboard.greeting', { name: user?.firstName })
-  }, [isVeterinarian, isPetOwner, isFarmer, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, t, user?.firstName])
+  }, [isVeterinarian, isPetOwner, isFarmer, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, t, user?.firstName])
 
   return (
     <div className="dashboard-container">

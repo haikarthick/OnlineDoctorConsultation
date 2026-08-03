@@ -845,7 +845,8 @@
       "farmer": "உங்கள் பண்ணை மேலாண்மை மேலோட்டம் இதோ",
       "corporateAdmin": "Hospital network administration overview",
       "hospitalStaff": "இங்கே உங்கள் மருத்துவமனை பணிப்பாய்வு கண்ணோட்டம் உள்ளது",
-      "pharmacist": "Redirecting to your Pharmacy module..."
+      "pharmacist": "Redirecting to your Pharmacy module...",
+      "support": "தள ஆதரவு — தகராறுகள் மற்றும் ரத்துகள்"
     },
     "pendingBookings": "🔔 நிலுவை முன்பதிவு உறுதிப்படுத்தல்கள்",
     "recentActivity": "சமீபத்திய செயல்பாடு",
@@ -956,7 +957,9 @@
         "networkHealthInsights": "Network health analytics",
         "manageSettings": "Manage settings",
         "patientQueue": "Manage patient queue",
-        "inpatientBoarding": "Manage inpatient cases"
+        "inpatientBoarding": "Manage inpatient cases",
+        "resolveDisputes": "வாடிக்கையாளர் தகராறுகளை மதிப்பாய்வு செய்து தீர்க்கவும்",
+        "cancellationOversight": "ரத்துகள் மற்றும் பணத்திருப்பங்களைக் கண்காணிக்கவும்"
       },
       "hospitalNetworks": "Hospital Networks",
       "settings": "Settings",
