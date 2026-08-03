@@ -440,6 +440,12 @@ textarea.module-input {
   letter-spacing: 0.2px;
 }
 
+/* Duplicate of the .module-card rule in styles/modules.css. Deliberately does
+   NOT set padding: every stylesheet is merged into one global bundle, so the
+   padding declared in modules.css already applies here, and re-declaring it in
+   this later file would outrank companion classes such as .metric-strip that
+   set their own (measured: it forced 20px where 16px was intended). A rule that
+   omits a property cannot override one that sets it, so leaving it out is safe. */
 .module-card {
   background: white;
   border: 1px solid #e2e8f0;

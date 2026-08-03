@@ -1692,6 +1692,33 @@
   border-radius: 14px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;
+  /* The card owns its inner spacing. Without this, content placed directly in a
+     module-card sat flush against the border — 107 of 120 usages across 28 pages
+     did exactly that, and it is most obvious on forms, where inputs ran edge to
+     edge (grooming provider onboarding). Cards that compose a self-padding block
+     opt out below. */
+  padding: 20px;
+}
+
+/* A card built from card-header/card-body, wrapping a full-bleed data table, or
+   nesting a module-content already manages its own padding — and the header's
+   bottom border and the table both have to reach the card edge, which an outer
+   padding would inset. Higher specificity than the rule above, so this wins
+   regardless of stylesheet order. */
+.module-card:has(> .card-header),
+.module-card:has(> .card-body),
+.module-card:has(> .data-table-container),
+.module-card:has(> .module-content),
+.module-card:has(> .modal-body),
+/* .module-form is itself a card in ModulePage.css (white background, 28px
+   padding, its own border) — a card nested in a card must not gain a third
+   inset. */
+.module-card:has(> .module-form),
+/* HospitalNetworks builds its panels from this header; some of those cards
+   pair it with .card-body and some do not, so it needs naming in its own
+   right. */
+.module-card:has(> .hn-panel-header) {
+  padding: 0;
 }
 
 /* ── Content Block ── */

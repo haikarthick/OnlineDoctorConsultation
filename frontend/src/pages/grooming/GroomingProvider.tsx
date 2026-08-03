@@ -102,7 +102,7 @@ const GroomingProvider: React.FC<Props> = () => {
               onChange={e => setForm({ ...form, offersMobile: e.target.checked })} />
             <span>🚐 {t('grooming.offersMobile')}</span>
           </label>
-          <button className="module-btn primary" disabled={saving || !form.businessName.trim()} onClick={handleCreate}>
+          <button className="module-btn primary spaced-top" disabled={saving || !form.businessName.trim()} onClick={handleCreate}>
             {saving ? t('grooming.creating') : t('grooming.createBusinessBtn')}
           </button>
         </div>
