@@ -7,12 +7,17 @@ import '../../styles/modules.css'
 interface Props { onNavigate: (path: string) => void }
 
 type StatusFilter = 'pending' | 'verified' | 'rejected' | 'suspended'
+/** 'disputes' is a different kind of view, so it sits outside the provider status filter. */
+type View = StatusFilter | 'disputes'
+
+const DISPUTE_STATUSES = ['under_review', 'resolved', 'partially_refunded', 'rejected'] as const
 
 const GroomingProvidersAdmin: React.FC<Props> = () => {
   const { t } = useTranslation()
   const { formatCurrency } = useSettings()
-  const [filter, setFilter] = useState<StatusFilter>('pending')
+  const [filter, setFilter] = useState<View>('pending')
   const [items, setItems] = useState<any[]>([])
+  const [disputes, setDisputes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [msg, setMsg] = useState('')
   const [err, setErr] = useState('')
@@ -21,12 +26,26 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
   const [reason, setReason] = useState('')
   const [recon, setRecon] = useState<any>(null)
   const [report, setReport] = useState<any>(null)
+  // Dispute response modal
+  const [disputeModal, setDisputeModal] = useState<any | null>(null)
+  const [disputeStatus, setDisputeStatus] = useState<string>('under_review')
+  const [disputeNote, setDisputeNote] = useState('')
+  const [disputeRefund, setDisputeRefund] = useState('')
+  // Earnings drill-down, opened before settling so the amount is not a guess
+  const [earningsFor, setEarningsFor] = useState<any | null>(null)
+  const [earnings, setEarnings] = useState<any | null>(null)
+  const [earningsLoading, setEarningsLoading] = useState(false)
 
   const load = useCallback(async () => {
     try {
       setLoading(true); setErr('')
-      const res = await apiService.adminListGroomingProviders(filter)
-      setItems(Array.isArray(res.data) ? res.data : [])
+      if (filter === 'disputes') {
+        const res = await apiService.adminListGroomingDisputes()
+        setDisputes(Array.isArray(res.data) ? res.data : [])
+      } else {
+        const res = await apiService.adminListGroomingProviders(filter)
+        setItems(Array.isArray(res.data) ? res.data : [])
+      }
     } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
   }, [filter])
   useEffect(() => { load() }, [load])
@@ -35,8 +54,47 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
 
   const settle = async (id: string) => {
     const ref = prompt(t('groomingAdmin.settlePrompt')); if (ref === null) return
-    try { setBusy(id); const r = await apiService.adminSettleGrooming(id, { method: 'bank_transfer', reference: ref || undefined }); flash(t('groomingAdmin.settled', { amount: formatCurrency(Number(r.data?.netPaid || 0)) })); load() }
+    try { setBusy(id); const r = await apiService.adminSettleGrooming(id, { method: 'bank_transfer', reference: ref || undefined }); flash(t('groomingAdmin.settled', { amount: formatCurrency(Number(r.data?.netPaid || 0)) })); setEarningsFor(null); load() }
     catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+  }
+
+  // Settling used to be a bare prompt() for a payment reference with no view of
+  // what was actually owed. This opens the provider's ledger first.
+  const openEarnings = async (provider: any) => {
+    setEarningsFor(provider); setEarnings(null); setEarningsLoading(true)
+    try {
+      const r = await apiService.adminGroomingProviderEarnings(provider.id)
+      setEarnings(r.data || null)
+    } catch (e: any) { setErr(e?.response?.data?.message || e.message); setEarningsFor(null) }
+    finally { setEarningsLoading(false) }
+  }
+
+  const openDispute = (d: any) => {
+    setDisputeModal(d)
+    setDisputeStatus(d.status === 'open' ? 'under_review' : d.status)
+    setDisputeNote(d.resolutionNote || '')
+    setDisputeRefund('')
+  }
+
+  const submitDispute = async () => {
+    if (!disputeModal) return
+    const payload: any = { status: disputeStatus }
+    if (disputeNote.trim()) payload.resolutionNote = disputeNote.trim()
+    // Only send a refund when the outcome is a partial refund — the backend
+    // books it as a negative earnings adjustment against the provider.
+    if (disputeStatus === 'partially_refunded') {
+      const amt = Number(disputeRefund)
+      if (!Number.isFinite(amt) || amt <= 0) { setErr(t('groomingAdmin.disputes.refundRequired')); return }
+      payload.refundAmount = amt
+    }
+    try {
+      setBusy(disputeModal.id)
+      await apiService.respondGroomingDispute(disputeModal.id, payload)
+      setDisputeModal(null)
+      flash(t('groomingAdmin.disputes.updated'))
+      load()
+    } catch (e: any) { setErr(e?.response?.data?.message || e?.response?.data?.error?.message || e.message) }
+    finally { setBusy(null) }
   }
 
   const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 3000) }
@@ -70,9 +128,56 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
         {(['pending', 'verified', 'rejected', 'suspended'] as StatusFilter[]).map(s => (
           <button key={s} className={`module-tab${filter === s ? ' active' : ''}`} onClick={() => setFilter(s)}>{t(`groomingAdmin.tab.${s}`)}</button>
         ))}
+        {/* The open-dispute count was already shown in the metric strip above with
+            no way to act on it — /grooming/admin/disputes had no caller at all. */}
+        <button className={`module-tab${filter === 'disputes' ? ' active' : ''}`} onClick={() => setFilter('disputes')}>
+          ⚖️ {t('groomingAdmin.tab.disputes')}
+          {(report?.disputes?.open || 0) > 0 && <span className="tab-badge">{report.disputes.open}</span>}
+        </button>
       </div>
 
-      {loading ? <div className="loading-container"><div className="loading-spinner" /></div>
+      {filter === 'disputes' ? (
+        loading ? <div className="loading-container"><div className="loading-spinner" /></div>
+          : disputes.length === 0 ? <div className="empty-state"><div className="si-0067e898">⚖️</div><p>{t('groomingAdmin.disputes.empty')}</p></div>
+            : (
+              <div className="data-table-container">
+                <table className="data-table">
+                  <thead><tr>
+                    <th>{t('groomingAdmin.disputes.order')}</th>
+                    <th>{t('groomingAdmin.business')}</th>
+                    <th>{t('groomingAdmin.disputes.reason')}</th>
+                    <th>{t('groomingAdmin.disputes.requested')}</th>
+                    <th>{t('groomingAdmin.disputes.status')}</th>
+                    <th>{t('groomingAdmin.actions')}</th>
+                  </tr></thead>
+                  <tbody>
+                    {disputes.map(d => (
+                      <tr key={d.id}>
+                        <td>
+                          <strong>{d.orderNumber || '—'}</strong>
+                          <div className="si-48a0b045">{formatCurrency(Number(d.grandTotal || 0))}</div>
+                        </td>
+                        <td>{d.providerName || '—'}<div className="si-48a0b045">{d.customerEmail || ''}</div></td>
+                        <td className="si-af971f42">
+                          <div>{d.reason}</div>
+                          {d.comments && <div className="slot-hint">{d.comments}</div>}
+                        </td>
+                        <td>{d.requestedResolution || '—'}</td>
+                        <td><span className={`status-badge status-${d.status}`}>{t(`groomingAdmin.disputes.st.${d.status}`)}</span></td>
+                        <td>
+                          <div className="order-row-actions">
+                            <button className="btn btn-sm btn-primary" disabled={busy === d.id} onClick={() => openDispute(d)}>
+                              {t('groomingAdmin.disputes.respond')}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
+      ) : loading ? <div className="loading-container"><div className="loading-spinner" /></div>
         : items.length === 0 ? <div className="empty-state"><div className="si-0067e898">💈</div><p>{t('groomingAdmin.empty', { status: t(`groomingAdmin.tab.${filter}`) })}</p></div>
           : (
             <div className="data-table-container">
@@ -101,7 +206,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
                         <div className="order-row-actions">
                           {filter !== 'verified' && <button className="btn btn-sm btn-primary" disabled={busy === p.id} onClick={() => verify(p.id)}>{busy === p.id ? '…' : t('groomingAdmin.verify')}</button>}
                           {filter === 'pending' && <button className="btn btn-sm btn-outline" disabled={busy === p.id} onClick={() => { setRejectModal(p.id); setReason('') }}>{t('groomingAdmin.reject')}</button>}
-                          {filter === 'verified' && <button className="btn btn-sm btn-primary" disabled={busy === p.id} onClick={() => settle(p.id)}>{t('groomingAdmin.settle')}</button>}
+                          {filter === 'verified' && <button className="btn btn-sm btn-primary" disabled={busy === p.id} onClick={() => openEarnings(p)}>{t('groomingAdmin.settle')}</button>}
                           {filter === 'verified' && <button className="btn btn-sm btn-outline" disabled={busy === p.id} onClick={() => suspend(p.id)}>{t('groomingAdmin.suspend')}</button>}
                         </div>
                       </td>
@@ -111,6 +216,92 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
               </table>
             </div>
           )}
+
+      {/* Earnings ledger — what is actually owed, before committing a payout */}
+      {earningsFor && (
+        <div className="modal-overlay" onClick={() => setEarningsFor(null)}>
+          <div className="modal si-3196bd33" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>💰 {earningsFor.businessName}</h2>
+              <button className="modal-close" onClick={() => setEarningsFor(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              {earningsLoading ? <div className="loading-container"><div className="loading-spinner" /></div>
+                : !earnings ? <p className="empty-state">{t('groomingAdmin.earnings.none')}</p>
+                  : (
+                    <>
+                      <div className="metric-strip">
+                        <div><div className="metric-value is-success">{formatCurrency(Number(earnings.summary?.available || 0))}</div><div className="slot-hint">{t('groomingEarnings.available')}</div></div>
+                        <div><div className="metric-value is-warning">{formatCurrency(Number(earnings.summary?.clearing || 0))}</div><div className="slot-hint">{t('groomingEarnings.clearing')}</div></div>
+                        <div><div className="metric-value">{formatCurrency(Number(earnings.summary?.paid || 0))}</div><div className="slot-hint">{t('groomingEarnings.paid')}</div></div>
+                        <div><div className="metric-value is-info">{formatCurrency(Number(earnings.summary?.commission || 0))}</div><div className="slot-hint">{t('groomingAdmin.commission')}</div></div>
+                      </div>
+                      <p className="slot-hint">{t('groomingAdmin.earnings.settleHint')}</p>
+                      <div className="si-f5f9f5f6">
+                        <button className="btn btn-outline" onClick={() => setEarningsFor(null)}>{t('groomingAdmin.cancel')}</button>
+                        <button
+                          className="btn btn-primary"
+                          disabled={busy === earningsFor.id || Number(earnings.summary?.available || 0) <= 0}
+                          onClick={() => settle(earningsFor.id)}
+                        >{t('groomingAdmin.settle')}</button>
+                      </div>
+                    </>
+                  )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dispute response */}
+      {disputeModal && (
+        <div className="modal-overlay" onClick={() => setDisputeModal(null)}>
+          <div className="modal si-3196bd33" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>⚖️ {t('groomingAdmin.disputes.respondTitle')}</h2>
+              <button className="modal-close" onClick={() => setDisputeModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p className="slot-hint">
+                {disputeModal.orderNumber} · {disputeModal.providerName} · {formatCurrency(Number(disputeModal.grandTotal || 0))}
+              </p>
+              <div className="form-group">
+                <label className="form-label">{t('groomingAdmin.disputes.reason')}</label>
+                <p>{disputeModal.reason}{disputeModal.comments ? ` — ${disputeModal.comments}` : ''}</p>
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('groomingAdmin.disputes.outcome')}</label>
+                <select className="form-input" value={disputeStatus} onChange={e => setDisputeStatus(e.target.value)}>
+                  {DISPUTE_STATUSES.map(s => (
+                    <option key={s} value={s}>{t(`groomingAdmin.disputes.st.${s}`)}</option>
+                  ))}
+                </select>
+              </div>
+              {disputeStatus === 'partially_refunded' && (
+                <div className="form-group">
+                  <label className="form-label">{t('groomingAdmin.disputes.refundAmount')}</label>
+                  <input
+                    className="form-input" type="number" min="0" step="0.01"
+                    value={disputeRefund} onChange={e => setDisputeRefund(e.target.value)}
+                    placeholder="0.00"
+                  />
+                  <p className="slot-hint">{t('groomingAdmin.disputes.refundHint')}</p>
+                </div>
+              )}
+              <div className="form-group">
+                <label className="form-label">{t('groomingAdmin.disputes.note')}</label>
+                <textarea className="form-input" rows={3} value={disputeNote} onChange={e => setDisputeNote(e.target.value)}
+                  placeholder={t('groomingAdmin.disputes.notePlaceholder')} />
+              </div>
+              <div className="si-f5f9f5f6">
+                <button className="btn btn-outline" onClick={() => setDisputeModal(null)}>{t('groomingAdmin.cancel')}</button>
+                <button className="btn btn-primary" disabled={busy === disputeModal.id} onClick={submitDispute}>
+                  {busy === disputeModal.id ? '…' : t('groomingAdmin.disputes.submit')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {rejectModal && (
         <div className="modal-overlay" onClick={() => setRejectModal(null)}>

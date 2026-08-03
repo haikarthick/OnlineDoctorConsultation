@@ -3220,6 +3220,16 @@ class ApiService {
     const response = await this.client.put(`/grooming/disputes/${disputeId}/respond`, data)
     return response.data
   }
+  /** Platform-wide dispute queue. Optional status filter; omit for all. */
+  async adminListGroomingDisputes(status?: string) {
+    const response = await this.client.get('/grooming/admin/disputes', { params: status ? { status } : undefined })
+    return response.data
+  }
+  /** A single provider's earnings ledger, for reviewing what is owed before settling. */
+  async adminGroomingProviderEarnings(providerId: string) {
+    const response = await this.client.get(`/grooming/admin/providers/${providerId}/earnings`)
+    return response.data
+  }
   async getGroomingProviderReport(id: string) {
     const response = await this.client.get(`/grooming/providers/${id}/report`)
     return response.data

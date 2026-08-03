@@ -7737,7 +7737,8 @@
       "pending": "लंबित",
       "verified": "सत्यापित",
       "rejected": "अस्वीकृत",
-      "suspended": "निलंबित"
+      "suspended": "निलंबित",
+      "disputes": "विवाद"
     },
     "empty": "कोई {{status}} प्रदाता नहीं।",
     "business": "व्यवसाय",
@@ -7760,7 +7761,35 @@
     "collected": "एकत्रित",
     "commission": "कमीशन",
     "payableNow": "अभी देय",
-    "settledTotal": "अब तक निपटाया गया"
+    "settledTotal": "अब तक निपटाया गया",
+    "disputes": {
+      "empty": "कोई विवाद दर्ज नहीं।",
+      "order": "ऑर्डर",
+      "reason": "कारण",
+      "requested": "अनुरोधित",
+      "status": "स्थिति",
+      "respond": "उत्तर दें",
+      "respondTitle": "विवाद का उत्तर दें",
+      "outcome": "परिणाम",
+      "refundAmount": "धनवापसी राशि",
+      "refundHint": "प्रदाता के विरुद्ध ऋणात्मक आय समायोजन के रूप में दर्ज किया जाएगा।",
+      "refundRequired": "शून्य से अधिक धनवापसी राशि दर्ज करें।",
+      "note": "समाधान टिप्पणी",
+      "notePlaceholder": "क्या और क्यों तय किया गया",
+      "submit": "उत्तर सहेजें",
+      "updated": "विवाद अद्यतन किया गया।",
+      "st": {
+        "open": "खुला",
+        "under_review": "समीक्षाधीन",
+        "resolved": "हल किया गया",
+        "partially_refunded": "आंशिक धनवापसी",
+        "rejected": "अस्वीकृत"
+      }
+    },
+    "earnings": {
+      "none": "इस प्रदाता के लिए कोई आय नहीं मिली।",
+      "settleHint": "निपटान उपलब्ध शेष का भुगतान करता है। क्लियरिंग राशि अभी देय नहीं है।"
+    }
   },
   "groomingFind": {
     "title": "ग्रूमर खोजें",

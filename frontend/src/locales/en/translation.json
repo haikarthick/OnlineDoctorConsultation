@@ -7732,7 +7732,8 @@
       "pending": "Pending",
       "verified": "Verified",
       "rejected": "Rejected",
-      "suspended": "Suspended"
+      "suspended": "Suspended",
+      "disputes": "Disputes"
     },
     "empty": "No {{status}} providers.",
     "business": "Business",
@@ -7755,7 +7756,35 @@
     "collected": "Collected",
     "commission": "Commission",
     "payableNow": "Payable now",
-    "settledTotal": "Settled to date"
+    "settledTotal": "Settled to date",
+    "disputes": {
+      "empty": "No disputes raised.",
+      "order": "Order",
+      "reason": "Reason",
+      "requested": "Requested",
+      "status": "Status",
+      "respond": "Respond",
+      "respondTitle": "Respond to dispute",
+      "outcome": "Outcome",
+      "refundAmount": "Refund amount",
+      "refundHint": "Booked as a negative earnings adjustment against the provider.",
+      "refundRequired": "Enter a refund amount greater than zero.",
+      "note": "Resolution note",
+      "notePlaceholder": "What was decided and why",
+      "submit": "Save response",
+      "updated": "Dispute updated.",
+      "st": {
+        "open": "Open",
+        "under_review": "Under review",
+        "resolved": "Resolved",
+        "partially_refunded": "Partially refunded",
+        "rejected": "Rejected"
+      }
+    },
+    "earnings": {
+      "none": "No earnings found for this provider.",
+      "settleHint": "Settling pays out the available balance. Clearing funds are not yet payable."
+    }
   },
   "groomingFind": {
     "title": "Find a Groomer",
