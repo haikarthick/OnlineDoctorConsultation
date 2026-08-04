@@ -99,6 +99,52 @@ makes obvious. For a secondary CTA **on a light surface, use `.btn-outline` from
 A related smell: `!important` on every property of a page-local `.btn-*` variant means no
 surrounding context can ever correct it. Prefer scoping over `!important`.
 
+## 2b. A page stylesheet may only style classes it owns — MANDATORY
+
+**There are no CSS modules in this app.** Every `import './Something.css'` is injected into one
+global stylesheet for the whole session. A selector written in a page's CSS file applies to
+*every page*, forever, from the moment that page is first visited.
+
+So a page stylesheet must only write selectors it owns — its own prefixed class names. It must
+never style a **generic, shared** class name (`.form-group`, `.btn`, `.message`, `.card`,
+`.spinner`) or a bare element (`input`, `select`, `button`), because those belong to
+`modules.css` and are used by every other screen.
+
+```css
+/* WRONG - in Auth.css. Applies to every .form-group in the entire app. */
+.form-group input,
+.form-group select { width: 100%; padding: 1rem; }
+
+/* RIGHT - scoped to the page's own root, and :where() so specificity is unchanged. */
+:where(.auth-page) .form-group input,
+:where(.auth-page) .form-group select { width: 100%; padding: 1rem; }
+```
+
+Use `:where(.page-root)` rather than a bare `.page-root ` prefix when retrofitting: `:where()`
+adds **zero** specificity, so existing cascade outcomes inside the page are preserved exactly
+and the change cannot have side effects on the page you are scoping.
+
+**The incident.** `Auth.css` declared 76 unscoped selectors, including `.form-group input/select
+{ width: 100% }` and `.btn { width: 100% }`. Because login is the entry point, that stylesheet
+is present in every session, so those rules silently governed form controls and buttons across
+the whole product. On the Create Enterprise screen the unit `<select>` took `width: 100%` of its
+flex row, leaving the "Total Area" number input **28px wide** — visible but impossible to type
+into.
+
+**What made it appear suddenly:** it did not. The leak was always there; an inline
+`style={{ width: '100px' }}` had been beating it. Commit `28bedfb` mechanically converted inline
+styles into generated `.si-*` classes — and that conversion is **not specificity-neutral**. An
+inline style beats every selector; a one-class selector (0,1,0) loses to `.form-group select`
+(0,1,1). The migration silently handed the win to a rule that had never been intended to apply.
+
+**Two rules this leaves behind:**
+
+1. Never convert an inline style to a class without checking what else targets that element. If
+   the inline style was load-bearing, the class needs the specificity to match — or the
+   competing rule needs scoping (preferred).
+2. When a control looks wrong and its own class *looks* correct, the question is never "what
+   does this class say" but **"which rule actually wins"**. Check computed style, not source.
+
 ## 3. Genuinely dynamic values
 
 Some values are computed at runtime (a progress width, a chart bar height, a transform). These

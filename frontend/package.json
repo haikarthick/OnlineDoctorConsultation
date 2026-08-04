@@ -20,7 +20,8 @@
     "test:e2e:ui": "npx playwright test --ui",
     "test:e2e:report": "npx playwright show-report",
     "test:e2e:generate": "node e2e/generate-tests.cjs",
-    "test:e2e:generate:write": "node e2e/generate-tests.cjs --write"
+    "test:e2e:generate:write": "node e2e/generate-tests.cjs --write",
+    "check:css-scoping": "node scripts/check-css-scoping.cjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.21",

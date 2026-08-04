@@ -83,6 +83,12 @@ runCheck('Schema Validation', 'node scripts/schema-check.js', BACKEND);
 // 4. E2E route coverage (ensure all routes have tests)
 runCheck('E2E Route Coverage', 'node e2e/generate-tests.cjs', FRONTEND);
 
+// 4b. CSS scoping - a page stylesheet applies to the WHOLE app (no CSS modules here), so an
+//     unscoped `.form-group input {}` in one page silently restyles every other screen. That is
+//     what collapsed the Create-Enterprise "Total Area" input to 28px. Allowlisted violations
+//     may only SHRINK; a NEW one fails the push. See docs/DESIGN_SYSTEM.md section 2b.
+runCheck('CSS Scoping (page styles stay in their page)', 'node scripts/check-css-scoping.cjs', FRONTEND);
+
 // 5. RUNTIME verification - the only check that actually executes SQL and boots the server.
 //    Checks 1-4 are all static: they prove code compiles, links and bundles. They cannot see a
 //    constraint violation, a migration that fails on a real DB, or startup code that silently
