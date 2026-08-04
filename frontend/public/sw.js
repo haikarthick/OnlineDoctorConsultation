@@ -93,7 +93,13 @@ async function cacheFirst(request) {
 
   try {
     const response = await fetch(request);
-    if (response.ok) {
+    // response.ok is NOT sufficient. A build rotates chunk hashes on every deploy, so a browser
+    // running the previous index.html asks for a filename that no longer exists. The server's
+    // SPA fallback used to answer those with index.html and HTTP 200 - ok === true - which
+    // would store an HTML document in the cache under a .js URL. Because this strategy is
+    // cache-first and never revalidates, that entry would then be served forever. Only cache a
+    // response whose type actually matches what was asked for.
+    if (response.ok && isExpectedType(request, response)) {
       const cache = await caches.open(RUNTIME_CACHE);
       cache.put(request, response.clone());
     }
@@ -101,6 +107,17 @@ async function cacheFirst(request) {
   } catch {
     return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
   }
+}
+
+// Guard against caching an HTML error/fallback page under a script or style URL.
+function isExpectedType(request, response) {
+  const pathname = new URL(request.url).pathname;
+  const type = (response.headers.get('content-type') || '').toLowerCase();
+  if (!type) return true; // opaque or header-less: nothing to contradict
+  if (/\.m?js$/i.test(pathname)) return type.includes('javascript') || type.includes('ecmascript');
+  if (/\.css$/i.test(pathname)) return type.includes('css');
+  // Everything else (images, fonts) - only reject an obvious HTML fallback.
+  return !type.includes('text/html');
 }
 
 // Network-first strategy (for API and dynamic content)
