@@ -433,14 +433,14 @@ const AnimalGroups: React.FC = () => {
                 <div className="form-group">
                   <label>{t('animalGroups.modal.type')}</label>
                   <select value={formData.groupType} onChange={e => setFormData(f => ({ ...f, groupType: e.target.value as AnimalGroupType }))} required>
-                    <option value="">{t('common.filter')}</option>
+                    <option value="">{t('animalGroups.modal.selectType')}</option>
                     {Object.entries(GROUP_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
                   <label>{t('animalGroups.modal.purpose')}</label>
                   <select value={formData.purpose} onChange={e => setFormData(f => ({ ...f, purpose: e.target.value }))}>
-                    <option value="">{t('common.filter')}</option>
+                    <option value="">{t('animalGroups.modal.selectPurpose')}</option>
                     {PURPOSE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </div>

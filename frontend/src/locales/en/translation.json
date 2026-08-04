@@ -2039,7 +2039,9 @@
       "colorCode": "Color Code",
       "description": "Description",
       "updateBtn": "Update Group",
-      "createBtn": "Create Group"
+      "createBtn": "Create Group",
+      "selectType": "Select group type",
+      "selectPurpose": "Select purpose"
     },
     "purposeOptions": {
       "dairy": "Dairy",

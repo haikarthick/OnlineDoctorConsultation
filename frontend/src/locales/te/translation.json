@@ -2039,7 +2039,9 @@
       "colorCode": "రంగు కోడ్",
       "description": "వివరణ",
       "updateBtn": "సమూహం అప్‌డేట్",
-      "createBtn": "సమూహం సృష్టించు"
+      "createBtn": "సమూహం సృష్టించు",
+      "selectType": "సమూహ రకాన్ని ఎంచుకోండి",
+      "selectPurpose": "ప్రయోజనాన్ని ఎంచుకోండి"
     },
     "purposeOptions": {
       "dairy": "పాడి",

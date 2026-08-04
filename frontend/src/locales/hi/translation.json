@@ -2039,7 +2039,9 @@
       "colorCode": "रंग कोड",
       "description": "विवरण",
       "updateBtn": "समूह अपडेट करें",
-      "createBtn": "समूह बनाएं"
+      "createBtn": "समूह बनाएं",
+      "selectType": "समूह का प्रकार चुनें",
+      "selectPurpose": "उद्देश्य चुनें"
     },
     "purposeOptions": {
       "dairy": "डेयरी",

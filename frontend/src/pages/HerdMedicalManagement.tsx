@@ -848,16 +848,19 @@ const HerdMedicalManagement: React.FC = () => {
 
   // Role info banner
   const renderRoleInfo = () => {
+    // Emoji, not a word. These were the strings 'Admin'/'Vet'/'Farmer'/'Owner' rendered as
+    // "[icon] label", which read as "[Farmer] Farmer" for a farmer and was redundant for every
+    // other role too ("[Vet] Veterinarian"). Icons match the role icons used at registration.
     const roleInfo: Record<string, { icon: string; label: string; perms: string }> = {
-      admin: { icon: 'Admin', label: t('herdMedical.role.admin'), perms: t('herdMedical.role.adminPerms') },
-      veterinarian: { icon: 'Vet', label: t('herdMedical.role.vet'), perms: t('herdMedical.role.vetPerms') },
-      farmer: { icon: 'Farmer', label: t('herdMedical.role.farmer'), perms: t('herdMedical.role.farmerPerms') },
-      pet_owner: { icon: 'Owner', label: t('herdMedical.role.petOwner'), perms: t('herdMedical.role.petOwnerPerms') },
+      admin: { icon: '🛡️', label: t('herdMedical.role.admin'), perms: t('herdMedical.role.adminPerms') },
+      veterinarian: { icon: '👨‍⚕️', label: t('herdMedical.role.vet'), perms: t('herdMedical.role.vetPerms') },
+      farmer: { icon: '🐄', label: t('herdMedical.role.farmer'), perms: t('herdMedical.role.farmerPerms') },
+      pet_owner: { icon: '🐕', label: t('herdMedical.role.petOwner'), perms: t('herdMedical.role.petOwnerPerms') },
     }
     const info = roleInfo[role] || roleInfo['pet_owner']
     return (
       <div className="si-c59d9a8b">
-        <span className="si-655cbeba">[{info?.icon}]</span>
+        <span className="si-655cbeba" aria-hidden="true">{info?.icon}</span>
         <div><strong>{info?.label}</strong> - {info?.perms}</div>
       </div>
     )

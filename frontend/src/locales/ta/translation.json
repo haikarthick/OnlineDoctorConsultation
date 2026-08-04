@@ -2039,7 +2039,9 @@
       "colorCode": "வண்ணக் குறியீடு",
       "description": "விளக்கம்",
       "updateBtn": "குழுவைப் புதுப்பி",
-      "createBtn": "குழு உருவாக்கு"
+      "createBtn": "குழு உருவாக்கு",
+      "selectType": "குழு வகையைத் தேர்ந்தெடுக்கவும்",
+      "selectPurpose": "நோக்கத்தைத் தேர்ந்தெடுக்கவும்"
     },
     "purposeOptions": {
       "dairy": "பால்",

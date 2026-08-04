@@ -2041,7 +2041,9 @@
       "colorCode": "Color Code",
       "description": "ವಿವರಣೆ",
       "updateBtn": "Update Group",
-      "createBtn": "Create Group"
+      "createBtn": "Create Group",
+      "selectType": "ಗುಂಪಿನ ಪ್ರಕಾರ ಆಯ್ಕೆಮಾಡಿ",
+      "selectPurpose": "ಉದ್ದೇಶ ಆಯ್ಕೆಮಾಡಿ"
     },
     "purposeOptions": {
       "dairy": "ಹೈನುಗಾರಿಕೆ",
