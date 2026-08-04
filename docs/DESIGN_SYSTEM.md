@@ -144,6 +144,32 @@ inline style beats every selector; a one-class selector (0,1,0) loses to `.form-
    competing rule needs scoping (preferred).
 2. When a control looks wrong and its own class *looks* correct, the question is never "what
    does this class say" but **"which rule actually wins"**. Check computed style, not source.
+   A harness with only that page's CSS will show it working — load *every* stylesheet to
+   reproduce what a real session actually has.
+
+### Giving a page a scope root
+
+Every page stylesheet needs one class it owns to scope against. Most pages wrapped themselves in
+the shared `.module-page` and nothing else, which is not a root — it is on 36 screens. Those
+pages now carry a second, page-specific class:
+
+```tsx
+<div className="module-page mp-page">        {/* Marketplace   */}
+<div className="module-page netsub-page">    {/* NetworkSubscriptions */}
+```
+
+When you add a page: give its wrapper a unique class, and scope every generic selector in its
+CSS with `:where(.that-class)`.
+
+### The gate
+
+`frontend/scripts/check-css-scoping.cjs` runs as check 4b of `pre-deploy.js`. It derives the
+shared vocabulary **from `modules.css` itself** — every class the design system defines — rather
+than a hand-written list, so it cannot miss a name just because nobody thought to add it. It
+also rejects bare element selectors (`input`, `button`, `table`) outside a scope root.
+
+**The allowlist is empty and must stay that way.** All 118 pre-existing leaks across 13
+stylesheets were fixed on 2026-08-04, not deferred. `npm run check:css-scoping` to run it alone.
 
 ## 3. Genuinely dynamic values
 

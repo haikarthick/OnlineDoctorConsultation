@@ -517,7 +517,7 @@
   .vpa-species-checkboxes {
     gap: 6px;
   }
-  .module-form-row {
+  :where(.vpa-page) .module-form-row {
     grid-template-columns: 1fr;
   }
   .vpa-card-actions {

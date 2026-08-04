@@ -329,7 +329,7 @@
     flex-direction: column;
     gap: 4px;
   }
-  .data-table-container {
+  :where(.vp-page) .data-table-container {
     overflow-x: auto;
   }
 }
@@ -358,7 +358,7 @@
   .vp-card-identity {
     gap: 8px;
   }
-  .module-stats {
+  :where(.vp-page) .module-stats {
     grid-template-columns: 1fr 1fr;
   }
 }

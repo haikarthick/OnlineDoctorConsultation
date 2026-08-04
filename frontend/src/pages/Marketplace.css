@@ -435,12 +435,14 @@
 .mp-detail-value.highlight { color: #667eea; font-weight: 700; font-size: 16px; }
 
 /* Buy / Bid Panel */
-.mp-buy-panel, .mp-bid-panel {
+.mp-buy-panel,
+.mp-bid-panel {
   background: #fff; border: 2px solid #e2e8f0; border-radius: 12px;
   padding: 20px; position: sticky; top: 80px;
   display: flex; flex-direction: column; gap: 10px;
 }
-.mp-buy-panel h4, .mp-bid-panel h4 { margin: 0; font-size: 16px; color: #1e293b; }
+.mp-buy-panel h4,
+.mp-bid-panel h4 { margin: 0; font-size: 16px; color: #1e293b; }
 .mp-buy-price { font-size: 28px; font-weight: 700; color: #667eea; }
 .mp-buy-panel .module-btn,
 .mp-bid-panel .module-btn { width: 100%; text-align: center; justify-content: center; }
@@ -473,17 +475,18 @@
   .mp-review-grid { grid-template-columns: 1fr; }
   .mp-detail-grid { grid-template-columns: 1fr; }
   .mp-species-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-  .mp-buy-panel, .mp-bid-panel { position: static; }
+  .mp-buy-panel,
+.mp-bid-panel { position: static; }
   .mp-chip-bar { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
   .mp-chip { flex-shrink: 0; }
-  .module-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  :where(.mp-page) .module-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .mp-sell-container { max-width: 100%; }
   .mp-sell-card { padding: 20px; }
   .mp-reject-row { flex-direction: column; }
   .mp-reject-row .module-input { width: 100%; min-width: 0; }
   .mp-order-toggle { width: 100%; }
   .mp-order-toggle .module-btn,
-  .mp-order-toggle .module-tab { flex: 1; text-align: center; }
+.mp-order-toggle .module-tab { flex: 1; text-align: center; }
   .mp-admin-header { flex-direction: column; align-items: stretch; }
 }
 
@@ -495,7 +498,7 @@
   .mp-seller-row { flex-direction: column; gap: 4px; text-align: center; }
   .mp-detail-price { font-size: 24px; }
   .mp-buy-price { font-size: 22px; }
-  .module-stats { grid-template-columns: repeat(2, 1fr) !important; }
+  :where(.mp-page) .module-stats { grid-template-columns: repeat(2, 1fr) !important; }
   .mp-sell-card { padding: 16px; }
   .mp-sell-step h3 { font-size: 17px; }
   .mp-step-actions { flex-direction: column; }
@@ -507,7 +510,7 @@
   .mp-card-price { font-size: 18px; }
   .mp-detail-price { font-size: 20px; }
   .mp-species-grid { grid-template-columns: 1fr 1fr; }
-  .module-stats { grid-template-columns: 1fr !important; }
+  :where(.mp-page) .module-stats { grid-template-columns: 1fr !important; }
   .mp-sell-card { padding: 14px; }
   .mp-sell-step h3 { font-size: 16px; }
   .mp-review-grid { gap: 8px; padding: 14px; }
@@ -838,7 +841,7 @@
 .mp-saved-chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .mp-saved-chip { background: #f1f5f9; color: #475569; border-radius: 6px; padding: 2px 8px; font-size: 11.5px; }
 .mp-saved-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
-.module-btn.muted { opacity: 0.55; }
+:where(.mp-page) .module-btn.muted { opacity: 0.55; }
 
 @media (max-width: 720px) {
   .mp-messages-layout { position: relative; }

@@ -266,7 +266,7 @@ const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate:
   }
 
   return (
-    <div className="module-page">
+    <div className="module-page vpa-page">
       <div className="module-header">
         <h1>{t('vaccineProtocol.title')}</h1>
         <p>{t('vaccineProtocol.subtitle')}</p>

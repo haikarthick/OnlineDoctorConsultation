@@ -590,7 +590,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
   )
 
   return (
-    <div className="module-page">
+    <div className="module-page vp-page">
       <div className="module-header">
         <h1>{t('vaccinationPassport.title')}</h1>
         <p className="module-header-subtitle">{t('vaccinationPassport.subtitle')}</p>

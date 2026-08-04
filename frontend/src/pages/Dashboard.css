@@ -84,7 +84,7 @@
   margin-bottom: 28px;
 }
 
-.stat-card {
+:where(.dashboard-container) .stat-card {
   background: white;
   border-radius: 12px;
   padding: 18px 20px;
@@ -97,13 +97,13 @@
   cursor: pointer;
 }
 
-.stat-card:hover {
+:where(.dashboard-container) .stat-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   border-color: #667eea40;
 }
 
-.stat-icon {
+:where(.dashboard-container) .stat-icon {
   width: 48px;
   height: 48px;
   border-radius: 10px;
@@ -114,8 +114,8 @@
   flex-shrink: 0;
 }
 
-.stat-content { flex: 1; }
-.stat-value { font-size: 24px; font-weight: 700; color: #1a202c; letter-spacing: -0.5px; line-height: 1; }
+:where(.dashboard-container) .stat-content { flex: 1; }
+:where(.dashboard-container) .stat-value { font-size: 24px; font-weight: 700; color: #1a202c; letter-spacing: -0.5px; line-height: 1; }
 .stat-label { font-size: 12px; color: #8b95a5; font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
 
 /* ─── Alert Section (Pending Approvals) ─── */
@@ -338,19 +338,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.activity-status.status-completed  { background: #dcfce7; color: #16a34a; }
-.activity-status.status-pending     { background: #fef3c7; color: #d97706; }
-.activity-status.status-confirmed   { background: #dbeafe; color: #2563eb; }
-.activity-status.status-scheduled   { background: #dbeafe; color: #2563eb; }
+.activity-status.status-completed { background: #dcfce7; color: #16a34a; }
+.activity-status.status-pending { background: #fef3c7; color: #d97706; }
+.activity-status.status-confirmed { background: #dbeafe; color: #2563eb; }
+.activity-status.status-scheduled { background: #dbeafe; color: #2563eb; }
 .activity-status.status-in_progress { background: #e0f2fe; color: #0369a1; }
-.activity-status.status-cancelled   { background: #fee2e2; color: #dc2626; }
-.activity-status.status-missed      { background: #fde8e8; color: #c53030; }
+.activity-status.status-cancelled { background: #fee2e2; color: #dc2626; }
+.activity-status.status-missed { background: #fde8e8; color: #c53030; }
 .activity-status.status-rescheduled { background: #fef3c7; color: #92400e; }
 .activity-time { font-size: 11px; color: #9ca3af; white-space: nowrap; }
 
-.empty-state { text-align: center; padding: 24px; color: #9ca3af; }
-.empty-icon { font-size: 32px; display: block; margin-bottom: 8px; }
-.empty-state p { font-size: 13px; margin: 0 0 12px; }
+:where(.dashboard-container) .empty-state { text-align: center; padding: 24px; color: #9ca3af; }
+:where(.dashboard-container) .empty-icon { font-size: 32px; display: block; margin-bottom: 8px; }
+:where(.dashboard-container) .empty-state p { font-size: 13px; margin: 0 0 12px; }
 .empty-action {
   padding: 8px 16px;
   border: 1px solid #667eea;
@@ -400,14 +400,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.status-pill.status-confirmed   { background: #dcfce7; color: #16a34a; }
-.status-pill.status-pending      { background: #fef3c7; color: #d97706; }
-.status-pill.status-completed    { background: #dcfce7; color: #16a34a; }
-.status-pill.status-scheduled    { background: #dbeafe; color: #2563eb; }
-.status-pill.status-in_progress  { background: #e0f2fe; color: #0369a1; }
-.status-pill.status-cancelled    { background: #fee2e2; color: #dc2626; }
-.status-pill.status-missed       { background: #fde8e8; color: #c53030; }
-.status-pill.status-rescheduled  { background: #fef3c7; color: #92400e; }
+.status-pill.status-confirmed { background: #dcfce7; color: #16a34a; }
+.status-pill.status-pending { background: #fef3c7; color: #d97706; }
+.status-pill.status-completed { background: #dcfce7; color: #16a34a; }
+.status-pill.status-scheduled { background: #dbeafe; color: #2563eb; }
+.status-pill.status-in_progress { background: #e0f2fe; color: #0369a1; }
+.status-pill.status-cancelled { background: #fee2e2; color: #dc2626; }
+.status-pill.status-missed { background: #fde8e8; color: #c53030; }
+.status-pill.status-rescheduled { background: #fef3c7; color: #92400e; }
 
 /* ─── Feature Cards ─── */
 .dashboard-feature-grid {
@@ -500,9 +500,9 @@
   .dashboard-title { font-size: 22px; }
   .dashboard-date { font-size: 12px; width: 100%; }
   .dashboard-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .stat-card { padding: 14px; }
-  .stat-value { font-size: 20px; }
-  .stat-icon { width: 40px; height: 40px; font-size: 18px; }
+  :where(.dashboard-container) .stat-card { padding: 14px; }
+  :where(.dashboard-container) .stat-value { font-size: 20px; }
+  :where(.dashboard-container) .stat-icon { width: 40px; height: 40px; font-size: 18px; }
   .dashboard-section { padding: 14px; }
   .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
   .dashboard-feature-grid { grid-template-columns: 1fr; }
@@ -527,8 +527,8 @@
   .dashboard-container { padding: 12px; }
   .dashboard-title { font-size: 20px; }
   .dashboard-stats-grid { grid-template-columns: 1fr; gap: 8px; }
-  .stat-card { padding: 12px; gap: 10px; }
-  .stat-value { font-size: 18px; }
+  :where(.dashboard-container) .stat-card { padding: 12px; gap: 10px; }
+  :where(.dashboard-container) .stat-value { font-size: 18px; }
   .stat-label { font-size: 10px; }
   .quick-actions-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .action-card { padding: 10px; gap: 8px; }

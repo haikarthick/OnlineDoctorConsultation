@@ -393,7 +393,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
   // ── Issued success screen ──
   if (issued) {
     return (
-      <div className="module-page">
+      <div className="module-page cw-page">
         <div className="module-card cw-success-card">
           <p className="cw-success-icon">✅</p>
           <h2>{t('certificateWriter.certificateIssued')}</h2>
@@ -412,7 +412,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
   }
 
   return (
-    <div className="module-page">
+    <div className="module-page cw-page">
       {/* ── Header ── */}
       <div className="module-header">
         <div>

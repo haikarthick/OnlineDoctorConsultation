@@ -94,12 +94,12 @@
 .cw-label-sm { font-size: 11px; }
 
 /* ── Remove/danger button modifier ── */
-.module-btn.danger {
+:where(.cw-page) .module-btn.danger {
   color: #e53e3e;
   border-color: #fed7d7;
   background: #fff5f5;
 }
-.module-btn.danger:hover { background: #fed7d7; }
+:where(.cw-page) .module-btn.danger:hover { background: #fed7d7; }
 
 /* ── Next button bar (right-aligned) ── */
 .cw-next-bar {

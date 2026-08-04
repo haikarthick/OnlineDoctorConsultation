@@ -22,6 +22,23 @@ const SRC = path.resolve(__dirname, '..', 'src');
 // Stylesheets that legitimately define the shared vocabulary.
 const GLOBAL_SHEETS = new Set(['modules.css', 'index.css', 'App.css', 'extracted-inline-styles.css']);
 
+/**
+ * The shared vocabulary is DERIVED from modules.css rather than hand-listed, so the rule cannot
+ * silently miss a class simply because nobody thought to add it. If the design system defines a
+ * name, a page stylesheet must not redefine it unscoped - that is the whole rule.
+ * The curated list below is kept as a floor for names that are conventional but not (yet) in
+ * modules.css.
+ */
+function designSystemClasses() {
+  const found = new Set();
+  try {
+    const css = fs.readFileSync(path.join(SRC, 'styles', 'modules.css'), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    for (const m of css.matchAll(/\.([A-Za-z][A-Za-z0-9_-]*)/g)) found.add(m[1]);
+  } catch { /* fall back to the curated floor below */ }
+  return found;
+}
+
 // Generic names owned by the design system. A page stylesheet must not target these unscoped.
 const SHARED_CLASSES = new Set([
   'form-group', 'form-row', 'form-grid', 'form-actions', 'form-label', 'form-input',
@@ -32,6 +49,7 @@ const SHARED_CLASSES = new Set([
   'spinner', 'loading-container', 'empty-state', 'data-table', 'stat-card',
   'subtitle', 'feature', 'features-list', 'link-btn', 'tabs', 'tab-button',
 ]);
+for (const c of designSystemClasses()) SHARED_CLASSES.add(c);
 
 const BARE_ELEMENTS = /^(input|select|textarea|button|table|th|td|tr|ul|ol|li|a|h[1-6]|p|form|label|img|section|div|span)$/;
 

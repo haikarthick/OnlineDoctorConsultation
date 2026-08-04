@@ -348,7 +348,7 @@ const PatientConsentPage: React.FC = () => {
   }
 
   return (
-    <div className="module-page">
+    <div className="module-page pc-page">
       <div className="module-header">
         <h1>{t('patientConsent.title')}</h1>
         <p className="page-subtitle">{t('patientConsent.subtitle')}</p>

@@ -42,12 +42,12 @@
 }
 .pharmacy-stat-card:hover { transform: translateY(-2px); }
 .pharmacy-stat-card.warning { border-color: #ff9800; }
-.pharmacy-stat-card.danger  { border-color: #f44336; }
+.pharmacy-stat-card.danger { border-color: #f44336; }
 .pharmacy-stat-card.success { border-color: #4caf50; }
-.pharmacy-stat-card.info    { border-color: #2196f3; }
+.pharmacy-stat-card.info { border-color: #2196f3; }
 .pharmacy-stat-card.primary { border-color: #3949ab; }
-.stat-icon { font-size: 1.8rem; }
-.stat-value { font-size: 2rem; font-weight: 800; color: #1a237e; }
+:where(.pharmacy-page) .stat-icon { font-size: 1.8rem; }
+:where(.pharmacy-page) .stat-value { font-size: 2rem; font-weight: 800; color: #1a237e; }
 .stat-label { font-size: 0.82rem; color: #666; font-weight: 500; }
 
 /* ── Tabs ── */
@@ -129,14 +129,14 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.pharm-badge.pending    { background: #fff3e0; color: #e65100; }
-.pharm-badge.approved   { background: #e8f5e9; color: #2e7d32; }
-.pharm-badge.rejected   { background: #ffebee; color: #c62828; }
-.pharm-badge.dispensed  { background: #e3f2fd; color: #1565c0; }
-.pharm-badge.low        { background: #fff8e1; color: #f57f17; }
-.pharm-badge.ok         { background: #e8f5e9; color: #388e3c; }
-.pharm-badge.expiring   { background: #fff3e0; color: #e65100; }
-.pharm-badge.expired    { background: #ffebee; color: #c62828; }
+.pharm-badge.pending { background: #fff3e0; color: #e65100; }
+.pharm-badge.approved { background: #e8f5e9; color: #2e7d32; }
+.pharm-badge.rejected { background: #ffebee; color: #c62828; }
+.pharm-badge.dispensed { background: #e3f2fd; color: #1565c0; }
+.pharm-badge.low { background: #fff8e1; color: #f57f17; }
+.pharm-badge.ok { background: #e8f5e9; color: #388e3c; }
+.pharm-badge.expiring { background: #fff3e0; color: #e65100; }
+.pharm-badge.expired { background: #ffebee; color: #c62828; }
 
 /* ── Search & Filter Bar ── */
 .pharmacy-filter-bar {
@@ -166,10 +166,10 @@
 }
 
 /* ── Inventory color coding ── */
-.stock-expired  { color: #c62828; font-weight: 700; }
+.stock-expired { color: #c62828; font-weight: 700; }
 .stock-expiring { color: #e65100; font-weight: 600; }
-.stock-low      { color: #f57f17; font-weight: 600; }
-.stock-ok       { color: #2e7d32; }
+.stock-low { color: #f57f17; font-weight: 600; }
+.stock-ok { color: #2e7d32; }
 
 /* ── Modal overlay ── */
 .pharm-modal-overlay {
@@ -266,9 +266,9 @@
 
 /* ── Badge variants ── */
 .pharm-badge.needs_clarification { background: #fff8e1; color: #f57f17; }
-.pharm-badge.sent_to_supplier    { background: #e8eaf6; color: #3949ab; }
-.pharm-badge.received            { background: #f1f8e9; color: #33691e; }
-.pharm-badge.shipped             { background: #e3f2fd; color: #1565c0; }
+.pharm-badge.sent_to_supplier { background: #e8eaf6; color: #3949ab; }
+.pharm-badge.received { background: #f1f8e9; color: #33691e; }
+.pharm-badge.shipped { background: #e3f2fd; color: #1565c0; }
 
 /* ── Wide modal ── */
 .pharm-modal-wide { max-width: 720px; }
