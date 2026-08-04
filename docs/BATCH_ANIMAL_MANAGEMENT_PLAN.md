@@ -348,11 +348,57 @@ head must keep saying 5,000 after the flock drops to 4,200.
 
 ---
 
-## 9. Remaining open question
+## 9. Mode transitions — RESOLVED (link, don't copy)
 
-**Mode transitions.** When an animal is promoted out of a batch (or absorbed into one), what
-happens to the health history on each side? Options: (a) the individual inherits nothing and
-starts fresh, with the batch history remaining group-level context; (b) group records are copied
-down as individual records at promotion time. (a) is far simpler and keeps the "no fan-out" rule
-intact; (b) is what a buyer of that single animal would want to see. Needs a decision before
-the promote/demote path in §7.1 is built.
+The owner's requirement settles this: an animal's history must be traceable **for its whole
+life, and to its ancestors**, because that is the point of keeping records digitally — proving
+provenance, parentage and insurance history.
+
+Neither option originally offered is right. Copying group records down at promotion is the
+fan-out we are avoiding, and it duplicates a fact into rows that can then drift apart. Inheriting
+nothing loses the first weeks of the animal's life.
+
+**Resolution: record membership, compose at read time.** `animal_group_memberships`
+(animal, group, cycle, `joined_at`, `left_at`, `exit_reason`) states exactly which population an
+animal belonged to and when. Its lifetime history is then its own records **plus** the group
+records whose `event_date` falls inside its membership window. One row per event, full history,
+nothing duplicated. `animals.origin_group_id` / `origin_cycle_id` record where a promoted animal
+came from.
+
+Ancestry needs nothing new: `animals.dam_id`/`sire_id`, `breeding_records` and `lineage_pairs`
+already exist and are untouched by any of this.
+
+**This is why `medical_records.event_date` was added.** The table only had `created_at` — when
+the row was typed. A treatment recorded after the fact would be matched to the wrong membership
+window, or to none. Caught by the Phase 1 test suite, not by review.
+
+---
+
+## 10. Implementation status
+
+**Phase 1 foundation — SHIPPED** (migration `041_batch_animal_management.sql`, mirrored into
+`docker/init.sql` §60).
+
+| Delivered | |
+|---|---|
+| `master_species.default_management_mode` | poultry seeded to `batch`, everything else `individual` |
+| `animal_groups.management_mode` | the group decides; species only suggests |
+| `group_cycles` | one active cycle per group, enforced by a partial unique index |
+| `group_population_events` | signed-quantity ledger; placement/hatch/mortality/cull/sale/transfer/promotion/adjustment |
+| `animal_group_memberships` + `animals.origin_*` | lifetime history without copying |
+| `group_id`/`cycle_id` on 5 health tables | with subject CHECKs |
+| `medical_records.event_date` | back-dating, and correct membership matching |
+| batch counters | `head_count_treated`, `affected_count`, `mortality_count` |
+| withdrawal | `withdrawal_days_milk/meat` on medications, `withdrawal_until_*` stored on the record |
+| `campaign_id` on health tables | ready for Phase 3 |
+
+Verified on a real PostgreSQL 18 cluster, 11 behaviour tests: one flock treatment creates
+**1 row not 5,000**; neither-subject rows rejected; negative counts rejected; a second active
+cycle rejected; the ledger reconciles to the stored count; a promoted bird still sees the flock
+treatment from its membership window; individual records unaffected. The upgrade path
+(init.sql + 41 migrations) and a fresh install (init.sql alone) produce **identical schemas** —
+2,496 columns, zero diff, all 7 new constraints on both.
+
+**Next: Phase 1 remainder** — backend service and routes for cycles, population events and
+group-subject records, then the Herd Medical subject picker. Nothing is reachable from the UI
+yet; the schema is in place and inert.
