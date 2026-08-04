@@ -153,6 +153,7 @@ import VaccineProtocolService from '../services/VaccineProtocolService';
 import MasterDataService from '../services/MasterDataService';
 import VaccineScheduleService from '../services/VaccineScheduleService';
 import { asyncHandler } from '../utils/errorHandler';
+import BatchManagementService from '../services/BatchManagementService';
 import { AuthRequest } from '../middleware/auth';
 import { checkAnimalAccess, requireAnimalAccess, requireEnterpriseAccess } from '../middleware/hospitalDataIsolation';
 import emailService from '../services/EmailService';
@@ -682,6 +683,117 @@ router.delete('/animal-groups/:id', authMiddleware, asyncHandler((req: Request, 
 router.get('/enterprises/:enterpriseId/groups', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listGroups(req, res)));
 router.post('/animal-groups/:id/assign', authMiddleware, validateBody(assignAnimalToGroupSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.assignAnimalToGroup(req, res)));
 router.delete('/animal-groups/:id/animals/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.removeAnimalFromGroup(req, res)));
+
+// ─── Batch (flock/herd) management ──────────────────────────────────────────
+// A health event has ONE subject - an animal or a group - so a 5,000-bird flock produces one
+// record, not 5,000. See docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md.
+//
+// Every route below is gated by ensureGroupAccess(): the caller must own the enterprise that
+// owns the group, be a member of it, or be a platform admin. A group id is a bearer of an
+// enterprise's data, so an unguarded :groupId here would be a cross-tenant read exactly like
+// the ones the network audits found.
+async function ensureGroupAccess(req: Request, res: Response): Promise<string | null> {
+  const authReq = req as any;
+  const groupId = req.params.groupId || req.params.id;
+  if (!groupId) { res.status(400).json({ success: false, message: 'Group id is required' }); return null; }
+
+  if (authReq.userRole === 'admin') return groupId;
+
+  const owned = await database.query(
+    `SELECT 1
+       FROM animal_groups ag
+       JOIN enterprises e ON e.id = ag.enterprise_id
+      WHERE ag.id = $1
+        AND (e.owner_id = $2
+             OR EXISTS (SELECT 1 FROM enterprise_members em
+                         WHERE em.enterprise_id = e.id AND em.user_id = $2 AND em.is_active = true))
+      LIMIT 1`,
+    [groupId, authReq.userId]
+  );
+  if (!owned.rows.length) {
+    // 404 not 403 - do not confirm that a group exists to someone with no claim on it.
+    res.status(404).json({ success: false, message: 'Animal group not found' });
+    return null;
+  }
+  return groupId;
+}
+
+router.get('/animal-groups/:groupId/cycles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  res.json({ success: true, data: await BatchManagementService.listCycles(groupId) });
+}));
+
+router.get('/animal-groups/:groupId/cycles/active', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  res.json({ success: true, data: await BatchManagementService.getActiveCycle(groupId) });
+}));
+
+router.post('/animal-groups/:groupId/cycles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  const { name, species, breed, placedCount, startedAt, notes } = req.body;
+  const cycle = await BatchManagementService.openCycle({
+    groupId, name, species, breed,
+    placedCount: Number(placedCount) || 0, startedAt, notes,
+    userId: (req as any).userId,
+  });
+  res.status(201).json({ success: true, data: cycle });
+}));
+
+router.post('/group-cycles/:cycleId/close', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  // The cycle is reached by its own id, so resolve its group first and guard on that.
+  const owner = await database.query(
+    `SELECT gc.group_id FROM group_cycles gc WHERE gc.id = $1`, [req.params.cycleId]
+  );
+  if (!owner.rows.length) { res.status(404).json({ success: false, message: 'Cycle not found' }); return; }
+  req.params.groupId = owner.rows[0].group_id;
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+
+  const cycle = await BatchManagementService.closeCycle(req.params.cycleId, authReq.userId, req.body?.reason);
+  res.json({ success: true, data: cycle });
+}));
+
+router.get('/animal-groups/:groupId/population-events', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  const events = await BatchManagementService.listPopulationEvents(groupId, req.query.cycleId as string | undefined);
+  res.json({ success: true, data: events });
+}));
+
+router.post('/animal-groups/:groupId/population-events', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  const { cycleId, eventType, quantity, eventDate, reason, sourceRef } = req.body;
+  const result = await BatchManagementService.recordPopulationEvent({
+    groupId, cycleId, eventType, quantity: Number(quantity),
+    eventDate, reason, sourceRef, userId: (req as any).userId,
+  });
+  res.status(201).json({ success: true, data: result });
+}));
+
+router.get('/animal-groups/:groupId/reconcile', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  res.json({ success: true, data: await BatchManagementService.reconcile(groupId) });
+}));
+
+router.get('/animal-groups/:groupId/withdrawal', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  res.json({ success: true, data: await BatchManagementService.getWithdrawalStatus({ groupId }) });
+}));
+
+router.post('/animal-groups/:groupId/promote', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  const { animalId, cycleId, reason } = req.body;
+  if (!animalId) { res.status(400).json({ success: false, message: 'animalId is required' }); return; }
+  const result = await BatchManagementService.promoteFromBatch({
+    animalId, groupId, cycleId, reason, userId: (req as any).userId,
+  });
+  res.status(201).json({ success: true, data: result });
+}));
+
+// An animal's FULL life story: its own records plus the group records that applied while it was
+// a member of that cycle. Composed at read time - nothing is ever copied down.
+router.get('/animals/:animalId/lifetime-history', authMiddleware, requireAnimalAccess('params:animalId', 'medical_records'), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await BatchManagementService.getAnimalLifetimeHistory(req.params.animalId) });
+}));
 
 // Locations
 router.post('/locations', authMiddleware, validateBody(createLocationSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.createLocation(req, res)));

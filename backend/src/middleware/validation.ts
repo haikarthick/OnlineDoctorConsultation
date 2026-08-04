@@ -588,6 +588,10 @@ export const createAnimalGroupSchema = Joi.object({
   targetCount: positiveInt.optional(),
   description: longText(2000).optional().allow('', null),
   colorCode: Joi.string().max(20).optional().allow('', null),
+  // 'batch' means the group is tracked as a population with a headcount rather than as
+  // individual animals - a 5,000-bird flock, not 5,000 rows. Omitted on create, it is derived
+  // from the species default. See docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md.
+  managementMode: Joi.string().valid('individual', 'batch').optional(),
 });
 
 export const updateAnimalGroupSchema = createAnimalGroupSchema.fork(

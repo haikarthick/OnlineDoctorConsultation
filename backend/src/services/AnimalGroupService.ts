@@ -14,6 +14,8 @@ export interface AnimalGroup {
   purpose?: string;
   targetCount: number;
   currentCount: number;
+  /** 'individual' = one animals row per head; 'batch' = a headcount held by the ledger. */
+  managementMode?: string;
   description?: string;
   colorCode?: string;
   isActive: boolean;
@@ -34,6 +36,7 @@ export interface AnimalGroupCreateDTO {
   targetCount?: number;
   description?: string;
   colorCode?: string;
+  managementMode?: string;
 }
 
 export class AnimalGroupService {
@@ -41,12 +44,23 @@ export class AnimalGroupService {
   async createGroup(data: AnimalGroupCreateDTO): Promise<AnimalGroup> {
     try {
       const id = uuidv4();
+      // The caller decides; if it does not, the species default applies (poultry is 'batch').
+      // Species only ever SUGGESTS - the same species is managed individually by a smallholder
+      // and as a batch by an enterprise, so the group is what actually decides.
+      let mode: string = (data as any).managementMode;
+      if (!mode) {
+        const sp = await database.query(
+          `SELECT default_management_mode FROM master_species WHERE code = $1 LIMIT 1`,
+          [data.species || null]
+        );
+        mode = sp.rows[0]?.default_management_mode || 'individual';
+      }
       const result = await database.query(
-        `INSERT INTO animal_groups (id, enterprise_id, name, group_type, species, breed, purpose, target_count, description, color_code)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+        `INSERT INTO animal_groups (id, enterprise_id, name, group_type, species, breed, purpose, target_count, description, color_code, management_mode)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
          RETURNING *`,
         [id, data.enterpriseId, data.name, data.groupType, data.species, data.breed,
-         data.purpose, data.targetCount || 0, data.description, data.colorCode]
+         data.purpose, data.targetCount || 0, data.description, data.colorCode, mode]
       );
       logger.info(`Animal group created: ${data.name}`, { groupId: id });
       return this.mapRow(result.rows[0]);
@@ -68,7 +82,12 @@ export class AnimalGroupService {
     if (result.rows.length === 0) throw new NotFoundError('Animal group not found');
     const row = result.rows[0];
     const mapped = this.mapRow(row);
-    mapped.currentCount = parseInt(row.actual_count || '0');
+    // Only an individual-mode group is counted by its animals rows. A batch group's population
+    // lives in animal_groups.current_count, maintained by group_population_events - overriding
+    // it here would report every flock as 0 head.
+    if (mapped.managementMode !== 'batch') {
+      mapped.currentCount = parseInt(row.actual_count || '0');
+    }
     return mapped;
   }
 
@@ -89,7 +108,10 @@ export class AnimalGroupService {
     return {
       items: result.rows.map((r: any) => {
         const mapped = this.mapRow(r);
-        mapped.currentCount = parseInt(r.actual_count || '0');
+        // See getGroup(): batch groups keep their ledger-maintained headcount.
+        if (mapped.managementMode !== 'batch') {
+          mapped.currentCount = parseInt(r.actual_count || '0');
+        }
         return mapped;
       }),
       total: parseInt(countResult.rows[0]?.total || '0'),
@@ -104,6 +126,7 @@ export class AnimalGroupService {
     const fieldMap: Record<string, string> = {
       name: 'name', groupType: 'group_type', species: 'species', breed: 'breed',
       purpose: 'purpose', targetCount: 'target_count', description: 'description', colorCode: 'color_code',
+      managementMode: 'management_mode',
     };
 
     for (const [key, col] of Object.entries(fieldMap)) {
@@ -141,10 +164,20 @@ export class AnimalGroupService {
     await this.updateGroupCount(groupId);
   }
 
-  /** Recalculate current_count */
+  /**
+   * Recalculate current_count from the individual animals in the group.
+   *
+   * ONLY valid for individual-mode groups. A batch group has no `animals` row per head - a
+   * 5,000-bird flock is a headcount maintained by group_population_events - so counting rows
+   * here would silently reset it to zero and destroy the ledger's meaning. The WHERE clause is
+   * the guard: for a batch group this updates nothing.
+   */
   private async updateGroupCount(groupId: string): Promise<void> {
     await database.query(
-      `UPDATE animal_groups SET current_count = (SELECT COUNT(*) FROM animals WHERE group_id = $1 AND is_active = true), updated_at = NOW() WHERE id = $1`,
+      `UPDATE animal_groups
+          SET current_count = (SELECT COUNT(*) FROM animals WHERE group_id = $1 AND is_active = true),
+              updated_at = NOW()
+        WHERE id = $1 AND management_mode = 'individual'`,
       [groupId]
     );
   }
@@ -153,6 +186,7 @@ export class AnimalGroupService {
     return {
       id: row.id,
       enterpriseId: row.enterprise_id,
+      managementMode: row.management_mode,
       name: row.name,
       groupType: row.group_type,
       species: row.species,
