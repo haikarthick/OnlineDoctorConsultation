@@ -29,7 +29,7 @@ class PaymentModuleConfig {
       this.cache.set(key, { value, fetchedAt: Date.now() });
       return value;
     } catch (err: any) {
-      logger.warn('PaymentModuleConfig read failed — using cached/default', { key, error: err.message });
+      logger.warn('PaymentModuleConfig read failed - using cached/default', { key, error: err.message });
       return hit?.value ?? null;
     }
   }
@@ -60,7 +60,7 @@ class PaymentModuleConfig {
 
   // ── Typed accessors for the module's keys ──────────────────
 
-  /** Master flag — when false the platform behaves exactly as before the module. */
+  /** Master flag - when false the platform behaves exactly as before the module. */
   async isEnabled(): Promise<boolean> {
     return this.getBoolean('payment.enabled', false);
   }
@@ -69,7 +69,7 @@ class PaymentModuleConfig {
     const raw = await this.getString('payment.gatewayMode', 'demo');
     const mode = raw.trim().toLowerCase();
     // 'test'/'live' are aliases from the legacy Payment Gateway admin card
-    // (pre-dates this module, writes 'demo'/'test'/'live') — without this,
+    // (pre-dates this module, writes 'demo'/'test'/'live') - without this,
     // clicking TEST/LIVE there silently no-ops for the payment module.
     if (mode === 'razorpay_test' || mode === 'test') return 'razorpay_test';
     if (mode === 'razorpay_live' || mode === 'live') return 'razorpay_live';

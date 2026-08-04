@@ -5,12 +5,12 @@ name: Setup Demo Environment
 # the Render dashboard.
 #
 # Required GitHub Secrets:
-#   RENDER_API_KEY          — Render → Account Settings → API Keys → Create
-#   RENDER_DEMO_SERVICE_ID  — From Render service URL: dashboard.render.com/web/srv-XXXXXXXXXX
-#   DEMO_DATABASE_URL       — Neon connection string (postgresql://...@neon.tech/...)
-#   DEMO_JWT_SECRET         — Strong random secret for JWT signing
-#   CLOUDINARY_URL          — cloudinary://api_key:api_secret@cloud_name
-#   RENDER_DEPLOY_HOOK_DEMO — Render → vetcare-demo → Settings → Deploy Hooks → Create
+#   RENDER_API_KEY          - Render → Account Settings → API Keys → Create
+#   RENDER_DEMO_SERVICE_ID  - From Render service URL: dashboard.render.com/web/srv-XXXXXXXXXX
+#   DEMO_DATABASE_URL       - Neon connection string (postgresql://...@neon.tech/...)
+#   DEMO_JWT_SECRET         - Strong random secret for JWT signing
+#   CLOUDINARY_URL          - cloudinary://api_key:api_secret@cloud_name
+#   RENDER_DEPLOY_HOOK_DEMO - Render → vetcare-demo → Settings → Deploy Hooks → Create
 #
 # How to run:
 #   GitHub → Actions → "Setup Demo Environment" → Run workflow → confirm=yes
@@ -101,7 +101,7 @@ jobs:
         run: |
           HOOK_URL="${{ secrets.RENDER_DEPLOY_HOOK_DEMO }}"
           if [ -z "$HOOK_URL" ]; then
-            echo "⚠️  RENDER_DEPLOY_HOOK_DEMO not set — skipping auto-redeploy"
+            echo "⚠️  RENDER_DEPLOY_HOOK_DEMO not set - skipping auto-redeploy"
             echo "   Get it from: Render → vetcare-demo → Settings → Deploy Hooks"
             exit 0
           fi

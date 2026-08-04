@@ -104,7 +104,9 @@
     "none": "None",
     "error": "Error",
     "deactivate": "Deactivate",
-    "previous": "ಹಿಂದಿನ"
+    "previous": "ಹಿಂದಿನ",
+    "showPassword": "ಪಾಸ್‌ವರ್ಡ್ ತೋರಿಸಿ",
+    "hidePassword": "ಪಾಸ್‌ವರ್ಡ್ ಮರೆಮಾಡಿ"
   },
   "nav": {
     "brand": "VetCare",
@@ -174,6 +176,7 @@
     "sections": {
       "main": "ಮುಖ್ಯ",
       "consultations": "ಸಮಾಲೋಚನೆಗಳು",
+      "groomingSpa": "ಗ್ರೂಮಿಂಗ್ ಮತ್ತು ಸ್ಪಾ",
       "animalsHealth": "ಪ್ರಾಣಿಗಳು ಮತ್ತು ಆರೋಗ್ಯ",
       "farmManagement": "ಕೃಷಿ ನಿರ್ವಹಣೆ",
       "analyticsTools": "ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಪರಿಕರಗಳು",
@@ -183,6 +186,7 @@
       "account": "ಖಾತೆ",
       "finance": "ಹಣಕಾಸು",
       "administration": "ಆಡಳಿತ",
+      "hospitalNetworks": "ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್",
       "preferences": "ಆದ್ಯತೆಗಳು"
     },
     "roles": {
@@ -206,7 +210,16 @@
     "settlements": "ಸೆಟಲ್ಮೆಂಟ್‌ಗಳು",
     "referrals": "ರೆಫರಲ್‌ಗಳು",
     "financeReports": "ಹಣಕಾಸು ವರದಿಗಳು",
-    "masterData": "ಮಾಸ್ಟರ್ ಡೇಟಾ"
+    "masterData": "ಮಾಸ್ಟರ್ ಡೇಟಾ",
+    "groomingProvider": "ನನ್ನ ಗ್ರೂಮಿಂಗ್ ವ್ಯಾಪಾರ",
+    "groomingAdmin": "ಗ್ರೂಮಿಂಗ್ ಪೂರೈಕೆದಾರರು",
+    "groomingFind": "ಗ್ರೂಮರ್ ಹುಡುಕಿ",
+    "groomingMyOrders": "ನನ್ನ ಗ್ರೂಮಿಂಗ್",
+    "groomingOrders": "ಗ್ರೂಮಿಂಗ್ ಆರ್ಡರ್‌ಗಳು",
+    "groomingEarnings": "ಗ್ರೂಮಿಂಗ್ ಗಳಿಕೆ",
+    "groomingApply": "ನಿಮ್ಮ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ",
+    "groomingSchedule": "ಕೆಲಸದ ಸಮಯ",
+    "payables": "ಪಾವತಿಸಬೇಕಾದ ಮೊತ್ತ"
   },
   "login": {
     "welcome": "ಮತ್ತೆ ಸ್ವಾಗತ",
@@ -233,8 +246,8 @@
     },
     "trust": "3,000+ ಉದ್ಯಮಗಳು ಮತ್ತು 500+ ಆಸ್ಪತ್ರೆಗಳ ವಿಶ್ವಾಸ",
     "hospitalStaffTitle": "ಆಸ್ಪತ್ರೆ ಅಥವಾ ಕ್ಲಿನಿಕ್ ಸಿಬ್ಬಂದಿಯೇ?",
-    "hospitalStaffDesc": "ನಿಮ್ಮ ಪಶುವೈದ್ಯ ಖಾತೆಯಿಂದ ಲಾಗಿನ್ ಮಾಡಿ — ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಒಳಗಿದೆ.",
-    "dbWakingUp": "ಡೇಟಾಬೇಸ್ ಎಚ್ಚರಗೊಳ್ಳುತ್ತಿದೆ — {{countdown}}s ನಲ್ಲಿ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮರು-ಪ್ರಯತ್ನಿಸಲಾಗುತ್ತಿದೆ…",
+    "hospitalStaffDesc": "ನಿಮ್ಮ ಪಶುವೈದ್ಯ ಖಾತೆಯಿಂದ ಲಾಗಿನ್ ಮಾಡಿ. ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಒಳಗಿದೆ.",
+    "dbWakingUp": "ಡೇಟಾಬೇಸ್ ಎಚ್ಚರಗೊಳ್ಳುತ್ತಿದೆ, {{countdown}}s ನಲ್ಲಿ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮರು-ಪ್ರಯತ್ನಿಸಲಾಗುತ್ತಿದೆ…",
     "dbWakingUpNote": "ಮೊದಲ ಭೇಟಿಯಲ್ಲಿ ಇದು ಸಾಮಾನ್ಯ. ದಯವಿಟ್ಟು ಕಾಯಿರಿ.",
     "success": "✓ ಲಾಗಿನ್ ಯಶಸ್ವಿ! ಮರುನಿರ್ದೇಶಿಸಲಾಗುತ್ತಿದೆ...",
     "error": "ಲಾಗಿನ್ ವಿಫಲವಾಗಿದೆ",
@@ -337,14 +350,18 @@
     "termsLink": "ಸೇವಾ ನಿಯಮಗಳು",
     "acceptAnd": "ಮತ್ತು",
     "privacyLink": "ಗೌಪ್ಯತಾ ನೀತಿ",
-    "doctorAgreementLink": "ವೈದ್ಯ ಸೇವಾ ಒಪ್ಪಂದ"
+    "doctorAgreementLink": "ವೈದ್ಯ ಸೇವಾ ಒಪ್ಪಂದ",
+    "roleGroomer": "ಗ್ರೂಮಿಂಗ್ ಪೂರೈಕೆದಾರ",
+    "roleGroomerDesc": "ಗ್ರೂಮಿಂಗ್ & ಸ್ಪಾ ಸೇವೆಗಳನ್ನು ನೀಡಿ",
+    "groomerNoticeTitle": "ಮುಂದೆ: ನಿಮ್ಮ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ",
+    "groomerNoticeBody": "ನಿಮ್ಮ ಖಾತೆ ತಕ್ಷಣವೇ ಸಕ್ರಿಯವಾಗುತ್ತದೆ. ಸೈನ್ ಇನ್ ಆದ ನಂತರ ನಿಮ್ಮ ವ್ಯವಹಾರದ ವಿವರಗಳು ಮತ್ತು ಸೇವಾ ಪಟ್ಟಿಯನ್ನು ಸೇರಿಸಿ. ಗ್ರಾಹಕರ ಹುಡುಕಾಟದಲ್ಲಿ ಕಾಣಿಸುವ ಮೊದಲು ನಮ್ಮ ತಂಡ ಪ್ರತಿ ವ್ಯವಹಾರವನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ."
   },
   "home": {
     "signIn": "ಸೈನ್ ಇನ್",
     "getStarted": "ಉಚಿತವಾಗಿ ಪ್ರಾರಂಭಿಸಿ",
     "heroTitle": "ಪ್ರಾಣಿ ಆರೋಗ್ಯ ಮತ್ತು ಉದ್ಯಮ ನಿರ್ವಹಣೆಗೆ ಸಂಪೂರ್ಣ ವೇದಿಕೆ",
-    "heroSubtitle": "ಒಂದೇ ಸಾಕುಪ್ರಾಣಿಯಿಂದ 10,000 ತಲೆ ಜಾನುವಾರು ಕಾರ್ಯಾಚರಣೆಗಳವರೆಗೆ — VetCare 24/7 ಪಶುವೈದ್ಯ ಸಮಾಲೋಚನೆಗಳು, AI-ಚಾಲಿತ ರೋಗ ಭವಿಷ್ಯ, IoT ಮೇಲ್ವಿಚಾರಣೆ, ಮತ್ತು ಸಂಪೂರ್ಣ ಉದ್ಯಮ ನಿರ್ವಹಣೆಯನ್ನು ಒಂದೇ ಏಕೀಕೃತ ವೇದಿಕೆಯಲ್ಲಿ ಒದಗಿಸುತ್ತದೆ.",
-    "ctaPrimary": "ಉಚಿತ ಪ್ರಾರಂಭ — ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕ",
+    "heroSubtitle": "ಒಂದೇ ಸಾಕುಪ್ರಾಣಿಯಿಂದ 10,000 ತಲೆ ಜಾನುವಾರು ಕಾರ್ಯಾಚರಣೆಗಳವರೆಗೆ, VetCare 24/7 ಪಶುವೈದ್ಯ ಸಮಾಲೋಚನೆಗಳು, AI-ಚಾಲಿತ ರೋಗ ಭವಿಷ್ಯ, IoT ಮೇಲ್ವಿಚಾರಣೆ, ಮತ್ತು ಸಂಪೂರ್ಣ ಉದ್ಯಮ ನಿರ್ವಹಣೆಯನ್ನು ಒಂದೇ ಏಕೀಕೃತ ವೇದಿಕೆಯಲ್ಲಿ ಒದಗಿಸುತ್ತದೆ.",
+    "ctaPrimary": "ಉಚಿತ ಪ್ರಾರಂಭ: ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕ",
     "ctaEnterprise": "🏢 ಉದ್ಯಮ ಸೈನ್ ಅಪ್",
     "ctaVet": "ಪಶುವೈದ್ಯರಾಗಿ ಸೇರಿ",
     "guarantees": "✓ ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರಿಗೆ ಉಚಿತ • ✓ 30-ದಿನ ಉದ್ಯಮ ಪ್ರಯೋಗ • ✓ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಅಗತ್ಯವಿಲ್ಲ",
@@ -359,7 +376,8 @@
       "compliance": "ಅನುಸರಣೆ",
       "howItWorks": "ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ",
       "testimonials": "ಪ್ರಶಂಸೆಗಳು",
-      "sections": "ಅನ್ವೇಷಿಸಿ"
+      "sections": "ಅನ್ವೇಷಿಸಿ",
+      "grooming": "ಗ್ರೂಮಿಂಗ್ ಮತ್ತು ಸ್ಪಾ"
     },
     "registerHospital": "ಆಸ್ಪತ್ರೆ ನೋಂದಣಿ",
     "browseHospitals": "ಆಸ್ಪತ್ರೆಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ",
@@ -372,7 +390,7 @@
     "heroCard2Title": "ಅಭಿಯಾನ: 94% ಪೂರ್ಣ",
     "heroCard2Sub": "FMD ಲಸಿಕೆ ಡ್ರೈವ್",
     "heroCard3Title": "ಲೈವ್ ಸಮಾಲೋಚನೆ",
-    "heroCard3Sub": "ಡಾ. ವಿಲ್ಸನ್ — ಈಗ",
+    "heroCard3Sub": "ಡಾ. ವಿಲ್ಸನ್, ಈಗ",
     "heroBadge": "ಉದ್ಯಮ ಪ್ರಾಣಿ ಆರೈಕೆ",
     "stats": {
       "petOwners": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರು",
@@ -398,7 +416,7 @@
       "sanctuaries": "ಅಭಯಾರಣ್ಯಗಳು"
     },
     "hospitalTitle": "ಪಶುವೈದ್ಯ ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್",
-    "hospitalSubtitle": "ನಿಮ್ಮ ಪಶುವೈದ್ಯ ಆಸ್ಪತ್ರೆಯನ್ನು ನಿರ್ಮಿಸಿ, ನಿರ್ವಹಿಸಿ ಮತ್ತು ಬೆಳೆಸಿ — ಎಲ್ಲಾ ಒಂದೇ ವೇದಿಕೆಯಲ್ಲಿ",
+    "hospitalSubtitle": "ನಿಮ್ಮ ಪಶುವೈದ್ಯ ಆಸ್ಪತ್ರೆಯನ್ನು ನಿರ್ಮಿಸಿ, ನಿರ್ವಹಿಸಿ ಮತ್ತು ಬೆಳೆಸಿ, ಎಲ್ಲಾ ಒಂದೇ ವೇದಿಕೆಯಲ್ಲಿ",
     "hospitalStats": {
       "hospitals": "ಆಸ್ಪತ್ರೆಗಳು",
       "doctorsNetworked": "ನೆಟ್‌ವರ್ಕ್ ವೈದ್ಯರು",
@@ -421,7 +439,7 @@
     },
     "hospitalCta": {
       "title": "ನಿಮ್ಮ ಆಸ್ಪತ್ರೆಯನ್ನು ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ತರಲು ಸಿದ್ಧರೇ?",
-      "desc": "ಪಶುವೈದ್ಯರಾಗಿ ನೋಂದಾಯಿಸಿ — ನಂತರ ನಿಮಿಷಗಳಲ್ಲಿ ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ಪ್ರೊಫೈಲ್ ರಚಿಸಿ. ನಿಮ್ಮ ತಂಡವನ್ನು ಸೇರಿಸಿ, ಸೇವೆಗಳನ್ನು ಹೊಂದಿಸಿ, ಇಂದೇ ಬುಕಿಂಗ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಪ್ರಾರಂಭಿಸಿ.",
+      "desc": "ಪಶುವೈದ್ಯರಾಗಿ ನೋಂದಾಯಿಸಿ. ನಂತರ ನಿಮಿಷಗಳಲ್ಲಿ ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ಪ್ರೊಫೈಲ್ ರಚಿಸಿ. ನಿಮ್ಮ ತಂಡವನ್ನು ಸೇರಿಸಿ, ಸೇವೆಗಳನ್ನು ಹೊಂದಿಸಿ, ಇಂದೇ ಬುಕಿಂಗ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಪ್ರಾರಂಭಿಸಿ.",
       "step1": "ಪಶುವೈದ್ಯರಾಗಿ ನೋಂದಣಿ",
       "step2": "ಆಸ್ಪತ್ರೆ ರಚಿಸಿ",
       "step3": "ವೈದ್ಯರನ್ನು ಸೇರಿಸಿ",
@@ -591,7 +609,7 @@
       },
       "5": {
         "title": "ವರದಿ ಜನರೇಟರ್",
-        "desc": "ಪ್ರಾಣಿ ಜನಗಣತಿಯಿಂದ ಸೆನ್ಸಾರ್ ವಿಶ್ಲೇಷಣೆಯವರೆಗೆ — ರಫ್ತು ಸಾಮರ್ಥ್ಯಗಳೊಂದಿಗೆ 7 ರೀತಿಯ ಕ್ರಾಸ್-ಮಾಡ್ಯೂಲ್ ವರದಿಗಳನ್ನು ಬೇಡಿಕೆ ಮೇಲೆ ಉತ್ಪಾದಿಸಿ"
+        "desc": "ಪ್ರಾಣಿ ಜನಗಣತಿಯಿಂದ ಸೆನ್ಸಾರ್ ವಿಶ್ಲೇಷಣೆಯವರೆಗೆ (ರಫ್ತು ಸಾಮರ್ಥ್ಯಗಳೊಂದಿಗೆ 7 ರೀತಿಯ ಕ್ರಾಸ್-ಮಾಡ್ಯೂಲ್ ವರದಿಗಳನ್ನು ಬೇಡಿಕೆ ಮೇಲೆ ಉತ್ಪಾದಿಸಿ"
       }
     },
     "intelligenceTitle": "ಭವಿಷ್ಯ ಬುದ್ಧಿಮತ್ತೆ",
@@ -650,7 +668,7 @@
       },
       "4": {
         "title": "12+ ಸಿಬ್ಬಂದಿ ಹುದ್ದೆಗಳು",
-        "desc": "ಪಶುವೈದ್ಯ ತಂತ್ರಜ್ಞರು, ನರ್ಸ್‌ಗಳು, ಶಸ್ತ್ರಚಿಕಿತ್ಸಕರು, ಲ್ಯಾಬ್ ತಂತ್ರಜ್ಞರು — ಎಲ್ಲರೂ ಪಾತ್ರ-ಆಧಾರಿತ ಪ್ರವೇಶದೊಂದಿಗೆ ಇಲಾಖೆಗಳಿಗೆ ಮ್ಯಾಪ್ ಮಾಡಲಾಗಿದೆ"
+        "desc": "ಪಶುವೈದ್ಯ ತಂತ್ರಜ್ಞರು, ನರ್ಸ್‌ಗಳು, ಶಸ್ತ್ರಚಿಕಿತ್ಸಕರು, ಲ್ಯಾಬ್ ತಂತ್ರಜ್ಞರು, ಎಲ್ಲರೂ ಪಾತ್ರ-ಆಧಾರಿತ ಪ್ರವೇಶದೊಂದಿಗೆ ಇಲಾಖೆಗಳಿಗೆ ಮ್ಯಾಪ್ ಮಾಡಲಾಗಿದೆ"
       },
       "5": {
         "title": "ಕಾರ್ಯಪ್ರವಾಹ ವಿಶ್ಲೇಷಣೆ",
@@ -684,7 +702,7 @@
       },
       "4": {
         "title": "PHI ಪ್ರವೇಶ ಮೇಲ್ವಿಚಾರಣೆ",
-        "desc": "ರಕ್ಷಿತ ಆರೋಗ್ಯ ಮಾಹಿತಿಯನ್ನು ಯಾರು ಪ್ರವೇಶಿಸಿದರು ಎಂಬುದನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುವ ನೈಜ-ಸಮಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ — ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು, ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು, ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು ಮತ್ತು ಸ್ಕ್ಯಾನ್‌ಗಳು"
+        "desc": "ರಕ್ಷಿತ ಆರೋಗ್ಯ ಮಾಹಿತಿಯನ್ನು ಯಾರು ಪ್ರವೇಶಿಸಿದರು ಎಂಬುದನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುವ ನೈಜ-ಸಮಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್: ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು, ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು, ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು ಮತ್ತು ಸ್ಕ್ಯಾನ್‌ಗಳು"
       },
       "5": {
         "title": "ಅನುಸರಣೆ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
@@ -777,7 +795,7 @@
       },
       "1": {
         "name": "ರಾಬರ್ಟ್ ಹಾರ್‌ಗ್ರೋವ್",
-        "role": "ಹೈನು ಕೃಷಿ ಮಾಲೀಕ — 2,400 ತಲೆ",
+        "role": "ಹೈನು ಕೃಷಿ ಮಾಲೀಕ, 2,400 ತಲೆ",
         "text": "3 ಕೃಷಿಯಲ್ಲಿ ಚಿಕಿತ್ಸಾ ಅಭಿಯಾನಗಳನ್ನು ನಿರ್ವಹಿಸುವುದು ಒಂದು ವಾರದ ಕಾಗದ ಕೆಲಸ ತೆಗೆದುಕೊಳ್ಳುತ್ತಿತ್ತು. ಈಗ ಅದು ಸಂಪೂರ್ಣ ಟ್ರೇಸಬಿಲಿಟಿಯೊಂದಿಗೆ ನಿಮಿಷಗಳಲ್ಲಿ ಆಗುತ್ತದೆ."
       },
       "2": {
@@ -788,16 +806,16 @@
       "3": {
         "name": "ಮಾರಿಯಾ ಚೆಂಗ್",
         "role": "ಮೃಗಾಲಯ ಕಾರ್ಯಾಚರಣೆ ನಿರ್ದೇಶಕ",
-        "text": "40 ಆವರಣಗಳಲ್ಲಿ ನಮ್ಮ 800+ ಪ್ರಾಣಿಗಳಿಗೆ ಸ್ಥಳ ಟ್ರ್ಯಾಕಿಂಗ್, ತಳಿ ಗುಂಪುಮಾಡುವಿಕೆ ಮತ್ತು ಅಭಿಯಾನ ನಿರ್ವಹಣೆ — ಎಲ್ಲವೂ ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ."
+        "text": "40 ಆವರಣಗಳಲ್ಲಿ ನಮ್ಮ 800+ ಪ್ರಾಣಿಗಳಿಗೆ ಸ್ಥಳ ಟ್ರ್ಯಾಕಿಂಗ್, ತಳಿ ಗುಂಪುಮಾಡುವಿಕೆ ಮತ್ತು ಅಭಿಯಾನ ನಿರ್ವಹಣೆ, ಎಲ್ಲವೂ ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ."
       },
       "4": {
         "name": "ಡಾ. ಪ್ರಿಯಾ ನಾಯರ್",
-        "role": "ನಿರ್ದೇಶಕ — ಸಿಟಿ ಪಾಸ್ ಪಶುವೈದ್ಯ ಆಸ್ಪತ್ರೆ",
+        "role": "ನಿರ್ದೇಶಕ, ಸಿಟಿ ಪಾಸ್ ಪಶುವೈದ್ಯ ಆಸ್ಪತ್ರೆ",
         "text": "ನಾವು ನಮ್ಮ ಆಸ್ಪತ್ರೆ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಹೊಂದಿಸಿ, 4 ಇಲಾಖೆಗಳಲ್ಲಿ 8 ವೈದ್ಯರನ್ನು ಸೇರಿಸಿ, ಒಂದೇ ಮಧ್ಯಾಹ್ನ ಲೈವ್ ಆಗಿ. ಅದೇ ದಿನ ಬುಕಿಂಗ್‌ಗಳು ಪ್ರಾರಂಭವಾದವು."
       },
       "5": {
         "name": "ಥಾಮಸ್ ಎರಿಕ್ಸನ್",
-        "role": "ಅನುಸರಣೆ ಅಧಿಕಾರಿ — ನಾರ್ಡಿಕ್ ಫಾರ್ಮ್ಸ್ ಗ್ರೂಪ್",
+        "role": "ಅನುಸರಣೆ ಅಧಿಕಾರಿ, ನಾರ್ಡಿಕ್ ಫಾರ್ಮ್ಸ್ ಗ್ರೂಪ್",
         "text": "HIPAA-ದರ್ಜೆ ಆಡಿಟ್ ಲಾಗಿಂಗ್ ಮತ್ತು PHI ಪ್ರವೇಶ ಮೇಲ್ವಿಚಾರಣೆ ನಮ್ಮ ಅನುಸರಣೆ ತಂಡಕ್ಕೆ ಸಂಪೂರ್ಣ ವಿಶ್ವಾಸ ನೀಡಿತು. ಪ್ರತಿ ದಾಖಲೆ ಪ್ರವೇಶ ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗುತ್ತದೆ."
       }
     },
@@ -817,6 +835,89 @@
       "petOwners": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರಿಗೆ",
       "enterprises": "ಉದ್ಯಮಗಳಿಗೆ",
       "veterinarians": "ಪಶುವೈದ್ಯರಿಗೆ"
+    },
+    "grooming": {
+      "title": "ಗ್ರೂಮಿಂಗ್ ಮತ್ತು ಸ್ಪಾ",
+      "subtitle": "ಪರಿಶೀಲಿಸಿದ ಗ್ರೂಮರ್ ಬುಕ್ ಮಾಡಿ, ಅಥವಾ ನಿಮ್ಮ ಗ್ರೂಮಿಂಗ್ ವ್ಯವಹಾರ ಬೆಳೆಸಿ, ನಿಮ್ಮ ಸಾಕುಪ್ರಾಣಿಯ ಆರೋಗ್ಯ ನೋಡಿಕೊಳ್ಳುವ ಅದೇ ವೇದಿಕೆಯಲ್ಲಿ.",
+      "owners": {
+        "title": "ಸಾಕುಪ್ರಾಣಿ ಪೋಷಕರಿಗೆ",
+        "lede": "ಸಲೂನ್, ಸ್ಪಾ ಮತ್ತು ಮನೆಯಲ್ಲೇ ಗ್ರೂಮಿಂಗ್, ನಾವು ನಿಜವಾಗಿ ಪರಿಶೀಲಿಸಿದ ವ್ಯವಹಾರಗಳಿಂದ.",
+        "points": {
+          "verified": {
+            "icon": "✅",
+            "title": "ಪರಿಶೀಲಿಸಿದ ವೃತ್ತಿಪರರು",
+            "desc": "ಪ್ರತಿ ವ್ಯವಹಾರವನ್ನೂ ಬುಕಿಂಗ್ ಸ್ವೀಕರಿಸುವ ಮೊದಲು ಪರಿಶೀಲಿಸಿ ಅನುಮೋದಿಸಲಾಗುತ್ತದೆ. ಕಾನೂನು ಹೆಸರು, GSTIN ಮತ್ತು ಸಂಪರ್ಕ ವಿವರ ಮೊದಲೇ ಕಾಣುತ್ತದೆ."
+          },
+          "mobile": {
+            "icon": "🚐",
+            "title": "ಮನೆಯಲ್ಲೇ ಗ್ರೂಮಿಂಗ್",
+            "desc": "ನಿಮ್ಮ ಮನೆ ಬಾಗಿಲಿಗೆ ಬರುವ ಮೊಬೈಲ್ ಗ್ರೂಮರ್‌ಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಿ, ಕ್ಯಾರಿಯರ್ ಇಲ್ಲ, ಕಾರು ಇಲ್ಲ, ಒತ್ತಡವಿಲ್ಲ."
+          },
+          "slots": {
+            "icon": "📅",
+            "title": "ನಿಜವಾದ ಲಭ್ಯತೆ",
+            "desc": "ಗ್ರೂಮರ್‌ನ ಡೈರಿ ಮತ್ತು ಸಾಮರ್ಥ್ಯದಿಂದ ನೇರ ಸ್ಲಾಟ್‌ಗಳು. ನೀವು ಆಯ್ಕೆ ಮಾಡಬಹುದಾದದ್ದು ನಿಜವಾಗಿ ಖಾಲಿ ಇದೆ."
+          },
+          "passport": {
+            "icon": "📖",
+            "title": "ಗ್ರೂಮಿಂಗ್ ಪಾಸ್‌ಪೋರ್ಟ್",
+            "desc": "ಪ್ರತಿ ಭೇಟಿಯೂ ದಾಖಲೆ ರಚಿಸುತ್ತದೆ: ಪೂರ್ಣ ಇತಿಹಾಸ ಮತ್ತು ವೈದ್ಯಕೀಯವಲ್ಲದ S.C.E.N.T. ಸ್ವಾಸ್ಥ್ಯ ಪ್ರವೃತ್ತಿ, ನಿಮ್ಮ ಪಶುವೈದ್ಯರಿಗೆ ತೋರಿಸಬಹುದು."
+          },
+          "escalation": {
+            "icon": "🩺",
+            "title": "ಇನ್ನೊಂದು ಜೊತೆ ಕಣ್ಣು",
+            "desc": "ಗ್ರೂಮರ್‌ಗಳು ನಿಮ್ಮ ಸಾಕುಪ್ರಾಣಿಯನ್ನು ಹತ್ತಿರದಿಂದ ನೋಡುತ್ತಾರೆ. ಗಂಟು, ಕುಂಟುವಿಕೆ ಅಥವಾ ಚರ್ಮದ ಸಮಸ್ಯೆ ಕಂಡರೆ ಸುರಕ್ಷತಾ ಫ್ಲ್ಯಾಗ್ ಎತ್ತುತ್ತಾರೆ, ಒಂದೇ ಟ್ಯಾಪ್‌ನಲ್ಲಿ ಪಶುವೈದ್ಯ ಸಮಾಲೋಚನೆಯಾಗಿ ಪರಿವರ್ತಿಸಿ."
+          },
+          "money": {
+            "icon": "💳",
+            "title": "ಸ್ಪಷ್ಟ ಹಣಕಾಸು",
+            "desc": "ಬುಕ್ ಮಾಡುವ ಮೊದಲು ಬೆಲೆ ಮತ್ತು ಠೇವಣಿ ಕಾಣುತ್ತದೆ. ನೀತಿ ಅವಧಿಯಲ್ಲಿ ರದ್ದುಗೊಳಿಸಿದರೆ ಮೂಲಕ್ಕೆ ಮರುಪಾವತಿ, ಅಥವಾ ಬಯಸಿದರೆ ವಾಲೆಟ್‌ಗೆ."
+          }
+        },
+        "cta": "ಹತ್ತಿರದ ಗ್ರೂಮರ್ ಹುಡುಕಿ"
+      },
+      "providers": {
+        "title": "ಗ್ರೂಮಿಂಗ್ ಮತ್ತು ಸ್ಪಾ ವ್ಯವಹಾರಗಳಿಗೆ",
+        "lede": "ಸಲೂನ್, ಮೊಬೈಲ್ ಗ್ರೂಮರ್ ಮತ್ತು ಪೆಟ್ ಸ್ಪಾ: ಕೇವಲ ಪಟ್ಟಿ ಅಲ್ಲ, ಇಡೀ ಕಾರ್ಯಾಚರಣೆ ನಡೆಸಿ.",
+        "points": {
+          "listing": {
+            "icon": "🆓",
+            "title": "ಪಟ್ಟಿ ಮಾಡಲು ಉಚಿತ",
+            "desc": "ಸೈನ್‌ಅಪ್ ಶುಲ್ಕವಿಲ್ಲ, ಮಾಸಿಕ ಶುಲ್ಕವಿಲ್ಲ. ಪ್ರೊಫೈಲ್ ರಚಿಸಿ, ಸೇವೆ ಮತ್ತು ಬೆಲೆ ಸೇರಿಸಿ, ಪರಿಶೀಲನೆ ನಂತರ ಲೈವ್ ಆಗಿ."
+          },
+          "diary": {
+            "icon": "🗓️",
+            "title": "ನಂಬಬಹುದಾದ ಡೈರಿ",
+            "desc": "ಕೆಲಸದ ಸಮಯ, ದಿನವಾರು ಅಪವಾದ, ನಿರ್ಬಂಧಿತ ಸ್ಲಾಟ್ ಮತ್ತು ಏಕಕಾಲಕ್ಕೆ ಎಷ್ಟು ಪ್ರಾಣಿಗಳು, ಹೊಂದಿಸಿ. ಡಬಲ್-ಬುಕಿಂಗ್ ಅಸಾಧ್ಯ."
+          },
+          "acceptance": {
+            "icon": "👍",
+            "title": "ಕೆಲಸ ನೀವು ಸ್ವೀಕರಿಸಿ",
+            "desc": "ಬುಕಿಂಗ್ ಮೊದಲು ನಿಮಗೆ ಸ್ವೀಕಾರ ಅಥವಾ ನಿರಾಕರಣೆಗೆ ಬರುತ್ತದೆ. ನೀವು ಒಪ್ಪದ್ದು ಡೈರಿಗೆ ಬರುವುದಿಲ್ಲ."
+          },
+          "earnings": {
+            "icon": "💰",
+            "title": "ಕಾಣುವ ಗಳಿಕೆ",
+            "desc": "ಪ್ರತಿ ಆರ್ಡರ್‌ನಲ್ಲಿ ಒಟ್ಟು, ಕಮಿಷನ್ ಮತ್ತು ನಿವ್ವಳ ಕಾಣುತ್ತದೆ. ಕ್ಲಿಯರಿಂಗ್‌ನಿಂದ ಲಭ್ಯಕ್ಕೆ ನೋಡಿ, ನಂತರ ಬ್ಯಾಂಕ್ ಅಥವಾ ವಾಲೆಟ್‌ಗೆ ಹಿಂಪಡೆಯಿರಿ."
+          },
+          "invoicing": {
+            "icon": "🧾",
+            "title": "GST ಇನ್‌ವಾಯ್ಸಿಂಗ್ ಒಳಗೊಂಡಿದೆ",
+            "desc": "ಅನುಸರಣೆ ಇನ್‌ವಾಯ್ಸ್ ಮತ್ತು ಕ್ರೆಡಿಟ್ ನೋಟ್ ತಾನಾಗಿಯೇ ರಚನೆಯಾಗುತ್ತವೆ, ಠೇವಣಿ, ಹೆಚ್ಚುವರಿ ಮತ್ತು ಬಾಕಿ ಸೇರಿದಂತೆ."
+          },
+          "disputes": {
+            "icon": "⚖️",
+            "title": "ನ್ಯಾಯಯುತ ವಿವಾದ ನಿರ್ವಹಣೆ",
+            "desc": "ಗ್ರಾಹಕ ಸಮಸ್ಯೆ ಎತ್ತಿದರೆ ನಿಮಗೆ ಉತ್ತರಿಸುವ ಅವಕಾಶ ಸಿಗುತ್ತದೆ, ದಾಖಲಿತ ನಿರ್ಧಾರ ಮತ್ತು ಸ್ಪಷ್ಟ ಮರುಪಾವತಿ ಜಾಡಿನೊಂದಿಗೆ."
+          }
+        },
+        "cta": "ನಿಮ್ಮ ವ್ಯವಹಾರ ಪಟ್ಟಿ ಮಾಡಿ, ಉಚಿತ",
+        "note": "ನಿಮಿಷಗಳಲ್ಲಿ ನೋಂದಾಯಿಸಿ. ಪರಿಶೀಲನೆ ಪ್ರತಿ ವ್ಯವಹಾರಕ್ಕೆ, ಆದ್ದರಿಂದ ಪರಿಶೀಲನೆ ನಡೆಯುತ್ತಿರುವಾಗಲೇ ಪ್ರೊಫೈಲ್ ಸಿದ್ಧಪಡಿಸಬಹುದು."
+      },
+      "moat": {
+        "title": "ನಿಜವಾದ ಪಶುವೈದ್ಯಕೀಯ ಆರೈಕೆಗೆ ಜೋಡಿಸಲಾದ ಗ್ರೂಮಿಂಗ್",
+        "desc": "ಪ್ರತ್ಯೇಕ ಗ್ರೂಮಿಂಗ್ ಆ್ಯಪ್ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗೆ ಮುಗಿಯುತ್ತದೆ. ಇಲ್ಲಿ, ಚಿಂತಾಜನಕವಾದದ್ದು ಕಂಡರೆ ಗ್ರೂಮರ್ ಸುರಕ್ಷತಾ ಎಸ್ಕಲೇಶನ್ ಎತ್ತುತ್ತಾರೆ, ಮತ್ತು ನೀವು ಅದೇ ವೇದಿಕೆಯಲ್ಲಿ ಪರವಾನಗಿ ಪಡೆದ ಪಶುವೈದ್ಯರನ್ನು ಬುಕ್ ಮಾಡಬಹುದು. ಪ್ರಾಣಿಯ ಗ್ರೂಮಿಂಗ್ ಇತಿಹಾಸ ಈಗಾಗಲೇ ಲಗತ್ತಿಸಲಾಗಿದೆ. ಗ್ರೂಮರ್‌ಗಳು ಕೇವಲ ಎಸ್ಕಲೇಟ್ ಮಾಡುತ್ತಾರೆ. ಎಂದಿಗೂ ರೋಗನಿರ್ಣಯ ಅಥವಾ ಔಷಧ ನೀಡುವುದಿಲ್ಲ. ಈ ಗಡಿ ಕೇವಲ ನೀತಿಯಲ್ಲಲ್ಲ, ಉತ್ಪನ್ನದಲ್ಲೇ ಜಾರಿಯಾಗಿದೆ."
+      }
     }
   },
   "dashboard": {
@@ -828,7 +929,8 @@
       "farmer": "ನಿಮ್ಮ ಕೃಷಿ ನಿರ್ವಹಣೆ ಅವಲೋಕನ ಇಲ್ಲಿದೆ",
       "corporateAdmin": "Hospital network administration overview",
       "hospitalStaff": "ಇಲ್ಲಿ ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ವರ್ಕ್‌ಫ್ಲೋ ಅವಲೋಕನ ಇದೆ",
-      "pharmacist": "Redirecting to your Pharmacy module..."
+      "pharmacist": "Redirecting to your Pharmacy module...",
+      "support": "ವೇದಿಕೆ ಬೆಂಬಲ: ವಿವಾದಗಳು ಮತ್ತು ರದ್ದತಿಗಳು"
     },
     "pendingBookings": "🔔 ಬಾಕಿ ಬುಕಿಂಗ್ ಖಚಿತೀಕರಣಗಳು",
     "recentActivity": "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ",
@@ -939,7 +1041,9 @@
         "networkHealthInsights": "Network health analytics",
         "manageSettings": "Manage settings",
         "patientQueue": "Manage patient queue",
-        "inpatientBoarding": "Manage inpatient cases"
+        "inpatientBoarding": "Manage inpatient cases",
+        "resolveDisputes": "ಗ್ರಾಹಕರ ವಿವಾದಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಪರಿಹರಿಸಿ",
+        "cancellationOversight": "ರದ್ದತಿಗಳು ಮತ್ತು ಮರುಪಾವತಿಗಳನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ"
       },
       "hospitalNetworks": "Hospital Networks",
       "settings": "Settings",
@@ -1027,7 +1131,8 @@
       "log": "📋 Log",
       "view": "📋 View",
       "review": "⭐ Review",
-      "details": "📋 Details"
+      "details": "📋 Details",
+      "markNoShow": "ಗೈರುಹಾಜರಿ ಗುರುತಿಸಿ"
     },
     "emptyAppointments": "No upcoming appointments",
     "appointmentHint": "Appointments requiring your attention will appear here",
@@ -1080,7 +1185,7 @@
       "originalLabel": "⚠️ Original Appointment",
       "selectDoctor": "Select Doctor",
       "selectDoctorOptional": "Select Doctor (optional)",
-      "keepCurrentDoctor": "— Keep current doctor —",
+      "keepCurrentDoctor": "Keep current doctor",
       "currentDoctor": "(current)",
       "loadingDoctors": "Loading doctors...",
       "dateLabel": "Select New Date *",
@@ -1091,10 +1196,10 @@
       "confirming": "Rescheduling...",
       "confirmBtn": "✓ Confirm Reschedule",
       "rescheduleCount": "📊 Reschedule {{current}} of {{max}} allowed",
-      "doctorConfirmedNoShow": "🩺 Doctor confirmed but did not attend — you may reschedule with any available doctor. No reschedule limit applies.",
-      "doctorNoConfirm": "🩺 Doctor did not confirm in time — you may reschedule with any available doctor. No reschedule limit applies.",
-      "patientNoShowNoLimit": "🙋 Patient no-show — you may reschedule (no limit configured).",
-      "patientNoShowLimit": "🙋 Patient no-show — reschedule {{current}} of {{max}} allowed.",
+      "doctorConfirmedNoShow": "🩺 Doctor confirmed but did not attend. you may reschedule with any available doctor. No reschedule limit applies.",
+      "doctorNoConfirm": "🩺 Doctor did not confirm in time. you may reschedule with any available doctor. No reschedule limit applies.",
+      "patientNoShowNoLimit": "🙋 Patient no-show. you may reschedule (no limit configured).",
+      "patientNoShowLimit": "🙋 Patient no-show. reschedule {{current}} of {{max}} allowed.",
       "expiredPendingNotice": "⚠️ The original appointment time has passed without doctor confirmation. You may select a different doctor for faster availability."
     },
     "noMatchAppointments": "No appointments match this filter",
@@ -1156,7 +1261,15 @@
     },
     "joinWindowTooltip": "Available {{minutes}} minutes before the appointment.",
     "viewActionHistory": "View action history",
-    "viewCancellationDetails": "View cancellation details"
+    "viewCancellationDetails": "View cancellation details",
+    "failedToMarkNoShow": "ಈ ಬುಕಿಂಗ್ ಅನ್ನು ಗೈರುಹಾಜರಿ ಎಂದು ಗುರುತಿಸಲಾಗಲಿಲ್ಲ.",
+    "noShow": {
+      "title": "ರೋಗಿಯನ್ನು ಗೈರುಹಾಜರಿ ಎಂದು ಗುರುತಿಸುವುದೇ?",
+      "warning": "ಇದು ಬುಕಿಂಗ್ ಅನ್ನು ತಪ್ಪಿಹೋದದ್ದು ಎಂದು ಮುಚ್ಚುತ್ತದೆ. ಪಾವತಿಸಿದ ಬುಕಿಂಗ್‌ನಲ್ಲಿ ಗೈರುಹಾಜರಿ ನೀತಿಯ ಅಡಿಯಲ್ಲಿ ವೈದ್ಯರಿಗೆ ಪರಿಹಾರ ನೀಡಲಾಗುತ್ತದೆ ಮತ್ತು ಈ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ರೋಗಿಯ ಮರುನಿಗದಿ ಮಿತಿಗೆ ಎಣಿಸಲಾಗುತ್ತದೆ. ಇದನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.",
+      "tooltip": "ರೋಗಿಯು ಈ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗೆ ಹಾಜರಾಗಲಿಲ್ಲ",
+      "forBooking": "{{animal}}, {{date}} ರಂದು {{time}}",
+      "confirm": "ಗೈರುಹಾಜರಿ ದೃಢೀಕರಿಸಿ"
+    }
   },
   "animals": {
     "pageTitles": {
@@ -1527,7 +1640,7 @@
       "dispensedOn": "{{date}} ರಂದು ವಿತರಿಸಲಾಗಿದೆ",
       "reviewStatus": {
         "pending_review": "ಫಾರ್ಮಸಿಸ್ಟ್ ಪರಿಶೀಲನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
-        "approved_for_dispensing": "ಅನುಮೋದಿಸಲಾಗಿದೆ — ವಿತರಣೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
+        "approved_for_dispensing": "ಅನುಮೋದಿಸಲಾಗಿದೆ, ವಿತರಣೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
         "rejected": "ಫಾರ್ಮಸಿಸ್ಟ್‌ನಿಂದ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
         "needs_clarification": "ಫಾರ್ಮಸಿಸ್ಟ್ ಸ್ಪಷ್ಟೀಕರಣ ಕೋರಿದ್ದಾರೆ"
       }
@@ -1840,12 +1953,28 @@
       "errSameRole": "ಈ ಪಾತ್ರ ಈಗಾಗಲೇ ನಿಮ್ಮದಾಗಿದೆ.",
       "errAlreadyPending": "ಒಂದು ವಿನಂತಿ ಈಗಾಗಲೇ ಬಾಕಿ ಇದೆ.",
       "successSubmit": "ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ!",
-      "successCancel": "ವಿನಂತಿ ರದ್ದು ಮಾಡಲಾಗಿದೆ."
+      "successCancel": "ವಿನಂತಿ ರದ್ದು ಮಾಡಲಾಗಿದೆ.",
+      "vetDetailsTitle": "ಪಶುವೈದ್ಯರ ವಿವರಗಳು",
+      "vetDetailsDesc": "ನಿರ್ವಾಹಕರು ನಿಮ್ಮ ರುಜುವಾತುಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಒಂದೇ ಹಂತದಲ್ಲಿ ನಿಮ್ಮ ವೈದ್ಯ ಪ್ರೊಫೈಲ್ ಸಕ್ರಿಯಗೊಳಿಸಲು ಈ ವಿವರಗಳು ಅಗತ್ಯ.",
+      "vetLicense": "ಪರವಾನಗಿ ಸಂಖ್ಯೆ",
+      "vetLicensePlaceholder": "ಉದಾ. VET-12345",
+      "vetLicenseRequired": "ಪಶುವೈದ್ಯ ಪಾತ್ರವನ್ನು ಕೋರಲು ಪರವಾನಗಿ ಸಂಖ್ಯೆ ಅಗತ್ಯ.",
+      "vetFee": "ಸಮಾಲೋಚನೆ ಶುಲ್ಕ",
+      "vetExperience": "ಅನುಭವದ ವರ್ಷಗಳು",
+      "vetClinic": "ಕ್ಲಿನಿಕ್ ಹೆಸರು",
+      "vetClinicPlaceholder": "ಉದಾ. ಸಿಟಿ ಪೆಟ್ ಕ್ಲಿನಿಕ್",
+      "vetSpecializations": "ಪರಿಣತಿಗಳು",
+      "vetSpecializationsPlaceholder": "ಸಣ್ಣ ಪ್ರಾಣಿಗಳು, ಶಸ್ತ್ರಚಿಕಿತ್ಸೆ, ದಂತವೈದ್ಯ (ಅಲ್ಪವಿರಾಮದಿಂದ ಬೇರ್ಪಡಿಸಿ)"
     },
     "certificateServices": "Certificate Services I Offer",
     "certificateServicesDesc": "Select which veterinary certificates you are qualified to issue",
     "saveCertificateTypes": "Save Certificate Preferences",
-    "certificateTypesSaved": "Certificate preferences saved"
+    "certificateTypesSaved": "Certificate preferences saved",
+    "becomeGroomer": {
+      "title": "ಗ್ರೂಮಿಂಗ್ & ಸ್ಪಾ ಸೇವೆಗಳನ್ನು ನೀಡಿ",
+      "desc": "ಗ್ರೂಮಿಂಗ್ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ ಬುಕಿಂಗ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಪ್ರಾರಂಭಿಸಿ. ಇದು ನಿಮ್ಮ ಈಗಿನ ಖಾತೆಗೆ ಸೇರುತ್ತದೆ. ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಪಾತ್ರ ಹಾಗೆಯೇ ಉಳಿಯುತ್ತದೆ.",
+      "btn": "ನನ್ನ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ"
+    }
   },
   "enterpriseManagement": {
     "pageTitle": "🏢 Enterprise Management",
@@ -2040,7 +2169,7 @@
       "reason": "ಕಾರಣ",
       "notes": "ಟಿಪ್ಪಣಿಗಳು",
       "groupDefault": "None",
-      "locationDefault": "—",
+      "locationDefault": "-",
       "recordBtn": "Record Movement"
     },
     "validation": {
@@ -2114,7 +2243,7 @@
     "pageDescription": "ನಿಮ್ಮ ಹಿಂಡಿನ ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು, ಲಸಿಕೆಗಳು, ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು ಮತ್ತು ಅಲರ್ಜಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
     "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
     "selectEnterprise": "ಉದ್ಯಮ ಆಯ್ಕೆಮಾಡಿ",
-    "selectEnterpriseOption": "— ಉದ್ಯಮ ಆಯ್ಕೆಮಾಡಿ —",
+    "selectEnterpriseOption": "ಉದ್ಯಮ ಆಯ್ಕೆಮಾಡಿ",
     "selectEnterprisePrompt": "ಹಿಂಡು ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳನ್ನು ನೋಡಲು ಮೇಲೆ ಉದ್ಯಮ ಆಯ್ಕೆಮಾಡಿ",
     "allGroups": "ಎಲ್ಲಾ ಗುಂಪುಗಳು",
     "selectAnimal": "ಪ್ರಾಣಿ ಆಯ್ಕೆಮಾಡಿ",
@@ -2124,7 +2253,7 @@
       "vet": "ಪಶುವೈದ್ಯ",
       "farmer": "ರೈತ",
       "petOwner": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕ",
-      "adminPerms": "Full access — view, create, manage, and archive all records",
+      "adminPerms": "Full access: view, create, manage, and archive all records",
       "vetPerms": "Create and manage records; view all herd data",
       "farmerPerms": "Create records; view your enterprise's medical data",
       "petOwnerPerms": "View records for your own animals"
@@ -2159,7 +2288,7 @@
       "addRecord": "ದಾಖಲೆ ಸೇರಿಸಿ",
       "allTypes": "ಎಲ್ಲಾ ಪ್ರಕಾರಗಳು",
       "allSeverities": "ಎಲ್ಲಾ ತೀವ್ರತೆಗಳು",
-      "showing": "{{from}}–{{to}} / {{total}} ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+      "showing": "{{from}}-{{to}} / {{total}} ತೋರಿಸಲಾಗುತ್ತಿದೆ",
       "prev": "ಹಿಂದಿನದು",
       "next": "ಮುಂದಿನದು",
       "archive": "ಆರ್ಕೈವ್ ಮಾಡಿ",
@@ -2273,7 +2402,7 @@
       "resultPlaceholder": "ಉದಾ: 5.2",
       "unit": "ಘಟಕ",
       "normalRange": "ಸಾಮಾನ್ಯ ವ್ಯಾಪ್ತಿ",
-      "normalRangePlaceholder": "ಉದಾ: 4.5–6.5",
+      "normalRangePlaceholder": "ಉದಾ: 4.5-6.5",
       "interpretation": "ವ್ಯಾಖ್ಯಾನ",
       "interpretationPlaceholder": "ಉದಾ: ಸಾಮಾನ್ಯ",
       "labName": "ಲ್ಯಾಬ್ ಹೆಸರು",
@@ -2555,8 +2684,8 @@
       "noExpired": "ಅವಧಿ ಮುಗಿದ ದಾಖಲೆಗಳಿಲ್ಲ!",
       "byType": "ದಾಖಲೆ ಪ್ರಕಾರದ ಪ್ರಕಾರ",
       "byStatus": "ಸ್ಥಿತಿ ಪ್ರಕಾರ",
-      "expiresPrefix": "– ಅವಧಿ ಮುಗಿಯುತ್ತದೆ",
-      "expiredPrefix": "– ಅವಧಿ ಮುಗಿದಿದೆ",
+      "expiresPrefix": "- ಅವಧಿ ಮುಗಿಯುತ್ತದೆ",
+      "expiredPrefix": "- ಅವಧಿ ಮುಗಿದಿದೆ",
       "typeHeader": "ಪ್ರಕಾರ",
       "countHeader": "ಎಣಿಕೆ"
     },
@@ -2876,7 +3005,7 @@
     "logEvent": "+ Log Event",
     "emptyBatches": "No batches",
     "emptyEvents": "No traceability events",
-    "emptyQR": "No QR codes generated yet — create one from a batch",
+    "emptyQR": "No QR codes generated yet, create one from a batch",
     "failedVerify": "Failed to verify event",
     "failedQR": "Failed to generate QR code",
     "batchStatusDist": "Batch Status Distribution",
@@ -3051,7 +3180,7 @@
       "hiUser": "Hi {{name}}! 👋 I'm AI Buddy",
       "hiGuest": "Hi there! 👋 I'm AI Buddy",
       "iKnowAbout": "I know about",
-      "askMeAnything": "— ask me anything!",
+      "askMeAnything": "ask me anything!",
       "askMeAnythingGeneral": "Ask me anything about pet health, symptoms, nutrition, or veterinary care!",
       "askAiBuddy": "Ask AI Buddy...",
       "thinking": "Thinking...",
@@ -3138,7 +3267,7 @@
   },
   "marketplace": {
     "pageTitle": "🏪 ಖರೀದಿ-ಮಾರಾಟ ಮಾರುಕಟ್ಟೆ",
-    "subtitle": "ಪ್ರಾಣಿಗಳನ್ನು ಖರೀದಿಸಿ ಮತ್ತು ಮಾರಾಟ ಮಾಡಿ — ಉಪಕರಣಗಳು ಮತ್ತು ಪಶುವೈದ್ಯ ಸರಬರಾಜುಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ",
+    "subtitle": "ಪ್ರಾಣಿಗಳನ್ನು ಖರೀದಿಸಿ ಮತ್ತು ಮಾರಾಟ ಮಾಡಿ, ಉಪಕರಣಗಳು ಮತ್ತು ಪಶುವೈದ್ಯ ಸರಬರಾಜುಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ",
     "errors": {
       "dashboardLoadFailed": "ನಿಮ್ಮ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
       "favoritesLoadFailed": "ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
@@ -3315,7 +3444,7 @@
       "autoPopulateTitle": "ನಿಮ್ಮ ಪ್ರಾಣಿಯಿಂದ ಆಟೋ-ಫಿಲ್",
       "autoPopulateHint": "ನಿಮ್ಮ ನೋಂದಾಯಿತ ಪ್ರಾಣಿಗಳಲ್ಲಿ ಒಂದನ್ನು ಆಯ್ಕೆ ಮಾಡಿ ಮತ್ತು ಅವರ ಪ್ರೊಫೈಲ್, ಆರೋಗ್ಯ ಮತ್ತು ತಳಿ ವಿವರಗಳೊಂದಿಗೆ ಪಟ್ಟಿಯನ್ನು ಸ್ವಯಂ-ಭರ್ತಿ ಮಾಡಿ.",
       "selectAnimal": "ವಿವರಗಳನ್ನು ಆಟೋ-ಫಿಲ್ ಮಾಡಲು ಪ್ರಾಣಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
-      "manualEntry": "— ಹಸ್ತಚಾಲಿತ ಪ್ರವೇಶ —",
+      "manualEntry": "ಹಸ್ತಚಾಲಿತ ಪ್ರವೇಶ",
       "autoPopulated": "ಪ್ರಾಣಿ ವಿವರಗಳು ಆಟೋ-ಫಿಲ್ ಆಗಿವೆ!",
       "fieldsAutoFilled": "ನಿಮ್ಮ ಪ್ರಾಣಿಯ ಪ್ರೊಫೈಲ್‌ನಿಂದ ಕ್ಷೇತ್ರಗಳು ಆಟೋ-ಫಿಲ್ ಆಗಿವೆ. ಕೆಳಗಿನ ಯಾವುದೇ ಕ್ಷೇತ್ರವನ್ನು ನೀವು ಸಂಪಾದಿಸಬಹುದು.",
       "imagesTitle": "ಪಟ್ಟಿ ಚಿತ್ರಗಳು",
@@ -3331,7 +3460,7 @@
       "priceHintFair": "ನ್ಯಾಯಯುತ ಬೆಲೆ",
       "useMyLocation": "ನನ್ನ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಬಳಸಿ",
       "locating": "ಸ್ಥಳ ಪಡೆಯಲಾಗುತ್ತಿದೆ…",
-      "locationSet": "ನಿರ್ದೇಶಾಂಕಗಳು ಸೆಟ್ — “ನನ್ನ ಹತ್ತಿರ” ಹುಡುಕಾಟ ಸಕ್ರಿಯ",
+      "locationSet": "ನಿರ್ದೇಶಾಂಕಗಳು ಸೆಟ್, “ನನ್ನ ಹತ್ತಿರ” ಹುಡುಕಾಟ ಸಕ್ರಿಯ",
       "locationCaptured": "ಈ ಪಟ್ಟಿಗೆ ಸ್ಥಳ ಸೆರೆಹಿಡಿಯಲಾಗಿದೆ",
       "locationGeoHint": "ನಿರ್ದೇಶಾಂಕಗಳನ್ನು ಸೇರಿಸುವುದರಿಂದ ಹತ್ತಿರದ ಖರೀದಿದಾರರು “ನನ್ನ ಹತ್ತಿರ” ಮೂಲಕ ನಿಮ್ಮ ಪಟ್ಟಿಯನ್ನು ಕಂಡುಹಿಡಿಯಬಹುದು.",
       "videoLabel": "ಪಟ್ಟಿ ವೀಡಿಯೊ (ಐಚ್ಛಿಕ)",
@@ -3339,9 +3468,9 @@
       "removeVideo": "ವೀಡಿಯೊ ತೆಗೆದುಹಾಕಿ",
       "videoUploaded": "ವೀಡಿಯೊ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ",
       "videoHint": "ಸಣ್ಣ ವೀಡಿಯೊ ವಿಶ್ವಾಸ ಮೂಡಿಸಿ ಹೆಚ್ಚು ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ಪಡೆಯುತ್ತದೆ.",
-      "imageTooLarge": "ಚಿತ್ರ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ — ಗರಿಷ್ಠ {{maxMb}}MB",
-      "videoTooLarge": "ವೀಡಿಯೊ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ — ಗರಿಷ್ಠ {{maxMb}}MB",
-      "videoTooLong": "ವೀಡಿಯೊ ತುಂಬಾ ಉದ್ದವಾಗಿದೆ — ಗರಿಷ್ಠ {{maxSec}} ಸೆಕೆಂಡುಗಳು",
+      "imageTooLarge": "ಚಿತ್ರ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ: ಗರಿಷ್ಠ {{maxMb}}MB",
+      "videoTooLarge": "ವೀಡಿಯೊ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ: ಗರಿಷ್ಠ {{maxMb}}MB",
+      "videoTooLong": "ವೀಡಿಯೊ ತುಂಬಾ ಉದ್ದವಾಗಿದೆ: ಗರಿಷ್ಠ {{maxSec}} ಸೆಕೆಂಡುಗಳು",
       "uploadingVideo": "ವೀಡಿಯೊ ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
       "videoLimits": "ಗರಿಷ್ಠ {{maxSec}} ಸೆಕೆಂಡುಗಳು, {{maxMb}}MB ವರೆಗೆ"
     },
@@ -3487,7 +3616,7 @@
       "welfareAttestation": "🛡️ ಪಟ್ಟಿಮಾಡಲಾದ ಪ್ರಾಣಿ(ಗಳು) ಆರೋಗ್ಯಕರ, ಚೆನ್ನಾಗಿ ಆರೈಕೆ ಮಾಡಲಾಗಿದೆ, ಮತ್ತು ಪ್ರಾಣಿಗಳ ಮೇಲಿನ ಕ್ರೌರ್ಯ ತಡೆ ಕಾಯಿದೆ, 1960 ಪ್ರಕಾರ ಯಾವುದೇ ಕ್ರೌರ್ಯಕ್ಕೆ ಒಳಗಾಗಿಲ್ಲ ಎಂದು ದೃಢೀಕರಿಸುತ್ತೇನೆ",
       "welfareHint": "ಈ ದೃಢೀಕರಣ ಪ್ರಾಣಿಗಳ ಮೇಲಿನ ಕ್ರೌರ್ಯ ತಡೆ ಕಾಯಿದೆ, 1960 (PCA ಕಾಯಿದೆ) ಅಡಿಯಲ್ಲಿ ಅಗತ್ಯ.",
       "legalTitle": "ಕಾನೂನು ಅನುಸರಣೆ & ನಿಯಮಗಳು",
-      "legalDisclaimer": "ಈ ವೇದಿಕೆ ಭಾರತೀಯ ಪ್ರಾಣಿ ಕಲ್ಯಾಣ ಕಾನೂನುಗಳಿಗೆ ಅನುಗುಣವಾಗಿ ಪ್ರಾಣಿಗಳ ವರ್ಗೀಕೃತ ಫಲಕವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ. ಎಲ್ಲಾ ಪಟ್ಟಿಗಳು PCA ಕಾಯಿದೆ 1960, PCA (ನಾಯಿ ಬ್ರೀಡಿಂಗ್) ನಿಯಮಗಳು 2017, ಮತ್ತು PCA (ಪೆಟ್ ಶಾಪ್) ನಿಯಮಗಳು 2018 ಅನ್ನು ಅನುಸರಿಸಬೇಕು. VetCare ನೇರ ಮಾರಾಟವನ್ನು ಸುಲಭಗೊಳಿಸುವುದಿಲ್ಲ — ಎಲ್ಲಾ ವ್ಯವಹಾರಗಳು ಪಕ್ಷಗಳ ನಡುವೆ ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿ ನಡೆಯುತ್ತವೆ.",
+      "legalDisclaimer": "ಈ ವೇದಿಕೆ ಭಾರತೀಯ ಪ್ರಾಣಿ ಕಲ್ಯಾಣ ಕಾನೂನುಗಳಿಗೆ ಅನುಗುಣವಾಗಿ ಪ್ರಾಣಿಗಳ ವರ್ಗೀಕೃತ ಫಲಕವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ. ಎಲ್ಲಾ ಪಟ್ಟಿಗಳು PCA ಕಾಯಿದೆ 1960, PCA (ನಾಯಿ ಬ್ರೀಡಿಂಗ್) ನಿಯಮಗಳು 2017, ಮತ್ತು PCA (ಪೆಟ್ ಶಾಪ್) ನಿಯಮಗಳು 2018 ಅನ್ನು ಅನುಸರಿಸಬೇಕು. VetCare ನೇರ ಮಾರಾಟವನ್ನು ಸುಲಭಗೊಳಿಸುವುದಿಲ್ಲ. ಎಲ್ಲಾ ವ್ಯವಹಾರಗಳು ಪಕ್ಷಗಳ ನಡುವೆ ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿ ನಡೆಯುತ್ತವೆ.",
       "termsAccept": "⚖️ ನಾನು ನಿಯಮಗಳು & ಷರತ್ತುಗಳನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೇನೆ ಮತ್ತು ಈ ಪಟ್ಟಿ ಭಾರತದ ಎಲ್ಲಾ ಅನ್ವಯವಾಗುವ ಪ್ರಾಣಿ ಕಲ್ಯಾಣ ಕಾನೂನುಗಳಿಗೆ ಅನುಗುಣವಾಗಿದೆ ಎಂದು ದೃಢೀಕರಿಸುತ್ತೇನೆ",
       "breederNote": "ನೋಂದಿತ ಬ್ರೀಡರ್ ಆಗಿ, ನಿಮ್ಮ PCA ನೋಂದಣಿ ಪ್ರಮಾಣಪತ್ರ ಸಂಖ್ಯೆ ನಿಮ್ಮ ಪಟ್ಟಿಯಲ್ಲಿ ಪ್ರದರ್ಶಿಸಲಾಗುವುದು. PCA (ನಾಯಿ ಬ್ರೀಡಿಂಗ್) ನಿಯಮಗಳು 2017 ನಿಯಮ 3 ಪ್ರಕಾರ ಮಾನ್ಯ ನೋಂದಣಿ ಇಲ್ಲದೆ ಪಟ್ಟಿ ತಿರಸ್ಕರಿಸಬಹುದು.",
       "complianceTitle": "ಅನುಸರಣೆ & ಕಲ್ಯಾಣ",
@@ -3497,7 +3626,7 @@
       "accepted": "ಒಪ್ಪಿಕೊಳ್ಳಲಾಗಿದೆ",
       "verified": "ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
       "detailDisclaimer": "ಈ ಪಟ್ಟಿ ಪ್ರಾಣಿಗಳ ವರ್ಗೀಕೃತ ಫಲಕದಲ್ಲಿ ಪ್ರಕಟಿಸಲಾಗಿದೆ. VetCare ನೇರ ಮಾರಾಟವನ್ನು ಸುಲಭಗೊಳಿಸುವುದಿಲ್ಲ. ಎಲ್ಲಾ ವ್ಯವಹಾರಗಳು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿ ನಡೆಯುತ್ತವೆ. PCA ಕಾಯಿದೆ 1960 ಮತ್ತು ಅನ್ವಯವಾಗುವ ರಾಜ್ಯ ನಿಯಮಗಳನ್ನು ಅನುಸರಿಸಿ.",
-      "adoptDontShop": "🐾 ದತ್ತು ತೆಗೆದುಕೊಳ್ಳಿ, ಖರೀದಿಸಬೇಡಿ — ಆಶ್ರಯಗಳು ಮತ್ತು ರಕ್ಷಣಾ ಸಂಸ್ಥೆಗಳಿಂದ ದತ್ತು ತೆಗೆದುಕೊಳ್ಳುವುದನ್ನು ಪರಿಗಣಿಸಿ"
+      "adoptDontShop": "🐾 ದತ್ತು ತೆಗೆದುಕೊಳ್ಳಿ, ಖರೀದಿಸಬೇಡಿ: ಆಶ್ರಯಗಳು ಮತ್ತು ರಕ್ಷಣಾ ಸಂಸ್ಥೆಗಳಿಂದ ದತ್ತು ತೆಗೆದುಕೊಳ್ಳುವುದನ್ನು ಪರಿಗಣಿಸಿ"
     },
     "monetization": {
       "subtabs": {
@@ -3591,13 +3720,13 @@
     "deal": {
       "reserveTitle": "ಕಾಯ್ದಿರಿಸಿ ಮತ್ತು ನೇರವಾಗಿ ವ್ಯವಹರಿಸಿ",
       "reserveNow": "ಈ ಪಟ್ಟಿಯನ್ನು ಕಾಯ್ದಿರಿಸಿ",
-      "reserveSuccess": "ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ! ಮಾರಾಟಗಾರರಿಗೆ ತಿಳಿಸಲಾಗಿದೆ — ಸಂಪರ್ಕಿಸಿ, ಪರಿಶೀಲಿಸಿ, ನೇರವಾಗಿ ಪಾವತಿಸಿ.",
+      "reserveSuccess": "ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ! ಮಾರಾಟಗಾರರಿಗೆ ತಿಳಿಸಲಾಗಿದೆ. ಸಂಪರ್ಕಿಸಿ, ಪರಿಶೀಲಿಸಿ, ನೇರವಾಗಿ ಪಾವತಿಸಿ.",
       "submittedForReview": "ಪಟ್ಟಿ ಸಲ್ಲಿಸಲಾಗಿದೆ! ನಿರ್ವಾಹಕ ಪರಿಶೀಲನೆಯ ನಂತರ ಇದು ಸಾರ್ವಜನಿಕವಾಗಿ ಕಾಣಿಸುತ್ತದೆ.",
-      "howStep1": "ಪಟ್ಟಿಯನ್ನು ಕಾಯ್ದಿರಿಸಿ — ಮಾರಾಟಗಾರರಿಗೆ ಸೂಚನೆ ಹೋಗುತ್ತದೆ",
+      "howStep1": "ಪಟ್ಟಿಯನ್ನು ಕಾಯ್ದಿರಿಸಿ: ಮಾರಾಟಗಾರರಿಗೆ ಸೂಚನೆ ಹೋಗುತ್ತದೆ",
       "howStep2": "ಸಂಪರ್ಕಿಸಿ ಮತ್ತು ಪ್ರಾಣಿಯನ್ನು ಖುದ್ದಾಗಿ ಪರಿಶೀಲಿಸಿ",
       "howStep3": "ಮಾರಾಟಗಾರರಿಗೆ ನೇರವಾಗಿ ಪಾವತಿಸಿ (ನಗದು / ನಿಮ್ಮ UPI)",
       "howStep4": "ವ್ಯವಹಾರ ಪೂರ್ಣಗೊಳಿಸಲು ಇಬ್ಬರೂ ಇಲ್ಲಿ ದೃಢೀಕರಿಸಿ",
-      "freeNote": "ಈ ಮಾರುಕಟ್ಟೆ 100% ಉಚಿತ — VetCare ಪಾವತಿಯನ್ನು ಎಂದಿಗೂ ನಿರ್ವಹಿಸುವುದಿಲ್ಲ. ಇನ್ನೊಂದು ಪಕ್ಷದೊಂದಿಗೆ ನೇರವಾಗಿ ಪಾವತಿಸಿ.",
+      "freeNote": "ಈ ಮಾರುಕಟ್ಟೆ 100% ಉಚಿತ. VetCare ಪಾವತಿಯನ್ನು ಎಂದಿಗೂ ನಿರ್ವಹಿಸುವುದಿಲ್ಲ. ಇನ್ನೊಂದು ಪಕ್ಷದೊಂದಿಗೆ ನೇರವಾಗಿ ಪಾವತಿಸಿ.",
       "tabNote": "ವ್ಯವಹಾರಗಳು ಖರೀದಿದಾರ ಮತ್ತು ಮಾರಾಟಗಾರರ ನಡುವೆ ನೇರವಾಗಿ ನಡೆಯುತ್ತವೆ. ಭೇಟಿಯಾಗಿ ಪಾವತಿಸಿದ ನಂತರ, ಇಬ್ಬರೂ ಇಲ್ಲಿ ದೃಢೀಕರಿಸಿ.",
       "currentlyReserved": "ಪ್ರಸ್ತುತ ಖರೀದಿದಾರರಿಂದ ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
       "actionsCol": "ವ್ಯವಹಾರ ಕ್ರಮಗಳು",
@@ -3608,7 +3737,7 @@
       "waitingOther": "ಇನ್ನೊಂದು ಪಕ್ಷಕ್ಕಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ",
       "otherConfirmed": "ಇನ್ನೊಂದು ಪಕ್ಷ ದೃಢೀಕರಿಸಿದೆ",
       "cancelDeal": "ರದ್ದುಮಾಡಿ",
-      "dealCancelled": "ಕಾಯ್ದಿರಿಸುವಿಕೆ ರದ್ದು — ಪಟ್ಟಿ ಮತ್ತೆ ಸಕ್ರಿಯವಾಗಿದೆ.",
+      "dealCancelled": "ಕಾಯ್ದಿರಿಸುವಿಕೆ ರದ್ದು. ಪಟ್ಟಿ ಮತ್ತೆ ಸಕ್ರಿಯವಾಗಿದೆ.",
       "dealDone": "ವ್ಯವಹಾರ ಪೂರ್ಣಗೊಂಡಿದೆ",
       "paymentMethod": "ಪಾವತಿ ವಿಧಾನ…",
       "pm": {
@@ -3647,8 +3776,8 @@
       "mySearch": "ನನ್ನ ಹುಡುಕಾಟ",
       "applySearch": "ಅನ್ವಯಿಸಿ",
       "allListings": "ಎಲ್ಲಾ ಪಟ್ಟಿಗಳು",
-      "alertsOn": "ಅಧಿಸೂಚನೆಗಳು ಆನ್ — ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ",
-      "alertsOff": "ಅಧಿಸೂಚನೆಗಳು ಆಫ್ — ಸಕ್ರಿಯಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"
+      "alertsOn": "ಅಧಿಸೂಚನೆಗಳು ಆನ್: ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ",
+      "alertsOff": "ಅಧಿಸೂಚನೆಗಳು ಆಫ್: ಸಕ್ರಿಯಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"
     },
     "pageOf": "ಪುಟ {{current}} / {{total}}",
     "report": {
@@ -3659,7 +3788,7 @@
       "details": "ವಿವರಗಳು (ಐಚ್ಛಿಕ)",
       "detailsPlaceholder": "ಪರಿಶೀಲನೆಗೆ ಸಹಾಯ ಮಾಡುವ ಯಾವುದೇ…",
       "submit": "ವರದಿ ಸಲ್ಲಿಸಿ",
-      "submitted": "ಧನ್ಯವಾದಗಳು — ನಿಮ್ಮ ವರದಿ ಪರಿಶೀಲನೆಗೆ ಸಲ್ಲಿಸಲಾಗಿದೆ.",
+      "submitted": "ಧನ್ಯವಾದಗಳು, ನಿಮ್ಮ ವರದಿ ಪರಿಶೀಲನೆಗೆ ಸಲ್ಲಿಸಲಾಗಿದೆ.",
       "resolved": "ವರದಿ ನವೀಕರಿಸಲಾಗಿದೆ.",
       "adminTitle": "ವರದಿ ಮಾಡಿದ ಪಟ್ಟಿಗಳು",
       "filterOpen": "ತೆರೆದ ವರದಿಗಳು",
@@ -3687,7 +3816,7 @@
     },
     "services": {
       "vetCheckTitle": "ಖರೀದಿ-ಪೂರ್ವ ಪಶುವೈದ್ಯ ತಪಾಸಣೆ",
-      "vetCheckDesc": "ಬದ್ಧರಾಗುವ ಮೊದಲು ಈ ಪ್ರಾಣಿಯನ್ನು ಪರೀಕ್ಷಿಸಲು ಪರವಾನಗಿ ಪಡೆದ ಪಶುವೈದ್ಯರನ್ನು ಬುಕ್ ಮಾಡಿ — ಆರೋಗ್ಯ, ವಯಸ್ಸು, ಸದೃಢತೆ ಪರಿಶೀಲಿಸಲಾಗಿದೆ.",
+      "vetCheckDesc": "ಬದ್ಧರಾಗುವ ಮೊದಲು ಈ ಪ್ರಾಣಿಯನ್ನು ಪರೀಕ್ಷಿಸಲು ಪರವಾನಗಿ ಪಡೆದ ಪಶುವೈದ್ಯರನ್ನು ಬುಕ್ ಮಾಡಿ: ಆರೋಗ್ಯ, ವಯಸ್ಸು, ಸದೃಢತೆ ಪರಿಶೀಲಿಸಲಾಗಿದೆ.",
       "bookVetCheck": "ಪಶುವೈದ್ಯ ತಪಾಸಣೆ ಬುಕ್ ಮಾಡಿ",
       "transportDesc": "ಪ್ರಾಣಿಯನ್ನು ಸಾಗಿಸಲು ಸಹಾಯ ಬೇಕೇ?",
       "arrangeTransport": "ಸಾರಿಗೆ ವ್ಯವಸ್ಥೆ"
@@ -4027,7 +4156,7 @@
     "generalVeterinarian": "ಸಾಮಾನ್ಯ ಪಶುವೈದ್ಯ",
     "perSession": "ಪ್ರತಿ ಅಧಿವೇಶನಕ್ಕೆ",
     "findingNextDate": "ಮುಂದಿನ ಲಭ್ಯ ದಿನಾಂಕವನ್ನು ಹುಡುಕುತ್ತಿದೆ...",
-    "nextAvailableAutoSelected": "ಮುಂದಿನ ಲಭ್ಯ ದಿನಾಂಕ ಸ್ವಯಂಚಾಲ್ ಆಯ್ಕೆಯಾಗಿದೆ — ಬೇಕಾದರೆ ಬದಲಾಯಿಸಕ್ಕು",
+    "nextAvailableAutoSelected": "ಮುಂದಿನ ಲಭ್ಯ ದಿನಾಂಕ ಸ್ವಯಂಚಾಲ್ ಆಯ್ಕೆಯಾಗಿದೆ, ಬೇಕಾದರೆ ಬದಲಾಯಿಸಕ್ಕು",
     "reasonTooShort": "ಭೇಟಿಯ ಕಾರಣ ಕನಿಷ್ಠ 3 ಅಕ್ಷರಗಳು ಇರಬೇಕು",
     "noPetsRegistered": "ಇನ್ನೂ ಯಾವ ಸಾಕು ಪ್ರಾಣಿಗಳನ್ನೂ ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ",
     "addPet": "ಸಾಕು ಪ್ರಾಣಿ ನೋಂದಾಯಿಸಿ",
@@ -4187,8 +4316,8 @@
     "noMessages": "ಇನ್ನೂ ಸಂದೇಶಗಳಿಲ್ಲ",
     "startConversation": "ಸಂಭಾಷಣೆ ಪ್ರಾರಂಭಿಸಿ",
     "typeMessage": "ಸಂದೇಶ ಟೈಪ್ ಮಾಡಿ...",
-    "cameraUnavailableAudioOnly": "Camera unavailable — switching to audio-only mode",
-    "cameraAndMicUnavailable": "Camera and microphone unavailable — switching to chat-only mode",
+    "cameraUnavailableAudioOnly": "Camera unavailable, switching to audio-only mode",
+    "cameraAndMicUnavailable": "Camera and microphone unavailable, switching to chat-only mode",
     "failedToCreateVideoRoom": "Failed to create video room",
     "failedToInitialize": "Failed to initialize video consultation",
     "failedToStartSession": "Failed to start video session",
@@ -4348,7 +4477,7 @@
       "sentToPharmacy": "Sent to Pharmacy",
       "readyForPickup": "Ready for Pickup",
       "outForDelivery": "Out for Delivery",
-      "issueContactVet": "Issue — Contact Your Vet",
+      "issueContactVet": "Issue: Contact Your Vet",
       "pendingUpdate": "Pending Vet Update",
       "autoRouted": "Will be sent to",
       "selectNetwork": "Route prescription to which pharmacy network?",
@@ -4400,7 +4529,7 @@
   },
   "patientQueue": {
     "title": "ರೋಗಿ ಸರತಿ",
-    "subtitle": "ಬರುವ ಬುಕಿಂಗ್ ವಿನಂತಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ — ಬುಕಿಂಗ್‌ಗಳನ್ನು ದೃಢೀಕರಿಸಿ, ನಂತರ ಸಮಾಲೋಚನೆಗಳನ್ನು ಪ್ರಾರಂಭಿಸಿ",
+    "subtitle": "ಬರುವ ಬುಕಿಂಗ್ ವಿನಂತಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ: ಬುಕಿಂಗ್‌ಗಳನ್ನು ದೃಢೀಕರಿಸಿ, ನಂತರ ಸಮಾಲೋಚನೆಗಳನ್ನು ಪ್ರಾರಂಭಿಸಿ",
     "refresh": "ರಿಫ್ರೆಶ್",
     "pending": "ಬಾಕಿ",
     "confirmed": "ದೃಢೀಕರಿಸಲಾಗಿದೆ",
@@ -4499,8 +4628,8 @@
     "historyTab": "ಇತಿಹಾಸ",
     "notesTab": "ಟಿಪ್ಪಣಿಗಳು",
     "rx": "Rx",
-    "cameraUnavailableAudioOnly": "Camera unavailable — switching to audio-only mode",
-    "cameraAndMicUnavailable": "Camera and microphone unavailable — switching to chat-only mode",
+    "cameraUnavailableAudioOnly": "Camera unavailable, switching to audio-only mode",
+    "cameraAndMicUnavailable": "Camera and microphone unavailable, switching to chat-only mode",
     "failedToCreateVideoSession": "Failed to create video session",
     "failedToInitializeRoom": "Failed to initialize consultation room",
     "failedToStartCall": "Failed to start call",
@@ -4638,7 +4767,7 @@
     "copyToAllEmpty": "Copy to all empty days",
     "minSlots": "min slots",
     "custom": "Custom",
-    "vacationInfoText": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled — please manage them separately.",
+    "vacationInfoText": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled. please manage them separately.",
     "daysWillBeMarked": "{{count}} day(s) will be marked unavailable"
   },
   "adminRoleRequests": {
@@ -4672,7 +4801,14 @@
     "approveSuccess": "ಪಾತ್ರ ಬದಲಾವಣೆ ಅನುಮೋದಿಸಲಾಗಿದೆ.",
     "rejectSuccess": "ವಿನಂತಿ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ.",
     "reviewedBy": "ಪರಿಶೀಲನೆ: {{name}}",
-    "rejectedReason": "ಕಾರಣ: {{reason}}"
+    "rejectedReason": "ಕಾರಣ: {{reason}}",
+    "vet": {
+      "license": "ಪರವಾನಗಿ",
+      "fee": "ಶುಲ್ಕ",
+      "experience": "ಅನುಭವ (ವರ್ಷ)",
+      "specializations": "ಪರಿಣತಿಗಳು",
+      "clinic": "ಕ್ಲಿನಿಕ್"
+    }
   },
   "adminDashboard": {
     "title": "ಅಡ್ಮಿನ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
@@ -5263,7 +5399,8 @@
     "resetPasswordLabel": "New Password",
     "resetPasswordBtn": "Reset Password",
     "resetPasswordSuccess": "Password reset successfully",
-    "resetPasswordMin": "Minimum 8 characters required"
+    "resetPasswordMin": "Minimum 8 characters required",
+    "vetRoleHint": "ಪಶುವೈದ್ಯ ಪಾತ್ರವನ್ನು ನಿಯೋಜಿಸುವುದು ವೈದ್ಯ ಪ್ರೊಫೈಲ್ ರಚಿಸುತ್ತದೆ. ಪರಿಶೀಲಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಲು ಪರವಾನಗಿ ಸಂಖ್ಯೆ ಸೇರಿಸಿ, ಅಥವಾ ಪರಿಶೀಲಿಸದ (ಆದರೆ ಗೋಚರ) ಪ್ರೊಫೈಲ್‌ಗಾಗಿ ಖಾಲಿ ಬಿಡಿ."
   },
   "vetHospitalAdmin": {
     "title": "ಪಶು ಆಸ್ಪತ್ರೆ ನಿರ್ವಹಣೆ",
@@ -5404,7 +5541,7 @@
       "backToSearch": "ಹುಡುಕಾಟಕ್ಕೆ ಹಿಂತಿರುಗಿ",
       "registerAndContinue": "ನೋಂದಾಯಿಸಿ ಮುಂದುವರಿಯಿರಿ",
       "registering": "ನೋಂದಾಯಿಸಲಾಗುತ್ತಿದೆ...",
-      "or": "— ಅಥವಾ —",
+      "or": "ಅಥವಾ",
       "requiredFields": "ಮಾಲೀಕರ ಹೆಸರು, ಪ್ರಾಣಿಯ ಹೆಸರು ಮತ್ತು ಪ್ರಭೇದ ಅಗತ್ಯ.",
       "registerFailed": "ವಾಕ್-ಇನ್ ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
       "searchRequired": "ಅಗತ್ಯ: ಚೆಕ್-ಇನ್ ಮಾಡಲು ಪ್ರಾಣಿಯ ಹೆಸರನ್ನು ಟೈಪ್ ಮಾಡಿ ಆಯ್ಕೆ ಮಾಡಿ.",
@@ -5491,8 +5628,8 @@
     "heartRateLabel": "ಹೃದಯ ಬಡಿತ",
     "weightLabel": "ತೂಕ",
     "notesLabel": "ಟಿಪ್ಪಣಿಗಳು",
-    "normalTempHint": "ಸಾಮಾನ್ಯ: 100–102.5°F",
-    "normalHrHint": "ಸಾಮಾನ್ಯ: 60–160 bpm",
+    "normalTempHint": "ಸಾಮಾನ್ಯ: 100-102.5°F",
+    "normalHrHint": "ಸಾಮಾನ್ಯ: 60-160 bpm",
     "weightUnit": "ಕಿಲೋಗಳಲ್ಲಿ",
     "vitalsErrorNegative": "ವೈಟಲ್ಸ್ ಶೂನ್ಯ ಅಥವಾ ನಕಾರಾತ್ಮಕವಾಗಿರಬಾರದು.",
     "vitalsHistory": "ವೈಟಲ್ಸ್ ಇತಿಹಾಸ",
@@ -5515,7 +5652,7 @@
   },
   "publicMarketplace": {
     "heroTitle": "ಮಾರಾಟಕ್ಕಿರುವ ಪ್ರಾಣಿಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ",
-    "heroSubtitle": "ಮಾರಾಟಕ್ಕೆ ಲಭ್ಯವಿರುವ ಪ್ರಾಣಿಗಳನ್ನು ಕಂಡುಕೊಳ್ಳಿ — ಲಾಗಿನ್ ಅಗತ್ಯವಿಲ್ಲ. ಮಾರಾಟಗಾರರನ್ನು ಸಂಪರ್ಕಿಸಲು, ಬಿಡ್ ಮಾಡಲು ಅಥವಾ ನಿಮ್ಮದನ್ನು ಪಟ್ಟಿ ಮಾಡಲು ಸೈನ್ ಇನ್ ಮಾಡಿ.",
+    "heroSubtitle": "ಮಾರಾಟಕ್ಕೆ ಲಭ್ಯವಿರುವ ಪ್ರಾಣಿಗಳನ್ನು ಕಂಡುಕೊಳ್ಳಿ, ಲಾಗಿನ್ ಅಗತ್ಯವಿಲ್ಲ. ಮಾರಾಟಗಾರರನ್ನು ಸಂಪರ್ಕಿಸಲು, ಬಿಡ್ ಮಾಡಲು ಅಥವಾ ನಿಮ್ಮದನ್ನು ಪಟ್ಟಿ ಮಾಡಲು ಸೈನ್ ಇನ್ ಮಾಡಿ.",
     "stats": {
       "activeListings": "ಸಕ್ರಿಯ ಪಟ್ಟಿಗಳು",
       "species": "ಜಾತಿಗಳು",
@@ -5545,7 +5682,7 @@
     },
     "homeCta": {
       "title": "ಖರೀದಿ-ಮಾರಾಟ ಮಾರುಕಟ್ಟೆ",
-      "subtitle": "ಮಾರಾಟಕ್ಕೆ ಲಭ್ಯವಿರುವ ಪ್ರಾಣಿಗಳು, ಕೃಷಿ ಸಲಕರಣೆಗಳು, ಮೇವು ಮತ್ತು ಪಶುವೈದ್ಯ ಸಾಮಗ್ರಿಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ — ಸಂಪೂರ್ಣ ಉಚಿತ, ಲಾಗಿನ್ ಅಗತ್ಯವಿಲ್ಲ.",
+      "subtitle": "ಮಾರಾಟಕ್ಕೆ ಲಭ್ಯವಿರುವ ಪ್ರಾಣಿಗಳು, ಕೃಷಿ ಸಲಕರಣೆಗಳು, ಮೇವು ಮತ್ತು ಪಶುವೈದ್ಯ ಸಾಮಗ್ರಿಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ, ಸಂಪೂರ್ಣ ಉಚಿತ, ಲಾಗಿನ್ ಅಗತ್ಯವಿಲ್ಲ.",
       "livestock": "ಪ್ರಾಣಿಗಳು",
       "feed": "ಮೇವು ಮತ್ತು ಪೋಷಣೆ",
       "equipment": "ಸಲಕರಣೆಗಳು",
@@ -5580,7 +5717,7 @@
     "loadMore": "Load More"
   },
   "acceptInvite": {
-    "noToken": "Invalid invitation link — no token provided",
+    "noToken": "Invalid invitation link: no token provided",
     "invalidInvite": "Invalid or expired invitation",
     "failedToAccept": "Failed to accept invitation",
     "passwordMinLength": "Password must be at least 8 characters",
@@ -5852,11 +5989,19 @@
     "name": "ಪ್ರಮಾಣ ಹೆಸರು",
     "disease": "ರೋಗ",
     "species": "ಪ್ರಾಣಿ ಜಾತಿ",
-    "category": "ವರ್ಗ",
+    "category": {
+      "core": "ಪ್ರಮುಖ",
+      "nonCore": "ಪ್ರಮುಖವಲ್ಲದ",
+      "mandatoryGovt": "ಕಡ್ಡಾಯ (ಸರ್ಕಾರಿ)",
+      "legallyMandated": "ಕಾನೂನುಬದ್ಧವಾಗಿ ಕಡ್ಡಾಯ"
+    },
     "zoonotic": "ಜೂನೋಟಿಕ್",
     "boosterInterval": "ಬೂಸ್ಟರ್ (ದಿನಗಳು)",
     "regulatory": "ನಿಯಾಮಕ ಸಂಸ್ಥೆ",
-    "status": "ಸ್ಥಿತಿ",
+    "status": {
+      "active": "ಸಕ್ರಿಯ",
+      "archived": "ಆರ್ಕೈವ್ ಮಾಡಲಾಗಿದೆ"
+    },
     "actions": "ಕ್ರಿಯೆಗಳು",
     "active": "ಸಕ್ರಿಯ",
     "archived": "ಸಂಗ್ರಹಿಸಲಾಗಿದೆ",
@@ -6268,7 +6413,7 @@
     "form": {
       "idPrefix": "ನೆಟ್‌ವರ್ಕ್ ID ಪೂರ್ವಪ್ರತ್ಯಯ",
       "idPrefixHint": "2-10 ದೊಡ್ಡ ಅಕ್ಷರಗಳು/ಸಂಖ್ಯೆಗಳು. PREFIX-DOG-26-000001 ರೀತಿಯ ರೋಗಿ IDಗಳನ್ನು ರಚಿಸಲು ಬಳಸಲಾಗುತ್ತದೆ",
-      "chooseHospital": "— ಆಸ್ಪತ್ರೆ ಆಯ್ಕೆ ಮಾಡಿ —",
+      "chooseHospital": "ಆಸ್ಪತ್ರೆ ಆಯ್ಕೆ ಮಾಡಿ",
       "pasteUserId": "ಬಳಕೆದಾರ UUID ಅಂಟಿಸಿ"
     },
     "networkPatientId": "ನೆಟ್‌ವರ್ಕ್ ರೋಗಿ ID",
@@ -6304,12 +6449,12 @@
       "searchMinChars": "ಹುಡುಕಲು ಕನಿಷ್ಠ 2 ಅಕ್ಷರಗಳನ್ನು ಟೈಪ್ ಮಾಡಿ",
       "noResults": "ರೋಗಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
       "requestEnrollment": "ನೋಂದಣಿ ವಿನಂತಿ",
-      "enrollmentRequested": "ನೋಂದಣಿ ವಿನಂತಿ ಕಳುಹಿಸಲಾಗಿದೆ — ರೋಗಿಗೆ ತಿಳಿಸಲಾಗುತ್ತದೆ",
+      "enrollmentRequested": "ನೋಂದಣಿ ವಿನಂತಿ ಕಳುಹಿಸಲಾಗಿದೆ. ರೋಗಿಗೆ ತಿಳಿಸಲಾಗುತ್ತದೆ",
       "inviteWalkIn": "ವಾಕ್-ಇನ್ ರೋಗಿಯನ್ನು ಆಹ್ವಾನಿಸಿ",
       "registerWalkIn": "ವಾಕ್-ಇನ್ ನೋಂದಣಿ",
       "registerWalkInTitle": "ವಾಕ್-ಇನ್ ರೋಗಿ ನೋಂದಣಿ",
       "walkInSuccess": "ರೋಗಿ ನೋಂದಾಯಿಸಲಾಗಿದೆ!",
-      "walkInHelperText": "ತಕ್ಷಣದ ಚಿಕಿತ್ಸೆಗಾಗಿ ವಾಕ್-ಇನ್ ರೋಗಿಯನ್ನು ನೋಂದಾಯಿಸಿ. ಆಹ್ವಾನ ಅಥವಾ ಖಾತೆ ಅಗತ್ಯವಿಲ್ಲ — ನಂತರ ಆನ್‌ಲೈನ್ ಪ್ರವೇಶ ನೀಡಬಹುದು.",
+      "walkInHelperText": "ತಕ್ಷಣದ ಚಿಕಿತ್ಸೆಗಾಗಿ ವಾಕ್-ಇನ್ ರೋಗಿಯನ್ನು ನೋಂದಾಯಿಸಿ. ಆಹ್ವಾನ ಅಥವಾ ಖಾತೆ ಅಗತ್ಯವಿಲ್ಲ. ನಂತರ ಆನ್‌ಲೈನ್ ಪ್ರವೇಶ ನೀಡಬಹುದು.",
       "inviteForOnlineAccess": "ಆನ್‌ಲೈನ್ ಪ್ರವೇಶಕ್ಕಾಗಿ ಆಹ್ವಾನಿಸಿ",
       "registerNow": "ನೋಂದಾಯಿಸಿ ಮತ್ತು ಚಿಕಿತ್ಸೆ ಪ್ರಾರಂಭಿಸಿ",
       "reasonForVisit": "ಭೇಟಿ ಕಾರಣ",
@@ -6343,7 +6488,7 @@
       "searchHelper": "ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಬಳಕೆದಾರರನ್ನು ಹುಡುಕಿ ನೋಂದಣಿ ವಿನಂತಿ ಕಳುಹಿಸಿ. ರೋಗಿ ಒಪ್ಪಿಕೊಳ್ಳಬೇಕು.",
       "consentCollected": "Consent Collected",
       "consentCollectedHint": "Patient has given consent for this network",
-      "consentPendingWarning": "Consent pending — limited data access until patient grants consent"
+      "consentPendingWarning": "Consent pending: limited data access until patient grants consent"
     },
     "audit": {
       "title": "ಆಡಿಟ್ ಮತ್ತು ಅನುಸರಣೆ",
@@ -6439,7 +6584,18 @@
     "selectDepartment": "ವಿಭಾಗ ಆಯ್ಕೆಮಾಡಿ",
     "customDepartment": "ಕಸ್ಟಮ್ ವಿಭಾಗ",
     "noDepartment": "ಯಾವುದೇ ವಿಭಾಗ ಇಲ್ಲ",
-    "memberName": "Member Name"
+    "memberName": "Member Name",
+    "securityAudit": {
+      "title": "ಸಂರಚನೆ ಬದಲಾವಣೆಗಳು",
+      "subtitle": "ಯಾರು ಪಾತ್ರಗಳು, ಸದಸ್ಯರು ಮತ್ತು ನೆಟ್‌ವರ್ಕ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿದರು. ಮೇಲಿನ ದಾಖಲೆ-ಪ್ರವೇಶ ಲಾಗ್‌ನಿಂದ ಪ್ರತ್ಯೇಕ.",
+      "empty": "ಯಾವುದೇ ಸಂರಚನೆ ಬದಲಾವಣೆ ದಾಖಲಾಗಿಲ್ಲ.",
+      "when": "ಯಾವಾಗ",
+      "actor": "ಬದಲಾಯಿಸಿದವರು",
+      "action": "ಕ್ರಿಯೆ",
+      "target": "ಗುರಿ",
+      "change": "ಬದಲಾವಣೆ",
+      "ip": "IP ವಿಳಾಸ"
+    }
   },
   "networkReferrals": {
     "title": "ನೆಟ್‌ವರ್ಕ್ ರೆಫರಲ್‌ಗಳು",
@@ -6458,8 +6614,8 @@
     "clinicalNotes": "ಕ್ಲಿನಿಕಲ್ ಟಿಪ್ಪಣಿಗಳು (ಐಚ್ಛಿಕ)",
     "clinicalNotesPlaceholder": "ಸಂಬಂಧಿತ ಇತಿಹಾಸ, ಪ್ರಸ್ತುತ ಸ್ಥಿತಿ ಸೇರಿಸಿ...",
     "reasonPlaceholder": "ಉದಾ: ತಜ್ಞರ ಸಮಾಲೋಚನೆ ಅಗತ್ಯ...",
-    "selectHospital": "— ಆಸ್ಪತ್ರೆ ಆಯ್ಕೆಮಾಡಿ —",
-    "selectVet": "— ವೈದ್ಯರನ್ನು ಆಯ್ಕೆಮಾಡಿ (ಐಚ್ಛಿಕ) —",
+    "selectHospital": "ಆಸ್ಪತ್ರೆ ಆಯ್ಕೆಮಾಡಿ",
+    "selectVet": "ವೈದ್ಯರನ್ನು ಆಯ್ಕೆಮಾಡಿ (ಐಚ್ಛಿಕ)",
     "sending": "ರೆಫರಲ್ ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ...",
     "send": "ರೆಫರಲ್ ಕಳುಹಿಸಿ",
     "accept": "ರೆಫರಲ್ ಒಪ್ಪಿಕೊಳ್ಳಿ",
@@ -6727,7 +6883,7 @@
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
     "preferenceSaved": "Notification preferences saved",
-    "loadFailed": "ನಿಮ್ಮ ಉಳಿಸಿದ ಅಧಿಸೂಚನೆ ಆದ್ಯತೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ — ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ"
+    "loadFailed": "ನಿಮ್ಮ ಉಳಿಸಿದ ಅಧಿಸೂಚನೆ ಆದ್ಯತೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ, ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ"
   },
   "emailTemplates": {
     "title": "ಇಮೇಲ್ ಟೆಂಪ್ಲೇಟ್‌ಗಳು",
@@ -6797,7 +6953,8 @@
       "history": "History",
       "reorders": "Reorders",
       "transfers": "Transfers",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "alerts": "ಎಚ್ಚರಿಕೆಗಳು"
     },
     "stats": {
       "pendingReviews": "Pending Reviews",
@@ -6983,7 +7140,7 @@
       "available": "Available",
       "loadingInventory": "Loading pharmacy inventory...",
       "inventoryLoadError": "Could not load pharmacy inventory",
-      "stockWarningError": "Cannot dispense — one or more quantities exceed available stock",
+      "stockWarningError": "Cannot dispense: one or more quantities exceed available stock",
       "unmatchedWarning": "Some medications are not matched to inventory items",
       "selectInventoryWarning": "Select a batch for this medication"
     },
@@ -7120,11 +7277,31 @@
       "pendingReviews": "Pending Reviews",
       "lowStock": "Low Stock Items",
       "expiringSoon": "Expiring Soon",
-      "topMedications": "Top Medications by Volume"
+      "topMedications": "Top Medications by Volume",
+      "networkTitle": "ಈ ನೆಟ್‌ವರ್ಕ್‌ನ ಎಲ್ಲಾ ಔಷಧಾಲಯಗಳು",
+      "pharmacy": "ಔಷಧಾಲಯ",
+      "revenue": "ಆದಾಯ",
+      "dispensings": "ವಿತರಣೆಗಳು",
+      "thisPharmacy": "ಈ ಔಷಧಾಲಯ"
     },
     "receipt": {
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
+    },
+    "alerts": {
+      "expired": "ಅವಧಿ ಮುಗಿದಿದೆ: ವಿತರಿಸಬೇಡಿ",
+      "noExpired": "ಅವಧಿ ಮುಗಿದ ದಾಸ್ತಾನು ಇಲ್ಲ.",
+      "expiredAgo": "ಅವಧಿ ಮುಗಿದಿದೆ",
+      "expiringSoon": "ಶೀಘ್ರದಲ್ಲೇ ಅವಧಿ ಮುಗಿಯುತ್ತದೆ",
+      "noExpiring": "ಮುಂದಿನ 90 ದಿನಗಳಲ್ಲಿ ಯಾವುದರ ಅವಧಿಯೂ ಮುಗಿಯುತ್ತಿಲ್ಲ.",
+      "daysLeft": "ಉಳಿದ ದಿನಗಳು",
+      "outOfStock": "ದಾಸ್ತಾನು ಖಾಲಿ",
+      "noOutOfStock": "ಯಾವುದೂ ದಾಸ್ತಾನು ಖಾಲಿಯಾಗಿಲ್ಲ.",
+      "runningLow": "ಕಡಿಮೆಯಾಗುತ್ತಿದೆ",
+      "noLowStock": "ಯಾವುದೇ ಔಷಧಿ ಮರುಕ್ರಮ ಬಿಂದುವಿಗಿಂತ ಕಡಿಮೆ ಇಲ್ಲ.",
+      "inStock": "ದಾಸ್ತಾನಿನಲ್ಲಿ",
+      "reorderPoint": "ಮರುಕ್ರಮ ಬಿಂದು",
+      "reorder": "ಮರುಕ್ರಮ"
     }
   },
   "chat": {
@@ -7146,7 +7323,7 @@
   },
   "payment": {
     "title": "ನಿಮ್ಮ ಪಾವತಿಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ",
-    "testModeNotice": "ಪರೀಕ್ಷಾ ಮೋಡ್ — ನಿಜವಾದ ಹಣ ಕಡಿತಗೊಳ್ಳುವುದಿಲ್ಲ.",
+    "testModeNotice": "ಪರೀಕ್ಷಾ ಮೋಡ್: ನಿಜವಾದ ಹಣ ಕಡಿತಗೊಳ್ಳುವುದಿಲ್ಲ.",
     "slotHeldFor": "ಸ್ಲಾಟ್ ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
     "consultationFee": "ಸಮಾಲೋಚನಾ ಶುಲ್ಕ",
     "useWallet": "ವಾಲೆಟ್ ಬ್ಯಾಲೆನ್ಸ್ ಬಳಸಿ",
@@ -7241,7 +7418,7 @@
     "locked": "ಹಿಂಪಡೆಯುವಿಕೆಯಲ್ಲಿ",
     "withdrawn": "ಹಿಂಪಡೆದಿದೆ",
     "clearingHint": "ಸಮಾಲೋಚನೆಯ {{days}} ದಿನ(ಗಳ) ನಂತರ ಲಭ್ಯವಾಗುತ್ತದೆ",
-    "negativeHint": "ಋಣಾತ್ಮಕ ಬ್ಯಾಲೆನ್ಸ್ — ನಿಮ್ಮ ಮುಂದಿನ ಗಳಿಕೆಯಿಂದ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸರಿದೂಗಿಸಲಾಗುತ್ತದೆ",
+    "negativeHint": "ಋಣಾತ್ಮಕ ಬ್ಯಾಲೆನ್ಸ್: ನಿಮ್ಮ ಮುಂದಿನ ಗಳಿಕೆಯಿಂದ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸರಿದೂಗಿಸಲಾಗುತ್ತದೆ",
     "withdrawalThreshold": "ಕನಿಷ್ಠ ಹಿಂಪಡೆಯುವಿಕೆಯ ಕಡೆಗೆ ಪ್ರಗತಿ",
     "thresholdReached": "ನೀವು ಈಗ ಹಿಂಪಡೆಯುವಿಕೆ ಕೋರಬಹುದು.",
     "thresholdHint": "ಲಭ್ಯ ಬ್ಯಾಲೆನ್ಸ್ ಕನಿಷ್ಠ ತಲುಪಿದಾಗ ಹಿಂಪಡೆಯುವಿಕೆ ತೆರೆಯುತ್ತದೆ.",
@@ -7270,10 +7447,10 @@
   },
   "commissionAdmin": {
     "title": "ಕಮಿಷನ್ ನಿಯಮಗಳು",
-    "subtitle": "ವೈದ್ಯ-ಮಟ್ಟದ ಕಮಿಷನ್ ಓವರ್‌ರೈಡ್‌ಗಳು — ಖಾಲಿ ಕ್ಷೇತ್ರಗಳು ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್ ಬಳಸುತ್ತವೆ",
+    "subtitle": "ವೈದ್ಯ-ಮಟ್ಟದ ಕಮಿಷನ್ ಓವರ್‌ರೈಡ್‌ಗಳು, ಖಾಲಿ ಕ್ಷೇತ್ರಗಳು ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್ ಬಳಸುತ್ತವೆ",
     "globalSettings": "ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್‌ಗಳು",
     "globalInfo": "ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್: {{percent}}% + ಪ್ರತಿ ಪಾವತಿ ಬುಕಿಂಗ್‌ಗೆ {{flat}} ಫ್ಲಾಟ್ ಶುಲ್ಕ. System Settings ನಲ್ಲಿ ಬದಲಾಯಿಸಿ.",
-    "globalsLoadFailed": "ಪ್ರಸ್ತುತ ಜಾಗತಿಕ ಕಮಿಷನ್ ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ — ಫಾಲ್‌ಬ್ಯಾಕ್ ಮೌಲ್ಯಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+    "globalsLoadFailed": "ಪ್ರಸ್ತುತ ಜಾಗತಿಕ ಕಮಿಷನ್ ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ, ಫಾಲ್‌ಬ್ಯಾಕ್ ಮೌಲ್ಯಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ",
     "saved": "ಓವರ್‌ರೈಡ್ ಉಳಿಸಲಾಗಿದೆ. ಹೊಸ ಪಾವತಿಗಳಿಗೆ ಮಾತ್ರ ಅನ್ವಯ.",
     "saveFailed": "ಓವರ್‌ರೈಡ್ ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ.",
     "searchPlaceholder": "ಹೆಸರು ಅಥವಾ ಇಮೇಲ್ ಮೂಲಕ ವೈದ್ಯರನ್ನು ಹುಡುಕಿ…",
@@ -7282,11 +7459,11 @@
     "colFee": "ಶುಲ್ಕ",
     "colPercentOverride": "% ಓವರ್‌ರೈಡ್",
     "colFlatOverride": "ಫ್ಲಾಟ್ ಓವರ್‌ರೈಡ್",
-    "snapshotNote": "ಕಮಿಷನ್ ಪಾವತಿ ಸಮಯದಲ್ಲಿ ಸ್ನ್ಯಾಪ್‌ಶಾಟ್ ಆಗುತ್ತದೆ — ಬದಲಾವಣೆಗಳು ಹಳೆಯ ಪಾವತಿಗಳನ್ನು ಬದಲಾಯಿಸುವುದಿಲ್ಲ."
+    "snapshotNote": "ಕಮಿಷನ್ ಪಾವತಿ ಸಮಯದಲ್ಲಿ ಸ್ನ್ಯಾಪ್‌ಶಾಟ್ ಆಗುತ್ತದೆ, ಬದಲಾವಣೆಗಳು ಹಳೆಯ ಪಾವತಿಗಳನ್ನು ಬದಲಾಯಿಸುವುದಿಲ್ಲ."
   },
   "withdrawals": {
     "title": "ಹಿಂಪಡೆಯುವಿಕೆಗಳು",
-    "payoutOnFile": "ಪಾವತಿ ವಿವರಗಳು ದಾಖಲಾಗಿವೆ — ನಿಮ್ಮ ಪೂರ್ಣ ಲಭ್ಯ ಬ್ಯಾಲೆನ್ಸ್ ಹಿಂಪಡೆಯಲು ಕೋರಬಹುದು.",
+    "payoutOnFile": "ಪಾವತಿ ವಿವರಗಳು ದಾಖಲಾಗಿವೆ. ನಿಮ್ಮ ಪೂರ್ಣ ಲಭ್ಯ ಬ್ಯಾಲೆನ್ಸ್ ಹಿಂಪಡೆಯಲು ಕೋರಬಹುದು.",
     "payoutMissing": "ಹಿಂಪಡೆಯುವಿಕೆ ಸಕ್ರಿಯಗೊಳಿಸಲು ಬ್ಯಾಂಕ್ ಖಾತೆ ಅಥವಾ UPI ವಿವರ ಸೇರಿಸಿ.",
     "payoutDetails": "ಪಾವತಿ ವಿವರಗಳು",
     "requestButton": "ಹಿಂಪಡೆಯುವಿಕೆ ಕೋರಿ",
@@ -7337,7 +7514,7 @@
   },
   "referrals": {
     "title": "ರೆಫರಲ್‌ಗಳು",
-    "subtitlePatient": "ನಿಮ್ಮ ವೈದ್ಯರ ರೆಫರಲ್‌ಗಳು — ಸ್ವೀಕರಿಸಿ, ಬೇರೆ ವೈದ್ಯರನ್ನು ಆರಿಸಿ, ಅಥವಾ ಮರುಪಾವತಿ ಪಡೆಯಿರಿ",
+    "subtitlePatient": "ನಿಮ್ಮ ವೈದ್ಯರ ರೆಫರಲ್‌ಗಳು: ಸ್ವೀಕರಿಸಿ, ಬೇರೆ ವೈದ್ಯರನ್ನು ಆರಿಸಿ, ಅಥವಾ ಮರುಪಾವತಿ ಪಡೆಯಿರಿ",
     "subtitleVet": "ರೋಗಿಗಳನ್ನು ಇತರ ವೈದ್ಯರಿಗೆ ರೆಫರ್ ಮಾಡಿ ಫಲಿತಾಂಶ ನೋಡಿ",
     "referButton": "ರೋಗಿಯನ್ನು ರೆಫರ್ ಮಾಡಿ",
     "empty": "ಇನ್ನೂ ರೆಫರಲ್‌ಗಳಿಲ್ಲ.",
@@ -7348,16 +7525,16 @@
     "chooseAnother": "ಬೇರೆ ವೈದ್ಯರು",
     "refund": "ಮರುಪಾವತಿ",
     "acceptTitle": "ರೆಫರಲ್ ಸ್ವೀಕರಿಸಿ",
-    "acceptHint": "ವೈದ್ಯರೊಂದಿಗೆ ಸ್ಲಾಟ್ ಆರಿಸಿ. ಈಗಾಗಲೇ ಪಾವತಿಸಿದ್ದು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ವರ್ಗಾವಣೆಯಾಗುತ್ತದೆ — ವ್ಯತ್ಯಾಸ ಮಾತ್ರ ಪಾವತಿಸುತ್ತೀರಿ.",
+    "acceptHint": "ವೈದ್ಯರೊಂದಿಗೆ ಸ್ಲಾಟ್ ಆರಿಸಿ. ಈಗಾಗಲೇ ಪಾವತಿಸಿದ್ದು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ವರ್ಗಾವಣೆಯಾಗುತ್ತದೆ. ವ್ಯತ್ಯಾಸ ಮಾತ್ರ ಪಾವತಿಸುತ್ತೀರಿ.",
     "selectDoctor": "ವೈದ್ಯರನ್ನು ಆರಿಸಿ…",
     "noSlots": "ಈ ದಿನಾಂಕಕ್ಕೆ ಸ್ಲಾಟ್‌ಗಳಿಲ್ಲ. ಬೇರೆ ದಿನಾಂಕ ಪ್ರಯತ್ನಿಸಿ.",
     "confirmAccept": "ಮುಂದುವರಿಸಿ",
     "refundTitle": "ಬದಲಿಗೆ ಮರುಪಾವತಿ ಪಡೆಯಿರಿ",
     "refundHint": "ವೈದ್ಯರು ಲಭ್ಯವಿಲ್ಲದ ಕಾರಣ ಪೂರ್ಣ ಮರುಪಾವತಿ + ಗುಡ್‌ವಿಲ್ ಬೋನಸ್ ಸಿಗುತ್ತದೆ.",
     "refundToWallet": "ವಾಲೆಟ್‌ಗೆ ತಕ್ಷಣ ಮರುಪಾವತಿ",
-    "refundToSource": "ಮೂಲ ಪಾವತಿ ವಿಧಾನಕ್ಕೆ (5–7 ದಿನ)",
+    "refundToSource": "ಮೂಲ ಪಾವತಿ ವಿಧಾನಕ್ಕೆ (5-7 ದಿನ)",
     "refunded": "ಮರುಪಾವತಿ ಪೂರ್ಣ.",
-    "accepted": "ರೆಫರಲ್ ಪೂರ್ಣ — ಹೊಸ ಬುಕಿಂಗ್ ಸಿದ್ಧ.",
+    "accepted": "ರೆಫರಲ್ ಪೂರ್ಣ. ಹೊಸ ಬುಕಿಂಗ್ ಸಿದ್ಧ.",
     "created": "ರೆಫರಲ್ ಕಳുಹಿಸಲಾಗಿದೆ. ರೋಗಿಗೆ ತಿಳಿಸಲಾಗಿದೆ.",
     "actionFailed": "ಕ್ರಿಯೆ ವಿಫಲ.",
     "deadlineIn": "{{hours}} ಗಂಟೆಯೊಳಗೆ ಕ್ರಮ ಕೈಗೊಳ್ಳಿ",
@@ -7384,7 +7561,7 @@
   },
   "taxAdmin": {
     "title": "ತೆರಿಗೆ & GST",
-    "subtitle": "SAC ದರಗಳು ಮುಂದಿನ ಸರಕುಪಟ್ಟಿಗಳಿಗೆ ಮಾತ್ರ — ಹಳೆಯವು ಬದಲಾಗದ ದಾಖಲೆಗಳು. GSTIN, ಕಾನೂನು ಹೆಸರು, ಪ್ರಿಫಿಕ್ಸ್ System Settings (tax.*) ನಲ್ಲಿ.",
+    "subtitle": "SAC ದರಗಳು ಮುಂದಿನ ಸರಕುಪಟ್ಟಿಗಳಿಗೆ ಮಾತ್ರ. ಹಳೆಯವು ಬದಲಾಗದ ದಾಖಲೆಗಳು. GSTIN, ಕಾನೂನು ಹೆಸರು, ಪ್ರಿಫಿಕ್ಸ್ System Settings (tax.*) ನಲ್ಲಿ.",
     "colLabel": "ಸೇವೆ",
     "colRate": "GST ದರ",
     "rateSaved": "ದರ ಉಳಿಸಲಾಗಿದೆ. ಇನ್ನು ಮುಂದೆ ಜಾರಿಯಾಗುವ ಸರಕುಪಟ್ಟಿಗಳಿಗೆ ಅನ್ವಯ.",
@@ -7417,14 +7594,14 @@
     "doctorAvailable": "ವೈದ್ಯ ಗಳಿಕೆ ಲಭ್ಯ",
     "doctorLocked": "ಹಿಂಪಡೆಯುವಿಕೆಯಲ್ಲಿ",
     "walletLiability": "ರೋಗಿ ವಾಲೆಟ್ ಹೊಣೆ",
-    "walletLiabilityHint": "ಗ್ರಾಹಕರಿಗೆ ಸಲ್ಲಬೇಕಾದದ್ದು — ವೇದಿಕೆ ಆದಾಯವಲ್ಲ",
+    "walletLiabilityHint": "ಗ್ರಾಹಕರಿಗೆ ಸಲ್ಲಬೇಕಾದದ್ದು: ವೇದಿಕೆ ಆದಾಯವಲ್ಲ",
     "tdsTitle": "TDS ರಿಜಿಸ್ಟರ್ (ಆಯ್ದ ವ್ಯಾಪ್ತಿ)",
     "tdsDeducted": "TDS ಕಡಿತ",
     "tdsCount": "{{count}} ಸೆಟಲ್ಮೆಂಟ್‌ಗಳು",
     "netPaidToDoctors": "ವೈದ್ಯರಿಗೆ ನಿವ್ವಳ ಪಾವತಿ",
     "healthTitle": "ಪಾವತಿ ಆರೋಗ್ಯ",
     "stuckPending": "ಸಿಲುಕಿದ ಬಾಕಿ ಪಾವತಿಗಳು",
-    "stuckPendingHint": "1 ಗಂಟೆಗಿಂತ ಹೆಚ್ಚು — ದೈನಂದಿನ ಹೊಂದಾಣಿಕೆ ಪ್ರಯತ್ನ",
+    "stuckPendingHint": "1 ಗಂಟೆಗಿಂತ ಹೆಚ್ಚು: ದೈನಂದಿನ ಹೊಂದಾಣಿಕೆ ಪ್ರಯತ್ನ",
     "openHolds": "ತೆರೆದ ಪಾವತಿ ಹೋಲ್ಡ್‌ಗಳು"
   },
   "animalClass": {
@@ -7482,7 +7659,7 @@
   },
   "masterData": {
     "title": "ಮಾಸ್ಟರ್ ಡೇಟಾ",
-    "subtitle": "ಪ್ರಭೇದಗಳು, ತಳಿಗಳು, ಪ್ರಾಣಿ ವರ್ಗಗಳು ಮತ್ತು ಮಾರುಕಟ್ಟೆ ಡ್ರಾಪ್‌ಡೌನ್ ಮೌಲ್ಯಗಳನ್ನು ನಿರ್ವಹಿಸಿ — ಕೋಡ್ ಡಿಪ್ಲಾಯ್ ಅಗತ್ಯವಿಲ್ಲ.",
+    "subtitle": "ಪ್ರಭೇದಗಳು, ತಳಿಗಳು, ಪ್ರಾಣಿ ವರ್ಗಗಳು ಮತ್ತು ಮಾರುಕಟ್ಟೆ ಡ್ರಾಪ್‌ಡೌನ್ ಮೌಲ್ಯಗಳನ್ನು ನಿರ್ವಹಿಸಿ, ಕೋಡ್ ಡಿಪ್ಲಾಯ್ ಅಗತ್ಯವಿಲ್ಲ.",
     "tabs": {
       "species": "ಪ್ರಭೇದಗಳು",
       "breeds": "ತಳಿಗಳು",
@@ -7491,16 +7668,16 @@
       "conditions": "ಮಾರುಕಟ್ಟೆ ಸ್ಥಿತಿಗಳು"
     },
     "filterBySpecies": "ಪ್ರಭೇದ",
-    "selectSpeciesPrompt": "— ಒಂದು ಪ್ರಭೇದವನ್ನು ಆಯ್ಕೆಮಾಡಿ —",
+    "selectSpeciesPrompt": "ಒಂದು ಪ್ರಭೇದವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
     "addNew": "ಹೊಸದನ್ನು ಸೇರಿಸಿ",
     "editEntry": "ನಮೂದನ್ನು ಸಂಪಾದಿಸಿ",
     "reactivate": "ಮರುಸಕ್ರಿಯಗೊಳಿಸಿ",
     "noEntries": "ಇನ್ನೂ ನಮೂದುಗಳಿಲ್ಲ",
-    "protectedHint": "ಸಂರಕ್ಷಿತ — ಪ್ರಮುಖ ತರ್ಕವು ಈ ಕೋಡ್ ಅನ್ನು ಅವಲಂಬಿಸಿದೆ",
+    "protectedHint": "ಸಂರಕ್ಷಿತ: ಪ್ರಮುಖ ತರ್ಕವು ಈ ಕೋಡ್ ಅನ್ನು ಅವಲಂಬಿಸಿದೆ",
     "labelKeyHint": "ಅಂತರ್ನಿರ್ಮಿತ ಅನುವಾದವನ್ನು ಇರಿಸಿಕೊಳ್ಳಲು ಖಾಲಿ ಬಿಡಿ",
-    "perLocaleLabelsHint": "ಐಚ್ಛಿಕ — ಕೆಳಗಿನ ಯಾವುದೇ ಭಾಷೆಗೆ ಅನುವಾದಿತ ಲೇಬಲ್ ಸೇರಿಸಿ. ಖಾಲಿ ಬಿಟ್ಟರೆ, ಆ ಭಾಷೆಯಲ್ಲಿ ಇಂಗ್ಲಿಷ್ ಲೇಬಲ್ ತೋರಿಸಲಾಗುತ್ತದೆ.",
+    "perLocaleLabelsHint": "ಐಚ್ಛಿಕ: ಕೆಳಗಿನ ಯಾವುದೇ ಭಾಷೆಗೆ ಅನುವಾದಿತ ಲೇಬಲ್ ಸೇರಿಸಿ. ಖಾಲಿ ಬಿಟ್ಟರೆ, ಆ ಭಾಷೆಯು ಅಂತರ್ನಿರ್ಮಿತ ಅನುವಾದವನ್ನು ಬಳಸುತ್ತದೆ (ಪ್ರತಿ ಪೆಟ್ಟಿಗೆಯಲ್ಲಿ ಬೂದು ಬಣ್ಣದಲ್ಲಿ ತೋರಿಸಲಾಗಿದೆ).",
     "confirmDelete": "ಈ ನಮೂದನ್ನು ಅಳಿಸುವುದೇ? ಇದನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.",
-    "deleteBlocked": "ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ — ಇದು ಇನ್ನೂ ಬಳಕೆಯಲ್ಲಿರಬಹುದು",
+    "deleteBlocked": "ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ: ಇದು ಇನ್ನೂ ಬಳಕೆಯಲ್ಲಿರಬಹುದು",
     "updatedSuccess": "ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ",
     "createdSuccess": "ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ",
     "archivedSuccess": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
@@ -7524,24 +7701,641 @@
       "canBePregnant": "ಗರ್ಭಿಣಿಯಾಗಬಹುದು",
       "canProduceMilk": "ಹಾಲು ಉತ್ಪಾದಿಸಬಹುದು",
       "marketplaceEligible": "ಮಾರುಕಟ್ಟೆಯಲ್ಲಿ ಮಾರಾಟ ಯೋಗ್ಯ",
-      "labelHi": "Label (हिन्दी)",
-      "labelKn": "Label (ಕನ್ನಡ)",
-      "labelMl": "Label (മലയാളം)",
-      "labelTa": "Label (தமிழ்)",
-      "labelTe": "Label (తెలుగు)"
-    }
+      "labelHi": "Label (Hindi / हिन्दी)",
+      "labelKn": "Label (Kannada / ಕನ್ನಡ)",
+      "labelMl": "Label (Malayalam / മലയാളം)",
+      "labelTa": "Label (Tamil / தமிழ்)",
+      "labelTe": "Label (Telugu / తెలుగు)"
+    },
+    "currentlyShowing": "ಪ್ರಸ್ತುತ ತೋರಿಸಲಾಗುತ್ತಿದೆ: {{value}}"
   },
   "speciesNames": {
-    "dog": "ನಾಯಿ", "cat": "ಬೆಕ್ಕು", "rabbit": "ಮೊಲ", "hamster": "ಹ್ಯಾಮ್ಸ್ಟರ್", "guinea_pig": "ಗಿನಿ ಪಿಗ್",
-    "gerbil": "ಜರ್ಬಿಲ್", "chinchilla": "ಚಿಂಚಿಲ್ಲಾ", "ferret": "ಫೆರೆಟ್", "hedgehog": "ಮುಳ್ಳುಹಂದಿ",
-    "sugar_glider": "ಶುಗರ್ ಗ್ಲೈಡರ್", "parrot": "ಗಿಳಿ", "budgerigar": "ಬಡ್ಜಿ", "cockatiel": "ಕಾಕಟೀಲ್",
-    "lovebird": "ಲವ್ ಬರ್ಡ್", "finch": "ಫಿಂಚ್", "canary": "ಕ್ಯಾನರಿ", "mynah": "ಗೊರವಂಕ", "pigeon": "ಪಾರಿವಾಳ",
-    "bird": "ಪಕ್ಷಿ", "tortoise": "ಆಮೆ", "turtle": "ನೀರಾಮೆ", "gecko": "ಹಲ್ಲಿ",
-    "bearded_dragon": "ಬಿಯರ್ಡೆಡ್ ಡ್ರ್ಯಾಗನ್", "chameleon": "ಗೋಸುಂಬೆ", "snake": "ಹಾವು", "frog": "ಕಪ್ಪೆ",
-    "axolotl": "ಆಕ್ಸೊಲೊಟಲ್", "ornamental_fish": "ಅಲಂಕಾರಿಕ ಮೀನು", "koi": "ಕೋಯಿ ಮೀನು", "arowana": "ಅರೋವಾನಾ",
-    "goldfish": "ಚಿನ್ನದ ಮೀನು", "cattle": "ದನ", "buffalo": "ಎಮ್ಮೆ", "horse": "ಕುದುರೆ", "donkey": "ಕತ್ತೆ",
-    "sheep": "ಕುರಿ", "goat": "ಮೇಕೆ", "pig": "ಹಂದಿ", "camel": "ಒಂಟೆ", "yak": "ಯಾಕ್", "deer": "ಜಿಂಕೆ",
-    "chicken": "ಕೋಳಿ", "duck": "ಬಾತುಕೋಳಿ", "turkey": "ಟರ್ಕಿ ಕೋಳಿ", "quail": "ಲಾವಕ್ಕಿ", "emu": "ಎಮು",
-    "ostrich": "ಆಸ್ಟ್ರಿಚ್", "peacock": "ನವಿಲು", "llama": "ಲಾಮಾ", "alpaca": "ಅಲ್ಪಾಕ", "other": "ಇತರೆ"
+    "dog": "ನಾಯಿ",
+    "cat": "ಬೆಕ್ಕು",
+    "rabbit": "ಮೊಲ",
+    "hamster": "ಹ್ಯಾಮ್ಸ್ಟರ್",
+    "guinea_pig": "ಗಿನಿ ಪಿಗ್",
+    "gerbil": "ಜರ್ಬಿಲ್",
+    "chinchilla": "ಚಿಂಚಿಲ್ಲಾ",
+    "ferret": "ಫೆರೆಟ್",
+    "hedgehog": "ಮುಳ್ಳುಹಂದಿ",
+    "sugar_glider": "ಶುಗರ್ ಗ್ಲೈಡರ್",
+    "parrot": "ಗಿಳಿ",
+    "budgerigar": "ಬಡ್ಜಿ",
+    "cockatiel": "ಕಾಕಟೀಲ್",
+    "lovebird": "ಲವ್ ಬರ್ಡ್",
+    "finch": "ಫಿಂಚ್",
+    "canary": "ಕ್ಯಾನರಿ",
+    "mynah": "ಗೊರವಂಕ",
+    "pigeon": "ಪಾರಿವಾಳ",
+    "bird": "ಪಕ್ಷಿ",
+    "tortoise": "ಆಮೆ",
+    "turtle": "ನೀರಾಮೆ",
+    "gecko": "ಹಲ್ಲಿ",
+    "bearded_dragon": "ಬಿಯರ್ಡೆಡ್ ಡ್ರ್ಯಾಗನ್",
+    "chameleon": "ಗೋಸುಂಬೆ",
+    "snake": "ಹಾವು",
+    "frog": "ಕಪ್ಪೆ",
+    "axolotl": "ಆಕ್ಸೊಲೊಟಲ್",
+    "ornamental_fish": "ಅಲಂಕಾರಿಕ ಮೀನು",
+    "koi": "ಕೋಯಿ ಮೀನು",
+    "arowana": "ಅರೋವಾನಾ",
+    "goldfish": "ಚಿನ್ನದ ಮೀನು",
+    "cattle": "ದನ",
+    "buffalo": "ಎಮ್ಮೆ",
+    "horse": "ಕುದುರೆ",
+    "donkey": "ಕತ್ತೆ",
+    "sheep": "ಕುರಿ",
+    "goat": "ಮೇಕೆ",
+    "pig": "ಹಂದಿ",
+    "camel": "ಒಂಟೆ",
+    "yak": "ಯಾಕ್",
+    "deer": "ಜಿಂಕೆ",
+    "chicken": "ಕೋಳಿ",
+    "duck": "ಬಾತುಕೋಳಿ",
+    "turkey": "ಟರ್ಕಿ ಕೋಳಿ",
+    "quail": "ಲಾವಕ್ಕಿ",
+    "emu": "ಎಮು",
+    "ostrich": "ಆಸ್ಟ್ರಿಚ್",
+    "peacock": "ನವಿಲು",
+    "llama": "ಲಾಮಾ",
+    "alpaca": "ಅಲ್ಪಾಕ",
+    "other": "ಇತರೆ"
+  },
+  "grooming": {
+    "genericError": "ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "businessNameRequired": "ವ್ಯಾಪಾರದ ಹೆಸರು ಅಗತ್ಯವಿದೆ.",
+    "created": "ನಿಮ್ಮ ಗ್ರೂಮಿಂಗ್ ವ್ಯಾಪಾರ ರಚಿಸಲಾಗಿದೆ.",
+    "providerTitle": "ನನ್ನ ಗ್ರೂಮಿಂಗ್ & ಸ್ಪಾ ವ್ಯಾಪಾರ",
+    "onboardIntro": "ಪರಿಶೀಲಿಸಿದ ನಂತರ ಬುಕಿಂಗ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ನಿಮ್ಮ ಗ್ರೂಮಿಂಗ್ & ಸ್ಪಾ ವ್ಯಾಪಾರವನ್ನು ಹೊಂದಿಸಿ.",
+    "createBusiness": "ನಿಮ್ಮ ವ್ಯಾಪಾರವನ್ನು ರಚಿಸಿ",
+    "businessName": "ವ್ಯಾಪಾರದ ಹೆಸರು",
+    "businessNamePlaceholder": "ಉದಾ. ಹ್ಯಾಪಿ ಪಾಸ್ ಗ್ರೂಮಿಂಗ್",
+    "providerType": "ಪೂರೈಕೆದಾರ ಪ್ರಕಾರ",
+    "type": {
+      "groomer": "ಸ್ವತಂತ್ರ ಗ್ರೂಮರ್",
+      "business": "ಗ್ರೂಮಿಂಗ್ ವ್ಯಾಪಾರ",
+      "veterinarian": "ಪಶುವೈದ್ಯ",
+      "clinic": "ಕ್ಲಿನಿಕ್"
+    },
+    "contactPhone": "ಸಂಪರ್ಕ ಫೋನ್",
+    "contactEmail": "ಸಂಪರ್ಕ ಇಮೇಲ್",
+    "offersMobile": "ನಾವು ಮನೆ/ಮೊಬೈಲ್ ಗ್ರೂಮಿಂಗ್ ನೀಡುತ್ತೇವೆ",
+    "creating": "ರಚಿಸಲಾಗುತ್ತಿದೆ…",
+    "createBusinessBtn": "ವ್ಯಾಪಾರ ರಚಿಸಿ",
+    "status": {
+      "pending": "ಪರಿಶೀಲನೆ ಬಾಕಿ",
+      "verified": "ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
+      "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
+      "suspended": "ಅಮಾನತುಗೊಳಿಸಲಾಗಿದೆ"
+    },
+    "pendingReview": "ನಿಮ್ಮ ವ್ಯಾಪಾರ ಪರಿಶೀಲನೆಯಲ್ಲಿದೆ. ಈಗಲೇ ನಿಮ್ಮ ಪಟ್ಟಿಯನ್ನು ರಚಿಸಬಹುದು; ನಿರ್ವಾಹಕರು ಪರಿಶೀಲಿಸಿದ ನಂತರ ಅದು ಬುಕ್ ಮಾಡಬಹುದಾಗುತ್ತದೆ.",
+    "rejectedReason": "ಪರಿಶೀಲನೆ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ: {{reason}}",
+    "tab": {
+      "overview": "ಅವಲೋಕನ",
+      "services": "ಸೇವೆಗಳು",
+      "locations": "ಸ್ಥಳಗಳು",
+      "resources": "ಸಂಪನ್ಮೂಲಗಳು",
+      "staff": "ಸಿಬ್ಬಂದಿ"
+    },
+    "businessProfile": "ವ್ಯಾಪಾರ ಪ್ರೊಫೈಲ್",
+    "description": "ವಿವರಣೆ",
+    "legalPayout": "ಕಾನೂನು & ಪಾವತಿ ವಿವರಗಳು",
+    "legalName": "ಕಾನೂನು ಹೆಸರು",
+    "payoutUpi": "ಪಾವತಿ UPI",
+    "payoutAccountName": "ಖಾತೆದಾರರ ಹೆಸರು",
+    "payoutAccountNumber": "ಖಾತೆ ಸಂಖ್ಯೆ",
+    "saveChanges": "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ",
+    "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ…",
+    "saved": "ಉಳಿಸಲಾಗಿದೆ.",
+    "addService": "ಸೇವೆ ಸೇರಿಸಿ",
+    "serviceName": "ಸೇವೆ ಹೆಸರು",
+    "serviceNamePlaceholder": "ಉದಾ. ಫುಲ್ ಗ್ರೂಮ್",
+    "price": "ಬೆಲೆ",
+    "durationMin": "ಅವಧಿ (ನಿಮಿ)",
+    "taxPercent": "ತೆರಿಗೆ %",
+    "paymentRule": "ಪಾವತಿ",
+    "payFull": "ಪೂರ್ಣ ಪಾವತಿ",
+    "payDeposit": "ಠೇವಣಿ",
+    "noServices": "ಇನ್ನೂ ಸೇವೆಗಳಿಲ್ಲ. ನಿಮ್ಮ ಮೊದಲ ಸೇವೆಯನ್ನು ಸೇರಿಸಿ.",
+    "serviceNamePriceRequired": "ಸೇವೆ ಹೆಸರು ಮತ್ತು ಬೆಲೆ ಅಗತ್ಯವಿದೆ.",
+    "serviceAdded": "ಸೇವೆ ಸೇರಿಸಲಾಗಿದೆ.",
+    "remove": "ತೆಗೆದುಹಾಕಿ",
+    "locationName": "ಸ್ಥಳದ ಹೆಸರು",
+    "locationType": "ಪ್ರಕಾರ",
+    "premises": "ಆವರಣ",
+    "mobileZone": "ಮೊಬೈಲ್ ವಲಯ",
+    "city": "ನಗರ",
+    "add": "ಸೇರಿಸಿ",
+    "noLocations": "ಇನ್ನೂ ಸ್ಥಳಗಳಿಲ್ಲ.",
+    "nameRequired": "ಹೆಸರು ಅಗತ್ಯವಿದೆ.",
+    "resourceName": "ಸಂಪನ್ಮೂಲ ಹೆಸರು",
+    "resourceType": "ಪ್ರಕಾರ",
+    "resType": {
+      "grooming_table": "ಗ್ರೂಮಿಂಗ್ ಟೇಬಲ್",
+      "bath_station": "ಸ್ನಾನ ಕೇಂದ್ರ",
+      "drying_cage": "ಒಣಗಿಸುವ ಪಂಜರ",
+      "spa_room": "ಸ್ಪಾ ಕೊಠಡಿ",
+      "other": "ಇತರೆ"
+    },
+    "noResources": "ಇನ್ನೂ ಸಂಪನ್ಮೂಲಗಳಿಲ್ಲ.",
+    "staffIntro": "ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಪ್ಲಾಟ್‌ಫಾರ್ಮ್ ಬಳಕೆದಾರರನ್ನು ವ್ಯವಸ್ಥಾಪಕ ಅಥವಾ ಸಿಬ್ಬಂದಿಯಾಗಿ ಸೇರಿಸಿ. ಅವರಿಗೆ ಈಗಾಗಲೇ ಖಾತೆ ಇರಬೇಕು.",
+    "staffEmail": "ಸಿಬ್ಬಂದಿ ಇಮೇಲ್",
+    "role": "ಪಾತ್ರ",
+    "roleStaff": "ಸಿಬ್ಬಂದಿ",
+    "roleManager": "ವ್ಯವಸ್ಥಾಪಕ",
+    "roleOwner": "ಮಾಲೀಕ",
+    "addStaff": "ಸಿಬ್ಬಂದಿ ಸೇರಿಸಿ",
+    "emailRequired": "ಇಮೇಲ್ ಅಗತ್ಯವಿದೆ.",
+    "staffAdded": "ಸಿಬ್ಬಂದಿ ಸೇರಿಸಲಾಗಿದೆ."
+  },
+  "groomingAdmin": {
+    "title": "ಗ್ರೂಮಿಂಗ್ ಪೂರೈಕೆದಾರರು",
+    "subtitle": "ಗ್ರೂಮಿಂಗ್ & ಸ್ಪಾ ಪೂರೈಕೆದಾರರನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ.",
+    "verified": "ಪೂರೈಕೆದಾರ ಪರಿಶೀಲಿಸಲಾಗಿದೆ.",
+    "suspendReason": "ಅಮಾನತಿಗೆ ಕಾರಣ:",
+    "suspended": "ಪೂರೈಕೆದಾರ ಅಮಾನತುಗೊಳಿಸಲಾಗಿದೆ.",
+    "rejected": "ಪೂರೈಕೆದಾರ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ.",
+    "tab": {
+      "pending": "ಬಾಕಿ",
+      "verified": "ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
+      "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
+      "suspended": "ಅಮಾನತುಗೊಳಿಸಲಾಗಿದೆ",
+      "disputes": "ವಿವಾದಗಳು"
+    },
+    "empty": "{{status}} ಪೂರೈಕೆದಾರರಿಲ್ಲ.",
+    "business": "ವ್ಯಾಪಾರ",
+    "owner": "ಮಾಲೀಕ",
+    "type": "ಪ್ರಕಾರ",
+    "legal": "ಕಾನೂನು / ಪಾವತಿ",
+    "actions": "ಕ್ರಿಯೆಗಳು",
+    "mobile": "ಮೊಬೈಲ್",
+    "verify": "ಪರಿಶೀಲಿಸಿ",
+    "reject": "ತಿರಸ್ಕರಿಸಿ",
+    "suspend": "ಅಮಾನತುಗೊಳಿಸಿ",
+    "rejectTitle": "ಪೂರೈಕೆದಾರರನ್ನು ತಿರಸ್ಕರಿಸಿ",
+    "rejectReasonLabel": "ತಿರಸ್ಕಾರ ಕಾರಣ (ಅಗತ್ಯ)",
+    "rejectReasonPlaceholder": "ಈ ಪೂರೈಕೆದಾರ ಏಕೆ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ ಎಂದು ವಿವರಿಸಿ…",
+    "cancel": "ರದ್ದು",
+    "confirmReject": "ತಿರಸ್ಕಾರ ದೃಢೀಕರಿಸಿ",
+    "settle": "ಪಾವತಿ ಇತ್ಯರ್ಥಗೊಳಿಸಿ",
+    "settlePrompt": "ಪಾವತಿ ರೆಫರೆನ್ಸ್ (ಬ್ಯಾಂಕ್/UPI):",
+    "settled": "{{amount}} ಪಾವತಿಸಲಾಗಿದೆ.",
+    "collected": "ಸಂಗ್ರಹಿಸಲಾಗಿದೆ",
+    "commission": "ಕಮಿಷನ್",
+    "payableNow": "ಈಗ ಪಾವತಿಸಬೇಕಾದದ್ದು",
+    "settledTotal": "ಇಲ್ಲಿಯವರೆಗೆ ಇತ್ಯರ್ಥ",
+    "disputes": {
+      "empty": "ಯಾವುದೇ ವಿವಾದ ದಾಖಲಾಗಿಲ್ಲ.",
+      "order": "ಆರ್ಡರ್",
+      "reason": "ಕಾರಣ",
+      "requested": "ವಿನಂತಿಸಲಾಗಿದೆ",
+      "status": "ಸ್ಥಿತಿ",
+      "respond": "ಪ್ರತಿಕ್ರಿಯಿಸಿ",
+      "respondTitle": "ವಿವಾದಕ್ಕೆ ಪ್ರತಿಕ್ರಿಯಿಸಿ",
+      "outcome": "ಫಲಿತಾಂಶ",
+      "refundAmount": "ಮರುಪಾವತಿ ಮೊತ್ತ",
+      "refundHint": "ಪೂರೈಕೆದಾರರ ವಿರುದ್ಧ ಋಣಾತ್ಮಕ ಗಳಿಕೆ ಹೊಂದಾಣಿಕೆಯಾಗಿ ದಾಖಲಿಸಲಾಗುತ್ತದೆ.",
+      "refundRequired": "ಶೂನ್ಯಕ್ಕಿಂತ ಹೆಚ್ಚಿನ ಮರುಪಾವತಿ ಮೊತ್ತವನ್ನು ನಮೂದಿಸಿ.",
+      "note": "ಪರಿಹಾರ ಟಿಪ್ಪಣಿ",
+      "notePlaceholder": "ಏನು ಮತ್ತು ಏಕೆ ನಿರ್ಧರಿಸಲಾಯಿತು",
+      "submit": "ಪ್ರತಿಕ್ರಿಯೆ ಉಳಿಸಿ",
+      "updated": "ವಿವಾದ ನವೀಕರಿಸಲಾಗಿದೆ.",
+      "st": {
+        "open": "ತೆರೆದಿದೆ",
+        "under_review": "ಪರಿಶೀಲನೆಯಲ್ಲಿ",
+        "resolved": "ಪರಿಹರಿಸಲಾಗಿದೆ",
+        "partially_refunded": "ಭಾಗಶಃ ಮರುಪಾವತಿ",
+        "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ"
+      }
+    },
+    "earnings": {
+      "none": "ಈ ಪೂರೈಕೆದಾರರಿಗೆ ಗಳಿಕೆ ಕಂಡುಬಂದಿಲ್ಲ.",
+      "settleHint": "ಇತ್ಯರ್ಥವು ಲಭ್ಯವಿರುವ ಬಾಕಿಯನ್ನು ಪಾವತಿಸುತ್ತದೆ. ಕ್ಲಿಯರಿಂಗ್ ಹಣ ಇನ್ನೂ ಪಾವತಿಸಬಹುದಾದದ್ದಲ್ಲ."
+    }
+  },
+  "groomingFind": {
+    "title": "ಗ್ರೂಮರ್ ಹುಡುಕಿ",
+    "subtitle": "ನಿಮ್ಮ ಹತ್ತಿರ ಪರಿಶೀಲಿಸಿದ ಗ್ರೂಮಿಂಗ್ & ಸ್ಪಾ ಪೂರೈಕೆದಾರರನ್ನು ಹುಡುಕಿ.",
+    "searchPlaceholder": "ಹೆಸರಿನಿಂದ ಹುಡುಕಿ…",
+    "mobileOnly": "ಮನೆ/ಮೊಬೈಲ್ ಮಾತ್ರ",
+    "none": "ಗ್ರೂಮರ್‌ಗಳು ಸಿಗಲಿಲ್ಲ",
+    "noneHint": "ಬೇರೆ ಹುಡುಕಾಟ ಪ್ರಯತ್ನಿಸಿ.",
+    "count": "{{count}} ಗ್ರೂಮರ್‌ಗಳು ಲಭ್ಯ",
+    "mobile": "ಮನೆ/ಮೊಬೈಲ್",
+    "atPremises": "ಆವರಣದಲ್ಲಿ",
+    "from": "ಇಂದ",
+    "viewBook": "ನೋಡಿ ಮತ್ತು ಬುಕ್ ಮಾಡಿ",
+    "ownerCtaTitle": "ನೀವು ಗ್ರೂಮರ್ ಆಗಿದ್ದೀರಾ?",
+    "ownerCtaDesc": "ನಿಮ್ಮ ಗ್ರೂಮಿಂಗ್ ಅಥವಾ ಸ್ಪಾ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ ಮತ್ತು ಹತ್ತಿರದ ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರಿಂದ ಬುಕಿಂಗ್‌ಗಳನ್ನು ಪಡೆಯಿರಿ.",
+    "ownerCtaBtn": "ನಿಮ್ಮ ವ್ಯವಹಾರವನ್ನು ನೋಂದಾಯಿಸಿ"
+  },
+  "groomingPublic": {
+    "notFound": "ಪೂರೈಕೆದಾರ ಲಭ್ಯವಿಲ್ಲ.",
+    "back": "ಗ್ರೂಮರ್‌ಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
+    "orders": "ಆರ್ಡರ್‌ಗಳು",
+    "services": "ಸೇವೆಗಳು",
+    "noServices": "ಇನ್ನೂ ಸೇವೆಗಳ ಪಟ್ಟಿ ಇಲ್ಲ.",
+    "book": "ಬುಕ್ ಮಾಡಿ"
+  },
+  "groomingBook": {
+    "missingParams": "ಬುಕಿಂಗ್ ವಿವರಗಳಿಲ್ಲ.",
+    "serviceUnavailable": "ಈ ಸೇವೆ ಲಭ್ಯವಿಲ್ಲ.",
+    "back": "ಹಿಂದೆ",
+    "title": "ಗ್ರೂಮಿಂಗ್ ಬುಕ್ ಮಾಡಿ",
+    "inclTax": "ತೆರಿಗೆ ಸೇರಿ",
+    "selectPet": "ಸಾಕುಪ್ರಾಣಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ (ಐಚ್ಛಿಕ)",
+    "noPet": "ನಿರ್ದಿಷ್ಟ ಸಾಕುಪ್ರಾಣಿ ಇಲ್ಲ",
+    "serviceMode": "ಸೇವಾ ಸ್ಥಳ",
+    "atPremises": "ಆವರಣದಲ್ಲಿ",
+    "mobile": "ಮನೆ/ಮೊಬೈಲ್",
+    "date": "ದಿನಾಂಕ",
+    "time": "ಸಮಯ",
+    "handlingNotes": "ನಿರ್ವಹಣೆ ಟಿಪ್ಪಣಿಗಳು",
+    "handlingPlaceholder": "ಗ್ರೂಮರ್ ತಿಳಿದಿರಬೇಕಾದದ್ದು (ಸ್ವಭಾವ, ಅಲರ್ಜಿ)…",
+    "consentHandling": "ನನ್ನ ಸಾಕುಪ್ರಾಣಿಯನ್ನು ಪ್ರಮಾಣಿತ ಉಪಕರಣಗಳು ಮತ್ತು ಉತ್ಪನ್ನಗಳೊಂದಿಗೆ ನಿರ್ವಹಿಸಲು ಮತ್ತು ಗ್ರೂಮ್ ಮಾಡಲು ನಾನು ಒಪ್ಪುತ್ತೇನೆ.",
+    "consentPhoto": "ಮೊದಲು/ನಂತರದ ಫೋಟೋಗಳನ್ನು ನಾನು ಅನುಮತಿಸುತ್ತೇನೆ.",
+    "consentRequired": "ಬುಕ್ ಮಾಡಲು ನಿರ್ವಹಣೆ ಒಪ್ಪಿಗೆ ಅಗತ್ಯವಿದೆ.",
+    "total": "ಒಟ್ಟು",
+    "demoPay": "ಡೆಮೊ ಪಾವತಿ (ನಿಜವಾದ ಶುಲ್ಕ ಇಲ್ಲ)",
+    "booking": "ಬುಕ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "confirmPay": "ದೃಢೀಕರಿಸಿ ಮತ್ತು ಪಾವತಿಸಿ",
+    "today": "ಇಂದು",
+    "tomorrow": "ನಾಳೆ",
+    "minutes": "ನಿಮಿಷ",
+    "pickDateFirst": "ಲಭ್ಯವಿರುವ ಸಮಯ ನೋಡಲು ದಿನಾಂಕ ಆಯ್ಕೆಮಾಡಿ.",
+    "noSlots": "ಈ ದಿನಾಂಕದಂದು ಯಾವುದೇ ಸಮಯ ಲಭ್ಯವಿಲ್ಲ.",
+    "slotFull": "ಸಂಪೂರ್ಣ ಬುಕ್",
+    "slotRange": "{{start}} - {{end}}"
+  },
+  "groomingOrders": {
+    "cancelReason": "ರದ್ದತಿ ಕಾರಣ (ಐಚ್ಛಿಕ):",
+    "title": "ನನ್ನ ಗ್ರೂಮಿಂಗ್ ಆರ್ಡರ್‌ಗಳು",
+    "bookNew": "ಗ್ರೂಮಿಂಗ್ ಬುಕ್ ಮಾಡಿ",
+    "none": "ಇನ್ನೂ ಗ್ರೂಮಿಂಗ್ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ",
+    "findGroomer": "ಗ್ರೂಮರ್ ಹುಡುಕಿ",
+    "payNow": "ಈಗ ಪಾವತಿಸಿ",
+    "cancel": "ರದ್ದು",
+    "details": "ವಿವರಗಳು",
+    "passport": "ಪಾಸ್‌ಪೋರ್ಟ್",
+    "paid": "ಪಾವತಿ ಯಶಸ್ವಿ.",
+    "cancelled": "ಬುಕಿಂಗ್ ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ",
+    "cancelTitle": "ಈ ಬುಕಿಂಗ್ ರದ್ದುಗೊಳಿಸಬೇಕೇ?",
+    "cancelling": "ರದ್ದುಗೊಳಿಸಲಾಗುತ್ತಿದೆ…",
+    "confirmCancel": "ಬುಕಿಂಗ್ ರದ್ದುಗೊಳಿಸಿ",
+    "keepBooking": "ಬುಕಿಂಗ್ ಉಳಿಸಿ",
+    "amountPaid": "ಪಾವತಿಸಿದ ಮೊತ್ತ",
+    "processingCharge": "ಪ್ರಕ್ರಿಯೆ ಶುಲ್ಕ",
+    "youGetBack": "ನಿಮಗೆ ಮರಳಿ ಸಿಗುವುದು",
+    "noPaymentToRefund": "ಈ ಬುಕಿಂಗ್‌ಗೆ ಇನ್ನೂ ಪಾವತಿ ಸ್ವೀಕರಿಸಿಲ್ಲ.",
+    "balanceDue": "ಬಾಕಿ ಮೊತ್ತ: {{amount}}",
+    "payBalance": "ಬಾಕಿ ಪಾವತಿಸಿ",
+    "balancePaid": "ಬಾಕಿ ಪಾವತಿಯಾಗಿದೆ",
+    "refunded": "{{amount}} ಮರುಪಾವತಿಸಲಾಗಿದೆ",
+    "refundPartial": "ಭಾಗಶಃ",
+    "refundTo": {
+      "wallet": "ವಾಲೆಟ್‌ಗೆ",
+      "gateway": "ಮೂಲ ಪಾವತಿ ವಿಧಾನಕ್ಕೆ"
+    },
+    "policy": {
+      "customer_free_window": "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗಿಂತ ಬಹಳ ಮೊದಲು ರದ್ದು: ಪ್ರಕ್ರಿಯೆ ಶುಲ್ಕ ಕಳೆದು ಪೂರ್ಣ ಮರುಪಾವತಿ.",
+      "customer_partial_window": "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗೆ ಹತ್ತಿರ ರದ್ದು: ರದ್ದತಿ ನೀತಿಯಂತೆ ಭಾಗಶಃ ಮರುಪಾವತಿ.",
+      "customer_no_refund_window": "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗೆ ಬಹಳ ಹತ್ತಿರ ರದ್ದು: ಮರುಪಾವತಿ ಇಲ್ಲ.",
+      "customer_no_show": "ನೋ-ಶೋ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ: ಮರುಪಾವತಿ ಇಲ್ಲ.",
+      "provider_cancel_full_refund": "ಗ್ರೂಮರ್ ರದ್ದುಗೊಳಿಸಿದ್ದಾರೆ: ಪೂರ್ಣ ಮರುಪಾವತಿ ಮತ್ತು ಸದ್ಭಾವನಾ ಬೋನಸ್."
+    }
+  },
+  "groomingStatus": {
+    "draft": "ಕರಡು",
+    "payment_pending": "ಪಾವತಿ ಬಾಕಿ",
+    "payment_expired": "ಅವಧಿ ಮುಗಿದಿದೆ",
+    "confirmed": "ದೃಢೀಕರಿಸಲಾಗಿದೆ",
+    "provider_assigned": "ನಿಯೋಜಿಸಲಾಗಿದೆ",
+    "checked_in": "ಚೆಕ್-ಇನ್",
+    "en_route": "ದಾರಿಯಲ್ಲಿ",
+    "intake_done": "ಇನ್‌ಟೇಕ್ ಮುಗಿದಿದೆ",
+    "in_progress": "ಪ್ರಗತಿಯಲ್ಲಿ",
+    "awaiting_approval": "ನಿಮ್ಮ ಅನುಮೋದನೆ ಬೇಕು",
+    "quality_check": "ಗುಣಮಟ್ಟ ಪರಿಶೀಲನೆ",
+    "ready_for_pickup": "ಪಿಕಪ್‌ಗೆ ಸಿದ್ಧ",
+    "returning": "ಹಿಂತಿರುಗುತ್ತಿದೆ",
+    "completed": "ಪೂರ್ಣಗೊಂಡಿದೆ",
+    "cancelled_by_customer": "ರದ್ದು",
+    "cancelled_by_provider": "ಪೂರೈಕೆದಾರರಿಂದ ರದ್ದು",
+    "no_show": "ಬರಲಿಲ್ಲ",
+    "disputed": "ವಿವಾದಿತ",
+    "closed": "ಮುಚ್ಚಲಾಗಿದೆ",
+    "pending_provider_acceptance": "ದೃಢೀಕರಣಕ್ಕಾಗಿ ಕಾಯುತ್ತಿದೆ",
+    "declined_by_provider": "ನಿರಾಕರಿಸಲಾಗಿದೆ: ಮರುಪಾವತಿ"
+  },
+  "groomingBoard": {
+    "title": "ಆರ್ಡರ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
+    "noProvider": "ಮೊದಲು ನಿಮ್ಮ ಗ್ರೂಮಿಂಗ್ ವ್ಯಾಪಾರವನ್ನು ರಚಿಸಿ.",
+    "all": "ಎಲ್ಲಾ",
+    "none": "ಇನ್ನೂ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.",
+    "details": "ವಿವರಗಳು",
+    "earnings": "ಗಳಿಕೆ & ಪಾವತಿಗಳು",
+    "action": {
+      "checkIn": "ಚೆಕ್-ಇನ್",
+      "start": "ಪ್ರಾರಂಭಿಸಿ",
+      "noShow": "ಬರಲಿಲ್ಲ",
+      "qualityCheck": "ಗುಣಮಟ್ಟ ಪರಿಶೀಲನೆ",
+      "ready": "ಸಿದ್ಧ",
+      "complete": "ಪೂರ್ಣ"
+    },
+    "acceptance": {
+      "heading": "ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ ({{count}})",
+      "accept": "ಬುಕಿಂಗ್ ಸ್ವೀಕರಿಸಿ",
+      "decline": "ತೆಗೆದುಕೊಳ್ಳಲಾಗದು",
+      "confirmDecline": "ನಿರಾಕರಿಸಿ ಮತ್ತು ಗ್ರಾಹಕರಿಗೆ ಮರುಪಾವತಿಸಿ",
+      "reasonLabel": "ಈ ಬುಕಿಂಗ್ ಅನ್ನು ಏಕೆ ತೆಗೆದುಕೊಳ್ಳಲಾಗುವುದಿಲ್ಲ?",
+      "reasonPlaceholder": "ಉದಾ. ಆ ಸಮಯದಲ್ಲಿ ಸಂಪೂರ್ಣ ಬುಕ್ ಆಗಿದೆ",
+      "explainer": "ಗ್ರಾಹಕರು ಈಗಾಗಲೇ ಪಾವತಿಸಿದ್ದಾರೆ. ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ದೃಢೀಕರಿಸಲು ಸ್ವೀಕರಿಸಿ, ಅಥವಾ ನಿರಾಕರಿಸಿ ಮತ್ತು ಅವರಿಗೆ ಪೂರ್ಣ ಮರುಪಾವತಿ ಆಗುತ್ತದೆ.",
+      "expiresIn": "{{count}} ನಿಮಿಷಗಳಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯಿಸಿ",
+      "expiring": "ಈಗ ಮುಕ್ತಾಯವಾಗುತ್ತಿದೆ"
+    }
+  },
+  "groomingDetail": {
+    "back": "ಹಿಂದೆ",
+    "notFound": "ಆರ್ಡರ್ ಕಂಡುಬಂದಿಲ್ಲ.",
+    "items": "ಸೇವೆಗಳು & ಐಟಂಗಳು",
+    "intake": "ಇನ್‌ಟೇಕ್ & ಸ್ವಾಸ್ಥ್ಯ",
+    "arrivalCondition": "ಆಗಮನ ಸ್ಥಿತಿ",
+    "scent": "S.C.E.N.T. ಸ್ವಾಸ್ಥ್ಯ ಪರಿಶೀಲನೆ (ವೈದ್ಯಕೀಯವಲ್ಲದ)",
+    "scentSkin": "ಚರ್ಮ",
+    "scentCoat": "ಕೋಟ್",
+    "scentEars": "ಕಿವಿಗಳು",
+    "scentNails": "ಉಗುರುಗಳು",
+    "scentTeeth": "ಹಲ್ಲುಗಳು",
+    "scentNotes": "ಸ್ವಾಸ್ಥ್ಯ ಟಿಪ್ಪಣಿಗಳು",
+    "saveIntake": "ಇನ್‌ಟೇಕ್ ಉಳಿಸಿ",
+    "noIntake": "ಇನ್ನೂ ಇನ್‌ಟೇಕ್ ದಾಖಲಾಗಿಲ್ಲ.",
+    "reportCard": "ವರದಿ ಕಾರ್ಡ್",
+    "summary": "ಸಾರಾಂಶ",
+    "aftercare": "ಆರೈಕೆ ಟಿಪ್ಪಣಿಗಳು",
+    "productsUsed": "ಬಳಸಿದ ಉತ್ಪನ್ನಗಳು",
+    "completeWithReport": "ಪೂರ್ಣಗೊಳಿಸಿ ವರದಿ ಕಾರ್ಡ್ ಉಳಿಸಿ",
+    "noReport": "ಇನ್ನೂ ವರದಿ ಕಾರ್ಡ್ ಇಲ್ಲ.",
+    "timeline": "ಟೈಮ್‌ಲೈನ್",
+    "intakeSaved": "ಇನ್‌ಟೇಕ್ ಉಳಿಸಲಾಗಿದೆ.",
+    "reportSaved": "ವರದಿ ಕಾರ್ಡ್ ಉಳಿಸಲಾಗಿದೆ; ಆರ್ಡರ್ ಪೂರ್ಣ."
+  },
+  "groomingEarnings": {
+    "noProvider": "ಗ್ರೂಮಿಂಗ್ ವ್ಯಾಪಾರ ಕಂಡುಬಂದಿಲ್ಲ.",
+    "title": "ಗಳಿಕೆ & ಪಾವತಿಗಳು",
+    "backToBoard": "ಆರ್ಡರ್‌ಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
+    "available": "ಲಭ್ಯ",
+    "clearing": "ಕ್ಲಿಯರಿಂಗ್",
+    "paid": "ಪಾವತಿಸಲಾಗಿದೆ",
+    "manualNote": "ಕ್ಲಿಯರೆನ್ಸ್ ಅವಧಿಯ ನಂತರ ವೇದಿಕೆಯಿಂದ ಪಾವತಿಗಳನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ಇತ್ಯರ್ಥಗೊಳಿಸಲಾಗುತ್ತದೆ.",
+    "ledger": "ಗಳಿಕೆ ಲೆಡ್ಜರ್",
+    "noEntries": "ಇನ್ನೂ ಗಳಿಕೆ ಇಲ್ಲ.",
+    "order": "ಆರ್ಡರ್",
+    "gross": "ಒಟ್ಟು",
+    "commission": "ಕಮಿಷನ್",
+    "net": "ನಿವ್ವಳ",
+    "status": "ಸ್ಥಿತಿ",
+    "st": {
+      "clearing": "ಕ್ಲಿಯರಿಂಗ್",
+      "available": "ಲಭ್ಯ",
+      "paid": "ಪಾವತಿಸಲಾಗಿದೆ",
+      "reversed": "ಹಿಂತಿರುಗಿಸಲಾಗಿದೆ"
+    },
+    "settlements": "ಇತ್ಯರ್ಥಗಳು",
+    "noSettlements": "ಇನ್ನೂ ಪಾವತಿಗಳಿಲ್ಲ.",
+    "date": "ದಿನಾಂಕ",
+    "amount": "ಮೊತ್ತ",
+    "netPaid": "ನಿವ್ವಳ ಪಾವತಿ",
+    "method": "ವಿಧಾನ",
+    "reference": "ಉಲ್ಲೇಖ",
+    "statement": "ಹೇಳಿಕೆ",
+    "viewStatement": "ಹೇಳಿಕೆ ವೀಕ್ಷಿಸಿ",
+    "statementTitle": "ಇತ್ಯರ್ಥ ಹೇಳಿಕೆ"
+  },
+  "groomingItem": {
+    "pending": "ಬಾಕಿ",
+    "started": "ಪ್ರಾರಂಭವಾಗಿದೆ",
+    "completed": "ಪೂರ್ಣಗೊಂಡಿದೆ",
+    "skipped": "ಬಿಟ್ಟುಬಿಡಲಾಗಿದೆ",
+    "awaiting_approval": "ಅನುಮೋದನೆ ಕಾಯುತ್ತಿದೆ",
+    "paused": "ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"
+  },
+  "groomingScent": {
+    "good": "ಒಳ್ಳೆಯದು",
+    "watch": "ಗಮನಿಸಿ",
+    "vet_advised": "ಪಶುವೈದ್ಯ ಸಲಹೆ"
+  },
+  "groomingVar": {
+    "title": "ಹೆಚ್ಚುವರಿ ಕೆಲಸ ಅನುಮೋದನೆ",
+    "namePriceRequired": "ಕೆಲಸದ ಹೆಸರು ಮತ್ತು ಬೆಲೆ ಅಗತ್ಯವಿದೆ.",
+    "requested": "ಅನುಮೋದನೆಗಾಗಿ ಗ್ರಾಹಕರಿಗೆ ಕಳುಹಿಸಲಾಗಿದೆ.",
+    "approved": "ಅನುಮೋದಿಸಲಾಗಿದೆ & ಪಾವತಿಸಲಾಗಿದೆ.",
+    "declined": "ನಿರಾಕರಿಸಲಾಗಿದೆ.",
+    "enRouteSet": "ದಾರಿಯಲ್ಲಿ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ.",
+    "onTheWay": "ಗ್ರೂಮರ್ ದಾರಿಯಲ್ಲಿದ್ದಾರೆ",
+    "eta": "ETA {{min}} ನಿಮಿ",
+    "etaLabel": "ETA (ನಿಮಿಷಗಳು)",
+    "markOnTheWay": "ದಾರಿಯಲ್ಲಿ",
+    "approvePay": "ಅನುಮೋದಿಸಿ & ಪಾವತಿಸಿ",
+    "decline": "ನಿರಾಕರಿಸಿ",
+    "waitingOwner": "ಗ್ರಾಹಕ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ…",
+    "workName": "ಹೆಚ್ಚುವರಿ ಕೆಲಸ",
+    "workPlaceholder": "ಉದಾ. ತೀವ್ರ ಮ್ಯಾಟಿಂಗ್ ತೆಗೆಯುವಿಕೆ",
+    "price": "ಬೆಲೆ",
+    "reason": "ಕಾರಣ",
+    "requestApproval": "ಅನುಮೋದನೆ ವಿನಂತಿಸಿ"
+  },
+  "groomingEsc": {
+    "title": "ಸುರಕ್ಷತಾ ಎಸ್ಕಲೇಶನ್",
+    "typeRequired": "ಸಮಸ್ಯೆ ಪ್ರಕಾರ ಅಗತ್ಯವಿದೆ.",
+    "raised": "ಎಸ್ಕಲೇಶನ್ ಎತ್ತಲಾಗಿದೆ; ಮಾಲೀಕರಿಗೆ ತಿಳಿಸಲಾಗಿದೆ.",
+    "issueType": "ಸಮಸ್ಯೆ ಪ್ರಕಾರ",
+    "issuePlaceholder": "ಉದಾ. ಚರ್ಮದ ಕಿರಿಕಿರಿ, ತೆರೆದ ಗಾಯ",
+    "description": "ವಿವರಣೆ",
+    "raise": "ಎಸ್ಕಲೇಶನ್ ಎತ್ತಿ",
+    "dismiss": "ವಜಾಗೊಳಿಸಿ",
+    "markResolved": "ಪರಿಹರಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿ",
+    "bookConsult": "ಪಶುವೈದ್ಯ ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಿ",
+    "wellnessNudge": "ಒಂದು ಸ್ವಾಸ್ಥ್ಯ ಪರಿಶೀಲನೆ ಪಶುವೈದ್ಯರ ಗಮನಕ್ಕೆ ಅರ್ಹವಾದದ್ದನ್ನು ಗುರುತಿಸಿದೆ.",
+    "disclaimer": "ಗ್ರೂಮರ್‌ಗಳು ಕಾಳಜಿಗಳನ್ನು ಗುರುತಿಸಿ ಪಶುವೈದ್ಯರನ್ನು ಶಿಫಾರಸು ಮಾಡಬಹುದು, ಆದರೆ ರೋಗನಿರ್ಣಯ ಅಥವಾ ಚಿಕಿತ್ಸೆ ಮಾಡುವುದಿಲ್ಲ.",
+    "st": {
+      "open": "ತೆರೆದ",
+      "owner_notified": "ಮಾಲೀಕರಿಗೆ ತಿಳಿಸಲಾಗಿದೆ",
+      "consult_booked": "ಸಮಾಲೋಚನೆ ಬುಕ್",
+      "resolved": "ಪರಿಹರಿಸಲಾಗಿದೆ",
+      "dismissed": "ವಜಾಗೊಳಿಸಲಾಗಿದೆ"
+    }
+  },
+  "groomingPassport": {
+    "notFound": "ಪಾಸ್‌ಪೋರ್ಟ್ ಲಭ್ಯವಿಲ್ಲ.",
+    "back": "ನನ್ನ ಆರ್ಡರ್‌ಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
+    "title": "{{name}} ರ ಗ್ರೂಮಿಂಗ್ ಪಾಸ್‌ಪೋರ್ಟ್",
+    "wellness": "S.C.E.N.T. ಸ್ವಾಸ್ಥ್ಯ ಪ್ರವೃತ್ತಿ",
+    "wellnessNote": "ಗ್ರೂಮಿಂಗ್ ಭೇಟಿಗಳಿಂದ ವೈದ್ಯಕೀಯವಲ್ಲದ ಅವಲೋಕನಗಳು (ಚರ್ಮ, ಕೋಟ್, ಕಿವಿಗಳು, ಉಗುರುಗಳು, ಹಲ್ಲುಗಳು).",
+    "noData": "ಡೇಟಾ ಇಲ್ಲ",
+    "vetAdvised": "ಇವುಗಳಿಗೆ ಪಶುವೈದ್ಯ ಪರಿಶೀಲನೆ ಸಲಹೆ ನೀಡಲಾಗಿದೆ: {{areas}}.",
+    "history": "ಗ್ರೂಮಿಂಗ್ ಇತಿಹಾಸ",
+    "noHistory": "ಇನ್ನೂ ಗ್ರೂಮಿಂಗ್ ಭೇಟಿಗಳಿಲ್ಲ."
+  },
+  "groomingDispute": {
+    "title": "ವಿವಾದಗಳು",
+    "raise": "ದೂರು ಸಲ್ಲಿಸಿ",
+    "reasonPrompt": "ಏನು ತಪ್ಪಾಯಿತು? (ಸಂಕ್ಷಿಪ್ತ ಕಾರಣ)",
+    "raised": "ನಿಮ್ಮ ದೂರು ಸಲ್ಲಿಸಲಾಗಿದೆ.",
+    "myDisputes": "ನನ್ನ ದೂರುಗಳು",
+    "refundPrompt": "ಮರುಪಾವತಿ ಮೊತ್ತ:",
+    "review": "ಪರಿಶೀಲನೆಯಲ್ಲಿ ಎಂದು ಗುರುತಿಸಿ",
+    "partialRefund": "ಭಾಗಶಃ ಮರುಪಾವತಿ",
+    "resolve": "ಪರಿಹರಿಸಿ",
+    "reject": "ತಿರಸ್ಕರಿಸಿ",
+    "st": {
+      "open": "ತೆರೆದ",
+      "under_review": "ಪರಿಶೀಲನೆಯಲ್ಲಿ",
+      "resolved": "ಪರಿಹರಿಸಲಾಗಿದೆ",
+      "partially_refunded": "ಭಾಗಶಃ ಮರುಪಾವತಿ",
+      "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ"
+    },
+    "submit": "ವಿವಾದ ದಾಖಲಿಸಿ",
+    "cancel": "ರದ್ದು",
+    "issueRefund": "ಮರುಪಾವತಿ ನೀಡಿ",
+    "refundHint": "ಈ ಮೊತ್ತವನ್ನು ಗ್ರಾಹಕರಿಗೆ ಹಿಂತಿರುಗಿಸಿ ನಿಮ್ಮ ಬಾಕಿಯಿಂದ ಕಳೆಯಲಾಗುತ್ತದೆ."
+  },
+  "groomingReport": {
+    "title": "ವ್ಯಾಪಾರ ಸಾರಾಂಶ",
+    "completed": "ಪೂರ್ಣ",
+    "upcoming": "ಮುಂಬರುವ",
+    "noShows": "ಬರಲಿಲ್ಲ",
+    "disputes": "ವಿವಾದಗಳು",
+    "byService": "ಸೇವೆ ಪ್ರಕಾರ ಆದಾಯ",
+    "escalationRate": "ಪಶುವೈದ್ಯ ಎಸ್ಕಲೇಶನ್ ದರ",
+    "wellnessConversion": "ಸ್ವಾಸ್ಥ್ಯ → ಸಮಾಲೋಚನೆ",
+    "openDisputes": "ತೆರೆದ ವಿವಾದಗಳು"
+  },
+  "groomingMyOrders": {
+    "acceptance": {
+      "awaitingTitle": "ಗ್ರೂಮರ್ ದೃಢೀಕರಣಕ್ಕಾಗಿ ಕಾಯುತ್ತಿದೆ",
+      "awaitingBody": "ನೀವು ಪಾವತಿಸಿದ್ದೀರಿ ಮತ್ತು ಗ್ರೂಮರ್‌ಗೆ ತಿಳಿಸಲಾಗಿದೆ. ಅವರು ತೆಗೆದುಕೊಳ್ಳಲಾಗದಿದ್ದರೆ, ನಿಮಗೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪೂರ್ಣ ಮರುಪಾವತಿ ಆಗುತ್ತದೆ.",
+      "declinedTitle": "ಈ ಬುಕಿಂಗ್ ಸ್ವೀಕರಿಸಲಾಗಲಿಲ್ಲ",
+      "declinedBody": "ನಿಮಗೆ ಪೂರ್ಣ ಮರುಪಾವತಿ ಮಾಡಲಾಗಿದೆ. ನೀವು ಯಾವಾಗ ಬೇಕಾದರೂ ಬೇರೆ ಪೂರೈಕೆದಾರರನ್ನು ಬುಕ್ ಮಾಡಬಹುದು."
+    }
+  },
+  "groomingSchedule": {
+    "title": "ಕೆಲಸದ ಸಮಯ ಮತ್ತು ಲಭ್ಯತೆ",
+    "subtitle": "ಗ್ರಾಹಕರು ನೀವು ಇಲ್ಲಿ ತೆರೆದ ಸಮಯವನ್ನು ಮಾತ್ರ ಬುಕ್ ಮಾಡಬಹುದು. ಮುಚ್ಚಿದ ದಿನಗಳು ಎಂದಿಗೂ ಕಾಣಿಸುವುದಿಲ್ಲ.",
+    "noProvider": "ಮೊದಲು ನಿಮ್ಮ ಗ್ರೂಮಿಂಗ್ ವ್ಯವಹಾರವನ್ನು ರಚಿಸಿ.",
+    "goToProvider": "ನನ್ನ ವ್ಯವಹಾರಕ್ಕೆ ಹೋಗಿ",
+    "weeklyHours": "ಸಾಪ್ತಾಹಿಕ ತೆರೆಯುವ ಸಮಯ",
+    "capacityHint": "ಸಾಮರ್ಥ್ಯ ಎಂದರೆ ನೀವು ಒಂದೇ ಸಮಯದಲ್ಲಿ ಎಷ್ಟು ಸಾಕುಪ್ರಾಣಿಗಳನ್ನು ನಿಭಾಯಿಸಬಲ್ಲಿರಿ: ಸಮಾನಾಂತರವಾಗಿ ಕೆಲಸ ಮಾಡುವ ಟೇಬಲ್, ಸ್ಟೇಷನ್ ಅಥವಾ ಗ್ರೂಮರ್.",
+    "open": "ತೆರೆಯುತ್ತದೆ",
+    "close": "ಮುಚ್ಚುತ್ತದೆ",
+    "every": "ಪ್ರತಿ ಸ್ಲಾಟ್",
+    "capacity": "ಸಾಮರ್ಥ್ಯ",
+    "closed": "ಮುಚ್ಚಲಾಗಿದೆ",
+    "save": "ಉಳಿಸಿ",
+    "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ…",
+    "saved": "ಉಳಿಸಲಾಗಿದೆ",
+    "closeAfterOpen": "ಮುಚ್ಚುವ ಸಮಯ ತೆರೆಯುವ ಸಮಯದ ನಂತರ ಇರಬೇಕು.",
+    "overridesTitle": "ನಿರ್ದಿಷ್ಟ ದಿನಾಂಕಗಳು",
+    "overridesHint": "ಒಂದು ದಿನಾಂಕವನ್ನು ಮುಚ್ಚಿ, ಅಥವಾ ಬೇರೆ ಸಮಯದೊಂದಿಗೆ ತೆರೆಯಿರಿ: ರಜಾದಿನಗಳು, ಕಾರ್ಯಕ್ರಮಗಳು, ಅರ್ಧ ದಿನ.",
+    "blocksTitle": "ವಿರಾಮಗಳು",
+    "blocksHint": "ದಿನದ ಒಂದು ಭಾಗವನ್ನು ತಡೆಯಿರಿ, ಪ್ರತಿ ವಾರ ಅಥವಾ ಒಮ್ಮೆ: ಊಟ, ಸ್ವಚ್ಛತೆ, ವಿತರಣೆ.",
+    "date": "ದಿನಾಂಕ",
+    "type": "ಏನಾಗುತ್ತದೆ",
+    "reason": "ಕಾರಣ",
+    "reasonPlaceholder": "ಉದಾ. ಸಾರ್ವಜನಿಕ ರಜೆ",
+    "blockReasonPlaceholder": "ಉದಾ. ಊಟದ ವಿರಾಮ",
+    "closedAllDay": "ಇಡೀ ದಿನ ಮುಚ್ಚಲಾಗಿದೆ",
+    "customHours": "ಬೇರೆ ಸಮಯ",
+    "add": "ಸೇರಿಸಿ",
+    "remove": "ತೆಗೆದುಹಾಕಿ",
+    "noOverrides": "ಇನ್ನೂ ದಿನಾಂಕ ಬದಲಾವಣೆಗಳಿಲ್ಲ.",
+    "noBlocks": "ಇನ್ನೂ ವಿರಾಮಗಳಿಲ್ಲ.",
+    "pickDate": "ಮೊದಲು ದಿನಾಂಕ ಆಯ್ಕೆಮಾಡಿ.",
+    "repeats": "ಪುನರಾವರ್ತನೆ",
+    "everyWeek": "ಪ್ರತಿ ವಾರ",
+    "onceOnly": "ಒಮ್ಮೆ ಮಾತ್ರ",
+    "day": "ದಿನ",
+    "from": "ಇಂದ",
+    "to": "ವರೆಗೆ",
+    "everyDayName": "ಪ್ರತಿ {{day}}",
+    "backToOrders": "ಬುಕಿಂಗ್‌ಗೆ ಹಿಂತಿರುಗಿ",
+    "days": {
+      "sunday": "ಭಾನುವಾರ",
+      "monday": "ಸೋಮವಾರ",
+      "tuesday": "ಮಂಗಳವಾರ",
+      "wednesday": "ಬುಧವಾರ",
+      "thursday": "ಗುರುವಾರ",
+      "friday": "ಶುಕ್ರವಾರ",
+      "saturday": "ಶನಿವಾರ"
+    }
+  },
+  "walletWithdrawal": {
+    "title": "ನಿಮ್ಮ ಬ್ಯಾಂಕ್‌ಗೆ ಹಿಂಪಡೆಯಿರಿ",
+    "hint": "ನಿಮ್ಮ ವಾಲೆಟ್‌ಗೆ ಜಮೆಯಾದ ಮರುಪಾವತಿಯನ್ನು ನಿಮ್ಮ ಬ್ಯಾಂಕ್ ಖಾತೆ ಅಥವಾ UPI ಗೆ ಕಳುಹಿಸಬಹುದು. ಬೋನಸ್ ಕ್ರೆಡಿಟ್‌ಗಳನ್ನು ಹಿಂಪಡೆಯಲಾಗದು.",
+    "nothingToWithdraw": "ಸದ್ಯಕ್ಕೆ ಹಿಂಪಡೆಯಬಹುದಾದ ಮೊತ್ತವಿಲ್ಲ.",
+    "withdraw": "ಹಣ ಹಿಂಪಡೆಯಿರಿ",
+    "amount": "ಮೊತ್ತ",
+    "method": "ಕಳುಹಿಸಿ",
+    "bank": "ಬ್ಯಾಂಕ್ ಖಾತೆ",
+    "upi": "UPI",
+    "upiId": "UPI ಐಡಿ",
+    "accountName": "ಖಾತೆದಾರ",
+    "accountNumber": "ಖಾತೆ ಸಂಖ್ಯೆ",
+    "ifsc": "IFSC ಕೋಡ್",
+    "submit": "ಹಿಂಪಡೆಯಲು ವಿನಂತಿಸಿ",
+    "submitting": "ವಿನಂತಿಸಲಾಗುತ್ತಿದೆ…",
+    "submitted": "ಹಿಂಪಡೆಯುವ ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ. ನಾವು ಪಾವತಿಸಿ ಉಲ್ಲೇಖ ಕಳುಹಿಸುತ್ತೇವೆ.",
+    "cancelRequest": "ರದ್ದುಮಾಡಿ",
+    "reference": "ಉಲ್ಲೇಖ",
+    "status": {
+      "requested": "ಪರಿಶೀಲನೆ ಬಾಕಿ",
+      "approved": "ಅನುಮೋದಿತ: ಪಾವತಿ ಪ್ರಗತಿಯಲ್ಲಿದೆ",
+      "settled": "ಪಾವತಿಸಲಾಗಿದೆ",
+      "rejected": "ಅನುಮೋದಿಸಲಾಗಿಲ್ಲ",
+      "cancelled": "ರದ್ದಾಗಿದೆ"
+    }
+  },
+  "payables": {
+    "title": "ಪಾವತಿಸಬೇಕಾದ ಮೊತ್ತ",
+    "subtitle": "ಈಗ ವೇದಿಕೆ ಯಾರಿಗೆ ಎಷ್ಟು ನೀಡಬೇಕು, ಮತ್ತು ಏನು ಪಾವತಿಸಲಾಗಿದೆ.",
+    "groomingPayable": "ಗ್ರೂಮಿಂಗ್: ಈಗ ಪಾವತಿಸಬೇಕು",
+    "groomingClearing": "ಗ್ರೂಮಿಂಗ್: ಕ್ಲಿಯರಿಂಗ್",
+    "doctorPayable": "ವೈದ್ಯರು: ಈಗ ಪಾವತಿಸಬೇಕು",
+    "blocked": "ತಡೆದ ಪಾವತಿಗಳು",
+    "blockedHint": "ಬ್ಯಾಂಕ್/UPI ವಿವರಗಳಿಲ್ಲ",
+    "groomingTab": "ಗ್ರೂಮಿಂಗ್ ಪೂರೈಕೆದಾರರು",
+    "doctorsTab": "ವೈದ್ಯರು",
+    "noneGrooming": "ಗ್ರೂಮಿಂಗ್ ಪೂರೈಕೆದಾರರಿಗೆ ಬಾಕಿ ಇಲ್ಲ.",
+    "noneDoctors": "ವೈದ್ಯರಿಗೆ ಬಾಕಿ ಇಲ್ಲ.",
+    "vendor": "ಮಾರಾಟಗಾರ",
+    "payableNow": "ಈಗ ಪಾವತಿಸಬೇಕು",
+    "clearing": "ಕ್ಲಿಯರಿಂಗ್",
+    "waiting": "ಕಾಯುತ್ತಿದೆ",
+    "lastPaid": "ಕೊನೆಯ ಪಾವತಿ",
+    "payoutTo": "ಯಾರಿಗೆ ಪಾವತಿ",
+    "action": "ಕ್ರಮ",
+    "status": "ಸ್ಥಿತಿ",
+    "days": "{{count}} ದಿನಗಳು",
+    "never": "ಎಂದಿಗೂ ಇಲ್ಲ",
+    "noPayoutDetails": "ಪಾವತಿ ವಿವರಗಳಿಲ್ಲ",
+    "noPayoutDetailsHint": "ಈ ಪೂರೈಕೆದಾರರು ಇನ್ನೂ ಬ್ಯಾಂಕ್ ಅಥವಾ UPI ವಿವರ ನೀಡಿಲ್ಲ.",
+    "recordPayout": "ಪಾವತಿ ದಾಖಲಿಸಿ",
+    "recordPayoutFor": "ಪಾವತಿ ದಾಖಲಿಸಿ: {{name}}",
+    "payoutExplainer": "ಇದು {{amount}} ಅನ್ನು ಪಾವತಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿ, ನಿಮ್ಮ ಉಲ್ಲೇಖದೊಂದಿಗೆ ಪೂರೈಕೆದಾರರಿಗೆ ತಿಳಿಸುತ್ತದೆ. ಮೊದಲು ಹಣ ಕಳುಹಿಸಿ, ನಂತರ ಇಲ್ಲಿ ದಾಖಲಿಸಿ.",
+    "method": "ಪಾವತಿ ವಿಧಾನ",
+    "bankTransfer": "ಬ್ಯಾಂಕ್ ವರ್ಗಾವಣೆ",
+    "other": "ಇತರೆ",
+    "reference": "ಪಾವತಿ ಉಲ್ಲೇಖ (UTR)",
+    "referencePlaceholder": "ಉದಾ. UTR / ವಹಿವಾಟು ಐಡಿ",
+    "tdsOverride": "TDS",
+    "tdsAuto": "ಸ್ವಯಂ",
+    "notes": "ಟಿಪ್ಪಣಿಗಳು",
+    "notifyNote": "ಪೂರೈಕೆದಾರರಿಗೆ ಮೊತ್ತ, ಅವಧಿ ಮತ್ತು ಈ ಉಲ್ಲೇಖ ತಿಳಿಸಲಾಗುತ್ತದೆ.",
+    "confirmPaid": "ಪಾವತಿ ದೃಢೀಕರಿಸಿ",
+    "recording": "ದಾಖಲಿಸಲಾಗುತ್ತಿದೆ…",
+    "paidAndNotified": "ಪಾವತಿ ದಾಖಲಾಗಿದೆ ಮತ್ತು {{name}} ಗೆ ತಿಳಿಸಲಾಗಿದೆ.",
+    "inQueue": "ಹಿಂಪಡೆಯಲು ವಿನಂತಿಸಲಾಗಿದೆ",
+    "noRequestYet": "ಇನ್ನೂ ವಿನಂತಿಸಿಲ್ಲ",
+    "doctorsHint": "ವೈದ್ಯರು ಹಿಂಪಡೆಯಲು ವಿನಂತಿಸಿದಾಗ ಪಾವತಿಸಲಾಗುತ್ತದೆ. \"ಇನ್ನೂ ವಿನಂತಿಸಿಲ್ಲ\" ಎಂದಿರುವವರಿಗೆ ಬಾಕಿ ಇದೆ ಆದರೆ ಕೇಳಿಲ್ಲ. ಈಗಲೇ ಪಾವತಿಸಬೇಕಿದ್ದರೆ ಸೆಟಲ್‌ಮೆಂಟ್ ಪರದೆಯಿಂದ ಮಾಡಿ."
   }
 }

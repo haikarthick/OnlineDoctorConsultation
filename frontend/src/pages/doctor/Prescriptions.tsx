@@ -342,7 +342,7 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
                 <div className="si-10e52e93">
                   {rx.medications.map((med, i) => (
                     <div key={i} className="si-2b2ac1e4">
-                      <strong>{med.name}</strong> — {med.dosage} • {med.frequency}
+                      <strong>{med.name}</strong> - {med.dosage} • {med.frequency}
                       {med.duration && ` • ${med.duration}`}
                       {med.instructions && <span className="si-23033f05"> ({med.instructions})</span>}
                     </div>

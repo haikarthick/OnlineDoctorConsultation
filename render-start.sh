@@ -4,9 +4,9 @@
 # Runs DB migrations then starts the backend server
 # (Backend also serves the frontend static files in production)
 # ─────────────────────────────────────────────────
-# Don't use set -e globally — only the final server start must succeed
+# Don't use set -e globally - only the final server start must succeed
 echo "══════════════════════════════════════════"
-echo "  VetCare Platform — Starting"
+echo "  VetCare Platform - Starting"
 echo "══════════════════════════════════════════"
 
 cd backend
@@ -38,7 +38,7 @@ async function main() {
     await client.query('SET search_path TO ' + schema + ', public');
 
     const sqlPath = path.join(process.cwd(), '..', 'docker', 'init.sql');
-    if (!fs.existsSync(sqlPath)) { console.log('  init.sql not found — skipping'); return; }
+    if (!fs.existsSync(sqlPath)) { console.log('  init.sql not found - skipping'); return; }
     const sql = fs.readFileSync(sqlPath, 'utf8');
     await client.query(sql);
     console.log('  ✓ Base schema ready (' + schema + ')');
@@ -57,44 +57,44 @@ main().catch(e => { process.exit(1); });
     break
   fi
   if [ "$ATTEMPT" -lt 4 ]; then
-    echo "  Schema setup attempt $ATTEMPT failed — waiting 25s before retry..."
+    echo "  Schema setup attempt $ATTEMPT failed - waiting 25s before retry..."
     sleep 25
   fi
 done
 
 if [ "$SCHEMA_READY" = "false" ]; then
-  echo "  WARNING: All schema setup attempts failed — server will attempt ensureSchema() on startup"
+  echo "  WARNING: All schema setup attempts failed - server will attempt ensureSchema() on startup"
 fi
 echo ""
 
-# Step 1: Run database migrations using the migrate runner (idempotent — safe to re-run)
+# Step 1: Run database migrations using the migrate runner (idempotent - safe to re-run)
 # The migrate runner tracks applied migrations in _migrations table, never re-runs a file.
 # This step runs BEFORE the server binds its port, so aborting here actually fails the
-# Render deploy (rather than shipping traffic to a partially-migrated schema) — unlike
+# Render deploy (rather than shipping traffic to a partially-migrated schema) - unlike
 # the server's own startup, which deliberately never crashes over DB issues once it's
 # already listening (see index.ts).
 #
 # Exit codes from migrate.js:
-#   0   — success (or nothing pending)
-#   1   — a migration's SQL genuinely failed — this is the only case that aborts the deploy
-#   2   — couldn't even reach the DB to check migration state (cold start) — transient, tolerated
-#   124 — the `timeout` wrapper below killed it — also transient, tolerated
+#   0   - success (or nothing pending)
+#   1   - a migration's SQL genuinely failed - this is the only case that aborts the deploy
+#   2   - couldn't even reach the DB to check migration state (cold start) - transient, tolerated
+#   124 - the `timeout` wrapper below killed it - also transient, tolerated
 echo "━━━ Running database migrations ━━━"
 timeout 60 node dist/utils/migrate.js 2>&1
 MIGRATE_EXIT=$?
 if [ "$MIGRATE_EXIT" = "0" ]; then
   echo "✓ Migrations complete"
 elif [ "$MIGRATE_EXIT" = "124" ] || [ "$MIGRATE_EXIT" = "2" ]; then
-  echo "  ⚠ Could not reach the database to run migrations (likely a slow free-tier DB wake-up) — continuing"
+  echo "  ⚠ Could not reach the database to run migrations (likely a slow free-tier DB wake-up) - continuing"
 else
-  echo "  ✗ FATAL: Database migration(s) failed — aborting deploy"
+  echo "  ✗ FATAL: Database migration(s) failed - aborting deploy"
   echo "  Set MIGRATIONS_FAIL_FAST=false in the Render environment to temporarily bypass this"
   echo "  and investigate with a running server, then unset it once fixed."
   exit 1
 fi
 
 # Step 1b: Load mandatory platform seed data (admin user, settings, permissions)
-# This is idempotent (ON CONFLICT DO NOTHING) — safe to re-run on every deploy.
+# This is idempotent (ON CONFLICT DO NOTHING) - safe to re-run on every deploy.
 echo "━━━ Loading platform required data ━━━"
 timeout 45 node -e "
 const { Pool } = require('pg');
@@ -107,7 +107,7 @@ async function main() {
     const schema = process.env.DB_SCHEMA || 'public';
     await client.query('SET search_path TO ' + schema + ', public');
     const sqlPath = path.join(process.cwd(), '..', 'docker', 'seeds', '01_platform_required.sql');
-    if (!fs.existsSync(sqlPath)) { console.log('  01_platform_required.sql not found — skipping'); return; }
+    if (!fs.existsSync(sqlPath)) { console.log('  01_platform_required.sql not found - skipping'); return; }
     const sql = fs.readFileSync(sqlPath, 'utf8');
     await client.query(sql);
     console.log('  ✓ Platform required data loaded (' + schema + ')');
@@ -119,7 +119,7 @@ async function main() {
   }
 }
 main();
-" 2>&1 || echo "  (platform seed warning — continuing)"
+" 2>&1 || echo "  (platform seed warning - continuing)"
 echo ""
 
 # Step 2: Seed demo data if core data is missing (vet_profiles table empty)
@@ -149,16 +149,16 @@ SEED_ON_STARTUP_LOWER=$(echo "$SEED_ON_STARTUP" | tr '[:upper:]' '[:lower:]')
 # SEED_ON_STARTUP=true → seed only if DB is empty (safe for every startup)
 if [ "$FORCE_RESEED_LOWER" = "true" ] || [ "$FORCE_RESEED" = "1" ]; then
   echo ""
-  echo "━━━ FORCE_RESEED=true — Re-seeding demo data ━━━"
-  timeout 120 node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings or timed out — continuing"
+  echo "━━━ FORCE_RESEED=true - Re-seeding demo data ━━━"
+  timeout 120 node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings or timed out - continuing"
   echo "✓ Seed complete"
 elif [ "$VET_PROFILE_COUNT" = "0" ]; then
   echo ""
-  echo "━━━ No demo data detected — Seeding demo data ━━━"
-  timeout 120 node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings or timed out — continuing"
+  echo "━━━ No demo data detected - Seeding demo data ━━━"
+  timeout 120 node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings or timed out - continuing"
   echo "✓ Seed complete"
 else
-  echo "  ✓ Database already has demo data — skipping seed"
+  echo "  ✓ Database already has demo data - skipping seed"
 fi
 
 # Step 3: Start the server (this MUST succeed)

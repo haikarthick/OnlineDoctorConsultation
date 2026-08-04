@@ -147,7 +147,7 @@ const CancellationDashboard: React.FC<CancellationDashboardProps> = ({ onNavigat
           <div className="si-2a57fba0">
             {doctorPercent > 40 && (
               <div className="si-56fca271">
-                🚨 <strong>{t('cancellationDashboard.highDoctorCancellationRate')} ({doctorPercent}%)</strong> — {t('cancellationDashboard.highDoctorCancellationAdvice')}
+                🚨 <strong>{t('cancellationDashboard.highDoctorCancellationRate')} ({doctorPercent}%)</strong> - {t('cancellationDashboard.highDoctorCancellationAdvice')}
                 <button className="btn btn-sm btn-outline si-7984dfbc" onClick={() => onNavigate('/admin/settings')}>
                   {t('cancellationDashboard.reviewPolicy')}
                 </button>
@@ -155,12 +155,12 @@ const CancellationDashboard: React.FC<CancellationDashboardProps> = ({ onNavigat
             )}
             {totalRefunded > 10000 && (
               <div className="si-88cee687">
-                ⚠️ <strong>{t('cancellationDashboard.highRefundVolume')} ({formatCurrency(totalRefunded)})</strong> — {t('cancellationDashboard.highRefundAdvice')}
+                ⚠️ <strong>{t('cancellationDashboard.highRefundVolume')} ({formatCurrency(totalRefunded)})</strong> - {t('cancellationDashboard.highRefundAdvice')}
               </div>
             )}
             {totalCancellations === 0 && (
               <div className="si-a535e093">
-                ✅ <strong>{t('cancellationDashboard.noCancellations')}</strong> — {t('cancellationDashboard.perfectCompletionRate')}
+                ✅ <strong>{t('cancellationDashboard.noCancellations')}</strong> - {t('cancellationDashboard.perfectCompletionRate')}
               </div>
             )}
             <div className="si-fbbff6c4">

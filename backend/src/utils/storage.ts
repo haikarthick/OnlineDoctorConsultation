@@ -2,8 +2,8 @@
  * Storage Abstraction Layer
  *
  * Provides a unified interface for file storage with two backends:
- * 1. LocalStorage      – saves to disk (default, development)
- * 2. CloudinaryStorage – production (images + video, see render.yaml)
+ * 1. LocalStorage      - saves to disk (default, development)
+ * 2. CloudinaryStorage - production (images + video, see render.yaml)
  *
  * Switch backends via the STORAGE_DRIVER env var ('local' | 'cloudinary').
  */
@@ -29,7 +29,7 @@ export interface StoredFile {
   url: string;
   /** Storage key (path or S3 key) */
   key: string;
-  /** Video duration in seconds — only set by drivers that can report it (Cloudinary) */
+  /** Video duration in seconds - only set by drivers that can report it (Cloudinary) */
   duration?: number;
 }
 
@@ -56,7 +56,7 @@ class LocalStorage implements StorageDriver {
 
   async save(file: Express.Multer.File, folder: string): Promise<StoredFile> {
     const dir = path.resolve(UPLOAD_ROOT, folder);
-    // Guard against path traversal — resolved dir must stay inside UPLOAD_ROOT
+    // Guard against path traversal - resolved dir must stay inside UPLOAD_ROOT
     if (!dir.startsWith(UPLOAD_ROOT + path.sep) && dir !== UPLOAD_ROOT) {
       throw new Error('Invalid upload path');
     }
@@ -109,7 +109,7 @@ class LocalStorage implements StorageDriver {
 // Free-tier friendly: images are auto-optimized (format/quality/size-capped)
 // on upload, videos are stored with auto quality so delivery adapts to the
 // viewer's connection. Resource type (image vs video) is inferred from the
-// upload folder — callers append '/video' for video uploads — so delete()
+// upload folder - callers append '/video' for video uploads - so delete()
 // knows which Cloudinary API to call without changing the StorageDriver
 // interface.
 
@@ -124,7 +124,7 @@ class CloudinaryStorage implements StorageDriver {
     this.cloudinary = v2;
 
     if (process.env.CLOUDINARY_URL) {
-      // SDK auto-parses CLOUDINARY_URL (cloudinary://key:secret@cloud_name) — nothing else to do.
+      // SDK auto-parses CLOUDINARY_URL (cloudinary://key:secret@cloud_name) - nothing else to do.
       this.cloudinary.config({ secure: true });
     } else {
       this.cloudinary.config({
@@ -134,7 +134,7 @@ class CloudinaryStorage implements StorageDriver {
         secure: true,
       });
     }
-    logger.info(`Cloudinary storage driver initialised — cloud=${this.cloudinary.config().cloud_name || '(from CLOUDINARY_URL)'}`);
+    logger.info(`Cloudinary storage driver initialised - cloud=${this.cloudinary.config().cloud_name || '(from CLOUDINARY_URL)'}`);
   }
 
   private isVideo(folder: string, mimetype: string): boolean {
@@ -148,7 +148,7 @@ class CloudinaryStorage implements StorageDriver {
     const uploadOptions: Record<string, any> = {
       folder,
       resource_type: resourceType,
-      // Unique, filesystem-safe public_id — Cloudinary would otherwise derive
+      // Unique, filesystem-safe public_id - Cloudinary would otherwise derive
       // one from the original filename, which can collide or leak PII.
       public_id: `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`,
     };
@@ -203,20 +203,20 @@ class CloudinaryStorage implements StorageDriver {
 
 // ── URL → storage key ─────────────────────────────────────────
 // The DB stores full delivery URLs (marketplace_listings.images/video_url), not raw
-// storage keys — callers that need to delete an asset (e.g. MarketplaceService cleaning
+// storage keys - callers that need to delete an asset (e.g. MarketplaceService cleaning
 // up removed/replaced media) must reverse the URL back into a key first. Cloudinary
 // delivery URLs are always shaped
 // https://res.cloudinary.com/<cloud>/<image|video>/upload/v<version>/<public_id>.<ext>
-// (this app always sets an explicit public_id on upload — see CloudinaryStorage.save —
+// (this app always sets an explicit public_id on upload - see CloudinaryStorage.save -
 // so <public_id> here includes the folder path exactly as stored in the DB `key`/`url`
 // pair). Returns null for anything that doesn't match (legacy local /uploads/ paths,
-// empty/undefined) — callers should treat null as "nothing to delete."
+// empty/undefined) - callers should treat null as "nothing to delete."
 export function extractStorageKeyFromUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   // Greedy capture + mandatory trailing extension so the LAST dot-extension is stripped
   // correctly (a lazy capture with an optional extension group would never backtrack into
   // stripping it, since "match zero characters of the optional group" always succeeds
-  // first — leaving the extension incorrectly inside the returned key).
+  // first - leaving the extension incorrectly inside the returned key).
   const match = url.match(/res\.cloudinary\.com\/[^/]+\/(?:image|video)\/upload\/v\d+\/(.+)\.[a-zA-Z0-9]+$/);
   return match ? match[1] : null;
 }
@@ -231,12 +231,12 @@ function createStorageDriver(): StorageDriver {
 
   if (raw && !KNOWN_DRIVERS.includes(driver)) {
     // A typo'd STORAGE_DRIVER (e.g. "clodinary") would otherwise silently fall through to
-    // LocalStorage — on Render's ephemeral disk that means uploads work fine until the
+    // LocalStorage - on Render's ephemeral disk that means uploads work fine until the
     // next deploy/restart wipes them, with zero error signal until a user notices missing
     // images days later. Loud at boot beats silent data loss.
-    logger.error(`STORAGE_DRIVER="${raw}" is not a recognized driver (expected one of: ${KNOWN_DRIVERS.join(', ')}) — falling back to 'local'. On an ephemeral-disk host this means uploaded files WILL be lost on the next deploy/restart.`);
+    logger.error(`STORAGE_DRIVER="${raw}" is not a recognized driver (expected one of: ${KNOWN_DRIVERS.join(', ')}) - falling back to 'local'. On an ephemeral-disk host this means uploaded files WILL be lost on the next deploy/restart.`);
   } else if (!raw) {
-    logger.warn(`STORAGE_DRIVER is not set — defaulting to 'local'. On an ephemeral-disk host (e.g. Render free tier) uploaded files will be lost on the next deploy/restart; set STORAGE_DRIVER=cloudinary there instead.`);
+    logger.warn(`STORAGE_DRIVER is not set - defaulting to 'local'. On an ephemeral-disk host (e.g. Render free tier) uploaded files will be lost on the next deploy/restart; set STORAGE_DRIVER=cloudinary there instead.`);
   }
 
   switch (driver) {

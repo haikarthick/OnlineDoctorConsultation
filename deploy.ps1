@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════
-#  VetCare Platform — Automated Cloud Deployment (PowerShell)
+#  VetCare Platform - Automated Cloud Deployment (PowerShell)
 #  Usage: .\deploy.ps1 [command]
 #
 #  Commands:

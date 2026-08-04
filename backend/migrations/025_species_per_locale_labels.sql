@@ -7,7 +7,7 @@
 -- has since added matching entries to all 6 locale JSON files and redeployed).
 --
 -- Adds one nullable label column per non-English locale so an admin can type all
--- 6 language labels directly when creating/editing a species — no code deploy
+-- 6 language labels directly when creating/editing a species - no code deploy
 -- needed, ever, for species added after today. Existing pre-seeded species are
 -- untouched (columns stay NULL) and keep resolving via their labelKey exactly as
 -- before; the frontend speciesLabel() resolver checks these row-level columns

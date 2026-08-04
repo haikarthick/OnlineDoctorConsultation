@@ -44,7 +44,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
   const [selectedAnimalId, setSelectedAnimalId] = useState(urlAnimalId)
   const [loadingPatients, setLoadingPatients] = useState(false)
   const [loadingAnimals, setLoadingAnimals] = useState(false)
-  // Network pharmacy routing — auto-detected from animal's care contexts
+  // Network pharmacy routing - auto-detected from animal's care contexts
   const [networkOptions, setNetworkOptions] = useState<{ id: string; name: string }[]>([])
   const [selectedNetworkId, setSelectedNetworkId] = useState<string | null>(null)
 

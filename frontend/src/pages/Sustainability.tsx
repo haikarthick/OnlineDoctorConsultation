@@ -140,7 +140,7 @@ const Sustainability: React.FC = () => {
             <div className="stat-card"><div className="stat-value">{dashboard.summary?.metricTypes || 0}</div><div className="stat-label">{t('sustainability.stats.metricTypes')}</div></div>
             <div className="stat-card"><div className="stat-value">{dashboard.summary?.activeGoals || 0}</div><div className="stat-label">{t('sustainability.stats.activeGoals')}</div></div>
             <div className="stat-card"><div className="stat-value">{dashboard.summary?.avgGoalProgress || 0}%</div><div className="stat-label">{t('sustainability.stats.avgGoalProgress')}</div></div>
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.estimatedCO2tons || '—'}</div><div className="stat-label">{t('sustainability.stats.estCO2')}</div></div>
+            <div className="stat-card"><div className="stat-value">{dashboard.summary?.estimatedCO2tons || '-'}</div><div className="stat-label">{t('sustainability.stats.estCO2')}</div></div>
           </div>
 
           {dashboard.goals?.length > 0 && (
@@ -167,7 +167,7 @@ const Sustainability: React.FC = () => {
               <table className="module-table">
                 <thead><tr><th>{t('sustainability.metricType')}</th><th>{t('sustainability.entries')}</th><th>{t('sustainability.total')}</th><th>{t('sustainability.average')}</th><th>{t('sustainability.unit')}</th></tr></thead>
                 <tbody>{dashboard.byMetricType.map((m: any) => (
-                  <tr key={m.metric_type}><td>{m.metric_type}</td><td>{m.entries}</td><td>{(+m.total_value).toFixed(1)}</td><td>{(+m.avg_value).toFixed(2)}</td><td>{m.unit || '—'}</td></tr>
+                  <tr key={m.metric_type}><td>{m.metric_type}</td><td>{m.entries}</td><td>{(+m.total_value).toFixed(1)}</td><td>{(+m.avg_value).toFixed(2)}</td><td>{m.unit || '-'}</td></tr>
                 ))}</tbody>
               </table>
             </div>
@@ -217,7 +217,7 @@ const Sustainability: React.FC = () => {
             <tbody>{metrics.map(m => (
               <tr key={m.id}><td>{m.metricName}</td><td><span className="module-badge">{m.metricType}</span></td>
               <td className="si-b2cfcbec">{m.value}</td><td>{m.unit}</td><td>{SCOPE_LABELS[m.scope] || m.scope}</td>
-              <td>{m.periodStart?.slice(0, 10)} → {m.periodEnd?.slice(0, 10)}</td><td>{m.notes || '—'}</td></tr>
+              <td>{m.periodStart?.slice(0, 10)} → {m.periodEnd?.slice(0, 10)}</td><td>{m.notes || '-'}</td></tr>
             ))}</tbody>
           </table>
           {metrics.length === 0 && <p className="si-3a7b9567">{t('sustainability.noMetrics')}</p>}

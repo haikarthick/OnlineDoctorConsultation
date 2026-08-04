@@ -54,7 +54,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
       CORS_ORIGIN: http://localhost
       CORS_CREDENTIALS: "true"
-      # Feature flags – all OFF for initial go-live
+      # Feature flags - all OFF for initial go-live
       FEATURE_REDIS_CACHE: "false"
       FEATURE_PAYMENTS: "false"
       FEATURE_EMAIL_NOTIFICATIONS: "false"

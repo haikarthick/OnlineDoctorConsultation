@@ -14,9 +14,9 @@ import { test, expect } from './fixtures'
  * - Wallet transaction filters
  */
 
-// ── FindDoctor — Search & Filters ──────────────────────────
+// ── FindDoctor - Search & Filters ──────────────────────────
 
-test.describe('Find Doctor — Search', () => {
+test.describe('Find Doctor - Search', () => {
   test('search input accepts text and triggers filtering', async ({ petOwnerPage: page }) => {
     await page.goto('/find-doctor')
     await page.waitForLoadState('networkidle')
@@ -119,14 +119,14 @@ test.describe('Find Doctor — Search', () => {
 
     // Look for pagination elements
     const pagination = page.locator('[class*="pagination"], [class*="page"]')
-    // May or may not have pagination depending on data volume — just ensure no crash
+    // May or may not have pagination depending on data volume - just ensure no crash
     await expect(page).toHaveURL(/\/find-doctor/)
   })
 })
 
-// ── Animals — Search & Species Filter ──────────────────────
+// ── Animals - Search & Species Filter ──────────────────────
 
-test.describe('Animals — Search & Filter', () => {
+test.describe('Animals - Search & Filter', () => {
   test('search input filters animals by name', async ({ petOwnerPage: page }) => {
     await page.goto('/animals')
     await page.waitForLoadState('networkidle')
@@ -155,9 +155,9 @@ test.describe('Animals — Search & Filter', () => {
   })
 })
 
-// ── Vet Hospitals — Search & Filters ───────────────────────
+// ── Vet Hospitals - Search & Filters ───────────────────────
 
-test.describe('Vet Hospitals — Search & Filters', () => {
+test.describe('Vet Hospitals - Search & Filters', () => {
   test('hospital search input works', async ({ petOwnerPage: page }) => {
     await page.goto('/vet-hospitals')
     await page.waitForLoadState('networkidle')
@@ -193,9 +193,9 @@ test.describe('Vet Hospitals — Search & Filters', () => {
   })
 })
 
-// ── Marketplace — Browse Filters ───────────────────────────
+// ── Marketplace - Browse Filters ───────────────────────────
 
-test.describe('Marketplace — Browse Filters', () => {
+test.describe('Marketplace - Browse Filters', () => {
   test('category filter dropdown has marketplace categories', async ({ farmerPage: page }) => {
     await page.goto('/marketplace')
     await page.waitForLoadState('networkidle')
@@ -237,9 +237,9 @@ test.describe('Marketplace — Browse Filters', () => {
   })
 })
 
-// ── Wallet — Transaction List ──────────────────────────────
+// ── Wallet - Transaction List ──────────────────────────────
 
-test.describe('Wallet — Transactions & Filters', () => {
+test.describe('Wallet - Transactions & Filters', () => {
   test('wallet displays balance cards', async ({ petOwnerPage: page }) => {
     await page.goto('/wallet')
     await page.waitForLoadState('networkidle')
@@ -262,9 +262,9 @@ test.describe('Wallet — Transactions & Filters', () => {
   })
 })
 
-// ── Admin — Consultation & Payment Filters ─────────────────
+// ── Admin - Consultation & Payment Filters ─────────────────
 
-test.describe('Admin — Management Filters', () => {
+test.describe('Admin - Management Filters', () => {
   test('admin consultation page has status filter', async ({ adminPage: page }) => {
     await page.goto('/admin/consultations')
     await page.waitForLoadState('networkidle')

@@ -4,7 +4,7 @@ import {
 } from '../types';
 
 /**
- * Demo gateway (docs/PAYMENT_MODULE_PLAN.md §3) — makes the entire payment
+ * Demo gateway (docs/PAYMENT_MODULE_PLAN.md §3) - makes the entire payment
  * lifecycle exercisable locally and on environments without Razorpay keys.
  *
  * Behavior notes:
@@ -51,7 +51,7 @@ export class DemoGateway implements PaymentGateway {
   }
 
   /**
-   * Demo checkout "capture" — called by the orchestrator when the simulated
+   * Demo checkout "capture" - called by the orchestrator when the simulated
    * checkout succeeds. Returns the captured payment with its simulated fee.
    */
   capturePayment(gatewayOrderId: string, amount: number): GatewayPaymentStatus {

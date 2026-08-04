@@ -74,8 +74,8 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
     { label: 'Failed Login Monitoring', status: d.failedLoginAttempts > 10 ? 'warn' : 'pass', detail: `${d.failedLoginAttempts || 0} failed attempts in last 30 days` },
     { label: 'User Data Transparency', status: 'pass', detail: 'Users can view their data footprint from Privacy & Data settings' },
     { label: 'Data Breach Detection', status: 'info', detail: 'High-severity events flagged for PHI export/delete operations' },
-    { label: 'SOC 2 / ISO 27001 Certification', status: 'na', detail: 'Not applicable — pursuing in future phases' },
-    { label: 'Encryption at Rest', status: 'info', detail: 'PostgreSQL instance on Render — provider-managed encryption' },
+    { label: 'SOC 2 / ISO 27001 Certification', status: 'na', detail: 'Not applicable - pursuing in future phases' },
+    { label: 'Encryption at Rest', status: 'info', detail: 'PostgreSQL instance on Render - provider-managed encryption' },
     { label: 'Business Associate Agreements', status: 'info', detail: 'BAA framework documented, to be signed with third-party processors' },
     { label: 'Data Retention Policy', status: 'pass', detail: 'Audit logs retained indefinitely, session data auto-expires' },
   ]
@@ -228,10 +228,10 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
                     {(d.highSeverityEvents || []).map((e: any) => (
                       <tr key={e.id} className="si-52e81842">
                         <td className="si-78a83654">{formatDateTime(e.createdAt)}</td>
-                        <td className="si-78a83654">{e.userName || e.userEmail || '—'}</td>
+                        <td className="si-78a83654">{e.userName || e.userEmail || '-'}</td>
                         <td className="si-78a83654"><code className="si-0c0c6ed2">{e.action}</code></td>
                         <td className="si-78a83654">{categoryLabel(e.details?.hipaaCategory)}</td>
-                        <td className="si-5ef23e23">{e.ipAddress || '—'}</td>
+                        <td className="si-5ef23e23">{e.ipAddress || '-'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -287,7 +287,7 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
                       <tr className="si-1666bcf0"
                         onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}>
                         <td className="si-56ec6f14">{formatDateTime(log.createdAt)}</td>
-                        <td className="si-56ec6f14">{log.userName || log.userEmail || '—'}</td>
+                        <td className="si-56ec6f14">{log.userName || log.userEmail || '-'}</td>
                         <td className="si-56ec6f14">
                           <span style={{ padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600,
                             background: log.userRole === 'admin' ? '#fef3c7' : log.userRole === 'veterinarian' ? '#dbeafe' : '#f3e8ff',
@@ -297,17 +297,17 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
                         <td className="si-56ec6f14"><code className="si-756a9f21">{log.action}</code></td>
                         <td className="si-56ec6f14">{log.entityType}</td>
                         <td className="si-56ec6f14">{categoryLabel(log.details?.hipaaCategory)}</td>
-                        <td className="si-a38bb09f">{log.ipAddress || '—'}</td>
+                        <td className="si-a38bb09f">{log.ipAddress || '-'}</td>
                         <td className="si-56ec6f14">{expandedId === log.id ? '▲' : '▼'}</td>
                       </tr>
                       {expandedId === log.id && (
                         <tr>
                           <td colSpan={8} className="si-692de530">
                             <div className="si-fbb64b4e">
-                              <div><strong>{t('complianceDashboard.entityId')}:</strong> <code className="si-6af9d82f">{log.entityId || '—'}</code></div>
-                              <div><strong>{t('complianceDashboard.user')} Agent:</strong> <span className="si-b0271ccd">{log.userAgent || '—'}</span></div>
+                              <div><strong>{t('complianceDashboard.entityId')}:</strong> <code className="si-6af9d82f">{log.entityId || '-'}</code></div>
+                              <div><strong>{t('complianceDashboard.user')} Agent:</strong> <span className="si-b0271ccd">{log.userAgent || '-'}</span></div>
                               <div><strong>{t('complianceDashboard.severity')}:</strong> <span style={{ color: severityColor(log.details?.severity) }}>{log.details?.severity?.toUpperCase()}</span></div>
-                              <div><strong>{t('complianceDashboard.user')} ID:</strong> <code className="si-6af9d82f">{log.userId || '—'}</code></div>
+                              <div><strong>{t('complianceDashboard.user')} ID:</strong> <code className="si-6af9d82f">{log.userId || '-'}</code></div>
                             </div>
                           </td>
                         </tr>
@@ -365,7 +365,7 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
                 { title: 'Data Retention', icon: '📅',
                   content: 'Medical records are retained indefinitely for continuity of care. Audit logs are retained indefinitely for compliance. User session tokens expire per configured TTL. Soft-delete is used for data removal (deactivation, not permanent erasure).' },
                 { title: 'Third-Party Processing', icon: '🤝',
-                  content: 'AI features (scan analysis, drug checks, symptom analysis) use Groq API — data sent to Groq for processing is transient and not stored by the provider per their data processing terms. No other third-party data processors are used for PHI.' },
+                  content: 'AI features (scan analysis, drug checks, symptom analysis) use Groq API - data sent to Groq for processing is transient and not stored by the provider per their data processing terms. No other third-party data processors are used for PHI.' },
                 { title: 'User Rights', icon: '👤',
                   content: 'Users can view their data summary, review what records exist, and request session termination. Users are informed of data collection through transparent UIs. Data export and deletion requests can be submitted to administrators.' },
                 { title: 'Breach Response', icon: '🚨',

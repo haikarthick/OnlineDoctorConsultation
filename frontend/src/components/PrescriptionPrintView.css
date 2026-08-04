@@ -425,7 +425,7 @@
 }
 
 /* ============================================================
-   @MEDIA PRINT — A4 output
+   @MEDIA PRINT - A4 output
    ============================================================ */
 @media print {
   /* Hide entire app, show only the prescription document */

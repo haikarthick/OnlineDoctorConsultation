@@ -3,7 +3,7 @@
 --   payments/bookings/vet_profiles/referrals extensions, earnings ledger,
 --   withdrawals, payment events, invoices, tax codes, legal documents,
 --   policy acceptances, INR defaults, and payment/settlement settings seeds.
--- Fully idempotent — safe to re-run.
+-- Fully idempotent - safe to re-run.
 
 -- ── 1. payments: gateway + commission + fee-recovery columns ─
 ALTER TABLE payments ADD COLUMN IF NOT EXISTS gateway_order_id VARCHAR(255);
@@ -74,7 +74,7 @@ ALTER TABLE vet_profiles ALTER COLUMN currency SET DEFAULT 'INR';
 -- ── 4. wallets: INR default ─────────────────────────────────
 ALTER TABLE wallets ALTER COLUMN currency SET DEFAULT 'INR';
 
--- INR single-currency migration (D5) — dev/demo data only; prod is clean-start (D14)
+-- INR single-currency migration (D5) - dev/demo data only; prod is clean-start (D14)
 UPDATE payments SET currency = 'INR' WHERE currency = 'USD';
 UPDATE wallets SET currency = 'INR' WHERE currency = 'USD';
 UPDATE vet_profiles SET currency = 'INR' WHERE currency = 'USD';
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS doctor_earnings (
 CREATE INDEX IF NOT EXISTS idx_doctor_earnings_doctor ON doctor_earnings(doctor_id, status);
 CREATE INDEX IF NOT EXISTS idx_doctor_earnings_clear ON doctor_earnings(status, clear_at);
 
--- ── 9. tax_codes: SAC master (D8/D13 — admin-editable rates) ─
+-- ── 9. tax_codes: SAC master (D8/D13 - admin-editable rates) ─
 CREATE TABLE IF NOT EXISTS tax_codes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   sac_code VARCHAR(20) UNIQUE NOT NULL,

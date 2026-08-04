@@ -562,7 +562,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   MONETIZATION ADMIN — Sub-tabs, Settings, Plans, Revenue
+   MONETIZATION ADMIN - Sub-tabs, Settings, Plans, Revenue
    ═══════════════════════════════════════════════════════════════════ */
 
 /* Admin Sub-tabs */
@@ -668,7 +668,7 @@
   display: flex; gap: 10px; margin-top: 16px;
 }
 
-/* ═══════ RESPONSIVE — Monetization ═══════ */
+/* ═══════ RESPONSIVE - Monetization ═══════ */
 
 @media (max-width: 1200px) {
   .mp-settings-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
@@ -872,7 +872,7 @@
 .mp-detail-video-el { width: 100%; max-height: 360px; border-radius: 10px; background: #000; }
 .mp-card-video-badge { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.65); color: #fff; font-size: 13px; padding: 2px 7px; border-radius: 6px; }
 
-/* ─── Listing Detail — Image Gallery ─── */
+/* ─── Listing Detail - Image Gallery ─── */
 .mp-detail-gallery { margin-bottom: 14px; }
 .mp-detail-gallery-main {
   width: 100%;

@@ -123,7 +123,7 @@ export async function fixDemoPasswords(): Promise<void> {
       logger.warn('Demo animal cleanup skipped: ' + cleanupErr.message.substring(0, 200));
     }
 
-    // 2. Seed demo data if missing (check multiple indicators — vet_profiles AND consultations must both exist)
+    // 2. Seed demo data if missing (check multiple indicators - vet_profiles AND consultations must both exist)
     const { rows: vpRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM vet_profiles');
     const { rows: cRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM consultations');
 
@@ -132,7 +132,7 @@ export async function fixDemoPasswords(): Promise<void> {
     try {
       const { rows: protocolRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM vaccine_protocols');
       if (protocolRows[0].cnt === 0) {
-        logger.info('Vaccine protocols table empty — running STEP 92 & 93 seed...');
+        logger.info('Vaccine protocols table empty - running STEP 92 & 93 seed...');
         const possibleSeedPaths = [
           path.join(__dirname, '..', '..', '..', 'docker', 'seed-demo-data.sql'),
           path.join(__dirname, '..', '..', 'docker', 'seed-demo-data.sql'),
@@ -186,13 +186,13 @@ export async function fixDemoPasswords(): Promise<void> {
         ['dog']
       );
       if (dogRows[0].cnt === 0) {
-        logger.info('Dog/cat vaccine protocols missing — seeding now...');
+        logger.info('Dog/cat vaccine protocols missing - seeding now...');
         await database.query(`
 INSERT INTO vaccine_protocols (id, name, disease, species, applicable_gender, min_age_weeks, max_age_weeks, vaccine_category, is_zoonotic, initial_dose_age_weeks, booster_interval_days, series_dose_count, series_interval_days, route, dosage_ml, site, regulatory_body, regulatory_standard, seasonal_window, country, notes) VALUES
 ('a9000000-0000-0000-0000-000000000020','Rabies (Canine)','Rabies',ARRAY['dog'],'all',12,NULL,'mandatory_govt',true,12,365,1,0,'subcutaneous','1 ml','Right rear leg','WSAVA / BVA','WSAVA Vaccination Guidelines 2022, Local Rabies Control Act','Any season','ALL','Core vaccine. Legally mandatory in most countries. First dose at 12 weeks, booster at 1 year, then annually or every 3 years depending on vaccine label and local law.'),
 ('a9000000-0000-0000-0000-000000000021','DHPP (Distemper, Hepatitis, Parvo, Para-Influenza)','Canine Distemper / Hepatitis / Parvovirus / Parainfluenza',ARRAY['dog'],'all',6,NULL,'core',false,6,1095,3,21,'subcutaneous','1 ml','Right shoulder','WSAVA / AAHA','WSAVA Vaccination Guidelines 2022, AAHA Canine Vaccination Guidelines 2022','Any season','ALL','Core. Puppy series: 6, 9, 12 weeks then booster at 1 year, then every 3 years. Do not skip - parvovirus is highly fatal in unvaccinated puppies.'),
-('a9000000-0000-0000-0000-000000000022','Bordetella bronchiseptica (Kennel Cough)','Infectious Tracheobronchitis',ARRAY['dog'],'all',8,NULL,'non_core',false,8,365,1,0,'intranasal','1 ml','Intranasal','WSAVA / AAHA','WSAVA Vaccination Guidelines 2022','Any season — required before boarding/kenneling','ALL','Non-core but recommended for all social dogs. Required by most boarding facilities and dog parks.'),
-('a9000000-0000-0000-0000-000000000023','Leptospirosis (L4)','Leptospirosis',ARRAY['dog'],'all',8,NULL,'non_core',true,8,365,2,21,'subcutaneous','1 ml','Left shoulder','WSAVA / AAHA','WSAVA Vaccination Guidelines 2022','Any season — higher risk in monsoon/wet season','ALL','Zoonotic. Non-core but strongly recommended in endemic areas. Annual boosters required for maintained immunity.'),
+('a9000000-0000-0000-0000-000000000022','Bordetella bronchiseptica (Kennel Cough)','Infectious Tracheobronchitis',ARRAY['dog'],'all',8,NULL,'non_core',false,8,365,1,0,'intranasal','1 ml','Intranasal','WSAVA / AAHA','WSAVA Vaccination Guidelines 2022','Any season - required before boarding/kenneling','ALL','Non-core but recommended for all social dogs. Required by most boarding facilities and dog parks.'),
+('a9000000-0000-0000-0000-000000000023','Leptospirosis (L4)','Leptospirosis',ARRAY['dog'],'all',8,NULL,'non_core',true,8,365,2,21,'subcutaneous','1 ml','Left shoulder','WSAVA / AAHA','WSAVA Vaccination Guidelines 2022','Any season - higher risk in monsoon/wet season','ALL','Zoonotic. Non-core but strongly recommended in endemic areas. Annual boosters required for maintained immunity.'),
 ('a9000000-0000-0000-0000-000000000024','Canine Influenza (H3N2/H3N8)','Canine Influenza',ARRAY['dog'],'all',6,NULL,'non_core',false,6,182,2,21,'subcutaneous','1 ml','Right shoulder','AAHA','AAHA Canine Vaccination Guidelines 2022','Any season','ALL','Non-core. Recommended for dogs with frequent exposure (shows, boarding, shelters).'),
 ('a9000000-0000-0000-0000-000000000025','Rabies (Feline)','Rabies',ARRAY['cat'],'all',12,NULL,'mandatory_govt',true,12,365,1,0,'subcutaneous','1 ml','Right rear leg','WSAVA / ABCD','WSAVA Vaccination Guidelines 2022, ABCD Guidelines 2023','Any season','ALL','Core. Legally mandatory in most jurisdictions. Annual or 3-year vaccine depending on product label.'),
 ('a9000000-0000-0000-0000-000000000026','FVRCP (Feline Panleukopenia, Herpesvirus, Calicivirus)','Feline Panleukopenia / Herpesvirus / Calicivirus',ARRAY['cat'],'all',6,NULL,'core',false,6,1095,3,21,'subcutaneous','1 ml','Right shoulder','WSAVA / ABCD','WSAVA Vaccination Guidelines 2022','Any season','ALL','Core. Kitten series at 6, 9, 12 weeks. Booster at 1 year then every 3 years.'),
@@ -206,13 +206,13 @@ ON CONFLICT (id) DO NOTHING;
     }
 
     if (vpRows[0].cnt >= 3 && cRows[0].cnt > 0) {
-      // Full seed data already exists — but check if hospital network demo data is missing
+      // Full seed data already exists - but check if hospital network demo data is missing
       try {
         const { rows: hnRows } = await database.query(
           `SELECT COUNT(*)::int AS cnt FROM hospital_network_members WHERE network_id = 'hn000000-0000-0000-0000-000000000001'`
         );
         if (hnRows[0].cnt < 3) {
-          logger.info('Hospital network demo data missing — seeding network data...');
+          logger.info('Hospital network demo data missing - seeding network data...');
           // Find seed SQL file
           const networkSeedPaths = [
             path.join(__dirname, '..', '..', '..', 'docker', 'seed-demo-data.sql'),
@@ -252,7 +252,7 @@ ON CONFLICT (id) DO NOTHING;
       return; // Full seed data already exists
     }
 
-    logger.info('No demo data found — seeding via app database connection...');
+    logger.info('No demo data found - seeding via app database connection...');
 
     // Try multiple paths to find the seed SQL file
     const possiblePaths = [

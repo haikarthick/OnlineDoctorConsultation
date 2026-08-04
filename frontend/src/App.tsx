@@ -55,6 +55,7 @@ const HolidayManagementAdmin = lazy(() => import('./pages/admin/HolidayManagemen
 const LegalPoliciesAdmin = lazy(() => import('./pages/admin/LegalPolicies'))
 const CommissionSettingsAdmin = lazy(() => import('./pages/admin/CommissionSettings'))
 const SettlementsAdmin = lazy(() => import('./pages/admin/Settlements'))
+const PayablesAdmin = lazy(() => import('./pages/admin/Payables'))
 const FinanceReportsAdmin = lazy(() => import('./pages/admin/FinanceReports'))
 // Payment module
 const PolicyPage = lazy(() => import('./pages/PolicyPage'))
@@ -119,6 +120,19 @@ const AcceptHospitalInvite = React.lazy(() => import('./pages/AcceptHospitalInvi
 const NetworkMemberships = React.lazy(() => import('./pages/petowner/NetworkMemberships'))
 // Pharmacy
 const PharmacyDashboard = React.lazy(() => import('./pages/pharmacy/PharmacyDashboard'))
+
+// Grooming & Spa
+const GroomingProvider = React.lazy(() => import('./pages/grooming/GroomingProvider'))
+const GroomingProvidersAdmin = React.lazy(() => import('./pages/admin/GroomingProvidersAdmin'))
+const FindGrooming = React.lazy(() => import('./pages/grooming/FindGrooming'))
+const GroomingProviderPublic = React.lazy(() => import('./pages/grooming/GroomingProviderPublic'))
+const BookGrooming = React.lazy(() => import('./pages/grooming/BookGrooming'))
+const MyGroomingOrders = React.lazy(() => import('./pages/grooming/MyGroomingOrders'))
+const GroomingOrdersBoard = React.lazy(() => import('./pages/grooming/GroomingOrdersBoard'))
+const GroomingSchedule = React.lazy(() => import('./pages/grooming/GroomingSchedule'))
+const GroomingOrderDetail = React.lazy(() => import('./pages/grooming/GroomingOrderDetail'))
+const GroomingEarnings = React.lazy(() => import('./pages/grooming/GroomingEarnings'))
+const GroomingPassport = React.lazy(() => import('./pages/grooming/GroomingPassport'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
@@ -377,6 +391,7 @@ function AppRoutes() {
       <Route path="/admin/legal-policies" element={<RoleRoute path="/admin/legal-policies"><AppLayout><RoutedPage Component={LegalPoliciesAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/commission-settings" element={<RoleRoute path="/admin/commission-settings"><AppLayout><RoutedPage Component={CommissionSettingsAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/settlements" element={<RoleRoute path="/admin/settlements"><AppLayout><RoutedPage Component={SettlementsAdmin} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/payables" element={<RoleRoute path="/admin/payables"><AppLayout><RoutedPage Component={PayablesAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/finance-reports" element={<RoleRoute path="/admin/finance-reports"><AppLayout><RoutedPage Component={FinanceReportsAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/vaccine-protocols" element={<RoleRoute path="/admin/vaccine-protocols"><AppLayout><RoutedPage Component={VaccineProtocolAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/master-data" element={<RoleRoute path="/admin/master-data"><AppLayout><RoutedPage Component={MasterDataManagement} /></AppLayout></RoleRoute>} />
@@ -391,7 +406,7 @@ function AppRoutes() {
       <Route path="/admin/network-subscriptions" element={<RoleRoute path="/admin/network-subscriptions"><AppLayout><NetworkSubscriptions /></AppLayout></RoleRoute>} />
       <Route path="/admin/disputes" element={<RoleRoute path="/admin/disputes"><AppLayout><RoutedPage Component={DisputeManagement} /></AppLayout></RoleRoute>} />
       <Route path="/accept-hospital-invite" element={<AcceptHospitalInvite />} />
-      {/* Alias: staff-invites endpoint sends this URL — must match /accept-hospital-invite behaviour */}
+      {/* Alias: staff-invites endpoint sends this URL - must match /accept-hospital-invite behaviour */}
       <Route path="/accept-staff-invite" element={<AcceptHospitalInvite />} />
 
       {/* ── Patient Consent Module ── */}
@@ -402,6 +417,19 @@ function AppRoutes() {
 
       {/* ── Pharmacy Module ── */}
       <Route path="/pharmacy" element={<RoleRoute path="/pharmacy"><AppLayout><PharmacyDashboard /></AppLayout></RoleRoute>} />
+
+      {/* ── Grooming & Spa Module ── */}
+      <Route path="/grooming/provider" element={<RoleRoute path="/grooming/provider"><AppLayout><RoutedPage Component={GroomingProvider} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/grooming-providers" element={<RoleRoute path="/admin/grooming-providers"><AppLayout><RoutedPage Component={GroomingProvidersAdmin} /></AppLayout></RoleRoute>} />
+      <Route path="/grooming/find" element={<RoleRoute path="/grooming/find"><AppLayout><RoutedPage Component={FindGrooming} /></AppLayout></RoleRoute>} />
+      <Route path="/grooming/provider/:id" element={<RoleRoute path="/grooming/provider/:id"><AppLayout><RoutedPage Component={GroomingProviderPublic} paramKey="id" /></AppLayout></RoleRoute>} />
+      <Route path="/grooming/book" element={<RoleRoute path="/grooming/book"><AppLayout><RoutedPage Component={BookGrooming} /></AppLayout></RoleRoute>} />
+      <Route path="/grooming/my-orders" element={<RoleRoute path="/grooming/my-orders"><AppLayout><RoutedPage Component={MyGroomingOrders} /></AppLayout></RoleRoute>} />
+      <Route path="/grooming/orders" element={<RoleRoute path="/grooming/orders"><AppLayout><RoutedPage Component={GroomingOrdersBoard} /></AppLayout></RoleRoute>} />
+      <Route path="/grooming/schedule" element={<RoleRoute path="/grooming/schedule"><AppLayout><RoutedPage Component={GroomingSchedule} /></AppLayout></RoleRoute>} />
+      <Route path="/grooming/order/:id" element={<RoleRoute path="/grooming/order/:id"><AppLayout><RoutedPage Component={GroomingOrderDetail} paramKey="id" /></AppLayout></RoleRoute>} />
+      <Route path="/grooming/earnings" element={<RoleRoute path="/grooming/earnings"><AppLayout><RoutedPage Component={GroomingEarnings} /></AppLayout></RoleRoute>} />
+      <Route path="/grooming/passport/:animalId" element={<RoleRoute path="/grooming/passport/:animalId"><AppLayout><RoutedPage Component={GroomingPassport} paramKey="animalId" /></AppLayout></RoleRoute>} />
 
       {/* Catch-all → home */}
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -3,7 +3,7 @@ import CertificateService from '../services/CertificateService';
 import { ForbiddenError, ValidationError, NotFoundError } from '../utils/errors';
 
 // CertificateService throws plain Error('Certificate not found' | 'Unauthorized' | <validation
-// message>) rather than AppError subclasses — translate to the right status/shape here so
+// message>) rather than AppError subclasses - translate to the right status/shape here so
 // asyncHandler's generic 500 fallback doesn't swallow the real message.
 function rethrowServiceError(err: any): never {
   if (err instanceof Error && err.message === 'Certificate not found') throw new NotFoundError('Certificate');
@@ -47,7 +47,7 @@ class CertificateController {
         search: req.query.search as string | undefined,
       });
     } else {
-      // pet_owner or farmer — pass enterpriseId filter
+      // pet_owner or farmer - pass enterpriseId filter
       result = await CertificateService.listByOwner(userId, params);
     }
 

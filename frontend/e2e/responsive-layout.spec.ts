@@ -14,7 +14,7 @@ import { test, expect } from './fixtures'
 
 // ── Layout & Overflow ──────────────────────────────────────
 
-test.describe('Layout — No Overflow', () => {
+test.describe('Layout - No Overflow', () => {
   const pagesToCheck = [
     { path: '/dashboard', role: 'petOwner' as const },
     { path: '/consultations', role: 'petOwner' as const },
@@ -96,7 +96,7 @@ test.describe('Mobile Viewport', () => {
 
 // ── Console Error Monitoring ───────────────────────────────
 
-test.describe('Console Errors — Key Pages', () => {
+test.describe('Console Errors - Key Pages', () => {
   const criticalPages = [
     { path: '/dashboard', name: 'Dashboard' },
     { path: '/consultations', name: 'Consultations' },
@@ -136,7 +136,7 @@ test.describe('Console Errors — Key Pages', () => {
 
 // ── Failed Resource Loading ────────────────────────────────
 
-test.describe('Resource Loading — Key Pages', () => {
+test.describe('Resource Loading - Key Pages', () => {
   test('dashboard loads all CSS and JS bundles', async ({ petOwnerPage: page }) => {
     const failedResources: string[] = []
 
@@ -172,7 +172,7 @@ test.describe('Empty States', () => {
     await page.waitForLoadState('networkidle')
 
     const bodyText = await page.textContent('body')
-    // Should show either booking data OR a friendly empty state — not a crash
+    // Should show either booking data OR a friendly empty state - not a crash
     expect(bodyText!.toLowerCase()).toMatch(
       /consultation|booking|appointment|no.*booking|no.*consultation|empty|schedule/i,
     )
@@ -237,7 +237,7 @@ test.describe('Keyboard Accessibility', () => {
     await page.keyboard.press('Enter')
 
     await page.waitForTimeout(1_000)
-    // Should show error or stay on login — not crash
+    // Should show error or stay on login - not crash
     await expect(page).toHaveURL(/\/login/)
   })
 })

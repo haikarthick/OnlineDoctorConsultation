@@ -7,7 +7,7 @@ import apiService from '../services/api'
 import AnimalSearchPicker from '../components/AnimalSearchPicker'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
-// JSONB columns from PostgreSQL arrive as JS objects — handle both string and array
+// JSONB columns from PostgreSQL arrive as JS objects - handle both string and array
 const parseJsonbArray = (val: any): any[] => {
   if (Array.isArray(val)) return val
   try { return JSON.parse(typeof val === 'string' ? val : '[]') } catch { return [] }
@@ -237,7 +237,7 @@ export default function InpatientManagement() {
                 <div className="si-7a981126">
                   <div>
                     <div className="si-9dd702ba">{p.animal_name}</div>
-                    <div className="si-4801fc30">{speciesLabel(p.animal_species, t)}{p.animal_breed ? ` — ${p.animal_breed}` : ''}{p.animal_weight ? ` • ${p.animal_weight}kg` : ''}</div>
+                    <div className="si-4801fc30">{speciesLabel(p.animal_species, t)}{p.animal_breed ? ` - ${p.animal_breed}` : ''}{p.animal_weight ? ` • ${p.animal_weight}kg` : ''}</div>
                     <div className="si-db3602ae">{t('inpatientManagement.owner')}: {p.owner_first_name} {p.owner_last_name}{p.owner_phone ? ` • ${p.owner_phone}` : ''}</div>
                     {p.enterpriseName && (
                       <div className="si-e893254c">
@@ -261,7 +261,7 @@ export default function InpatientManagement() {
                   {p.daily_rate > 0 && <div><strong>{t('inpatientManagement.dailyRate')}:</strong> {formatCurrency(p.daily_rate)}</div>}
                 </div>
 
-                {/* Last Vitals — clickable to open full history */}
+                {/* Last Vitals - clickable to open full history */}
                 {lastVitals && (
                   <button
                     onClick={() => setShowVitalsHistory(p)}
@@ -316,7 +316,7 @@ export default function InpatientManagement() {
 
             <div className="si-58f59f7a">
 
-              {/* Animal Search — Required */}
+              {/* Animal Search - Required */}
               <div>
                 <AnimalSearchPicker selectedAnimal={admitAnimal} onSelect={a => { setAdmitAnimal(a); setAdmitError('') }} label={`🔍 ${t('inpatientManagement.searchPatient')} *`} />
                 {!admitAnimal && (
@@ -403,7 +403,7 @@ export default function InpatientManagement() {
         <div className="si-db8248e9" onClick={() => { setShowVitals(null); setVitalsError('') }}>
           <div className="si-922743e0" onClick={e => e.stopPropagation()}>
             <div className="si-101fd1d0">
-              <h3 className="si-44087c4b">📊 {t('inpatientManagement.recordVitals')} — {showVitals.animal_name}</h3>
+              <h3 className="si-44087c4b">📊 {t('inpatientManagement.recordVitals')} - {showVitals.animal_name}</h3>
               <button onClick={() => { setShowVitals(null); setVitalsError('') }} className="si-5e3e3c2e">✕</button>
             </div>
             {vitalsError && (
@@ -474,7 +474,7 @@ export default function InpatientManagement() {
           <div className="si-db8248e9" onClick={() => setShowVitalsHistory(null)}>
             <div className="si-8352c1ac" onClick={e => e.stopPropagation()}>
               <div className="si-101fd1d0">
-                <h3 className="si-44087c4b">📈 {t('inpatientManagement.vitalsHistory')} — {showVitalsHistory.animal_name}</h3>
+                <h3 className="si-44087c4b">📈 {t('inpatientManagement.vitalsHistory')} - {showVitalsHistory.animal_name}</h3>
                 <button onClick={() => setShowVitalsHistory(null)} className="si-5e3e3c2e">✕</button>
               </div>
               {allVitals.length === 0 ? (
@@ -524,7 +524,7 @@ export default function InpatientManagement() {
         <div className="si-db8248e9">
           <div className="si-84e7f0b2">
             <div className="si-101fd1d0">
-              <h3 className="si-44087c4b">📋 {t('inpatientManagement.medicalHistory')} — {viewHistory.animal_name}</h3>
+              <h3 className="si-44087c4b">📋 {t('inpatientManagement.medicalHistory')} - {viewHistory.animal_name}</h3>
               <button onClick={() => { setViewHistory(null); setMedicalHistory(null) }} className="si-e23655e2">✕</button>
             </div>
 
@@ -536,7 +536,7 @@ export default function InpatientManagement() {
                 {medicalHistory.animal && (
                   <div className="si-1a4f5caf">
                     <div className="si-8b3478d6">🐾 {medicalHistory.animal.name}</div>
-                    <div className="si-c3e04596">{speciesLabel(medicalHistory.animal.species, t)}{medicalHistory.animal.breed ? ` — ${medicalHistory.animal.breed}` : ''}{medicalHistory.animal.weight ? ` • ${medicalHistory.animal.weight}kg` : ''}{medicalHistory.animal.age_years ? ` • ${medicalHistory.animal.age_years}y` : ''}</div>
+                    <div className="si-c3e04596">{speciesLabel(medicalHistory.animal.species, t)}{medicalHistory.animal.breed ? ` - ${medicalHistory.animal.breed}` : ''}{medicalHistory.animal.weight ? ` • ${medicalHistory.animal.weight}kg` : ''}{medicalHistory.animal.age_years ? ` • ${medicalHistory.animal.age_years}y` : ''}</div>
                     <div className="si-f199afd6">{t('inpatientManagement.owner')}: {medicalHistory.animal.owner_first_name} {medicalHistory.animal.owner_last_name}</div>
                   </div>
                 )}
@@ -581,7 +581,7 @@ export default function InpatientManagement() {
                       return (
                         <div key={i} className="si-e1bc71cf">
                           {meds.length > 0 ? meds.map((m: any, j: number) => (
-                            <div key={j}><span className="si-7d5d38b3">{m.name || m.medication}</span>{m.dosage && <span className="si-98734f9a"> — {m.dosage}</span>}</div>
+                            <div key={j}><span className="si-7d5d38b3">{m.name || m.medication}</span>{m.dosage && <span className="si-98734f9a"> - {m.dosage}</span>}</div>
                           )) : <span className="si-7d5d38b3">{rx.instructions || 'Prescription'}</span>}
                           {rx.valid_until && <div className="si-96a4ece3">Valid until: {new Date(rx.valid_until).toLocaleDateString()}</div>}
                         </div>

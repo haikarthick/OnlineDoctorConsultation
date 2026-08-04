@@ -76,9 +76,9 @@ export class NotificationService {
         html: `<div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:32px;background:#fff;border:1px solid #e5e7eb;border-radius:12px">
           <h2 style="color:#667eea">${title}</h2>
           <p>${message}</p>
-          <p style="margin-top:32px;color:#999;font-size:12px">— VetCare Notifications</p>
+          <p style="margin-top:32px;color:#999;font-size:12px">- VetCare Notifications</p>
         </div>`,
-        text: `${title}\n\n${message}\n\n— VetCare Notifications`,
+        text: `${title}\n\n${message}\n\n- VetCare Notifications`,
       });
     }
   }
@@ -181,7 +181,7 @@ export class NotificationService {
       const pendingInvites = parseInt(pendingInvitesRes.rows[0]?.count ?? '0', 10);
 
       const label = digestType === 'weekly' ? 'Weekly' : 'Daily';
-      const subject = `VetCare Network ${label} Summary — ${networkName}`;
+      const subject = `VetCare Network ${label} Summary - ${networkName}`;
       const message = `Here is your ${label.toLowerCase()} summary for ${networkName}:\n\n` +
         `• New Patients Enrolled: ${newPatients}\n` +
         `• Referrals This Period: ${referrals}\n` +

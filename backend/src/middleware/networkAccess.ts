@@ -15,11 +15,11 @@ export interface NetworkAccessRequest extends AuthRequest {
 }
 
 /**
- * Result of a network membership + action check. Pure data — no req/res coupling —
+ * Result of a network membership + action check. Pure data - no req/res coupling -
  * so every network-hospital gate (route middleware, controller helper, resource-id-keyed
  * checks) can share this ONE implementation instead of each re-querying
  * hospital_network_members and re-implementing the admin-bypass / action-matrix / branch-scope
- * logic slightly differently. See [[feedback-network-hospital-change-approval]] — four
+ * logic slightly differently. See [[feedback-network-hospital-change-approval]] - four
  * independently-maintained variants of this exact check previously existed, which is how a
  * new route (leave-requests) shipped without the equivalent of any of them.
  */
@@ -77,7 +77,7 @@ export async function resolveNetworkAccess(
 /**
  * Express middleware wrapper around resolveNetworkAccess() for /hospital-networks/:id/*
  * endpoints. The :id param name can be overridden (e.g. for routes that nest the network
- * id elsewhere). Non-membership returns 404 (not 403) deliberately — an unauthorized caller
+ * id elsewhere). Non-membership returns 404 (not 403) deliberately - an unauthorized caller
  * should not be able to confirm a network/resource exists just by probing IDs.
  */
 export function requireNetworkAccess(action?: string, paramName: string = 'id') {

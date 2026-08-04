@@ -142,7 +142,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
             )}
             {reliability && !reliability.isReliable && (
               <span className="si-dbec1238"
-                title={`Reliability score: ${reliability.reliabilityScore}% — This doctor has had ${reliability.monthCancellations} cancellation(s) this month`}>
+                title={`Reliability score: ${reliability.reliabilityScore}% - This doctor has had ${reliability.monthCancellations} cancellation(s) this month`}>
                 ⚠️ {reliability.reliabilityScore}% reliable
               </span>
             )}
@@ -226,7 +226,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
             )}
             <div><span className="si-23033f05">{t('vetProfile.availableDays')}:</span> <strong>{formatDays(vet.availableDays)}</strong></div>
             {vet.availableHoursStart && vet.availableHoursEnd && (
-              <div><span className="si-23033f05">{t('vetProfile.hours')}:</span> <strong>{vet.availableHoursStart} – {vet.availableHoursEnd}</strong></div>
+              <div><span className="si-23033f05">{t('vetProfile.hours')}:</span> <strong>{vet.availableHoursStart} - {vet.availableHoursEnd}</strong></div>
             )}
           </div>
 

@@ -14,7 +14,7 @@ import { useMasterData } from '../context/MasterDataContext'
 
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
 
-// Media limits — mirror backend caps (uploadImage/uploadVideo in
+// Media limits - mirror backend caps (uploadImage/uploadVideo in
 // backend/src/middleware/upload.ts, MAX_VIDEO_DURATION_SECONDS in
 // FileController.ts). Checked client-side first so a farmer on a slow
 // mobile connection gets instant feedback instead of uploading a file
@@ -52,7 +52,7 @@ const Marketplace: React.FC = () => {
   const { user } = useAuth()
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, marketplaceCategories, marketplaceConditions, resolveLabel, marketplaceEligibleSpecies, speciesLabel } = useMasterData()
+  const { speciesCategories, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, marketplaceCategories, marketplaceConditions, resolveLabel, marketplaceEligibleSpecies, speciesLabel } = useMasterData()
   const isAdmin = user?.role === 'admin'
   const SPECIES_LIST = marketplaceEligibleSpecies
   const CATEGORY_KEYS: Array<{ value: string; label: string }> = [
@@ -332,7 +332,7 @@ const Marketplace: React.FC = () => {
     if (!file) return
 
     if (file.size > MAX_VIDEO_SIZE_MB * 1024 * 1024) {
-      setError(t('marketplace.sell.videoTooLarge', { maxMb: MAX_VIDEO_SIZE_MB, defaultValue: `Video is too large — max ${MAX_VIDEO_SIZE_MB}MB` }))
+      setError(t('marketplace.sell.videoTooLarge', { maxMb: MAX_VIDEO_SIZE_MB, defaultValue: `Video is too large - max ${MAX_VIDEO_SIZE_MB}MB` }))
       e.target.value = ''
       return
     }
@@ -342,12 +342,12 @@ const Marketplace: React.FC = () => {
     try {
       const duration = await readVideoDuration(file)
       if (duration > MAX_VIDEO_DURATION_SECONDS) {
-        setError(t('marketplace.sell.videoTooLong', { maxSec: MAX_VIDEO_DURATION_SECONDS, defaultValue: `Video is too long — max ${MAX_VIDEO_DURATION_SECONDS} seconds` }))
+        setError(t('marketplace.sell.videoTooLong', { maxSec: MAX_VIDEO_DURATION_SECONDS, defaultValue: `Video is too long - max ${MAX_VIDEO_DURATION_SECONDS} seconds` }))
         e.target.value = ''
         return
       }
     } catch {
-      // Couldn't read duration client-side (unsupported format/browser) —
+      // Couldn't read duration client-side (unsupported format/browser) -
       // let the backend's authoritative check catch it instead of blocking upload.
     }
 
@@ -359,7 +359,7 @@ const Marketplace: React.FC = () => {
     } catch (err: any) {
       const apiErr = err?.response?.data?.error
       if (apiErr?.code === 'VIDEO_TOO_LONG') {
-        setError(t('marketplace.sell.videoTooLong', { maxSec: apiErr.maxSeconds || MAX_VIDEO_DURATION_SECONDS, defaultValue: `Video is too long — max ${MAX_VIDEO_DURATION_SECONDS} seconds` }))
+        setError(t('marketplace.sell.videoTooLong', { maxSec: apiErr.maxSeconds || MAX_VIDEO_DURATION_SECONDS, defaultValue: `Video is too long - max ${MAX_VIDEO_DURATION_SECONDS} seconds` }))
       } else {
         setError(apiErr?.message || t('marketplace.sell.uploadFailed', 'Upload failed'))
       }
@@ -392,7 +392,7 @@ const Marketplace: React.FC = () => {
     } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
   }
 
-  // Pre-purchase vet check — funnel into a paid consultation (the revenue layer)
+  // Pre-purchase vet check - funnel into a paid consultation (the revenue layer)
   const bookVetCheck = (listing: MarketplaceListing) => {
     const params = new URLSearchParams({ purpose: 'pre_purchase_check' })
     if (listing.species) params.set('species', String(listing.species))
@@ -495,12 +495,12 @@ const Marketplace: React.FC = () => {
     // Registration number for breeder compliance
     const regNum = animal.registrationNumber || animal.registration_number
     if (regNum) updates.registrationNumber = regNum
-    // Auto-generate title — prefer the species-correct class label ("Bullock")
+    // Auto-generate title - prefer the species-correct class label ("Bullock")
     // over raw gender ("male") when the linked animal has one set
     const ageStr = updates.animalAgeMonths ? `${updates.animalAgeMonths}m` : ''
     const classTerm = animalClassVal ? findClassTerm(animal.species, animalClassVal) : undefined
-    const genderStr = classTerm ? ` ${t(classTerm.labelKey)}` : (animal.gender ? ` ${animal.gender}` : '')
-    updates.title = `${animal.name} — ${animal.species || ''}${animal.breed ? ' ' + animal.breed : ''}${genderStr}${ageStr ? ', ' + ageStr : ''}`.trim()
+    const genderStr = classTerm ? ` ${resolveLabel(classTerm, t)}` : (animal.gender ? ` ${animal.gender}` : '')
+    updates.title = `${animal.name} - ${animal.species || ''}${animal.breed ? ' ' + animal.breed : ''}${genderStr}${ageStr ? ', ' + ageStr : ''}`.trim()
     // Auto-generate description from medical notes and profile
     const descParts: string[] = []
     if (animal.name) descParts.push(`Name: ${animal.name}`)
@@ -521,7 +521,7 @@ const Marketplace: React.FC = () => {
 
     const oversized = Array.from(files).find(f => f.size > MAX_IMAGE_SIZE_MB * 1024 * 1024)
     if (oversized) {
-      setError(t('marketplace.sell.imageTooLarge', { maxMb: MAX_IMAGE_SIZE_MB, defaultValue: `Image is too large — max ${MAX_IMAGE_SIZE_MB}MB` }))
+      setError(t('marketplace.sell.imageTooLarge', { maxMb: MAX_IMAGE_SIZE_MB, defaultValue: `Image is too large - max ${MAX_IMAGE_SIZE_MB}MB` }))
       e.target.value = ''
       return
     }
@@ -551,10 +551,10 @@ const Marketplace: React.FC = () => {
   }
 
   // Free classifieds: reserving holds the listing while buyer and seller
-  // connect and settle directly — no payment happens on the platform
+  // connect and settle directly - no payment happens on the platform
   const reserveListing = async (listing: MarketplaceListing) => {
     if (listing.price == null) {
-      // "Contact for fee" listing — send inquiry instead of reserving
+      // "Contact for fee" listing - send inquiry instead of reserving
       try {
         await apiService.createInquiry(listing.id, '')
         setSuccessMsg(t('marketplace.inquirySent', 'Inquiry sent! The seller will be notified.'))
@@ -897,7 +897,7 @@ const Marketplace: React.FC = () => {
                 {filters.species && classTermsForSpecies(filters.species).length > 0 && (
                   <select className="module-input si-e28594a4" value={filters.animalClass || ''} onChange={e => updateFilter('animalClass', e.target.value)}>
                     <option value="">{t('animalClass.anyClass')}</option>
-                    {classTermsForSpecies(filters.species).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                    {classTermsForSpecies(filters.species).map(c => <option key={c.value} value={c.value}>{resolveLabel(c, t)}</option>)}
                   </select>
                 )}
                 <select className="module-input si-e28594a4" value={sortBy} onChange={e => setSortBy(e.target.value)}>
@@ -945,7 +945,7 @@ const Marketplace: React.FC = () => {
                 {Object.keys(filters).length > 0 && <button className="mp-chip clear" onClick={() => { setFilters({}); setSortBy(''); setNearMeActive(false) }}>{t('marketplace.chips.clearAll')}</button>}
               </div>
 
-              {/* Treasure Mount interlink — surfaced when browsing non-animal product categories */}
+              {/* Treasure Mount interlink - surfaced when browsing non-animal product categories */}
               {mpConfig?.treasureMount?.enabled && ['feed', 'equipment', 'medicine', 'other'].includes(filters.category || '') && (
                 <a className="mp-treasure-banner" href={mpConfig.treasureMount.url} target="_blank" rel="noopener noreferrer">
                   🛒 {t('marketplace.interlink.treasureBanner')} <span className="mp-treasure-cta">{t('marketplace.interlink.visitTreasure')} →</span>
@@ -1004,7 +1004,7 @@ const Marketplace: React.FC = () => {
                 <h3>{t('marketplace.sell.basicInfoTitle')}</h3>
                 <p className="mp-sell-step-desc">{t('marketplace.sell.basicInfoDesc')}</p>
                 <div className="module-form">
-                  {/* Auto-populate from existing animal — top of form for visibility */}
+                  {/* Auto-populate from existing animal - top of form for visibility */}
                   {userAnimals.length > 0 && (
                     <div className="mp-auto-populate-section">
                       <div className="mp-form-section-title">🐾 {t('marketplace.sell.autoPopulateTitle')}</div>
@@ -1022,7 +1022,7 @@ const Marketplace: React.FC = () => {
                         const vcId = sel?.uniqueId || sel?.unique_id
                         return vcId ? (
                           <div className="si-a85540c4"
-                            title="VetCare Animal ID — click to copy"
+                            title="VetCare Animal ID - click to copy"
                             onClick={() => navigator.clipboard?.writeText(vcId).then(() => {
                               setCopiedId(vcId)
                               setTimeout(() => setCopiedId(prev => (prev === vcId ? null : prev)), 1500)
@@ -1116,11 +1116,17 @@ const Marketplace: React.FC = () => {
                         <select className="module-input" value={sellForm.species}
                           onChange={e => setSellForm(f => ({ ...f, species: e.target.value, breed: '' }))}>
                           <option value="">{t('marketplace.livestock.selectSpecies')}</option>
-                          {speciesCategories.map(cat => (
-                            <optgroup key={cat.label} label={cat.label}>
-                              {cat.species.map(s => <option key={s} value={s}>{speciesLabel(s, t)}</option>)}
-                            </optgroup>
-                          ))}
+                          {speciesCategories.map(cat => {
+                            // Only species flagged marketplace-eligible in Master Data - keeps this in
+                            // sync with the Browse filter's SPECIES_LIST (both read marketplaceEligibleSpecies).
+                            const eligible = cat.species.filter(s => marketplaceEligibleSpecies.includes(s))
+                            if (eligible.length === 0) return null
+                            return (
+                              <optgroup key={cat.label} label={cat.label}>
+                                {eligible.map(s => <option key={s} value={s}>{speciesLabel(s, t)}</option>)}
+                              </optgroup>
+                            )
+                          })}
                         </select>
                       </div>
                       <div className="module-form-group">
@@ -1130,7 +1136,7 @@ const Marketplace: React.FC = () => {
                           return breeds.length > 0 ? (
                             <select className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} disabled={!sellForm.species}>
                               <option value="">{sellForm.species ? t('marketplace.sell.selectBreed') : t('marketplace.sell.selectSpeciesFirst')}</option>
-                              {breeds.map(b => <option key={b} value={b}>{b}</option>)}
+                              {breeds.map(b => <option key={b} value={b}>{breedLabel(sellForm.species, b)}</option>)}
                             </select>
                           ) : (
                             <input className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} placeholder={t('marketplace.sell.breedPlaceholder')} disabled={!sellForm.species} />
@@ -1152,7 +1158,7 @@ const Marketplace: React.FC = () => {
                               if (term?.impliedGender) sf('gender', term.impliedGender)
                             }}>
                               <option value="">{t('animalClass.selectClass')}</option>
-                              {classTermsForSpecies(sellForm.species).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                              {classTermsForSpecies(sellForm.species).map(c => <option key={c.value} value={c.value}>{resolveLabel(c, t)}</option>)}
                             </select>
                           </>
                         ) : (
@@ -1178,7 +1184,7 @@ const Marketplace: React.FC = () => {
                   </div>
                   {(() => {
                     // Only show production/pregnancy fields when relevant to the
-                    // selected species+class — e.g. a Bullock or Dog listing never
+                    // selected species+class - e.g. a Bullock or Dog listing never
                     // needs a milk-yield field. Species without a class glossary keep
                     // today's always-show behavior (no new judgment calls for them).
                     const hasClassGlossary = classTermsForSpecies(sellForm.species).length > 0
@@ -1352,7 +1358,7 @@ const Marketplace: React.FC = () => {
                       <div className="mp-price-hint-title">💡 {t('marketplace.sell.priceHintTitle')}</div>
                       <div className="mp-price-hint-body">
                         <span>{t('marketplace.sell.priceHintAvg')}: <strong>{formatCurrency(priceHint.avg)}</strong></span>
-                        <span>{t('marketplace.prices.min')}–{t('marketplace.prices.max')}: {formatCurrency(priceHint.min)} – {formatCurrency(priceHint.max)}</span>
+                        <span>{t('marketplace.prices.min')}-{t('marketplace.prices.max')}: {formatCurrency(priceHint.min)} - {formatCurrency(priceHint.max)}</span>
                         <span className="mp-price-hint-count">{t('marketplace.sell.priceHintBasis', { count: priceHint.count })}</span>
                       </div>
                       {sellForm.price && (() => {
@@ -1404,23 +1410,23 @@ const Marketplace: React.FC = () => {
                   <ReviewItem label={t('marketplace.sell.category')} value={sellForm.category} />
                   <ReviewItem label={t('marketplace.reviewLabels.type')} value={sellForm.listingType} />
                   <ReviewItem label={t('marketplace.livestock.species')} value={speciesLabel(sellForm.species, t)} />
-                  <ReviewItem label={t('marketplace.livestock.breed')} value={sellForm.breed} />
+                  <ReviewItem label={t('marketplace.livestock.breed')} value={breedLabel(sellForm.species, sellForm.breed)} />
                   <ReviewItem label={t('marketplace.livestock.gender')} value={(() => {
                     const term = findClassTerm(sellForm.species, sellForm.animalClass)
-                    if (term) return t(term.labelKey)
-                    return sellForm.gender ? GENDER_LABELS[sellForm.gender] : '—'
+                    if (term) return resolveLabel(term, t)
+                    return sellForm.gender ? GENDER_LABELS[sellForm.gender] : '-'
                   })()} />
-                  <ReviewItem label={t('marketplace.livestock.age')} value={sellForm.animalAgeMonths ? `${sellForm.animalAgeMonths} ${t('marketplace.units.months')}` : '—'} />
-                  <ReviewItem label={t('marketplace.livestock.weightKg')} value={sellForm.animalWeightKg ? `${sellForm.animalWeightKg} ${t('marketplace.units.kg')}` : '—'} />
-                  <ReviewItem label={t('marketplace.reviewLabels.milkYield')} value={sellForm.dailyMilkYield ? `${sellForm.dailyMilkYield} ${t('marketplace.units.lPerDay')}` : '—'} />
-                  <ReviewItem label={t('marketplace.livestock.pregnancy')} value={sellForm.pregnancyStatus || '—'} />
-                  <ReviewItem label={t('marketplace.livestock.vaccination')} value={VAX_LABELS[sellForm.vaccinationStatus] || '—'} />
+                  <ReviewItem label={t('marketplace.livestock.age')} value={sellForm.animalAgeMonths ? `${sellForm.animalAgeMonths} ${t('marketplace.units.months')}` : '-'} />
+                  <ReviewItem label={t('marketplace.livestock.weightKg')} value={sellForm.animalWeightKg ? `${sellForm.animalWeightKg} ${t('marketplace.units.kg')}` : '-'} />
+                  <ReviewItem label={t('marketplace.reviewLabels.milkYield')} value={sellForm.dailyMilkYield ? `${sellForm.dailyMilkYield} ${t('marketplace.units.lPerDay')}` : '-'} />
+                  <ReviewItem label={t('marketplace.livestock.pregnancy')} value={sellForm.pregnancyStatus || '-'} />
+                  <ReviewItem label={t('marketplace.livestock.vaccination')} value={VAX_LABELS[sellForm.vaccinationStatus] || '-'} />
                   <ReviewItem label={t('marketplace.reviewLabels.healthCert')} value={sellForm.healthCertificate ? t('marketplace.reviewLabels.yes') : t('marketplace.reviewLabels.no')} />
                   <ReviewItem label={t('marketplace.reviewLabels.price')} value={sellForm.price ? `${settings.currency} ${sellForm.price}` : t('marketplace.reviewLabels.contactForPrice')} />
-                  <ReviewItem label={t('marketplace.sell.location')} value={sellForm.location || '—'} />
-                  <ReviewItem label={t('marketplace.livestock.contact')} value={sellForm.contactPhone || '—'} />
+                  <ReviewItem label={t('marketplace.sell.location')} value={sellForm.location || '-'} />
+                  <ReviewItem label={t('marketplace.livestock.contact')} value={sellForm.contactPhone || '-'} />
                   <ReviewItem label={t('marketplace.compliance.sellerType')} value={sellForm.sellerType === 'registered_breeder' ? t('marketplace.compliance.registeredBreeder') : t('marketplace.compliance.individualOwner')} />
-                  {sellForm.sellerType === 'registered_breeder' && <ReviewItem label={t('marketplace.compliance.registrationNumber')} value={sellForm.registrationNumber || '—'} />}
+                  {sellForm.sellerType === 'registered_breeder' && <ReviewItem label={t('marketplace.compliance.registrationNumber')} value={sellForm.registrationNumber || '-'} />}
                 </div>
                 {sellForm.description && (
                   <div className="mp-review-desc">
@@ -1472,9 +1478,9 @@ const Marketplace: React.FC = () => {
                   <tbody>
                     {inquiries.map((inq: any) => (
                       <tr key={inq.id}>
-                        <td>{inq.listingTitle || inq.listing_title || '—'}</td>
-                        <td>{inq.message || '—'}</td>
-                        <td>{inq.created_at ? new Date(inq.created_at).toLocaleDateString() : '—'}</td>
+                        <td>{inq.listingTitle || inq.listing_title || '-'}</td>
+                        <td>{inq.message || '-'}</td>
+                        <td>{inq.created_at ? new Date(inq.created_at).toLocaleDateString() : '-'}</td>
                         <td><span className={`module-badge ${inq.status === 'responded' ? 'success' : ''}`}>{inq.status || 'pending'}</span></td>
                       </tr>
                     ))}
@@ -1497,8 +1503,8 @@ const Marketplace: React.FC = () => {
                   const statusLabel = t(statusKey) === statusKey ? o.status : t(statusKey)
                   return (
                     <tr key={o.id}>
-                      <td>{g(o, 'listingTitle', 'listing_title') || '—'}</td>
-                      <td>{o.species ? speciesLabel(o.species, t) : '—'}</td>
+                      <td>{g(o, 'listingTitle', 'listing_title') || '-'}</td>
+                      <td>{o.species ? speciesLabel(o.species, t) : '-'}</td>
                       <td>{orderRole === 'buyer' ? g(o, 'sellerName', 'seller_name') : g(o, 'buyerName', 'buyer_name')}</td>
                       <td>{o.quantity}</td>
                       <td className="mp-price-highlight">{formatCurrency(g(o, 'totalPrice', 'total_price') || 0)}</td>
@@ -1508,7 +1514,7 @@ const Marketplace: React.FC = () => {
                           <div className="mp-deal-until">{t('marketplace.deal.reservedUntil')}: {new Date(reservedUntil).toLocaleDateString()}</div>
                         )}
                       </td>
-                      <td>{(g(o, 'createdAt', 'created_at')) ? new Date(g(o, 'createdAt', 'created_at')).toLocaleDateString() : '—'}</td>
+                      <td>{(g(o, 'createdAt', 'created_at')) ? new Date(g(o, 'createdAt', 'created_at')).toLocaleDateString() : '-'}</td>
                       <td>
                         {o.status === 'reserved' ? (
                           <div className="mp-deal-actions">
@@ -1535,7 +1541,7 @@ const Marketplace: React.FC = () => {
                           </div>
                         ) : o.status === 'completed' ? (
                           <span className="mp-deal-done">🎉 {t('marketplace.deal.dealDone')}</span>
-                        ) : '—'}
+                        ) : '-'}
                       </td>
                     </tr>
                   )
@@ -1666,13 +1672,13 @@ const Marketplace: React.FC = () => {
                   {marketPrices.map((mp, i) => (
                     <tr key={i}>
                       <td><strong>{speciesLabel(mp.species, t)}</strong></td>
-                      <td>{mp.breed || '—'}</td>
+                      <td>{mp.breed || '-'}</td>
                       <td>{mp.total_listings}</td>
                       <td className="mp-price-highlight">{formatCurrency(Math.round(mp.avg_price || 0))}</td>
                       <td>{formatCurrency(Math.round(mp.min_price || 0))}</td>
                       <td>{formatCurrency(Math.round(mp.max_price || 0))}</td>
-                      <td>{mp.avg_milk_yield ? `${Number(mp.avg_milk_yield).toFixed(1)}L` : '—'}</td>
-                      <td>{mp.avg_weight ? `${Number(mp.avg_weight).toFixed(0)} ${t('marketplace.units.kg')}` : '—'}</td>
+                      <td>{mp.avg_milk_yield ? `${Number(mp.avg_milk_yield).toFixed(1)}L` : '-'}</td>
+                      <td>{mp.avg_weight ? `${Number(mp.avg_weight).toFixed(0)} ${t('marketplace.units.kg')}` : '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1718,8 +1724,8 @@ const Marketplace: React.FC = () => {
                     <tbody>{adminStats.bySpecies.map((s, i) => (
                       <tr key={i}><td><strong>{speciesLabel(s.species, t)}</strong></td><td>{s.count}</td>
                         <td>{formatCurrency(Math.round(s.avg_price || 0))}</td>
-                        <td>{s.avg_milk_yield ? `${Number(s.avg_milk_yield).toFixed(1)}L` : '—'}</td>
-                        <td>{s.avg_weight ? `${Number(s.avg_weight).toFixed(0)}${t('marketplace.units.kg')}` : '—'}</td></tr>
+                        <td>{s.avg_milk_yield ? `${Number(s.avg_milk_yield).toFixed(1)}L` : '-'}</td>
+                        <td>{s.avg_weight ? `${Number(s.avg_weight).toFixed(0)}${t('marketplace.units.kg')}` : '-'}</td></tr>
                     ))}</tbody>
                   </table>
                 </div>
@@ -1757,9 +1763,9 @@ const Marketplace: React.FC = () => {
                               <span className="mp-title-link" onClick={() => { setTab('browse'); viewListing(l) }}>{l.title}</span>
                             </div>
                           </td>
-                          <td>{g(l, 'sellerName', 'seller_name') || '—'}</td>
-                          <td>{l.species ? speciesLabel(l.species, t) : '—'}</td>
-                          <td>{l.price ? formatCurrency(l.price) : '—'}</td>
+                          <td>{g(l, 'sellerName', 'seller_name') || '-'}</td>
+                          <td>{l.species ? speciesLabel(l.species, t) : '-'}</td>
+                          <td>{l.price ? formatCurrency(l.price) : '-'}</td>
                           <td><span className={`module-badge ${l.status === 'active' ? 'success' : l.status === 'rejected' ? 'error' : ''}`}>{l.status}</span></td>
                           <td>{g(l, 'adminApproved', 'admin_approved') === true ? '✅' : g(l, 'adminApproved', 'admin_approved') === false ? '❌' : '⏳'}</td>
                           <td>
@@ -1813,7 +1819,7 @@ const Marketplace: React.FC = () => {
                   {adminReports.map(r => (
                     <div key={r.id} className="mp-report-card">
                       <div className="mp-report-head">
-                        <span className="mp-title-link" onClick={() => { setTab('browse'); viewListing({ id: r.listing_id, title: r.listing_title } as MarketplaceListing) }}>{r.listing_title || '—'}</span>
+                        <span className="mp-title-link" onClick={() => { setTab('browse'); viewListing({ id: r.listing_id, title: r.listing_title } as MarketplaceListing) }}>{r.listing_title || '-'}</span>
                         <span className={`module-badge ${r.status === 'open' ? 'error' : r.status === 'actioned' ? 'success' : ''}`}>{t(`marketplace.report.status.${r.status}`)}</span>
                       </div>
                       <div className="mp-report-meta">
@@ -1842,7 +1848,7 @@ const Marketplace: React.FC = () => {
           {/* ── Monetization Settings Sub-tab ── */}
           {adminSubTab === 'settings' && (
             <div>
-              {/* Auction Feature Toggle — prominent card */}
+              {/* Auction Feature Toggle - prominent card */}
               <div className="mp-section">
                 <h3 className="mp-section-title">🔨 {t('marketplace.admin.auctionFeature', 'Auction Feature')}</h3>
                 <div className={`mp-setting-card ${auctionEnabled ? 'enabled' : ''} si-197ba518`}>
@@ -2056,7 +2062,7 @@ const Marketplace: React.FC = () => {
                       <tbody>
                         {monetizationDashboard.recentTransactions.map((tx: any) => (
                           <tr key={tx.id}>
-                            <td>{tx.userName || '—'}</td>
+                            <td>{tx.userName || '-'}</td>
                             <td><span className="module-badge">{tx.transaction_type}</span></td>
                             <td>{formatCurrency(tx.amount)}</td>
                             <td><span className={`module-badge ${tx.status === 'completed' ? 'success' : ''}`}>{tx.status}</span></td>
@@ -2083,7 +2089,7 @@ const Marketplace: React.FC = () => {
 
 // ─── Listing Card Component ───
 const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: TFunction; isFavorite?: boolean; onToggleFavorite?: () => void }> = ({ listing: l, formatCurrency, onView, t, isFavorite, onToggleFavorite }) => {
-  const { speciesLabel } = useMasterData()
+  const { speciesLabel, breedLabel } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -2105,7 +2111,7 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
   const breedAvgPrice = g(l, 'breedAvgPrice', 'breed_avg_price')
   const hasHealthPassport = g(l, 'hasHealthPassport', 'has_health_passport')
-  // Moderation state — only ever present on the seller's own listings (and for admins)
+  // Moderation state - only ever present on the seller's own listings (and for admins)
   const adminApproved = g(l, 'adminApproved', 'admin_approved')
   const isRejected = adminApproved === false && l.status === 'rejected'
   const isPendingReview = adminApproved === false && !isRejected
@@ -2159,7 +2165,7 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
         {(species || breed) && (
           <div className="mp-card-livestock">
             {species && <span className="mp-tag species">{speciesLabel(species, t)}</span>}
-            {breed && <span className="mp-tag breed">{breed}</span>}
+            {breed && <span className="mp-tag breed">{breedLabel(species, breed)}</span>}
             {gender && <span className="mp-tag gender">{gender === 'female' ? '♀' : '♂'}</span>}
           </div>
         )}
@@ -2234,7 +2240,7 @@ const ListingDetail: React.FC<{
   onReport?: () => void; onBookVetCheck?: () => void; transport?: { url: string };
   t: TFunction;
 }> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
-  const { findClassTerm, speciesLabel } = useMasterData()
+  const { findClassTerm, speciesLabel, resolveLabel, breedLabel } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -2335,10 +2341,10 @@ const ListingDetail: React.FC<{
               <h3>{t('marketplace.detail.animalProfile')}</h3>
               <div className="mp-detail-grid">
                 {species && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.species')}</span><span className="mp-detail-value">{speciesLabel(species, t)}</span></div>}
-                {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breed}</span></div>}
+                {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breedLabel(species, breed)}</span></div>}
                 {(gender || animalClass) && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{(() => {
                   const term = animalClass ? findClassTerm(species || '', animalClass) : undefined
-                  if (term) return t(term.labelKey)
+                  if (term) return resolveLabel(term, t)
                   return (gender && ({ male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') } as Record<string, string>)[gender]) || gender
                 })()}</span></div>}
                 {age && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.age')}</span><span className="mp-detail-value">{age >= 12 ? `${Math.floor(age / 12)}y ${age % 12}m` : `${age} ${t('marketplace.units.months')}`}</span></div>}
@@ -2390,7 +2396,7 @@ const ListingDetail: React.FC<{
                         </button>
                       )}
                     </div>
-                  ) : <span className="si-e70e9abd">—</span>}
+                  ) : <span className="si-e70e9abd">-</span>}
                 </span>
               </div>
               <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.views')}</span><span className="mp-detail-value">{viewsCount || 0}</span></div>
@@ -2407,7 +2413,7 @@ const ListingDetail: React.FC<{
           <div className="mp-detail-section mp-compliance-detail">
             <h3>⚖️ {t('marketplace.compliance.complianceTitle')}</h3>
             <div className="mp-detail-grid">
-              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.welfareStatus')}</span><span className="mp-detail-value">{welfareAtt ? '✅ ' + t('marketplace.compliance.attested') : '—'}</span></div>
+              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.welfareStatus')}</span><span className="mp-detail-value">{welfareAtt ? '✅ ' + t('marketplace.compliance.attested') : '-'}</span></div>
               <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.termsStatus')}</span><span className="mp-detail-value">✅ {t('marketplace.compliance.accepted')}</span></div>
             </div>
             <div className="mp-compliance-info">{t('marketplace.compliance.detailDisclaimer')}</div>
@@ -2516,7 +2522,7 @@ const ListingDetail: React.FC<{
 
 // ─── Review Item ───
 const ReviewItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div className="mp-review-item"><span className="mp-review-label">{label}</span><span className="mp-review-value">{value || '—'}</span></div>
+  <div className="mp-review-item"><span className="mp-review-label">{label}</span><span className="mp-review-value">{value || '-'}</span></div>
 )
 
 export default Marketplace

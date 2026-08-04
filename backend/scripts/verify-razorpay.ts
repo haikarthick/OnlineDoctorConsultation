@@ -1,5 +1,5 @@
 /**
- * Standalone pre-flight check for a Razorpay Key Id/Secret pair — verifies
+ * Standalone pre-flight check for a Razorpay Key Id/Secret pair - verifies
  * against Razorpay's real API BEFORE you paste it into Admin -> System
  * Settings -> Razorpay Credentials (which is where the app actually stores
  * and reads credentials from, encrypted, not from env vars).
@@ -21,11 +21,11 @@ async function main() {
   }
   const gw = new RazorpayGateway('razorpay_test', { keyId, keySecret, webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '' });
   const order = await gw.createOrder(10, 'INR', `verify_${Date.now()}`, { purpose: 'credential-verification' });
-  console.log('SUCCESS — Razorpay test order created:');
+  console.log('SUCCESS - Razorpay test order created:');
   console.log(JSON.stringify(order, null, 2));
 }
 
 main().catch((err) => {
-  console.error('FAILED —', err?.response?.data || err.message || err);
+  console.error('FAILED -', err?.response?.data || err.message || err);
   process.exit(1);
 });

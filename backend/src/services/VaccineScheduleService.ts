@@ -73,7 +73,7 @@ export interface PassportProtocolStatus {
 class VaccineScheduleService {
   /**
    * Generate or refresh schedule rows for an animal + protocol.
-   * Idempotent — skips existing pending/waived rows.
+   * Idempotent - skips existing pending/waived rows.
    */
   async generateScheduleForAnimal(
     animalId: string,

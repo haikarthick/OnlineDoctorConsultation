@@ -183,10 +183,10 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
                   <div className="si-660753ea">
                     <div className="si-1327446f">
                       <div><strong>{t('auditLogs.logId')}:</strong> {log.id}</div>
-                      <div><strong>{t('auditLogs.user')}:</strong> {log.userName || log.userEmail || '—'}</div>
-                      <div><strong>{t('auditLogs.userId')}:</strong> {log.userId || '—'}</div>
-                      <div><strong>{t('auditLogs.resourceId')}:</strong> {log.resourceId || '—'}</div>
-                      <div><strong>{t('auditLogs.resourceType')}:</strong> {log.resourceType || '—'}</div>
+                      <div><strong>{t('auditLogs.user')}:</strong> {log.userName || log.userEmail || '-'}</div>
+                      <div><strong>{t('auditLogs.userId')}:</strong> {log.userId || '-'}</div>
+                      <div><strong>{t('auditLogs.resourceId')}:</strong> {log.resourceId || '-'}</div>
+                      <div><strong>{t('auditLogs.resourceType')}:</strong> {log.resourceType || '-'}</div>
                       {log.ipAddress && <div><strong>{t('auditLogs.ip')}:</strong> {log.ipAddress}</div>}
                     </div>
                     {log.details && (

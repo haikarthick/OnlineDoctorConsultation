@@ -1,7 +1,7 @@
 -- ============================================================
 -- GO-LIVE CLEAN-START SCRIPT (docs/PAYMENT_MODULE_PLAN.md D14)
 -- ============================================================
--- Owner rule (2026-07-05): production launches with a clean slate —
+-- Owner rule (2026-07-05): production launches with a clean slate -
 -- no grandfathered bookings/consultations/payments. This script wipes
 -- TRANSACTIONAL data while preserving accounts, profiles, master data,
 -- settings, policies and consent records.

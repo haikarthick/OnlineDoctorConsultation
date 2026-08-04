@@ -1,7 +1,7 @@
 /**
  * Marketplace Engagement Service (Phase 3)
  * Buyer<->seller messaging threads, favorites/watchlist, and saved searches
- * with new-listing alerts. All free — no payment touches this module.
+ * with new-listing alerts. All free - no payment touches this module.
  */
 import pool from '../utils/database';
 import { v4 as uuidv4 } from 'uuid';
@@ -196,7 +196,7 @@ class MarketplaceEngagementService {
   // Saved searches + alerts
   // ══════════════════════════════════════════
 
-  // Only these filter keys are honored — anything else is ignored so a saved
+  // Only these filter keys are honored - anything else is ignored so a saved
   // search can never smuggle arbitrary SQL fragments into the matcher.
   private static readonly ALLOWED_FILTERS = ['category', 'species', 'breed', 'gender', 'listingType', 'minPrice', 'maxPrice', 'vaccinationStatus', 'search'];
 
@@ -287,7 +287,7 @@ class MarketplaceEngagementService {
       return { reported: true, id };
     } catch (err: any) {
       // Partial unique index blocks a second open report from the same user
-      if (err.code === '23505') throw new Error('You have already reported this listing — it is under review.');
+      if (err.code === '23505') throw new Error('You have already reported this listing - it is under review.');
       throw err;
     }
   }
@@ -325,7 +325,7 @@ class MarketplaceEngagementService {
     if (isFinal) {
       await notifySafe(report.reporter_id, 'marketplace_report_resolved', 'Your report was reviewed',
         status === 'actioned'
-          ? 'Thanks — we reviewed the listing you reported and took action.'
+          ? 'Thanks - we reviewed the listing you reported and took action.'
           : 'Thanks for your report. After review, no action was needed on that listing.',
         { reportId: id });
     }
@@ -333,7 +333,7 @@ class MarketplaceEngagementService {
   }
 
   // ══════════════════════════════════════════
-  // Interlink / referral config (marketplace is free — these are just links)
+  // Interlink / referral config (marketplace is free - these are just links)
   // ══════════════════════════════════════════
 
   async getConfig() {

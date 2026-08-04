@@ -116,10 +116,10 @@ export default function PharmacySuppliers({ networkId }: Props) {
                 {suppliers.map(s => (
                   <tr key={s.id}>
                     <td><strong>{s.name}</strong></td>
-                    <td>{s.contact_name || '—'}</td>
-                    <td>{s.email || '—'}</td>
-                    <td>{s.phone || '—'}</td>
-                    <td>{s.lead_time_days ? `${s.lead_time_days}d` : '—'}</td>
+                    <td>{s.contact_name || '-'}</td>
+                    <td>{s.email || '-'}</td>
+                    <td>{s.phone || '-'}</td>
+                    <td>{s.lead_time_days ? `${s.lead_time_days}d` : '-'}</td>
                     <td>
                       <span className={`pharm-badge ${s.is_approved ? 'approved' : 'rejected'}`}>
                         {s.is_approved ? t('pharmacy.suppliers.approved') : t('pharmacy.suppliers.unapproved')}

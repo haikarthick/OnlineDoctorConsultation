@@ -249,7 +249,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
         const match = futureSlots.find(s => s.startTime === autoTime)
         if (match) {
           setSelectedSlot(match)
-          setStep(3) // skip the "Choose Time" step — user already chose in FindDoctor
+          setStep(3) // skip the "Choose Time" step - user already chose in FindDoctor
         }
       } else {
         // If all slots for the selected date are in the past (common on initial load with today's date),
@@ -259,7 +259,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
         if (date === todayStr && !autoSelectedDate) {
           const futureSlots = filterFutureSlots(slots, date)
           if (futureSlots.length === 0 && slots.length > 0) {
-            // Today has slots but all are past — skip to next available date
+            // Today has slots but all are past - skip to next available date
             autoFindNextDate(selectedVet.userId, date)
           }
         }
@@ -312,7 +312,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
           return
         }
       } catch {
-        // ignore — let user pick manually
+        // ignore - let user pick manually
       }
     }
     setDateSearching(false)
@@ -464,7 +464,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Persistent Doctor Info Panel — visible on steps 2, 3, 4 */}
+      {/* Persistent Doctor Info Panel - visible on steps 2, 3, 4 */}
       {selectedVet && step > 1 && (
         <div className="card si-aff059cd">
           <div className="card-body si-bc0f1da3">
@@ -713,7 +713,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                       <option value="">-- {t('bookConsultation.selectFarmPlaceholder')} --</option>
                       {enterprises.map(ent => (
                         <option key={ent.id} value={ent.id}>
-                          {ent.name} — {ent.type}{ent.location ? ` (${ent.location})` : ''}
+                          {ent.name} - {ent.type}{ent.location ? ` (${ent.location})` : ''}
                         </option>
                       ))}
                     </select>
@@ -740,7 +740,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                           <option value="">-- {t('bookConsultation.allAnimalsNoFilter')} --</option>
                           {groups.map(g => (
                             <option key={g.id} value={g.id}>
-                              {g.name} — {g.type}{g.animalCount != null ? ` (${g.animalCount} animals)` : ''}
+                              {g.name} - {g.type}{g.animalCount != null ? ` (${g.animalCount} animals)` : ''}
                             </option>
                           ))}
                         </select>
@@ -759,7 +759,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                         <option value="">-- {t('bookConsultation.selectAnimalOptional')} --</option>
                         {filteredEnterpriseAnimals.map((a: any) => (
                           <option key={a.id} value={a.id}>
-                            {a.name} — {speciesLabel(a.species, t)}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}
+                            {a.name} - {speciesLabel(a.species, t)}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}
                           </option>
                         ))}
                       </select>
@@ -828,7 +828,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                     >
                       <option value="">-- {t('bookConsultation.selectPetOptional')} --</option>
                       {animals.map(a => (
-                        <option key={a.id} value={a.id}>{a.name} — {speciesLabel(a.species, t)}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}</option>
+                        <option key={a.id} value={a.id}>{a.name} - {speciesLabel(a.species, t)}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}</option>
                       ))}
                     </select>
                   )}
@@ -992,7 +992,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                       <div className="si-f48bb60f">
                         <span className="si-48a0b045">{t('bookConsultation.animalLabel')}:</span>
                         <p className="si-3611a35f">
-                          {selectedAnimalObj.name} — {speciesLabel(selectedAnimalObj.species, t)}
+                          {selectedAnimalObj.name} - {speciesLabel(selectedAnimalObj.species, t)}
                           {selectedAnimalObj.breed ? ` / ${selectedAnimalObj.breed}` : ''}
                         </p>
                       </div>
@@ -1009,7 +1009,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                   <div>
                     <strong className="si-c3b93ebb">{t('bookConsultation.petLabel')}</strong>
                     <p className="si-4dc4c991">
-                      {selectedAnimalObj.name} — {selectedAnimalObj.species}
+                      {selectedAnimalObj.name} - {selectedAnimalObj.species}
                       {selectedAnimalObj.breed ? ` / ${selectedAnimalObj.breed}` : ''}
                     </p>
                   </div>

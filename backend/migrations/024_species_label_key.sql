@@ -5,7 +5,7 @@
 -- fallback pattern used on the frontend). Every place in the app that displays a
 -- species name (Animals.tsx, Marketplace/PublicMarketplace filters and facets,
 -- HospitalWorkflow walk-in, VaccinationPassport) rendered the raw English `code`/`label`
--- directly — species names never translated into any of the 6 locales, regardless of
+-- directly - species names never translated into any of the 6 locales, regardless of
 -- the user's selected language. Reported via screenshot: PublicMarketplace's species
 -- filter showing "Buffalo" untranslated while every other control around it was in Tamil.
 --

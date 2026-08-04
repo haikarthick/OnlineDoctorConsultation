@@ -3,7 +3,7 @@
 -- Marketplace.tsx/PublicMarketplace.tsx picked their "which species can be listed for
 -- sale" dropdown from two hardcoded arrays in speciesBreeds.ts (MARKETPLACE_FARMER_SPECIES /
 -- MARKETPLACE_PET_OWNER_SPECIES), disconnected from the admin master-data CRUD shipped in
--- migration 022 — a species an admin adds there would never become sellable without a code
+-- migration 022 - a species an admin adds there would never become sellable without a code
 -- change. The two hardcoded lists differ by exactly one species (Rabbit, pet-owner only),
 -- so this collapses them to a single admin-editable flag rather than two, matching how
 -- similar the two lists actually are in practice.

@@ -13,7 +13,7 @@ import { loginAs, assertPageLoaded, assertAccessDenied } from './fixtures'
  */
 
 // ── NAVIGATION VISIBILITY TESTS ─────────────────────────────
-test.describe('Navigation — Menu Visibility by Role', () => {
+test.describe('Navigation - Menu Visibility by Role', () => {
 
   test('pet_owner should see only permitted menu items', async ({ petOwnerPage: page }) => {
     const allowedItems = NAV_ITEMS.filter(item => item.roles.includes('pet_owner'))
@@ -24,7 +24,7 @@ test.describe('Navigation — Menu Visibility by Role', () => {
       // The item should be in the sidebar (could be collapsed in mobile)
       const count = await link.count()
       if (count === 0) {
-        // May be hidden due to permission check beyond role — that's acceptable
+        // May be hidden due to permission check beyond role - that's acceptable
         continue
       }
       await expect(link.first()).toBeVisible()
@@ -42,7 +42,7 @@ test.describe('Navigation — Menu Visibility by Role', () => {
     for (const item of vetItems.slice(0, 10)) {
       const link = page.locator(`nav a[href="${item.path}"], .sidebar a[href="${item.path}"], .nav-sidebar a[href="${item.path}"]`)
       const count = await link.count()
-      // Just verify it doesn't crash — exact visibility depends on permission system
+      // Just verify it doesn't crash - exact visibility depends on permission system
       expect(count).toBeGreaterThanOrEqual(0)
     }
   })
@@ -79,7 +79,7 @@ const ROLE_USER_MAP: Record<UserRole, keyof typeof USERS> = {
   farmer: 'farmer1',
 }
 
-test.describe('Page Load — All Routes Smoke Test', () => {
+test.describe('Page Load - All Routes Smoke Test', () => {
   // Test accessible routes load without crash for each role
   for (const [route, allowedRoles] of Object.entries(ROUTE_ROLES)) {
     // Skip parameterized routes (e.g. /vet-profile/:userId)
@@ -100,7 +100,7 @@ test.describe('Page Load — All Routes Smoke Test', () => {
 })
 
 // ── ACCESS DENIED TESTS ─────────────────────────────────────
-test.describe('Permission Guards — Unauthorized Access', () => {
+test.describe('Permission Guards - Unauthorized Access', () => {
   // Test that roles are blocked from routes they shouldn't access
 
   const DENY_TESTS: { role: UserRole; routes: string[] }[] = [

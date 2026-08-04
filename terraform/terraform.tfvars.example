@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════
-#  VetCare — Terraform Variables (Production Defaults)
+#  VetCare - Terraform Variables (Production Defaults)
 # ═══════════════════════════════════════════════════════
 # Copy to terraform.tfvars and fill in sensitive values.
 # NEVER commit terraform.tfvars to version control.
@@ -10,7 +10,7 @@ domain_name     = "vetcare.example.com"
 docker_registry = "ghcr.io/your-org/vetcare"
 image_tag       = "latest"
 
-# Sensitive — set via environment variables or Terraform Cloud:
+# Sensitive - set via environment variables or Terraform Cloud:
 #   export TF_VAR_db_password="..."
 #   export TF_VAR_jwt_secret="..."
 #   export TF_VAR_redis_password="..."

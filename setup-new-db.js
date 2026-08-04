@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * VetCare — New Database Bootstrap Script
+ * VetCare - New Database Bootstrap Script
  * Runs: schema creation → init.sql → migrations → seed demo data
  * Usage: node setup-new-db.js <EXTERNAL_DATABASE_URL>
  *        (Run from the project root folder)
@@ -21,7 +21,7 @@ if (!DATABASE_URL) {
   process.exit(1);
 }
 
-// Schemas to set up — one for DEV, one for PROD
+// Schemas to set up - one for DEV, one for PROD
 const SCHEMAS = ['vetcare_dev', 'vetcare_prod'];
 
 const MIGRATIONS_DIR = path.join(__dirname, 'backend', 'src', 'utils');
@@ -33,9 +33,9 @@ async function runSQL(client, sql, label) {
     await client.query(sql);
     console.log(`  ✔ ${label}`);
   } catch (e) {
-    // Many init.sql statements are CREATE TABLE IF NOT EXISTS — warnings are safe
+    // Many init.sql statements are CREATE TABLE IF NOT EXISTS - warnings are safe
     if (e.message.includes('already exists') || e.code === '42P07' || e.code === '42710') {
-      console.log(`  ⚠  ${label} — object already exists (safe to ignore)`);
+      console.log(`  ⚠  ${label} - object already exists (safe to ignore)`);
     } else {
       console.error(`  ✗ ${label} FAILED: ${e.message}`);
       throw e;
@@ -80,7 +80,7 @@ async function setupSchema(pool, schema) {
         }
       }
     }
-    console.log(`  ✔ init.sql — ${ok} statements OK, ${warn} skipped (already exist)`);
+    console.log(`  ✔ init.sql - ${ok} statements OK, ${warn} skipped (already exist)`);
 
     // 4. Check if demo data already exists
     let vetCount = 0;
@@ -106,15 +106,15 @@ async function setupSchema(pool, schema) {
             seedOk++;
           } catch (e) {
             seedWarn++;
-            // Don't log individual seed warnings — they're usually duplicate key on re-seed
+            // Don't log individual seed warnings - they're usually duplicate key on re-seed
           }
         }
-        console.log(`  ✔ Demo data seeded — ${seedOk} statements OK, ${seedWarn} skipped`);
+        console.log(`  ✔ Demo data seeded - ${seedOk} statements OK, ${seedWarn} skipped`);
       } catch (e) {
         console.warn(`  ⚠  Seed warning: ${e.message}`);
       }
     } else {
-      console.log(`  ✔ Demo data already present (${vetCount} vet profiles) — skipping seed`);
+      console.log(`  ✔ Demo data already present (${vetCount} vet profiles) - skipping seed`);
     }
 
     console.log(`\n  ✅  Schema "${schema}" fully ready`);
@@ -125,7 +125,7 @@ async function setupSchema(pool, schema) {
 
 async function main() {
   console.log('\n╔══════════════════════════════════════════════╗');
-  console.log('  VetCare — Database Bootstrap');
+  console.log('  VetCare - Database Bootstrap');
   console.log('╚══════════════════════════════════════════════╝\n');
   console.log(`  Target DB: ${DATABASE_URL.replace(/:([^:@]+)@/, ':***@')}`);
   console.log(`  Schemas to set up: ${SCHEMAS.join(', ')}\n`);
@@ -161,11 +161,11 @@ async function main() {
   console.log('\n╔══════════════════════════════════════════════╗');
   console.log('  ✅  Database setup complete!');
   console.log('╚══════════════════════════════════════════════╝\n');
-  console.log('Next steps — update these env vars in Render dashboard:\n');
+  console.log('Next steps - update these env vars in Render dashboard:\n');
   console.log('  For BOTH web services (vetcare-dev and vetcare-app):');
   const internalUrl = DATABASE_URL.replace(/\.(oregon|frankfurt|singapore|ohio)-postgres\.render\.com/, '');
   console.log(`  DATABASE_URL = ${internalUrl.replace(/:([^:@]+)@/, ':***@')}`);
-  console.log('  (use the Internal Database URL from Render — no region suffix)');
+  console.log('  (use the Internal Database URL from Render - no region suffix)');
   console.log('\n  For vetcare-dev:  DB_SCHEMA = vetcare_dev');
   console.log('  For vetcare-app:  DB_SCHEMA = vetcare_prod\n');
 }

@@ -114,7 +114,7 @@ const Settlements: React.FC<SettlementsProps> = () => {
                     <span className="si-23033f05"> · TDS {formatCurrency(parseFloat(String(w.tdsAmount || 0)))} · {t('withdrawals.netPaid')} <strong>{formatCurrency(parseFloat(String(w.netPaidAmount || 0)))}</strong></span>
                   </div>
                   <div className="si-322b324f">
-                    {w.payoutUpi ? `UPI: ${w.payoutUpi}` : `${w.payoutAccountName || ''} · ${w.payoutAccountNumber || '—'} · ${w.payoutIfsc || ''}`}
+                    {w.payoutUpi ? `UPI: ${w.payoutUpi}` : `${w.payoutAccountName || ''} · ${w.payoutAccountNumber || '-'} · ${w.payoutIfsc || ''}`}
                   </div>
                   {w.utrReference && <div className="si-48a0b045">UTR: {w.utrReference}</div>}
                   {w.rejectionReason && <div className="si-f900fd0c">{w.rejectionReason}</div>}
@@ -197,7 +197,7 @@ const Settlements: React.FC<SettlementsProps> = () => {
         </div>
       )}
 
-      {/* Discretionary payout dialog (opened from negative/none — via button below) */}
+      {/* Discretionary payout dialog (opened from negative/none - via button below) */}
       <div className="si-138c678b">
         <button className="module-btn" onClick={() => setDiscDialog({ doctorId: '', doctorName: '', utr: '', note: '' })}>
           ⚡ {t('settlementsAdmin.discretionaryButton')}

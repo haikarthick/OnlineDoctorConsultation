@@ -191,7 +191,7 @@ const WorkforcePage: React.FC = () => {
                   <table className="data-table compact">
                     <thead><tr><th>{t('common.name')}</th><th>{t('common.completed')}</th><th>{t('common.active')}</th><th>{t('workforce.avgHours')}</th></tr></thead>
                     <tbody>{dashboard.topWorkers.map((w: any, i: number) => (
-                      <tr key={i}><td>{w.name}</td><td><strong>{w.completed}</strong></td><td>{w.active}</td><td>{w.avg_hours ? (+w.avg_hours).toFixed(1) : '—'}</td></tr>
+                      <tr key={i}><td>{w.name}</td><td><strong>{w.completed}</strong></td><td>{w.active}</td><td>{w.avg_hours ? (+w.avg_hours).toFixed(1) : '-'}</td></tr>
                     ))}</tbody>
                   </table>
                 </div>
@@ -203,8 +203,8 @@ const WorkforcePage: React.FC = () => {
                   <table className="data-table">
                     <thead><tr><th>{t('workforce.task')}</th><th>{t('workforce.assignedTo')}</th><th>{t('workforce.due')}</th><th>{t('workforce.priority')}</th></tr></thead>
                     <tbody>{dashboard.overdueTasks.map((ot: any, i: number) => (
-                      <tr key={i}><td>{ot.title}</td><td>{ot.assigned_to_name || '—'}</td>
-                        <td className="si-4fb20e94">{ot.due_date ? new Date(ot.due_date).toLocaleDateString() : '—'}</td>
+                      <tr key={i}><td>{ot.title}</td><td>{ot.assigned_to_name || '-'}</td>
+                        <td className="si-4fb20e94">{ot.due_date ? new Date(ot.due_date).toLocaleDateString() : '-'}</td>
                         <td><span className="badge" style={{ backgroundColor: PRIORITY_COLORS[ot.priority] }}>{ot.priority}</span></td></tr>
                     ))}</tbody>
                   </table>
@@ -217,8 +217,8 @@ const WorkforcePage: React.FC = () => {
                   <table className="data-table">
                     <thead><tr><th>{t('workforce.worker')}</th><th>{t('workforce.time')}</th><th>{t('workforce.role')}</th><th>{t('common.status')}</th></tr></thead>
                     <tbody>{dashboard.todayShifts.map((s: any, i: number) => (
-                      <tr key={i}><td>{s.user_name}</td><td>{s.start_time} – {s.end_time}</td>
-                        <td>{s.role_on_shift || '—'}</td><td><span className={`badge badge-${s.status}`}>{s.status}</span></td></tr>
+                      <tr key={i}><td>{s.user_name}</td><td>{s.start_time} - {s.end_time}</td>
+                        <td>{s.role_on_shift || '-'}</td><td><span className={`badge badge-${s.status}`}>{s.status}</span></td></tr>
                     ))}</tbody>
                   </table>
                 </div>
@@ -312,10 +312,10 @@ const WorkforcePage: React.FC = () => {
                   {shifts.map(s => (
                     <tr key={s.id}>
                       <td>{s.userName || (s as any).user_name || s.userId}</td>
-                      <td>{(s.shiftDate || (s as any).shift_date) ? new Date(s.shiftDate || (s as any).shift_date).toLocaleDateString() : '–'}</td>
+                      <td>{(s.shiftDate || (s as any).shift_date) ? new Date(s.shiftDate || (s as any).shift_date).toLocaleDateString() : '-'}</td>
                       <td>{s.startTime || (s as any).start_time}</td>
                       <td>{s.endTime || (s as any).end_time}</td>
-                      <td>{s.roleOnShift || (s as any).role_on_shift || '—'}</td>
+                      <td>{s.roleOnShift || (s as any).role_on_shift || '-'}</td>
                       <td><span className={`badge badge-${s.status}`}>{s.status}</span></td>
                       <td>
                         {s.status === 'scheduled' && <button className="btn-sm" onClick={() => handleCheckIn(s.id)}>{t('workforce.checkIn')}</button>}

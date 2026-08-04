@@ -55,7 +55,7 @@ const VetHospitalManage: React.FC = () => {
   const [vetSearchLoading, setVetSearchLoading] = useState(false)
   const [selectedVetName, setSelectedVetName] = useState('')
   const [specFilter, setSpecFilter] = useState('')
-  // Per-modal feedback message (shared — only one modal open at a time)
+  // Per-modal feedback message (shared - only one modal open at a time)
   const [modalMsg, setModalMsg] = useState<{ text: string; isError: boolean } | null>(null)
 
   // Department modal
@@ -455,7 +455,7 @@ const VetHospitalManage: React.FC = () => {
     under_review: {
       label: 'Under Review',
       className: 'vstatus-review',
-      msg: 'All documents have been submitted. Our team will review them within 2–3 business days.',
+      msg: 'All documents have been submitted. Our team will review them within 2-3 business days.',
     },
     approved: {
       label: 'Verified & Active',
@@ -468,7 +468,7 @@ const VetHospitalManage: React.FC = () => {
       msg: 'One or more documents were rejected. Please re-upload the corrected documents.',
     },
     suspended: {
-      label: 'Suspended — Expired Documents',
+      label: 'Suspended - Expired Documents',
       className: 'vstatus-suspended',
       msg: 'Your hospital has been suspended due to expired documents. Please renew and re-upload.',
     },
@@ -543,7 +543,7 @@ const VetHospitalManage: React.FC = () => {
               { label: t('vetHospitalManage.overview.doctors'), value: doctors.length, icon: '👨‍⚕️' },
               { label: t('vetHospitalManage.overview.departments'), value: departments.length, icon: '🏢' },
               { label: t('vetHospitalManage.overview.services'), value: services.length, icon: '💊' },
-              { label: t('vetHospitalManage.overview.avgRating'), value: hospital.rating > 0 ? Number(hospital.rating).toFixed(1) : '—', icon: '⭐' },
+              { label: t('vetHospitalManage.overview.avgRating'), value: hospital.rating > 0 ? Number(hospital.rating).toFixed(1) : '-', icon: '⭐' },
               { label: t('vetHospitalManage.overview.totalReviews'), value: hospital.totalReviews, icon: '💬' },
               { label: t('common.status'), value: hospital.isActive ? t('common.active') : t('vetHospitalManage.overview.inactive'), icon: '🔘' },
             ].map(s => (
@@ -673,7 +673,7 @@ const VetHospitalManage: React.FC = () => {
                     {(svc.priceMin || svc.priceMax) && (
                       <div className="vh-service-price">
                         {svc.priceMin && svc.priceMax && svc.priceMin !== svc.priceMax
-                          ? `${formatCurrency(svc.priceMin)}–${formatCurrency(svc.priceMax)}`
+                          ? `${formatCurrency(svc.priceMin)}-${formatCurrency(svc.priceMax)}`
                           : `${formatCurrency(svc.priceMin || svc.priceMax || 0)}`}
                       </div>
                     )}
@@ -880,10 +880,10 @@ const VetHospitalManage: React.FC = () => {
                 <tbody>
                   {bookings.map((b: any) => (
                     <tr key={b.id}>
-                      <td>{b.scheduledDate ? new Date(b.scheduledDate).toLocaleDateString() : '—'}</td>
-                      <td>{b.timeSlotStart ? formatSlotTime(b.timeSlotStart) : '—'}{b.timeSlotEnd ? ` – ${formatSlotTime(b.timeSlotEnd)}` : ''}</td>
-                      <td>{b.patientName || b.ownerName || '—'}</td>
-                      <td>{b.vetName || b.veterinarianName || '—'}</td>
+                      <td>{b.scheduledDate ? new Date(b.scheduledDate).toLocaleDateString() : '-'}</td>
+                      <td>{b.timeSlotStart ? formatSlotTime(b.timeSlotStart) : '-'}{b.timeSlotEnd ? ` - ${formatSlotTime(b.timeSlotEnd)}` : ''}</td>
+                      <td>{b.patientName || b.ownerName || '-'}</td>
+                      <td>{b.vetName || b.veterinarianName || '-'}</td>
                       <td><span className="chip">{(b.bookingType || 'in_person').replace(/_/g, ' ')}</span></td>
                       <td>
                         <span className={`badge badge-${b.status}`} style={{
@@ -891,7 +891,7 @@ const VetHospitalManage: React.FC = () => {
                           color: b.status === 'confirmed' ? '#166534' : b.status === 'pending' ? '#92400e' : b.status === 'completed' ? '#1e40af' : '#991b1b'
                         }}>{b.status}</span>
                       </td>
-                      <td className="si-073b955b">{b.reasonForVisit || '—'}</td>
+                      <td className="si-073b955b">{b.reasonForVisit || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1042,7 +1042,7 @@ const VetHospitalManage: React.FC = () => {
                   <div className="form-group">
                     <label>{t('vetHospitalManage.invite.department')}</label>
                     <select value={inviteForm.departmentId} onChange={e => setInviteForm(f => ({ ...f, departmentId: e.target.value }))}>
-                      <option value="">— None —</option>
+                      <option value="">- None -</option>
                       {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                     </select>
                   </div>
@@ -1160,7 +1160,7 @@ const VetHospitalManage: React.FC = () => {
                 <div className="form-group">
                   <label>{t('vetHospitalManage.invite.department')}</label>
                   <select value={doctorForm.departmentId} onChange={e => setDoctorForm(f => ({ ...f, departmentId: e.target.value }))}>
-                    <option value="">— None —</option>
+                    <option value="">- None -</option>
                     {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                   </select>
                 </div>
@@ -1216,7 +1216,7 @@ const VetHospitalManage: React.FC = () => {
                 <div className="form-group">
                   <label>{t('vetHospitalManage.modal.headDoctor')}</label>
                   <select value={deptForm.headDoctorId} onChange={e => setDeptForm(f => ({ ...f, headDoctorId: e.target.value }))}>
-                    <option value="">— None —</option>
+                    <option value="">- None -</option>
                     {doctors.map(d => <option key={d.doctorId} value={d.doctorId}>{d.doctorName || d.doctorId}</option>)}
                   </select>
                 </div>

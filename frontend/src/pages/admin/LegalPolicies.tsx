@@ -132,7 +132,7 @@ const LegalPolicies: React.FC<LegalPoliciesProps> = () => {
       {editing && (
         <div className="si-9f028f26">
           <div className="si-914527c6">
-            <h2 className="si-e57614ee">{t('legalAdmin.publishTitle')} — {t(`legalAdmin.docTypes.${editing.docType}`)}</h2>
+            <h2 className="si-e57614ee">{t('legalAdmin.publishTitle')} - {t(`legalAdmin.docTypes.${editing.docType}`)}</h2>
             <p className="si-ea95bef1">{t('legalAdmin.publishHint')}</p>
 
             <label className="si-2262bb4a">{t('legalAdmin.docTitle')}</label>

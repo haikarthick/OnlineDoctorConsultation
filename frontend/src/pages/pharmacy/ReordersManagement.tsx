@@ -144,7 +144,7 @@ export default function ReordersManagement({ pharmacyId }: Props) {
                         {r.form && <small className="si-1a0c0bfa">{r.form} {r.strength}</small>}
                       </td>
                       <td><strong>{r.requested_qty}</strong></td>
-                      <td>{r.supplier_name || <span className="si-c81ca09e">—</span>}</td>
+                      <td>{r.supplier_name || <span className="si-c81ca09e">-</span>}</td>
                       <td className="si-c5381d69">
                         {r.requested_by_name}
                         {r.triggered_by === 'automatic' && (
@@ -167,7 +167,7 @@ export default function ReordersManagement({ pharmacyId }: Props) {
                         </span>
                       </td>
                       <td className="si-f2dbbee4">
-                        {r.tracking_number || <span className="si-c81ca09e">—</span>}
+                        {r.tracking_number || <span className="si-c81ca09e">-</span>}
                         {r.shipped_at && <small className="si-1a0c0bfa">Shipped: {formatDate(r.shipped_at)}</small>}
                         {r.received_at && <small className="si-b661dbed">Received: {formatDate(r.received_at)}</small>}
                       </td>

@@ -247,7 +247,7 @@
   border: 1px solid #fecaca;
 }
 
-/* Error shake animation — applied globally by ErrorAutoScroll */
+/* Error shake animation - applied globally by ErrorAutoScroll */
 @keyframes errorShake {
   0%, 100% { transform: translateX(0); }
   15%, 45%, 75% { transform: translateX(-6px); }
@@ -271,7 +271,7 @@
   font-weight: 500;
 }
 
-/* ═══ Edit Form Panel — slide-in with overlay ═══ */
+/* ═══ Edit Form Panel - slide-in with overlay ═══ */
 .edit-form-overlay {
   position: fixed;
   inset: 0;
@@ -440,6 +440,12 @@ textarea.module-input {
   letter-spacing: 0.2px;
 }
 
+/* Duplicate of the .module-card rule in styles/modules.css. Deliberately does
+   NOT set padding: every stylesheet is merged into one global bundle, so the
+   padding declared in modules.css already applies here, and re-declaring it in
+   this later file would outrank companion classes such as .metric-strip that
+   set their own (measured: it forced 20px where 16px was intended). A rule that
+   omits a property cannot override one that sets it, so leaving it out is safe. */
 .module-card {
   background: white;
   border: 1px solid #e2e8f0;
@@ -865,7 +871,7 @@ textarea.module-input {
 .tab-btn:hover { border-color: #667eea; color: #667eea; }
 .tab-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: transparent; }
 
-/* Tab bar buttons (bare button pattern — used by pages without .tab-btn class) */
+/* Tab bar buttons (bare button pattern - used by pages without .tab-btn class) */
 .tab-bar button {
   padding: 10px 20px; border: 2px solid #e2e8f0; background: white;
   border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer;
@@ -876,7 +882,7 @@ textarea.module-input {
 
 /* Action buttons (btn-primary, btn-success, btn-danger) inside tab-bar MUST NOT inherit
    the .tab-bar button white-background/grey-text override. The .tab-bar button selector
-   has specificity 0,1,1 which beats .btn-primary at 0,1,0 — causing white text on white
+   has specificity 0,1,1 which beats .btn-primary at 0,1,0 - causing white text on white
    background (invisible). This override (0,2,0) restores correct appearance. */
 .tab-bar .btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

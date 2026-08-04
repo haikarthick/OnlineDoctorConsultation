@@ -320,7 +320,7 @@ const EnterpriseManagement: React.FC = () => {
         {/* Stats Panel */}
         {selectedEnterprise && stats && (
           <div className="si-78b34307">
-            <h3 className="si-7f683059">{selectedEnterprise.name} — Overview</h3>
+            <h3 className="si-7f683059">{selectedEnterprise.name} - Overview</h3>
             <div className="si-b2577ace">
               <div className="si-6e899795">
                 <div className="si-7729e24e">{stats.totalAnimals}</div>

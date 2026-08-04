@@ -191,9 +191,9 @@ const GeospatialAnalytics: React.FC = () => {
               <h3>{t('geospatialAnalytics.recentEvents')}</h3>
               <table className="module-table"><thead><tr><th>{t('iotSensors.time')}</th><th>{t('genomicLineage.animal')}</th><th>{t('common.type')}</th><th>{t('geospatialAnalytics.zone')}</th><th>{t('geospatialAnalytics.location')}</th></tr></thead>
                 <tbody>{dashboard.recentEvents.map((ev: any) => (
-                  <tr key={ev.id}><td>{ev.recorded_at ? new Date(ev.recorded_at).toLocaleString() : '–'}</td><td>{ev.animal_name}</td>
+                  <tr key={ev.id}><td>{ev.recorded_at ? new Date(ev.recorded_at).toLocaleString() : '-'}</td><td>{ev.animal_name}</td>
                     <td><span className={`module-badge ${ev.event_type === 'zone_breach' ? 'error' : ''}`}>{ev.event_type}</span></td>
-                    <td>{ev.zone_name || '—'}</td><td>{(+ev.latitude).toFixed(4)}, {(+ev.longitude).toFixed(4)}</td></tr>
+                    <td>{ev.zone_name || '-'}</td><td>{(+ev.latitude).toFixed(4)}, {(+ev.longitude).toFixed(4)}</td></tr>
                 ))}</tbody></table>
             </div>
           )}
@@ -423,12 +423,12 @@ const GeospatialAnalytics: React.FC = () => {
               <tbody>
                 {events.map(ev => (
                   <tr key={ev.id}>
-                    <td>{ev.createdAt ? new Date(ev.createdAt).toLocaleString() : '—'}</td>
+                    <td>{ev.createdAt ? new Date(ev.createdAt).toLocaleString() : '-'}</td>
                     <td>{ev.animalName || ev.animalId}</td>
                     <td><span className={`module-badge ${ev.eventType === 'boundary_breach' ? 'error' : ev.eventType === 'speed_alert' ? 'error' : ''}`}>{ev.eventType?.replace(/_/g, ' ')}</span></td>
-                    <td>{ev.zoneName || '—'}</td>
+                    <td>{ev.zoneName || '-'}</td>
                     <td className="si-756a9f21">{(+(ev.latitude ?? 0)).toFixed(4)}, {(+(ev.longitude ?? 0)).toFixed(4)}</td>
-                    <td className="si-756a9f21">{ev.metadata ? JSON.stringify(ev.metadata).slice(0, 60) : '—'}</td>
+                    <td className="si-756a9f21">{ev.metadata ? JSON.stringify(ev.metadata).slice(0, 60) : '-'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -525,7 +525,7 @@ const GeospatialAnalytics: React.FC = () => {
                           popup: (
                             <div>
                               <strong>Start</strong><br />
-                              <span className="si-756a9f21">{trailData.trail[0].recorded_at ? new Date(trailData.trail[0].recorded_at).toLocaleString() : '—'}</span>
+                              <span className="si-756a9f21">{trailData.trail[0].recorded_at ? new Date(trailData.trail[0].recorded_at).toLocaleString() : '-'}</span>
                             </div>
                           ),
                         }] : []),
@@ -538,7 +538,7 @@ const GeospatialAnalytics: React.FC = () => {
                           popup: (
                             <div>
                               <strong>Latest Position</strong><br />
-                              <span className="si-756a9f21">{trailData.trail[trailData.trail.length - 1].recorded_at ? new Date(trailData.trail[trailData.trail.length - 1].recorded_at).toLocaleString() : '—'}</span>
+                              <span className="si-756a9f21">{trailData.trail[trailData.trail.length - 1].recorded_at ? new Date(trailData.trail[trailData.trail.length - 1].recorded_at).toLocaleString() : '-'}</span>
                             </div>
                           ),
                         }] : []),
@@ -556,7 +556,7 @@ const GeospatialAnalytics: React.FC = () => {
                         <thead><tr><th>#</th><th>{t('iotSensors.time')}</th><th>{t('geospatialAnalytics.lat')}</th><th>{t('geospatialAnalytics.lng')}</th><th>{t('common.type')}</th></tr></thead>
                         <tbody>
                           {trailData.trail.slice(0, 50).map((p: any, i: number) => (
-                            <tr key={i}><td>{i + 1}</td><td>{p.recorded_at ? new Date(p.recorded_at).toLocaleString() : '–'}</td>
+                            <tr key={i}><td>{i + 1}</td><td>{p.recorded_at ? new Date(p.recorded_at).toLocaleString() : '-'}</td>
                               <td>{(+p.latitude).toFixed(5)}</td><td>{(+p.longitude).toFixed(5)}</td><td>{p.event_type}</td></tr>
                           ))}
                         </tbody>

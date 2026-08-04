@@ -33,15 +33,21 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     req.userRole = userCheck.rows[0].role; // Use DB role (source of truth) instead of JWT claim
     req.token = token;
 
-    // Fetch secondary roles (P4-HIGH1) — non-blocking, falls back to primary role only
+    // Fetch secondary roles (P4-HIGH1) - non-blocking, falls back to primary role only.
+    // user_roles is ADDITIVE (init.sql §46: "does not replace users.role"), so the effective set
+    // is the UNION of the primary role and every secondary role. Returning only the user_roles
+    // rows would silently strip the primary role's permissions from GET /permissions/my the
+    // moment a user gains any secondary role (e.g. a pet_owner who registers a grooming
+    // business is granted 'groomer' and would otherwise lose access to their own animals).
     try {
       const rolesRes = await database.query(
         `SELECT role FROM user_roles WHERE user_id = $1`,
         [decoded.userId]
       );
-      req.userRoles = rolesRes.rows.length > 0
-        ? rolesRes.rows.map((r: any) => r.role)
-        : [userCheck.rows[0].role];
+      req.userRoles = [...new Set<string>([
+        userCheck.rows[0].role,
+        ...rolesRes.rows.map((r: any) => r.role),
+      ])];
     } catch {
       req.userRoles = [userCheck.rows[0].role];
     }

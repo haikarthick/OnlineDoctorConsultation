@@ -54,9 +54,9 @@ const MedicationLabelPrint: React.FC<Props> = ({ pharmacyName, pharmacyPhone, an
           {items.map((item, i) => (
             <div className="ml-label" key={i}>
               <div className="ml-label-header">
-                🐾 {(animalName || '—').toUpperCase()}{animalSpecies ? ` (${animalSpecies})` : ''}
+                🐾 {(animalName || '-').toUpperCase()}{animalSpecies ? ` (${animalSpecies})` : ''}
               </div>
-              <div className="ml-label-sub">{t('medicationLabel.owner')}: {ownerName || '—'}</div>
+              <div className="ml-label-sub">{t('medicationLabel.owner')}: {ownerName || '-'}</div>
               <hr className="ml-label-divider" />
               <div className="ml-label-med">{item.medicationName.toUpperCase()}</div>
               {item.directions && <div className="ml-label-directions">{item.directions}</div>}

@@ -37,7 +37,7 @@ export function csrfProtection(req: Request, res: Response, next: NextFunction):
   }
 
   // If the request uses Bearer auth and does NOT send cookies,
-  // it's from a programmatic client — skip CSRF check.
+  // it's from a programmatic client - skip CSRF check.
   const authHeader = req.headers.authorization;
   const hasCookies = req.headers.cookie && req.headers.cookie.includes(CSRF_COOKIE_NAME);
   if (authHeader && authHeader.startsWith('Bearer ') && !hasCookies) {

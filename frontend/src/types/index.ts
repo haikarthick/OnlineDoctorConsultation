@@ -1,4 +1,4 @@
-export type UserRole = 'veterinarian' | 'pet_owner' | 'farmer' | 'admin' | 'corporate_admin' | 'hospital_staff' | 'pharmacist'
+export type UserRole = 'veterinarian' | 'pet_owner' | 'farmer' | 'admin' | 'corporate_admin' | 'hospital_staff' | 'pharmacist' | 'groomer' | 'support'
 export type ConsultationStatus = 'pending' | 'confirmed' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'rescheduled' | 'completed' | 'missed'
 export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded' | 'partially_refunded'
@@ -1428,7 +1428,7 @@ export interface MarketplaceOrder {
   shippingAddress: Record<string, any>
   trackingNumber?: string
   notes?: string
-  // Deal handshake (free classifieds — settlement happens off-platform)
+  // Deal handshake (free classifieds - settlement happens off-platform)
   buyerConfirmedAt?: string
   buyer_confirmed_at?: string
   sellerConfirmedAt?: string

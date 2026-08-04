@@ -199,12 +199,12 @@ const BreedingManager: React.FC = () => {
                     {records.map(r => (
                       <tr key={r.id}>
                         <td>{r.damName || r.damId?.slice(0, 8)}</td>
-                        <td>{r.sireName || r.sireId?.slice(0, 8) || '–'}</td>
-                        <td>{r.breedingDate ? new Date(r.breedingDate).toLocaleDateString() : '–'}</td>
-                        <td>{r.breedingMethod ? t('breedingManager.methods.' + r.breedingMethod) : '–'}</td>
-                        <td><span className="badge" style={{ background: STATUS_COLORS[r.status] || '#888' }}>{r.status ? t('breedingManager.statuses.' + r.status) : '–'}</span></td>
-                        <td>{r.expectedDueDate ? new Date(r.expectedDueDate).toLocaleDateString() : '–'}</td>
-                        <td>{r.liveOffspring ?? '–'} / {r.offspringCount ?? '–'}</td>
+                        <td>{r.sireName || r.sireId?.slice(0, 8) || '-'}</td>
+                        <td>{r.breedingDate ? new Date(r.breedingDate).toLocaleDateString() : '-'}</td>
+                        <td>{r.breedingMethod ? t('breedingManager.methods.' + r.breedingMethod) : '-'}</td>
+                        <td><span className="badge" style={{ background: STATUS_COLORS[r.status] || '#888' }}>{r.status ? t('breedingManager.statuses.' + r.status) : '-'}</span></td>
+                        <td>{r.expectedDueDate ? new Date(r.expectedDueDate).toLocaleDateString() : '-'}</td>
+                        <td>{r.liveOffspring ?? '-'} / {r.offspringCount ?? '-'}</td>
                         <td><button className="btn btn-sm" onClick={() => startEdit(r)}>{t('breedingManager.editBtn')}</button></td>
                       </tr>
                     ))}
@@ -224,10 +224,10 @@ const BreedingManager: React.FC = () => {
                       return (
                         <tr key={r.id}>
                           <td>{r.damName || r.damId?.slice(0, 8)}</td>
-                          <td>{r.expectedDueDate ? new Date(r.expectedDueDate).toLocaleDateString() : '–'}</td>
+                          <td>{r.expectedDueDate ? new Date(r.expectedDueDate).toLocaleDateString() : '-'}</td>
                           <td><span className={`badge ${daysLeft && daysLeft <= 7 ? 'badge-danger' : daysLeft && daysLeft <= 14 ? 'badge-warning' : ''}`}>{daysLeft ?? '?'} {t('breedingManager.upcomingDue.dayUnit')}</span></td>
-                          <td>{r.status ? t('breedingManager.statuses.' + r.status) : '–'}</td>
-                          <td>{r.breedingMethod ? t('breedingManager.methods.' + r.breedingMethod) : '–'}</td>
+                          <td>{r.status ? t('breedingManager.statuses.' + r.status) : '-'}</td>
+                          <td>{r.breedingMethod ? t('breedingManager.methods.' + r.breedingMethod) : '-'}</td>
                         </tr>
                       )
                     })}
@@ -243,7 +243,7 @@ const BreedingManager: React.FC = () => {
               <div className="card"><h3>{t('breedingManager.statistics.delivered')}</h3><div className="big-stat">{stats.delivered}</div></div>
               <div className="card"><h3>{t('breedingManager.statistics.liveBirths')}</h3><div className="big-stat success">{stats.live_births}</div></div>
               <div className="card"><h3>{t('breedingManager.statistics.stillbirths')}</h3><div className="big-stat danger">{stats.stillbirths}</div></div>
-              <div className="card"><h3>{t('breedingManager.statistics.avgGestation')}</h3><div className="big-stat">{stats.avgGestation ? Number(stats.avgGestation).toFixed(0) : '–'}</div></div>
+              <div className="card"><h3>{t('breedingManager.statistics.avgGestation')}</h3><div className="big-stat">{stats.avgGestation ? Number(stats.avgGestation).toFixed(0) : '-'}</div></div>
             </div>
           ) : null}
         </>

@@ -12,7 +12,7 @@ import logger from '../utils/logger';
 // In-memory file registry (replace with DB table in production)
 const fileRegistry: Map<string, StoredFile & { uploadedBy: string; uploadedAt: string }> = new Map();
 
-// Hard cap on listing video length — keeps a single upload's Cloudinary
+// Hard cap on listing video length - keeps a single upload's Cloudinary
 // storage+bandwidth credits small and matches what a farmer can realistically
 // capture/upload on a mobile connection to show an animal's condition.
 const MAX_VIDEO_DURATION_SECONDS = 60;
@@ -49,7 +49,7 @@ export class FileController {
    * POST /api/files/upload-video
    * Body: multipart/form-data with field "file" (single) and optional "folder"
    * Enforces a max duration server-side (multer can only bound file size,
-   * not length) — if the uploaded video is too long, it's deleted from
+   * not length) - if the uploaded video is too long, it's deleted from
    * storage immediately and the request is rejected, so we never bill
    * storage/bandwidth credits for a rejected upload.
    */
@@ -68,16 +68,16 @@ export class FileController {
     if (typeof storedFile.duration === 'number' && storedFile.duration > MAX_VIDEO_DURATION_SECONDS) {
       const deleted = await storage.delete(storedFile.key);
       if (!deleted) {
-        // storage.delete() already warn-logs the underlying error — this is a distinct,
+        // storage.delete() already warn-logs the underlying error - this is a distinct,
         // higher-severity log specifically for "an oversized video is now permanently
         // parked in storage consuming credits with nothing left to retry the delete,"
         // since the client only ever sees a generic 400 and has no reason to retry.
-        logger.error(`Orphaned rejected video left in storage — delete failed for key=${storedFile.key}, duration=${storedFile.duration}s, uploadedBy=${(req as any).userId || 'anonymous'}`);
+        logger.error(`Orphaned rejected video left in storage - delete failed for key=${storedFile.key}, duration=${storedFile.duration}s, uploadedBy=${(req as any).userId || 'anonymous'}`);
       }
       return res.status(400).json({
         error: {
           code: 'VIDEO_TOO_LONG',
-          message: `Video is ${Math.round(storedFile.duration)}s — max allowed is ${MAX_VIDEO_DURATION_SECONDS}s.`,
+          message: `Video is ${Math.round(storedFile.duration)}s - max allowed is ${MAX_VIDEO_DURATION_SECONDS}s.`,
           maxSeconds: MAX_VIDEO_DURATION_SECONDS,
         },
       });

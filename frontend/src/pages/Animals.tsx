@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useMasterData } from '../context/MasterDataContext'
+import type { AnimalClassTerm } from '../constants/speciesBreeds'
 
 interface AnimalData {
   id: string; uniqueId?: string; name: string; species: string; breed?: string;
@@ -27,11 +28,13 @@ interface GroupOption { id: string; name: string }
 /** Species-correct class label ("Bullock") when set, falling back to raw gender ("Male"). */
 function classOrGenderLabel(
   t: (k: string) => string,
-  findClassTerm: (species: string, value: string) => { labelKey: string } | undefined,
+  findClassTerm: (species: string, value: string) => AnimalClassTerm | undefined,
+  resolveLabel: (item: AnimalClassTerm, t: (key: string) => string) => string,
   species: string, animalClass: string | undefined, gender: string | undefined
 ): string | null {
   const term = animalClass ? findClassTerm(species, animalClass) : undefined
-  if (term) return t(term.labelKey)
+  // Locale-aware (per-locale override → English label → labelKey translation), via resolveLabel.
+  if (term) { const l = resolveLabel(term, t); if (l) return l }
   if (gender === 'male') return t('animals.form.maleDisplay')
   if (gender === 'female') return t('animals.form.femaleDisplay')
   return null
@@ -39,7 +42,7 @@ function classOrGenderLabel(
 
 const Animals: React.FC = () => {
   const { t } = useTranslation()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies, speciesLabel } = useMasterData()
+  const { speciesCategories, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
 
   const { user } = useAuth()
   const { formatDate } = useSettings()
@@ -160,7 +163,7 @@ const Animals: React.FC = () => {
   }
 
   const downloadTemplate = () => {
-    // animalClass is optional — species-correct terms like cattle_cow, cattle_bull,
+    // animalClass is optional - species-correct terms like cattle_cow, cattle_bull,
     // sheep_ewe, etc. (see ANIMAL_CLASS_TERMS in constants/speciesBreeds.ts); leave
     // blank for species without class terms, or to just use gender.
     const csv = 'name,species,breed,gender,animalClass,dateOfBirth,weight,color,microchipId\n' +
@@ -317,7 +320,7 @@ const Animals: React.FC = () => {
   const labelStyle = { fontSize: 12, fontWeight: 600 as const, color: '#4b5563', marginBottom: 4, display: 'block' }
 
   const handleDownloadPassport= async (animal: AnimalData) => {
-    // Open the window SYNCHRONOUSLY before any await — browsers block popups
+    // Open the window SYNCHRONOUSLY before any await - browsers block popups
     // opened after an async gap because they're no longer tied to the user gesture.
     const win = window.open('', '_blank')
     if (!win) {
@@ -329,12 +332,18 @@ const Animals: React.FC = () => {
 
     setPassportLoading(animal.id)
     try {
+      // `/medical-records/animal/:id` was never a registered route - it 404'd on
+      // every passport and the .catch() below turned that into "No medical
+      // records found" on a printed medical document. The real endpoint is the
+      // list route with an animalId filter, which returns { data: { records } }.
+      let vaccFailed = false
+      let medFailed = false
       const [vaccRes, medRes] = await Promise.all([
-        (apiService as any).get(`/vaccinations/animal/${animal.id}`).catch(() => ({ data: { vaccinations: [] } })),
-        (apiService as any).get(`/medical-records/animal/${animal.id}`).catch(() => ({ data: { records: [] } }))
+        (apiService as any).get(`/vaccinations/animal/${animal.id}`).catch(() => { vaccFailed = true; return null }),
+        (apiService as any).get(`/medical-records?animalId=${animal.id}&limit=100`).catch(() => { medFailed = true; return null })
       ])
-      const vaccinations: any[] = vaccRes?.data?.vaccinations || vaccRes?.data?.data || []
-      const records: any[] = medRes?.data?.records || medRes?.data?.data || []
+      const vaccinations: any[] = vaccRes?.data?.data?.vaccinations || vaccRes?.data?.vaccinations || (Array.isArray(vaccRes?.data?.data) ? vaccRes.data.data : []) || []
+      const records: any[] = medRes?.data?.data?.records || medRes?.data?.records || (Array.isArray(medRes?.data?.data) ? medRes.data.data : []) || []
 
       const microchipHtml = animal.microchipId
         ? '<div class="info-item"><span class="label">Microchip:</span> ' + animal.microchipId + '</div>'
@@ -345,7 +354,13 @@ const Animals: React.FC = () => {
         '<td>' + ((v.nextDueDate || v.next_due_date || '').split('T')[0] || 'N/A') + '</td>' +
         '<td>' + (v.batchNumber || v.batch_number || 'N/A') + '</td></tr>'
       ).join('')
-      const vaccHtml = vaccinations.length === 0
+      // A failed fetch must never render as "none found" on a medical document -
+      // an empty section has to mean "there are none", not "we could not ask".
+      const couldNotLoad = (what: string) =>
+        '<p style="color:#b91c1c;font-weight:600">⚠ ' + what + ' could not be loaded - this section is incomplete. Do not treat it as a complete record.</p>'
+      const vaccHtml = vaccFailed
+        ? couldNotLoad('Vaccination history')
+        : vaccinations.length === 0
         ? '<p style="color:#999">No vaccination records found</p>'
         : '<table><thead><tr><th>Vaccine</th><th>Date Administered</th><th>Next Due</th><th>Batch</th></tr></thead><tbody>' + vaccRowsHtml + '</tbody></table>'
       const medRowsHtml = records.map((r: any) =>
@@ -354,7 +369,9 @@ const Animals: React.FC = () => {
         '<td>' + (r.title || '') + '</td>' +
         '<td>' + (r.vetName || r.vet_name || 'N/A') + '</td></tr>'
       ).join('')
-      const medHtml = records.length === 0
+      const medHtml = medFailed
+        ? couldNotLoad('Medical history')
+        : records.length === 0
         ? '<p style="color:#999">No medical records found</p>'
         : '<table><thead><tr><th>Date</th><th>Type</th><th>Title</th><th>Veterinarian</th></tr></thead><tbody>' + medRowsHtml + '</tbody></table>'
 
@@ -518,7 +535,7 @@ const Animals: React.FC = () => {
                 {breeds.length > 0 ? (
                   <select value={formData.breed} onChange={e => setFormData(p => ({ ...p, breed: e.target.value, customBreed: '' }))} style={fieldStyle}>
                     <option value="">{t('animals.registerModal.selectBreed')}</option>
-                    {breeds.map(b => <option key={b} value={b}>{b}</option>)}
+                    {breeds.map(b => <option key={b} value={b}>{breedLabel(formData.species, b)}</option>)}
                     <option value="Other">{t('animals.registerModal.otherBreed')}</option>
                   </select>
                 ) : (
@@ -540,7 +557,7 @@ const Animals: React.FC = () => {
                       setFormData(p => ({ ...p, animalClass: e.target.value, gender: term?.impliedGender || p.gender }))
                     }} style={fieldStyle}>
                       <option value="">{t('animalClass.selectClass')}</option>
-                      {classTermsForSpecies(formData.species).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                      {classTermsForSpecies(formData.species).map(c => <option key={c.value} value={c.value}>{resolveLabel(c, t)}</option>)}
                     </select>
                   </>
                 ) : (
@@ -733,7 +750,7 @@ const Animals: React.FC = () => {
                       <span className="si-42fc55d5">{speciesIcon(animal.species)}</span>
                       <div>
                         <div className="si-90c2c65d">{animal.name}</div>
-                        <div className="si-122e0f6b">{speciesLabel(animal.species, t)}{animal.breed ? ` • ${animal.breed}` : ''}</div>
+                        <div className="si-122e0f6b">{speciesLabel(animal.species, t)}{animal.breed ? ` • ${breedLabel(animal.species, animal.breed)}` : ''}</div>
                       </div>
                     </div>
                     <div className="si-f4e64596">
@@ -759,7 +776,7 @@ const Animals: React.FC = () => {
                   {/* Card Body */}
                   <div className="si-d29f2575">
                     <div className="si-3b3a79d7">
-                      {(animal.animalClass || animal.gender) && <div><span className="si-23033f05">{t('animals.cardLabels.gender')}</span> <strong>{classOrGenderLabel(t, findClassTerm, animal.species, animal.animalClass, animal.gender)}</strong></div>}
+                      {(animal.animalClass || animal.gender) && <div><span className="si-23033f05">{t('animals.cardLabels.gender')}</span> <strong>{classOrGenderLabel(t, findClassTerm, resolveLabel, animal.species, animal.animalClass, animal.gender)}</strong></div>}
                       {animal.weight && <div><span className="si-23033f05">{t('animals.cardLabels.weight')}</span> <strong>{animal.weight} kg</strong></div>}
                       {animal.color && <div><span className="si-23033f05">{t('animals.cardLabels.color')}</span> <strong>{animal.color}</strong></div>}
                       {animal.isNeutered && <div><span className="si-23033f05">{t('animals.cardLabels.neutered')}</span> <strong className="si-487e8582">{t('animals.cardLabels.yesCheck')}</strong></div>}
@@ -794,7 +811,7 @@ const Animals: React.FC = () => {
                         <div style={{ fontWeight: 600, color: insExpired ? '#dc2626' : '#059669', marginBottom: 2 }}>
                           {insExpired ? t('animals.cardLabels.insuranceExpired') : `🛡️ ${t('animals.cardLabels.insured')}`}
                         </div>
-                        <div className="si-91a28c8c">{animal.insuranceProvider} — {animal.insurancePolicyNumber}</div>
+                        <div className="si-91a28c8c">{animal.insuranceProvider} - {animal.insurancePolicyNumber}</div>
                         {animal.insuranceExpiry && <div style={{ color: insExpired ? '#dc2626' : '#6b7280' }}>{t('animals.cardLabels.expires')} {formatDate(animal.insuranceExpiry)}</div>}
                       </div>
                     )}
@@ -845,7 +862,7 @@ const Animals: React.FC = () => {
                 <span className="si-0067e898">{speciesIcon(detailAnimal.species)}</span>
                 <div>
                   <div className="si-f0920f33">{detailAnimal.name}</div>
-                  <div className="si-e17c55f7">{speciesLabel(detailAnimal.species, t)}{detailAnimal.breed ? ` • ${detailAnimal.breed}` : ''} — {detailAnimal.uniqueId}</div>
+                  <div className="si-e17c55f7">{speciesLabel(detailAnimal.species, t)}{detailAnimal.breed ? ` • ${breedLabel(detailAnimal.species, detailAnimal.breed)}` : ''} - {detailAnimal.uniqueId}</div>
                 </div>
               </div>
               <button onClick={() => setDetailAnimal(null)} className="si-1b1a545b">✕</button>
@@ -856,8 +873,8 @@ const Animals: React.FC = () => {
               <div className="si-7e1e70ef">
                 <div><span className="si-23033f05">{t('animals.detailModal.name')}</span> <strong>{detailAnimal.name}</strong></div>
                 <div><span className="si-23033f05">{t('animals.detailModal.species')}</span> <strong>{speciesLabel(detailAnimal.species, t)}</strong></div>
-                {detailAnimal.breed && <div><span className="si-23033f05">{t('animals.detailModal.breed')}</span> <strong>{detailAnimal.breed}</strong></div>}
-                {(detailAnimal.animalClass || detailAnimal.gender) && <div><span className="si-23033f05">{t('animals.detailModal.gender')}</span> <strong>{classOrGenderLabel(t, findClassTerm, detailAnimal.species, detailAnimal.animalClass, detailAnimal.gender)}</strong></div>}
+                {detailAnimal.breed && <div><span className="si-23033f05">{t('animals.detailModal.breed')}</span> <strong>{breedLabel(detailAnimal.species, detailAnimal.breed)}</strong></div>}
+                {(detailAnimal.animalClass || detailAnimal.gender) && <div><span className="si-23033f05">{t('animals.detailModal.gender')}</span> <strong>{classOrGenderLabel(t, findClassTerm, resolveLabel, detailAnimal.species, detailAnimal.animalClass, detailAnimal.gender)}</strong></div>}
                 {detailAnimal.dateOfBirth && <div><span className="si-23033f05">{t('animals.detailModal.dob')}</span> <strong>{formatDate(detailAnimal.dateOfBirth)}</strong></div>}
                 {detailAnimal.sireName && <div><span className="si-23033f05">{t('animalClass.sire')}</span> <strong>{detailAnimal.sireName}</strong></div>}
                 {detailAnimal.damName && <div><span className="si-23033f05">{t('animalClass.dam')}</span> <strong>{detailAnimal.damName}</strong></div>}
@@ -947,8 +964,8 @@ const Animals: React.FC = () => {
                         <tr key={i}>
                           <td>{row.name}</td>
                           <td>{speciesLabel(row.species, t)}</td>
-                          <td>{row.breed || '—'}</td>
-                          <td>{row.gender || '—'}</td>
+                          <td>{row.breed || '-'}</td>
+                          <td>{row.gender || '-'}</td>
                         </tr>
                       ))}
                       {importPreview.length > 20 && (

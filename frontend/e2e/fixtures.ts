@@ -2,7 +2,7 @@ import { test as base, expect, Page, BrowserContext } from '@playwright/test'
 import { USERS, UserKey, authStatePath } from './constants'
 
 /**
- * VetCare E2E — Custom Fixtures
+ * VetCare E2E - Custom Fixtures
  *
  * Provides pre-authenticated page contexts for each role.
  * Usage:

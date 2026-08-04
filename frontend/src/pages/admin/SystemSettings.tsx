@@ -9,7 +9,7 @@ interface SystemSettingsProps {
   onNavigate: (path: string) => void
 }
 
-// Keys managed by dedicated UI cards — excluded from the generic table
+// Keys managed by dedicated UI cards - excluded from the generic table
 const MANAGED_KEYS = new Set([
   'display.timeFormat',
   'display.dateFormat',
@@ -19,7 +19,7 @@ const MANAGED_KEYS = new Set([
   'booking.patientNoShowRescheduleLimit',
   'booking.advanceBookingDays',
   'booking.cancellationWindowHours',
-  // Legacy aliases from seed.sql — same concepts, different key names
+  // Legacy aliases from seed.sql - same concepts, different key names
   'max_booking_days_ahead',
   'default_slot_duration',
   'payment.currency',
@@ -79,7 +79,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   const [savingGateway, setSavingGateway] = useState(false)
   const [gatewaySaved, setGatewaySaved] = useState(false)
 
-  // Razorpay credentials state (payment module — stored encrypted in DB, never returned in plaintext)
+  // Razorpay credentials state (payment module - stored encrypted in DB, never returned in plaintext)
   const [razorpayWebhookUrl, setRazorpayWebhookUrl] = useState('')
   const [razorpayStatus, setRazorpayStatus] = useState<Record<'test' | 'live', { configured: boolean; keyId: string | null; keySecretConfigured: boolean; webhookSecretConfigured: boolean; updatedAt: string | null }>>({
     test: { configured: false, keyId: null, keySecretConfigured: false, webhookSecretConfigured: false, updatedAt: null },
@@ -916,26 +916,26 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                   disabled={savingCurrency}
                   style={{ fontSize: 14, padding: '8px 12px', minWidth: 220, ...inputStyle }}
                 >
-                  <option value="INR">🇮🇳 INR — Indian Rupee (₹)</option>
-                  <option value="USD">🇺🇸 USD — US Dollar ($)</option>
-                  <option value="EUR">🇪🇺 EUR — Euro (€)</option>
-                  <option value="GBP">🇬🇧 GBP — British Pound (£)</option>
-                  <option value="AUD">🇦🇺 AUD — Australian Dollar (A$)</option>
-                  <option value="CAD">🇨🇦 CAD — Canadian Dollar (C$)</option>
-                  <option value="JPY">🇯🇵 JPY — Japanese Yen (¥)</option>
-                  <option value="CNY">🇨🇳 CNY — Chinese Yuan (¥)</option>
-                  <option value="KES">🇰🇪 KES — Kenyan Shilling (KSh)</option>
-                  <option value="ZAR">🇿🇦 ZAR — South African Rand (R)</option>
-                  <option value="BRL">🇧🇷 BRL — Brazilian Real (R$)</option>
-                  <option value="SGD">🇸🇬 SGD — Singapore Dollar (S$)</option>
-                  <option value="AED">🇦🇪 AED — UAE Dirham (د.إ)</option>
-                  <option value="SAR">🇸🇦 SAR — Saudi Riyal (﷼)</option>
-                  <option value="MYR">🇲🇾 MYR — Malaysian Ringgit (RM)</option>
-                  <option value="THB">🇹🇭 THB — Thai Baht (฿)</option>
-                  <option value="PHP">🇵🇭 PHP — Philippine Peso (₱)</option>
-                  <option value="IDR">🇮🇩 IDR — Indonesian Rupiah (Rp)</option>
-                  <option value="NZD">🇳🇿 NZD — New Zealand Dollar (NZ$)</option>
-                  <option value="CHF">🇨🇭 CHF — Swiss Franc (CHF)</option>
+                  <option value="INR">🇮🇳 INR - Indian Rupee (₹)</option>
+                  <option value="USD">🇺🇸 USD - US Dollar ($)</option>
+                  <option value="EUR">🇪🇺 EUR - Euro (€)</option>
+                  <option value="GBP">🇬🇧 GBP - British Pound (£)</option>
+                  <option value="AUD">🇦🇺 AUD - Australian Dollar (A$)</option>
+                  <option value="CAD">🇨🇦 CAD - Canadian Dollar (C$)</option>
+                  <option value="JPY">🇯🇵 JPY - Japanese Yen (¥)</option>
+                  <option value="CNY">🇨🇳 CNY - Chinese Yuan (¥)</option>
+                  <option value="KES">🇰🇪 KES - Kenyan Shilling (KSh)</option>
+                  <option value="ZAR">🇿🇦 ZAR - South African Rand (R)</option>
+                  <option value="BRL">🇧🇷 BRL - Brazilian Real (R$)</option>
+                  <option value="SGD">🇸🇬 SGD - Singapore Dollar (S$)</option>
+                  <option value="AED">🇦🇪 AED - UAE Dirham (د.إ)</option>
+                  <option value="SAR">🇸🇦 SAR - Saudi Riyal (﷼)</option>
+                  <option value="MYR">🇲🇾 MYR - Malaysian Ringgit (RM)</option>
+                  <option value="THB">🇹🇭 THB - Thai Baht (฿)</option>
+                  <option value="PHP">🇵🇭 PHP - Philippine Peso (₱)</option>
+                  <option value="IDR">🇮🇩 IDR - Indonesian Rupiah (Rp)</option>
+                  <option value="NZD">🇳🇿 NZD - New Zealand Dollar (NZ$)</option>
+                  <option value="CHF">🇨🇭 CHF - Swiss Franc (CHF)</option>
                 </select>
                 {savingCurrency && <span className="si-48a0b045">{t('systemSettings.saving')}</span>}
                 {currencySaved && <span className="si-ab4fa2e9">✅ Saved!</span>}
@@ -1000,7 +1000,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             {gatewayMode === 'demo' && (
               <div className="si-50d6616f">
                 <div className="si-8638f8e4">
-                  ⚠️ <strong>{t('systemSettings.demoModeActive')}</strong> — {t('systemSettings.demoModeDesc')}
+                  ⚠️ <strong>{t('systemSettings.demoModeActive')}</strong> - {t('systemSettings.demoModeDesc')}
                 </div>
               </div>
             )}
@@ -1008,7 +1008,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             {gatewayMode === 'live' && (
               <div className="si-50d6616f">
                 <div className="si-ce0d3ed4">
-                  🔴 <strong>{t('systemSettings.liveMode')}</strong> — {t('systemSettings.liveModeDesc')}
+                  🔴 <strong>{t('systemSettings.liveMode')}</strong> - {t('systemSettings.liveModeDesc')}
                 </div>
               </div>
             )}
@@ -1029,7 +1029,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
           <div className="card-header"><h2 className="si-63c2680d">🔑 Razorpay Credentials</h2></div>
           <div className="card-body">
             <p className="si-5b728486">
-              Used by the payment module when Gateway Mode above is <strong>Test</strong> or <strong>Live</strong>. Secrets are encrypted at rest and never shown again after saving — leave a secret field blank to keep its current value.
+              Used by the payment module when Gateway Mode above is <strong>Test</strong> or <strong>Live</strong>. Secrets are encrypted at rest and never shown again after saving - leave a secret field blank to keep its current value.
             </p>
             {(['test', 'live'] as const).map(env => {
               const status = razorpayStatus[env]
@@ -1196,7 +1196,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                 <strong>📋 Policy Preview (for a {formatCurrency(1000)} consultation):</strong>
                 <ul className="si-9f9227b0">
                   <li>Cancel {cancellationPolicy.patientFreeWindowHours}+ hours before → <strong className="si-487e8582">{formatCurrency(1000)} full refund</strong></li>
-                  <li>Cancel {cancellationPolicy.partialRefundWindowHours}–{cancellationPolicy.patientFreeWindowHours} hours before → <strong className="si-cdb09cc1">{formatCurrency(cancellationPolicy.partialRefundPercent * 10)} ({cancellationPolicy.partialRefundPercent}%)</strong></li>
+                  <li>Cancel {cancellationPolicy.partialRefundWindowHours}-{cancellationPolicy.patientFreeWindowHours} hours before → <strong className="si-cdb09cc1">{formatCurrency(cancellationPolicy.partialRefundPercent * 10)} ({cancellationPolicy.partialRefundPercent}%)</strong></li>
                   <li>Cancel &lt; {cancellationPolicy.partialRefundWindowHours} hours before → <strong className="si-f84f41a5">No refund</strong></li>
                   <li>Doctor cancels → <strong className="si-487e8582">{formatCurrency(1000)} + {formatCurrency(cancellationPolicy.goodwillBonusPercent * 10)} bonus ({cancellationPolicy.goodwillBonusPercent}%)</strong></li>
                 </ul>
@@ -1264,7 +1264,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
               <div style={{ marginTop: 8, padding: '8px 12px', borderRadius: 6, background: testEmailResult.success ? '#f0fdf4' : '#fef2f2', color: testEmailResult.success ? '#059669' : '#dc2626', fontSize: 13 }}>
                 {testEmailResult.success ? '✅ ' : '❌ '}{testEmailResult.message}
                 {testEmailResult.previewUrl && (
-                  <> — <a href={testEmailResult.previewUrl} target="_blank" rel="noopener noreferrer" className="si-215a56c7">Preview Email</a></>
+                  <> - <a href={testEmailResult.previewUrl} target="_blank" rel="noopener noreferrer" className="si-215a56c7">Preview Email</a></>
                 )}
               </div>
             )}

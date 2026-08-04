@@ -180,7 +180,7 @@ export default function HolidayManagement() {
                   <td>
                     {h.isFullDay
                       ? <span className="time-info">{t('holidayManagement.fullDay')}</span>
-                      : <span className="time-info partial">{formatSlotTime(h.startTime || '')} – {formatSlotTime(h.endTime || '')}</span>
+                      : <span className="time-info partial">{formatSlotTime(h.startTime || '')} - {formatSlotTime(h.endTime || '')}</span>
                     }
                   </td>
                   <td className="td-actions">

@@ -1,12 +1,12 @@
 /**
  * Unit tests for the shared Axios client's auth-refresh and CSRF-retry
  * interceptors in api.ts (the client actually used by ~94 of the app's
- * pages — see services/api/client.ts for the separate, newer client used
+ * pages - see services/api/client.ts for the separate, newer client used
  * by a handful of pages under services/api/*Api.ts).
  *
  * Interceptors are tested by capturing the callback functions Axios
  * registers them with, then invoking those callbacks directly with
- * synthetic error objects — this avoids needing a real network layer and
+ * synthetic error objects - this avoids needing a real network layer and
  * matches how Axios itself would invoke them on a real response.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
@@ -28,7 +28,7 @@ vi.mock('axios', () => {
 
 import axios from 'axios'
 
-describe('api.ts — auth refresh + CSRF retry interceptors', () => {
+describe('api.ts - auth refresh + CSRF retry interceptors', () => {
   let responseErrorHandler: (error: any) => Promise<any>
   let requestHandler: (config: any) => any
   let locationHrefSetter: ReturnType<typeof vi.fn>
@@ -54,7 +54,7 @@ describe('api.ts — auth refresh + CSRF retry interceptors', () => {
     requestHandler = mockClient.interceptors.request.use.mock.calls[0][0]
     // First registered response interceptor: auth-refresh + CSRF-retry (the
     // second one registered, at the bottom of the constructor, is timeout
-    // handling — unrelated to this test).
+    // handling - unrelated to this test).
     responseErrorHandler = mockClient.interceptors.response.use.mock.calls[0][1]
   })
 
@@ -83,7 +83,7 @@ describe('api.ts — auth refresh + CSRF retry interceptors', () => {
     })
   })
 
-  describe('401 handling — refresh-then-retry', () => {
+  describe('401 handling - refresh-then-retry', () => {
     it('refreshes the token and retries the original request on success', async () => {
       localStorage.setItem('refreshToken', 'old-refresh')
       ;(axios.post as any).mockResolvedValue({
@@ -144,7 +144,7 @@ describe('api.ts — auth refresh + CSRF retry interceptors', () => {
     })
   })
 
-  describe('403 handling — CSRF retry', () => {
+  describe('403 handling - CSRF retry', () => {
     it('fetches a fresh CSRF token and retries once when the error mentions CSRF', async () => {
       mockClient.get.mockResolvedValue({ data: { csrfToken: 'rotated-csrf' } })
       mockClient.request.mockResolvedValue({ data: 'retried-after-csrf' })

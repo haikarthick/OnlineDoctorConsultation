@@ -3,12 +3,12 @@
 -- ============================================================
 -- Fresh-install schema covering every table used by the application
 -- services (see backend/migrations/*.sql for the same schema built up
--- incrementally on already-deployed environments — keep both in sync when
+-- incrementally on already-deployed environments - keep both in sync when
 -- adding new tables/columns, since a migration alone is invisible to a
 -- brand new database that runs only this file).
 -- ============================================================
 
--- gen_random_uuid() is built into PostgreSQL 13+ — no extension required
+-- gen_random_uuid() is built into PostgreSQL 13+ - no extension required
 
 -- Extensions for geospatial proximity search (earthdistance requires cube)
 CREATE EXTENSION IF NOT EXISTS cube CASCADE;
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
-  role VARCHAR(50) NOT NULL CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist')),
+  role VARCHAR(50) NOT NULL CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support')),
   phone VARCHAR(20) DEFAULT '',
   password_hash VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT true,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- ============================================================
--- 1b. HOSPITAL NETWORKS (defined early — referenced by many tables below)
+-- 1b. HOSPITAL NETWORKS (defined early - referenced by many tables below)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS hospital_networks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -180,7 +180,11 @@ CREATE TABLE IF NOT EXISTS consultations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-  animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
+  -- RESTRICT, not SET NULL: an animal with consultation history must not be deletable, and
+  -- nulling the link would orphan the clinical record. database.ts's startup self-heal has
+  -- always forced RESTRICT here, so every deployed DB is already RESTRICT - this line used to
+  -- say SET NULL and lost the fight on every boot. Kept aligned so the two cannot disagree.
+  animal_id UUID REFERENCES animals(id) ON DELETE RESTRICT,
   animal_type VARCHAR(100) NOT NULL DEFAULT '',
   symptom_description TEXT NOT NULL DEFAULT '',
   status VARCHAR(50) NOT NULL DEFAULT 'scheduled'
@@ -622,6 +626,11 @@ CREATE TABLE IF NOT EXISTS payments (
   transaction_id VARCHAR(255),
   invoice_number VARCHAR(100),
   gateway VARCHAR(50) DEFAULT 'stripe',
+  -- Which revenue stream this payment belongs to. The finance overview counts GMV by it and the
+  -- Razorpay webhook routes completion by it, so it must exist from a fresh install - it used to
+  -- be added only by the startup self-heal, which runs AFTER migrations.
+  payment_source VARCHAR(30) DEFAULT 'consultation'
+    CHECK (payment_source IN ('consultation', 'pharmacy', 'subscription', 'other', 'grooming')),
   tax_amount DECIMAL(10,2) DEFAULT 0,
   discount_amount DECIMAL(10,2) DEFAULT 0,
   refund_amount DECIMAL(10,2) DEFAULT 0,
@@ -726,6 +735,41 @@ CREATE TABLE IF NOT EXISTS wallet_transactions (
   reference_type VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ============================================================
+-- 18b. WALLET WITHDRAWALS (migration 038) - money OUT of the platform
+-- ============================================================
+-- Without this the wallet is a one-way door: refunds land in it and can only ever be spent
+-- back on the platform. Separate from withdrawal_requests, which is keyed to doctor earnings
+-- and carries TDS/commission-invoice semantics that do not apply to handing a customer back
+-- their own money. Only `balance` is withdrawable - `bonus_credits` is promotional.
+CREATE TABLE IF NOT EXISTS wallet_withdrawal_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  wallet_id UUID NOT NULL REFERENCES wallets(id) ON DELETE CASCADE,
+  amount DECIMAL(10,2) NOT NULL CHECK (amount > 0),
+  currency VARCHAR(10) DEFAULT 'INR',
+  status VARCHAR(20) NOT NULL DEFAULT 'requested'
+    CHECK (status IN ('requested', 'approved', 'rejected', 'settled', 'cancelled')),
+  method VARCHAR(20) NOT NULL DEFAULT 'bank_transfer'
+    CHECK (method IN ('bank_transfer', 'upi')),
+  account_name VARCHAR(255),
+  account_number VARCHAR(50),
+  ifsc VARCHAR(20),
+  upi_id VARCHAR(100),
+  utr_reference VARCHAR(100),
+  admin_note TEXT,
+  rejection_reason TEXT,
+  reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  reviewed_at TIMESTAMP,
+  settled_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  settled_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_wallet_withdrawals_user ON wallet_withdrawal_requests (user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_wallet_withdrawals_open
+  ON wallet_withdrawal_requests (created_at ASC) WHERE status IN ('requested', 'approved');
 
 -- ============================================================
 -- AUTO-UPDATE TRIGGERS  (drop+create for idempotency)
@@ -877,13 +921,13 @@ CREATE INDEX IF NOT EXISTS idx_system_settings_key ON system_settings(key);
 
 -- ============================================================
 -- NOTE: bookings_status_check is (re)created once, later in this file,
--- by the "46.2 bookings: payment lifecycle statuses" block — with the
+-- by the "46.2 bookings: payment lifecycle statuses" block - with the
 -- FULL, current status list ('missed' included). Do not add another
 -- ALTER TABLE ... ADD CONSTRAINT bookings_status_check block here: this
 -- file runs as one atomic statement, so an earlier block using a
 -- narrower status list than what real rows already contain (e.g. it's
 -- missing 'payment_pending'/'payment_expired'/'referred') aborts the
--- ENTIRE init.sql run on every existing DB that has such rows — which
+-- ENTIRE init.sql run on every existing DB that has such rows - which
 -- is exactly what took down the 2026-07-20 vetcare-dev deploy. If the
 -- status list ever needs to change, edit the single block at the
 -- "46.2 bookings" section below, in place, rather than adding a new one.
@@ -1390,7 +1434,7 @@ CREATE TABLE IF NOT EXISTS vaccine_protocols (
   -- Regulatory & labelling
   regulatory_body VARCHAR(255),
   regulatory_standard VARCHAR(500),
-  seasonal_window VARCHAR(100),            -- e.g. "Pre-monsoon (May–June)"
+  seasonal_window VARCHAR(100),            -- e.g. "Pre-monsoon (May-June)"
   country VARCHAR(50) DEFAULT 'ALL',
   -- Status
   is_active BOOLEAN DEFAULT true,
@@ -1459,7 +1503,7 @@ CREATE TABLE IF NOT EXISTS vaccine_certificate_log (
   generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- vaccination_records — add protocol / schedule FKs
+-- vaccination_records - add protocol / schedule FKs
 ALTER TABLE vaccination_records ADD COLUMN IF NOT EXISTS protocol_id UUID REFERENCES vaccine_protocols(id) ON DELETE SET NULL;
 ALTER TABLE vaccination_records ADD COLUMN IF NOT EXISTS schedule_id UUID REFERENCES vaccine_schedule(id) ON DELETE SET NULL;
 
@@ -1534,7 +1578,7 @@ CREATE TRIGGER update_vet_certificates_updated_at BEFORE UPDATE ON vet_certifica
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================
--- ENTERPRISE TABLES — Triggers & Indexes
+-- ENTERPRISE TABLES - Triggers & Indexes
 -- ============================================================
 DROP TRIGGER IF EXISTS update_enterprises_updated_at ON enterprises;
 CREATE TRIGGER update_enterprises_updated_at BEFORE UPDATE ON enterprises
@@ -1572,7 +1616,7 @@ CREATE INDEX IF NOT EXISTS idx_animals_group_id ON animals(group_id);
 CREATE INDEX IF NOT EXISTS idx_animals_status ON animals(status);
 
 -- ============================================================
--- HOSPITAL NETWORK TABLES (Phase 1 — Clinical Domain)
+-- HOSPITAL NETWORK TABLES (Phase 1 - Clinical Domain)
 -- NOTE: Completely separate from farm enterprises table.
 --       enterprises = farm domain, hospital_networks = clinical domain.
 -- ============================================================
@@ -1697,7 +1741,7 @@ CREATE TABLE IF NOT EXISTS patient_data_consent (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 41. CLINICAL DATA ACCESS LOG (immutable audit trail — append only, never delete)
+-- 41. CLINICAL DATA ACCESS LOG (immutable audit trail - append only, never delete)
 -- Every access to hospital-scoped clinical records is logged here.
 -- Corporate admin, hospital director access is ALWAYS logged.
 CREATE TABLE IF NOT EXISTS clinical_data_access_log (
@@ -1720,7 +1764,7 @@ CREATE TABLE IF NOT EXISTS clinical_data_access_log (
   access_granted BOOLEAN NOT NULL,
   denial_reason TEXT,
   accessed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-  -- NOTE: No updated_at — this table is append-only, never update or delete rows
+  -- NOTE: No updated_at - this table is append-only, never update or delete rows
 );
 
 -- 41b. NETWORK REFERRALS (inter-hospital referrals and patient transfers within a network)
@@ -1824,6 +1868,10 @@ CREATE TABLE IF NOT EXISTS role_change_requests (
     "current_role" VARCHAR(50) NOT NULL,
     requested_role VARCHAR(50) NOT NULL,
     reason TEXT,
+    -- Role-specific details captured at request time (e.g. vet license_number,
+    -- specializations, fee) so an admin can review + provision the satellite profile
+    -- (vet_profiles) in one approval step. See migration 027.
+    profile_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
     status VARCHAR(20) NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
     reviewed_by UUID REFERENCES users(id),
@@ -1901,7 +1949,10 @@ CREATE TABLE IF NOT EXISTS hospital_staff_invites (
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
   invited_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   invitee_email VARCHAR(255) NOT NULL,
-  invitee_name VARCHAR(200) NOT NULL,
+  -- Nullable by design - the invite form labels this field "(optional)". database.ts's startup
+  -- self-heal has always run `ALTER COLUMN invitee_name DROP NOT NULL`, so deployed DBs are
+  -- already nullable; this used to say NOT NULL and was silently undone on every boot.
+  invitee_name VARCHAR(200),
   staff_position VARCHAR(50) NOT NULL
     CHECK (staff_position IN (
       'nurse','technician','receptionist','lab_tech',
@@ -1977,7 +2028,7 @@ CREATE INDEX IF NOT EXISTS idx_leave_requests_hospital ON staff_leave_requests(h
 -- FIX: these were only ever defined in backend/migrations/008_tier4_features.sql
 -- and never backported here, so listing_boosts/marketplace_inquiries/
 -- marketplace_transactions below (which FK-reference marketplace_listings)
--- made init.sql fail on any truly fresh database — rolling back the ENTIRE
+-- made init.sql fail on any truly fresh database - rolling back the ENTIRE
 -- script (incl. users/bookings/payments) since it runs as one implicit
 -- transaction. Mirrors migration 008 lines 81-134 exactly (idempotent).
 CREATE TABLE IF NOT EXISTS marketplace_listings (
@@ -1993,6 +2044,11 @@ CREATE TABLE IF NOT EXISTS marketplace_listings (
   quantity INT DEFAULT 1,
   unit VARCHAR(30),
   condition VARCHAR(30) DEFAULT 'new',
+  -- Animal attributes (also added idempotently by migration 008); required here because the
+  -- idx_mp_listings_fts full-text index below references breed/species, and init.sql runs
+  -- atomically BEFORE migrations on a fresh DB - omitting them aborts the entire schema build.
+  species VARCHAR(60),
+  breed VARCHAR(100),
   images JSONB DEFAULT '[]',
   location VARCHAR(200),
   shipping_options JSONB DEFAULT '[]',
@@ -2049,7 +2105,7 @@ CREATE INDEX IF NOT EXISTS idx_mp_orders_buyer ON marketplace_orders(buyer_id);
 CREATE INDEX IF NOT EXISTS idx_mp_orders_seller ON marketplace_orders(seller_id);
 CREATE INDEX IF NOT EXISTS idx_mp_orders_status ON marketplace_orders(status);
 
--- ─── Marketplace engagement (Phase 3) — mirrors backend/migrations/016_marketplace_engagement.sql ───
+-- ─── Marketplace engagement (Phase 3) - mirrors backend/migrations/016_marketplace_engagement.sql ───
 -- Buyer<->seller messaging threads, favorites/watchlist, saved searches with alerts.
 CREATE TABLE IF NOT EXISTS marketplace_threads (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -2204,12 +2260,12 @@ CREATE TABLE IF NOT EXISTS marketplace_transactions (
 );
 
 -- ============================================================
--- 46. USER ROLES (secondary roles — additive, does not replace users.role)
+-- 46. USER ROLES (secondary roles - additive, does not replace users.role)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS user_roles (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  role VARCHAR(50) NOT NULL CHECK (role IN ('pet_owner','farmer','veterinarian','admin','corporate_admin','hospital_staff','pharmacist')),
+  role VARCHAR(50) NOT NULL CHECK (role IN ('pet_owner','farmer','veterinarian','admin','corporate_admin','hospital_staff','pharmacist','groomer','support')),
   is_primary BOOLEAN DEFAULT false,
   granted_by UUID REFERENCES users(id),
   granted_at TIMESTAMPTZ DEFAULT NOW(),
@@ -2477,13 +2533,13 @@ ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_notes TEXT;
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS is_network_coordinated BOOLEAN DEFAULT false;
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS target_pharmacy_id UUID REFERENCES hospital_pharmacies(id) ON DELETE SET NULL;
 
--- Seed auction_enabled feature flag (disabled by default — legal review pending)
+-- Seed auction_enabled feature flag (disabled by default - legal review pending)
 INSERT INTO marketplace_monetization_settings (setting_key, is_enabled, description, category)
 VALUES ('auction_enabled', false, 'Enable or disable the auction feature platform-wide', 'feature')
 ON CONFLICT (setting_key) DO NOTHING;
 
 -- ============================================================
--- 46. PAYMENT MODULE (docs/PAYMENT_MODULE_PLAN.md — Phase P0)
+-- 46. PAYMENT MODULE (docs/PAYMENT_MODULE_PLAN.md - Phase P0)
 -- Mirrors backend/migrations/012_payment_module.sql. Idempotent.
 -- ============================================================
 
@@ -2515,7 +2571,7 @@ END $$;
 ALTER TABLE payments ALTER COLUMN currency SET DEFAULT 'INR';
 ALTER TABLE payments ALTER COLUMN gateway SET DEFAULT 'demo';
 CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
--- (idx_payments_status already created earlier in this file — see the
+-- (idx_payments_status already created earlier in this file - see the
 -- "FIX: bookings status CHECK" era section above)
 
 -- 46.2 bookings: payment lifecycle statuses + booking_type fix
@@ -2642,14 +2698,15 @@ INSERT INTO tax_codes (id, sac_code, label, rate_percent, is_active) VALUES
   (gen_random_uuid(), '998351', 'Veterinary services for pet animals (GST-exempt healthcare)', 0, true),
   (gen_random_uuid(), '998352', 'Veterinary services for livestock (GST-exempt healthcare)', 0, true),
   (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true),
-  (gen_random_uuid(), '300490', 'Pharmacy — dispensed veterinary medicaments (HSN 3004)', 12, true)
+  (gen_random_uuid(), '300490', 'Pharmacy - dispensed veterinary medicaments (HSN 3004)', 12, true)
 ON CONFLICT (sac_code) DO NOTHING;
 
 -- 46.10 invoices: immutable snapshots
 CREATE TABLE IF NOT EXISTS invoices (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   invoice_number VARCHAR(100) UNIQUE NOT NULL,
-  invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('consultation', 'commission', 'pharmacy')),
+  invoice_type VARCHAR(30) NOT NULL
+    CHECK (invoice_type IN ('consultation', 'commission', 'pharmacy', 'grooming', 'grooming_credit_note')),
   payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
   withdrawal_id UUID REFERENCES withdrawal_requests(id) ON DELETE SET NULL,
   issuer_details JSONB NOT NULL DEFAULT '{}',
@@ -2725,7 +2782,7 @@ CREATE TRIGGER update_tax_codes_updated_at BEFORE UPDATE ON tax_codes
 
 -- 46.14 payment_gateway_credentials: Razorpay key_id/key_secret/webhook_secret
 -- per environment (test/live), key_secret + webhook_secret AES-256-GCM
--- encrypted at rest (backend/src/utils/secretCrypto.ts) — never readable in
+-- encrypted at rest (backend/src/utils/secretCrypto.ts) - never readable in
 -- plaintext via any admin API response (§12 rule 6).
 CREATE TABLE IF NOT EXISTS payment_gateway_credentials (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -2750,13 +2807,13 @@ CREATE TRIGGER update_payment_gateway_credentials_updated_at BEFORE UPDATE ON pa
 -- 47. TIER 2/3/4 ADVANCED FEATURE TABLES
 -- ============================================================
 -- Backported from backend/migrations/006_tier2_features.sql,
--- 007_tier3_features.sql, 008_tier4_features.sql — these 31 tables existed
+-- 007_tier3_features.sql, 008_tier4_features.sql - these 31 tables existed
 -- only as migrations (applied to every live environment already) but were
 -- never mirrored into this fresh-install schema, so a brand new DB would
 -- 500 the moment any of these features were touched. marketplace_listings/
 -- bids/orders/monetization_settings/plans/subscriptions/listing_boosts/
 -- inquiries/transactions (9 of migration 008's 19 tables) already exist
--- above (§ marketplace) — not repeated here — but marketplace_listings was
+-- above (§ marketplace) - not repeated here - but marketplace_listings was
 -- still missing the entire livestock/compliance column block from 008,
 -- backported separately below since active Marketplace code depends on it.
 
@@ -2944,7 +3001,7 @@ CREATE TABLE IF NOT EXISTS alert_events (
 -- ─── 47.9 animals: extend with health/breeding fields (006) ────
 -- breeding_status/last_breeding_date/expected_due_date/current_weight/
 -- weight_unit/last_weighed_at/dam_id/sire_id/animal_class already exist
--- above in the main animals CREATE TABLE — only birth_weight/health_score
+-- above in the main animals CREATE TABLE - only birth_weight/health_score
 -- were actually missing.
 ALTER TABLE animals ADD COLUMN IF NOT EXISTS birth_weight DECIMAL(10,2);
 ALTER TABLE animals ADD COLUMN IF NOT EXISTS health_score INT DEFAULT 100;
@@ -3405,7 +3462,7 @@ CREATE TABLE IF NOT EXISTS geospatial_events (
 
 -- ─── 47.21 marketplace_listings: livestock + compliance columns (008) ──
 -- The base table already exists above (§ marketplace) but was missing this
--- entire block — active Marketplace.tsx/MarketplaceService.ts code reads
+-- entire block - active Marketplace.tsx/MarketplaceService.ts code reads
 -- and writes every one of these columns, so a fresh-install DB would 500 on
 -- the very first listing create/search.
 ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS species VARCHAR(60);
@@ -3438,7 +3495,7 @@ ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS terms_accepted BOOLEAN
 ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMPTZ;
 
 -- ─── 47.22 users: network_id/corporate_role (009 hospital networks) ────
--- Not from 006/007/008, but discovered missing during this same audit —
+-- Not from 006/007/008, but discovered missing during this same audit -
 -- hospital_networks (defined early in § 1b above) already existed as an FK
 -- target, but these two columns on users referencing it were never
 -- backported.
@@ -3473,10 +3530,10 @@ CREATE INDEX IF NOT EXISTS idx_geospatial_events_time ON geospatial_events(creat
 -- ============================================================
 -- 48. MASTER DATA (species, breeds, animal classes, marketplace categories/conditions)
 -- ============================================================
--- Backported from backend/migrations/022_master_data_tables.sql — admin-editable
+-- Backported from backend/migrations/022_master_data_tables.sql - admin-editable
 -- reference data that replaces the hardcoded TypeScript arrays previously in
 -- frontend/src/constants/speciesBreeds.ts and Marketplace.tsx's CATEGORY_KEYS/
--- condition options. Identity is matched by the `code`/`value` string columns —
+-- condition options. Identity is matched by the `code`/`value` string columns -
 -- animals.species, marketplace_listings.species/category/condition/animal_class stay
 -- plain VARCHAR (not FKs), matching existing behavior exactly.
 
@@ -3485,7 +3542,7 @@ CREATE TABLE IF NOT EXISTS master_species (
   code VARCHAR(50) UNIQUE NOT NULL,
   label VARCHAR(100) NOT NULL,
   -- i18n key resolved via resolveLabel() (same fallback pattern as
-  -- master_marketplace_categories/conditions) — see migration 024. NULL for a
+  -- master_marketplace_categories/conditions) - see migration 024. NULL for a
   -- newly admin-added species with no matching translation falls back to `label`.
   label_key VARCHAR(150),
   icon VARCHAR(10),
@@ -3495,11 +3552,11 @@ CREATE TABLE IF NOT EXISTS master_species (
   is_active BOOLEAN DEFAULT true,
   is_protected BOOLEAN DEFAULT false,
   -- Controls whether this species appears in the Marketplace "sell an animal" species
-  -- picker (Marketplace.tsx/PublicMarketplace.tsx) — see migration 023. Defaults false so
+  -- picker (Marketplace.tsx/PublicMarketplace.tsx) - see migration 023. Defaults false so
   -- newly admin-added species don't silently become sellable; the seed data below
   -- explicitly enables it for the species that were already in the old hardcoded picker.
   is_marketplace_eligible BOOLEAN NOT NULL DEFAULT false,
-  -- Per-locale label overrides (migration 025) — lets an admin type all 6 language
+  -- Per-locale label overrides (migration 025) - lets an admin type all 6 language
   -- labels directly when adding a species, no labelKey/i18n-file/deploy needed.
   -- Checked first by the frontend's speciesLabel() resolver; NULL falls back to
   -- the label_key/i18n-key path above, same as pre-seeded species always have.
@@ -3518,6 +3575,13 @@ CREATE TABLE IF NOT EXISTS master_breeds (
   name VARCHAR(150) NOT NULL,
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
+  -- Per-locale display overrides (migration 026) - translate `name`; NULL falls back to
+  -- the canonical English name, which remains the stored/value column.
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(species_id, name)
@@ -3534,6 +3598,12 @@ CREATE TABLE IF NOT EXISTS master_animal_classes (
   can_produce_milk BOOLEAN DEFAULT false,
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
+  -- Per-locale label overrides (migration 026) - NULL falls back to label_key/label.
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(species_id, value)
@@ -3548,6 +3618,12 @@ CREATE TABLE IF NOT EXISTS master_marketplace_categories (
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
   is_protected BOOLEAN DEFAULT false,
+  -- Per-locale label overrides (migration 026) - NULL falls back to label_key/label.
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -3559,6 +3635,12 @@ CREATE TABLE IF NOT EXISTS master_marketplace_conditions (
   label VARCHAR(100),
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
+  -- Per-locale label overrides (migration 026) - NULL falls back to label_key/label.
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -3570,6 +3652,523 @@ CREATE INDEX IF NOT EXISTS idx_master_animal_classes_species ON master_animal_cl
 CREATE INDEX IF NOT EXISTS idx_master_animal_classes_active ON master_animal_classes(is_active);
 CREATE INDEX IF NOT EXISTS idx_master_mp_categories_active ON master_marketplace_categories(is_active);
 CREATE INDEX IF NOT EXISTS idx_master_mp_conditions_active ON master_marketplace_conditions(is_active);
+
+-- ============================================================
+-- 48. PET WELLNESS / GROOMING & SPA MODULE (platform-level marketplace)
+--     Separate from network hospitals (never a provider) and from the
+--     consultation `bookings` table. Ships dark behind system setting
+--     grooming.enabled. See docs/PET_WELLNESS_GROOMING_SPA_PLAN.md and
+--     migration 029 (kept identical to this block).
+-- ============================================================
+CREATE TABLE IF NOT EXISTS master_grooming_categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code VARCHAR(50) UNIQUE NOT NULL,
+  label_key VARCHAR(150),
+  label VARCHAR(100),
+  icon VARCHAR(10),
+  description TEXT,
+  sort_order INT DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  is_protected BOOLEAN DEFAULT false,
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS master_grooming_addons (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code VARCHAR(50) UNIQUE NOT NULL,
+  label_key VARCHAR(150),
+  label VARCHAR(100),
+  icon VARCHAR(10),
+  sort_order INT DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  is_protected BOOLEAN DEFAULT false,
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS grooming_providers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  provider_type VARCHAR(20) NOT NULL DEFAULT 'groomer'
+    CHECK (provider_type IN ('veterinarian','groomer','business','clinic')),
+  business_name VARCHAR(200) NOT NULL,
+  slug VARCHAR(220) UNIQUE,
+  description TEXT,
+  logo_url VARCHAR(500),
+  contact_phone VARCHAR(20),
+  contact_email VARCHAR(255),
+  offers_at_premises BOOLEAN DEFAULT true,
+  offers_mobile BOOLEAN DEFAULT false,
+  operating_hours JSONB DEFAULT '{}',
+  supported_species TEXT[] DEFAULT '{}',
+  size_limits JSONB DEFAULT '{}',
+  legal_name VARCHAR(255),
+  pan VARCHAR(20),
+  gstin VARCHAR(20),
+  business_address TEXT,
+  payout_account_name VARCHAR(255),
+  payout_account_number VARCHAR(50),
+  payout_ifsc VARCHAR(20),
+  payout_upi VARCHAR(100),
+  verification_status VARCHAR(20) NOT NULL DEFAULT 'pending'
+    CHECK (verification_status IN ('pending','verified','rejected','suspended')),
+  verified_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  verified_at TIMESTAMP,
+  rejection_reason TEXT,
+  is_paused BOOLEAN DEFAULT false,
+  rating DECIMAL(3,2) DEFAULT 0.00,
+  total_reviews INT DEFAULT 0,
+  total_orders INT DEFAULT 0,
+  -- Acceptance SLA counters: a provider that routinely declines or lets bookings lapse is a
+  -- marketplace quality problem, and admin needs it visible rather than inferred from orders.
+  total_accepted INT DEFAULT 0,
+  total_declined INT DEFAULT 0,
+  total_acceptance_timeouts INT DEFAULT 0,
+  reliability_score DECIMAL(5,2) DEFAULT 100.00,
+  commission_override_percent DECIMAL(5,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_locations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  name VARCHAR(200) NOT NULL,
+  location_type VARCHAR(20) NOT NULL DEFAULT 'premises'
+    CHECK (location_type IN ('premises','mobile_zone')),
+  address TEXT,
+  city VARCHAR(100),
+  state VARCHAR(100),
+  postal_code VARCHAR(20),
+  gps_latitude DECIMAL(9,6),
+  gps_longitude DECIMAL(9,6),
+  service_radius_km DECIMAL(6,2),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_resources (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  location_id UUID REFERENCES grooming_locations(id) ON DELETE SET NULL,
+  name VARCHAR(150) NOT NULL,
+  resource_type VARCHAR(30) NOT NULL DEFAULT 'grooming_table'
+    CHECK (resource_type IN ('grooming_table','bath_station','drying_cage','spa_room','other')),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ── Grooming availability (migration 037) ──
+-- Mirrors the consultation scheduling tables, with two differences a salon needs and the
+-- doctor model cannot express: CAPACITY (several tables/stations serve concurrently) and
+-- per-service DURATION (occupancy is an interval, not one fixed slot length).
+-- location_id is nullable: NULL = the whole business, set = that branch only.
+CREATE TABLE IF NOT EXISTS grooming_schedules (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  location_id UUID REFERENCES grooming_locations(id) ON DELETE CASCADE,
+  day_of_week INT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+  open_time VARCHAR(5) NOT NULL,
+  close_time VARCHAR(5) NOT NULL,
+  slot_interval_minutes INT NOT NULL DEFAULT 30 CHECK (slot_interval_minutes BETWEEN 5 AND 480),
+  capacity INT NOT NULL DEFAULT 1 CHECK (capacity BETWEEN 1 AND 100),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- Partial indexes, not a plain UNIQUE: Postgres treats NULLs as distinct, which would allow
+-- unlimited duplicate business-wide rows for the same weekday.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_grooming_schedules_provider_day_loc
+  ON grooming_schedules (provider_id, location_id, day_of_week) WHERE location_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_grooming_schedules_provider_day_nolo
+  ON grooming_schedules (provider_id, day_of_week) WHERE location_id IS NULL;
+
+CREATE TABLE IF NOT EXISTS grooming_date_overrides (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  location_id UUID REFERENCES grooming_locations(id) ON DELETE CASCADE,
+  override_date DATE NOT NULL,
+  override_type VARCHAR(20) NOT NULL CHECK (override_type IN ('closed', 'custom_hours')),
+  open_time VARCHAR(5),
+  close_time VARCHAR(5),
+  slot_interval_minutes INT CHECK (slot_interval_minutes BETWEEN 5 AND 480),
+  capacity INT CHECK (capacity BETWEEN 1 AND 100),
+  reason TEXT,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_grooming_overrides_date_loc
+  ON grooming_date_overrides (provider_id, location_id, override_date) WHERE location_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_grooming_overrides_date_nolo
+  ON grooming_date_overrides (provider_id, override_date) WHERE location_id IS NULL;
+
+CREATE TABLE IF NOT EXISTS grooming_blocked_slots (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  location_id UUID REFERENCES grooming_locations(id) ON DELETE CASCADE,
+  block_date DATE,
+  start_time VARCHAR(5) NOT NULL,
+  end_time VARCHAR(5) NOT NULL,
+  is_recurring BOOLEAN DEFAULT false,
+  recurring_day INT CHECK (recurring_day BETWEEN 0 AND 6),
+  reason TEXT,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  -- Either a one-off on a date or a weekly recurrence - never neither, which would be a row
+  -- invisible to every lookup that silently blocks nothing.
+  CONSTRAINT grooming_blocked_slots_when_check CHECK (
+    (is_recurring = true AND recurring_day IS NOT NULL)
+    OR (is_recurring = false AND block_date IS NOT NULL)
+  )
+);
+CREATE INDEX IF NOT EXISTS idx_grooming_blocked_provider_date
+  ON grooming_blocked_slots (provider_id, block_date);
+CREATE INDEX IF NOT EXISTS idx_grooming_blocked_provider_recurring
+  ON grooming_blocked_slots (provider_id, recurring_day) WHERE is_recurring = true;
+
+CREATE TABLE IF NOT EXISTS grooming_provider_staff (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  provider_role VARCHAR(20) NOT NULL DEFAULT 'staff'
+    CHECK (provider_role IN ('owner','manager','staff')),
+  capabilities TEXT[] DEFAULT '{}',
+  is_active BOOLEAN DEFAULT true,
+  invited_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(provider_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS grooming_services (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  category_id UUID REFERENCES master_grooming_categories(id) ON DELETE SET NULL,
+  name VARCHAR(200) NOT NULL,
+  description TEXT,
+  service_kind VARCHAR(20) NOT NULL DEFAULT 'service'
+    CHECK (service_kind IN ('service','package','membership')),
+  base_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  currency VARCHAR(10) DEFAULT 'INR',
+  duration_minutes INT DEFAULT 60,
+  tax_percent DECIMAL(5,2) DEFAULT 0.00,
+  payment_rule VARCHAR(20) NOT NULL DEFAULT 'full'
+    CHECK (payment_rule IN ('full','deposit')),
+  deposit_amount DECIMAL(10,2) DEFAULT 0.00,
+  is_variable_price BOOLEAN DEFAULT false,
+  cancellation_policy JSONB DEFAULT '{}',
+  supported_species TEXT[] DEFAULT '{}',
+  available_at_premises BOOLEAN DEFAULT true,
+  available_mobile BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  is_paused BOOLEAN DEFAULT false,
+  sort_order INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_service_addons (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  service_id UUID NOT NULL REFERENCES grooming_services(id) ON DELETE CASCADE,
+  addon_id UUID REFERENCES master_grooming_addons(id) ON DELETE SET NULL,
+  name VARCHAR(200) NOT NULL,
+  price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  duration_minutes INT DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_pet_profile (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  animal_id UUID NOT NULL UNIQUE REFERENCES animals(id) ON DELETE CASCADE,
+  owner_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  coat_type VARCHAR(50),
+  coat_length VARCHAR(30),
+  grooming_preference TEXT,
+  allergies TEXT,
+  temperament VARCHAR(50),
+  handling_notes TEXT,
+  medical_restrictions TEXT,
+  photo_url VARCHAR(500),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_number VARCHAR(30) UNIQUE,
+  pet_owner_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
+  animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE RESTRICT,
+  location_id UUID REFERENCES grooming_locations(id) ON DELETE SET NULL,
+  primary_service_id UUID REFERENCES grooming_services(id) ON DELETE SET NULL,
+  service_mode VARCHAR(20) NOT NULL DEFAULT 'premises'
+    CHECK (service_mode IN ('premises','mobile')),
+  scheduled_date DATE NOT NULL,
+  time_slot_start VARCHAR(10) NOT NULL,
+  time_slot_end VARCHAR(10),
+  -- pending_provider_acceptance sits between payment and confirmed: the provider must actively
+  -- accept the booking. Declining, or letting acceptance_deadline lapse, triggers a full
+  -- no-fault refund. Mirrors the doctor confirm/decline gate on bookings, kept module-separate.
+  status VARCHAR(30) NOT NULL DEFAULT 'draft'
+    CHECK (status IN ('draft','payment_pending','payment_expired',
+                      'pending_provider_acceptance','declined_by_provider',
+                      'confirmed','provider_assigned',
+                      'checked_in','en_route','intake_done','in_progress','awaiting_approval',
+                      'quality_check','ready_for_pickup','returning','completed',
+                      'cancelled_by_customer','cancelled_by_provider','no_show','disputed','closed')),
+  assigned_staff_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  assigned_resource_id UUID REFERENCES grooming_resources(id) ON DELETE SET NULL,
+  subtotal DECIMAL(10,2) DEFAULT 0.00,
+  addons_total DECIMAL(10,2) DEFAULT 0.00,
+  variable_total DECIMAL(10,2) DEFAULT 0.00,
+  discount_total DECIMAL(10,2) DEFAULT 0.00,
+  tax_total DECIMAL(10,2) DEFAULT 0.00,
+  grand_total DECIMAL(10,2) DEFAULT 0.00,
+  deposit_due DECIMAL(10,2) DEFAULT 0.00,
+  amount_paid DECIMAL(10,2) DEFAULT 0.00,
+  currency VARCHAR(10) DEFAULT 'INR',
+  payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
+  commission_percent DECIMAL(5,2),
+  commission_amount DECIMAL(10,2) DEFAULT 0.00,
+  handling_notes TEXT,
+  owner_notes TEXT,
+  cancellation_reason TEXT,
+  cancelled_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  cancelled_at TIMESTAMP,
+  eta_minutes INT,
+  gateway_order_id VARCHAR(120),
+  gateway_payment_id VARCHAR(120),
+  gateway VARCHAR(30),
+  invoice_number VARCHAR(100),
+  -- Slot-hold window: an unpaid order past expires_at is released by the grooming expiry job.
+  -- Grooming keeps its OWN hold/refund columns rather than leaning on the consultation
+  -- payment-hold fields, so the two modules' lifecycles can change independently.
+  expires_at TIMESTAMP,
+  refund_amount DECIMAL(10,2) DEFAULT 0.00,
+  refund_status VARCHAR(20) NOT NULL DEFAULT 'none'
+    CHECK (refund_status IN ('none', 'partial', 'full', 'failed')),
+  refund_destination VARCHAR(20) CHECK (refund_destination IN ('wallet', 'gateway')),
+  refund_reason TEXT,
+  refunded_at TIMESTAMP,
+  -- Still owed on this order: set when only a deposit was taken, and grown when the customer
+  -- approves extra work mid-service. A balance checkout collects it.
+  balance_due DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  -- How long this booking occupies a station, copied from the service at booking time so a
+  -- later price/duration edit cannot retroactively change what was already scheduled.
+  duration_minutes INT,
+  -- Provider acceptance gate (see the status CHECK above).
+  acceptance_deadline TIMESTAMP,
+  accepted_at TIMESTAMP,
+  accepted_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  declined_at TIMESTAMP,
+  decline_reason TEXT,
+  completed_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_grooming_orders_acceptance_deadline
+  ON grooming_orders (acceptance_deadline)
+  WHERE status = 'pending_provider_acceptance';
+
+-- Occupancy lookups are always "this provider, this date, statuses that hold a slot".
+CREATE INDEX IF NOT EXISTS idx_grooming_orders_provider_date
+  ON grooming_orders (provider_id, scheduled_date);
+
+CREATE TABLE IF NOT EXISTS grooming_order_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES grooming_orders(id) ON DELETE CASCADE,
+  service_id UUID REFERENCES grooming_services(id) ON DELETE SET NULL,
+  addon_id UUID REFERENCES master_grooming_addons(id) ON DELETE SET NULL,
+  item_type VARCHAR(20) NOT NULL DEFAULT 'service'
+    CHECK (item_type IN ('service','addon','variable')),
+  name VARCHAR(200) NOT NULL,
+  quantity INT DEFAULT 1,
+  unit_price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  tax_percent DECIMAL(5,2) DEFAULT 0.00,
+  line_total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending','started','completed','skipped','awaiting_approval','paused')),
+  approval_status VARCHAR(20) DEFAULT 'not_required'
+    CHECK (approval_status IN ('not_required','requested','approved','declined')),
+  reason TEXT,
+  photo_url VARCHAR(500),
+  -- Which invoice already billed this line, so a supplementary invoice covers only new work.
+  invoice_number VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_order_status_history (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES grooming_orders(id) ON DELETE CASCADE,
+  from_status VARCHAR(30),
+  to_status VARCHAR(30) NOT NULL,
+  changed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  note TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_intake (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL UNIQUE REFERENCES grooming_orders(id) ON DELETE CASCADE,
+  recorded_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  arrival_condition TEXT,
+  temperament VARCHAR(50),
+  owner_instructions TEXT,
+  allergies TEXT,
+  handling_restrictions TEXT,
+  scent_skin VARCHAR(20) CHECK (scent_skin IN ('good','watch','vet_advised')),
+  scent_coat VARCHAR(20) CHECK (scent_coat IN ('good','watch','vet_advised')),
+  scent_ears VARCHAR(20) CHECK (scent_ears IN ('good','watch','vet_advised')),
+  scent_nails VARCHAR(20) CHECK (scent_nails IN ('good','watch','vet_advised')),
+  scent_teeth VARCHAR(20) CHECK (scent_teeth IN ('good','watch','vet_advised')),
+  scent_notes TEXT,
+  before_photos TEXT[] DEFAULT '{}',
+  consent_handling BOOLEAN DEFAULT false,
+  consent_products BOOLEAN DEFAULT false,
+  consent_photography BOOLEAN DEFAULT false,
+  consent_emergency_contact BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_report_card (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL UNIQUE REFERENCES grooming_orders(id) ON DELETE CASCADE,
+  after_photos TEXT[] DEFAULT '{}',
+  products_used TEXT,
+  aftercare_notes TEXT,
+  summary TEXT,
+  next_recommended_date DATE,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_safety_escalations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES grooming_orders(id) ON DELETE CASCADE,
+  raised_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  issue_type VARCHAR(40) NOT NULL,
+  description TEXT,
+  photos TEXT[] DEFAULT '{}',
+  consultation_booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'open'
+    CHECK (status IN ('open','owner_notified','consult_booked','resolved','dismissed')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_disputes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES grooming_orders(id) ON DELETE CASCADE,
+  raised_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  reason VARCHAR(100) NOT NULL,
+  comments TEXT,
+  images TEXT[] DEFAULT '{}',
+  requested_resolution VARCHAR(30),
+  status VARCHAR(20) NOT NULL DEFAULT 'open'
+    CHECK (status IN ('open','under_review','resolved','partially_refunded','rejected')),
+  resolution_note TEXT,
+  resolved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  resolved_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_settlements (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  tds_amount DECIMAL(10,2) DEFAULT 0.00,
+  net_paid DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  method VARCHAR(20) DEFAULT 'bank_transfer'
+    CHECK (method IN ('bank_transfer','upi','other')),
+  reference VARCHAR(120),
+  status VARCHAR(20) NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending','paid','failed')),
+  period_from DATE,
+  period_to DATE,
+  notes TEXT,
+  settled_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  settled_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS grooming_earnings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider_id UUID NOT NULL REFERENCES grooming_providers(id) ON DELETE CASCADE,
+  order_id UUID REFERENCES grooming_orders(id) ON DELETE SET NULL,
+  gross_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  commission_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  tax_amount DECIMAL(10,2) DEFAULT 0.00,
+  gateway_fee DECIMAL(10,2) DEFAULT 0.00,
+  net_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  entry_type VARCHAR(20) NOT NULL DEFAULT 'earning'
+    CHECK (entry_type IN ('earning','penalty','compensation','refund_adjustment')),
+  status VARCHAR(20) NOT NULL DEFAULT 'clearing'
+    CHECK (status IN ('clearing','available','paid','reversed')),
+  available_at TIMESTAMP,
+  settlement_id UUID REFERENCES grooming_settlements(id) ON DELETE SET NULL,
+  note TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_grooming_providers_owner ON grooming_providers(owner_user_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_providers_status ON grooming_providers(verification_status);
+CREATE INDEX IF NOT EXISTS idx_grooming_locations_provider ON grooming_locations(provider_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_resources_provider ON grooming_resources(provider_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_staff_provider ON grooming_provider_staff(provider_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_staff_user ON grooming_provider_staff(user_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_services_provider ON grooming_services(provider_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_services_active ON grooming_services(is_active);
+CREATE INDEX IF NOT EXISTS idx_grooming_service_addons_service ON grooming_service_addons(service_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_pet_profile_animal ON grooming_pet_profile(animal_id);
+-- payments.grooming_order_id is added here, not in the payments CREATE TABLE, because payments is
+-- defined long before grooming_orders and a forward FK reference would abort the whole file (this
+-- script applies as ONE transaction). A grooming order can have several payments: the initial or
+-- deposit collection, plus one per balance collection for approved extra work.
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS grooming_order_id UUID REFERENCES grooming_orders(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_payments_grooming_order ON payments(grooming_order_id);
+
+CREATE INDEX IF NOT EXISTS idx_grooming_orders_owner ON grooming_orders(pet_owner_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_orders_provider ON grooming_orders(provider_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_orders_status ON grooming_orders(status);
+CREATE INDEX IF NOT EXISTS idx_grooming_orders_date ON grooming_orders(scheduled_date);
+CREATE INDEX IF NOT EXISTS idx_grooming_order_items_order ON grooming_order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_order_status_history_order ON grooming_order_status_history(order_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_intake_order ON grooming_intake(order_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_report_card_order ON grooming_report_card(order_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_safety_order ON grooming_safety_escalations(order_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_disputes_order ON grooming_disputes(order_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_earnings_provider ON grooming_earnings(provider_id);
+CREATE INDEX IF NOT EXISTS idx_grooming_earnings_status ON grooming_earnings(status);
+CREATE INDEX IF NOT EXISTS idx_grooming_settlements_provider ON grooming_settlements(provider_id);
+CREATE INDEX IF NOT EXISTS idx_master_grooming_categories_active ON master_grooming_categories(is_active);
+CREATE INDEX IF NOT EXISTS idx_master_grooming_addons_active ON master_grooming_addons(is_active);
+
+INSERT INTO system_settings (key, value, category, description)
+VALUES ('grooming.enabled', 'false', 'grooming',
+        'Master switch for the Pet Wellness/Grooming/Spa module (dark-launch flag, default off)')
+ON CONFLICT (key) DO NOTHING;
+
 -- Species (generated from SPECIES_CATEGORIES + BREED_DATABASE keys, frontend/src/constants/speciesBreeds.ts)
 INSERT INTO master_species (id, code, label, icon, category, has_ear_tag, sort_order, is_active) VALUES
   (gen_random_uuid(), 'Dog', 'Dog', '🐕', 'Common Pets', false, 10, true),
@@ -3626,7 +4225,7 @@ INSERT INTO master_species (id, code, label, icon, category, has_ear_tag, sort_o
 ON CONFLICT (code) DO NOTHING;
 
 -- Marketplace eligibility backfill (migration 023): exactly the species that were already
--- in the old hardcoded MARKETPLACE_FARMER_SPECIES/MARKETPLACE_PET_OWNER_SPECIES arrays —
+-- in the old hardcoded MARKETPLACE_FARMER_SPECIES/MARKETPLACE_PET_OWNER_SPECIES arrays -
 -- preserves today's marketplace species picker contents exactly, nothing more.
 UPDATE master_species SET is_marketplace_eligible = true
 WHERE code IN ('Cattle', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Chicken', 'Dog', 'Cat', 'Rabbit', 'Other');
@@ -4105,7 +4704,7 @@ INSERT INTO master_animal_classes (id, species_id, value, label_key, implied_gen
   (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'cat_neuter', 'animalClass.cat_neuter', 'unknown', false, false, 40, true)
 ON CONFLICT (species_id, value) DO NOTHING;
 
--- Marketplace categories (generated from CATEGORY_KEYS, frontend/src/pages/Marketplace.tsx — skips the blank '' "all" filter entry)
+-- Marketplace categories (generated from CATEGORY_KEYS, frontend/src/pages/Marketplace.tsx - skips the blank '' "all" filter entry)
 INSERT INTO master_marketplace_categories (id, code, label_key, sort_order, is_active, is_protected) VALUES
   (gen_random_uuid(), 'animal', 'marketplace.categories.animals', 10, true, true),
   (gen_random_uuid(), 'feed', 'marketplace.categories.feed', 20, true, false),

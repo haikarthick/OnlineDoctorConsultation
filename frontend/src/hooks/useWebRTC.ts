@@ -106,7 +106,7 @@ export function useWebRTC(
         const signals = res.data || []
         for (const signal of signals) {
           if (signal.type === 'offer' && !isHost) {
-            // Received offer — set remote description & create answer
+            // Received offer - set remote description & create answer
             setConnectionState('connecting')
             await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(signal.data)))
             await drainIceQueue(pc)
@@ -114,7 +114,7 @@ export function useWebRTC(
             await pc.setLocalDescription(answer)
             await apiService.sendSignal(sessionId, 'answer', JSON.stringify(answer))
           } else if (signal.type === 'answer' && isHost) {
-            // Received answer — set remote description
+            // Received answer - set remote description
             await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(signal.data)))
             await drainIceQueue(pc)
           } else if (signal.type === 'ice-candidate') {
@@ -126,7 +126,7 @@ export function useWebRTC(
             }
           }
         }
-      } catch { /* network hiccup — retry next interval */ }
+      } catch { /* network hiccup - retry next interval */ }
     }, SIGNAL_POLL_MS)
   }, [sessionId, isHost, drainIceQueue])
 
@@ -151,12 +151,12 @@ export function useWebRTC(
         startPolling(pc)
       })()
     } else {
-      // Guest: just start polling — will create answer when offer arrives
+      // Guest: just start polling - will create answer when offer arrives
       startPolling(pc)
     }
 
     return () => {
-      // Don't cleanup here — let the explicit cleanup handle it
+      // Don't cleanup here - let the explicit cleanup handle it
     }
   }, [active, sessionId, localStream, isHost, createPC, startPolling])
 

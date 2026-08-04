@@ -82,8 +82,8 @@ const DispensingReceiptView: React.FC<Props> = ({ receipt, onClose, secondaryAct
             <span>{t('pharmacyReceipt.date')}: <strong>{formatDate(receipt.createdAt)}</strong></span>
           </div>
           <div className="pr-info-row">
-            <span>{t('pharmacyReceipt.patient')}: <strong>{receipt.animalName || '—'}{receipt.animalSpecies ? ` (${receipt.animalSpecies})` : ''}</strong></span>
-            <span>{t('pharmacyReceipt.owner')}: <strong>{receipt.ownerName || '—'}</strong></span>
+            <span>{t('pharmacyReceipt.patient')}: <strong>{receipt.animalName || '-'}{receipt.animalSpecies ? ` (${receipt.animalSpecies})` : ''}</strong></span>
+            <span>{t('pharmacyReceipt.owner')}: <strong>{receipt.ownerName || '-'}</strong></span>
           </div>
           {receipt.vetName && (
             <div className="pr-info-row">

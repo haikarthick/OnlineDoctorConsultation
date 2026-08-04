@@ -12,7 +12,7 @@ import NotificationService from '../NotificationService';
  *    clearing→reversed. Penalties post as negative net_amount rows that are
  *    immediately 'available' (they reduce the running balance at once).
  *  - The doctor's available balance = SUM(net_amount) of rows in status
- *    'available' — penalties make it negative; recovery is automatic because
+ *    'available' - penalties make it negative; recovery is automatic because
  *    new earnings mature into the same bucket (§6.2).
  */
 
@@ -41,7 +41,7 @@ class EarningsService {
          ORDER BY p.created_at DESC LIMIT 1`,
         [consultationId]
       );
-      if (res.rows.length === 0) return; // unpaid/legacy consultation — no ledger entry
+      if (res.rows.length === 0) return; // unpaid/legacy consultation - no ledger entry
       const row = res.rows[0];
 
       const existing = await database.query(

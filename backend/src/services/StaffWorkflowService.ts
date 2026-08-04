@@ -70,7 +70,7 @@ class StaffWorkflowService {
       return result.rows;
     }
 
-    // No hospital context — global fallback (admin / vet without assigned hospital)
+    // No hospital context - global fallback (admin / vet without assigned hospital)
     const result = await database.query(`
       SELECT a.id, a.name, a.species, a.breed, a.weight, a.date_of_birth,
         a.gender, a.microchip_id, a.color,
@@ -108,7 +108,7 @@ class StaffWorkflowService {
     params.push(limit);
     const limitParam = params.length;
 
-    // Referral-target search only — deliberately excludes email, license_number,
+    // Referral-target search only - deliberately excludes email, license_number,
     // consultation_fee: this is reachable by any hospital's staff for any
     // platform vet, and those fields aren't needed to pick a referral target.
     const result = await database.query(`
@@ -307,7 +307,7 @@ class StaffWorkflowService {
   }
 
   async updateQueueStatus(queueId: string, status: string, userId: string) {
-    // Fetch queue entry first — needed for auto-creates
+    // Fetch queue entry first - needed for auto-creates
     const queueEntry = await database.query(
       `SELECT q.*, h.name AS hospital_name
        FROM appointment_queue q
@@ -326,7 +326,7 @@ class StaffWorkflowService {
       if (status === 'discharged' && qe?.animal_id) {
         try {
           const contentParts = [
-            `Queue Visit — ${qe.hospital_name || 'Hospital'}`,
+            `Queue Visit - ${qe.hospital_name || 'Hospital'}`,
             qe.reason ? `Reason: ${qe.reason}` : null,
             qe.priority !== 'normal' ? `Priority: ${qe.priority}` : null,
             qe.triage_notes ? `Triage Notes: ${qe.triage_notes}` : null,

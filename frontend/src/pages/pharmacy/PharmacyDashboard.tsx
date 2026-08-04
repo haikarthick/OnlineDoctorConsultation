@@ -15,6 +15,7 @@ import MedicationCatalog from './MedicationCatalog'
 import DispensingHistory from './DispensingHistory'
 import ReordersManagement from './ReordersManagement'
 import MedicationTransfers from './MedicationTransfers'
+import PharmacyAlerts from './PharmacyAlerts'
 import PrescriptionReviewModal from './PrescriptionReviewModal'
 import DispensingModal from './DispensingModal'
 
@@ -72,11 +73,19 @@ interface Analytics {
   expiring_count: number
 }
 
-const TABS = ['overview', 'review', 'dispense', 'inventory', 'catalog', 'suppliers', 'history', 'reorders', 'transfers', 'analytics', 'settings'] as const
+/** One row of /networks/:networkId/pharmacy-reports */
+interface NetworkPharmacyRow {
+  pharmacy_id: string
+  pharmacy_name: string
+  revenue: number
+  dispensing_count: number
+}
+
+const TABS = ['overview', 'review', 'dispense', 'inventory', 'alerts', 'catalog', 'suppliers', 'history', 'reorders', 'transfers', 'analytics', 'settings'] as const
 type Tab = typeof TABS[number]
 
 const TAB_ICONS: Record<Tab, string> = {
-  overview: '🏠', review: '📋', dispense: '✅', inventory: '📦',
+  overview: '🏠', review: '📋', dispense: '✅', inventory: '📦', alerts: '🔔',
   catalog: '💊', suppliers: '🏭', history: '📜', reorders: '🔄', transfers: '🚚',
   analytics: '📊', settings: '⚙️'
 }
@@ -93,6 +102,7 @@ export default function PharmacyDashboard() {
   const [pendingRx, setPendingRx] = useState<PendingPrescription[]>([])
   const [readyDispense, setReadyDispense] = useState<ReadyDispensing[]>([])
   const [analytics, setAnalytics] = useState<Analytics | null>(null)
+  const [networkReport, setNetworkReport] = useState<{ period_days: number; pharmacies: NetworkPharmacyRow[] } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [reviewTarget, setReviewTarget] = useState<PendingPrescription | null>(null)
@@ -141,9 +151,21 @@ export default function PharmacyDashboard() {
     } catch { /* non-fatal */ }
   }, [selectedPharmacy, analyticsDays])
 
+  // Network-wide comparison across every pharmacy in the network. The endpoint
+  // existed with no caller, so a network operator could only ever see one
+  // pharmacy at a time and had no way to compare them.
+  const loadNetworkReports = useCallback(async () => {
+    if (!networkId) return
+    try {
+      const res = await client.get(`/networks/${networkId}/pharmacy-reports?days=${analyticsDays}`)
+      setNetworkReport(res.data)
+    } catch { /* non-fatal - requires network membership */ }
+  }, [networkId, analyticsDays])
+
   useEffect(() => { loadPharmacies() }, [loadPharmacies])
   useEffect(() => { if (selectedPharmacy) loadDashboard() }, [selectedPharmacy, loadDashboard])
   useEffect(() => { if (tab === 'analytics' && selectedPharmacy) loadAnalytics() }, [tab, loadAnalytics])
+  useEffect(() => { if (tab === 'analytics' && networkId) loadNetworkReports() }, [tab, networkId, loadNetworkReports])
 
   useAutoRefresh('pharmacy', useCallback(() => {
     if (selectedPharmacy && tab === 'overview') loadDashboard()
@@ -230,27 +252,31 @@ export default function PharmacyDashboard() {
           <div className="pharmacy-stats">
             <div className="pharmacy-stat-card warning si-3c1f81b9" onClick={() => setTab('review')}>
               <span className="stat-icon">📋</span>
-              <span className="stat-value">{summary?.pending_reviews ?? '—'}</span>
+              <span className="stat-value">{summary?.pending_reviews ?? '-'}</span>
               <span className="stat-label">{t('pharmacy.stats.pendingReviews')}</span>
             </div>
             <div className="pharmacy-stat-card success si-3c1f81b9" onClick={() => setTab('dispense')}>
               <span className="stat-icon">✅</span>
-              <span className="stat-value">{summary?.ready_to_dispense ?? '—'}</span>
+              <span className="stat-value">{summary?.ready_to_dispense ?? '-'}</span>
               <span className="stat-label">{t('pharmacy.stats.readyToDispense')}</span>
             </div>
-            <div className="pharmacy-stat-card danger si-3c1f81b9" onClick={() => setTab('inventory')}>
+            {/* These two link to Alerts, not Inventory: the inventory table lists
+                one row per batch, so a medication that has run out entirely has
+                nothing to show there and the count led to a page it was absent
+                from. */}
+            <div className="pharmacy-stat-card danger si-3c1f81b9" onClick={() => setTab('alerts')}>
               <span className="stat-icon">⚠️</span>
-              <span className="stat-value">{summary?.low_stock_count ?? '—'}</span>
+              <span className="stat-value">{summary?.low_stock_count ?? '-'}</span>
               <span className="stat-label">{t('pharmacy.stats.lowStock')}</span>
             </div>
-            <div className="pharmacy-stat-card warning si-3c1f81b9" onClick={() => setTab('inventory')}>
+            <div className="pharmacy-stat-card warning si-3c1f81b9" onClick={() => setTab('alerts')}>
               <span className="stat-icon">⏰</span>
-              <span className="stat-value">{summary?.expiring_soon_count ?? '—'}</span>
+              <span className="stat-value">{summary?.expiring_soon_count ?? '-'}</span>
               <span className="stat-label">{t('pharmacy.stats.expiringSoon')}</span>
             </div>
             <div className="pharmacy-stat-card info si-3c1f81b9" onClick={() => setTab('reorders')}>
               <span className="stat-icon">🔄</span>
-              <span className="stat-value">{summary?.pending_reorders ?? '—'}</span>
+              <span className="stat-value">{summary?.pending_reorders ?? '-'}</span>
               <span className="stat-label">{t('pharmacy.stats.pendingReorders')}</span>
             </div>
             <div className="pharmacy-stat-card primary">
@@ -289,13 +315,13 @@ export default function PharmacyDashboard() {
                     {pendingRx.slice(0, 5).map(rx => (
                       <tr key={rx.id}>
                         <td>
-                          <strong>{rx.pet_name || '—'}</strong>
+                          <strong>{rx.pet_name || '-'}</strong>
                           {rx.animal_species && <small className="si-1a0c0bfa">{speciesLabel(rx.animal_species, t)}</small>}
                         </td>
-                        <td>{rx.owner_name || '—'}</td>
-                        <td>{rx.vet_name || '—'}</td>
-                        <td className="si-cf8f70f1">{rx.medication_names || '—'}</td>
-                        <td className="si-86931177">{rx.created_at ? new Date(rx.created_at).toLocaleDateString() : '—'}</td>
+                        <td>{rx.owner_name || '-'}</td>
+                        <td>{rx.vet_name || '-'}</td>
+                        <td className="si-cf8f70f1">{rx.medication_names || '-'}</td>
+                        <td className="si-86931177">{rx.created_at ? new Date(rx.created_at).toLocaleDateString() : '-'}</td>
                         <td>
                           <button type="button" className="module-btn small primary" onClick={() => setReviewTarget(rx)}>
                             {t('pharmacy.actions.review')}
@@ -341,11 +367,11 @@ export default function PharmacyDashboard() {
                     {readyDispense.slice(0, 5).map(rx => (
                       <tr key={rx.id}>
                         <td>
-                          <strong>{rx.pet_name || '—'}</strong>
+                          <strong>{rx.pet_name || '-'}</strong>
                           {rx.animal_species && <small className="si-1a0c0bfa">{speciesLabel(rx.animal_species, t)}</small>}
                         </td>
-                        <td>{rx.owner_name || '—'}</td>
-                        <td className="si-4a370a4e">{rx.medication_names || '—'}</td>
+                        <td>{rx.owner_name || '-'}</td>
+                        <td className="si-4a370a4e">{rx.medication_names || '-'}</td>
                         <td>
                           <button type="button" className="module-btn small primary" onClick={() => setDispenseTarget(rx)}>
                             {t('pharmacy.actions.dispense')}
@@ -371,6 +397,10 @@ export default function PharmacyDashboard() {
 
       {tab === 'inventory' && selectedPharmacy && (
         <PharmacyInventory pharmacyId={selectedPharmacy.id} networkId={networkId ?? ''} onRefresh={loadDashboard} />
+      )}
+
+      {tab === 'alerts' && selectedPharmacy && (
+        <PharmacyAlerts pharmacyId={selectedPharmacy.id} />
       )}
 
       {tab === 'catalog' && networkId && selectedPharmacy && (
@@ -468,6 +498,40 @@ export default function PharmacyDashboard() {
               </>
             )}
           </div>
+
+          {/* Network-wide comparison. Every other view on this page is scoped to
+              the one selected pharmacy; this is the only place a network
+              operator can see them side by side. */}
+          {networkReport && networkReport.pharmacies?.length > 0 && (
+            <div className="pharmacy-card">
+              <div className="pharmacy-card-header">
+                <h3>🌐 {t('pharmacy.analytics.networkTitle')}</h3>
+              </div>
+              <div className="table-scroll">
+                <table className="pharmacy-table">
+                  <thead>
+                    <tr>
+                      <th>{t('pharmacy.analytics.pharmacy')}</th>
+                      <th>{t('pharmacy.analytics.revenue')}</th>
+                      <th>{t('pharmacy.analytics.dispensings')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {networkReport.pharmacies.map(p => (
+                      <tr key={p.pharmacy_id} className={p.pharmacy_id === selectedPharmacy.id ? 'is-current' : undefined}>
+                        <td>
+                          {p.pharmacy_name}
+                          {p.pharmacy_id === selectedPharmacy.id && ` - ${t('pharmacy.analytics.thisPharmacy')}`}
+                        </td>
+                        <td>{formatCurrency(Number(p.revenue) || 0)}</td>
+                        <td>{p.dispensing_count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

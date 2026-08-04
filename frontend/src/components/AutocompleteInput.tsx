@@ -57,7 +57,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   }
 
   // Highlight the matched substring using React nodes (never raw HTML) so
-  // option text can never be interpreted as markup — prevents XSS if any
+  // option text can never be interpreted as markup - prevents XSS if any
   // option list is ever sourced from user-generated content.
   const renderHighlighted = (opt: string) => {
     if (!value) return opt

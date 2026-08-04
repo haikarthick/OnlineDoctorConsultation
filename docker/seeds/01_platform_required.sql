@@ -1,5 +1,5 @@
 -- ============================================================
--- VetCare Platform — MANDATORY Platform Seed Data
+-- VetCare Platform - MANDATORY Platform Seed Data
 -- ============================================================
 -- Run this on EVERY environment (production, development, staging).
 -- Contains only data the platform CANNOT run without.
@@ -8,11 +8,11 @@
 --   1. docker/init.sql           (schema + tables)
 --   2. backend/migrations/*.sql  (incremental schema changes)
 --   3. THIS FILE                 (mandatory platform data)
---   4. 03_demo_data.sql          (OPTIONAL — dev/demo only, NEVER production)
+--   4. 03_demo_data.sql          (OPTIONAL - dev/demo only, NEVER production)
 -- ============================================================
 
 -- ── Platform Admin User ────────────────────────────────────────
--- Password: Admin@123  (bcrypt hash — must be changed in production)
+-- Password: Admin@123  (bcrypt hash - must be changed in production)
 INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash, is_active)
 VALUES (
   'a0000000-0000-0000-0000-000000000001',

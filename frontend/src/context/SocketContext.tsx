@@ -1,5 +1,5 @@
 /**
- * SocketContext — provides a singleton socket.io-client instance to the React tree.
+ * SocketContext - provides a singleton socket.io-client instance to the React tree.
  *
  * Usage:
  *   const { socket, connected } = useSocket()

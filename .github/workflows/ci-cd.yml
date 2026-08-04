@@ -1,4 +1,4 @@
-name: CI/CD Pipeline — Build, Test & Deploy
+name: CI/CD Pipeline - Build, Test & Deploy
 
 on:
   push:
@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   # ═════════════════════════════════════════════
-  #  1. Backend — Lint + Test + Coverage
+  #  1. Backend - Lint + Test + Coverage
   # ═════════════════════════════════════════════
   backend-test:
     name: Backend Tests
@@ -80,7 +80,7 @@ jobs:
           path: backend/coverage/
 
   # ═════════════════════════════════════════════
-  #  2. Frontend — Lint + Build + TypeCheck
+  #  2. Frontend - Lint + Build + TypeCheck
   # ═════════════════════════════════════════════
   frontend-test:
     name: Frontend Build & Lint
@@ -110,6 +110,87 @@ jobs:
         with:
           name: frontend-build
           path: frontend/dist/
+
+  # ═════════════════════════════════════════════
+  #  2a. Runtime Verification - the only job that RUNS anything
+  # ═════════════════════════════════════════════
+  # Every other job here is static: lint, jest-with-mocks, tsc, vite build. None of them
+  # execute a line of SQL or boot the server - which is exactly how a fully broken feature
+  # shipped green on 2026-07-27. The local pre-push hook runs this same gate, but a hook can
+  # be bypassed with `git push --no-verify`; this job is what makes it unskippable, and
+  # `resolve-env` (which gates deploy) depends on it.
+  #
+  # See docs/VERIFICATION.md and backend/scripts/runtime-verify.js.
+  runtime-verify:
+    name: Runtime Verification (${{ matrix.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Production behaviour: the legacy startup self-heal runs, as it does on Render today.
+          - mode: self-heal on
+            disable_selfheal: ''
+          # The retirement check. Proves docker/init.sql + backend/migrations are SUFFICIENT on
+          # their own for a fresh database. If someone adds schema only to database.ts's
+          # self-heal - which the file's own header forbids - this leg goes red while the other
+          # stays green, which names the mistake precisely.
+          - mode: self-heal OFF (migrations must suffice)
+            disable_selfheal: 'true'
+    env:
+      DISABLE_LEGACY_SELFHEAL: ${{ matrix.disable_selfheal }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # The harness creates its OWN throwaway cluster with initdb (so it can control the exact
+      # startup sequence), which needs the postgresql SERVER package, not just the client.
+      # initdb refuses to run as root - GitHub runners execute as the non-root `runner` user.
+      - name: Install PostgreSQL server
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql
+          ls /usr/lib/postgresql/
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      # NODE_ENV=production for the BUILDS only, mirroring render-build.sh.
+      - name: Build backend
+        working-directory: backend
+        run: NODE_ENV=production npm run build
+
+      - name: Build frontend
+        working-directory: frontend
+        run: NODE_ENV=production npm run build
+
+      - name: Install Playwright chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run runtime verification
+        working-directory: backend
+        run: npm run verify:runtime
+
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          # Must be unique per matrix leg - two jobs uploading the same artifact name collide.
+          name: runtime-verify-playwright-${{ strategy.job-index }}
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
 
   # ═════════════════════════════════════════════
   #  2b. E2E Route Coverage Check
@@ -246,7 +327,9 @@ jobs:
   resolve-env:
     name: Resolve Environment
     runs-on: ubuntu-latest
-    needs: [backend-test, frontend-test]
+    # runtime-verify is a hard dependency: no deploy may proceed on a build whose schema,
+    # server boot and critical UI journeys have not actually been executed.
+    needs: [backend-test, frontend-test, runtime-verify]
     if: github.event_name == 'push'
     outputs:
       environment: ${{ steps.env.outputs.environment }}
@@ -303,7 +386,7 @@ jobs:
           esac
 
           if [ -z "$HOOK_URL" ]; then
-            echo "⚠️  No deploy hook configured for $ENV — skipping deployment."
+            echo "⚠️  No deploy hook configured for $ENV - skipping deployment."
             echo "    Set the RENDER_DEPLOY_HOOK_$(echo $ENV | tr a-z A-Z) secret in GitHub."
             exit 0
           fi

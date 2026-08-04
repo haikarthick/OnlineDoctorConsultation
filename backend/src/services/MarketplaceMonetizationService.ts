@@ -1,7 +1,7 @@
 /**
  * Marketplace Monetization Service
  * Manages monetization settings, subscription plans, boosts, inquiries, and transactions.
- * All features are disabled by default — admin toggles them on when ready.
+ * All features are disabled by default - admin toggles them on when ready.
  */
 import pool from '../utils/database';
 import { v4 as uuidv4 } from 'uuid';
@@ -332,7 +332,7 @@ class MarketplaceMonetizationService {
       const listingTitle = (await pool.query(`SELECT title FROM marketplace_listings WHERE id = $1`, [inquiry.listing_id])).rows[0]?.title || '';
       await notifySafe(inquiry.buyer_id, 'marketplace_inquiry_response', 'Seller responded to your inquiry',
         revealContact
-          ? `The seller of "${listingTitle}" shared their contact details — open the listing to connect.`
+          ? `The seller of "${listingTitle}" shared their contact details - open the listing to connect.`
           : `The seller of "${listingTitle}" responded to your inquiry.`,
         { listingId: inquiry.listing_id, inquiryId });
     }

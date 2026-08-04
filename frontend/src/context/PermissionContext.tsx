@@ -118,6 +118,24 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   dispute_management: ['/admin/disputes'],
   // Pharmacy
   pharmacy_view_dashboard: ['/pharmacy'],
+  // Grooming & Spa
+  // /grooming/provider is guarded by grooming_provider_apply, NOT grooming_provider_console.
+  // The page is dual-purpose: it shows the "register your grooming business" onboarding form
+  // when the caller has no provider, and the provider console when they do. Guarding it with
+  // the console permission created a catch-22 - only existing providers could reach the form
+  // that makes you a provider. Every console holder also holds apply, and the console UI only
+  // renders when the backend actually returns a provider for the caller.
+  grooming_provider_apply: ['/grooming/provider'],
+  grooming_provider_console: [],
+  grooming_admin: ['/admin/grooming-providers'],
+  grooming_browse: ['/grooming/find', '/grooming/provider/:id'],
+  grooming_book: ['/grooming/book'],
+  grooming_my_orders: ['/grooming/my-orders'],
+  // Working hours sit with booking management: whoever runs the diary sets when it is open.
+  grooming_manage_bookings: ['/grooming/orders', '/grooming/schedule'],
+  grooming_earnings_view: ['/grooming/earnings'],
+  // /grooming/order/:id is intentionally NOT mapped - shared by provider + customer, so it is
+  // auth-only at the route layer and access is enforced per-order by the backend.
 }
 
 // Reverse map: route path → required permission
@@ -212,6 +230,15 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'admin-disputes': 'dispute_management',
   // Pharmacy
   'pharmacy': 'pharmacy_view_dashboard',
+  // Grooming & Spa
+  'grooming-provider': 'grooming_provider_console',
+  'grooming-apply': 'grooming_provider_apply',
+  'admin-grooming-providers': 'grooming_admin',
+  'grooming-find': 'grooming_browse',
+  'grooming-my-orders': 'grooming_my_orders',
+  'grooming-orders': 'grooming_manage_bookings',
+  'grooming-schedule': 'grooming_manage_bookings',
+  'grooming-earnings': 'grooming_earnings_view',
 }
 
 // ─── Context ────────────────────────────────────────────────

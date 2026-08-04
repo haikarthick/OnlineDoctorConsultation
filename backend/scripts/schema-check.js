@@ -175,7 +175,7 @@ function validate(tables, inserts) {
   for (const insert of inserts) {
     const tableSchema = tables[insert.table];
     if (!tableSchema) {
-      // Table doesn't exist at all — could be created by tier migrations
+      // Table doesn't exist at all - could be created by tier migrations
       continue;
     }
 
@@ -322,19 +322,19 @@ function checkFkOrder(filePath) {
 
 // ── Check for banned SQL patterns ────────────────────────────
 // uuid_generate_v4() requires the uuid-ossp extension, and Render's managed
-// PostgreSQL runs the app as a restricted (non-superuser) role — CREATE
+// PostgreSQL runs the app as a restricted (non-superuser) role - CREATE
 // EXTENSION always fails there. This has caused two separate production
 // incidents (see memories/repo/past-bugs.md, memories/repo/lessons.md
 // LESSON-001): once when it aborted init.sql entirely (zero tables
 // created), and once when it silently failed two migrations for an
 // unknown length of time (the migration runner used to catch and log a
-// warning rather than fail — see the MIGRATIONS_FAIL_FAST fix). Always use
+// warning rather than fail - see the MIGRATIONS_FAIL_FAST fix). Always use
 // gen_random_uuid() (built into PostgreSQL 13+ core, no extension needed).
 function checkBannedSqlPatterns() {
   const violations = [];
   const BANNED = [
     { pattern: /uuid_generate_v4\s*\(/i, name: 'uuid_generate_v4()', fix: 'gen_random_uuid()' },
-    { pattern: /CREATE\s+EXTENSION/i, name: 'CREATE EXTENSION', fix: 'nothing — Render managed PostgreSQL does not permit CREATE EXTENSION; use only functions built into PostgreSQL core (gen_random_uuid(), etc.)' },
+    { pattern: /CREATE\s+EXTENSION/i, name: 'CREATE EXTENSION', fix: 'nothing - Render managed PostgreSQL does not permit CREATE EXTENSION; use only functions built into PostgreSQL core (gen_random_uuid(), etc.)' },
   ];
 
   const sqlDirs = [
@@ -357,7 +357,7 @@ function checkBannedSqlPatterns() {
   for (const file of files) {
     const lines = fs.readFileSync(file, 'utf-8').split('\n');
     lines.forEach((line, idx) => {
-      // cube/earthdistance/pgcrypto etc. ARE allowed — Render permits some
+      // cube/earthdistance/pgcrypto etc. ARE allowed - Render permits some
       // extensions via CASCADE for the app role; only the pattern name
       // itself is banned when it's specifically uuid-ossp/uuid_generate_v4.
       if (/CREATE\s+EXTENSION/i.test(line) && !/uuid-ossp/i.test(line)) return;
@@ -406,7 +406,7 @@ function main() {
     for (const [file, items] of Object.entries(byFile)) {
       console.log(`  ${YELLOW}${file}${RESET}`);
       for (const item of items) {
-        console.log(`    ${RED}Line ${item.line}:${RESET} UPDATE sets column "${item.column}" — not in table "${item.table}"`);
+        console.log(`    ${RED}Line ${item.line}:${RESET} UPDATE sets column "${item.column}" - not in table "${item.table}"`);
       }
       console.log('');
     }
@@ -431,7 +431,7 @@ function main() {
     console.log(`\n${RED}✗ Found ${bannedViolations.length} banned SQL pattern(s):${RESET}\n`);
     for (const v of bannedViolations) {
       console.log(`  ${YELLOW}${v.file}:${v.line}${RESET}`);
-      console.log(`    ${RED}${v.found}${RESET} — ${DIM}${v.text}${RESET}`);
+      console.log(`    ${RED}${v.found}${RESET} - ${DIM}${v.text}${RESET}`);
       console.log(`    ${DIM}Fix: use ${v.fix}${RESET}\n`);
     }
   } else {

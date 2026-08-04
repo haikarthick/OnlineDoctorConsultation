@@ -43,7 +43,7 @@ describe('RefreshTokenService', () => {
       (database.query as jest.Mock).mockResolvedValue({ rows: [{ id: 'token-1' }] });
       const { rawToken } = await RefreshTokenService.createToken('user-1');
 
-      // Now validate — need to mock the validation query
+      // Now validate - need to mock the validation query
       (database.query as jest.Mock).mockResolvedValue({
         rows: [{ id: 'token-1', user_id: 'user-1', is_revoked: false, expires_at: new Date(Date.now() + 86400000) }]
       });

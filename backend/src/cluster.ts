@@ -8,7 +8,7 @@
  *   node dist/cluster.js          # compiled JS
  *   npx ts-node src/cluster.ts    # development
  *
- * In Docker / ECS Fargate you should NOT use cluster mode — scale
+ * In Docker / ECS Fargate you should NOT use cluster mode - scale
  * horizontally with multiple containers instead.
  */
 import cluster from 'cluster';

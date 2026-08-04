@@ -59,7 +59,7 @@ try {
 
 Write-Host ""
 Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Yellow
-Write-Host "  VetCare — Free-Tier Render Setup (1 DB + 2 Services)" -ForegroundColor Yellow
+Write-Host "  VetCare - Free-Tier Render Setup (1 DB + 2 Services)" -ForegroundColor Yellow
 Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Yellow
 Write-Host ""
 
@@ -191,7 +191,7 @@ foreach ($env in $Environments) {
         Write-Host "  $secretName" -ForegroundColor Yellow
         Write-Host "    $hook"
     } else {
-        Write-Host "  $secretName — get from Render Dashboard → $($env.SvcName) → Settings → Deploy Hook" -ForegroundColor DarkYellow
+        Write-Host "  $secretName - get from Render Dashboard → $($env.SvcName) → Settings → Deploy Hook" -ForegroundColor DarkYellow
     }
     Write-Host ""
 }

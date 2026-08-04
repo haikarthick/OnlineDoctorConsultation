@@ -4,8 +4,8 @@
  * treatment suggestions, and contextual animal health intelligence.
  *
  * Provider priority:
- *   1. Groq  (GROQ_API_KEY)  — free, fast, llama-3.3-70b
- *   2. OpenAI (OPENAI_API_KEY) — GPT-4o (requires paid plan)
+ *   1. Groq  (GROQ_API_KEY)  - free, fast, llama-3.3-70b
+ *   2. OpenAI (OPENAI_API_KEY) - GPT-4o (requires paid plan)
  *   3. Local knowledge-base fallback
  */
 import path from 'path';
@@ -47,7 +47,7 @@ function getAI(): AiClient | null {
       logger.info('AI Copilot: using OpenAI GPT-4o');
     } else {
       _ai = null;
-      logger.warn('AI Copilot: no GROQ_API_KEY or OPENAI_API_KEY — running in offline mode');
+      logger.warn('AI Copilot: no GROQ_API_KEY or OPENAI_API_KEY - running in offline mode');
     }
   }
   return _ai;
@@ -126,7 +126,7 @@ class AiCopilotService {
           const dob = a.date_of_birth ? `, DOB: ${new Date(a.date_of_birth).toLocaleDateString()}` : '';
           const inactive = a.is_active ? '' : ' [INACTIVE/DECEASED]';
           // Prefer the species-correct class term (e.g. "Cattle Bull") over raw
-          // gender when set — humanized from the species-prefixed value since
+          // gender when set - humanized from the species-prefixed value since
           // this is plain-text LLM context, not translated UI.
           const classOrGender = a.animal_class
             ? a.animal_class.split('_').map((w: string) => w[0].toUpperCase() + w.slice(1)).join(' ')
@@ -228,15 +228,15 @@ class AiCopilotService {
         ),
       ]);
 
-      // 3. Medical records — group by animal, show all with year headers
+      // 3. Medical records - group by animal, show all with year headers
       if (medRes.rows.length > 0) {
         const grouped = this.groupByAnimal(medRes.rows, (r: any) =>
-          `[${new Date(r.created_at).toLocaleDateString()}] ${r.record_type}: ${r.title}${r.content ? ` — ${r.content.substring(0, 150)}` : ''}`
+          `[${new Date(r.created_at).toLocaleDateString()}] ${r.record_type}: ${r.title}${r.content ? ` - ${r.content.substring(0, 150)}` : ''}`
         );
         sections.push(`## Complete Medical History (${medRes.rows.length} records)\n${grouped}`);
       }
 
-      // 4. Vaccinations — full history
+      // 4. Vaccinations - full history
       if (vaccRes.rows.length > 0) {
         const grouped = this.groupByAnimal(vaccRes.rows, (v: any) =>
           `${v.vaccine_name} on ${new Date(v.date_administered).toLocaleDateString()}${v.next_due_date ? ` (next due: ${new Date(v.next_due_date).toLocaleDateString()})` : ''}${v.batch_number ? ` [batch: ${v.batch_number}]` : ''}`
@@ -244,15 +244,15 @@ class AiCopilotService {
         sections.push(`## Complete Vaccination History (${vaccRes.rows.length} records)\n${grouped}`);
       }
 
-      // 5. Prescriptions — full history
+      // 5. Prescriptions - full history
       if (rxRes.rows.length > 0) {
         const grouped = this.groupByAnimal(rxRes.rows, (p: any) =>
-          `[${new Date(p.created_at).toLocaleDateString()}] ${p.medication_name} ${p.dosage || ''} ${p.frequency || ''} for ${p.duration || 'ongoing'} (${p.status})${p.instructions ? ` — ${p.instructions.substring(0, 100)}` : ''}`
+          `[${new Date(p.created_at).toLocaleDateString()}] ${p.medication_name} ${p.dosage || ''} ${p.frequency || ''} for ${p.duration || 'ongoing'} (${p.status})${p.instructions ? ` - ${p.instructions.substring(0, 100)}` : ''}`
         );
         sections.push(`## Complete Prescription History (${rxRes.rows.length} records)\n${grouped}`);
       }
 
-      // 6. Consultations — full history
+      // 6. Consultations - full history
       if (consultRes.rows.length > 0) {
         const grouped = this.groupByAnimal(consultRes.rows, (c: any) =>
           `[${new Date(c.created_at).toLocaleDateString()}] ${c.reason || 'General'}${c.diagnosis ? ` → Dx: ${c.diagnosis}` : ''}${c.treatment_plan ? ` → Tx: ${c.treatment_plan.substring(0, 100)}` : ''} (${c.status})${c.vet_first ? ` with Dr. ${c.vet_first} ${c.vet_last}` : ''}${c.follow_up_date ? ` [follow-up: ${new Date(c.follow_up_date).toLocaleDateString()}]` : ''}`
@@ -260,10 +260,10 @@ class AiCopilotService {
         sections.push(`## Complete Consultation History (${consultRes.rows.length} records)\n${grouped}`);
       }
 
-      // 7. Allergies (always critical — show ALL)
+      // 7. Allergies (always critical - show ALL)
       if (allergyRes.rows.length > 0) {
         const alLines = allergyRes.rows.map((al: any) =>
-          `- **${al.animal_name}**: ${al.allergen} (${al.severity})${al.reaction ? ` — ${al.reaction}` : ''}${al.is_active === false ? ' [resolved]' : ' [ACTIVE]'}${al.identified_date ? ` since ${new Date(al.identified_date).toLocaleDateString()}` : ''}`
+          `- **${al.animal_name}**: ${al.allergen} (${al.severity})${al.reaction ? ` - ${al.reaction}` : ''}${al.is_active === false ? ' [resolved]' : ' [ACTIVE]'}${al.identified_date ? ` since ${new Date(al.identified_date).toLocaleDateString()}` : ''}`
         );
         sections.push(`## Known Allergies (${allergyRes.rows.length})\n${alLines.join('\n')}`);
       }
@@ -276,10 +276,10 @@ class AiCopilotService {
         sections.push(`## Weight History / Growth Trend\n${grouped}`);
       }
 
-      // 9. Lab results — full history, flag abnormals
+      // 9. Lab results - full history, flag abnormals
       if (labRes.rows.length > 0) {
         const grouped = this.groupByAnimal(labRes.rows, (lr: any) =>
-          `[${new Date(lr.test_date).toLocaleDateString()}] ${lr.test_name}${lr.test_category ? ` (${lr.test_category})` : ''}: ${lr.result_value || 'pending'}${lr.unit ? ` ${lr.unit}` : ''}${lr.normal_range ? ` [normal: ${lr.normal_range}]` : ''}${lr.is_abnormal ? ' ⚠️ ABNORMAL' : ''}${lr.interpretation ? ` — ${lr.interpretation.substring(0, 100)}` : ''}`
+          `[${new Date(lr.test_date).toLocaleDateString()}] ${lr.test_name}${lr.test_category ? ` (${lr.test_category})` : ''}: ${lr.result_value || 'pending'}${lr.unit ? ` ${lr.unit}` : ''}${lr.normal_range ? ` [normal: ${lr.normal_range}]` : ''}${lr.is_abnormal ? ' ⚠️ ABNORMAL' : ''}${lr.interpretation ? ` - ${lr.interpretation.substring(0, 100)}` : ''}`
         );
         sections.push(`## Complete Lab Results (${labRes.rows.length})\n${grouped}`);
       }
@@ -292,13 +292,13 @@ class AiCopilotService {
 
         if (upcoming.length > 0) {
           const uLines = upcoming.map((b: any) =>
-            `- ${new Date(b.scheduled_date).toLocaleDateString()} ${b.time_slot_start}${b.animal_name ? ` for **${b.animal_name}**` : ''}: ${b.booking_type} (${b.status})${b.reason_for_visit ? ` — ${b.reason_for_visit}` : ''}${b.priority === 'emergency' ? ' 🚨 EMERGENCY' : ''}${b.vet_first ? ` with Dr. ${b.vet_first} ${b.vet_last}` : ''}`
+            `- ${new Date(b.scheduled_date).toLocaleDateString()} ${b.time_slot_start}${b.animal_name ? ` for **${b.animal_name}**` : ''}: ${b.booking_type} (${b.status})${b.reason_for_visit ? ` - ${b.reason_for_visit}` : ''}${b.priority === 'emergency' ? ' 🚨 EMERGENCY' : ''}${b.vet_first ? ` with Dr. ${b.vet_first} ${b.vet_last}` : ''}`
           );
           sections.push(`## Upcoming Appointments (${upcoming.length})\n${uLines.join('\n')}`);
         }
         if (past.length > 0) {
           const pLines = past.slice(0, 20).map((b: any) =>
-            `- ${new Date(b.scheduled_date).toLocaleDateString()}${b.animal_name ? ` **${b.animal_name}**` : ''}: ${b.booking_type} (${b.status})${b.reason_for_visit ? ` — ${b.reason_for_visit}` : ''}${b.symptoms ? ` [symptoms: ${b.symptoms.substring(0, 80)}]` : ''}`
+            `- ${new Date(b.scheduled_date).toLocaleDateString()}${b.animal_name ? ` **${b.animal_name}**` : ''}: ${b.booking_type} (${b.status})${b.reason_for_visit ? ` - ${b.reason_for_visit}` : ''}${b.symptoms ? ` [symptoms: ${b.symptoms.substring(0, 80)}]` : ''}`
           );
           sections.push(`## Past Appointments (${past.length} total, showing recent 20)\n${pLines.join('\n')}`);
         }
@@ -378,10 +378,10 @@ Rate your overall confidence (0-100%) and explain any limitations.
 IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and should be confirmed by a licensed veterinarian.`;
 
     try {
-      // Try vision models in order — fallback chain so deprecations don't break the feature.
+      // Try vision models in order - fallback chain so deprecations don't break the feature.
       // qwen3.6-27b is Groq's current multimodal model (llama-4-scout is decommissioned
       // 2026-07-17 for free tier, kept as a fallback only; llama-3.3-70b was removed from
-      // this chain — it is text-only and always rejects image payloads).
+      // this chain - it is text-only and always rejects image payloads).
       const visionModels = ai.provider.includes('Groq')
         ? ['qwen/qwen3.6-27b', 'meta-llama/llama-4-scout-17b-16e-instruct']
         : [ai.model];
@@ -591,7 +591,7 @@ IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and sho
         const text = completion.choices[0]?.message?.content ?? '';
         return { drugs: normalized, aiAnalysis: text, interactions: [], hasInteractions: text.toLowerCase().includes('interaction'), provider: ai.provider };
       } catch (err: any) {
-        const hint = err?.status === 429 ? ' (quota exceeded — add billing or switch to Groq)' : '';
+        const hint = err?.status === 429 ? ' (quota exceeded - add billing or switch to Groq)' : '';
         logger.warn(`AI drug check failed${hint}`, { error: err?.message });
       }
     }
@@ -638,7 +638,7 @@ IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and sho
           provider: ai.provider
         };
       } catch (err: any) {
-        const hint = err?.status === 429 ? ' (quota exceeded — add billing or switch to Groq)' : '';
+        const hint = err?.status === 429 ? ' (quota exceeded - add billing or switch to Groq)' : '';
         logger.warn(`AI symptom analysis failed${hint}`, { error: err?.message });
       }
     }
@@ -670,7 +670,7 @@ IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and sho
 
     // Build personalized system prompt
     const personalizedPrompt = userContext
-      ? `${SYSTEM_PROMPT}\n\n--- COMPLETE PATIENT PROFILE (user's full data from the platform) ---\n${userContext}\n---\nYou have the user's COMPLETE history — from their animals' birth/registration date through today. Use this full context to:\n- Reference specific animals by name, breed, age, and current weight\n- Correlate current symptoms with past diagnoses, treatments, and lab results\n- Flag if a current medication might conflict with known allergies or past prescriptions\n- Note overdue vaccinations or missed follow-ups based on dates\n- Track weight trends (gaining/losing) over time and alert on concerning changes\n- Reference abnormal lab results and past conditions when advising on new symptoms\n- Remind about upcoming appointments\nDo not dump the context back — weave it naturally into your clinical advice.`
+      ? `${SYSTEM_PROMPT}\n\n--- COMPLETE PATIENT PROFILE (user's full data from the platform) ---\n${userContext}\n---\nYou have the user's COMPLETE history - from their animals' birth/registration date through today. Use this full context to:\n- Reference specific animals by name, breed, age, and current weight\n- Correlate current symptoms with past diagnoses, treatments, and lab results\n- Flag if a current medication might conflict with known allergies or past prescriptions\n- Note overdue vaccinations or missed follow-ups based on dates\n- Track weight trends (gaining/losing) over time and alert on concerning changes\n- Reference abnormal lab results and past conditions when advising on new symptoms\n- Remind about upcoming appointments\nDo not dump the context back - weave it naturally into your clinical advice.`
       : SYSTEM_PROMPT;
 
     // ── AI path ──
@@ -745,7 +745,7 @@ In the meantime, please use the Symptom Analysis or Drug Interactions tabs.`,
     }
 
     return {
-      content: `⚠️ AI Copilot offline — no AI provider configured.\n\nSet one of these in your backend .env and restart:\n- **Free**: GROQ_API_KEY=<key from https://console.groq.com>\n- **Paid**: OPENAI_API_KEY=<key from https://platform.openai.com>`,
+      content: `⚠️ AI Copilot offline - no AI provider configured.\n\nSet one of these in your backend .env and restart:\n- **Free**: GROQ_API_KEY=<key from https://console.groq.com>\n- **Paid**: OPENAI_API_KEY=<key from https://platform.openai.com>`,
       confidence: 40, sources: ['Local Knowledge Base'], tokens: 55
     };
   }

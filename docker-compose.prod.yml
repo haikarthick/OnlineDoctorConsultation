@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════
-#  VetCare Platform — Production Docker Compose
+#  VetCare Platform - Production Docker Compose
 #  Usage: docker compose -f docker-compose.prod.yml up -d
 #  Requires: .env file with production secrets
 # ═══════════════════════════════════════════════════════
@@ -32,7 +32,7 @@ services:
           cpus: '1.0'
         reservations:
           memory: 256M
-    # NOT exposed to host — only accessible from backend-net
+    # NOT exposed to host - only accessible from backend-net
 
   # ── Redis ───────────────────────────────────────────
   redis:
@@ -115,7 +115,7 @@ services:
           cpus: '1.0'
         reservations:
           memory: 256M
-    # NOT exposed to host — nginx proxies to it
+    # NOT exposed to host - nginx proxies to it
 
   # ── Frontend (Nginx) ───────────────────────────────
   frontend:
@@ -154,6 +154,6 @@ volumes:
 networks:
   backend-net:
     driver: bridge
-    internal: true          # No external access — DB/Redis isolated
+    internal: true          # No external access - DB/Redis isolated
   frontend-net:
     driver: bridge          # Frontend + Backend communicate here

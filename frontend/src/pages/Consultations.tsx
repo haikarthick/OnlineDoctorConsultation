@@ -52,6 +52,17 @@ const isExpiredPending = (b: BookingRow): boolean => {
   return d < new Date()
 }
 
+/**
+ * Whether the booked slot has finished (browser local time).
+ * A no-show can only be judged after the appointment window has closed - the
+ * backend accepts confirmed/pending bookings at any time, so the UI is what
+ * stops a slot being written off while the patient could still turn up.
+ */
+const hasSlotEnded = (b: BookingRow): boolean => {
+  const end = new Date(b.scheduledDate + 'T' + b.timeSlotEnd + ':00')
+  return end < new Date()
+}
+
 /** Check if a user can reschedule (within limit) */
 const canReschedule = (b: BookingRow, maxReschedules: number, patientNoShowLimit: number): boolean => {
   // Expired pending → always allowed (not user's fault)
@@ -85,7 +96,7 @@ const Consultations: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('')
 
   // Split bookings into active (needs attention) vs history (reference only)
-  // 'rescheduled' goes to history — the old booking is superseded, the new one appears separately
+  // 'rescheduled' goes to history - the old booking is superseded, the new one appears separately
   const activeStatuses = ['pending', 'confirmed', 'missed']
   const historyStatuses = ['completed', 'cancelled', 'rescheduled']
 
@@ -127,6 +138,9 @@ const Consultations: React.FC = () => {
     show: false, bookingId: '', reason: ''
   })
   const [cancelError, setCancelError] = useState('')
+  const [noShowModal, setNoShowModal] = useState<BookingRow | null>(null)
+  const [noShowError, setNoShowError] = useState('')
+  const [noShowSaving, setNoShowSaving] = useState(false)
 
   // Action Log modal state
   const [actionLogBookingId, setActionLogBookingId] = useState<string | null>(null)
@@ -195,6 +209,28 @@ const Consultations: React.FC = () => {
     try { await apiService.confirmBooking(id); loadData() }
     catch (err: any) { setError(err?.response?.data?.error?.message || t('consultations.failedToConfirm')) }
     finally { setActionLoading(null) }
+  }
+
+  // Marking a no-show moves money (PaymentOrchestrator.settleMissedBooking
+  // compensates the doctor on paid bookings) and caps the patient's remaining
+  // reschedules, so it asks for confirmation rather than firing on one click.
+  const handleMarkNoShow = async () => {
+    const b = noShowModal
+    if (!b) return
+    setNoShowSaving(true)
+    setNoShowError('')
+    try {
+      await apiService.markBookingNoShow(b.id)
+      setNoShowModal(null)
+      loadData()
+    } catch (err: any) {
+      setNoShowError(
+        err?.response?.data?.error?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        t('consultations.failedToMarkNoShow')
+      )
+    } finally { setNoShowSaving(false) }
   }
 
   const handleCancelBooking = async (id?: string) => {
@@ -320,7 +356,7 @@ const Consultations: React.FC = () => {
       const symptoms = booking.symptoms || ''
       let description = symptoms || reason
       if (description.length < 10) {
-        description = `Consultation: ${description} — scheduled appointment`
+        description = `Consultation: ${description} - scheduled appointment`
       }
 
       const res = await apiService.createConsultation({
@@ -434,7 +470,7 @@ const Consultations: React.FC = () => {
         <button type="button" onClick={loadData} className="si-a5c246fd">{t('common.refresh')}</button>
       </div>
 
-      {/* Appointments Tab — items needing attention or upcoming */}
+      {/* Appointments Tab - items needing attention or upcoming */}
       {activeTab === 'bookings' && (
         <div className="module-content">
           {filteredActive.length === 0 ? (
@@ -453,7 +489,7 @@ const Consultations: React.FC = () => {
                     <div className="appt-card-who">
                       {isVet && <strong>{b.petOwnerName || t('common.patient')}</strong>}
                       {isPetOwner && <strong>{b.vetName || t('common.doctor')}</strong>}
-                      {isAdmin && <span>{b.petOwnerName || '—'} / {b.vetName || '—'}</span>}
+                      {isAdmin && <span>{b.petOwnerName || '-'} / {b.vetName || '-'}</span>}
                     </div>
                     <div className="si-0fb5fcc7">
                       <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: 11, fontWeight: 600,
@@ -476,9 +512,9 @@ const Consultations: React.FC = () => {
                             : <span className="si-bce9b403"> · {t('consultations.herdLevel')}</span>}
                         </>
                       ) : b.animalName ? (
-                        <span>🐾 {b.animalName}{b.animalSpecies ? ` — ${b.animalSpecies}` : ''}{b.animalBreed ? ` / ${b.animalBreed}` : ''}</span>
+                        <span>🐾 {b.animalName}{b.animalSpecies ? ` - ${b.animalSpecies}` : ''}{b.animalBreed ? ` / ${b.animalBreed}` : ''}</span>
                       ) : (
-                        <span className="si-e70e9abd">—</span>
+                        <span className="si-e70e9abd">-</span>
                       )}
                     </div>
 
@@ -496,7 +532,7 @@ const Consultations: React.FC = () => {
 
                     {/* ─── Status-specific info banners ─── */}
 
-                    {/* PENDING — awaiting vet confirmation */}
+                    {/* PENDING - awaiting vet confirmation */}
                     {b.status === 'pending' && !isExpiredPending(b) && (
                       <div className="si-f3ba3645">
                         {isPetOwner && t('consultations.pendingMessages.petOwner')}
@@ -505,14 +541,14 @@ const Consultations: React.FC = () => {
                       </div>
                     )}
 
-                    {/* PENDING but expired (safety fallback — backend normally auto-expires these) */}
+                    {/* PENDING but expired (safety fallback - backend normally auto-expires these) */}
                     {isExpiredPending(b) && (
                       <div className="si-d3e4ea8a">
                         {isPetOwner ? t('consultations.expiredPendingMessages.petOwner') : t('consultations.expiredPendingMessages.general')}
                       </div>
                     )}
 
-                    {/* CONFIRMED — appointment is set */}
+                    {/* CONFIRMED - appointment is set */}
                     {b.status === 'confirmed' && (
                       <div className="si-ad9785fc">
                         {isPetOwner && t('consultations.confirmedMessages.petOwner')}
@@ -521,12 +557,12 @@ const Consultations: React.FC = () => {
                       </div>
                     )}
 
-                    {/* MISSED — distinguish pending→missed vs confirmed→missed */}
+                    {/* MISSED - distinguish pending→missed vs confirmed→missed */}
                     {b.status === 'missed' && (
                       <div className="si-cbfb1eb8">
                         {missedBadge(b.missedBy)}
 
-                        {/* Doctor missed — was never confirmed (pending → missed) */}
+                        {/* Doctor missed - was never confirmed (pending → missed) */}
                         {b.missedBy === 'doctor' && !b.confirmedAt && (
                           <>
                             {isPetOwner && (
@@ -547,7 +583,7 @@ const Consultations: React.FC = () => {
                           </>
                         )}
 
-                        {/* Doctor missed — was confirmed but didn't show up (confirmed → missed) */}
+                        {/* Doctor missed - was confirmed but didn't show up (confirmed → missed) */}
                         {b.missedBy === 'doctor' && b.confirmedAt && (
                           <>
                             {isPetOwner && (
@@ -618,7 +654,7 @@ const Consultations: React.FC = () => {
                         ? <button className="btn-small si-af66012c" onClick={() => handleStartConsultation(b)}>{t('consultations.actions.join')}</button>
                         : <button className="btn-small si-33f445bc" disabled title={t('consultations.joinWindowTooltip', { minutes: appSettings.joinWindowMinutes })}>{t('consultations.actions.notYet')}</button>
                     )}
-                    {/* Reschedule button — conditional on who missed and reschedule limits */}
+                    {/* Reschedule button - conditional on who missed and reschedule limits */}
                     {(b.status === 'confirmed' || (b.status === 'pending' && canReschedule(b, maxReschedules, patientNoShowRescheduleLimit)) || (b.status === 'missed' && canReschedule(b, maxReschedules, patientNoShowRescheduleLimit))) && (
                       <button className="btn-small" style={{
                         background: isExpiredPending(b) ? '#dc2626' : '#f59e0b',
@@ -633,6 +669,19 @@ const Consultations: React.FC = () => {
                     {isAdmin && b.status === 'pending' && !isExpiredPending(b) && (
                       <button className="btn-small si-0e51a69a" disabled={actionLoading === b.id} onClick={() => handleConfirmBooking(b.id)}>{actionLoading === b.id ? '⏳' : t('consultations.actions.confirm')}</button>
                     )}
+                    {/* Patient no-show. Vet/admin only, and only once the slot has
+                        ended - the backend allows it earlier, so this is the guard
+                        that stops a slot being written off while the patient could
+                        still arrive. */}
+                    {(isVet || isAdmin) && (b.status === 'confirmed' || b.status === 'pending') && hasSlotEnded(b) && (
+                      <button
+                        className="btn-small btn-warning"
+                        onClick={() => { setNoShowModal(b); setNoShowError('') }}
+                        title={t('consultations.noShow.tooltip')}
+                      >
+                        🙋 {t('consultations.actions.markNoShow')}
+                      </button>
+                    )}
                     <button className="btn-small si-1827a52c" onClick={() => openActionLog(b.id)} title={t('consultations.viewActionHistory')}>{t('consultations.actions.log')}</button>
                   </div>
                 </div>
@@ -642,7 +691,7 @@ const Consultations: React.FC = () => {
         </div>
       )}
 
-      {/* Consultation History Tab — completed/cancelled, reference only */}
+      {/* Consultation History Tab - completed/cancelled, reference only */}
       {activeTab === 'consultations' && (
         <div className="module-content">
           {filteredHistory.length === 0 ? (
@@ -663,7 +712,7 @@ const Consultations: React.FC = () => {
                       <div className="appt-card-who">
                         {isVet && <strong>{b.petOwnerName || t('common.patient')}</strong>}
                         {isPetOwner && <strong>{b.vetName || t('common.doctor')}</strong>}
-                        {isAdmin && <span>{b.petOwnerName || '—'} / {b.vetName || '—'}</span>}
+                        {isAdmin && <span>{b.petOwnerName || '-'} / {b.vetName || '-'}</span>}
                       </div>
                       <div className="si-0fb5fcc7">
                         {networkInfo && networkInfo.networkName && (
@@ -685,9 +734,9 @@ const Consultations: React.FC = () => {
                             {b.animalName && <span> · 🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</span>}
                           </>
                         ) : b.animalName ? (
-                          <span>🐾 {b.animalName}{b.animalSpecies ? ` — ${b.animalSpecies}` : ''}</span>
+                          <span>🐾 {b.animalName}{b.animalSpecies ? ` - ${b.animalSpecies}` : ''}</span>
                         ) : (
-                          <span className="si-e70e9abd">—</span>
+                          <span className="si-e70e9abd">-</span>
                         )}
                       </div>
 
@@ -716,7 +765,7 @@ const Consultations: React.FC = () => {
                         </div>
                       )}
 
-                      {/* Rescheduled indicator — this is the OLD booking that was superseded */}
+                      {/* Rescheduled indicator - this is the OLD booking that was superseded */}
                       {b.status === 'rescheduled' && (
                         <div className="si-01262b7b">
                           {t('consultations.rescheduledNotice')}
@@ -762,7 +811,7 @@ const Consultations: React.FC = () => {
             <div className="si-9c52ec04">
               <p className="si-75f3eb54">{t('consultations.reschedule.originalLabel')}</p>
               <p className="si-63d91992">
-                {rescheduleBooking.vetName || t('common.doctor')} — {fmt(rescheduleBooking.scheduledDate)} {t('common.at')} {formatSlotTime(rescheduleBooking.timeSlotStart)} - {formatSlotTime(rescheduleBooking.timeSlotEnd)}
+                {rescheduleBooking.vetName || t('common.doctor')} - {fmt(rescheduleBooking.scheduledDate)} {t('common.at')} {formatSlotTime(rescheduleBooking.timeSlotStart)} - {formatSlotTime(rescheduleBooking.timeSlotEnd)}
               </p>
             </div>
 
@@ -818,7 +867,7 @@ const Consultations: React.FC = () => {
                   <option value="">{t('consultations.reschedule.keepCurrentDoctor')}</option>
                   {vetList.map(v => (
                     <option key={v.id} value={v.id}>
-                      {v.name}{v.specialization ? ` — ${v.specialization}` : ''}{v.id === rescheduleBooking.veterinarianId ? ` ${t('consultations.reschedule.currentDoctor')}` : ''}
+                      {v.name}{v.specialization ? ` - ${v.specialization}` : ''}{v.id === rescheduleBooking.veterinarianId ? ` ${t('consultations.reschedule.currentDoctor')}` : ''}
                     </option>
                   ))}
                 </select>
@@ -849,7 +898,7 @@ const Consultations: React.FC = () => {
                   </div>
                 ) : rescheduleDateMsg ? (
                   <div className="si-88c863bb">
-                    {rescheduleDateMsg} — {t('consultations.reschedule.selectAnotherDate')}
+                    {rescheduleDateMsg} - {t('consultations.reschedule.selectAnotherDate')}
                   </div>
                 ) : futureSlots.length === 0 ? (
                   <p className="si-ed4d0fb3">
@@ -949,11 +998,11 @@ const Consultations: React.FC = () => {
                         {t('consultations.actionLog.by')} <strong>{log.userName || t('consultations.actionLog.system')}</strong>
                         {log.details?.role && <span> ({log.details.role})</span>}
                         {' · '}
-                        {log.createdAt ? new Date(log.createdAt).toLocaleString() : '–'}
+                        {log.createdAt ? new Date(log.createdAt).toLocaleString() : '-'}
                       </div>
                       {log.action === 'BOOKING_RESCHEDULED' && log.details && (
                         <div className="si-e4117c98">
-                          {t('consultations.actionLog.newSlot')} {log.details.newDate} {formatSlotTime(log.details.newTimeSlotStart)}–{formatSlotTime(log.details.newTimeSlotEnd)}
+                          {t('consultations.actionLog.newSlot')} {log.details.newDate} {formatSlotTime(log.details.newTimeSlotStart)}-{formatSlotTime(log.details.newTimeSlotEnd)}
                           {log.details.newStatus === 'pending' && (
                             // Check if a subsequent confirmation exists in the log
                             actionLogs.some((l, j) => j > idx && l.action === 'BOOKING_CONFIRMED')
@@ -1058,6 +1107,49 @@ const Consultations: React.FC = () => {
         </div>
         )
       })()}
+
+      {/* No-show confirmation. Deliberately a dialog and not a one-click action:
+          confirming settles the booking as missed, triggers doctor compensation
+          on paid bookings, and counts against the patient's reschedule limit. */}
+      {noShowModal && (
+        <div className="si-10f9485f" onClick={() => { setNoShowModal(null); setNoShowError('') }}>
+          <div className="si-b6bf627f" onClick={e => e.stopPropagation()}>
+            <div className="si-101fd1d0">
+              <h2 className="si-670df8d2">{t('consultations.noShow.title')}</h2>
+              <button type="button" onClick={() => { setNoShowModal(null); setNoShowError('') }}
+                className="si-60f45c55">✕</button>
+            </div>
+            <div className="si-941430f8">
+              {t('consultations.noShow.warning')}
+            </div>
+            <p className="slot-hint">
+              {t('consultations.noShow.forBooking', {
+                animal: noShowModal.animalName || '-',
+                date: formatDate(new Date(noShowModal.scheduledDate)),
+                time: formatSlotTime(noShowModal.timeSlotStart),
+              })}
+            </p>
+            {noShowError && (
+              <div className="si-919b5437">
+                ⚠ {noShowError}
+              </div>
+            )}
+            <div className="si-7be0b9bd">
+              <button
+                type="button"
+                onClick={() => { setNoShowModal(null); setNoShowError('') }}
+                className="si-60c838b7"
+              >{t('common.cancel')}</button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                disabled={noShowSaving}
+                onClick={handleMarkNoShow}
+              >{noShowSaving ? '⏳' : t('consultations.noShow.confirm')}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

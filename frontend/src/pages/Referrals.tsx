@@ -284,7 +284,7 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
                 <option value="">{t('referrals.selectDoctor')}</option>
                 {vets.filter((v: any) => (v.userId || v.id) !== accepting.fromVetId).map((v: any) => (
                   <option key={v.userId || v.id} value={v.userId || v.id}>
-                    Dr. {v.firstName} {v.lastName} — {formatCurrency(parseFloat(String(v.consultationFee || 0)))}
+                    Dr. {v.firstName} {v.lastName} - {formatCurrency(parseFloat(String(v.consultationFee || 0)))}
                   </option>
                 ))}
               </select>
@@ -364,7 +364,7 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
                 <input type="radio" name="referSource" checked={referSource?.kind === 'booking' && referSource.id === b.id}
                   onChange={() => setReferSource({ kind: 'booking', id: b.id })} />
                 <span>
-                  {b.patientName}{b.animalName ? ` (${b.animalName})` : ''} — {b.scheduledDate ? formatDate(b.scheduledDate) : ''} {b.timeSlotStart}
+                  {b.patientName}{b.animalName ? ` (${b.animalName})` : ''} - {b.scheduledDate ? formatDate(b.scheduledDate) : ''} {b.timeSlotStart}
                   {b.priority === 'emergency' ? ' ⚡' : ''}
                 </span>
               </label>
@@ -376,7 +376,7 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
               <label key={c.id} className="si-db8d8b8b">
                 <input type="radio" name="referSource" checked={referSource?.kind === 'consultation' && referSource.id === c.id}
                   onChange={() => setReferSource({ kind: 'consultation', id: c.id })} />
-                <span>{c.patientName}{c.animalName ? ` (${c.animalName})` : ''} — {c.completedAt ? formatDate(c.completedAt) : ''}</span>
+                <span>{c.patientName}{c.animalName ? ` (${c.animalName})` : ''} - {c.completedAt ? formatDate(c.completedAt) : ''}</span>
               </label>
             ))}
 
@@ -386,7 +386,7 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
               <option value="">{referSource?.kind === 'booking' ? t('referrals.patientChooses') : t('referrals.selectDoctor')}</option>
               {vets.filter((v: any) => (v.userId || v.id) !== user?.id).map((v: any) => (
                 <option key={v.userId || v.id} value={v.userId || v.id}>
-                  Dr. {v.firstName} {v.lastName} — {formatCurrency(parseFloat(String(v.consultationFee || 0)))}
+                  Dr. {v.firstName} {v.lastName} - {formatCurrency(parseFloat(String(v.consultationFee || 0)))}
                 </option>
               ))}
             </select>

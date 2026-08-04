@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
+import PasswordInput from '../components/PasswordInput'
 import './Auth.css'
 
 interface LoginProps {
@@ -170,9 +171,8 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
                     </button>
                   )}
                 </div>
-                <input
+                <PasswordInput
                   id="login-password"
-                  type="password"
                   placeholder={t('login.passwordPlaceholder')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

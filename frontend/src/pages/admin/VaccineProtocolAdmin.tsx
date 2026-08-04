@@ -513,7 +513,7 @@ const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate:
                   </div>
                   <div className="module-form-group">
                     <label className="module-label">{t('vaccineProtocol.form.seasonalWindow')}</label>
-                    <input className="module-input" value={formData.seasonalWindow || ''} onChange={e => setFormData(p => ({ ...p, seasonalWindow: e.target.value }))} placeholder="e.g. Pre-monsoon (May–Jun)" />
+                    <input className="module-input" value={formData.seasonalWindow || ''} onChange={e => setFormData(p => ({ ...p, seasonalWindow: e.target.value }))} placeholder="e.g. Pre-monsoon (May-Jun)" />
                   </div>
                 </div>
 
@@ -607,7 +607,7 @@ const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate:
                           <span className="vpa-change-date">{new Date(c.effectiveDate).toLocaleDateString()}</span>
                         </div>
                         <div className="vpa-change-values">
-                          <span className="vpa-old-val">{c.oldValue || '–'}</span>
+                          <span className="vpa-old-val">{c.oldValue || '-'}</span>
                           <span className="vpa-arrow">→</span>
                           <span className="vpa-new-val">{c.newValue}</span>
                         </div>

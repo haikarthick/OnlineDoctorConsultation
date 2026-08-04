@@ -1,5 +1,5 @@
 /**
- * Marketplace & Auction Service — Buy & Sell Marketplace
+ * Marketplace & Auction Service - Buy & Sell Marketplace
  * Buy and sell animals, equipment, and supplies with fixed-price listings,
  * live auction bidding, order processing, and search.
  * Compliant with PCA Act 1960, Dog Breeding Rules 2017, Pet Shop Rules 2018.
@@ -11,10 +11,10 @@ import NotificationService from './NotificationService';
 import logger from '../utils/logger';
 import storage, { extractStorageKeyFromUrl } from '../utils/storage';
 
-/** Deletes storage assets for a set of listing media URLs — non-fatal per URL (a delete
+/** Deletes storage assets for a set of listing media URLs - non-fatal per URL (a delete
  *  failure here should never block the listing update/delete itself; storage.delete()
  *  already swallows its own errors to a warn log). Skips URLs with no extractable key
- *  (legacy local /uploads/ paths, nulls) — nothing to clean up for those. */
+ *  (legacy local /uploads/ paths, nulls) - nothing to clean up for those. */
 async function cleanupListingMedia(urls: Array<string | null | undefined>): Promise<void> {
   for (const url of urls) {
     const key = extractStorageKeyFromUrl(url);
@@ -23,7 +23,7 @@ async function cleanupListingMedia(urls: Array<string | null | undefined>): Prom
 }
 
 // Categories that involve a live animal (or germplasm) must pass admin review
-// before going public — Pet Shop Rules 2018 compliance posture.
+// before going public - Pet Shop Rules 2018 compliance posture.
 const MODERATED_CATEGORIES = ['animal', 'semen_embryo'];
 // Free fair-use cap when the user has no subscription plan quota.
 const MAX_FREE_ACTIVE_LISTINGS = 20;
@@ -106,7 +106,7 @@ class MarketplaceService {
       else where.push('(l.admin_approved = true OR l.admin_approved IS NULL)');
     }
     // Proximity filter (requires earthdistance extension); coordinates are
-    // numerically coerced — non-numeric input is rejected, never interpolated
+    // numerically coerced - non-numeric input is rejected, never interpolated
     const latN = Number(userLat); const lngN = Number(userLng); const radN = Number(radiusKm);
     const hasGeo = Number.isFinite(latN) && Number.isFinite(lngN);
     if (hasGeo && Number.isFinite(radN) && radN > 0) {
@@ -188,7 +188,7 @@ class MarketplaceService {
   }
 
   async createListing(data: any) {
-    // Free fair-use cap (marketplace is free — cap prevents spam); a plan with a
+    // Free fair-use cap (marketplace is free - cap prevents spam); a plan with a
     // larger max_listings can raise it, but plans are optional and default-off
     const sub = await pool.query(
       `SELECT mp.max_listings FROM marketplace_subscriptions ms
@@ -207,7 +207,7 @@ class MarketplaceService {
       throw new Error(`Listing limit (${maxListings}) reached. Please close or delete an existing listing before adding a new one.`);
     }
 
-    // A linked animal must belong to the seller — prevents borrowing another
+    // A linked animal must belong to the seller - prevents borrowing another
     // owner's health-passport badge and VC-ID
     if (data.linkedAnimalId) {
       const owned = await pool.query('SELECT 1 FROM animals WHERE id = $1 AND owner_id = $2', [data.linkedAnimalId, data.sellerId]);
@@ -267,7 +267,7 @@ class MarketplaceService {
     if (!isAdmin && data.status !== undefined) {
       const sellerStatuses = ['active', 'sold', 'rehomed', 'deleted'];
       if (!sellerStatuses.includes(data.status)) throw new Error(`Status must be one of: ${sellerStatuses.join(', ')}`);
-      if (existing.rows[0].status === 'reserved') throw new Error('Listing is reserved — complete or cancel the deal first');
+      if (existing.rows[0].status === 'reserved') throw new Error('Listing is reserved - complete or cancel the deal first');
     }
 
     const allowedFields = [
@@ -302,7 +302,7 @@ class MarketplaceService {
     for (const [camel, snake] of Object.entries(enumFields)) {
       if (data[camel] !== undefined) { sets.push(`${snake} = $${idx++}`); vals.push(data[camel]); }
     }
-    // Boolean fields — promotion and verification flags are admin-only
+    // Boolean fields - promotion and verification flags are admin-only
     if (isAdmin && data.isHotDeal !== undefined) { sets.push(`is_hot_deal = $${idx++}`); vals.push(data.isHotDeal); }
     if (data.healthCertificate !== undefined) { sets.push(`health_certificate = $${idx++}`); vals.push(data.healthCertificate); }
     if (isAdmin && data.featured !== undefined) { sets.push(`featured = $${idx++}`); vals.push(data.featured); }
@@ -317,7 +317,7 @@ class MarketplaceService {
     const result = await pool.query('SELECT * FROM marketplace_listings WHERE id = $1', [id]);
 
     // Clean up Cloudinary assets dropped by this edit (removed photos, a replaced/removed
-    // video) — only after the UPDATE succeeds, so a failed request never deletes media a
+    // video) - only after the UPDATE succeeds, so a failed request never deletes media a
     // listing still references. Runs after the response-worthy work, never blocks it.
     const oldImages: string[] = Array.isArray(existing.rows[0].images) ? existing.rows[0].images : [];
     const oldVideoUrl: string | null = existing.rows[0].video_url || null;
@@ -340,11 +340,11 @@ class MarketplaceService {
     const existing = await pool.query('SELECT seller_id, status, images, video_url FROM marketplace_listings WHERE id = $1', [id]);
     if (!existing.rows[0]) throw new Error('Listing not found');
     if (!isAdmin && existing.rows[0].seller_id !== userId) throw new Error('You can only delete your own listings');
-    if (!isAdmin && existing.rows[0].status === 'reserved') throw new Error('Listing is reserved — complete or cancel the deal first');
+    if (!isAdmin && existing.rows[0].status === 'reserved') throw new Error('Listing is reserved - complete or cancel the deal first');
     await pool.query('UPDATE marketplace_listings SET status = $1, updated_at = NOW() WHERE id = $2', ['deleted', id]);
 
     // Soft-delete keeps the row (price/species/breed/etc.) for audit/history, but the
-    // listing has no further product purpose for its photos/video — clean those up so a
+    // listing has no further product purpose for its photos/video - clean those up so a
     // deleted listing doesn't go on consuming Cloudinary storage credits indefinitely.
     const media: string[] = Array.isArray(existing.rows[0].images) ? [...existing.rows[0].images] : [];
     if (existing.rows[0].video_url) media.push(existing.rows[0].video_url);
@@ -445,7 +445,7 @@ class MarketplaceService {
   }
 
   /**
-   * Reserve a listing (free classifieds deal — no payment is processed).
+   * Reserve a listing (free classifieds deal - no payment is processed).
    * Creates a 'reserved' order that holds the listing while buyer and seller
    * connect, inspect, and settle directly between themselves. The deal is
    * completed by BOTH parties confirming via confirmDeal(); only then does a
@@ -464,7 +464,7 @@ class MarketplaceService {
       if (l.admin_approved === false && !data.systemCall) throw new Error('Listing is not active');
       if (l.seller_id === data.buyerId) throw new Error('Cannot reserve your own listing');
       if (l.price == null && data.unitPrice == null)
-        throw new Error('This is a contact-for-fee listing — please use Inquire to contact the seller');
+        throw new Error('This is a contact-for-fee listing - please use Inquire to contact the seller');
       sellerId = l.seller_id; listingTitle = l.title;
 
       const unitPrice = data.unitPrice != null ? +data.unitPrice : +l.price;
@@ -504,7 +504,7 @@ class MarketplaceService {
       const order = orderRes.rows[0];
       if (!order) throw new Error('Deal not found');
       if (order.buyer_id !== userId && order.seller_id !== userId) throw new Error('You are not part of this deal');
-      if (order.status !== 'reserved') throw new Error(`Deal is ${order.status} — only reserved deals can be confirmed`);
+      if (order.status !== 'reserved') throw new Error(`Deal is ${order.status} - only reserved deals can be confirmed`);
 
       const isBuyer = order.buyer_id === userId;
       counterpartyId = isBuyer ? order.seller_id : order.buyer_id;
@@ -547,9 +547,9 @@ class MarketplaceService {
 
     if (completed) {
       await notifySafe(counterpartyId, 'marketplace_deal_completed', 'Deal completed',
-        `The deal for "${listingTitle}" is complete — both parties confirmed.`, { orderId });
+        `The deal for "${listingTitle}" is complete - both parties confirmed.`, { orderId });
       await notifySafe(userId, 'marketplace_deal_completed', 'Deal completed',
-        `The deal for "${listingTitle}" is complete — both parties confirmed.`, { orderId });
+        `The deal for "${listingTitle}" is complete - both parties confirmed.`, { orderId });
     } else {
       await notifySafe(counterpartyId, 'marketplace_deal_confirm', 'Deal confirmation received',
         `The other party confirmed the deal for "${listingTitle}". Please confirm from your side to complete it.`, { orderId });
@@ -567,7 +567,7 @@ class MarketplaceService {
       const order = orderRes.rows[0];
       if (!order) throw new Error('Deal not found');
       if (order.buyer_id !== userId && order.seller_id !== userId) throw new Error('You are not part of this deal');
-      if (order.status !== 'reserved') throw new Error(`Deal is ${order.status} — only reserved deals can be cancelled`);
+      if (order.status !== 'reserved') throw new Error(`Deal is ${order.status} - only reserved deals can be cancelled`);
       counterpartyId = order.buyer_id === userId ? order.seller_id : order.buyer_id;
 
       await client.query(
@@ -597,7 +597,7 @@ class MarketplaceService {
     for (const o of expired.rows) {
       await pool.query(`UPDATE marketplace_listings SET status = 'active', updated_at = NOW() WHERE id = $1 AND status = 'reserved'`, [o.listing_id]);
       await notifySafe(o.buyer_id, 'marketplace_deal_expired', 'Reservation expired', 'Your reservation expired and the listing is back on the market.', { orderId: o.id });
-      await notifySafe(o.seller_id, 'marketplace_deal_expired', 'Reservation expired', 'A reservation on your listing expired — it is active again.', { orderId: o.id });
+      await notifySafe(o.seller_id, 'marketplace_deal_expired', 'Reservation expired', 'A reservation on your listing expired - it is active again.', { orderId: o.id });
     }
     return expired.rows.length;
   }
@@ -787,7 +787,7 @@ class MarketplaceService {
       `SELECT COUNT(*) FROM marketplace_listings l WHERE ${where}`, params.slice()
     );
 
-    // Only select safe public columns — no seller email/phone/id
+    // Only select safe public columns - no seller email/phone/id
     let query = `SELECT l.id, l.title, l.description, l.category, l.listing_type, l.price, l.currency,
                  l.quantity, l.unit, l.condition, l.images, l.location, l.tags, l.featured,
                  l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender, l.animal_class,
@@ -914,7 +914,7 @@ class MarketplaceService {
         );
         const metReserve = winBid.rows[0] && (!listing.reserve_price || +winBid.rows[0].amount >= +listing.reserve_price);
         if (metReserve) {
-          // Winner gets a reservation (free classifieds — settlement happens
+          // Winner gets a reservation (free classifieds - settlement happens
           // off-platform, then both sides confirm via the deal handshake)
           await pool.query(`UPDATE marketplace_listings SET status = 'active', updated_at = NOW() WHERE id = $1`, [listing.id]);
           await this.createOrder({
@@ -933,7 +933,7 @@ class MarketplaceService {
             winBid.rows[0] ? `"${listing.title}" ended below your reserve price.` : `"${listing.title}" ended with no bids.`, { listingId: listing.id });
         }
       } catch (err: any) {
-        // Leave the listing recoverable — never destroy data on a job failure
+        // Leave the listing recoverable - never destroy data on a job failure
         logger.error('[Marketplace] auction close failed for listing', { listingId: listing.id, error: err.message });
         await pool.query(`UPDATE marketplace_listings SET status = 'expired', updated_at = NOW() WHERE id = $1`, [listing.id]);
       }

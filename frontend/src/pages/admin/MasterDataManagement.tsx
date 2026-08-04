@@ -8,22 +8,49 @@ import './MasterDataManagement.css'
 type TabKey = 'species' | 'breeds' | 'classes' | 'categories' | 'conditions'
 
 interface SpeciesRow {
-  id: string; code: string; label: string;
+  id: string; code: string; label: string; labelKey: string | null;
   labelHi: string | null; labelKn: string | null; labelMl: string | null; labelTa: string | null; labelTe: string | null;
   icon: string | null; category: string | null;
   hasEarTag: boolean; sortOrder: number; isActive: boolean; isProtected: boolean; isMarketplaceEligible: boolean
 }
-interface BreedRow { id: string; speciesId: string; speciesCode?: string; name: string; sortOrder: number; isActive: boolean }
-interface ClassRow {
+
+/** Per-locale label fields shared by every master-data form, in display order. `col` is the
+ *  i18n key for the field caption; `field` is the formData/DB column camelCase key. */
+const LOCALE_LABEL_FIELDS: Array<{ locale: string; field: 'labelHi' | 'labelKn' | 'labelMl' | 'labelTa' | 'labelTe'; col: string }> = [
+  { locale: 'hi', field: 'labelHi', col: 'masterData.col.labelHi' },
+  { locale: 'kn', field: 'labelKn', col: 'masterData.col.labelKn' },
+  { locale: 'ml', field: 'labelMl', col: 'masterData.col.labelMl' },
+  { locale: 'ta', field: 'labelTa', col: 'masterData.col.labelTa' },
+  { locale: 'te', field: 'labelTe', col: 'masterData.col.labelTe' },
+]
+/** Per-locale label overrides present on every master-data row (migrations 025/026). */
+interface LocaleLabelCols {
+  labelHi: string | null; labelKn: string | null; labelMl: string | null; labelTa: string | null; labelTe: string | null
+}
+interface BreedRow extends LocaleLabelCols { id: string; speciesId: string; speciesCode?: string; name: string; sortOrder: number; isActive: boolean }
+interface ClassRow extends LocaleLabelCols {
   id: string; speciesId: string; speciesCode?: string; value: string; labelKey: string | null; label: string | null;
   impliedGender: 'male' | 'female' | 'unknown'; canBePregnant: boolean; canProduceMilk: boolean; sortOrder: number; isActive: boolean
 }
-interface CategoryRow { id: string; code: string; labelKey: string | null; label: string | null; icon: string | null; sortOrder: number; isActive: boolean; isProtected: boolean }
-interface ConditionRow { id: string; code: string; labelKey: string | null; label: string | null; sortOrder: number; isActive: boolean }
+interface CategoryRow extends LocaleLabelCols { id: string; code: string; labelKey: string | null; label: string | null; icon: string | null; sortOrder: number; isActive: boolean; isProtected: boolean }
+interface ConditionRow extends LocaleLabelCols { id: string; code: string; labelKey: string | null; label: string | null; sortOrder: number; isActive: boolean }
 
 const MasterDataManagement: React.FC = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { resolveLabel } = useMasterData()
+
+  // Per-locale translators for the 5 non-English languages, so the edit form can
+  // show each row's *currently effective* built-in translation (resolved from that
+  // language's i18n bundle via label_key) as a placeholder - otherwise seeded rows,
+  // whose per-locale override columns are NULL, look empty and admins can't tell what
+  // the animal is actually called in Tamil/Hindi/etc. Only 'en' is bundled up front
+  // (see i18n/index.ts), so the other bundles are force-loaded once here.
+  const [localeReady, setLocaleReady] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    i18n.loadLanguages(['hi', 'kn', 'ml', 'ta', 'te']).then(() => { if (!cancelled) setLocaleReady(true) }).catch(() => {})
+    return () => { cancelled = true }
+  }, [i18n])
 
   const [tab, setTab] = useState<TabKey>('species')
   const [error, setError] = useState('')
@@ -42,6 +69,42 @@ const MasterDataManagement: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<Record<string, any>>({})
   const [saving, setSaving] = useState(false)
+
+  /** The built-in translation the current row displays in `locale`, for use as an input
+   *  placeholder. Resolves label_key against that locale's bundle; falls back to the plain
+   *  English `label` when there's no key (matching how the app actually renders these). */
+  const builtinLabelFor = useCallback((locale: string): string => {
+    const key = formData.labelKey as string | null | undefined
+    if (key && localeReady) {
+      const v = i18n.getFixedT(locale)(key)
+      if (v && v !== key) return v
+    }
+    // Breeds have no labelKey - their English value is `name`.
+    return (formData.label as string) || (formData.name as string) || ''
+  }, [formData.labelKey, formData.label, formData.name, i18n, localeReady])
+
+  /** The shared per-locale label input block, reused by all five entity forms. */
+  const renderLocaleLabelInputs = () => (
+    <>
+      <p className="module-hint">{t('masterData.perLocaleLabelsHint', 'Optional - add a translation for any language below. Left blank, that language uses the built-in translation (shown greyed inside each box).')}</p>
+      {LOCALE_LABEL_FIELDS.map(({ locale, field, col }) => {
+        const builtin = builtinLabelFor(locale)
+        return (
+          <div className="module-form-group" key={field}>
+            <label className="module-label">{t(col)}</label>
+            <input className="module-input" value={formData[field] || ''}
+              placeholder={builtin ? t('masterData.currentlyShowing', 'Currently showing: {{value}}', { value: builtin }) : ''}
+              onChange={e => setFormData((f: any) => ({ ...f, [field]: e.target.value }))} />
+          </div>
+        )
+      })}
+    </>
+  )
+
+  /** Per-locale label values from the current form, for update payloads. */
+  const localeLabelsFromForm = () => ({
+    labelHi: formData.labelHi, labelKn: formData.labelKn, labelMl: formData.labelMl, labelTa: formData.labelTa, labelTe: formData.labelTe,
+  })
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -63,7 +126,7 @@ const MasterDataManagement: React.FC = () => {
         const res = await apiService.adminListMasterMarketplaceConditions()
         setConditionRows(res.data || [])
       }
-      // Species list is needed by every tab (breeds/classes scoping, species dropdown) — keep it fresh.
+      // Species list is needed by every tab (breeds/classes scoping, species dropdown) - keep it fresh.
       if (tab !== 'species') {
         const sres = await apiService.adminListMasterSpecies()
         setSpeciesRows(sres.data || [])
@@ -106,20 +169,21 @@ const MasterDataManagement: React.FC = () => {
         else await apiService.adminCreateMasterSpecies(formData)
       } else if (tab === 'breeds') {
         if (!formData.speciesId) { setError(t('masterData.errors.speciesRequired', 'Select a species first')); setSaving(false); return }
-        if (editingId) await apiService.adminUpdateMasterBreed(editingId, { name: formData.name, sortOrder: formData.sortOrder })
+        if (editingId) await apiService.adminUpdateMasterBreed(editingId, { name: formData.name, sortOrder: formData.sortOrder, ...localeLabelsFromForm() })
         else await apiService.adminCreateMasterBreed(formData)
       } else if (tab === 'classes') {
         if (!formData.speciesId) { setError(t('masterData.errors.speciesRequired', 'Select a species first')); setSaving(false); return }
         if (editingId) await apiService.adminUpdateMasterAnimalClass(editingId, {
           label: formData.label, impliedGender: formData.impliedGender,
           canBePregnant: formData.canBePregnant, canProduceMilk: formData.canProduceMilk, sortOrder: formData.sortOrder,
+          ...localeLabelsFromForm(),
         })
         else await apiService.adminCreateMasterAnimalClass(formData)
       } else if (tab === 'categories') {
-        if (editingId) await apiService.adminUpdateMasterMarketplaceCategory(editingId, { label: formData.label, icon: formData.icon, sortOrder: formData.sortOrder })
+        if (editingId) await apiService.adminUpdateMasterMarketplaceCategory(editingId, { label: formData.label, icon: formData.icon, sortOrder: formData.sortOrder, ...localeLabelsFromForm() })
         else await apiService.adminCreateMasterMarketplaceCategory(formData)
       } else {
-        if (editingId) await apiService.adminUpdateMasterMarketplaceCondition(editingId, { label: formData.label, sortOrder: formData.sortOrder })
+        if (editingId) await apiService.adminUpdateMasterMarketplaceCondition(editingId, { label: formData.label, sortOrder: formData.sortOrder, ...localeLabelsFromForm() })
         else await apiService.adminCreateMasterMarketplaceCondition(formData)
       }
       setSuccess(editingId ? t('masterData.updatedSuccess', 'Updated successfully') : t('masterData.createdSuccess', 'Created successfully'))
@@ -160,7 +224,7 @@ const MasterDataManagement: React.FC = () => {
       setSuccess(t('masterData.deletedSuccess', 'Deleted'))
       load()
     } catch (e: any) {
-      setError(e?.response?.data?.error?.message || e?.response?.data?.message || t('masterData.deleteBlocked', 'Could not delete — it may still be in use'))
+      setError(e?.response?.data?.error?.message || e?.response?.data?.message || t('masterData.deleteBlocked', 'Could not delete: it may still be in use'))
     }
   }
 
@@ -178,7 +242,7 @@ const MasterDataManagement: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <h1>{t('masterData.title', 'Master Data')}</h1>
-        <p>{t('masterData.subtitle', 'Manage species, breeds, animal classes, and marketplace dropdown values — no code deploy needed.')}</p>
+        <p>{t('masterData.subtitle', 'Manage species, breeds, animal classes, and marketplace dropdown values, no code deploy needed.')}</p>
       </div>
 
       {error && <div className="module-alert error">{error}<button onClick={() => setError('')}>×</button></div>}
@@ -196,7 +260,7 @@ const MasterDataManagement: React.FC = () => {
         <div className="module-form-group" style={{ maxWidth: 320, marginTop: 16 }}>
           <label className="module-label">{t('masterData.filterBySpecies', 'Species')}</label>
           <select className="module-input" value={scopeSpeciesId} onChange={e => setScopeSpeciesId(e.target.value)}>
-            <option value="">{t('masterData.selectSpeciesPrompt', '— Select a species —')}</option>
+            <option value="">{t('masterData.selectSpeciesPrompt', 'Select a species')}</option>
             {speciesRows.map(s => <option key={s.id} value={s.id}>{s.icon || ''} {s.label}</option>)}
           </select>
         </div>
@@ -236,9 +300,9 @@ const MasterDataManagement: React.FC = () => {
                   <td>{row.icon || '🐾'}</td>
                   <td>{row.code}</td>
                   <td>{row.label}</td>
-                  <td>{row.category || '—'}</td>
-                  <td>{row.hasEarTag ? '✓' : '—'}</td>
-                  <td>{row.isMarketplaceEligible ? '✓' : '—'}</td>
+                  <td>{row.category || '-'}</td>
+                  <td>{row.hasEarTag ? '✓' : '-'}</td>
+                  <td>{row.isMarketplaceEligible ? '✓' : '-'}</td>
                   <td><span className={`module-badge ${row.isActive ? 'badge-success' : 'badge-error'}`}>{row.isActive ? t('common.active') : t('common.inactive')}</span></td>
                   <td>
                     <button className="module-btn small" onClick={() => openEdit(row)}>{t('common.edit')}</button>
@@ -264,8 +328,8 @@ const MasterDataManagement: React.FC = () => {
                   <td>{row.value}</td>
                   <td>{resolveLabel(row, t)}</td>
                   <td>{row.impliedGender}</td>
-                  <td>{row.canBePregnant ? '✓' : '—'}</td>
-                  <td>{row.canProduceMilk ? '✓' : '—'}</td>
+                  <td>{row.canBePregnant ? '✓' : '-'}</td>
+                  <td>{row.canProduceMilk ? '✓' : '-'}</td>
                   <td><span className={`module-badge ${row.isActive ? 'badge-success' : 'badge-error'}`}>{row.isActive ? t('common.active') : t('common.inactive')}</span></td>
                   <td>
                     <button className="module-btn small" onClick={() => openEdit(row)}>{t('common.edit')}</button>
@@ -277,7 +341,7 @@ const MasterDataManagement: React.FC = () => {
               {tab === 'categories' && categoryRows.map(row => (
                 <tr key={row.id} className={!row.isActive ? 'inactive-row' : ''}>
                   <td>{row.icon || '📦'}</td>
-                  <td>{row.code} {row.isProtected && <span className="module-badge badge-pending" title={t('masterData.protectedHint', 'Protected — core logic depends on this code')}>🔒</span>}</td>
+                  <td>{row.code} {row.isProtected && <span className="module-badge badge-pending" title={t('masterData.protectedHint', 'Protected: core logic depends on this code')}>🔒</span>}</td>
                   <td>{resolveLabel(row, t)}</td>
                   <td><span className={`module-badge ${row.isActive ? 'badge-success' : 'badge-error'}`}>{row.isActive ? t('common.active') : t('common.inactive')}</span></td>
                   <td>
@@ -307,7 +371,7 @@ const MasterDataManagement: React.FC = () => {
             (tab === 'categories' && categoryRows.length === 0) ||
             (tab === 'conditions' && conditionRows.length === 0)) && (
             <div className="module-loading">
-              {needsSpeciesScope && !scopeSpeciesId ? t('masterData.selectSpeciesPrompt', '— Select a species —') : t('masterData.noEntries', 'No entries yet')}
+              {needsSpeciesScope && !scopeSpeciesId ? t('masterData.selectSpeciesPrompt', 'Select a species') : t('masterData.noEntries', 'No entries yet')}
             </div>
           )}
         </div>
@@ -330,27 +394,7 @@ const MasterDataManagement: React.FC = () => {
                   <label className="module-label">{t('masterData.col.label', 'Label')}</label>
                   <input className="module-input" value={formData.label || ''} onChange={e => setFormData((f: any) => ({ ...f, label: e.target.value }))} />
                 </div>
-                <p className="module-hint">{t('masterData.perLocaleLabelsHint', 'Optional — add a translated label for any language below. Left blank, that language shows the English label instead.')}</p>
-                <div className="module-form-group">
-                  <label className="module-label">{t('masterData.col.labelHi', 'Label (हिन्दी)')}</label>
-                  <input className="module-input" value={formData.labelHi || ''} onChange={e => setFormData((f: any) => ({ ...f, labelHi: e.target.value }))} />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('masterData.col.labelKn', 'Label (ಕನ್ನಡ)')}</label>
-                  <input className="module-input" value={formData.labelKn || ''} onChange={e => setFormData((f: any) => ({ ...f, labelKn: e.target.value }))} />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('masterData.col.labelMl', 'Label (മലയാളം)')}</label>
-                  <input className="module-input" value={formData.labelMl || ''} onChange={e => setFormData((f: any) => ({ ...f, labelMl: e.target.value }))} />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('masterData.col.labelTa', 'Label (தமிழ்)')}</label>
-                  <input className="module-input" value={formData.labelTa || ''} onChange={e => setFormData((f: any) => ({ ...f, labelTa: e.target.value }))} />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('masterData.col.labelTe', 'Label (తెలుగు)')}</label>
-                  <input className="module-input" value={formData.labelTe || ''} onChange={e => setFormData((f: any) => ({ ...f, labelTe: e.target.value }))} />
-                </div>
+                {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.icon', 'Icon (emoji)')}</label>
                   <input className="module-input" value={formData.icon || ''} onChange={e => setFormData((f: any) => ({ ...f, icon: e.target.value }))} maxLength={10} />
@@ -380,6 +424,7 @@ const MasterDataManagement: React.FC = () => {
                   <label className="module-label">{t('common.name')}</label>
                   <input className="module-input" value={formData.name || ''} onChange={e => setFormData((f: any) => ({ ...f, name: e.target.value }))} />
                 </div>
+                {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>
                   <input type="number" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
@@ -397,8 +442,9 @@ const MasterDataManagement: React.FC = () => {
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.label', 'Label')}</label>
                   <input className="module-input" value={formData.label || ''} onChange={e => setFormData((f: any) => ({ ...f, label: e.target.value }))}
-                    placeholder={formData.labelKey ? t('masterData.labelKeyHint', 'Leave blank to keep the built-in translation') : ''} />
+                    placeholder={formData.labelKey ? t('masterData.currentlyShowing', 'Currently showing: {{value}}', { value: t(formData.labelKey) }) : ''} />
                 </div>
+                {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.impliedGender', 'Implied gender')}</label>
                   <select className="module-input" value={formData.impliedGender || 'unknown'} onChange={e => setFormData((f: any) => ({ ...f, impliedGender: e.target.value }))}>
@@ -432,8 +478,9 @@ const MasterDataManagement: React.FC = () => {
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.label', 'Label')}</label>
                   <input className="module-input" value={formData.label || ''} onChange={e => setFormData((f: any) => ({ ...f, label: e.target.value }))}
-                    placeholder={formData.labelKey ? t('masterData.labelKeyHint', 'Leave blank to keep the built-in translation') : ''} />
+                    placeholder={formData.labelKey ? t('masterData.currentlyShowing', 'Currently showing: {{value}}', { value: t(formData.labelKey) }) : ''} />
                 </div>
+                {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.icon', 'Icon (emoji)')}</label>
                   <input className="module-input" value={formData.icon || ''} onChange={e => setFormData((f: any) => ({ ...f, icon: e.target.value }))} maxLength={10} />
@@ -455,8 +502,9 @@ const MasterDataManagement: React.FC = () => {
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.label', 'Label')}</label>
                   <input className="module-input" value={formData.label || ''} onChange={e => setFormData((f: any) => ({ ...f, label: e.target.value }))}
-                    placeholder={formData.labelKey ? t('masterData.labelKeyHint', 'Leave blank to keep the built-in translation') : ''} />
+                    placeholder={formData.labelKey ? t('masterData.currentlyShowing', 'Currently showing: {{value}}', { value: t(formData.labelKey) }) : ''} />
                 </div>
+                {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>
                   <input type="number" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />

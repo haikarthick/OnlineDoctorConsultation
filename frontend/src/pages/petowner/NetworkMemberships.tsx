@@ -200,7 +200,7 @@ const NetworkMemberships: React.FC = () => {
                     <div className="nm-card-header">
                       <span className="nm-card-icon">✅</span>
                       <div>
-                        <p className="nm-card-title">{e.networkName} — {e.animalName}</p>
+                        <p className="nm-card-title">{e.networkName} - {e.animalName}</p>
                         <p className="nm-card-sub">{speciesLabel(e.species, t)}{e.breed ? ` · ${e.breed}` : ''}</p>
                       </div>
                     </div>
@@ -259,7 +259,7 @@ const NetworkMemberships: React.FC = () => {
                       <div className="nm-card-header">
                         <span className="nm-card-icon">📋</span>
                         <div>
-                          <p className="nm-card-title">{e.networkName} — {e.animalName}</p>
+                          <p className="nm-card-title">{e.networkName} - {e.animalName}</p>
                           <p className="nm-card-sub">{speciesLabel(e.species, t)}</p>
                         </div>
                       </div>

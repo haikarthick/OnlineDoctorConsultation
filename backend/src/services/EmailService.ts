@@ -4,10 +4,10 @@
  * Priority: Resend (HTTP) → SMTP → Log-only fallback
  *
  * Configuration via environment variables:
- *   RESEND_API_KEY          — Resend HTTP API (works on all platforms including Render)
- *   SMTP_HOST/PORT/USER/PASS — Traditional SMTP (may be blocked on some cloud platforms)
- *   SMTP_FROM               — Sender address for both providers
- *   EMAIL_DEV_REDIRECT      — Redirect ALL emails to this address in dev/demo
+ *   RESEND_API_KEY          - Resend HTTP API (works on all platforms including Render)
+ *   SMTP_HOST/PORT/USER/PASS - Traditional SMTP (may be blocked on some cloud platforms)
+ *   SMTP_FROM               - Sender address for both providers
+ *   EMAIL_DEV_REDIRECT      - Redirect ALL emails to this address in dev/demo
  */
 
 import nodemailer, { Transporter } from 'nodemailer';
@@ -77,19 +77,19 @@ const templates: Record<string, EmailTemplate> = {
         <div style="text-align:center;margin-bottom:24px"><span style="font-size:48px">🏥</span></div>
         <h1 style="color:#667eea;text-align:center;margin-bottom:16px">Welcome to VetCare!</h1>
         <p>Hi <strong>${d.firstName}</strong>,</p>
-        <p>Thank you for registering on VetCare — the complete animal health platform. Your account is ready to use.</p>
+        <p>Thank you for registering on VetCare - the complete animal health platform. Your account is ready to use.</p>
         <ul>
           <li><strong>Email:</strong> ${d.email}</li>
           <li><strong>Role:</strong> ${d.role}</li>
         </ul>
         <p>If you have any questions, reply to this email or contact support.</p>
-        <p style="margin-top:32px;color:#999;font-size:12px">— The VetCare Team</p>
+        <p style="margin-top:32px;color:#999;font-size:12px">- The VetCare Team</p>
       </div>`,
-    text: (d) => `Welcome to VetCare, ${d.firstName}!\n\nYour account (${d.email}) with role "${d.role}" is ready.\n\n— The VetCare Team`,
+    text: (d) => `Welcome to VetCare, ${d.firstName}!\n\nYour account (${d.email}) with role "${d.role}" is ready.\n\n- The VetCare Team`,
   },
 
   consultation_booked: {
-    subject: (d) => `Consultation Booked – ${d.consultationId}`,
+    subject: (d) => `Consultation Booked - ${d.consultationId}`,
     html: (d) => `
       <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:32px;background:#fff;border:1px solid #e5e7eb;border-radius:12px">
         <h2 style="color:#667eea">Consultation Booked</h2>
@@ -101,13 +101,13 @@ const templates: Record<string, EmailTemplate> = {
           <tr><td style="padding:8px 0;font-weight:600">Date / Time</td><td>${d.scheduledAt || 'TBD'}</td></tr>
           <tr><td style="padding:8px 0;font-weight:600">Type</td><td>${d.type || 'video_call'}</td></tr>
         </table>
-        <p style="margin-top:32px;color:#999;font-size:12px">— VetCare Notifications</p>
+        <p style="margin-top:32px;color:#999;font-size:12px">- VetCare Notifications</p>
       </div>`,
     text: (d) => `Consultation ${d.consultationId} booked.\nDoctor: ${d.vetName || 'TBD'}\nDate: ${d.scheduledAt || 'TBD'}\nType: ${d.type || 'video_call'}`,
   },
 
   consultation_completed: {
-    subject: (d) => `Consultation Completed – ${d.consultationId}`,
+    subject: (d) => `Consultation Completed - ${d.consultationId}`,
     html: (d) => `
       <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:32px;background:#fff;border:1px solid #e5e7eb;border-radius:12px">
         <h2 style="color:#2e7d32">Consultation Completed ✓</h2>
@@ -115,13 +115,13 @@ const templates: Record<string, EmailTemplate> = {
         <p>Your consultation <strong>${d.consultationId}</strong> with <strong>${d.vetName}</strong> has been completed.</p>
         <p>You can view your medical records and prescriptions in your dashboard.</p>
         <p>If you had a good experience, please consider leaving a review!</p>
-        <p style="margin-top:32px;color:#999;font-size:12px">— VetCare Notifications</p>
+        <p style="margin-top:32px;color:#999;font-size:12px">- VetCare Notifications</p>
       </div>`,
     text: (d) => `Consultation ${d.consultationId} with ${d.vetName} completed.\nCheck your dashboard for records and prescriptions.`,
   },
 
   password_reset: {
-    subject: () => 'VetCare — Password Reset Request',
+    subject: () => 'VetCare - Password Reset Request',
     html: (d) => `
       <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:32px;background:#fff;border:1px solid #e5e7eb;border-radius:12px">
         <h2 style="color:#d32f2f">Password Reset</h2>
@@ -129,20 +129,20 @@ const templates: Record<string, EmailTemplate> = {
         <p>We received a request to reset your password. Use the link below within 1 hour:</p>
         <p style="text-align:center;margin:24px 0"><a href="${d.resetUrl}" style="background:#667eea;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600">Reset Password</a></p>
         <p>If you did not request this, you can ignore this email.</p>
-        <p style="margin-top:32px;color:#999;font-size:12px">— VetCare Security</p>
+        <p style="margin-top:32px;color:#999;font-size:12px">- VetCare Security</p>
       </div>`,
     text: (d) => `Password reset requested.\nReset URL: ${d.resetUrl}\nThis link expires in 1 hour.\n\nIf you did not request this, ignore this email.`,
   },
 
   payment_receipt: {
-    subject: (d) => `Payment Receipt – ${d.paymentId}`,
+    subject: (d) => `Payment Receipt - ${d.paymentId}`,
     html: (d) => `
       <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:32px;background:#fff;border:1px solid #e5e7eb;border-radius:12px">
         <h2 style="color:#667eea">Payment Received</h2>
         <p>Hi <strong>${d.userName}</strong>,</p>
         <p>We've received your payment of <strong>$${(d.amount / 100).toFixed(2)}</strong> for consultation <strong>${d.consultationId}</strong>.</p>
         <p>Payment ID: ${d.paymentId}</p>
-        <p style="margin-top:32px;color:#999;font-size:12px">— VetCare Billing</p>
+        <p style="margin-top:32px;color:#999;font-size:12px">- VetCare Billing</p>
       </div>`,
     text: (d) => `Payment of $${(d.amount / 100).toFixed(2)} received.\nPayment ID: ${d.paymentId}\nConsultation: ${d.consultationId}`,
   },
@@ -161,7 +161,7 @@ const templates: Record<string, EmailTemplate> = {
       </p>
       <p style="color:#6b7280;font-size:13px">This invitation expires in 7 days. If you did not expect this invitation, you can safely ignore this email.</p>
       <p style="color:#6b7280;font-size:13px">Or copy this link: <a href="${d.inviteUrl}">${d.inviteUrl}</a></p>
-      <p style="margin-top:32px;color:#999;font-size:12px">— The VetCare Team</p>
+      <p style="margin-top:32px;color:#999;font-size:12px">- The VetCare Team</p>
     </div>`,
     text: (d) => `You've been invited to join ${d.networkName} as a ${d.position}.\n\nAccept here: ${d.inviteUrl}\n\nThis link expires in 7 days.`,
   },
@@ -186,7 +186,7 @@ class EmailService {
     if (process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === 'test') {
       this.mode = 'log-only';
       this.initialized = true;
-      logger.info('Email service in LOG-ONLY mode (test environment detected — real providers disabled)');
+      logger.info('Email service in LOG-ONLY mode (test environment detected - real providers disabled)');
       return;
     }
     // Eagerly check for Resend API key
@@ -240,7 +240,7 @@ class EmailService {
     // Try SMTP
     if (await this.initSmtp()) return;
 
-    // All providers failed — log-only mode
+    // All providers failed - log-only mode
     this.mode = 'log-only';
     logger.warn('Email service in LOG-ONLY mode. Set RESEND_API_KEY (recommended) or configure working SMTP for delivery.');
   }

@@ -386,7 +386,7 @@ export class VetHospitalService {
 
   /**
    * Network-branch hospitals are independent SaaS tenants with zero
-   * integration into the platform's patient marketplace — only their own
+   * integration into the platform's patient marketplace - only their own
    * network members (or platform admin) may resolve them by id. Non-branch
    * (standalone) hospitals are unaffected. Returns NotFoundError rather than
    * ForbiddenError so an unauthorized caller can't confirm the hospital
@@ -432,7 +432,7 @@ export class VetHospitalService {
     const limit = Math.min(filters.limit || 20, 100);
     const offset = filters.offset || 0;
 
-    // Check if the requesting user is a network member — if so, show only their network's hospitals
+    // Check if the requesting user is a network member - if so, show only their network's hospitals
     let networkHospitalIds: string[] | null = null;
     if (userId) {
       const memberCheck = await database.query(
@@ -982,7 +982,7 @@ export class VetHospitalService {
       });
       logger.info(`Invite email sent to ${data.email}`);
     } catch (err) {
-      logger.warn('Failed to send invite email — share the invite link manually', { email: data.email, error: (err as any).message });
+      logger.warn('Failed to send invite email - share the invite link manually', { email: data.email, error: (err as any).message });
     }
 
     return result.rows[0];

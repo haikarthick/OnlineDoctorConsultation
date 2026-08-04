@@ -120,7 +120,7 @@ const CERT_TYPE_LABELS: Record<string, string> = {
 }
 
 function calcAge(dob?: string): string {
-  if (!dob) return '—'
+  if (!dob) return '-'
   const ms = Date.now() - new Date(dob).getTime()
   const years = Math.floor(ms / (1000 * 60 * 60 * 24 * 365.25))
   if (years >= 1) return `${years}y`
@@ -158,11 +158,11 @@ function VaccineTable({ details, t }: { details?: { vaccines?: VaccinationEntry[
             {rows.map((v, i) => (
               <tr key={i}>
                 <td>{i + 1}</td>
-                <td>{v.vaccine || '—'}</td>
-                <td>{v.batchNo || '—'}</td>
-                <td>{v.dateAdministered || '—'}</td>
-                <td>{v.nextDue || '—'}</td>
-                <td>{v.manufacturer || '—'}</td>
+                <td>{v.vaccine || '-'}</td>
+                <td>{v.batchNo || '-'}</td>
+                <td>{v.dateAdministered || '-'}</td>
+                <td>{v.nextDue || '-'}</td>
+                <td>{v.manufacturer || '-'}</td>
               </tr>
             ))}
           </tbody>
@@ -181,7 +181,7 @@ function VaccineTable({ details, t }: { details?: { vaccines?: VaccinationEntry[
 const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, onClose }) => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
-  const { findClassTerm, speciesLabel } = useMasterData()
+  const { findClassTerm, speciesLabel, resolveLabel } = useMasterData()
   const tpl = { ...DEFAULT_TEMPLATE, ...template }
   const overlayRef = useRef<HTMLDivElement>(null)
   const docRef = useRef<HTMLDivElement>(null)
@@ -209,7 +209,7 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
       try {
         Array.from(sheet.cssRules).forEach(rule => { cssTexts.push(rule.cssText) })
       } catch {
-        // Cross-origin sheet — import by URL
+        // Cross-origin sheet - import by URL
         if (sheet.href) cssTexts.push(`@import url("${sheet.href}");`)
       }
     })
@@ -256,8 +256,8 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
   }
 
   const certTypeLabel = CERT_TYPE_LABELS[cert.certificateType] || cert.certificateType.toUpperCase().replace(/_/g, ' ')
-  const vetName = [cert.vetFirstName, cert.vetLastName].filter(Boolean).join(' ') || '—'
-  const ownerName = [cert.ownerFirstName, cert.ownerLastName].filter(Boolean).join(' ') || '—'
+  const vetName = [cert.vetFirstName, cert.vetLastName].filter(Boolean).join(' ') || '-'
+  const ownerName = [cert.ownerFirstName, cert.ownerLastName].filter(Boolean).join(' ') || '-'
 
   const isVaccRelated = ['rabies_vaccination', 'vaccination_record'].includes(cert.certificateType)
   const isTravelRelated = ['fitness_to_travel', 'pre_travel'].includes(cert.certificateType)
@@ -350,7 +350,7 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
             <div className="cert-info-row">
               <span className="cert-info-label">{t('certificatePrint.patient')}:</span>
               <span className="cert-info-value">
-                <strong>{cert.animalName || '—'}</strong>
+                <strong>{cert.animalName || '-'}</strong>
                 {cert.animalSpecies && ` (${speciesLabel(cert.animalSpecies, t)}${cert.animalBreed ? ', ' + cert.animalBreed : ''})`}
               </span>
             </div>
@@ -364,7 +364,7 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
             </div>
             <div className="cert-info-row">
               <span className="cert-info-label">{t('certificatePrint.licenseNo')}:</span>
-              <span className="cert-info-value">{cert.vetLicenseNumber || '—'}</span>
+              <span className="cert-info-value">{cert.vetLicenseNumber || '-'}</span>
             </div>
             {(cert.animalGender || cert.animalDob) && (
               <div className="cert-info-row">
@@ -372,7 +372,7 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
                 <span className="cert-info-value">
                   {(() => {
                     const classTerm = cert.animalClass ? findClassTerm(cert.animalSpecies || '', cert.animalClass) : undefined
-                    const genderOrClass = classTerm ? t(classTerm.labelKey) : cert.animalGender
+                    const genderOrClass = classTerm ? resolveLabel(classTerm, t) : cert.animalGender
                     return [calcAge(cert.animalDob), genderOrClass].filter(Boolean).join(' / ')
                   })()}
                 </span>

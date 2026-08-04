@@ -20,7 +20,7 @@ import cacheManager from './utils/cacheManager';
 
 const app: Express = express();
 
-// Trust reverse proxy (nginx / ALB / Cloudflare) – required for correct
+// Trust reverse proxy (nginx / ALB / Cloudflare) - required for correct
 // client IP in rate limiting, logging, and req.ip
 app.set('trust proxy', 1);
 
@@ -30,13 +30,13 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       // Razorpay checkout (payment module): script-src loads checkout.js,
-      // frame-src is required for the hosted payment iframe (was 'none' —
+      // frame-src is required for the hosted payment iframe (was 'none' -
       // blocked the whole widget even with a working script), connect-src
       // for the widget's own API/analytics calls.
       scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       // res.cloudinary.com: marketplace listing images/video (CloudinaryStorage
-      // driver) — added 2026-07-21, without it every Cloudinary-hosted image
+      // driver) - added 2026-07-21, without it every Cloudinary-hosted image
       // and video renders as a broken icon (uploads succeed, delivery is
       // silently CSP-blocked since it's a cross-origin img/video src).
       imgSrc: ["'self'", "data:", "blob:", "https://*.tile.openstreetmap.org", "https://unpkg.com", "https://*.razorpay.com", "https://res.cloudinary.com"],
@@ -65,15 +65,25 @@ function keyGenerator(req: express.Request): string {
         algorithms: ['HS256'],
       }) as any
       if (payload.userId) return `user:${payload.userId}`
-    } catch { /* invalid/expired token — fall through to IP */ }
+    } catch { /* invalid/expired token - fall through to IP */ }
   }
   return req.ip || req.socket.remoteAddress || 'unknown'
 }
 
 // Strict: auth endpoints (login / register / refresh)
+//
+// Limits are env-overridable but the DEFAULTS ARE UNCHANGED (15 attempts / 15 min / IP), so
+// production behaviour is exactly as before unless an operator opts in. The override exists
+// because automated verification legitimately performs many auths from one IP: the runtime gate
+// registers every role and logs in as every seeded demo account, and the e2e suite authenticates
+// far more than that. Without this, those runs fail with 429s that look like app bugs and
+// silently erode trust in the gate. Never set these on a customer-facing deployment.
+const AUTH_RATE_LIMIT_MAX = Number(process.env.AUTH_RATE_LIMIT_MAX) || 15;
+const AUTH_RATE_LIMIT_WINDOW_MS = Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000;
+
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 15,
+  windowMs: AUTH_RATE_LIMIT_WINDOW_MS,
+  max: AUTH_RATE_LIMIT_MAX,
   message: 'Too many authentication attempts. Please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -101,7 +111,7 @@ const sensitiveLimiter = rateLimit({
 })
 
 // Uploads: /files/upload-image and /files/upload-video. These previously only inherited
-// the general 300-req/15min apiLimiter — video uploads in particular are checked for
+// the general 300-req/15min apiLimiter - video uploads in particular are checked for
 // duration only AFTER landing in Cloudinary (duration can't be read from raw bytes), so a
 // user repeatedly uploading and getting rejected 100MB clips could burn through
 // Cloudinary's hard-capped free tier (25 credits/month) well before hitting 300 requests.
@@ -125,7 +135,7 @@ app.use(`/api/${config.app.apiVersion}/files/upload-video`, uploadLimiter)
 app.use('/api/', apiLimiter)
 
 // Body parser
-// Razorpay webhook needs the RAW body for signature verification — must be
+// Razorpay webhook needs the RAW body for signature verification - must be
 // registered BEFORE express.json (body-parser skips already-parsed bodies)
 app.use(`/api/${config.app.apiVersion}/webhooks/razorpay`, express.raw({ type: '*/*', limit: '1mb' }));
 app.use(express.json({ limit: '10mb' }));
@@ -138,7 +148,7 @@ app.use(requestLogger);
 // Harden against stored-XSS via spoofed-MIME uploads: `nosniff` stops the
 // browser from re-interpreting a mislabelled file, and a locked-down CSP makes
 // any HTML served from here inert (scripts can't run, resource is sandboxed).
-// We intentionally do NOT force Content-Disposition: attachment — uploaded
+// We intentionally do NOT force Content-Disposition: attachment - uploaded
 // images/avatars are displayed inline in the SPA and must keep rendering.
 app.use('/uploads', express.static(path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, '..', 'uploads')), {
   setHeaders: (res) => {

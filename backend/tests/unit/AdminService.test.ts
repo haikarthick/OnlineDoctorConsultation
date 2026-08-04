@@ -53,11 +53,17 @@ describe('AdminService', () => {
   });
 
   describe('changeUserRole', () => {
-    it('should change user role', async () => {
+    it('should change user role and provision vet_profiles in a transaction', async () => {
       const user = { id: 'u1', role: 'veterinarian' };
-      (database.query as jest.Mock).mockResolvedValue({ rows: [user] });
+      const client = {
+        query: jest.fn()
+          .mockResolvedValueOnce({ rows: [user] }) // UPDATE users
+          .mockResolvedValueOnce({ rows: [] }),     // INSERT vet_profiles (veterinarian)
+      };
+      (database.transaction as jest.Mock).mockImplementation(async (cb: any) => cb(client));
       const result = await adminService.changeUserRole('u1', 'veterinarian');
       expect(result).toEqual(user);
+      expect(client.query).toHaveBeenCalledTimes(2);
     });
   });
 

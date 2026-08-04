@@ -1,12 +1,12 @@
 -- Migration: 022_master_data_tables.sql
 -- Description: Admin-editable master data for species, breeds, animal class terms,
---              marketplace categories, and marketplace conditions — replaces the
+--              marketplace categories, and marketplace conditions - replaces the
 --              hardcoded TypeScript arrays in frontend/src/constants/speciesBreeds.ts
 --              and Marketplace.tsx's CATEGORY_KEYS/condition options, which had no
 --              admin CRUD UI at all (any change required a code edit + redeploy).
 -- Depends on: none (species/breed/category/condition are free-standing reference data;
 --             animals.species, marketplace_listings.species/category/condition/animal_class
---             remain plain VARCHAR columns — NOT converted to FKs, to avoid a data
+--             remain plain VARCHAR columns - NOT converted to FKs, to avoid a data
 --             migration risk on existing rows; identity is matched by the `code`/`value`
 --             string, exactly as today).
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS master_breeds (
 );
 
 -- ============================================================
--- 3. ANIMAL CLASS TERMS (per species — Bull/Cow/Bullock etc.)
+-- 3. ANIMAL CLASS TERMS (per species - Bull/Cow/Bullock etc.)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS master_animal_classes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -108,7 +108,7 @@ CREATE INDEX IF NOT EXISTS idx_master_mp_conditions_active ON master_marketplace
 -- speciesBreeds.ts + Marketplace.tsx's CATEGORY_KEYS) via a one-off Node script that
 -- parsed the actual source AST and evaluated the literal values, guaranteeing exact
 -- fidelity (51 species, 423 breeds, 37 animal-class terms, 7 marketplace categories,
--- 3 marketplace conditions) — not hand-transcribed, to eliminate transcription-error risk
+-- 3 marketplace conditions) - not hand-transcribed, to eliminate transcription-error risk
 -- across 400+ breed names. Existing pages therefore see IDENTICAL data immediately after
 -- this migration runs; nothing changes on migration day.
 -- Species (generated from SPECIES_CATEGORIES + BREED_DATABASE keys, frontend/src/constants/speciesBreeds.ts)
@@ -634,7 +634,7 @@ INSERT INTO master_animal_classes (id, species_id, value, label_key, implied_gen
   (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'cat_neuter', 'animalClass.cat_neuter', 'unknown', false, false, 40, true)
 ON CONFLICT (species_id, value) DO NOTHING;
 
--- Marketplace categories (generated from CATEGORY_KEYS, frontend/src/pages/Marketplace.tsx — skips the blank '' "all" filter entry)
+-- Marketplace categories (generated from CATEGORY_KEYS, frontend/src/pages/Marketplace.tsx - skips the blank '' "all" filter entry)
 INSERT INTO master_marketplace_categories (id, code, label_key, sort_order, is_active, is_protected) VALUES
   (gen_random_uuid(), 'animal', 'marketplace.categories.animals', 10, true, true),
   (gen_random_uuid(), 'feed', 'marketplace.categories.feed', 20, true, false),

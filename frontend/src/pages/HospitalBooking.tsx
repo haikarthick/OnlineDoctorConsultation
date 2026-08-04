@@ -110,7 +110,7 @@ const HospitalBooking: React.FC = () => {
       const res = await apiService.getVetAvailability(doctorId, date)
       const data = res?.data || res || {}
       const allSlots = data.slots || []
-      if (data.holiday) setDateMessage(`\uD83C\uDF89 Holiday: ${data.holiday} — No appointments available`)
+      if (data.holiday) setDateMessage(`\uD83C\uDF89 Holiday: ${data.holiday} - No appointments available`)
       else if (data.unavailableReason) setDateMessage(`\uD83D\uDEAB ${data.unavailableReason}`)
       setSlots(allSlots)
     } catch { setSlots([]) }
@@ -185,7 +185,7 @@ const HospitalBooking: React.FC = () => {
           <div className="hb-success-details">
             <div><strong>Doctor:</strong> {selectedDoctor?.doctorName}</div>
             <div><strong>Date:</strong> {selectedDate}</div>
-            <div><strong>Time:</strong> {selectedSlot?.startTime} – {selectedSlot?.endTime}</div>
+            <div><strong>Time:</strong> {selectedSlot?.startTime} - {selectedSlot?.endTime}</div>
             <div><strong>Type:</strong> {BOOKING_TYPES.find(b => b.value === bookingType)?.label}</div>
           </div>
           <p className="hb-success-note">The doctor will review and confirm your appointment. You'll receive a notification once confirmed.</p>
@@ -352,7 +352,7 @@ const HospitalBooking: React.FC = () => {
                       className={`hb-slot${selectedSlot?.startTime === slot.startTime ? ' selected' : ''}`}
                       onClick={() => setSelectedSlot(slot)}
                     >
-                      {slot.startTime} – {slot.endTime}
+                      {slot.startTime} - {slot.endTime}
                     </button>
                   ))}
                 </div>
@@ -400,9 +400,9 @@ const HospitalBooking: React.FC = () => {
               <div className="hb-form-group">
                 <label className="form-label">Select Pet/Animal (optional)</label>
                 <select className="form-input" value={animalId} onChange={e => setAnimalId(e.target.value)}>
-                  <option value="">— Select —</option>
+                  <option value="">- Select -</option>
                   {animals.map((a: any) => (
-                    <option key={a.id} value={a.id}>{a.name} ({speciesLabel(a.species, t)}{a.breed ? ` — ${a.breed}` : ''})</option>
+                    <option key={a.id} value={a.id}>{a.name} ({speciesLabel(a.species, t)}{a.breed ? ` - ${a.breed}` : ''})</option>
                   ))}
                 </select>
               </div>
@@ -486,7 +486,7 @@ const HospitalBooking: React.FC = () => {
 
             <div className="hb-confirm-section">
               <h3>📅 Schedule</h3>
-              <p>{selectedDate} · {selectedSlot?.startTime} – {selectedSlot?.endTime}</p>
+              <p>{selectedDate} · {selectedSlot?.startTime} - {selectedSlot?.endTime}</p>
               <p className="hb-confirm-sub">{BOOKING_TYPES.find(b => b.value === bookingType)?.label}</p>
             </div>
 

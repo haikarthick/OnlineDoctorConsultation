@@ -233,7 +233,7 @@ export class MedicalRecordService {
     try {
       const id = uuidv4();
       const recordNumber = await generateRecordNumber();
-      // HIGH FIX-6: CRITICAL — never use caller-provided userId, always use authenticated userId
+      // HIGH FIX-6: CRITICAL - never use caller-provided userId, always use authenticated userId
       // Even if controller passes it, service enforces: record belongs to authenticated user
       const targetUserId = userId; // FORCE to authenticated user, ignore data.userId
       const query = `
@@ -452,7 +452,7 @@ export class MedicalRecordService {
       ]);
       // If a protocol was selected from the master list, auto-assign it to the animal so
       // the vaccination appears on the Vaccination Passport page. The assignProtocolToAnimal
-      // call uses ON CONFLICT DO UPDATE — fully idempotent.
+      // call uses ON CONFLICT DO UPDATE - fully idempotent.
       if (protocolId) {
         try {
           await VaccineProtocolService.assignProtocolToAnimal(

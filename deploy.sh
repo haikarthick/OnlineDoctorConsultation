@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════
-#  VetCare Platform — Automated Cloud Deployment Script
+#  VetCare Platform - Automated Cloud Deployment Script
 #  This script automates the ENTIRE deployment pipeline.
 #  Run: chmod +x deploy.sh && ./deploy.sh [command]
 #
@@ -281,7 +281,7 @@ case "${1:-help}" in
     ;;
   help|*)
     echo ""
-    echo "  VetCare Platform — Deployment Automation"
+    echo "  VetCare Platform - Deployment Automation"
     echo "  ─────────────────────────────────────────"
     echo ""
     echo "  Usage: ./deploy.sh <command>"

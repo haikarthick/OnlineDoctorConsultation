@@ -101,7 +101,7 @@ export class ConsultationController {
         logger.warn('Consultation dedup check failed', { error: (err as Error).message });
       }
 
-      // === No existing consultation found — create new one ===
+      // === No existing consultation found - create new one ===
       const consultation = await ConsultationService.createConsultation(
         patientId,
         veterinarianId,
@@ -169,7 +169,7 @@ export class ConsultationController {
           logger.warn('Failed to update linked booking status', { consultationId: id, error: (err as Error).message });
         }
 
-        // §6.1: create the doctor's earning ledger entry (clearing) — idempotent
+        // §6.1: create the doctor's earning ledger entry (clearing) - idempotent
         try {
           const EarningsService = (await import('../services/payment/EarningsService')).default;
           await EarningsService.createEarningOnCompletion(id);
@@ -205,7 +205,7 @@ export class ConsultationController {
                    (id, user_id, animal_id, veterinarian_id, consultation_id, record_type, title, content, created_at, updated_at)
                    VALUES ($1, $2, $3, $4, $5, 'other', $6, $7, NOW(), NOW())`,
                   [mrId, c.user_id, c.animal_id, c.veterinarian_id, id,
-                   `Consultation Summary — ${new Date().toLocaleDateString()}`,
+                   `Consultation Summary - ${new Date().toLocaleDateString()}`,
                    content]
                 );
                 logger.info('Auto-created medical record for completed consultation', { consultationId: id, mrId });

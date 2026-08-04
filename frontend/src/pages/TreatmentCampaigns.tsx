@@ -126,7 +126,7 @@ const TreatmentCampaigns: React.FC = () => {
     } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
   }
 
-  const formatDate = (d: string | null | undefined) => d ? new Date(d).toLocaleDateString() : '—'
+  const formatDate = (d: string | null | undefined) => d ? new Date(d).toLocaleDateString() : '-'
 
   const getStatusLabel = (s: string) => {
     return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())

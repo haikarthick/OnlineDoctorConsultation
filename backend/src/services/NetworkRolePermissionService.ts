@@ -21,7 +21,7 @@ export const NETWORK_ACTIONS = [
   'viewAuditLogs', 'exportComplianceReport',
 ] as const;
 
-/** Platform-only actions — never configurable, enforced at route level (admin only) */
+/** Platform-only actions - never configurable, enforced at route level (admin only) */
 export const PLATFORM_ONLY_ACTIONS = ['deactivateNetwork', 'manageSubscription'];
 
 /**
@@ -31,9 +31,9 @@ export const PLATFORM_ONLY_ACTIONS = ['deactivateNetwork', 'manageSubscription']
  */
 export const BRANCH_SCOPED_ROLES = ['hospital_director', 'hospital_staff'];
 
-/** Code defaults — used as fallback when no DB row exists for a network */
+/** Code defaults - used as fallback when no DB row exists for a network */
 // NOTE: matrix values are booleans (capability granted yes/no). Branch-scoping for
-// hospital_director / hospital_staff (🔵 in the target spec) is NOT expressed here — it is
+// hospital_director / hospital_staff (🔵 in the target spec) is NOT expressed here - it is
 // enforced at the SQL row level via requireNetworkAccess() attaching req.branchScopeHospitalId.
 export const DEFAULTS: Record<string, Record<string, boolean>> = {
   corporate_admin: {
@@ -188,7 +188,7 @@ class NetworkRolePermissionService {
     } catch {
       // Fall through
     }
-    // Check if it's a custom role — inherit from base_template
+    // Check if it's a custom role - inherit from base_template
     try {
       const customRole = await database.query(
         `SELECT base_template FROM network_custom_roles

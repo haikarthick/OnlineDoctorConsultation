@@ -8,6 +8,7 @@ import { Booking, Consultation } from '../types'
 import './Dashboard.css'
 import { useTranslation } from 'react-i18next'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
+import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
 
 /* ════════════════════════════════════════════════════════
  * TYPES
@@ -45,17 +46,30 @@ const Dashboard: React.FC = () => {
   const isHospitalStaff = user?.role === 'hospital_staff'
   const isCorporateAdmin = user?.role === 'corporate_admin'
   const isPharmacist = user?.role === 'pharmacist'
+  const isGroomer = user?.role === 'groomer'
+  const isSupport = user?.role === 'support'
+  const { enabled: groomingEnabled } = useGroomingEnabled()
 
-  // Pharmacist's home is the Pharmacy module — redirect immediately so they never see the generic dashboard
+  // Pharmacist's home is the Pharmacy module - redirect immediately so they never see the generic dashboard
   useEffect(() => {
     if (isPharmacist) {
       navigate('/pharmacy', { replace: true })
     }
   }, [isPharmacist, navigate])
 
+  // Same for a groomer-primary account: their home is the grooming business console, which doubles
+  // as the onboarding form for someone who just self-registered. Only when the module is live -
+  // otherwise every /grooming route 404s and the generic dashboard is the safer landing.
+  // Users who hold 'groomer' as a SECONDARY role keep their own primary dashboard.
+  useEffect(() => {
+    if (isGroomer && groomingEnabled) {
+      navigate('/grooming/provider', { replace: true })
+    }
+  }, [isGroomer, groomingEnabled, navigate])
+
   useEffect(() => { loadDashboardData() }, [])
 
-  // Vets who prescribe into a network pharmacy get a lightweight status tile — silent no-op for standalone vets
+  // Vets who prescribe into a network pharmacy get a lightweight status tile - silent no-op for standalone vets
   useEffect(() => {
     if (!isVeterinarian) return
     apiService.getVetPharmacyStats()
@@ -64,7 +78,7 @@ const Dashboard: React.FC = () => {
   }, [isVeterinarian])
 
   const loadDashboardData = async () => {
-    // Pharmacist is redirected to /pharmacy — skip all data loading
+    // Pharmacist is redirected to /pharmacy - skip all data loading
     if (isPharmacist) return
 
     // Corporate admin loads network stats instead of booking/consultation data
@@ -167,7 +181,7 @@ const Dashboard: React.FC = () => {
         const mode = b.bookingType === 'video_call' ? t('common.video') : t('common.inPerson')
         acts.push({
           type: t('common.booking'),
-          description: `${mode} ${t('common.with')} ${who} — ${b.reasonForVisit || t('common.consultation')}`,
+          description: `${mode} ${t('common.with')} ${who} - ${b.reasonForVisit || t('common.consultation')}`,
           time: b.scheduledDate ? formatDate(b.scheduledDate, { month: 'short', day: 'numeric' }) : '',
           status: b.status
         })
@@ -175,7 +189,7 @@ const Dashboard: React.FC = () => {
       consults.slice(0, 2).forEach((c: any) => {
         acts.push({
           type: t('common.consultation'),
-          description: `${c.animalType || t('common.animal')} — ${c.symptomDescription || t('common.generalConsultation')}`,
+          description: `${c.animalType || t('common.animal')} - ${c.symptomDescription || t('common.generalConsultation')}`,
           time: c.scheduledAt ? formatDate(c.scheduledAt, { month: 'short', day: 'numeric' }) : '',
           status: c.status
         })
@@ -204,7 +218,7 @@ const Dashboard: React.FC = () => {
    * ROLE-SPECIFIC CONFIGURATIONS
    * ════════════════════════════════════════════════════════ */
 
-  // Stat cards — different per role
+  // Stat cards - different per role
   const statCards = useMemo(() => {
     const base = [
       { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
@@ -256,10 +270,10 @@ const Dashboard: React.FC = () => {
       ]
     }
 
-    // Hospital staff: dedicated stat section renders separately below — no generic tiles
+    // Hospital staff: dedicated stat section renders separately below - no generic tiles
     if (isHospitalStaff) return []
 
-    // Pharmacist — redirected to /pharmacy, but guard against any fallthrough
+    // Pharmacist - redirected to /pharmacy, but guard against any fallthrough
     if (isPharmacist) {
       return [
         { label: t('pharmacy.stats.pendingReviews'), value: 0, icon: '📋', color: '#3949ab', path: '/pharmacy' },
@@ -268,16 +282,27 @@ const Dashboard: React.FC = () => {
       ]
     }
 
-    // Admin
-    return [
-      { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
-      { label: t('dashboard.stats.consultations'), value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
-      { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
-      { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
-    ]
-  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, corpStats, vetPharmacyStats, t])
+    // Platform support: the quick actions below are the navigation surface. No
+    // generic tiles rather than tiles of zeroes - support holds none of the
+    // permissions those counts describe.
+    if (isSupport) return []
 
-  // Quick actions — role-specific
+    // Admin. Explicitly guarded: this used to be the bare fallback, so every
+    // role without a branch above (support) silently inherited the admin tiles
+    // and quick actions and got redirected back here on clicking any of them.
+    if (isAdmin) {
+      return [
+        { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
+        { label: t('dashboard.stats.consultations'), value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
+        { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
+        { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
+      ]
+    }
+
+    return []
+  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, corpStats, vetPharmacyStats, t])
+
+  // Quick actions - role-specific
   const quickActions: QuickAction[] = useMemo(() => {
     if (isFarmer) {
       return [
@@ -336,7 +361,7 @@ const Dashboard: React.FC = () => {
       ]
     }
 
-    // Pharmacist — home is /pharmacy, redirect handles it but provide fallback actions
+    // Pharmacist - home is /pharmacy, redirect handles it but provide fallback actions
     if (isPharmacist) {
       return [
         { icon: '💊', label: t('pharmacy.tabs.overview'), path: '/pharmacy', color: '#3949ab', description: t('pharmacy.pendingReview') },
@@ -346,17 +371,36 @@ const Dashboard: React.FC = () => {
       ]
     }
 
-    // Admin
+    // Platform support - exactly the pages its DEFAULT_ROLE_PERMISSIONS grant
+    // (dispute_management, admin_cancellation_dashboard, settings). Anything
+    // more would render a tile that RoleRoute bounces straight back here.
+    if (isSupport) {
+      return [
+        { icon: '⚖️', label: t('disputeManagement.title'), path: '/admin/disputes', color: '#667eea', description: t('dashboard.quickActions.desc.resolveDisputes') },
+        { icon: '📊', label: t('nav.cancellations'), path: '/admin/cancellation-dashboard', color: '#f59e0b', description: t('dashboard.quickActions.desc.cancellationOversight') },
+        { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
+      ]
+    }
+
+    // Admin - explicitly guarded, see the note on the stat cards above.
+    if (isAdmin) {
+      return [
+        { icon: '🛡️', label: t('dashboard.quickActions.adminPanel'), path: '/admin/dashboard', color: '#667eea', description: t('dashboard.quickActions.desc.systemOverview') },
+        { icon: '👥', label: t('dashboard.quickActions.users'), path: '/admin/users', color: '#8b5cf6', description: t('dashboard.quickActions.desc.userManagement') },
+        { icon: '🩺', label: t('dashboard.quickActions.viewConsultations'), path: '/admin/consultations', color: '#10b981', description: t('dashboard.quickActions.desc.allConsultations') },
+        { icon: '💳', label: t('dashboard.quickActions.payments'), path: '/admin/payments', color: '#f59e0b', description: t('dashboard.quickActions.desc.paymentManagement') },
+        { icon: '⚖️', label: t('dashboard.quickActions.reviews'), path: '/admin/reviews', color: '#06b6d4', description: t('dashboard.quickActions.desc.reviewModeration') },
+        { icon: '📜', label: t('dashboard.quickActions.auditLogs'), path: '/admin/audit-logs', color: '#ef4444', description: t('dashboard.quickActions.desc.systemActivity') },
+        { icon: '🏥', label: t('dashboard.quickActions.hospitalMgmt'), path: '/admin/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.hospitalOversight') },
+      ]
+    }
+
+    // Only reached by a role added to the backend without a branch here. An
+    // empty action list is honest; the admin list was not.
     return [
-      { icon: '🛡️', label: t('dashboard.quickActions.adminPanel'), path: '/admin/dashboard', color: '#667eea', description: t('dashboard.quickActions.desc.systemOverview') },
-      { icon: '👥', label: t('dashboard.quickActions.users'), path: '/admin/users', color: '#8b5cf6', description: t('dashboard.quickActions.desc.userManagement') },
-      { icon: '🩺', label: t('dashboard.quickActions.viewConsultations'), path: '/admin/consultations', color: '#10b981', description: t('dashboard.quickActions.desc.allConsultations') },
-      { icon: '💳', label: t('dashboard.quickActions.payments'), path: '/admin/payments', color: '#f59e0b', description: t('dashboard.quickActions.desc.paymentManagement') },
-      { icon: '⚖️', label: t('dashboard.quickActions.reviews'), path: '/admin/reviews', color: '#06b6d4', description: t('dashboard.quickActions.desc.reviewModeration') },
-      { icon: '📜', label: t('dashboard.quickActions.auditLogs'), path: '/admin/audit-logs', color: '#ef4444', description: t('dashboard.quickActions.desc.systemActivity') },
-      { icon: '🏥', label: t('dashboard.quickActions.hospitalMgmt'), path: '/admin/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.hospitalOversight') },
+      { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
     ]
-  }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, t])
+  }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, t])
 
   // Subtitle per role
   const subtitle = useMemo(() => {
@@ -367,8 +411,9 @@ const Dashboard: React.FC = () => {
     if (isHospitalStaff) return t('dashboard.subtitles.hospitalStaff')
     if (isCorporateAdmin) return t('dashboard.subtitles.corporateAdmin')
     if (isPharmacist) return t('dashboard.subtitles.pharmacist')
+    if (isSupport) return t('dashboard.subtitles.support')
     return t('dashboard.greeting', { name: user?.firstName })
-  }, [isVeterinarian, isPetOwner, isFarmer, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, t, user?.firstName])
+  }, [isVeterinarian, isPetOwner, isFarmer, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, t, user?.firstName])
 
   return (
     <div className="dashboard-container">
@@ -399,7 +444,7 @@ const Dashboard: React.FC = () => {
                 <span>{stat.icon}</span>
               </div>
               <div className="stat-content">
-                <div className="stat-value">{loading ? '—' : stat.value}</div>
+                <div className="stat-value">{loading ? '-' : stat.value}</div>
                 <div className="stat-label">{stat.label}</div>
               </div>
             </div>
@@ -443,7 +488,7 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ── Pending Booking Approvals — vet/admin only ── */}
+      {/* ── Pending Booking Approvals - vet/admin only ── */}
       {hasPermission('dashboard_pending_approvals') && pendingBookings.length > 0 && (
         <div className="dashboard-alert-section">
           <div className="alert-card alert-warning">
@@ -460,7 +505,7 @@ const Dashboard: React.FC = () => {
                   const d = new Date(booking.scheduledDate + 'T' + (booking.timeSlotEnd || '23:59') + ':00')
                   return d < new Date()
                 })()
-                // Skip expired pending bookings — backend auto-transitions these to missed
+                // Skip expired pending bookings - backend auto-transitions these to missed
                 if (expired) return null
                 return (
                 <div key={booking.id} className="alert-item">

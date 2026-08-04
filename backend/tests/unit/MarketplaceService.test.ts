@@ -2,7 +2,7 @@ import database from '../../src/utils/database';
 import marketplaceService from '../../src/services/MarketplaceService';
 
 jest.mock('../../src/utils/database');
-// Notifications are fire-and-forget side effects — stub them so tests stay focused on data flow
+// Notifications are fire-and-forget side effects - stub them so tests stay focused on data flow
 jest.mock('../../src/services/NotificationService', () => ({
   __esModule: true,
   default: { createNotification: jest.fn().mockResolvedValue({}) },

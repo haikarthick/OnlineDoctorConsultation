@@ -11,7 +11,7 @@ import path from 'path';
 
 // ── Allowed MIME types ────────────────────────────────────────
 
-// SVG intentionally excluded — served via /uploads without content-type override,
+// SVG intentionally excluded - served via /uploads without content-type override,
 // making it a stored XSS vector when opened directly in the browser.
 const IMAGE_MIMES = [
   'image/jpeg',
@@ -54,7 +54,7 @@ function createFileFilter(allowedMimes: string[]) {
 
 const memoryStorage = multer.memoryStorage();
 
-/** General file upload – images & documents, max 10 MB */
+/** General file upload - images & documents, max 10 MB */
 export const uploadAny = multer({
   storage: memoryStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
@@ -77,7 +77,7 @@ export const uploadDocument = multer({
 
 /**
  * Video-only upload, max 100 MB.
- * 100 MB is a coarse pre-gate against obviously oversized files — the real
+ * 100 MB is a coarse pre-gate against obviously oversized files - the real
  * limit is duration (60s), checked server-side after upload since multer
  * can't read a video's length from the raw bytes.
  */

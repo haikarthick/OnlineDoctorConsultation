@@ -95,7 +95,7 @@ class WithdrawalService {
     }
   }
 
-  /** Doctor cancels their own pending request — rows unlock. */
+  /** Doctor cancels their own pending request - rows unlock. */
   async cancelRequest(doctorId: string, withdrawalId: string): Promise<void> {
     const res = await database.query(
       `UPDATE withdrawal_requests SET status = 'cancelled', updated_at = NOW()
@@ -268,6 +268,48 @@ class WithdrawalService {
        ORDER BY SUM(de.net_amount) FILTER (WHERE de.status = 'available') ASC`
     );
     return res.rows;
+  }
+
+  /**
+   * Doctors the platform currently OWES money to - the positive counterpart of
+   * adminNegativeBalances() above, which only ever surfaced doctors in deficit.
+   *
+   * Same gap the grooming module had (see GroomingSettlementService.adminPayables): payouts are
+   * doctor-initiated, so a doctor who never opens the withdrawal screen - or who sits below the
+   * minimum threshold - accrues a balance nobody is watching. There was no view that answered
+   * "who are we behind on paying". `pendingRequest` marks the ones already in the queue so an
+   * admin does not pay the same balance twice via a discretionary payout.
+   */
+  async adminPayables(): Promise<any> {
+    const res = await database.query(
+      `SELECT de.doctor_id as "doctorId",
+              CONCAT(u.first_name, ' ', u.last_name) as "doctorName", u.email,
+              ROUND(COALESCE(SUM(de.net_amount) FILTER (WHERE de.status = 'available'), 0)::numeric, 2) as "available",
+              ROUND(COALESCE(SUM(de.net_amount) FILTER (WHERE de.status = 'clearing'), 0)::numeric, 2) as "clearing",
+              ROUND(COALESCE(SUM(de.net_amount) FILTER (WHERE de.status = 'locked'), 0)::numeric, 2) as "locked",
+              ROUND(COALESCE(SUM(de.net_amount) FILTER (WHERE de.status = 'withdrawn'), 0)::numeric, 2) as "paidToDate",
+              MIN(de.created_at) FILTER (WHERE de.status = 'available') as "oldestAvailableAt",
+              (SELECT MAX(settled_at) FROM withdrawal_requests w
+                WHERE w.doctor_id = de.doctor_id AND w.status = 'settled') as "lastSettledAt",
+              EXISTS (SELECT 1 FROM withdrawal_requests w
+                       WHERE w.doctor_id = de.doctor_id AND w.status IN ('requested','approved')) as "pendingRequest"
+       FROM doctor_earnings de JOIN users u ON u.id = de.doctor_id
+       GROUP BY de.doctor_id, u.first_name, u.last_name, u.email
+       HAVING COALESCE(SUM(de.net_amount) FILTER (WHERE de.status = 'available'), 0) > 0
+       ORDER BY SUM(de.net_amount) FILTER (WHERE de.status = 'available') DESC`
+    );
+    const rows = res.rows.map((r: any) => ({
+      ...r,
+      available: Number(r.available),
+      clearing: Number(r.clearing),
+      ageDays: r.oldestAvailableAt
+        ? Math.floor((Date.now() - new Date(r.oldestAvailableAt).getTime()) / 86400000) : null,
+    }));
+    return {
+      doctors: rows,
+      totalPayableNow: +rows.reduce((s: number, r: any) => s + r.available, 0).toFixed(2),
+      awaitingRequestCount: rows.filter((r: any) => !r.pendingRequest).length,
+    };
   }
 
   private async unlockRows(withdrawalId: string): Promise<void> {

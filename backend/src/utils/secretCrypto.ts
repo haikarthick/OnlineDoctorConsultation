@@ -2,12 +2,12 @@ import crypto from 'crypto';
 
 /**
  * AES-256-GCM encryption for secrets stored at rest in the DB (payment
- * gateway credentials — docs/PAYMENT_MODULE_PLAN.md §12 rule 6 requires
+ * gateway credentials - docs/PAYMENT_MODULE_PLAN.md §12 rule 6 requires
  * secrets never be readable in plaintext from any admin API response;
  * this is what makes DB storage safe to allow instead of env-vars-only).
  *
  * The master key comes from PAYMENT_CREDENTIALS_KEY (env var, set once per
- * deploy target) — never stored in the DB itself. Any string length is
+ * deploy target) - never stored in the DB itself. Any string length is
  * accepted and normalized to 32 bytes via SHA-256 so ops doesn't have to
  * generate a key in a specific format.
  */
@@ -15,12 +15,12 @@ import crypto from 'crypto';
 function getMasterKey(): Buffer {
   const raw = process.env.PAYMENT_CREDENTIALS_KEY;
   if (!raw) {
-    throw new Error('PAYMENT_CREDENTIALS_KEY env var is not set — cannot encrypt/decrypt stored gateway credentials.');
+    throw new Error('PAYMENT_CREDENTIALS_KEY env var is not set - cannot encrypt/decrypt stored gateway credentials.');
   }
   return crypto.createHash('sha256').update(raw).digest();
 }
 
-/** Returns base64(iv[12] + authTag[16] + ciphertext) — a single opaque string for one TEXT column. */
+/** Returns base64(iv[12] + authTag[16] + ciphertext) - a single opaque string for one TEXT column. */
 export function encryptSecret(plaintext: string): string {
   const key = getMasterKey();
   const iv = crypto.randomBytes(12);

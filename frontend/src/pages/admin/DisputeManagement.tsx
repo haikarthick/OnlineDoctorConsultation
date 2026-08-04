@@ -163,11 +163,11 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
                       <span className={`badge ${STATUS_BADGE[d.status] || 'badge-inactive'}`}>{d.status.replace('_', ' ')}</span>
                     </td>
                     <td>
-                      <div>{d.reportedByName || '—'}</div>
+                      <div>{d.reportedByName || '-'}</div>
                       {d.reportedByEmail && <div className="si-48a0b045">{d.reportedByEmail}</div>}
                     </td>
                     <td className="si-c3b93ebb">
-                      {d.createdAt ? new Date(d.createdAt).toLocaleDateString() : '—'}
+                      {d.createdAt ? new Date(d.createdAt).toLocaleDateString() : '-'}
                     </td>
                     <td>
                       {!['resolved', 'dismissed'].includes(d.status) && (

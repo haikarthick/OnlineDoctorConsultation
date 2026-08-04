@@ -216,8 +216,8 @@ export default function MedicationTransfers({ networkId }: Props) {
                   return (
                     <tr key={r.id}>
                       <td>
-                        <strong>{r.source_hospital_name || '—'}</strong>
-                        <small className="si-1a0c0bfa">→ {r.destination_hospital_name || '—'}</small>
+                        <strong>{r.source_hospital_name || '-'}</strong>
+                        <small className="si-1a0c0bfa">→ {r.destination_hospital_name || '-'}</small>
                       </td>
                       <td className="si-d83d7d70">
                         {(r.requested_medications || []).map((m, i) => (
@@ -234,7 +234,7 @@ export default function MedicationTransfers({ networkId }: Props) {
                           <small className="si-1a0c0bfa">{r.decline_reason}</small>
                         )}
                       </td>
-                      <td className="si-f2dbbee4">{r.tracking_number || <span className="si-c81ca09e">—</span>}</td>
+                      <td className="si-f2dbbee4">{r.tracking_number || <span className="si-c81ca09e">-</span>}</td>
                       <td>
                         <div className="si-8aa04a6d">
                           {nextStatus && (

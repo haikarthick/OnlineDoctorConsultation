@@ -10,11 +10,11 @@ import PaymentModuleConfig from './PaymentModuleConfig';
  * Two invoice streams:
  *  - consultation: doctor → patient (issued via the platform). Veterinary
  *    healthcare is GST-exempt by default (SAC 998351 pets / 998352 livestock,
- *    rate 0) — rates live in tax_codes and are fully admin-editable (D13).
+ *    rate 0) - rates live in tax_codes and are fully admin-editable (D13).
  *  - commission: platform → doctor per settlement (SAC 998599, default 18%).
  *
  * Amounts are treated as TAX-INCLUSIVE (tax = total × r / (100 + r)) so an
- * admin rate change never alters what was already collected — it only changes
+ * admin rate change never alters what was already collected - it only changes
  * how future invoices break the same total down. Invoices are immutable
  * snapshots; numbering is financial-year sequential (VC/2026-27/00001) and
  * race-safe via an advisory lock.
@@ -25,7 +25,7 @@ function round2(n: number): number {
 }
 
 function financialYearLabel(d: Date): string {
-  // Indian FY: Apr 1 – Mar 31
+  // Indian FY: Apr 1 - Mar 31
   const y = d.getFullYear();
   const fyStart = d.getMonth() >= 3 ? y : y - 1;
   return `${fyStart}-${String((fyStart + 1) % 100).padStart(2, '0')}`;
@@ -41,20 +41,28 @@ class InvoiceService {
     return { ratePercent: parseFloat(String(res.rows[0].rate_percent)), label: res.rows[0].label };
   }
 
-  /** Race-safe sequential invoice number within the financial year. */
+  /**
+   * Race-safe sequential invoice number within the financial year.
+   *
+   * Continues from the HIGHEST suffix already issued, never from COUNT(*) - a counted series
+   * only works while it is a contiguous 1..N, and any gap (a deleted invoice, a partial
+   * clean_start_launch.sql) makes it recompute a number that is already taken, which the
+   * UNIQUE index on invoice_number then rejects. See the same fix in GroomingPaymentService.
+   */
   private async nextInvoiceNumber(client: any): Promise<string> {
     const prefix = await PaymentModuleConfig.getString('tax.invoicePrefix', 'VC');
     const fy = financialYearLabel(new Date());
     await client.query(`SELECT pg_advisory_xact_lock(hashtext('invoice_number_seq'))`);
     const res = await client.query(
-      `SELECT COUNT(*) as count FROM invoices WHERE invoice_number LIKE $1`,
+      `SELECT COALESCE(MAX(substring(invoice_number from '([0-9]+)$')::bigint), 0) AS last
+       FROM invoices WHERE invoice_number LIKE $1 AND invoice_number ~ '/[0-9]+$'`,
       [`${prefix}/${fy}/%`]
     );
-    const next = parseInt(res.rows[0].count, 10) + 1;
+    const next = Number(res.rows[0].last) + 1;
     return `${prefix}/${fy}/${String(next).padStart(5, '0')}`;
   }
 
-  /** Consultation invoice — created when a payment completes (idempotent per payment). */
+  /** Consultation invoice - created when a payment completes (idempotent per payment). */
   async createConsultationInvoice(paymentId: string): Promise<void> {
     if (!(await PaymentModuleConfig.isEnabled())) return;
     try {
@@ -131,7 +139,7 @@ class InvoiceService {
     }
   }
 
-  /** Pharmacy invoice — network pharmacy → pet owner, created at time of dispensing (goods
+  /** Pharmacy invoice - network pharmacy → pet owner, created at time of dispensing (goods
    *  leave the shelf then, independent of whether payment is collected immediately or later). */
   async createPharmacyInvoice(paymentId: string): Promise<void> {
     if (!(await PaymentModuleConfig.isEnabled())) return;
@@ -198,7 +206,7 @@ class InvoiceService {
     }
   }
 
-  /** Commission invoice — platform → doctor, created on settlement (idempotent per withdrawal). */
+  /** Commission invoice - platform → doctor, created on settlement (idempotent per withdrawal). */
   async createCommissionInvoice(withdrawalId: string): Promise<void> {
     if (!(await PaymentModuleConfig.isEnabled())) return;
     try {

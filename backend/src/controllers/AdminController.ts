@@ -110,7 +110,7 @@ class AdminController {
           <h2 style="color:#1e3a5f;">Account Notice</h2>
           <p>Dear ${user.firstName},</p>
           <p>Your account has been temporarily restricted pending further review by our platform team. This measure has been taken to ensure the safety and integrity of the platform.</p>
-          <p>If you believe this is an error or would like clarification, please contact us at <a href="mailto:support@vetcare.com">support@vetcare.com</a> — we will be happy to assist you and aim to resolve this at the earliest.</p>
+          <p>If you believe this is an error or would like clarification, please contact us at <a href="mailto:support@vetcare.com">support@vetcare.com</a> - we will be happy to assist you and aim to resolve this at the earliest.</p>
           <p>Please quote your registered email address when contacting support.</p>
           <p style="color:#888;font-size:.85rem;">We apologise for any inconvenience caused.</p>
         </div>`,
@@ -178,10 +178,10 @@ class AdminController {
 
   async changeUserRole(req: Request, res: Response) {
     const authReq = this.assertAdmin(req);
-    const { role } = req.body;
+    const { role, profile } = req.body;
     if (!role) throw new ValidationError('role field is required');
 
-    const user = await AdminService.changeUserRole(req.params.id, role);
+    const user = await AdminService.changeUserRole(req.params.id, role, profile);
 
     await AdminService.createAuditLog({
       userId: authReq.userId!,

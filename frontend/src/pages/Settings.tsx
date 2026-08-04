@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
+import { usePermission } from '../context/PermissionContext'
+import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
@@ -9,6 +12,9 @@ import { VetProfile } from '../types'
 const Settings: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const { hasPermission } = usePermission()
+  const { enabled: groomingEnabled } = useGroomingEnabled()
   const { formatCurrency, formatDateTime } = useSettings()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const isVet = user?.role === 'veterinarian'
@@ -29,6 +35,13 @@ const Settings: React.FC = () => {
   const [rcMsg, setRcMsg] = useState('')
   const [selectedNewRole, setSelectedNewRole] = useState('')
   const [rcReason, setRcReason] = useState('')
+  // Vet-specific details, required when requesting the veterinarian role (mirrors
+  // registration) so an admin can verify + provision the vet profile in one approval step.
+  const [rcVetLicense, setRcVetLicense] = useState('')
+  const [rcVetFee, setRcVetFee] = useState('')
+  const [rcVetExperience, setRcVetExperience] = useState('')
+  const [rcVetSpecializations, setRcVetSpecializations] = useState('')
+  const [rcVetClinic, setRcVetClinic] = useState('')
 
   // P6-NOTIFICATIONS: notification preferences
   const [digestEnabled, setDigestEnabled] = useState(true)
@@ -51,15 +64,35 @@ const Settings: React.FC = () => {
   const pendingRequest = roleRequests.find((r: any) => r.status === 'pending')
   const approvedRequest = roleRequests.find((r: any) => r.status === 'approved')
 
+  const isVetRequest = selectedNewRole === 'veterinarian'
+  const vetDetailsMissing = isVetRequest && !rcVetLicense.trim()
+
   const handleSubmitRoleChange = async () => {
     if (!selectedNewRole || !rcReason.trim()) return
+    if (vetDetailsMissing) { setRcMsg(t('settings.roleChange.vetLicenseRequired')); return }
     setRcSubmitting(true)
     setRcMsg('')
     try {
-      await apiService.submitRoleChangeRequest({ requested_role: selectedNewRole, reason: rcReason })
+      const payload: Parameters<typeof apiService.submitRoleChangeRequest>[0] = {
+        requested_role: selectedNewRole,
+        reason: rcReason,
+      }
+      if (isVetRequest) {
+        payload.profile = {
+          licenseNumber: rcVetLicense.trim(),
+          consultationFee: rcVetFee ? Number(rcVetFee) : undefined,
+          yearsOfExperience: rcVetExperience ? Number(rcVetExperience) : undefined,
+          specializations: rcVetSpecializations
+            ? rcVetSpecializations.split(',').map(s => s.trim()).filter(Boolean)
+            : undefined,
+          clinicName: rcVetClinic.trim() || undefined,
+        }
+      }
+      await apiService.submitRoleChangeRequest(payload)
       setRcMsg(t('settings.roleChange.successSubmit'))
       setSelectedNewRole('')
       setRcReason('')
+      setRcVetLicense(''); setRcVetFee(''); setRcVetExperience(''); setRcVetSpecializations(''); setRcVetClinic('')
       const r = await apiService.getMyRoleChangeRequests()
       setRoleRequests((r as any).data || [])
     } catch (err: any) {
@@ -531,9 +564,23 @@ const Settings: React.FC = () => {
           <span className="badge badge-active si-ecf1d5e5">{user?.role?.replace('_', ' ')}</span>
         </div>
 
+        {/* Grooming & Spa: becoming a provider is ADDITIVE (createProvider grants the 'groomer'
+            role alongside the existing one), so it deliberately does NOT go through the role-change
+            request below - that flow REPLACES users.role and would cost a pet owner access to
+            their own animals. Hidden once they already run a business. */}
+        {groomingEnabled && !hasPermission('grooming_provider_console') && (
+          <div className="module-card si-7e63ec4f" style={{ maxWidth: 640 }}>
+            <h3 className="si-ff527946">💈 {t('settings.becomeGroomer.title')}</h3>
+            <p className="si-676930d7">{t('settings.becomeGroomer.desc')}</p>
+            <button className="module-btn primary" onClick={() => navigate('/grooming/provider')}>
+              {t('settings.becomeGroomer.btn')}
+            </button>
+          </div>
+        )}
+
         {rcMsg && <div className={`module-alert ${rcMsg.includes('✓') || rcMsg.includes('submitted') || rcMsg.includes('cancel') ? 'success' : 'error'} si-7e63ec4f`}>{rcMsg}</div>}
 
-        {/* Approved — need to re-login */}
+        {/* Approved - need to re-login */}
         {approvedRequest && (
           <div className="module-alert success">
             <strong>{t('settings.roleChange.approvedTitle')}</strong>
@@ -565,7 +612,7 @@ const Settings: React.FC = () => {
               <div className="module-form-group">
                 <label className="module-label">{t('settings.roleChange.selectRole')}</label>
                 <select className="module-input" value={selectedNewRole} onChange={e => setSelectedNewRole(e.target.value)}>
-                  <option value="">— {t('settings.roleChange.selectRole')} —</option>
+                  <option value="">- {t('settings.roleChange.selectRole')} -</option>
                   {(['pet_owner', 'farmer', 'veterinarian', 'corporate_admin'] as const)
                     .filter(r => r !== user?.role)
                     .map(r => (
@@ -574,6 +621,46 @@ const Settings: React.FC = () => {
                 </select>
               </div>
             </div>
+            {/* Vet-specific details - shown only when requesting the veterinarian role, so
+                the admin can verify the license and provision the vet profile in one step. */}
+            {isVetRequest && (
+              <div className="module-alert si-e120eda2">
+                <strong>{t('settings.roleChange.vetDetailsTitle')}</strong>
+                <p className="si-676930d7">{t('settings.roleChange.vetDetailsDesc')}</p>
+                <div className="module-form-row">
+                  <div className="module-form-group">
+                    <label className="module-label">{t('settings.roleChange.vetLicense')} *</label>
+                    <input className="module-input" type="text" value={rcVetLicense}
+                      onChange={e => setRcVetLicense(e.target.value)}
+                      placeholder={t('settings.roleChange.vetLicensePlaceholder')} />
+                  </div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('settings.roleChange.vetFee')}</label>
+                    <input className="module-input" type="number" min={0} value={rcVetFee}
+                      onChange={e => setRcVetFee(e.target.value)} placeholder="500" />
+                  </div>
+                </div>
+                <div className="module-form-row">
+                  <div className="module-form-group">
+                    <label className="module-label">{t('settings.roleChange.vetExperience')}</label>
+                    <input className="module-input" type="number" min={0} value={rcVetExperience}
+                      onChange={e => setRcVetExperience(e.target.value)} placeholder="5" />
+                  </div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('settings.roleChange.vetClinic')}</label>
+                    <input className="module-input" type="text" value={rcVetClinic}
+                      onChange={e => setRcVetClinic(e.target.value)}
+                      placeholder={t('settings.roleChange.vetClinicPlaceholder')} />
+                  </div>
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('settings.roleChange.vetSpecializations')}</label>
+                  <input className="module-input" type="text" value={rcVetSpecializations}
+                    onChange={e => setRcVetSpecializations(e.target.value)}
+                    placeholder={t('settings.roleChange.vetSpecializationsPlaceholder')} />
+                </div>
+              </div>
+            )}
             <div className="module-form-group">
               <label className="module-label">{t('settings.roleChange.reasonLabel')}</label>
               <textarea
@@ -582,12 +669,12 @@ const Settings: React.FC = () => {
                 value={rcReason}
                 onChange={e => setRcReason(e.target.value)}
                 placeholder={t('settings.roleChange.reasonPlaceholder')}
-               
+
               />
             </div>
             <button
               className="module-btn primary"
-              disabled={!selectedNewRole || rcReason.length < 10 || rcSubmitting}
+              disabled={!selectedNewRole || rcReason.length < 10 || rcSubmitting || vetDetailsMissing}
               onClick={handleSubmitRoleChange}
             >
               {rcSubmitting ? t('settings.roleChange.submitting') : t('settings.roleChange.submitBtn')}
@@ -616,7 +703,7 @@ const Settings: React.FC = () => {
                       <td><span className={`badge badge-${r.status === 'approved' ? 'active' : r.status === 'rejected' ? 'danger' : 'pending'}`}>{r.status}</span></td>
                       <td className="si-756a9f21">{new Date(r.createdAt).toLocaleDateString()}</td>
                       <td className="si-756a9f21">
-                        {r.reviewedBy || '—'}
+                        {r.reviewedBy || '-'}
                         {r.rejectionReason && <div className="si-16697caf">{r.rejectionReason}</div>}
                       </td>
                     </tr>

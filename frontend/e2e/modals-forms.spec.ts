@@ -15,7 +15,7 @@ import { test, expect } from './fixtures'
 
 // ── Animal CRUD ────────────────────────────────────────────
 
-test.describe('Animals — CRUD Forms', () => {
+test.describe('Animals - CRUD Forms', () => {
   test('add animal button opens registration form', async ({ petOwnerPage: page }) => {
     await page.goto('/animals')
     await page.waitForLoadState('networkidle')
@@ -143,7 +143,7 @@ test.describe('Animals — CRUD Forms', () => {
 
 // ── Booking Wizard Steps ───────────────────────────────────
 
-test.describe('Book Consultation — Wizard Flow', () => {
+test.describe('Book Consultation - Wizard Flow', () => {
   test('booking page shows step indicators', async ({ petOwnerPage: page }) => {
     await page.goto('/book-consultation')
     await page.waitForLoadState('networkidle')
@@ -215,7 +215,7 @@ test.describe('Book Consultation — Wizard Flow', () => {
 
 // ── Consultations Reschedule Modal ─────────────────────────
 
-test.describe('Consultations — Reschedule Modal', () => {
+test.describe('Consultations - Reschedule Modal', () => {
   test('reschedule button opens modal with date/slot picker', async ({ petOwnerPage: page }) => {
     await page.goto('/consultations')
     await page.waitForLoadState('networkidle')
@@ -242,7 +242,7 @@ test.describe('Consultations — Reschedule Modal', () => {
 
 // ── Enterprise Management CRUD ─────────────────────────────
 
-test.describe('Enterprise Management — CRUD', () => {
+test.describe('Enterprise Management - CRUD', () => {
   test('add enterprise button opens form modal', async ({ farmerPage: page }) => {
     await page.goto('/enterprises')
     await page.waitForLoadState('networkidle')
@@ -280,7 +280,7 @@ test.describe('Enterprise Management — CRUD', () => {
 
 // ── Wellness Scorecard & Reminder Modals ───────────────────
 
-test.describe('Wellness Portal — Create Modals', () => {
+test.describe('Wellness Portal - Create Modals', () => {
   test('new scorecard button opens form', async ({ petOwnerPage: page }) => {
     await page.goto('/wellness')
     await page.waitForLoadState('networkidle')
@@ -333,7 +333,7 @@ test.describe('Wellness Portal — Create Modals', () => {
 
 // ── Marketplace Create Listing ─────────────────────────────
 
-test.describe('Marketplace — Create Listing Form', () => {
+test.describe('Marketplace - Create Listing Form', () => {
   test('create listing tab shows form fields', async ({ farmerPage: page }) => {
     await page.goto('/marketplace')
     await page.waitForLoadState('networkidle')
@@ -374,7 +374,7 @@ test.describe('Marketplace — Create Listing Form', () => {
 
 // ── Settings Profile Save ──────────────────────────────────
 
-test.describe('Settings — Profile Form', () => {
+test.describe('Settings - Profile Form', () => {
   test('profile form loads with pre-filled user data', async ({ petOwnerPage: page }) => {
     await page.goto('/settings')
     await page.waitForLoadState('networkidle')
@@ -440,7 +440,7 @@ test.describe('Settings — Profile Form', () => {
 
 // ── Admin User Management ──────────────────────────────────
 
-test.describe('Admin — User Management', () => {
+test.describe('Admin - User Management', () => {
   test('user list table renders rows', async ({ adminPage: page }) => {
     await page.goto('/admin/users')
     await page.waitForLoadState('networkidle')

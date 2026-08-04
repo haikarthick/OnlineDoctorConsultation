@@ -1,7 +1,11 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "react", "react-hooks"],
+  "plugins": [
+    "@typescript-eslint",
+    "react",
+    "react-hooks"
+  ],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -11,7 +15,9 @@
   "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module",
-    "ecmaFeatures": { "jsx": true }
+    "ecmaFeatures": {
+      "jsx": true
+    }
   },
   "env": {
     "browser": true,
@@ -19,11 +25,18 @@
     "node": true
   },
   "settings": {
-    "react": { "version": "detect" }
+    "react": {
+      "version": "detect"
+    }
   },
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/ban-types": "warn",
     "@typescript-eslint/no-empty-function": "warn",
@@ -34,7 +47,135 @@
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
     "react/no-unescaped-entities": "warn",
-    "react/no-unknown-property": "warn"
+    "react/no-unknown-property": "warn",
+    "react/forbid-dom-props": [
+      "error",
+      {
+        "forbid": [
+          {
+            "propName": "style",
+            "message": "Inline styles bypass the design system and are why modules drift visually. Use the shared classes and tokens in src/styles/modules.css (--primary, --gray-500, --radius-lg, --shadow-md, module-card, module-btn, module-input). If a value is genuinely dynamic (a computed width/transform), set a CSS custom property on the class instead. See docs/DESIGN_SYSTEM.md."
+          }
+        ]
+      }
+    ]
   },
-  "ignorePatterns": ["dist/", "node_modules/", "coverage/"]
+  "ignorePatterns": [
+    "dist/",
+    "node_modules/",
+    "coverage/"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "src/App.tsx",
+        "src/components/AnimalSearchPicker.tsx",
+        "src/components/CertificatePrintView.tsx",
+        "src/components/ErrorBoundary.tsx",
+        "src/components/FloatingChatWidget.tsx",
+        "src/components/MapView.tsx",
+        "src/components/PaymentCheckout.tsx",
+        "src/components/PendingPolicyModal.tsx",
+        "src/components/PrescriptionPrintView.tsx",
+        "src/components/SearchSelect.tsx",
+        "src/components/VetSearchPicker.tsx",
+        "src/pages/AICopilot.tsx",
+        "src/pages/AlertCenter.tsx",
+        "src/pages/AnimalGroups.tsx",
+        "src/pages/AnimalTimeline.tsx",
+        "src/pages/Animals.tsx",
+        "src/pages/BreedingManager.tsx",
+        "src/pages/ComplianceDocs.tsx",
+        "src/pages/Consultations.tsx",
+        "src/pages/Dashboard.tsx",
+        "src/pages/DigitalTwin.tsx",
+        "src/pages/DiseasePrediction.tsx",
+        "src/pages/EnterpriseManagement.tsx",
+        "src/pages/FeedInventory.tsx",
+        "src/pages/FinancialAnalytics.tsx",
+        "src/pages/GenomicLineage.tsx",
+        "src/pages/GeospatialAnalytics.tsx",
+        "src/pages/HealthAnalytics.tsx",
+        "src/pages/HerdMedicalManagement.tsx",
+        "src/pages/Home.tsx",
+        "src/pages/HospitalWorkflow.tsx",
+        "src/pages/InpatientManagement.tsx",
+        "src/pages/IoTSensors.tsx",
+        "src/pages/LocationManagement.tsx",
+        "src/pages/MedicalRecords.tsx",
+        "src/pages/MovementLog.tsx",
+        "src/pages/PaymentsHistory.tsx",
+        "src/pages/ReportBuilder.tsx",
+        "src/pages/ResetPassword.tsx",
+        "src/pages/Settings.tsx",
+        "src/pages/SupplyChain.tsx",
+        "src/pages/Sustainability.tsx",
+        "src/pages/TreatmentCampaigns.tsx",
+        "src/pages/VaccinationPassport.tsx",
+        "src/pages/VetCertificates.tsx",
+        "src/pages/VetHospitalManage.tsx",
+        "src/pages/VetHospitalProfile.tsx",
+        "src/pages/Wallet.tsx",
+        "src/pages/WellnessPortal.tsx",
+        "src/pages/Workforce.tsx",
+        "src/pages/admin/AdminDashboard.tsx",
+        "src/pages/admin/AuditLogs.tsx",
+        "src/pages/admin/CancellationDashboard.tsx",
+        "src/pages/admin/ComplianceDashboard.tsx",
+        "src/pages/admin/ConsultationManagement.tsx",
+        "src/pages/admin/FinanceReports.tsx",
+        "src/pages/admin/HolidayManagement.tsx",
+        "src/pages/admin/MasterDataManagement.tsx",
+        "src/pages/admin/MedicalRecordManagement.tsx",
+        "src/pages/admin/NetworkSubscriptions.tsx",
+        "src/pages/admin/PermissionManagement.tsx",
+        "src/pages/admin/ReviewModeration.tsx",
+        "src/pages/admin/Settlements.tsx",
+        "src/pages/admin/StaffSettings.tsx",
+        "src/pages/admin/SystemSettings.tsx",
+        "src/pages/admin/VetHospitalAdmin.tsx",
+        "src/pages/doctor/ConsultationRoom.tsx",
+        "src/pages/doctor/ManageSchedule.tsx",
+        "src/pages/doctor/MyReviews.tsx",
+        "src/pages/doctor/PrescriptionWriter.tsx",
+        "src/pages/doctor/Prescriptions.tsx",
+        "src/pages/doctor/VetEarnings.tsx",
+        "src/pages/hospitalnetwork/HospitalNetworks.tsx",
+        "src/pages/hospitalnetwork/NetworkRoleMatrix.tsx",
+        "src/pages/petowner/BookConsultation.tsx",
+        "src/pages/petowner/FindDoctor.tsx",
+        "src/pages/petowner/VetProfilePage.tsx",
+        "src/pages/petowner/VideoConsultation.tsx",
+        "src/pages/pharmacy/DispensingHistory.tsx",
+        "src/pages/pharmacy/DispensingModal.tsx",
+        "src/pages/pharmacy/MedicationCatalog.tsx",
+        "src/pages/pharmacy/MedicationTransfers.tsx",
+        "src/pages/pharmacy/PharmacyDashboard.tsx",
+        "src/pages/pharmacy/PrescriptionReviewModal.tsx",
+        "src/pages/pharmacy/ReordersManagement.tsx"
+      ],
+      "rules": {
+        "react/forbid-dom-props": [
+          "warn",
+          {
+            "forbid": [
+              {
+                "propName": "style",
+                "message": "LEGACY INLINE-STYLE DEBT - this list must only ever shrink. Do NOT add files to it. Replace these with modules.css classes when you next touch this file, then delete the file from the allowlist in .eslintrc.json. Regenerate the current offender list with: grep -rl 'style={{' --include=*.tsx src"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/**/*.test.tsx",
+        "src/test/**/*.tsx"
+      ],
+      "rules": {
+        "react/forbid-dom-props": "off"
+      }
+    }
+  ]
 }

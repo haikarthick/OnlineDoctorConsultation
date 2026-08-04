@@ -1,5 +1,5 @@
 /**
- * Auth middleware tests — mock jwt + database.
+ * Auth middleware tests - mock jwt + database.
  */
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'

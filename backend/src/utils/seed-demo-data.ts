@@ -1,5 +1,5 @@
 /**
- * seed-demo-data.ts — Run all migrations then seed demo data
+ * seed-demo-data.ts - Run all migrations then seed demo data
  *
  * Usage:  npx ts-node src/utils/seed-demo-data.ts
  */

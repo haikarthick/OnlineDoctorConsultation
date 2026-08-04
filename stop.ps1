@@ -1,5 +1,5 @@
 ###############################################################################
-#  VetCare Platform — Stop Script
+#  VetCare Platform - Stop Script
 #  Kills all processes running on ports 3000 (backend) and 5173 (frontend)
 ###############################################################################
 

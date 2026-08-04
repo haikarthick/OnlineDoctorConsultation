@@ -27,13 +27,13 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'reviews', label: '💬 Most Reviewed' },
   { value: 'fee_asc', label: '💰 Fee: Low to High' },
   { value: 'fee_desc', label: '💰 Fee: High to Low' },
-  { value: 'name', label: '🔤 Name A–Z' },
+  { value: 'name', label: '🔤 Name A-Z' },
 ]
 
 const TIME_RANGES: Record<string, { label: string; from: string; to: string; desc: string }> = {
-  morning:   { label: '🌅 Morning',   from: '08:00', to: '12:00', desc: '8am–12pm' },
-  afternoon: { label: '☀️ Afternoon', from: '12:00', to: '17:00', desc: '12pm–5pm' },
-  evening:   { label: '🌆 Evening',   from: '17:00', to: '20:00', desc: '5pm–8pm'  },
+  morning:   { label: '🌅 Morning',   from: '08:00', to: '12:00', desc: '8am-12pm' },
+  afternoon: { label: '☀️ Afternoon', from: '12:00', to: '17:00', desc: '12pm-5pm' },
+  evening:   { label: '🌆 Evening',   from: '17:00', to: '20:00', desc: '5pm-8pm'  },
 }
 
 function getDateChips() {
@@ -254,7 +254,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
             <button
               key={slot.startTime}
               onClick={e => { e.stopPropagation(); handleSlotBook(vet, slot.startTime) }}
-              title={`Book ${formatSlotTime(slot.startTime)} — pre-fills date & time`}
+              title={`Book ${formatSlotTime(slot.startTime)} - pre-fills date & time`}
               className="si-98553089"
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.background = '#16a34a'
@@ -415,7 +415,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
         <p className="si-48d05eba">
           {selectedDate
             ? <>Showing doctors available on <strong>{formatDateLabel(selectedDate)}</strong>{timeOfDay ? ` · ${TIME_RANGES[timeOfDay].desc}` : ''}</>
-            : <>Browse {total > 0 ? `${total} ` : ''}qualified veterinarians — search by name, specialty, language, and more</>
+            : <>Browse {total > 0 ? `${total} ` : ''}qualified veterinarians - search by name, specialty, language, and more</>
           }
         </p>
       </div>
@@ -467,9 +467,9 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
           <span className="si-c96f2222">🕐 Time:</span>
           {([
             { key: '' as TimeOfDay,        label: 'Any time'       },
-            { key: 'morning'   as TimeOfDay, label: '🌅 Morning',   sub: '8am–12pm' },
-            { key: 'afternoon' as TimeOfDay, label: '☀️ Afternoon', sub: '12pm–5pm' },
-            { key: 'evening'   as TimeOfDay, label: '🌆 Evening',   sub: '5pm–8pm'  },
+            { key: 'morning'   as TimeOfDay, label: '🌅 Morning',   sub: '8am-12pm' },
+            { key: 'afternoon' as TimeOfDay, label: '☀️ Afternoon', sub: '12pm-5pm' },
+            { key: 'evening'   as TimeOfDay, label: '🌆 Evening',   sub: '5pm-8pm'  },
           ] as { key: TimeOfDay; label: string; sub?: string }[]).map(({ key, label, sub }) => {
             const active = timeOfDay === key
             return (

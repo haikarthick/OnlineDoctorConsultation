@@ -225,7 +225,7 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
 
       <p className="si-5a747b21">{t('commissionAdmin.snapshotNote')}</p>
 
-      {/* ── Tax & GST (D13 — rates fully admin-configurable) ── */}
+      {/* ── Tax & GST (D13 - rates fully admin-configurable) ── */}
       <div className="si-789c0fab">
         <h2 className="si-e57614ee">{t('taxAdmin.title')}</h2>
         <p className="si-ea95bef1">{t('taxAdmin.subtitle')}</p>

@@ -15,14 +15,14 @@ const PRIORITY_COLORS: Record<string, string> = {
   emergency: '#dc2626', urgent: '#ea580c', high: '#d97706', normal: '#2563eb', low: '#6b7280',
 }
 
-// Triage level 1–5 maps directly to a priority — these are the SAME concept.
+// Triage level 1-5 maps directly to a priority - these are the SAME concept.
 // Never show both independently; derive priority from level automatically.
 const TRIAGE_LEVELS: Record<number, { priority: string; label: string; description: string; color: string; bg: string; icon: string }> = {
-  1: { priority: 'emergency', label: 'Critical',  description: 'Immediate life-threatening — act now',  color: '#dc2626', bg: '#fee2e2', icon: '🚨' },
-  2: { priority: 'urgent',    label: 'Urgent',    description: 'Serious condition — seen within 15 min', color: '#ea580c', bg: '#ffedd5', icon: '⚠️' },
-  3: { priority: 'high',      label: 'High',      description: 'Significant concern — monitor closely',  color: '#d97706', bg: '#fef3c7', icon: '🔶' },
-  4: { priority: 'normal',    label: 'Moderate',  description: 'Stable — routine attention required',    color: '#2563eb', bg: '#dbeafe', icon: '🔵' },
-  5: { priority: 'low',       label: 'Minor',     description: 'Non-urgent — can wait for treatment',    color: '#6b7280', bg: '#f1f5f9', icon: '🟢' },
+  1: { priority: 'emergency', label: 'Critical',  description: 'Immediate life-threatening - act now',  color: '#dc2626', bg: '#fee2e2', icon: '🚨' },
+  2: { priority: 'urgent',    label: 'Urgent',    description: 'Serious condition - seen within 15 min', color: '#ea580c', bg: '#ffedd5', icon: '⚠️' },
+  3: { priority: 'high',      label: 'High',      description: 'Significant concern - monitor closely',  color: '#d97706', bg: '#fef3c7', icon: '🔶' },
+  4: { priority: 'normal',    label: 'Moderate',  description: 'Stable - routine attention required',    color: '#2563eb', bg: '#dbeafe', icon: '🔵' },
+  5: { priority: 'low',       label: 'Minor',     description: 'Non-urgent - can wait for treatment',    color: '#6b7280', bg: '#f1f5f9', icon: '🟢' },
 }
 const STAGE_ICONS: Record<string, string> = {
   triage: '🏥', examination: '🔍', treatment: '💊', observation: '👁️', discharge: '✅',
@@ -31,7 +31,7 @@ const STAGE_ICONS: Record<string, string> = {
 export default function HospitalWorkflow() {
   const { t } = useTranslation()
   const { formatDateTime } = useSettings()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, earTagSpecies, speciesLabel } = useMasterData()
+  const { speciesCategories, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
 
   const [tab, setTab] = useState<'queue' | 'workflow' | 'referrals'>('queue')
   const [hospitalId, setHospitalId] = useState('')
@@ -441,7 +441,7 @@ export default function HospitalWorkflow() {
       {/* ═══ QUEUE TAB ═══ */}
       {tab === 'queue' && (
         <div>
-          {/* Stats Row — clickable tiles filter the queue below */}
+          {/* Stats Row - clickable tiles filter the queue below */}
           {queueStats && (() => {
             const tiles = [
               { label: t('hospitalWorkflow.waiting'),     value: queueStats.waiting_count,    color: '#f59e0b', filter: 'waiting' },
@@ -496,7 +496,7 @@ export default function HospitalWorkflow() {
             </button>
           </div>
 
-          {/* Queue List — filtered by status or emergency priority if tile selected */}
+          {/* Queue List - filtered by status or emergency priority if tile selected */}
           {(() => {
             // Apply filter
             let filtered = queue
@@ -520,7 +520,7 @@ export default function HospitalWorkflow() {
                       )}
                     </div>
                     <div className="si-42eae7d1">
-                      <div className="si-b2cfcbec">{q.animal_name || t('hospitalWorkflow.unknownPatient')} <span className="si-db3602ae">({speciesLabel(q.animal_species, t)}{q.animal_breed ? ` — ${q.animal_breed}` : ''})</span></div>
+                      <div className="si-b2cfcbec">{q.animal_name || t('hospitalWorkflow.unknownPatient')} <span className="si-db3602ae">({speciesLabel(q.animal_species, t)}{q.animal_breed ? ` - ${q.animal_breed}` : ''})</span></div>
                       <div className="si-4801fc30">{t('hospitalWorkflow.owner')}: {q.owner_first_name} {q.owner_last_name}</div>
                       {q.enterpriseName && (
                         <div className="si-e893254c">
@@ -545,7 +545,7 @@ export default function HospitalWorkflow() {
                             : t('hospitalWorkflow.medicationPendingReview')
                         return (
                           <div style={{ fontSize: 11, color: dot, marginTop: 2 }}>
-                            💊 {label}{ms.pharmacyName ? ` — ${ms.pharmacyName}` : ''}
+                            💊 {label}{ms.pharmacyName ? ` - ${ms.pharmacyName}` : ''}
                           </div>
                         )
                       })()}
@@ -708,7 +708,7 @@ export default function HospitalWorkflow() {
                       </div>
                     </div>
 
-                    {/* Patient Details — core */}
+                    {/* Patient Details - core */}
                     <div className="si-9a250e84">
                       <div className="si-27da07a6">🐾 {t('hospitalWorkflow.walkIn.patientDetails')}</div>
                       <div className="si-51b511c9">
@@ -733,7 +733,7 @@ export default function HospitalWorkflow() {
                             {breedsForSpecies(walkInForm.animalSpecies).length > 0 ? (
                               <select value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value, animalCustomBreed: '' }))} className="si-f3740d1a">
                                 <option value="">{t('hospitalWorkflow.walkIn.selectBreed')}</option>
-                                {breedsForSpecies(walkInForm.animalSpecies).map(b => <option key={b} value={b}>{b}</option>)}
+                                {breedsForSpecies(walkInForm.animalSpecies).map(b => <option key={b} value={b}>{breedLabel(walkInForm.animalSpecies, b)}</option>)}
                               </select>
                             ) : (
                               <input placeholder={t('hospitalWorkflow.walkIn.breedPlaceholder')} value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value }))} className="si-d0e0df59" />
@@ -756,7 +756,7 @@ export default function HospitalWorkflow() {
                                   setWalkInForm(f => ({ ...f, animalClass: e.target.value, animalGender: term?.impliedGender || f.animalGender }))
                                 }} className="si-f3740d1a">
                                   <option value="">{t('animalClass.selectClass')}</option>
-                                  {classTermsForSpecies(walkInForm.animalSpecies).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                                  {classTermsForSpecies(walkInForm.animalSpecies).map(c => <option key={c.value} value={c.value}>{resolveLabel(c, t)}</option>)}
                                 </select>
                               </>
                             ) : (
@@ -869,14 +869,14 @@ export default function HospitalWorkflow() {
                 {/* Header */}
                 <div className="si-fe2d5bfb">
                   <div>
-                    <h3 className="si-3fe3cab8">🏥 Triage — #{triageTarget.queue_number} {triageTarget.animal_name}</h3>
-                    <div className="si-aff656fd">Select severity level — priority is derived automatically</div>
+                    <h3 className="si-3fe3cab8">🏥 Triage - #{triageTarget.queue_number} {triageTarget.animal_name}</h3>
+                    <div className="si-aff656fd">Select severity level - priority is derived automatically</div>
                   </div>
                   <button onClick={() => setTriageTarget(null)} className="si-034e37c2">✕</button>
                 </div>
 
                 <div className="si-7a28b1a9">
-                  {/* Unified triage level selector — number + label + color all in one */}
+                  {/* Unified triage level selector - number + label + color all in one */}
                   <div>
                     <label className="si-1cac7fac">
                       {t('hospitalWorkflow.triageLevel')} <span className="si-f84f41a5">*</span>
@@ -902,7 +902,7 @@ export default function HospitalWorkflow() {
                     </div>
                   </div>
 
-                  {/* Derived priority badge — confirmation that priority auto-matches level */}
+                  {/* Derived priority badge - confirmation that priority auto-matches level */}
                   {(() => {
                     const tl = TRIAGE_LEVELS[triageForm.triageLevel]
                     return (
@@ -1041,7 +1041,7 @@ export default function HospitalWorkflow() {
                     <div className="si-85143a6f">
                       {selectedCase.transitions.map((tr: any, i: number) => (
                         <div key={i} className="si-72912216">
-                          <span className="si-b2cfcbec">{tr.from_stage || '—'} → {tr.to_stage}</span>
+                          <span className="si-b2cfcbec">{tr.from_stage || '-'} → {tr.to_stage}</span>
                           <span className="si-98734f9a">{t('hospitalWorkflow.by')} {tr.first_name} {tr.last_name}</span>
                           <span className="si-bd94d1af">{formatDateTime(tr.created_at)}</span>
                         </div>
@@ -1053,7 +1053,7 @@ export default function HospitalWorkflow() {
                 {/* Medical History Panel */}
                 {caseMedicalSummary && (
                   <div className="si-3d341eca">
-                    <div className="si-db20e0d4">📋 {t('hospitalWorkflow.medicalHistory')} — {caseMedicalSummary.animal?.name}</div>
+                    <div className="si-db20e0d4">📋 {t('hospitalWorkflow.medicalHistory')} - {caseMedicalSummary.animal?.name}</div>
                     <div className="si-933bc6a9">
                       {/* Allergies */}
                       {caseMedicalSummary.allergies?.length > 0 && (
@@ -1073,7 +1073,7 @@ export default function HospitalWorkflow() {
                           {caseMedicalSummary.recentRecords.slice(0, 5).map((r: any) => (
                             <div key={r.id} className="si-6804a5dc">
                               <span className="si-b2cfcbec">{r.title || r.record_type}</span>
-                              {r.diagnosis && <span className="si-23033f05"> — {r.diagnosis}</span>}
+                              {r.diagnosis && <span className="si-23033f05"> - {r.diagnosis}</span>}
                               <span className="si-68f18f88">{formatDateTime(r.created_at)}</span>
                             </div>
                           ))}
@@ -1085,7 +1085,7 @@ export default function HospitalWorkflow() {
                           <div className="si-47ae2048">💊 {t('hospitalWorkflow.recentPrescriptions')}</div>
                           {caseMedicalSummary.recentPrescriptions.slice(0, 3).map((p: any) => (
                             <div key={p.id} className="si-05aae049">
-                              {p.diagnosis || 'Prescription'} — Dr. {p.vet_first_name} {p.vet_last_name} <span className="si-385f4f50">{formatDateTime(p.created_at)}</span>
+                              {p.diagnosis || 'Prescription'} - Dr. {p.vet_first_name} {p.vet_last_name} <span className="si-385f4f50">{formatDateTime(p.created_at)}</span>
                             </div>
                           ))}
                         </div>
@@ -1218,7 +1218,7 @@ export default function HospitalWorkflow() {
                 )}
 
                 <div className="si-d8480906">
-                  {/* Vet Search — required */}
+                  {/* Vet Search - required */}
                   <VetSearchPicker selectedVet={selectedToVet} onSelect={setSelectedToVet} required />
                   {!selectedToVet && (
                     <p className="si-7bdf7b77">
@@ -1226,10 +1226,10 @@ export default function HospitalWorkflow() {
                     </p>
                   )}
 
-                  {/* Patient — optional */}
+                  {/* Patient - optional */}
                   <AnimalSearchPicker selectedAnimal={referralAnimal} onSelect={setReferralAnimal} label="🔍 Patient (optional)" hospitalId={hospitalId || undefined} />
 
-                  {/* Reason — required */}
+                  {/* Reason - required */}
                   <div>
                     <label className="si-1d2216db">
                       {t('hospitalWorkflow.reasonForReferral')} <span className="si-f84f41a5">*</span>
@@ -1247,7 +1247,7 @@ export default function HospitalWorkflow() {
                     )}
                   </div>
 
-                  {/* Specialty — optional */}
+                  {/* Specialty - optional */}
                   <div>
                     <label className="si-1d2216db">
                       {t('hospitalWorkflow.specialtyNeeded')} <span className="si-fe954780">(optional)</span>
@@ -1274,7 +1274,7 @@ export default function HospitalWorkflow() {
                     </select>
                   </div>
 
-                  {/* Clinical Notes — optional */}
+                  {/* Clinical Notes - optional */}
                   <div>
                     <label className="si-1d2216db">
                       {t('hospitalWorkflow.clinicalNotes')} <span className="si-fe954780">(optional)</span>

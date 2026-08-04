@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
+import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
+import PasswordInput from '../components/PasswordInput'
 import './Auth.css'
 
 interface RegisterProps {
@@ -8,9 +11,18 @@ interface RegisterProps {
   onGoHome?: () => void
 }
 
+/**
+ * Roles a landing page may preselect via ?role=. Deliberately a whitelist rather
+ * than trusting the query string - the value goes straight into the role field,
+ * and only self-registerable roles belong here.
+ */
+const PRESELECTABLE_ROLES = ['pet_owner', 'farmer', 'veterinarian', 'corporate_admin', 'groomer']
+
 export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
   const { register } = useAuth()
   const { t } = useTranslation()
+  const [searchParams] = useSearchParams()
+  const requestedRole = searchParams.get('role')
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -18,7 +30,9 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'pet_owner',
+    // "List your business" on the home page links here as ?role=groomer, so the
+    // visitor lands on the right form instead of having to find the role again.
+    role: requestedRole && PRESELECTABLE_ROLES.includes(requestedRole) ? requestedRole : 'pet_owner',
     // Vet-specific
     licenseNumber: '',
     yearsOfExperience: '',
@@ -33,9 +47,24 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
   const [submitted, setSubmitted] = useState(false)
   const [acceptTerms, setAcceptTerms] = useState(false)
 
+  // Grooming & Spa is dark-launched behind `grooming.enabled`; only offer the role when the
+  // module is actually live, otherwise the account would land on a workspace that 404s.
+  const { enabled: groomingEnabled } = useGroomingEnabled()
+
   const isVet = formData.role === 'veterinarian'
   const isCorporate = formData.role === 'corporate_admin'
+  const isGroomer = formData.role === 'groomer'
+  // groomer self-registers ACTIVE - verification happens per business, not per account
+  // (migration 030 + UserService.createUser's pendingRoles list).
   const isPendingRole = isVet || isCorporate
+
+  // If the flag flips off (or the probe resolves late) while 'groomer' is selected, fall back to
+  // the default role so the form can never submit a role the backend will reject.
+  useEffect(() => {
+    if (!groomingEnabled && formData.role === 'groomer') {
+      setFormData(prev => ({ ...prev, role: 'pet_owner' }))
+    }
+  }, [groomingEnabled, formData.role])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -131,6 +160,9 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
     { value: 'farmer', label: t('register.roleFarmer'), icon: '🐄', desc: t('register.roleFarmerDesc') },
     { value: 'veterinarian', label: t('register.roleVet'), icon: '👨‍⚕️', desc: t('register.roleVetDesc') },
     { value: 'corporate_admin', label: t('register.roleCorporateAdmin'), icon: '🏥', desc: t('register.roleCorporateAdminDesc') },
+    ...(groomingEnabled
+      ? [{ value: 'groomer', label: t('register.roleGroomer'), icon: '💈', desc: t('register.roleGroomerDesc') }]
+      : []),
   ]
 
   // After a pending-role submits successfully, show confirmation screen only
@@ -249,6 +281,18 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
               </div>
             )}
 
+            {/* Groomer next-steps notice - the account is active immediately; it is the BUSINESS
+                that needs admin verification before it becomes publicly searchable. */}
+            {isGroomer && (
+              <div className="hospital-callout" role="note">
+                <span className="hospital-callout-icon">💈</span>
+                <div className="hospital-callout-body">
+                  <strong>{t('register.groomerNoticeTitle')}</strong>
+                  <p>{t('register.groomerNoticeBody')}</p>
+                </div>
+              </div>
+            )}
+
             {/* Vet-specific fields (shown only when role = veterinarian) */}
             {isVet && (
               <div className="vet-fields">
@@ -289,15 +333,15 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="reg-password">{t('register.password')}</label>
-                <input id="reg-password" type="password" name="password" placeholder="Min 8 chars, A-Z, a-z, 0-9" value={formData.password} onChange={handleChange} required autoComplete="new-password" />
+                <PasswordInput id="reg-password" name="password" placeholder="Min 8 chars, A-Z, a-z, 0-9" value={formData.password} onChange={handleChange} required autoComplete="new-password" />
               </div>
               <div className="form-group">
                 <label htmlFor="reg-confirmPassword">{t('register.confirmPassword')}</label>
-                <input id="reg-confirmPassword" type="password" name="confirmPassword" placeholder="Re-enter password" value={formData.confirmPassword} onChange={handleChange} required autoComplete="new-password" />
+                <PasswordInput id="reg-confirmPassword" name="confirmPassword" placeholder="Re-enter password" value={formData.confirmPassword} onChange={handleChange} required autoComplete="new-password" />
               </div>
             </div>
 
-            {/* §17.2: policy acknowledgement — required before account creation */}
+            {/* §17.2: policy acknowledgement - required before account creation */}
             <label className="si-98a162b5">
               <input
                 type="checkbox"

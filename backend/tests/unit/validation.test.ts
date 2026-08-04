@@ -1,5 +1,5 @@
 /**
- * Joi validation schema tests — pure unit tests, no mocks required.
+ * Joi validation schema tests - pure unit tests, no mocks required.
  */
 import {
   registerSchema,

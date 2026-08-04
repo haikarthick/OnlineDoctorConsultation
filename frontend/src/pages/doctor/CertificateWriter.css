@@ -1,7 +1,7 @@
 /* ============================================================
    CertificateWriter.css
    Follows the established design system (ModulePage.css / modules.css).
-   NO inline styles needed in the JSX — all layout here.
+   NO inline styles needed in the JSX - all layout here.
    ============================================================ */
 
 /* ── Card padding (module-card has no padding by default) ── */
@@ -27,7 +27,7 @@
   margin-bottom: 24px;
 }
 
-/* ── Owner search — autocomplete wrapper ── */
+/* ── Owner search - autocomplete wrapper ── */
 .cw-owner-search-wrap {
   position: relative;
 }

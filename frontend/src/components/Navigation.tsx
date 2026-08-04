@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { usePermission, NAV_PERMISSION_MAP } from '../context/PermissionContext'
+import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { MenuItem, UserRole } from '../types'
 import './Navigation.css'
@@ -17,6 +18,7 @@ const NAV_SCROLL_KEY = 'vetcare_nav_scroll'
 export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath }) => {
   const { user, logout } = useAuth()
   const { hasPermission, networks } = usePermission()
+  const { enabled: groomingEnabled } = useGroomingEnabled()
   const { t } = useTranslation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -88,12 +90,12 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
   }, [currentPath])
 
   /* ════════════════════════════════════════════════════════
-   * MENU DEFINITIONS — properly grouped by module/section
+   * MENU DEFINITIONS - properly grouped by module/section
    * ════════════════════════════════════════════════════════ */
   const menuItems: MenuItem[] = [
     // ── Dashboard (always first, ungrouped) ──
     { id: 'dashboard', label: t('nav.dashboard'), icon: '📊', path: '/dashboard',
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'], section: 'Main' },
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'], section: 'Main' },
     { id: 'marketplace', label: t('nav.marketplace'), icon: '🏪', path: '/marketplace',
       roles: ['farmer', 'admin', 'pet_owner', 'veterinarian'], section: 'Main' },
 
@@ -110,6 +112,35 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['veterinarian'], section: 'Consultations' },
     { id: 'prescriptions', label: t('nav.myPrescriptions'), icon: '💊', path: '/prescriptions',
       roles: ['pet_owner', 'farmer'], section: 'Consultations' },
+
+    // ── Grooming & Spa ──
+    // Sits directly after Consultations by design: both are "book a service for my animal"
+    // journeys, so a customer scanning the menu finds them together instead of hunting past
+    // the farm/analytics/network sections. Section order here IS the render order.
+    { id: 'grooming-find', label: t('nav.groomingFind'), icon: '💈', path: '/grooming/find',
+      roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
+    { id: 'grooming-my-orders', label: t('nav.groomingMyOrders'), icon: '📅', path: '/grooming/my-orders',
+      roles: ['pet_owner', 'farmer'], section: 'Grooming & Spa' },
+    // Self-service onboarding entry. Same path as the console below - the page renders the
+    // "create your business" form until a provider exists. Hidden once the user actually holds
+    // grooming_provider_console (see the filter below) so the two never show at once.
+    { id: 'grooming-apply', label: t('nav.groomingApply'), icon: '🏪', path: '/grooming/provider',
+      roles: ['pet_owner', 'farmer', 'veterinarian'], section: 'Grooming & Spa' },
+    // pet_owner/farmer are listed on the provider items because createProvider() grants the
+    // 'groomer' role in the DB but the cached login payload keeps their original role until they
+    // re-login. The permission check below is the real gate - it reads live DB roles - so a
+    // customer who has not registered a business still never sees these.
+    { id: 'grooming-provider', label: t('nav.groomingProvider'), icon: '💈', path: '/grooming/provider',
+      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
+    { id: 'grooming-orders', label: t('nav.groomingOrders'), icon: '📋', path: '/grooming/orders',
+      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
+    // The grooming counterpart of the vet's "My Schedule" under Consultations.
+    { id: 'grooming-schedule', label: t('nav.groomingSchedule'), icon: '🗓️', path: '/grooming/schedule',
+      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
+    { id: 'grooming-earnings', label: t('nav.groomingEarnings'), icon: '💰', path: '/grooming/earnings',
+      roles: ['groomer', 'veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Grooming & Spa' },
+    { id: 'admin-grooming-providers', label: t('nav.groomingAdmin'), icon: '💈', path: '/admin/grooming-providers',
+      roles: ['admin'], section: 'Grooming & Spa' },
 
     // ── Animals & Health ──
     { id: 'animals', label: t(isPetOwner ? 'nav.myPets' : (user?.role === 'veterinarian' ? 'nav.myPets' : 'nav.myAnimals')),
@@ -220,16 +251,24 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-commission', label: t('nav.commissionSettings'), icon: '🪙', path: '/admin/commission-settings',
       roles: ['admin'], section: 'Finance' },
+    // Payables answers "who do I owe"; Settlements is the withdrawal queue. Payables first -
+    // it is the screen an admin opens to decide what to pay, before actioning anything.
+    { id: 'admin-payables', label: t('nav.payables'), icon: '💸', path: '/admin/payables',
+      roles: ['admin'], section: 'Finance' },
     { id: 'admin-settlements', label: t('nav.settlements'), icon: '🏦', path: '/admin/settlements',
       roles: ['admin'], section: 'Finance' },
     { id: 'admin-finance-reports', label: t('nav.financeReports'), icon: '📈', path: '/admin/finance-reports',
       roles: ['admin'], section: 'Finance' },
     { id: 'admin-reviews', label: t('nav.reviewModeration'), icon: '⚖️', path: '/admin/reviews',
       roles: ['admin'], section: 'Administration' },
+    // 'support' holds dispute_management and admin_cancellation_dashboard in
+    // DEFAULT_ROLE_PERMISSIONS, so RoleRoute already lets it open both of these.
+    // Without the role listed here there was simply no link to them, leaving the
+    // role with two reachable pages and no way to reach either.
     { id: 'admin-disputes', label: t('disputeManagement.title'), icon: '⚖️', path: '/admin/disputes',
-      roles: ['admin'], section: 'Administration' },
+      roles: ['admin', 'support'], section: 'Administration' },
     { id: 'admin-cancellation-dashboard', label: t('nav.cancellations'), icon: '📊', path: '/admin/cancellation-dashboard',
-      roles: ['admin'], section: 'Administration' },
+      roles: ['admin', 'support'], section: 'Administration' },
     { id: 'admin-medical-records', label: t('nav.medicalRecords'), icon: '📋', path: '/admin/medical-records',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-audit', label: t('nav.auditLogs'), icon: '📜', path: '/admin/audit-logs',
@@ -263,10 +302,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
     // ── Preferences (bottom) ──
     { id: 'settings', label: t('nav.settings'), icon: '⚙️', path: '/settings',
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin', 'hospital_staff', 'pharmacist'], section: 'Preferences' }
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin', 'hospital_staff', 'pharmacist', 'groomer', 'support'], section: 'Preferences' }
   ]
 
-  // Filter by role AND permission — supports multi-role users (P4-HIGH1)
+  // Filter by role AND permission - supports multi-role users (P4-HIGH1)
   const filteredMenuItems = menuItems.filter(item => {
     const userRoles = user?.roles && user.roles.length > 0 ? user.roles : (user?.role ? [user.role] : [])
     if (!item.roles.some(r => userRoles.includes(r as UserRole))) return false
@@ -278,6 +317,17 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
         && !userRoles.includes('admin' as UserRole)
         && !userRoles.includes('corporate_admin' as UserRole)
         && networks.length === 0) {
+      return false
+    }
+    // Grooming onboarding CTA disappears once the user owns/staffs a provider - from then on the
+    // "My Grooming Business" console entry covers the same route.
+    if (item.id === 'grooming-apply' && hasPermission('grooming_provider_console')) {
+      return false
+    }
+    // Dark launch: while `grooming.enabled` is off every /grooming route 404s server-side, so the
+    // whole section is hidden rather than leading users into dead pages. Permissions alone can't
+    // do this - the flag is a runtime setting, not a role.
+    if (item.section === 'Grooming & Spa' && !groomingEnabled) {
       return false
     }
     return true
@@ -298,7 +348,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     return groups
   }, [filteredMenuItems])
 
-  // Track collapsed sections — start with advanced sections collapsed
+  // Track collapsed sections - start with advanced sections collapsed
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
     'Innovation': true,
     'Intelligence': true,
@@ -337,7 +387,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
   // Section icon map for collapsed view
   const sectionIcons: Record<string, string> = {
-    'Main': '🏠', 'Consultations': '🏥', 'Animals & Health': '🐾',
+    'Main': '🏠', 'Consultations': '🏥', 'Grooming & Spa': '💈', 'Animals & Health': '🐾',
     'Farm Management': '🌾', 'Analytics & Tools': '📈', 'Innovation': '🚀',
     'Intelligence': '🤖', 'Veterinarian': '🩺', 'Administration': '🛡️',
     'Hospital Networks': '🌐', 'Preferences': '⚙️', 'Finance': '💰',
@@ -347,6 +397,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
   const sectionNameMap: Record<string, string> = {
     'Main': t('nav.sections.main'),
     'Consultations': t('nav.sections.consultations'),
+    'Grooming & Spa': t('nav.sections.groomingSpa'),
     'Animals & Health': t('nav.sections.animalsHealth'),
     'Farm Management': t('nav.sections.farmManagement'),
     'Analytics & Tools': t('nav.sections.analyticsTools'),
@@ -356,7 +407,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     'Account': t('nav.sections.account'),
     'Finance': t('nav.sections.finance'),
     'Administration': t('nav.sections.administration'),
-    'Hospital Networks': 'Hospital Networks',
+    'Hospital Networks': t('nav.sections.hospitalNetworks'),
     'Preferences': t('nav.sections.preferences'),
   }
 
@@ -426,7 +477,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
           )}
         </div>
 
-        {/* Menu Items — grouped by section */}
+        {/* Menu Items - grouped by section */}
         <div className="nav-menu" ref={navMenuRef} role="menubar" aria-label="Navigation menu">
           {groupedMenuItems.map((group) => {
             const isMainSection = group.section === 'Main'

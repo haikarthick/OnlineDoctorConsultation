@@ -32,8 +32,8 @@ export const registerSchema = Joi.object({
     'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
     'any.required': 'Password is required',
   }),
-  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'corporate_admin').default('pet_owner').messages({
-    'any.only': 'Role must be one of: pet_owner, farmer, veterinarian, corporate_admin',
+  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'corporate_admin', 'groomer').default('pet_owner').messages({
+    'any.only': 'Role must be one of: pet_owner, farmer, veterinarian, corporate_admin, groomer',
   }),
   confirmPassword: Joi.string().optional().strip(),
   // Veterinarian-specific fields (required when role = 'veterinarian')
@@ -336,7 +336,7 @@ export const createVaccinationSchema = Joi.object({
   dosage: shortText(100).optional().allow('', null),
   reactionNotes: longText(2000).optional().allow('', null),
   certificateNumber: shortText(100).optional().allow('', null),
-  // Protocol linkage — when vet selects a protocol from the master list,
+  // Protocol linkage - when vet selects a protocol from the master list,
   // this ID triggers auto-assignment in animal_vaccine_assignments so the
   // vaccination shows on the Vaccination Passport page.
   protocolId: uuid.optional(),
@@ -406,14 +406,14 @@ export const createPaymentSchema = Joi.object({
 });
 
 // ── Payment module (docs/PAYMENT_MODULE_PLAN.md §9) ──────────
-// NOTE: no client-supplied amounts anywhere — prices are server-derived.
+// NOTE: no client-supplied amounts anywhere - prices are server-derived.
 export const checkoutPaymentSchema = Joi.object({
   useWallet: Joi.boolean().optional().default(false),
 });
 
 export const verifyPaymentSchema = Joi.object({
   paymentId: requiredUuid,
-  // Razorpay fields (P2) — optional in demo mode
+  // Razorpay fields (P2) - optional in demo mode
   gatewayOrderId: Joi.string().max(255).optional().allow('', null),
   gatewayPaymentId: Joi.string().max(255).optional().allow('', null),
   gatewaySignature: Joi.string().max(512).optional().allow('', null),
@@ -476,8 +476,28 @@ export const toggleUserStatusSchema = Joi.object({
   isActive: Joi.boolean().required(),
 });
 
+// Vet details captured when a user takes the veterinarian role - used both by the self-serve
+// role-change request (licenseNumber required there) and the admin direct role change
+// (licenseNumber optional there). Provisions/updates the vet_profiles satellite row.
+const roleChangeVetProfileSchema = Joi.object({
+  licenseNumber: shortText(100).required(),
+  specializations: Joi.array().items(Joi.string().max(100)).optional(),
+  qualifications: Joi.array().items(Joi.string().max(200)).optional(),
+  yearsOfExperience: positiveInt.max(80).optional(),
+  consultationFee: positiveNumber.max(100000).optional(),
+  clinicName: shortText().optional().allow('', null),
+});
+
 export const changeUserRoleSchema = Joi.object({
-  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin').required(),
+  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin', 'groomer', 'support').required(),
+  // Optional vet details when an admin directly assigns the veterinarian role. If a license
+  // is supplied the resulting vet_profiles row is marked verified; otherwise it is provisioned
+  // unverified-but-visible so the vet can complete their license later. Stripped for non-vet roles.
+  profile: Joi.when('role', {
+    is: 'veterinarian',
+    then: roleChangeVetProfileSchema.fork(['licenseNumber'], (s) => s.optional()).optional(),
+    otherwise: Joi.object().strip(),
+  }),
 });
 
 export const processRefundSchema = Joi.object({
@@ -1121,7 +1141,7 @@ const livestockFields = {
   pregnancyMonth: Joi.number().integer().min(0).max(12).optional().allow(null),
   vaccinationStatus: Joi.string().valid('fully_vaccinated', 'partially_vaccinated', 'not_vaccinated', 'unknown').optional(),
   healthCertificate: Joi.boolean().optional(),
-  // listingTier / isHotDeal are admin-granted promotion flags — sellers cannot
+  // listingTier / isHotDeal are admin-granted promotion flags - sellers cannot
   // set them, so they are intentionally absent (stripUnknown drops them)
   linkedAnimalId: Joi.string().uuid().optional().allow('', null),
   auctionEndTime: Joi.string().optional().allow('', null),
@@ -1189,7 +1209,7 @@ export const updateOrderStatusSchema = Joi.object({
   status: Joi.string().valid('pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded').required(),
 });
 
-// Deal handshake (free classifieds — money settles off-platform between the parties)
+// Deal handshake (free classifieds - money settles off-platform between the parties)
 export const confirmDealSchema = Joi.object({
   paymentMethod: Joi.string().valid('cash', 'upi', 'bank_transfer', 'other').optional().allow('', null),
 });
@@ -1593,8 +1613,14 @@ export const createPatientConsentSchema = Joi.object({
 });
 
 export const roleChangeRequestSchema = Joi.object({
-  requested_role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'corporate_admin').required(),
+  requested_role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'corporate_admin', 'groomer').required(),
   reason: Joi.string().min(10).max(1000).required(),
+  // Required only when requesting the veterinarian role; ignored/forbidden otherwise.
+  profile: Joi.when('requested_role', {
+    is: 'veterinarian',
+    then: roleChangeVetProfileSchema.required(),
+    otherwise: Joi.object().strip(),
+  }),
 });
 
 export const rejectRoleChangeSchema = Joi.object({
@@ -1702,6 +1728,14 @@ export const createBranchHospitalSchema = Joi.object({
 });
 
 // ─── Master Data (admin CRUD: species/breeds/animal classes/marketplace categories/conditions) ───
+// Per-locale label overrides shared by every master-data entity (migrations 025/026).
+const localeLabelFields = {
+  labelHi: Joi.string().max(150).allow('', null).optional(),
+  labelKn: Joi.string().max(150).allow('', null).optional(),
+  labelMl: Joi.string().max(150).allow('', null).optional(),
+  labelTa: Joi.string().max(150).allow('', null).optional(),
+  labelTe: Joi.string().max(150).allow('', null).optional(),
+};
 export const createMasterSpeciesSchema = Joi.object({
   code: Joi.string().min(1).max(50).required(),
   label: Joi.string().min(1).max(100).required(),
@@ -1736,10 +1770,12 @@ export const createMasterBreedSchema = Joi.object({
   speciesId: Joi.string().uuid().required(),
   name: Joi.string().min(1).max(150).required(),
   sortOrder: Joi.number().integer().optional(),
+  ...localeLabelFields,
 });
 export const updateMasterBreedSchema = Joi.object({
   name: Joi.string().min(1).max(150).optional(),
   sortOrder: Joi.number().integer().optional(),
+  ...localeLabelFields,
 });
 
 export const createMasterAnimalClassSchema = Joi.object({
@@ -1751,6 +1787,7 @@ export const createMasterAnimalClassSchema = Joi.object({
   canBePregnant: Joi.boolean().optional(),
   canProduceMilk: Joi.boolean().optional(),
   sortOrder: Joi.number().integer().optional(),
+  ...localeLabelFields,
 });
 export const updateMasterAnimalClassSchema = Joi.object({
   labelKey: Joi.string().max(150).allow('', null).optional(),
@@ -1759,6 +1796,7 @@ export const updateMasterAnimalClassSchema = Joi.object({
   canBePregnant: Joi.boolean().optional(),
   canProduceMilk: Joi.boolean().optional(),
   sortOrder: Joi.number().integer().optional(),
+  ...localeLabelFields,
 });
 
 export const createMasterMarketplaceCategorySchema = Joi.object({
@@ -1767,12 +1805,14 @@ export const createMasterMarketplaceCategorySchema = Joi.object({
   label: Joi.string().max(100).allow('', null).optional(),
   icon: Joi.string().max(10).allow('', null).optional(),
   sortOrder: Joi.number().integer().optional(),
+  ...localeLabelFields,
 });
 export const updateMasterMarketplaceCategorySchema = Joi.object({
   labelKey: Joi.string().max(150).allow('', null).optional(),
   label: Joi.string().max(100).allow('', null).optional(),
   icon: Joi.string().max(10).allow('', null).optional(),
   sortOrder: Joi.number().integer().optional(),
+  ...localeLabelFields,
 });
 
 export const createMasterMarketplaceConditionSchema = Joi.object({
@@ -1780,9 +1820,270 @@ export const createMasterMarketplaceConditionSchema = Joi.object({
   labelKey: Joi.string().max(150).allow('', null).optional(),
   label: Joi.string().max(100).allow('', null).optional(),
   sortOrder: Joi.number().integer().optional(),
+  ...localeLabelFields,
 });
 export const updateMasterMarketplaceConditionSchema = Joi.object({
   labelKey: Joi.string().max(150).allow('', null).optional(),
   label: Joi.string().max(100).allow('', null).optional(),
   sortOrder: Joi.number().integer().optional(),
+  ...localeLabelFields,
+});
+
+// ─── Grooming & Spa module ───────────────────────────────────
+export const createGroomingProviderSchema = Joi.object({
+  businessName: shortText(200).required(),
+  providerType: Joi.string().valid('veterinarian', 'groomer', 'business', 'clinic').optional(),
+  description: longText(2000).optional().allow('', null),
+  logoUrl: Joi.string().uri({ allowRelative: true }).max(500).optional().allow('', null),
+  contactPhone: shortText(20).optional().allow('', null),
+  contactEmail: Joi.string().email().max(255).optional().allow('', null),
+  offersAtPremises: Joi.boolean().optional(),
+  offersMobile: Joi.boolean().optional(),
+  operatingHours: Joi.object().optional(),
+  supportedSpecies: Joi.array().items(Joi.string().max(60)).optional(),
+  sizeLimits: Joi.object().optional(),
+  legalName: shortText(255).optional().allow('', null),
+  pan: shortText(20).optional().allow('', null),
+  gstin: shortText(20).optional().allow('', null),
+  businessAddress: longText(500).optional().allow('', null),
+  payoutAccountName: shortText(255).optional().allow('', null),
+  payoutAccountNumber: shortText(50).optional().allow('', null),
+  payoutIfsc: shortText(20).optional().allow('', null),
+  payoutUpi: shortText(100).optional().allow('', null),
+});
+
+export const updateGroomingProviderSchema = createGroomingProviderSchema.fork(
+  ['businessName'], (s) => s.optional()
+).keys({ isPaused: Joi.boolean().optional() }).min(1);
+
+export const groomingLocationSchema = Joi.object({
+  name: shortText(200).required(),
+  locationType: Joi.string().valid('premises', 'mobile_zone').optional(),
+  address: longText(500).optional().allow('', null),
+  city: shortText(100).optional().allow('', null),
+  state: shortText(100).optional().allow('', null),
+  postalCode: shortText(20).optional().allow('', null),
+  gpsLatitude: Joi.number().min(-90).max(90).optional().allow(null),
+  gpsLongitude: Joi.number().min(-180).max(180).optional().allow(null),
+  serviceRadiusKm: positiveNumber.max(500).optional().allow(null),
+});
+
+export const groomingResourceSchema = Joi.object({
+  name: shortText(150).required(),
+  resourceType: Joi.string().valid('grooming_table', 'bath_station', 'drying_cage', 'spa_room', 'other').optional(),
+  locationId: uuid.optional().allow(null),
+});
+
+export const groomingServiceSchema = Joi.object({
+  name: shortText(200).required(),
+  categoryId: uuid.optional().allow(null),
+  description: longText(2000).optional().allow('', null),
+  serviceKind: Joi.string().valid('service', 'package', 'membership').optional(),
+  basePrice: positiveNumber.max(1000000).required(),
+  currency: Joi.string().max(10).optional(),
+  durationMinutes: positiveInt.max(1440).optional(),
+  taxPercent: positiveNumber.max(100).optional(),
+  paymentRule: Joi.string().valid('full', 'deposit').optional(),
+  depositAmount: positiveNumber.max(1000000).optional(),
+  isVariablePrice: Joi.boolean().optional(),
+  cancellationPolicy: Joi.object().optional(),
+  supportedSpecies: Joi.array().items(Joi.string().max(60)).optional(),
+  availableAtPremises: Joi.boolean().optional(),
+  availableMobile: Joi.boolean().optional(),
+  sortOrder: Joi.number().integer().optional(),
+});
+
+export const updateGroomingServiceSchema = groomingServiceSchema.fork(
+  ['name', 'basePrice'], (s) => s.optional()
+).keys({ isActive: Joi.boolean().optional(), isPaused: Joi.boolean().optional() }).min(1);
+
+export const groomingStaffSchema = Joi.object({
+  email: Joi.string().email().required(),
+  role: Joi.string().valid('manager', 'staff').required(),
+});
+
+export const groomingProviderRejectSchema = Joi.object({
+  reason: Joi.string().min(5).max(500).required(),
+});
+
+export const createGroomingOrderSchema = Joi.object({
+  providerId: uuid.required(),
+  serviceId: uuid.required(),
+  animalId: uuid.optional().allow(null),
+  locationId: uuid.optional().allow(null),
+  serviceMode: Joi.string().valid('premises', 'mobile').optional(),
+  scheduledDate: Joi.date().required(),
+  timeSlotStart: Joi.string().pattern(/^\d{2}:\d{2}/).required(),
+  addons: Joi.array().items(Joi.object({
+    name: shortText(200).required(),
+    price: positiveNumber.max(1000000).required(),
+  })).optional(),
+  handlingNotes: longText(1000).optional().allow('', null),
+  ownerNotes: longText(1000).optional().allow('', null),
+  consent: Joi.object({
+    handling: Joi.boolean().valid(true).required(),
+    products: Joi.boolean().optional(),
+    photography: Joi.boolean().optional(),
+    emergencyContact: Joi.boolean().optional(),
+  }).required(),
+});
+
+export const groomingCancelSchema = Joi.object({
+  reason: shortText(500).optional().allow('', null),
+});
+
+// ─── Wallet withdrawals (038) ────────────────────────────────
+// Payout details are conditional on the method: a UPI payout needs a VPA, a bank transfer needs
+// name + account + IFSC. The service re-checks and returns the readable error.
+export const walletWithdrawalRequestSchema = Joi.object({
+  amount: Joi.number().positive().precision(2).required(),
+  method: Joi.string().valid('bank_transfer', 'upi').optional(),
+  accountName: shortText(255).optional().allow('', null),
+  // .message() must attach directly to the rule it overrides. Chaining it after .allow()
+  // throws "Cannot apply rules to empty ruleset" at MODULE LOAD, which tsc cannot see and
+  // which takes the whole server down on boot - caught by npm run verify:runtime.
+  accountNumber: Joi.string().pattern(/^\d{6,20}$/).message('Account number must be 6-20 digits')
+    .optional().allow('', null),
+  ifsc: Joi.string().pattern(/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/).message('Enter a valid IFSC code')
+    .optional().allow('', null),
+  upiId: Joi.string().pattern(/^[\w.\-_]{2,64}@[a-zA-Z]{2,64}$/).message('Enter a valid UPI ID (name@bank)')
+    .optional().allow('', null),
+});
+
+// ─── Grooming availability / working hours (037) ─────────────
+// HH:MM, 24-hour. Deliberately strict: a malformed time parses to 0 in the slot engine and
+// would silently open the salon at midnight.
+const hhmm = Joi.string().pattern(/^([01]\d|2[0-3]):[0-5]\d$/).message('Time must be HH:MM (24-hour)');
+const isoDate = Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).message('Date must be YYYY-MM-DD');
+
+export const groomingScheduleSchema = Joi.object({
+  dayOfWeek: Joi.number().integer().min(0).max(6).required(),
+  locationId: uuid.optional().allow(null),
+  openTime: hhmm.required(),
+  closeTime: hhmm.required(),
+  slotIntervalMinutes: Joi.number().integer().min(5).max(480).optional(),
+  capacity: Joi.number().integer().min(1).max(100).optional(),
+  isActive: Joi.boolean().optional(),
+});
+
+export const groomingDateOverrideSchema = Joi.object({
+  overrideDate: isoDate.required(),
+  overrideType: Joi.string().valid('closed', 'custom_hours').required(),
+  locationId: uuid.optional().allow(null),
+  // Required together with custom_hours; the service re-checks and returns a readable error.
+  openTime: hhmm.optional().allow(null, ''),
+  closeTime: hhmm.optional().allow(null, ''),
+  slotIntervalMinutes: Joi.number().integer().min(5).max(480).optional().allow(null),
+  capacity: Joi.number().integer().min(1).max(100).optional().allow(null),
+  reason: shortText(500).optional().allow('', null),
+});
+
+export const groomingBlockedSlotSchema = Joi.object({
+  startTime: hhmm.required(),
+  endTime: hhmm.required(),
+  blockDate: isoDate.optional().allow(null, ''),
+  isRecurring: Joi.boolean().optional(),
+  recurringDay: Joi.number().integer().min(0).max(6).optional().allow(null),
+  locationId: uuid.optional().allow(null),
+  reason: shortText(500).optional().allow('', null),
+});
+
+// ─── Grooming provider acceptance gate (036) ─────────────────
+export const groomingAcceptSchema = Joi.object({
+  note: shortText(500).optional().allow('', null),
+});
+
+// A decline triggers a full refund and is shown to the customer, so - unlike cancel - the
+// reason is required and may not be blank.
+export const groomingDeclineSchema = Joi.object({
+  reason: shortText(500).required(),
+});
+
+// ─── Grooming ops (P3) ───────────────────────────────────────
+const scentValue = Joi.string().valid('good', 'watch', 'vet_advised').optional().allow(null, '');
+
+export const groomingTransitionSchema = Joi.object({
+  toStatus: Joi.string().valid('provider_assigned', 'checked_in', 'en_route', 'intake_done',
+    'in_progress', 'quality_check', 'ready_for_pickup', 'returning', 'completed', 'no_show').required(),
+  note: shortText(500).optional().allow('', null),
+});
+
+export const groomingAssignSchema = Joi.object({
+  staffId: uuid.optional().allow(null),
+  resourceId: uuid.optional().allow(null),
+  etaMinutes: positiveInt.max(600).optional().allow(null),
+}).min(1);
+
+export const groomingIntakeSchema = Joi.object({
+  arrivalCondition: longText(1000).optional().allow('', null),
+  temperament: shortText(50).optional().allow('', null),
+  ownerInstructions: longText(1000).optional().allow('', null),
+  allergies: longText(1000).optional().allow('', null),
+  handlingRestrictions: longText(1000).optional().allow('', null),
+  scentSkin: scentValue, scentCoat: scentValue, scentEars: scentValue, scentNails: scentValue, scentTeeth: scentValue,
+  scentNotes: longText(1000).optional().allow('', null),
+  beforePhotos: Joi.array().items(Joi.string().max(500)).optional(),
+  consentHandling: Joi.boolean().optional(),
+  consentProducts: Joi.boolean().optional(),
+  consentPhotography: Joi.boolean().optional(),
+  consentEmergencyContact: Joi.boolean().optional(),
+});
+
+export const groomingItemStatusSchema = Joi.object({
+  status: Joi.string().valid('pending', 'started', 'completed', 'skipped', 'awaiting_approval', 'paused').required(),
+  reason: shortText(500).optional().allow('', null),
+  photoUrl: Joi.string().max(500).optional().allow('', null),
+});
+
+export const groomingReportCardSchema = Joi.object({
+  afterPhotos: Joi.array().items(Joi.string().max(500)).optional(),
+  productsUsed: longText(1000).optional().allow('', null),
+  aftercareNotes: longText(2000).optional().allow('', null),
+  summary: longText(2000).optional().allow('', null),
+  nextRecommendedDate: Joi.date().optional().allow(null),
+});
+
+export const groomingSettleSchema = Joi.object({
+  method: Joi.string().valid('bank_transfer', 'upi', 'other').optional(),
+  // Required, not optional. Settlement is manual - the money moves outside this system, so the
+  // reference is the ONLY evidence it happened, and it is what the provider is told.
+  reference: shortText(120).required(),
+  tdsAmount: positiveNumber.max(1000000).optional(),
+  notes: longText(500).optional().allow('', null),
+});
+
+export const groomingVariableRequestSchema = Joi.object({
+  name: shortText(200).required(),
+  price: positiveNumber.max(1000000).required(),
+  taxPercent: positiveNumber.max(100).optional().allow(null),
+  reason: longText(1000).optional().allow('', null),
+  photoUrl: Joi.string().max(500).optional().allow('', null),
+});
+
+export const groomingVariableRespondSchema = Joi.object({
+  approve: Joi.boolean().required(),
+});
+
+export const groomingEscalationSchema = Joi.object({
+  issueType: shortText(40).required(),
+  description: longText(2000).optional().allow('', null),
+  photos: Joi.array().items(Joi.string().max(500)).optional(),
+});
+
+export const groomingEscalationRespondSchema = Joi.object({
+  status: Joi.string().valid('owner_notified', 'consult_booked', 'resolved', 'dismissed').required(),
+  consultationBookingId: uuid.optional().allow(null),
+});
+
+export const groomingDisputeSchema = Joi.object({
+  reason: shortText(100).required(),
+  comments: longText(2000).optional().allow('', null),
+  images: Joi.array().items(Joi.string().max(500)).optional(),
+  requestedResolution: shortText(30).optional().allow('', null),
+});
+
+export const groomingDisputeRespondSchema = Joi.object({
+  status: Joi.string().valid('under_review', 'resolved', 'partially_refunded', 'rejected').required(),
+  resolutionNote: longText(2000).optional().allow('', null),
+  refundAmount: positiveNumber.max(1000000).optional(),
 });

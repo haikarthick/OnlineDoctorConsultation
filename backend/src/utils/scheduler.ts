@@ -53,6 +53,18 @@ export function startScheduler(): void {
   // Payment module: expire unpaid slot holds (no-op while payment.enabled=false)
   setInterval(runPaymentHoldExpiry, FIVE_MINUTES);
 
+  // Grooming module: expire unpaid grooming slot holds (no-op while grooming.enabled=false)
+  setInterval(runGroomingHoldExpiry, FIVE_MINUTES);
+
+  // Grooming module: auto-cancel + refund bookings the provider never accepted.
+  // Every minute rather than every five: this job holds a customer's money on a booking nobody
+  // has committed to, so the window they were promised should be honoured to the minute.
+  setInterval(runGroomingAcceptanceExpiry, 60 * 1000);
+
+  // Grooming module: mature provider earnings clearing → available (hourly + on boot)
+  runGroomingEarningsMaturity();
+  setInterval(runGroomingEarningsMaturity, ONE_HOUR);
+
   // Payment module: reconcile stuck 'pending' payments against the gateway (daily + on boot)
   runPaymentReconciliation();
   setInterval(runPaymentReconciliation, TWENTY_FOUR_HOURS);
@@ -67,7 +79,7 @@ export function startScheduler(): void {
   // Payment module: emergency confirm-window fast-track (every minute; cheap no-op query)
   setInterval(runEmergencyFastTrack, 60 * 1000);
 
-  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, pharmacy stock alerts every 24h, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min');
+  logger.info('Scheduler started - expiry check every 24h, missed bookings every 15min, pharmacy stock alerts every 24h, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min, grooming hold expiry every 5min');
 }
 
 async function runExpiryCheck(): Promise<void> {
@@ -95,6 +107,44 @@ async function runPaymentHoldExpiry(): Promise<void> {
     await PaymentOrchestrator.expireStalePaymentHolds();
   } catch (err: any) {
     logger.error('[Payments] Hold expiry job failed', { error: err.message });
+  }
+}
+
+/**
+ * Grooming's own hold expiry - separate job from the consultation one above on purpose: they
+ * release different resources (grooming_orders vs bookings) under different settings, and one
+ * module's schedule must never depend on the other's.
+ */
+async function runGroomingHoldExpiry(): Promise<void> {
+  try {
+    const GroomingPaymentService = (await import('../services/grooming/GroomingPaymentService')).default;
+    await GroomingPaymentService.expireStaleHolds();
+  } catch (err: any) {
+    logger.error('[Grooming] Hold expiry job failed', { error: err.message });
+  }
+}
+
+/**
+ * Grooming acceptance gate: bookings the provider never accepted are auto-cancelled and the
+ * customer refunded in full. Distinct from the hold expiry above - that one releases UNPAID
+ * slots, this one returns money that was already collected.
+ */
+async function runGroomingAcceptanceExpiry(): Promise<void> {
+  try {
+    const GroomingOrderService = (await import('../services/grooming/GroomingOrderService')).default;
+    await GroomingOrderService.expireUnacceptedOrders();
+  } catch (err: any) {
+    logger.error('[Grooming] Acceptance expiry job failed', { error: err.message });
+  }
+}
+
+/** Grooming's own earnings maturity sweep (clearing → available), separate from the doctor one. */
+async function runGroomingEarningsMaturity(): Promise<void> {
+  try {
+    const GroomingSettlementService = (await import('../services/grooming/GroomingSettlementService')).default;
+    await GroomingSettlementService.releaseAllMatured();
+  } catch (err: any) {
+    logger.error('[Grooming] Earnings maturity job failed', { error: err.message });
   }
 }
 
@@ -219,14 +269,14 @@ async function runPharmacyStockAlerts(): Promise<void> {
   }
 }
 
-/** Runs Monday 08:00 UTC — sends weekly digest to corporate_admin and hospital_director members */
+/** Runs Monday 08:00 UTC - sends weekly digest to corporate_admin and hospital_director members */
 async function scheduleWeeklyDigest(): Promise<void> {
   try {
     const now = new Date();
     // Day 1 = Monday in JS Date (0=Sunday)
     if (now.getUTCDay() !== 1 || now.getUTCHours() !== 8) return;
 
-    logger.info('[WeeklyDigest] Monday 08:00 UTC — sending network digests');
+    logger.info('[WeeklyDigest] Monday 08:00 UTC - sending network digests');
 
     const networksRes = await database.query(
       `SELECT id FROM hospital_networks WHERE is_active = true AND is_approved = true`

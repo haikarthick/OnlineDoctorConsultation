@@ -1,11 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import Register from './Register'
 
+/**
+ * Register reads ?role= via useSearchParams, so it needs a Router - which it
+ * always has in the real app (App.tsx renders it inside the route tree).
+ * `initialPath` lets a test drive the query string.
+ */
+function render(ui: React.ReactElement, initialPath = '/register') {
+  return rtlRender(<MemoryRouter initialEntries={[initialPath]}>{ui}</MemoryRouter>)
+}
+
 const mockRegister = vi.fn()
+const mockGroomingEnabled = vi.fn(() => ({ enabled: false, loading: false }))
 
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ register: mockRegister }),
+}))
+
+// Keep the module-flag probe out of the test - the real hook hits GET /grooming/status.
+vi.mock('../hooks/useGroomingEnabled', () => ({
+  useGroomingEnabled: () => mockGroomingEnabled(),
 }))
 
 vi.mock('react-i18next', () => ({
@@ -18,6 +34,7 @@ describe('Register form validation', () => {
   beforeEach(() => {
     mockRegister.mockReset()
     mockRegister.mockResolvedValue(undefined)
+    mockGroomingEnabled.mockReturnValue({ enabled: false, loading: false })
   })
 
   function fillRequiredFields(overrides: Partial<Record<'firstName' | 'lastName' | 'email' | 'phone' | 'password' | 'confirmPassword', string>> = {}) {
@@ -110,5 +127,83 @@ describe('Register form validation', () => {
 
     const submitBtn = screen.getByRole('button', { name: /register.createAccountBtn/ })
     expect(submitBtn).toBeDisabled()
+  })
+
+  it('reveals and re-masks the password when the show/hide toggle is used', () => {
+    render(<Register onSwitchToLogin={onSwitchToLogin} />)
+
+    const passwordInput = screen.getByLabelText('register.password') as HTMLInputElement
+    expect(passwordInput.type).toBe('password')
+
+    // Two password fields on this form; each toggle drives only its own input.
+    const [toggle] = screen.getAllByLabelText('common.showPassword')
+    fireEvent.click(toggle)
+    expect(passwordInput.type).toBe('text')
+    expect((screen.getByLabelText('register.confirmPassword') as HTMLInputElement).type).toBe('password')
+
+    fireEvent.click(screen.getByLabelText('common.hidePassword'))
+    expect(passwordInput.type).toBe('password')
+  })
+
+  it('hides the grooming provider role while the grooming module is disabled', () => {
+    mockGroomingEnabled.mockReturnValue({ enabled: false, loading: false })
+    render(<Register onSwitchToLogin={onSwitchToLogin} />)
+
+    expect(document.querySelector('input[name="role"][value="groomer"]')).toBeNull()
+  })
+
+  it('offers the grooming provider role and submits it once the module is enabled', async () => {
+    mockGroomingEnabled.mockReturnValue({ enabled: true, loading: false })
+    render(<Register onSwitchToLogin={onSwitchToLogin} />)
+
+    const groomerRadio = document.querySelector('input[name="role"][value="groomer"]') as HTMLInputElement
+    expect(groomerRadio).not.toBeNull()
+
+    fireEvent.click(groomerRadio)
+    fillRequiredFields()
+    acceptTerms()
+    fireEvent.click(screen.getByRole('button', { name: /register.createAccountBtn/ }))
+
+    await waitFor(() => expect(mockRegister).toHaveBeenCalledTimes(1))
+    expect(mockRegister).toHaveBeenCalledWith(expect.objectContaining({ role: 'groomer' }))
+    // groomer is NOT an approval-gated role - no licence field, no review banner
+    expect(screen.queryByText('Account Review Required')).toBeNull()
+  })
+
+  // The home page's "List your business" CTA links to /register?role=groomer,
+  // so a visitor lands on the right form instead of hunting for the role.
+  describe('?role= preselection', () => {
+    it('preselects groomer from the query string when the module is enabled', () => {
+      mockGroomingEnabled.mockReturnValue({ enabled: true, loading: false })
+      render(<Register onSwitchToLogin={onSwitchToLogin} />, '/register?role=groomer')
+
+      const groomerRadio = document.querySelector('input[name="role"][value="groomer"]') as HTMLInputElement
+      expect(groomerRadio.checked).toBe(true)
+    })
+
+    it('falls back to pet_owner when the grooming module is disabled', () => {
+      // The existing guard effect must still win - otherwise a stale link would
+      // submit a role the backend rejects.
+      mockGroomingEnabled.mockReturnValue({ enabled: false, loading: false })
+      render(<Register onSwitchToLogin={onSwitchToLogin} />, '/register?role=groomer')
+
+      const petOwnerRadio = document.querySelector('input[name="role"][value="pet_owner"]') as HTMLInputElement
+      expect(petOwnerRadio.checked).toBe(true)
+    })
+
+    it('ignores a role that is not self-registerable', () => {
+      render(<Register onSwitchToLogin={onSwitchToLogin} />, '/register?role=admin')
+
+      const petOwnerRadio = document.querySelector('input[name="role"][value="pet_owner"]') as HTMLInputElement
+      expect(petOwnerRadio.checked).toBe(true)
+      expect(document.querySelector('input[name="role"][value="admin"]')).toBeNull()
+    })
+
+    it('defaults to pet_owner with no query string', () => {
+      render(<Register onSwitchToLogin={onSwitchToLogin} />)
+
+      const petOwnerRadio = document.querySelector('input[name="role"][value="pet_owner"]') as HTMLInputElement
+      expect(petOwnerRadio.checked).toBe(true)
+    })
   })
 })

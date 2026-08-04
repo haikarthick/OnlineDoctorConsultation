@@ -20,13 +20,16 @@
     "migrate:create": "ts-node --project tsconfig.json src/utils/migrate.ts --create",
     "seed": "ts-node --project tsconfig.json src/utils/seedDatabase.ts",
     "schema-check": "node scripts/schema-check.js",
+    "verify:runtime": "node scripts/runtime-verify.js",
+    "verify:slots": "node scripts/verify-grooming-slots.js",
     "pre-deploy": "node scripts/pre-deploy.js",
     "install-hooks": "node scripts/install-hooks.js",
     "log:bug": "node scripts/log-memory.js bug",
     "log:lesson": "node scripts/log-memory.js lesson",
     "log:feature": "node scripts/log-memory.js feature",
     "log:research": "node scripts/log-memory.js research",
-    "log:note": "node scripts/log-memory.js note"
+    "log:note": "node scripts/log-memory.js note",
+    "verify:runtime:full": "node scripts/runtime-verify.js --full"
   },
   "keywords": [
     "veterinary",
@@ -84,5 +87,8 @@
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
