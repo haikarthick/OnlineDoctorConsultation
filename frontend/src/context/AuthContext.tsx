@@ -74,7 +74,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (refreshTk) localStorage.setItem('refreshToken', refreshTk)
         navigate('/dashboard')
       } else {
-        throw new Error(data.error?.message || data.error || 'Login failed')
+        // `data.message` MUST be read. A blocked account (pending_approval / frozen /
+        // suspended) replies { success:false, accountStatus, message } with NO `error` key,
+        // so reading only data.error dropped the real explanation and fell through to the
+        // literal 'Login failed'. A vet waiting on approval was therefore told exactly what a
+        // typo'd password is told, concluded their registration had not gone through, and
+        // signed up again. Standard AppError replies carry BOTH message and error.message,
+        // so this ordering changes nothing for them.
+        const err = new Error(
+          data.message || data.error?.message || data.error || 'Login failed'
+        ) as Error & { accountStatus?: string }
+        // Let the caller render a blocked-but-legitimate account as information rather than
+        // as a failure the user is expected to correct.
+        if (data.accountStatus) err.accountStatus = data.accountStatus
+        throw err
       }
     } catch (error) {
       throw error

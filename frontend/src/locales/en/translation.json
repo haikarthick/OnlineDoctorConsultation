@@ -251,7 +251,10 @@
     "dbWakingUpNote": "This is normal on first visit. Please wait.",
     "success": "✓ Login successful! Redirecting...",
     "error": "Login failed",
-    "forgotPassword": "Forgot password?"
+    "forgotPassword": "Forgot password?",
+    "pendingTitle": "Registration received - awaiting approval",
+    "blockedTitle": "This account is not available",
+    "pendingNoReRegister": "Your details are already with us. Please do not register again - signing up a second time will not speed up the review."
   },
   "forgotPassword": {
     "title": "Forgot your password?",

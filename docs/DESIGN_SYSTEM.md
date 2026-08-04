@@ -146,6 +146,55 @@ Carried over from the usability standard — Admin screens are held to these too
 - **Four breakpoints.** Verify at 360 / 768 / 1024 / 1440px.
 - **Loading, empty and error states** use the shared classes above — not bespoke markup.
 
+## 5a. The user must always know where they stand — MANDATORY
+
+Clear navigation and honest, specific feedback are **core product requirements of this
+platform**, not polish. A user must never have to guess whether something worked, why they are
+blocked, or what to do next. This section is as binding as the inline-style ban.
+
+**Three rules:**
+
+**1. Never render a generic fallback when the server sent a real explanation.**
+Extract the server's own words. Our error bodies come in two shapes and you must read both:
+
+```ts
+// AppError responses:      { success:false, message, error:{ message, code } }
+// State-gate responses:    { success:false, accountStatus, message }   ← no `error` key
+const text = data.message || data.error?.message || 'Something went wrong'
+```
+
+Reading only `data.error` is what caused the login incident below. A generic string like
+"Login failed" is acceptable *only* when the body genuinely carries nothing.
+
+**2. "You are blocked" is not the same as "you made a mistake".**
+If the user did everything right and the system is simply not ready for them — awaiting
+approval, frozen, suspended, feature not yet enabled — say so in its own informational
+treatment (`.message.account-status` / `.message.info`). Do **not** style it as a red error.
+Red means *you can fix this by trying again*; if retrying cannot help, red is a lie.
+
+**3. Always state the next action, especially "do nothing".**
+A blocked user needs to know what happens next and what they should not do. Telling a
+pending-approval user *"your details are already with us, please do not register again"* is
+the difference between a calm wait and a duplicate account.
+
+**The incident this comes from.** `veterinarian` and `corporate_admin` register as
+`pending_approval`; the backend correctly returned 403 with a polite, specific message. But
+`AuthContext.login` read only `data.error?.message`, and the account-status body has no `error`
+key — so it fell through to the literal string **"Login failed"**. A vet waiting on approval saw
+exactly what a mistyped password shows, concluded the registration had never gone through, and
+signed up again. Every layer was individually "correct"; the product still lied to the user.
+
+**Before shipping any screen, check:**
+
+- [ ] Every failure path shows the server's actual message, never a generic substitute.
+- [ ] Blocked-but-legitimate states are informational, not red errors.
+- [ ] Every blocked/empty/pending state names the next action — including "wait, do nothing".
+- [ ] Success is explicitly confirmed; the user is never left wondering whether it saved.
+- [ ] The new copy exists in all six locales.
+
+Regression guards live in `AuthContext.test.tsx` ("blocked account states") and
+`Login.test.tsx`. Both fail if the message extraction regresses — verified by reverting the fix.
+
 ---
 
 ## 6. The ratchet — how the debt gets paid

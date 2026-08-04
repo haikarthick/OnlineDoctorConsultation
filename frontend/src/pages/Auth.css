@@ -226,6 +226,59 @@
   gap: 4px;
 }
 
+/* Informational, not a failure. Register.tsx has always applied `message info` for the
+   pending-approval confirmation, but no .info rule existed, so it rendered as bare text with
+   no colour and read like an afterthought next to the styled success/error states. */
+.message.info {
+  background: linear-gradient(135deg, #e8f4fd 0%, #d1e9f9 100%);
+  color: #1a5276;
+  border: 1px solid #aed6f1;
+  box-shadow: 0 2px 8px rgba(26, 82, 118, 0.1);
+}
+
+/* A correct password against an account that is not usable yet. Deliberately NOT red: there
+   is no user error to correct, and treating it as a failure is what made people register a
+   second time. */
+.message.account-status {
+  background: linear-gradient(135deg, #eef4ff 0%, #e0e9fd 100%);
+  color: #1e3a8a;
+  border: 1px solid #bfd3f7;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+}
+
+.account-status-icon {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.account-status-body {
+  /* min-width:0 lets long words wrap instead of forcing the panel wider than the card. */
+  min-width: 0;
+}
+
+.account-status-title {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.account-status-text {
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.account-status-note {
+  margin: 8px 0 0;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
 .auth-divider {
   text-align: center;
   color: #999;
