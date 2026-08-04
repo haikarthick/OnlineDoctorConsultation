@@ -921,7 +921,8 @@
         "title": "Grooming that is connected to real veterinary care",
         "desc": "A standalone grooming app ends at the appointment. Here, a groomer who spots something concerning raises a safety escalation, and you can book a licensed vet on the same platform, with the pet’s grooming history already attached. Groomers escalate. They never diagnose or prescribe. That boundary is enforced in the product, not just in policy."
       }
-    }
+    },
+    "ctaGrooming": "Book Grooming & Spa"
   },
   "dashboard": {
     "greeting": "Welcome, {{name}}!",

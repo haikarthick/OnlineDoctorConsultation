@@ -324,6 +324,15 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
               <button className="btn btn-marketplace btn-large" onClick={() => navigate('/browse-marketplace')}>
                 🏪 {t('publicMarketplace.homeCta.browseNow')}
               </button>
+              {/* Gated on the same grooming.enabled probe as the section and the nav entry -
+                  a hero CTA for a dark module would lead straight to a dead end. Uses
+                  onGetStarted rather than /grooming/find because every grooming route is
+                  behind RoleRoute, unlike the public /browse-marketplace. */}
+              {groomingEnabled && (
+                <button className="btn btn-grooming btn-large" onClick={onGetStarted}>
+                  💈 {t('home.ctaGrooming')}
+                </button>
+              )}
             </div>
             <p className="hero-subtext">
               {t('home.guarantees')}
@@ -769,6 +778,11 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
             <button className="btn btn-hospital btn-large" onClick={onGetStarted}>
               🏥 {t('home.registerHospital')}
             </button>
+            {groomingEnabled && (
+              <button className="btn btn-grooming btn-large" onClick={onGetStarted}>
+                💈 {t('home.ctaGrooming')}
+              </button>
+            )}
             <button className="btn btn-outline-inverse btn-large" onClick={onViewForDoctors}>
               {t('home.ctaVet')}
             </button>

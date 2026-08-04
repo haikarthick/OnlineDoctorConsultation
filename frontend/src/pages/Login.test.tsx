@@ -44,7 +44,7 @@ describe('Login - blocked account states', () => {
     // The regression: a pending vet used to see only "Login failed" - identical to what a
     // typo'd password shows - so they assumed registration had not worked and signed up again.
     mockLogin.mockRejectedValue(blockedError('pending_approval', PENDING_MSG))
-    render(<Login />)
+    render(<Login onSwitchToRegister={vi.fn()} />)
     await submit()
 
     await waitFor(() => expect(screen.getByText(PENDING_MSG)).toBeInTheDocument())
@@ -53,7 +53,7 @@ describe('Login - blocked account states', () => {
 
   it('tells a pending user not to register again', async () => {
     mockLogin.mockRejectedValue(blockedError('pending_approval', PENDING_MSG))
-    render(<Login />)
+    render(<Login onSwitchToRegister={vi.fn()} />)
     await submit()
 
     await waitFor(() => {
@@ -64,7 +64,7 @@ describe('Login - blocked account states', () => {
 
   it('renders a blocked account as information, not as a red error', async () => {
     mockLogin.mockRejectedValue(blockedError('pending_approval', PENDING_MSG))
-    const { container } = render(<Login />)
+    const { container } = render(<Login onSwitchToRegister={vi.fn()} />)
     await submit()
 
     await waitFor(() => {
@@ -76,7 +76,7 @@ describe('Login - blocked account states', () => {
 
   it('uses the lock treatment for frozen/suspended, without the re-register note', async () => {
     mockLogin.mockRejectedValue(blockedError('frozen', 'Your account has been temporarily restricted.'))
-    render(<Login />)
+    render(<Login onSwitchToRegister={vi.fn()} />)
     await submit()
 
     await waitFor(() => expect(screen.getByText('login.blockedTitle')).toBeInTheDocument())
@@ -85,7 +85,7 @@ describe('Login - blocked account states', () => {
 
   it('still shows a genuine credential failure as an error', async () => {
     mockLogin.mockRejectedValue(new Error('Invalid email or password'))
-    const { container } = render(<Login />)
+    const { container } = render(<Login onSwitchToRegister={vi.fn()} />)
     await submit()
 
     await waitFor(() => expect(screen.getByText('Invalid email or password')).toBeInTheDocument())
