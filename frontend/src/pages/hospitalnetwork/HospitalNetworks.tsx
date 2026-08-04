@@ -629,18 +629,22 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
+  // The candidate list is bounded by this network's own hospitals, so it is small enough to
+  // load up front - an empty query returns every eligible person. That is why there is no
+  // minimum length here any more: typing filters an already-visible list rather than being
+  // the only way to see one.
   useEffect(() => {
-    if (searchQuery.length < 2) { setSearchResults([]); return }
+    if (selectedUser) return
     const timer = setTimeout(async () => {
       setSearching(true)
       try {
-        const res = await apiService.searchNetworkUsers(searchQuery)
+        const res = await apiService.searchNetworkUsers(networkId, searchQuery)
         setSearchResults(res.data?.data || [])
       } catch { setSearchResults([]) }
       finally { setSearching(false) }
-    }, 350)
+    }, searchQuery ? 350 : 0)
     return () => clearTimeout(timer)
-  }, [searchQuery])
+  }, [searchQuery, selectedUser, networkId])
 
   const handleAdd = async () => {
     if (!selectedUser) { setError('Please search and select a user first'); return }
@@ -674,9 +678,12 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
               className="module-input"
               value={searchQuery}
               onChange={e => { setSearchQuery(e.target.value); setSelectedUser(null) }}
-              placeholder="Type name or email to search..."
+              placeholder="Filter by name or email..."
               autoFocus
             />
+            <p className="hn-field-hint">
+              Staff and doctors at this network&apos;s hospitals who are not members yet.
+            </p>
             {searching && <p className="si-acff8193">🔍 Searching...</p>}
 
             {searchResults.length > 0 && !selectedUser && (
@@ -695,10 +702,16 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
                 ))}
               </div>
             )}
-            {searchQuery.length >= 2 && searchResults.length === 0 && !searching && !selectedUser && (
+            {searchResults.length === 0 && !searching && !selectedUser && (
               <div className="si-fa4fc649">
-                <p className="si-519a52ea">No registered users found for "{searchQuery}".</p>
-                <p className="si-79d4f0fa">This person may not have a VetCare account yet.</p>
+                <p className="si-519a52ea">
+                  {searchQuery
+                    ? `No one at this network's hospitals matches "${searchQuery}".`
+                    : 'Everyone at this network’s hospitals is already a member.'}
+                </p>
+                <p className="si-79d4f0fa">
+                  To bring in someone who does not work at a branch hospital yet, invite them by email.
+                </p>
                 <button
                   type="button"
                   onClick={onInviteInstead}

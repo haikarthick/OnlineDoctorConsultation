@@ -908,6 +908,83 @@ router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandle
   res.json({ success: true, message: 'Member updated successfully' });
 }));
 router.delete('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.removeNetworkMember(req, res)));
+
+// Candidate users for network membership.
+//
+// Scope: people already attached to one of THIS network's branch hospitals - as a doctor
+// (hospital_doctors) or as staff (staff_positions) - who are not already active members.
+// It is deliberately NOT a platform-wide user directory. The route this replaces
+// (GET /network-user-search) selected `FROM users WHERE role NOT IN ('pet_owner','farmer')`
+// with no network scoping at all and no network id in the request, so any corporate_admin
+// or hospital_director of ANY network could enumerate the name, email and role of every
+// professional account on the platform two characters at a time, and users who were already
+// members still appeared in the picker (then collided with UNIQUE(network_id, user_id)).
+//
+// An empty `q` returns the whole candidate list rather than nothing: the set is bounded by
+// the network's own hospitals, so it is safe to show before the admin types. Someone with no
+// prior attachment to a branch hospital is onboarded through POST /:id/invite-staff instead.
+router.get('/hospital-networks/:id/user-search', authMiddleware, requireNetworkAccess('addRemoveMembers'), asyncHandler(async (req: Request, res: Response) => {
+  const networkId = req.params.id;
+  // hospital_director / hospital_staff are branch-scoped, so they only see their own branch,
+  // exactly as getNetworkPatients does with the same field.
+  const branchScopeHospitalId = (req as NetworkAccessRequest).branchScopeHospitalId ?? null;
+  const search = ((req.query.q as string) || '').trim();
+
+  // Built positionally rather than with hardcoded $n offsets - the clauses are optional.
+  const params: any[] = [networkId];
+  let idx = 2;
+
+  let branchClause = '';
+  if (branchScopeHospitalId) {
+    branchClause = `AND hnh.hospital_id = $${idx++}`;
+    params.push(branchScopeHospitalId);
+  }
+
+  let searchClause = '';
+  if (search.length > 0) {
+    searchClause = `AND (u.email ILIKE $${idx} OR u.first_name ILIKE $${idx}
+                         OR u.last_name ILIKE $${idx}
+                         OR (u.first_name || ' ' || u.last_name) ILIKE $${idx})`;
+    params.push(`%${search}%`);
+    idx++;
+  }
+
+  try {
+    const result = await database.query(
+      `SELECT u.id, u.first_name AS "firstName", u.last_name AS "lastName", u.email, u.role
+         FROM users u
+        WHERE u.is_active = true
+          AND EXISTS (
+            SELECT 1
+              FROM hospital_network_hospitals hnh
+             WHERE hnh.network_id = $1
+               AND hnh.is_active = true
+               ${branchClause}
+               AND (
+                 EXISTS (SELECT 1 FROM hospital_doctors hd
+                          WHERE hd.hospital_id = hnh.hospital_id
+                            AND hd.doctor_id = u.id AND hd.is_active = true)
+                 OR EXISTS (SELECT 1 FROM staff_positions sp
+                             WHERE sp.hospital_id = hnh.hospital_id
+                               AND sp.user_id = u.id AND sp.is_active = true)
+               )
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM hospital_network_members m
+             WHERE m.network_id = $1 AND m.user_id = u.id AND m.is_active = true
+          )
+          ${searchClause}
+        ORDER BY u.first_name, u.last_name
+        LIMIT 50`,
+      params
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    logger.error('Network candidate search failed', { error: err.message, networkId });
+    res.status(500).json({ success: false, message: 'Search failed' });
+  }
+}));
+
 router.get('/hospital-networks/:id/departments', authMiddleware, requireNetworkAccess('viewNetworkDetails'), asyncHandler(async (req: Request, res: Response) => {
   const custom = await database.query(
     `SELECT DISTINCT department FROM hospital_network_members 
@@ -948,23 +1025,17 @@ router.get('/hospital-networks/:id/security-audit', authMiddleware, requireNetwo
   }
 }));
 
-// User search for network member invite (corporate_admin/hospital_director can search registered users by name/email)
-router.get('/network-user-search', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const authReq = req as any;
-  if (authReq.userRole !== 'admin') {
-    // Same gate as the actual invite action (POST /hospital-networks/:id/invite-staff) --
-    // this search is only useful as a precursor to inviting, so it shouldn't be reachable
-    // by anyone who couldn't actually send an invite (was previously any veterinarian/
-    // hospital_staff system role, with zero network-membership check at all).
-    const membership = await database.query(
-      `SELECT 1 FROM hospital_network_members WHERE user_id = $1 AND is_active = true
-         AND network_role IN ('corporate_admin', 'hospital_director') LIMIT 1`,
-      [authReq.userId]
-    );
-    if (!membership.rows.length) {
-      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can search users to invite' });
-    }
-  }
+// PLATFORM-WIDE user search. Its only remaining caller is /admin/staff-settings, which is
+// admin-only (Navigation.tsx roles: ['admin']) and legitimately needs to attach ANY user to
+// ANY hospital as a staff position.
+//
+// Gate narrowed to platform admin. It previously also admitted anyone holding
+// corporate_admin/hospital_director in ANY network, which - because the route takes no
+// network id and applies no network filter - let a network admin enumerate every
+// professional account on the platform. Network-scoped member picking now lives at
+// GET /hospital-networks/:id/user-search. Do NOT widen this gate again: the check here
+// cannot be network-scoped, because there is no network in the request to scope to.
+router.get('/network-user-search', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
   const search = ((req.query.q as string) || '').trim();
   if (!search || search.length < 2) { res.json({ success: true, data: [] }); return; }
   try {

@@ -3411,8 +3411,13 @@ class ApiService {
     return this.client.get('/dashboard/hospital-staff')
   }
 
-  async searchNetworkUsers(query: string): Promise<any> {
-    return this.client.get('/network-user-search', { params: { q: query } })
+  /**
+   * Candidate users for network membership: doctors/staff already attached to one of this
+   * network's branch hospitals who are not yet members. An empty query returns the full
+   * candidate list. Network-scoped by the backend - this is NOT a platform user directory.
+   */
+  async searchNetworkUsers(networkId: string, query: string): Promise<any> {
+    return this.client.get(`/hospital-networks/${networkId}/user-search`, { params: { q: query } })
   }
 
   async createBranchHospital(networkId: string, data: {
