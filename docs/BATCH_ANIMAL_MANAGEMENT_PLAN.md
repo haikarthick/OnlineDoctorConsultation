@@ -216,22 +216,29 @@ animal's history is untouched.
 
 ## 5. Phasing
 
-**Phase 1 — model and the reported gap.** Migration for `group_id` + subject CHECK + batch
-counters; relax the two NOT NULLs; `management_mode` on species and group; Herd Medical subject
-picker. *Delivers: a poultry group can be given a record and a vaccination.*
+*Revised after the owner's answers in §7 — antibiotics are in scope, so withdrawal is no longer
+a separate phase.*
 
-**Phase 2 — withdrawal safety.** Withdrawal fields, computation on save, banners, and the
-Movement/certificate blocks. *Do not ship Phase 1 to production without this if antibiotics are
-in scope* — batch treatment without withdrawal tracking is a regression in food safety even
-though it is an improvement in usability.
+**Phase 1 — foundation + the reported gap + withdrawal.** `group_cycles` and
+`group_population_events` (§8); `group_id`/`cycle_id` + subject CHECK on the health tables;
+relax `vaccination_records`/`allergy_records` NOT NULL; `management_mode` on species and group;
+Herd Medical subject picker with batch fields; withdrawal days on medications, computed dates on
+save, and the banner. *Delivers: a poultry group can be treated, and the milk/meat withdrawal
+that follows is tracked.*
 
-**Phase 3 — campaign convergence.** Campaign completion emits group records; `campaign_id` on
-health tables; Herd Medical shows campaign-sourced records.
+**Phase 2 — the safety interlocks.** Movement Log and `slaughter_fitness` /
+`export_health_certificate` blocked or hard-warned while a withdrawal is active. Phase 1 records
+the withdrawal; this phase makes it *bite*. Without it the data exists and nothing enforces it.
+
+**Phase 3 — campaign convergence.** Campaign completion emits one group record; `campaign_id` on
+health tables; campaigns span multiple groups (§7.1); Herd Medical shows campaign-sourced records.
 
 **Phase 4 — read surfaces.** Timeline roll-up, group vaccination passport, group certificates,
 analytics as rates, dashboard counters, marketplace.
 
-**Phase 5 — vet-side authoring.** Group consultations, batch prescriptions, herd certificates.
+**Phase 5 — vet-side authoring and network.** Group consultations and batch prescriptions;
+group enrolment in a network with cycle-bound consent (§7.2); herd certificates.
+Network-hospital code is change-protected — needs explicit approval before this phase starts.
 
 ---
 
@@ -253,12 +260,99 @@ analytics as rates, dashboard counters, marketplace.
 
 ---
 
-## 7. Open questions for the owner
+## 7. Owner decisions (answered 2026-08-04)
 
-1. **Mixed groups.** For Sheep/Goat/Pig — default to batch or individual? Should a group be
-   allowed to hold both individually-tracked animals *and* a batch remainder?
-2. **Does a batch group enrol in a hospital network as one patient**, or is network care
-   individual-only? Affects `animal_care_contexts` and consent.
-3. **Antibiotics in scope for Phase 1?** If yes, Phase 2 must ship with it.
-4. **Mortality.** Should recording deaths in a batch auto-decrement `current_count`?
-5. **Billing.** Is a group consultation charged once, or per head? Affects the payment flow.
+**1. Both modes, for every species.** A smallholder with 5 goats manages them individually; an
+enterprise farm manages the same species as a batch. Mode is therefore never implied by species.
+*Accepted — this is what §2.4 already proposed; species supplies only the default.*
+
+**But one group stays single-mode.** A group is either individual or batch, never both. A farm
+that needs both keeps two groups ("Breeding Does" individual, "Meat Flock" batch) — which is how
+farmers describe it anyway. Mixing inside one group makes every aggregate ambiguous: does
+"flock treated, 190 head" include the 10 tagged does, and do they then get counted twice in
+mortality and withdrawal? Two consequences follow:
+
+- **Campaigns must span multiple groups.** `treatment_campaigns.group_id` is single today;
+  treating the whole farm in one operation needs `group_ids[]` or a campaign→group join.
+- **Animals must move between modes.** A promising ram born in a batch becomes individually
+  tracked; a tracked animal may be absorbed into a batch. Needs an explicit promote/demote path
+  that adjusts both populations in one transaction, never by hand-editing counts.
+
+**2. A batch group can enrol in a network as one patient.** *Accepted, with a blocker.*
+`animal_care_contexts.animal_id` is NOT NULL with `UNIQUE(animal_id, network_id)`, so it needs
+the same subject treatment as the health tables. Two harder issues:
+
+- **Consent covers a population that changes.** Consent must bind to the group *and* an effective
+  window, and be re-confirmed when the population turns over — otherwise a network keeps access
+  to a flock the owner never consented for.
+- **BLOCKER — there is no production-cycle identity.** `animal_groups` has no cycle, batch or
+  placement concept (verified: no such column). Poultry runs in cycles — place 5,000 day-olds,
+  clear at ~42 days, place a new flock in the same shed under the same group name. Reusing the
+  group row silently attaches the previous flock's health history to a completely different
+  population. That is wrong for traceability, and for a network it makes "this patient" mean two
+  different things over time. **A cycle concept must land before network enrolment** (§8).
+
+**3. Antibiotics are in scope.** *Phase 1 and Phase 2 therefore merge.* Batch treatment without
+withdrawal tracking is a food-safety regression regardless of how much it improves usability.
+
+**4. Mortality decrements `current_count`.** *Accepted, but a bare decrement is not enough.*
+Mortality is one of several events that change a population — placement, hatch, mortality, cull,
+sale, transfer in/out. If only mortality writes back, the count still drifts and no one can
+explain the difference. See §8.
+
+**5. One consultation, one charge.** *Accepted — and it is also the lowest-risk option.* The fee
+lives on `vet_profiles.consultation_fee` per consultation, not per animal, so billing a group
+once needs **no change to payments, commission, GST or settlement**. Two refinements:
+
+- **Separate the professional fee from products.** A flock visit is one service, but 5,000 doses
+  of vaccine is inherently quantity-based. If the platform ever bills medicines, that line is
+  per-head even though the consultation is not.
+- **Consider a distinct herd/flock visit fee.** A three-hour flock inspection priced identically
+  to a fifteen-minute pet consult will not hold. A separate service type keeps one invoice while
+  staying fair.
+
+---
+
+## 8. Two additions forced by those answers
+
+### 8.1 Production cycles (`group_cycles`)
+
+A batch group is a *shed*; the population inside it is a *cycle*. Health records, consent and
+network enrolment must attach to the cycle, not the shed.
+
+```
+group_cycles(id, group_id, cycle_number, started_at, ended_at,
+             placed_count, species, breed, status)
+```
+
+Health tables carry `cycle_id` alongside `group_id`. Closing a cycle freezes its history; opening
+a new one starts clean in the same physical group. Without this, §7.2 has no correct answer.
+
+### 8.2 One population ledger (`group_population_events`)
+
+Every event that changes headcount goes through one table — never a direct `current_count` edit:
+
+```
+group_population_events(id, group_id, cycle_id, event_type, quantity, event_date, reason,
+                        recorded_by, source_ref)
+   event_type ∈ placement | hatch | mortality | cull | sale | transfer_in | transfer_out | adjustment
+```
+
+`current_count` is then maintained atomically from the ledger
+(`SET current_count = current_count - $1` in the same transaction, with a non-negative CHECK),
+and every change is explainable. This is what makes mortality "work well together" with movement,
+sales and transfers rather than being a lone special case.
+
+**Head count on a health record is still stored, never derived** (§3.2) — a record citing 5,000
+head must keep saying 5,000 after the flock drops to 4,200.
+
+---
+
+## 9. Remaining open question
+
+**Mode transitions.** When an animal is promoted out of a batch (or absorbed into one), what
+happens to the health history on each side? Options: (a) the individual inherits nothing and
+starts fresh, with the batch history remaining group-level context; (b) group records are copied
+down as individual records at promotion time. (a) is far simpler and keeps the "no fan-out" rule
+intact; (b) is what a buyer of that single animal would want to see. Needs a decision before
+the promote/demote path in §7.1 is built.
