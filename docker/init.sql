@@ -1313,7 +1313,12 @@ CREATE TABLE IF NOT EXISTS hospital_doctors (
   hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   doctor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   department_id UUID REFERENCES hospital_departments(id) ON DELETE SET NULL,
-  hospital_role VARCHAR(50) NOT NULL DEFAULT 'doctor'
+  -- 'staff', not 'doctor': 'doctor' is NOT in the CHECK list below, so the old default made
+  -- every INSERT that omitted this column fail on its own constraint. It stayed latent only
+  -- because every caller happens to set the column explicitly. 'staff' is the value the
+  -- application already treats as the default (VetHospitalManage.tsx form state, and the
+  -- `|| 'staff'` display fallbacks). See migration 040 for already-deployed databases.
+  hospital_role VARCHAR(50) NOT NULL DEFAULT 'staff'
     CHECK (hospital_role IN (
       'owner','medical_director','department_head',
       'consultant','resident','intern','staff','visiting'

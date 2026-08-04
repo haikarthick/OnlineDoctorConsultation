@@ -123,8 +123,14 @@ let serverProc = null;
 
 function pgRun(bin, args, opts = {}) {
   // maxBuffer: a full-schema snapshot is megabytes of JSON; the 1MB default throws ENOBUFS.
+  // windowsHide: psql/initdb/pg_ctl are console executables, and Node's default
+  // (windowsHide: false) pops a real console window for each one. This helper runs dozens of
+  // times per verification, so without it the developer's screen fills with command prompts
+  // they cannot type into and cannot dismiss. Nothing here is interactive - all output is
+  // piped back and rendered by this script.
   return execFileSync(pg(bin), args,
-    { encoding: 'utf8', stdio: 'pipe', timeout: 180000, maxBuffer: 128 * 1024 * 1024, ...opts });
+    { encoding: 'utf8', stdio: 'pipe', timeout: 180000, maxBuffer: 128 * 1024 * 1024,
+      windowsHide: true, ...opts });
 }
 
 function psql(db, sqlOrFile, { file = false, singleTx = false } = {}) {
@@ -140,7 +146,8 @@ function killTree(proc) {
   if (!proc || proc.killed) return;
   try {
     if (process.platform === 'win32') {
-      execFileSync('taskkill', ['/pid', String(proc.pid), '/T', '/F'], { stdio: 'ignore' });
+      execFileSync('taskkill', ['/pid', String(proc.pid), '/T', '/F'],
+        { stdio: 'ignore', windowsHide: true });
     } else {
       process.kill(proc.pid, 'SIGKILL');
     }
@@ -452,6 +459,7 @@ async function http(method, url, body, token) {
       serverProc = spawn(process.execPath, [distEntry], {
         cwd: BACKEND,
         detached: process.platform !== 'win32',
+        windowsHide: true,
         stdio: ['ignore', 'pipe', 'pipe'],
         env: {
           ...process.env,
@@ -685,6 +693,7 @@ async function http(method, url, body, token) {
             cwd: FRONTEND,
             encoding: 'utf8',
             stdio: 'pipe',
+            windowsHide: true,
             // @critical is a handful of journeys; --full is 462 tests on a single worker and
             // needs far longer. Overridable via VERIFY_E2E_TIMEOUT_MS.
             timeout: Number(process.env.VERIFY_E2E_TIMEOUT_MS) || (FULL ? 3600000 : 600000),

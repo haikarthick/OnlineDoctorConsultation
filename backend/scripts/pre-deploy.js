@@ -38,7 +38,9 @@ function runCheck(name, command, cwd, timeout = 120000, envOverride = null) {
   process.stdout.write(`  ${name} ... `);
   try {
     const env = envOverride ? { ...process.env, ...envOverride } : process.env;
-    execSync(command, { cwd, stdio: 'pipe', timeout, env });
+    // windowsHide: these checks shell out to tsc/vitest/vite dozens of times on every push.
+    // Without it each one flashes a console window the developer cannot use or dismiss.
+    execSync(command, { cwd, stdio: 'pipe', timeout, env, windowsHide: true });
     console.log(`${GREEN}✓${RESET}`);
     passed++;
   } catch (err) {
@@ -95,7 +97,8 @@ runCheck('Runtime Verification (real DB + real server)', 'node scripts/runtime-v
   const { execSync: exec } = require('child_process');
   try {
     // Get commits being pushed (unpushed commits)
-    const log = exec('git log @{u}..HEAD --name-only --pretty=format:__COMMIT__', { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' }).trim();
+    const log = exec('git log @{u}..HEAD --name-only --pretty=format:__COMMIT__',
+      { cwd: ROOT, encoding: 'utf8', stdio: 'pipe', windowsHide: true }).trim();
     if (!log) return; // nothing to check
 
     const files = log.split('\n').filter(l => l && l !== '__COMMIT__');
