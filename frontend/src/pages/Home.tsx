@@ -318,7 +318,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
               <button className="btn btn-hospital btn-large" onClick={() => { onGetStarted() }}>
                 🏥 {t('home.registerHospital')}
               </button>
-              <button className="btn btn-secondary-outline btn-large" onClick={onViewForDoctors}>
+              <button className="btn btn-outline-inverse btn-large" onClick={onViewForDoctors}>
                 {t('home.ctaVet')}
               </button>
               <button className="btn btn-marketplace btn-large" onClick={() => navigate('/browse-marketplace')}>
@@ -455,7 +455,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
               <button className="btn btn-primary btn-large" onClick={onGetStarted}>
                 🏥 {t('home.registerHospital')}
               </button>
-              <button className="btn btn-secondary-outline btn-large" onClick={onGetStarted}>
+              <button className="btn btn-outline-inverse btn-large" onClick={onGetStarted}>
                 🔍 {t('home.browseHospitals')}
               </button>
             </div>
@@ -482,7 +482,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
             <button className="btn btn-primary btn-large" onClick={() => navigate('/browse-marketplace')}>
               🛒 {t('publicMarketplace.homeCta.browseNow')}
             </button>
-            <button className="btn btn-secondary-outline btn-large" onClick={onGetStarted}>
+            <button className="btn btn-outline btn-large" onClick={onGetStarted}>
               📝 {t('publicMarketplace.homeCta.sellYours')}
             </button>
           </div>
@@ -579,7 +579,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
                   </li>
                 ))}
               </ul>
-              <button className="btn btn-secondary-outline btn-large" onClick={() => navigate('/register?role=groomer')}>
+              <button className="btn btn-outline btn-large" onClick={() => navigate('/register?role=groomer')}>
                 📝 {t('home.grooming.providers.cta')}
               </button>
               <p className="grooming-home-note">{t('home.grooming.providers.note')}</p>
@@ -769,7 +769,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
             <button className="btn btn-hospital btn-large" onClick={onGetStarted}>
               🏥 {t('home.registerHospital')}
             </button>
-            <button className="btn btn-secondary-outline btn-large" onClick={onViewForDoctors}>
+            <button className="btn btn-outline-inverse btn-large" onClick={onViewForDoctors}>
               {t('home.ctaVet')}
             </button>
           </div>

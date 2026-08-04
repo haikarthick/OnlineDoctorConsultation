@@ -746,17 +746,32 @@
   transition: all 0.3s ease !important;
   box-shadow: 0 8px 20px rgba(0,0,0,0.2) !important;
 }
-.btn-secondary-outline {
+/* Inverse outline: white text on a transparent field. It is legible ONLY on a
+   dark surface, so it is scoped to the three dark bands instead of being
+   declared globally. Used anywhere else it now renders as a plain .btn (loud,
+   caught immediately) rather than white-on-white (invisible, caught by a user).
+   For a secondary CTA on a light surface use .btn-outline from modules.css.
+   See docs/DESIGN_SYSTEM.md section 2a. */
+.hero-section .btn-outline-inverse,
+.hospitals-cta-box .btn-outline-inverse,
+.cta-section .btn-outline-inverse {
   background: transparent !important;
   color: white !important;
   border: 2px solid rgba(255,255,255,0.6) !important;
   font-weight: 700 !important;
 }
-.btn-secondary-outline:hover {
+.hero-section .btn-outline-inverse:hover,
+.hospitals-cta-box .btn-outline-inverse:hover,
+.cta-section .btn-outline-inverse:hover {
   background: white !important;
   color: #667eea !important;
   border-color: white !important;
   transform: translateY(-2px) !important;
+}
+/* .btn-large's drop shadow is tuned for buttons sitting on dark gradients; at
+   that strength it reads as dirt under an outline button on a white card. */
+.btn-outline.btn-large {
+  box-shadow: var(--shadow) !important;
 }
 .btn-enterprise {
   background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;

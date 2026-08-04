@@ -66,6 +66,39 @@ A large inventory already exists. Most "I need a grid here" moments are already 
 **Before adding CSS, grep `modules.css` for an existing class.** A near-duplicate class is drift
 too — it just takes longer to notice.
 
+## 2a. Surface-coupled classes must name and scope their dependency
+
+Some classes are only correct on a particular background. `color: white` on a transparent field
+is a *dark-surface* decision, not a hierarchy decision. A class like that, declared globally with
+a context-free name, is a trap: the next person picks it for the right semantic reason
+(a secondary CTA) and gets an invisible control.
+
+That is not hypothetical. `.btn-secondary-outline` in `Home.css` was written for the hero band
+and used, entirely reasonably, on a white grooming card and a light marketplace band. Default
+state was white-on-white; `:hover` flipped the text to `#667eea`, so both buttons were invisible
+until moused over. `npm run lint` was green — no inline styles were involved.
+
+Two requirements, both mandatory:
+
+1. **The name states the constraint.** Use an `-inverse` / `-on-dark` suffix. `btn-outline-inverse`
+   is honest; `btn-secondary-outline` is not.
+2. **The CSS is scoped to the surfaces it is valid on**, never declared globally:
+
+```css
+/* Right: typing this on a white card yields an unstyled .btn - loud, caught at once. */
+.hero-section .btn-outline-inverse,
+.cta-section .btn-outline-inverse { color: white; background: transparent; }
+
+/* Wrong: applies anywhere it is typed, and fails silently when it does. */
+.btn-secondary-outline { color: white; background: transparent; }
+```
+
+Scoping is the gate. It converts a bug only a human eye can catch into one the very first render
+makes obvious. For a secondary CTA **on a light surface, use `.btn-outline` from `modules.css`.**
+
+A related smell: `!important` on every property of a page-local `.btn-*` variant means no
+surrounding context can ever correct it. Prefer scoping over `!important`.
+
 ## 3. Genuinely dynamic values
 
 Some values are computed at runtime (a progress width, a chart bar height, a transform). These
