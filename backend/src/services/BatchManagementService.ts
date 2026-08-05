@@ -313,6 +313,38 @@ export class BatchManagementService {
     };
   }
 
+  /**
+   * Refuse an action that would put treated animals into the food chain before their withdrawal
+   * period has run.
+   *
+   * `kind` picks which withdrawal applies: slaughter and meat export are governed by the MEAT
+   * period, milk collection by the MILK period, and a general movement by either - an animal
+   * still under any withdrawal should not leave the holding unannounced.
+   *
+   * This is the point of Phase 1 recording the dates: without an interlock the obligation is
+   * merely written down, and a batch treatment that never reaches the movement and certificate
+   * paths is a food-safety hole rather than a feature.
+   */
+  async assertNotUnderWithdrawal(
+    subject: { animalId?: string; groupId?: string },
+    kind: 'meat' | 'milk' | 'any' = 'any',
+  ): Promise<void> {
+    if (!subject.animalId && !subject.groupId) return;
+    const status = await this.getWithdrawalStatus(subject);
+
+    const blockingMeat = (kind === 'meat' || kind === 'any') && status.meatActive;
+    const blockingMilk = (kind === 'milk' || kind === 'any') && status.milkActive;
+    if (!blockingMeat && !blockingMilk) return;
+
+    const until = blockingMeat ? status.meatUntil : status.milkUntil;
+    const what = blockingMeat ? 'meat' : 'milk';
+    const on = until ? new Date(until).toISOString().slice(0, 10) : 'an unknown date';
+    throw new ValidationError(
+      `Blocked: this ${subject.groupId ? 'group' : 'animal'} is under a ${what} withdrawal period until ${on}. ` +
+      `Treated animals must not enter the food chain before it ends.`
+    );
+  }
+
   /** treatment date + withdrawal days, or null when the medication declares none. */
   computeWithdrawalDates(eventDate: string, milkDays?: number | null, meatDays?: number | null) {
     const base = new Date(eventDate);

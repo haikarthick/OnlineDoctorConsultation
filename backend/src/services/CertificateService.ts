@@ -1,5 +1,6 @@
 import database from '../utils/database';
 import logger from '../utils/logger';
+import BatchManagementService from './BatchManagementService';
 
 // 18 valid certificate types (14 original + 4 new farm/enterprise types)
 const VALID_CERT_TYPES = [
@@ -61,6 +62,14 @@ class CertificateService {
   async create(vetId: string, data: CertificateData): Promise<any> {
     if (!VALID_CERT_TYPES.includes(data.certificateType)) {
       throw new Error(`Invalid certificate type: ${data.certificateType}`);
+    }
+    // A certificate declaring an animal fit for slaughter or export is precisely the document
+    // that must not exist while a meat withdrawal is running. Refuse rather than warn.
+    const FOOD_CHAIN_CERTS = ['slaughter_fitness', 'export_health_certificate'];
+    if (FOOD_CHAIN_CERTS.includes(data.certificateType)) {
+      await BatchManagementService.assertNotUnderWithdrawal(
+        { animalId: (data as any).animalId, groupId: (data as any).groupId }, 'meat'
+      );
     }
     // Draft: no certificate number yet until issued
     const result = await database.query(

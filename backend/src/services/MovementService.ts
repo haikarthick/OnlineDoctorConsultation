@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
 import { DatabaseError, NotFoundError } from '../utils/errors';
 import logger from '../utils/logger';
+import BatchManagementService from './BatchManagementService';
 
 // ─── Interfaces ──────────────────────────────────────────────
 export interface MovementRecord {
@@ -48,6 +49,16 @@ export interface MovementCreateDTO {
 export class MovementService {
 
   async createMovement(recordedBy: string, data: MovementCreateDTO): Promise<MovementRecord> {
+    // Food-safety interlock. A movement that sends animals to slaughter or off the holding must
+    // not happen while a withdrawal period is running - Phase 1 records the date, this refuses
+    // the action. Internal moves (pen to pen) are exempt: the animals are not leaving.
+    const INTERNAL = ['internal', 'pen_change', 'relocation'];
+    if (!INTERNAL.includes(String(data.movementType))) {
+      const kind = String(data.movementType) === 'slaughter' ? 'meat' : 'any';
+      await BatchManagementService.assertNotUnderWithdrawal(
+        { animalId: data.animalId, groupId: data.groupId }, kind as any
+      );
+    }
     try {
       const id = uuidv4();
       const result = await database.query(
