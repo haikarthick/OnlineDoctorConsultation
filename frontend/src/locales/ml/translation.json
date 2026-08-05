@@ -6380,7 +6380,19 @@
       "allergenPlaceholder": "e.g. Penicillin",
       "reactionPlaceholder": "e.g. Hives, Swelling",
       "notesPlaceholder": "Additional notes...",
-      "titlePlaceholder": "Brief title for this record"
+      "titlePlaceholder": "Brief title for this record",
+      "subject": "ഈ രേഖ ആരെക്കുറിച്ചാണ്",
+      "subjectAnimal": "ഒരു മൃഗം",
+      "subjectGroup": "മുഴുവൻ ഗ്രൂപ്പ്",
+      "selectGroup": "ഗ്രൂപ്പ് തിരഞ്ഞെടുക്കുക",
+      "head": "എണ്ണം",
+      "noBatchGroups": "ബാച്ച് ഗ്രൂപ്പുകളൊന്നുമില്ല. മുഴുവൻ കൂട്ടത്തിനും രേഖപ്പെടുത്താൻ ഗ്രൂപ്പ് ബാച്ച് മോഡിലാക്കുക.",
+      "groupRecordNote": "{{count}} എണ്ണമുള്ള ഈ ഗ്രൂപ്പിന് ഒരു രേഖ മാത്രം - ഓരോ മൃഗത്തിനും അല്ല.",
+      "groupRecordGeneric": "മുഴുവൻ ഗ്രൂപ്പിനും ഒരു രേഖ മാത്രം സൃഷ്ടിക്കപ്പെടും.",
+      "headCountTreated": "ചികിത്സിച്ചവ",
+      "affectedCount": "ബാധിച്ചവ",
+      "mortalityCount": "മരണം",
+      "eventDate": "സംഭവ തീയതി"
     },
     "confirm": {
       "archiveRecord": "Archive this record?"

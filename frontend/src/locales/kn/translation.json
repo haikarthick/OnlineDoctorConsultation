@@ -2417,7 +2417,19 @@
       "notesPlaceholder": "ಹೆಚ್ಚುವರಿ ಟಿಪ್ಪಣಿಗಳು...",
       "titlePlaceholder": "ಈ ದಾಖಲೆಗೆ ಸಂಕ್ಷಿಪ್ತ ಶೀರ್ಷಿಕೆ",
       "vaccineNameSuggestPlaceholder": "Select or type vaccine name...",
-      "protocolsAvailable": "{{count}} vaccine protocol(s) available for this animal's species"
+      "protocolsAvailable": "{{count}} vaccine protocol(s) available for this animal's species",
+      "subject": "ಈ ದಾಖಲೆ ಯಾರ ಬಗ್ಗೆ",
+      "subjectAnimal": "ಒಂದು ಪ್ರಾಣಿ",
+      "subjectGroup": "ಸಂಪೂರ್ಣ ಗುಂಪು",
+      "selectGroup": "ಗುಂಪನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+      "head": "ಸಂಖ್ಯೆ",
+      "noBatchGroups": "ಇನ್ನೂ ಬ್ಯಾಚ್ ಗುಂಪುಗಳಿಲ್ಲ. ಸಂಪೂರ್ಣ ಹಿಂಡಿಗೆ ದಾಖಲಿಸಲು ಗುಂಪನ್ನು ಬ್ಯಾಚ್ ಮೋಡ್‌ಗೆ ಹೊಂದಿಸಿ.",
+      "groupRecordNote": "{{count}} ರ ಈ ಗುಂಪಿಗೆ ಒಂದೇ ದಾಖಲೆ ರಚನೆಯಾಗುತ್ತದೆ - ಪ್ರತಿ ಪ್ರಾಣಿಗೆ ಅಲ್ಲ.",
+      "groupRecordGeneric": "ಸಂಪೂರ್ಣ ಗುಂಪಿಗೆ ಒಂದೇ ದಾಖಲೆ ರಚನೆಯಾಗುತ್ತದೆ.",
+      "headCountTreated": "ಚಿಕಿತ್ಸೆ ಪಡೆದವು",
+      "affectedCount": "ಬಾಧಿತ",
+      "mortalityCount": "ಸಾವು",
+      "eventDate": "ಘಟನೆಯ ದಿನಾಂಕ"
     },
     "confirm": {
       "archiveRecord": "ಈ ದಾಖಲೆಯನ್ನು ಆರ್ಕೈವ್ ಮಾಡಬೇಕೇ?"

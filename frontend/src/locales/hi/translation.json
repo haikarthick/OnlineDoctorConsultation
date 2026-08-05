@@ -2415,7 +2415,19 @@
       "allergenPlaceholder": "जैसे पेनिसिलिन",
       "reactionPlaceholder": "जैसे पित्ती, सूजन",
       "notesPlaceholder": "अतिरिक्त नोट्स...",
-      "titlePlaceholder": "इस रिकॉर्ड के लिए संक्षिप्त शीर्षक"
+      "titlePlaceholder": "इस रिकॉर्ड के लिए संक्षिप्त शीर्षक",
+      "subject": "यह रिकॉर्ड किसके बारे में है",
+      "subjectAnimal": "एक पशु",
+      "subjectGroup": "पूरा समूह",
+      "selectGroup": "समूह चुनें",
+      "head": "पशु",
+      "noBatchGroups": "अभी कोई बैच-प्रबंधित समूह नहीं है। पूरे झुंड के लिए रिकॉर्ड करने हेतु समूह को बैच मोड में सेट करें।",
+      "groupRecordNote": "{{count}} के इस समूह के लिए एक ही रिकॉर्ड बनेगा - प्रति पशु नहीं।",
+      "groupRecordGeneric": "पूरे समूह के लिए एक ही रिकॉर्ड बनेगा।",
+      "headCountTreated": "उपचारित संख्या",
+      "affectedCount": "प्रभावित",
+      "mortalityCount": "मृत्यु",
+      "eventDate": "घटना की तिथि"
     },
     "confirm": {
       "archiveRecord": "यह रिकॉर्ड संग्रहीत करें?"

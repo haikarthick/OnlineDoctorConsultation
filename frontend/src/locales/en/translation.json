@@ -2415,7 +2415,19 @@
       "allergenPlaceholder": "e.g. Penicillin",
       "reactionPlaceholder": "e.g. Hives, Swelling",
       "notesPlaceholder": "Additional notes...",
-      "titlePlaceholder": "Brief title for this record"
+      "titlePlaceholder": "Brief title for this record",
+      "subject": "This record is about",
+      "subjectAnimal": "One animal",
+      "subjectGroup": "A whole group",
+      "selectGroup": "Select a group",
+      "head": "head",
+      "noBatchGroups": "No batch-managed groups yet. Set a group to batch mode in Herds & Groups to record against the whole flock.",
+      "groupRecordNote": "One record will be created for this group of {{count}} - not one per animal.",
+      "groupRecordGeneric": "One record will be created for the whole group.",
+      "headCountTreated": "Head treated",
+      "affectedCount": "Affected",
+      "mortalityCount": "Deaths",
+      "eventDate": "Date of event"
     },
     "confirm": {
       "archiveRecord": "Archive this record?"

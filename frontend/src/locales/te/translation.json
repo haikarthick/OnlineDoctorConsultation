@@ -2415,7 +2415,19 @@
       "allergenPlaceholder": "ఉదా: పెన్సిలిన్",
       "reactionPlaceholder": "ఉదా: దద్దుర్లు, వాపు",
       "notesPlaceholder": "అదనపు నోట్స్...",
-      "titlePlaceholder": "ఈ రికార్డుకు సంక్షిప్త శీర్షిక"
+      "titlePlaceholder": "ఈ రికార్డుకు సంక్షిప్త శీర్షిక",
+      "subject": "ఈ రికార్డు ఎవరి గురించి",
+      "subjectAnimal": "ఒక జంతువు",
+      "subjectGroup": "మొత్తం సమూహం",
+      "selectGroup": "సమూహాన్ని ఎంచుకోండి",
+      "head": "సంఖ్య",
+      "noBatchGroups": "ఇంకా బ్యాచ్ సమూహాలు లేవు. మొత్తం మందకు రికార్డు చేయడానికి సమూహాన్ని బ్యాచ్ మోడ్‌కు మార్చండి.",
+      "groupRecordNote": "{{count}} ఉన్న ఈ సమూహానికి ఒకే రికార్డు సృష్టించబడుతుంది - ప్రతి జంతువుకు కాదు.",
+      "groupRecordGeneric": "మొత్తం సమూహానికి ఒకే రికార్డు సృష్టించబడుతుంది.",
+      "headCountTreated": "చికిత్స పొందినవి",
+      "affectedCount": "ప్రభావితం",
+      "mortalityCount": "మరణాలు",
+      "eventDate": "సంఘటన తేదీ"
     },
     "confirm": {
       "archiveRecord": "ఈ రికార్డును ఆర్కైవ్ చేయాలా?"

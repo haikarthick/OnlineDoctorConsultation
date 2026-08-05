@@ -127,6 +127,39 @@ class ApiService {
     return fetchCsrfToken()
   }
 
+  // ─── Batch (flock/herd) management ─────────────────────────
+  async listGroupCycles(groupId: string) {
+    return (await this.client.get(`/animal-groups/${groupId}/cycles`)).data
+  }
+  async getActiveGroupCycle(groupId: string) {
+    return (await this.client.get(`/animal-groups/${groupId}/cycles/active`)).data
+  }
+  async openGroupCycle(groupId: string, data: { name?: string; species?: string; breed?: string; placedCount: number; startedAt?: string; notes?: string }) {
+    return (await this.client.post(`/animal-groups/${groupId}/cycles`, data)).data
+  }
+  async closeGroupCycle(cycleId: string, reason?: string) {
+    return (await this.client.post(`/group-cycles/${cycleId}/close`, { reason })).data
+  }
+  async listPopulationEvents(groupId: string, cycleId?: string) {
+    return (await this.client.get(`/animal-groups/${groupId}/population-events`, { params: { cycleId } })).data
+  }
+  async recordPopulationEvent(groupId: string, data: { cycleId?: string; eventType: string; quantity: number; eventDate?: string; reason?: string; sourceRef?: string }) {
+    return (await this.client.post(`/animal-groups/${groupId}/population-events`, data)).data
+  }
+  async reconcileGroup(groupId: string) {
+    return (await this.client.get(`/animal-groups/${groupId}/reconcile`)).data
+  }
+  async getGroupWithdrawal(groupId: string) {
+    return (await this.client.get(`/animal-groups/${groupId}/withdrawal`)).data
+  }
+  async promoteAnimalFromBatch(groupId: string, data: { animalId: string; cycleId?: string; reason?: string }) {
+    return (await this.client.post(`/animal-groups/${groupId}/promote`, data)).data
+  }
+  /** An animal's own records PLUS the group records that applied while it was in that cycle. */
+  async getAnimalLifetimeHistory(animalId: string) {
+    return (await this.client.get(`/animals/${animalId}/lifetime-history`)).data
+  }
+
   // ─── Auth ──────────────────────────────────────────────────
   async login(email: string, password: string) {
     const response = await this.client.post('/auth/login', { email, password })
@@ -586,7 +619,11 @@ class ApiService {
   }
 
   // ─── Medical Records ──────────────────────────────────────
-  async createMedicalRecord(data: { recordType: string; title: string; content: string; animalId?: string; consultationId?: string; veterinarianId?: string; severity?: string; medications?: any[]; attachments?: any[]; isConfidential?: boolean; followUpDate?: string; tags?: string[]; userId?: string }) {
+  /**
+   * A record has ONE subject: animalId OR groupId. Group records carry the batch facts
+   * (head count treated, affected, mortality) - a 5,000-bird flock is one record, not 5,000.
+   */
+  async createMedicalRecord(data: { recordType: string; title: string; content: string; animalId?: string; groupId?: string; cycleId?: string; eventDate?: string; headCountTreated?: number; affectedCount?: number; mortalityCount?: number; consultationId?: string; veterinarianId?: string; severity?: string; medications?: any[]; attachments?: any[]; isConfidential?: boolean; followUpDate?: string; tags?: string[]; userId?: string }) {
     const response = await this.client.post('/medical-records', data)
     return response.data
   }
@@ -622,7 +659,8 @@ class ApiService {
   }
 
   // ─── Vaccinations ─────────────────────────────────────────
-  async createVaccination(data: { animalId: string; vaccineName: string; dateAdministered: string; vaccineType?: string; batchNumber?: string; manufacturer?: string; nextDueDate?: string; siteOfAdministration?: string; dosage?: string; reactionNotes?: string; certificateNumber?: string }) {
+  /** animalId OR groupId - see createMedicalRecord. */
+  async createVaccination(data: { animalId?: string; groupId?: string; cycleId?: string; headCountTreated?: number; vaccineName: string; dateAdministered: string; vaccineType?: string; batchNumber?: string; manufacturer?: string; nextDueDate?: string; siteOfAdministration?: string; dosage?: string; reactionNotes?: string; certificateNumber?: string }) {
     const response = await this.client.post('/vaccinations', data)
     return response.data
   }

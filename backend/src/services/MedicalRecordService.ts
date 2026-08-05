@@ -241,17 +241,35 @@ export class MedicalRecordService {
           id, user_id, animal_id, consultation_id, veterinarian_id,
           record_type, record_number, title, content, severity, status,
           medications, attachments, is_confidential, follow_up_date, tags,
-          file_url, created_by, created_at, updated_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,NOW(),NOW())
+          file_url, created_by,
+          group_id, cycle_id, event_date, head_count_treated, affected_count, mortality_count,
+          created_at, updated_at
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
+                  $19,$20,COALESCE($21::date, CURRENT_DATE),$22,$23,$24,NOW(),NOW())
         RETURNING id
       `;
+      // A record has ONE subject. When a group is given, the cycle defaults to that group's
+      // open cycle so the record lands on the population it actually describes - matching a
+      // promoted animal's membership window later depends on it.
+      const groupId = (data as any).groupId || null;
+      let cycleId = (data as any).cycleId || null;
+      if (groupId && !cycleId) {
+        const active = await database.query(
+          `SELECT id FROM group_cycles WHERE group_id = $1 AND status = 'active' LIMIT 1`, [groupId]
+        );
+        cycleId = active.rows[0]?.id || null;
+      }
       await database.query(query, [
         id, targetUserId, data.animalId || null, data.consultationId || null,
         data.veterinarianId || null, data.recordType, recordNumber,
         data.title, data.content, data.severity || 'normal', 'active',
         JSON.stringify(data.medications || []), JSON.stringify(data.attachments || []),
         data.isConfidential || false, data.followUpDate || null,
-        data.tags || [], data.fileUrl || null, createdBy || userId
+        data.tags || [], data.fileUrl || null, createdBy || userId,
+        groupId, cycleId, (data as any).eventDate || null,
+        (data as any).headCountTreated ?? null,
+        (data as any).affectedCount ?? null,
+        (data as any).mortalityCount ?? null,
       ]);
       await logMedicalAudit(id, 'medical_record', 'CREATE', createdBy || userId, createdByName, null, { recordType: data.recordType, title: data.title });
       logger.info('Medical record created', { id, recordNumber, userId: targetUserId });
@@ -437,23 +455,34 @@ export class MedicalRecordService {
     try {
       const id = uuidv4();
       const protocolId: string | null = (data as any).protocolId || null;
+      // animalId OR groupId - a batch group is one subject, so a flock vaccination is one row.
+      const groupId = (data as any).groupId || null;
+      let cycleId = (data as any).cycleId || null;
+      if (groupId && !cycleId) {
+        const active = await database.query(
+          `SELECT id FROM group_cycles WHERE group_id = $1 AND status = 'active' LIMIT 1`, [groupId]
+        );
+        cycleId = active.rows[0]?.id || null;
+      }
       await database.query(`
         INSERT INTO vaccination_records (
           id, animal_id, vaccine_name, vaccine_type, batch_number, manufacturer,
           date_administered, next_due_date, administered_by, site_of_administration,
-          dosage, reaction_notes, is_valid, certificate_number, protocol_id, created_by, created_at, updated_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,NOW(),NOW())
+          dosage, reaction_notes, is_valid, certificate_number, protocol_id, created_by,
+          group_id, cycle_id, head_count_treated, created_at, updated_at
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,NOW(),NOW())
       `, [
-        id, animalId, data.vaccineName, data.vaccineType || null, data.batchNumber || null,
+        id, animalId || null, data.vaccineName, data.vaccineType || null, data.batchNumber || null,
         data.manufacturer || null, data.dateAdministered, data.nextDueDate || null,
         data.administeredBy || createdBy || null, data.siteOfAdministration || null,
         data.dosage || null, data.reactionNotes || null, true,
-        data.certificateNumber || null, protocolId, createdBy || null
+        data.certificateNumber || null, protocolId, createdBy || null,
+        groupId, cycleId, (data as any).headCountTreated ?? null,
       ]);
       // If a protocol was selected from the master list, auto-assign it to the animal so
       // the vaccination appears on the Vaccination Passport page. The assignProtocolToAnimal
       // call uses ON CONFLICT DO UPDATE - fully idempotent.
-      if (protocolId) {
+      if (protocolId && animalId) {
         try {
           await VaccineProtocolService.assignProtocolToAnimal(
             animalId,

@@ -9,7 +9,9 @@ import { useMasterData } from '../context/MasterDataContext'
 
 interface Enterprise { id: string; name: string }
 interface Animal { id: string; name: string; species: string; breed?: string; uniqueId?: string; groupName?: string; groupId?: string }
-interface AnimalGroup { id: string; name: string; groupType: string }
+// A batch group has no per-head animal rows: currentCount IS the flock, maintained by the
+// population ledger. managementMode decides whether a record can attach to the group at all.
+interface AnimalGroup { id: string; name: string; groupType: string; managementMode?: 'individual' | 'batch'; currentCount?: number }
 
 type Tab = 'overview' | 'records' | 'vaccinations' | 'allergies' | 'lab_results'
 type ModalType = null | 'add-record' | 'add-vaccination' | 'add-allergy' | 'add-lab' | 'view-record'
@@ -76,8 +78,10 @@ const HerdMedicalManagement: React.FC = () => {
   const [vaccineProtocols, setVaccineProtocols] = useState<any[]>([])
 
   // Form states
-  const [recordForm, setRecordForm] = useState({ animalId: '', recordType: 'diagnosis', title: '', content: '', severity: 'normal', followUpDate: '', medications: '' })
-  const [vaccForm, setVaccForm] = useState({ animalId: '', vaccineName: '', vaccineType: '', dateAdministered: new Date().toISOString().slice(0, 10), nextDueDate: '', batchNumber: '', manufacturer: '', dosage: '', certificateNumber: '' })
+  // subjectType decides whether this record belongs to ONE animal or to a whole group. A batch
+  // group is treated as a single subject - a 5,000-bird flock produces one record, not 5,000.
+  const [recordForm, setRecordForm] = useState({ subjectType: 'animal', animalId: '', groupId: '', recordType: 'diagnosis', title: '', content: '', severity: 'normal', followUpDate: '', medications: '', eventDate: new Date().toISOString().slice(0, 10), headCountTreated: '', affectedCount: '', mortalityCount: '' })
+  const [vaccForm, setVaccForm] = useState({ subjectType: 'animal', animalId: '', groupId: '', vaccineName: '', vaccineType: '', dateAdministered: new Date().toISOString().slice(0, 10), nextDueDate: '', batchNumber: '', manufacturer: '', dosage: '', certificateNumber: '', headCountTreated: '' })
   const [allergyForm, setAllergyForm] = useState({ animalId: '', allergen: '', reaction: '', severity: 'normal', notes: '' })
   const [labForm, setLabForm] = useState({ animalId: '', testName: '', testDate: new Date().toISOString().slice(0, 10), testCategory: '', resultValue: '', normalRange: '', unit: '', status: 'pending', interpretation: '', labName: '', notes: '' })
 
@@ -232,18 +236,29 @@ const HerdMedicalManagement: React.FC = () => {
   // Form handlers
   const handleCreateRecord = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!recordForm.animalId || !recordForm.title || !recordForm.content) { setError(t('herdMedical.validation.recordRequired')); return }
+    const recSubjectOk = recordForm.subjectType === 'group' ? !!recordForm.groupId : !!recordForm.animalId
+    if (!recSubjectOk || !recordForm.title || !recordForm.content) { setError(t('herdMedical.validation.recordRequired')); return }
     setModalSaving(true); clearMessages()
     try {
       const medsArray = recordForm.medications ? recordForm.medications.split(',').map(m => ({ name: m.trim() })) : undefined
+      const isGroupRec = recordForm.subjectType === 'group'
       await apiService.createMedicalRecord({
-        animalId: recordForm.animalId, recordType: recordForm.recordType, title: recordForm.title,
+        // Exactly one subject - the backend CHECK rejects both or neither.
+        animalId: isGroupRec ? undefined : recordForm.animalId,
+        groupId: isGroupRec ? recordForm.groupId : undefined,
+        recordType: recordForm.recordType, title: recordForm.title,
         content: recordForm.content, severity: recordForm.severity,
+        eventDate: recordForm.eventDate || undefined,
         followUpDate: recordForm.followUpDate || undefined, medications: medsArray,
         veterinarianId: isVet ? user?.id : undefined,
+        ...(isGroupRec ? {
+          headCountTreated: recordForm.headCountTreated ? Number(recordForm.headCountTreated) : undefined,
+          affectedCount: recordForm.affectedCount ? Number(recordForm.affectedCount) : undefined,
+          mortalityCount: recordForm.mortalityCount ? Number(recordForm.mortalityCount) : undefined,
+        } : {}),
       })
       setSuccess(t('herdMedical.success.recordCreated')); setModal(null)
-      setRecordForm({ animalId: '', recordType: 'diagnosis', title: '', content: '', severity: 'normal', followUpDate: '', medications: '' })
+      setRecordForm({ subjectType: 'animal', animalId: '', groupId: '', recordType: 'diagnosis', title: '', content: '', severity: 'normal', followUpDate: '', medications: '', eventDate: new Date().toISOString().slice(0, 10), headCountTreated: '', affectedCount: '', mortalityCount: '' })
       loadRecords(); loadStats()
     } catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToCreateRecord')) }
     finally { setModalSaving(false) }
@@ -251,18 +266,23 @@ const HerdMedicalManagement: React.FC = () => {
 
   const handleCreateVaccination = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!vaccForm.animalId || !vaccForm.vaccineName || !vaccForm.dateAdministered) { setError(t('herdMedical.validation.vaccinationRequired')); return }
+    const vaccSubjectOk = vaccForm.subjectType === 'group' ? !!vaccForm.groupId : !!vaccForm.animalId
+    if (!vaccSubjectOk || !vaccForm.vaccineName || !vaccForm.dateAdministered) { setError(t('herdMedical.validation.vaccinationRequired')); return }
     setModalSaving(true); clearMessages()
     try {
+      const isGroupVacc = vaccForm.subjectType === 'group'
       await apiService.createVaccination({
-        animalId: vaccForm.animalId, vaccineName: vaccForm.vaccineName,
+        animalId: isGroupVacc ? undefined : vaccForm.animalId,
+        groupId: isGroupVacc ? vaccForm.groupId : undefined,
+        headCountTreated: isGroupVacc && vaccForm.headCountTreated ? Number(vaccForm.headCountTreated) : undefined,
+        vaccineName: vaccForm.vaccineName,
         vaccineType: vaccForm.vaccineType || undefined, dateAdministered: vaccForm.dateAdministered,
         nextDueDate: vaccForm.nextDueDate || undefined, batchNumber: vaccForm.batchNumber || undefined,
         manufacturer: vaccForm.manufacturer || undefined, dosage: vaccForm.dosage || undefined,
         certificateNumber: vaccForm.certificateNumber || undefined,
       })
       setSuccess(t('herdMedical.success.vaccinationRecorded')); setModal(null)
-      setVaccForm({ animalId: '', vaccineName: '', vaccineType: '', dateAdministered: new Date().toISOString().slice(0, 10), nextDueDate: '', batchNumber: '', manufacturer: '', dosage: '', certificateNumber: '' })
+      setVaccForm({ subjectType: 'animal', animalId: '', groupId: '', vaccineName: '', vaccineType: '', dateAdministered: new Date().toISOString().slice(0, 10), nextDueDate: '', batchNumber: '', manufacturer: '', dosage: '', certificateNumber: '', headCountTreated: '' })
       loadVaccinations(); loadStats()
     } catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToRecordVaccination')) }
     finally { setModalSaving(false) }
@@ -455,7 +475,7 @@ const HerdMedicalManagement: React.FC = () => {
           <GroupFilterSelect />
         </div>
         {canCreate && (
-          <button className="btn btn-primary" onClick={() => { setRecordForm({ animalId: '', recordType: 'diagnosis', title: '', content: '', severity: 'normal', followUpDate: '', medications: '' }); setModal('add-record') }}>
+          <button className="btn btn-primary" onClick={() => { setRecordForm({ subjectType: 'animal', animalId: '', groupId: '', recordType: 'diagnosis', title: '', content: '', severity: 'normal', followUpDate: '', medications: '', eventDate: new Date().toISOString().slice(0, 10), headCountTreated: '', affectedCount: '', mortalityCount: '' }); setModal('add-record') }}>
             {t('herdMedical.records.addRecord')}
           </button>
         )}
@@ -511,7 +531,7 @@ const HerdMedicalManagement: React.FC = () => {
           <span className="si-07b0717a">{t('herdMedical.vaccinations.totalCount', { count: vaccinationsTotal })}</span>
         </div>
         {canCreate && (
-          <button className="btn btn-primary" onClick={() => { setVaccForm({ animalId: '', vaccineName: '', vaccineType: '', dateAdministered: new Date().toISOString().slice(0, 10), nextDueDate: '', batchNumber: '', manufacturer: '', dosage: '', certificateNumber: '' }); setModal('add-vaccination') }}>
+          <button className="btn btn-primary" onClick={() => { setVaccForm({ subjectType: 'animal', animalId: '', groupId: '', vaccineName: '', vaccineType: '', dateAdministered: new Date().toISOString().slice(0, 10), nextDueDate: '', batchNumber: '', manufacturer: '', dosage: '', certificateNumber: '', headCountTreated: '' }); setModal('add-vaccination') }}>
             {t('herdMedical.vaccinations.addButton')}
           </button>
         )}
@@ -644,6 +664,70 @@ const HerdMedicalManagement: React.FC = () => {
   const fieldStyle: React.CSSProperties = { marginBottom: '14px' }
   const labelStyle: React.CSSProperties = { display: 'block', fontWeight: 600, marginBottom: '4px', fontSize: '0.9em', color: '#374151' }
 
+  /**
+   * Subject picker: this record is about ONE animal, or about a whole group.
+   *
+   * For a batch group the animal list is not shown at all - a 5,000-bird flock has no
+   * per-bird rows to choose from, and offering them would be the dead end this feature exists
+   * to remove. Groups already in batch mode are labelled with their head count so the farmer
+   * can see what the record will cover.
+   */
+  const renderSubjectPicker = (
+    subjectType: string, animalId: string, groupId: string,
+    onChange: (patch: { subjectType?: string; animalId?: string; groupId?: string }) => void,
+  ) => {
+    const batchGroups = groups.filter(g => g.managementMode === 'batch')
+    const selectedGroup = groups.find(g => g.id === groupId)
+    return (
+      <div style={fieldStyle}>
+        <label style={labelStyle}>{t('herdMedical.modal.subject')} *</label>
+        <div className="hm-subject-toggle">
+          <button
+            type="button"
+            className={`hm-subject-btn ${subjectType === 'animal' ? 'hm-subject-btn--active' : ''}`}
+            onClick={() => onChange({ subjectType: 'animal', groupId: '' })}
+          >
+            🐄 {t('herdMedical.modal.subjectAnimal')}
+          </button>
+          <button
+            type="button"
+            className={`hm-subject-btn ${subjectType === 'group' ? 'hm-subject-btn--active' : ''}`}
+            onClick={() => onChange({ subjectType: 'group', animalId: '' })}
+          >
+            🐔 {t('herdMedical.modal.subjectGroup')}
+          </button>
+        </div>
+
+        {subjectType === 'animal' ? (
+          <AnimalSelect value={animalId} onChange={v => onChange({ animalId: v })} required />
+        ) : (
+          <>
+            <select
+              className="search-input si-7d984748"
+              value={groupId}
+              onChange={e => onChange({ groupId: e.target.value })}
+              required
+            >
+              <option value="">{t('herdMedical.modal.selectGroup')}</option>
+              {groups.map(g => (
+                <option key={g.id} value={g.id}>
+                  {g.name}{g.managementMode === 'batch' ? ` - ${g.currentCount ?? 0} ${t('herdMedical.modal.head')}` : ''}
+                </option>
+              ))}
+            </select>
+            <p className="hm-subject-hint">
+              {batchGroups.length === 0
+                ? t('herdMedical.modal.noBatchGroups')
+                : selectedGroup && selectedGroup.managementMode === 'batch'
+                  ? t('herdMedical.modal.groupRecordNote', { count: (selectedGroup.currentCount ?? 0) })
+                  : t('herdMedical.modal.groupRecordGeneric')}
+            </p>
+          </>
+        )}
+      </div>
+    )
+  }
+
   // MODALS
   const renderModals = () => (
     <>
@@ -655,7 +739,24 @@ const HerdMedicalManagement: React.FC = () => {
               {isVet ? t('herdMedical.modal.roleVet') : isAdmin ? t('herdMedical.modal.roleAdmin') : t('herdMedical.modal.roleFarmer')}
             </p>
             <form onSubmit={handleCreateRecord}>
-              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.modal.animal')} *</label><AnimalSelect value={recordForm.animalId} onChange={v => setRecordForm(f => ({ ...f, animalId: v }))} required /></div>
+              {renderSubjectPicker(recordForm.subjectType, recordForm.animalId, recordForm.groupId,
+                patch => setRecordForm(f => ({ ...f, ...patch })))}
+              {recordForm.subjectType === 'group' && (
+                <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
+                  <div className="si-6acd75e8"><label style={labelStyle}>{t('herdMedical.modal.headCountTreated')}</label>
+                    <input type="number" min="0" className="search-input si-7d984748" value={recordForm.headCountTreated}
+                      onChange={e => setRecordForm(f => ({ ...f, headCountTreated: e.target.value }))} /></div>
+                  <div className="si-6acd75e8"><label style={labelStyle}>{t('herdMedical.modal.affectedCount')}</label>
+                    <input type="number" min="0" className="search-input si-7d984748" value={recordForm.affectedCount}
+                      onChange={e => setRecordForm(f => ({ ...f, affectedCount: e.target.value }))} /></div>
+                  <div className="si-6acd75e8"><label style={labelStyle}>{t('herdMedical.modal.mortalityCount')}</label>
+                    <input type="number" min="0" className="search-input si-7d984748" value={recordForm.mortalityCount}
+                      onChange={e => setRecordForm(f => ({ ...f, mortalityCount: e.target.value }))} /></div>
+                </div>
+              )}
+              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.modal.eventDate')}</label>
+                <input type="date" className="search-input si-7d984748" value={recordForm.eventDate}
+                  onChange={e => setRecordForm(f => ({ ...f, eventDate: e.target.value }))} /></div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
                 <div className="si-6acd75e8"><label style={labelStyle}>{t('herdMedical.modal.recordType')} *</label>
                   <select value={recordForm.recordType} onChange={e => setRecordForm(f => ({ ...f, recordType: e.target.value }))} className="search-input si-7d984748">
@@ -689,7 +790,13 @@ const HerdMedicalManagement: React.FC = () => {
             <h2 className="si-d4411fdc">{t('herdMedical.modal.recordVaccination')}</h2>
             <p className="si-a43648b0">{t('herdMedical.modal.vaccDescription')}</p>
             <form onSubmit={handleCreateVaccination}>
-              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.modal.animal')} *</label><AnimalSelect value={vaccForm.animalId} onChange={v => setVaccForm(f => ({ ...f, animalId: v, vaccineName: '', vaccineType: '', dosage: '', nextDueDate: '' }))} required /></div>
+              {renderSubjectPicker(vaccForm.subjectType, vaccForm.animalId, vaccForm.groupId,
+                patch => setVaccForm(f => ({ ...f, ...patch, vaccineName: '', vaccineType: '', dosage: '', nextDueDate: '' })))}
+              {vaccForm.subjectType === 'group' && (
+                <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.modal.headCountTreated')}</label>
+                  <input type="number" min="0" className="search-input si-7d984748" value={vaccForm.headCountTreated}
+                    onChange={e => setVaccForm(f => ({ ...f, headCountTreated: e.target.value }))} /></div>
+              )}
               {vaccineProtocols.length > 0 && (
                 <div style={{ ...fieldStyle, padding: '8px 12px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', marginBottom: '8px', fontSize: '0.85em', color: '#166534' }}>
                   💉 {t('herdMedical.modal.protocolsAvailable', { count: vaccineProtocols.length })}

@@ -1222,3 +1222,42 @@
 100% { transform: scale(0.7); opacity: 0.4; }
   40% { transform: scale(1); opacity: 1; }
 }
+
+/* ─── Herd Medical: animal-vs-group subject picker ───────────────────────────
+   Scoped under .module-page (this file is global - docs/DESIGN_SYSTEM.md section 2b). */
+:where(.module-page) .hm-subject-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+:where(.module-page) .hm-subject-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+:where(.module-page) .hm-subject-btn:hover {
+  border-color: #cbd5e1;
+}
+
+:where(.module-page) .hm-subject-btn--active {
+  border-color: #667eea;
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+/* Explains what a group record will actually cover, so "one record" is never a surprise. */
+:where(.module-page) .hm-subject-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64748b;
+}
