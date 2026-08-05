@@ -399,6 +399,52 @@ treatment from its membership window; individual records unaffected. The upgrade
 (init.sql + 41 migrations) and a fresh install (init.sql alone) produce **identical schemas** —
 2,496 columns, zero diff, all 7 new constraints on both.
 
-**Next: Phase 1 remainder** — backend service and routes for cycles, population events and
-group-subject records, then the Herd Medical subject picker. Nothing is reachable from the UI
-yet; the schema is in place and inert.
+**Phase 1 - COMPLETE** (`1af8c11` schema, `50acc15` service/routes, `e293270` UI).
+A poultry group can be given a medical record and a vaccination from Herd Medical. One row for
+5,000 birds, zero `animals` rows. Subject picker hides the animal list entirely for a batch
+group. Two pre-existing bugs fixed on the way: `updateGroupCount()` and `getGroup()` both
+recalculated headcount from `COUNT(*)` of animals rows and would have reset every flock to 0.
+
+**Phase 2 - COMPLETE** (`25166e7`).
+`assertNotUnderWithdrawal()` refuses any movement that takes animals off the holding, and
+refuses `slaughter_fitness` / `export_health_certificate`, while a withdrawal is running.
+Internal pen moves stay allowed - blocking them would push farmers to record nothing at all.
+Verified the interlock actually fires, not merely exists.
+
+**Phase 3 - COMPLETE** (`9a0bac1`).
+Completing a campaign now emits a group-subject health record with head count, product and
+`campaign_id`. Idempotent; resolves the open cycle; never fails the campaign update if the
+derived record cannot be written.
+
+**Phase 4 - PARTIAL** (`9a0bac1`).
+DONE: `listEnterpriseRecords` and `listEnterpriseVaccinations` were doing
+`JOIN animals ON a.id = X.animal_id`, which structurally dropped every group record - a whole
+flock's history was invisible with no error. Both now reach the enterprise through the animal OR
+the group and return the batch fields.
+
+REMAINING for Phase 4:
+- Animal Timeline / Life Timeline - roll up the group events that applied during membership
+  (`getAnimalLifetimeHistory()` already returns exactly this; the screen does not call it yet).
+- Vaccination Passport - for a batch group the passport is the GROUP's, not the bird's.
+- Group certificates - `vet_certificates.group_id` exists and is unused; `herd_health_certificate`
+  and `movement_permit` should be issuable against a group.
+- Health Analytics as RATES - mortality %, morbidity %, treatment incidence per 1,000. A flock of
+  5,000 must not read as "1 record".
+- Dashboard tiles and Marketplace listings - same `JOIN animals` shape, needs the same audit.
+
+**Phase 5 - NOT STARTED.**
+Group consultations and batch prescriptions; group enrolment in a network with cycle-bound
+consent; herd certificates. Network-hospital code is change-protected - the owner has given
+blanket approval, but the specific isolation changes should still be shown before they ship.
+
+### The repeatable check for the remaining work
+
+Every gap found so far had the same shape: a query filtering `WHERE animal_id = ...` or joining
+`animals` inertly. It never errors - it silently returns less. Before each remaining item:
+
+```bash
+grep -rn "JOIN animals" backend/src/services | grep -v LEFT
+grep -rn "animal_id = \$" backend/src/services
+```
+
+and ask, for each hit, whether a group-subject row should have been included.
