@@ -4525,16 +4525,46 @@ async function guardNetworkPharmacy(req: Request, res: Response, networkId: stri
 router.get('/pharmacy/my-pharmacies', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const userId = authReq.userId;
-  // Find network(s) this user belongs to
+
+  // An empty list has two completely different causes and the screen used to show the same
+  // dead end for both: "Select a pharmacy", with nothing to select and no explanation. `reason`
+  // lets the UI say which precondition actually failed and what to do about it.
+  // See docs/DESIGN_SYSTEM.md section 5a.
+
+  // A platform admin is not a network member but must still be able to see and set pharmacies up.
+  if (authReq.userRole === 'admin') {
+    const all = await database.query(
+      `SELECT hp.*, vh.name AS hospital_name FROM hospital_pharmacies hp
+       LEFT JOIN vet_hospitals vh ON hp.hospital_id = vh.id
+       ORDER BY hp.is_primary_pharmacy DESC, hp.pharmacy_name ASC`
+    );
+    return res.json({
+      success: true, data: all.rows, networkId: null,
+      reason: all.rows.length ? 'ok' : 'no_pharmacy_in_network', canCreate: true,
+    });
+  }
+
   const memberRes = await database.query(
-    `SELECT DISTINCT hnm.network_id FROM hospital_network_members hnm WHERE hnm.user_id = $1 AND hnm.is_active = true`,
+    `SELECT hnm.network_id, hnm.network_role
+       FROM hospital_network_members hnm
+      WHERE hnm.user_id = $1 AND hnm.is_active = true
+        AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())`,
     [userId]
   );
   if (memberRes.rows.length === 0) {
-    return res.json({ success: true, data: [], networkId: null });
+    // The pharmacist exists but nobody has added them to a network, so there is no pharmacy
+    // they could possibly reach. Previously indistinguishable from "network has no pharmacy".
+    return res.json({
+      success: true, data: [], networkId: null,
+      reason: 'not_in_network', canCreate: false,
+    });
   }
-  // Use first network (pharmacist typically belongs to one network)
+
   const networkId = memberRes.rows[0].network_id;
+  // Only these roles may stand a new pharmacy up; the UI uses this to decide whether to offer
+  // the action or tell the user who to ask.
+  const canCreate = ['corporate_admin', 'hospital_director'].includes(memberRes.rows[0].network_role);
+
   const pharmaRes = await database.query(
     `SELECT hp.*, vh.name AS hospital_name FROM hospital_pharmacies hp
      LEFT JOIN vet_hospitals vh ON hp.hospital_id = vh.id
@@ -4542,7 +4572,11 @@ router.get('/pharmacy/my-pharmacies', authMiddleware, asyncHandler(async (req: R
      ORDER BY hp.is_primary_pharmacy DESC, hp.pharmacy_name ASC`,
     [networkId]
   );
-  res.json({ success: true, data: pharmaRes.rows, networkId });
+  res.json({
+    success: true, data: pharmaRes.rows, networkId,
+    reason: pharmaRes.rows.length ? 'ok' : 'no_pharmacy_in_network',
+    canCreate,
+  });
 }));
 
 // ── Pharmacy Setup ──────────────────────────────────────────

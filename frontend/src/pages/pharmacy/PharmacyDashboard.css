@@ -315,3 +315,69 @@
   .analytics-grid { grid-template-columns: 1fr; }
   .pharm-form-row { grid-template-columns: 1fr; }
 }
+
+/* ─── Empty state: no pharmacy to open ──────────────────────────────────────
+   The screen used to show "Select a pharmacy" beside a selector that only rendered when one
+   already existed - a dead end with no explanation. Scoped under .pharmacy-page because page
+   CSS is global here (docs/DESIGN_SYSTEM.md section 2b). */
+:where(.pharmacy-page) .pharm-empty-state {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+:where(.pharmacy-page) .pharm-empty-icon { font-size: 42px; line-height: 1; }
+
+:where(.pharmacy-page) .pharm-empty-state h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #1e293b;
+}
+
+:where(.pharmacy-page) .pharm-empty-state p {
+  margin: 0;
+  max-width: 460px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64748b;
+}
+
+:where(.pharmacy-page) .pharm-empty-hint { font-size: 13px; color: #94a3b8; }
+
+:where(.pharmacy-page) .pharm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+:where(.pharmacy-page) .pharm-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  /* min-width:0 keeps long values from widening the dialog past the viewport. */
+  min-width: 0;
+}
+
+:where(.pharmacy-page) .pharm-modal h3 { margin: 0 0 16px; font-size: 17px; color: #1e293b; }
+
+:where(.pharmacy-page) .pharm-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}

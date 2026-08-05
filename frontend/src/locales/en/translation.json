@@ -7292,6 +7292,17 @@
       "inStock": "In stock",
       "reorderPoint": "Reorder point",
       "reorder": "Reorder"
+    },
+    "empty": {
+      "title": "No pharmacy set up yet",
+      "notInNetwork": "Your account is not part of a hospital network yet, so there is no pharmacy to open. A corporate admin needs to add you to their network first.",
+      "noPharmacy": "Your network does not have a pharmacy yet. Create one to start managing stock, prescriptions and dispensing.",
+      "askAdmin": "Ask a corporate admin or hospital director in your network to set one up.",
+      "createCta": "Create pharmacy",
+      "name": "Pharmacy name",
+      "licenseNumber": "License number",
+      "phone": "Phone",
+      "address": "Address"
     }
   },
   "chat": {
