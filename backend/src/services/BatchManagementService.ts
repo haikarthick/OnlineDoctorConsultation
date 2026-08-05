@@ -357,6 +357,83 @@ export class BatchManagementService {
     return { withdrawalUntilMilk: add(milkDays), withdrawalUntilMeat: add(meatDays) };
   }
 
+  // ═══ FLOCK HEALTH METRICS ══════════════════════════════════════════════════
+
+  /**
+   * Batch health is measured in RATES, not counts.
+   *
+   * "1 medical record" is meaningless for a flock of 5,000 - the question is what percentage
+   * died, what percentage showed signs, and how much of the population was treated. These are
+   * the numbers a poultry or pig producer actually manages by, and counting rows cannot express
+   * any of them.
+   *
+   * Rates are computed against the PLACED population of the cycle, not the current count:
+   * dividing by a headcount that mortality has already reduced would understate the loss.
+   */
+  async getGroupHealthMetrics(groupId: string, cycleId?: string) {
+    const cycle = cycleId
+      ? (await database.query(`SELECT * FROM group_cycles WHERE id = $1`, [cycleId])).rows[0]
+      : (await database.query(
+          `SELECT * FROM group_cycles WHERE group_id = $1 ORDER BY cycle_number DESC LIMIT 1`,
+          [groupId]
+        )).rows[0];
+
+    if (!cycle) {
+      return {
+        groupId, cycleId: null, placedCount: 0, currentCount: 0,
+        mortalityCount: 0, mortalityRate: null, cullCount: 0,
+        affectedCount: 0, morbidityRate: null,
+        treatmentCount: 0, headTreated: 0, treatmentCoverage: null,
+        vaccinationCount: 0, survivalRate: null, note: 'No cycle recorded for this group yet.',
+      };
+    }
+
+    const placed = Number(cycle.placed_count) || 0;
+    const pct = (n: number) => (placed > 0 ? Math.round((n / placed) * 10000) / 100 : null);
+
+    const [losses, health, vacc] = await Promise.all([
+      database.query(
+        `SELECT
+           COALESCE(SUM(CASE WHEN event_type = 'mortality' THEN -quantity ELSE 0 END), 0) AS mortality,
+           COALESCE(SUM(CASE WHEN event_type = 'cull'      THEN -quantity ELSE 0 END), 0) AS culls
+         FROM group_population_events WHERE cycle_id = $1`, [cycle.id]
+      ),
+      database.query(
+        `SELECT COUNT(*) AS records,
+                COALESCE(SUM(affected_count), 0) AS affected,
+                COALESCE(SUM(head_count_treated), 0) AS treated
+           FROM medical_records WHERE cycle_id = $1`, [cycle.id]
+      ),
+      database.query(`SELECT COUNT(*) AS c FROM vaccination_records WHERE cycle_id = $1`, [cycle.id]),
+    ]);
+
+    const mortality = Number(losses.rows[0]?.mortality || 0);
+    const culls = Number(losses.rows[0]?.culls || 0);
+    const affected = Number(health.rows[0]?.affected || 0);
+    const treated = Number(health.rows[0]?.treated || 0);
+
+    return {
+      groupId,
+      cycleId: cycle.id,
+      cycleNumber: cycle.cycle_number,
+      placedCount: placed,
+      currentCount: Number(cycle.current_count) || 0,
+      mortalityCount: mortality,
+      mortalityRate: pct(mortality),
+      cullCount: culls,
+      cullRate: pct(culls),
+      // Survival is against placed, so it reflects the whole cycle rather than today's snapshot.
+      survivalRate: placed > 0 ? Math.round(((placed - mortality - culls) / placed) * 10000) / 100 : null,
+      affectedCount: affected,
+      morbidityRate: pct(affected),
+      treatmentCount: Number(health.rows[0]?.records || 0),
+      headTreated: treated,
+      // Can exceed 100%: treating the same flock twice is two treatments of the population.
+      treatmentCoverage: pct(treated),
+      vaccinationCount: Number(vacc.rows[0]?.c || 0),
+    };
+  }
+
   // ═══ LIFETIME HISTORY ══════════════════════════════════════════════════════
 
   /**

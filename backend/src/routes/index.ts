@@ -774,6 +774,14 @@ router.get('/animal-groups/:groupId/reconcile', authMiddleware, asyncHandler(asy
   res.json({ success: true, data: await BatchManagementService.reconcile(groupId) });
 }));
 
+// Flock health as RATES - mortality %, morbidity %, treatment coverage. "1 record" says
+// nothing about a flock of 5,000; these are the numbers a producer manages by.
+router.get('/animal-groups/:groupId/health-metrics', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  const metrics = await BatchManagementService.getGroupHealthMetrics(groupId, req.query.cycleId as string | undefined);
+  res.json({ success: true, data: metrics });
+}));
+
 router.get('/animal-groups/:groupId/withdrawal', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
   res.json({ success: true, data: await BatchManagementService.getWithdrawalStatus({ groupId }) });

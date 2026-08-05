@@ -149,6 +149,10 @@ class ApiService {
   async reconcileGroup(groupId: string) {
     return (await this.client.get(`/animal-groups/${groupId}/reconcile`)).data
   }
+  /** Flock health as rates: mortality %, morbidity %, treatment coverage, survival. */
+  async getGroupHealthMetrics(groupId: string, cycleId?: string) {
+    return (await this.client.get(`/animal-groups/${groupId}/health-metrics`, { params: { cycleId } })).data
+  }
   async getGroupWithdrawal(groupId: string) {
     return (await this.client.get(`/animal-groups/${groupId}/withdrawal`)).data
   }
