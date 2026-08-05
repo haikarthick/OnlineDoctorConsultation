@@ -1207,12 +1207,15 @@ export class MedicalRecordService {
     limit?: number; offset?: number;
   } = {}): Promise<{ records: MedicalRecord[]; total: number }> {
     try {
-      const conditions: string[] = [`a.enterprise_id = $1`];
+      // A record belongs to the enterprise through its ANIMAL or through its GROUP. An inner
+      // JOIN on animals silently dropped every group-subject record - a whole flock's history
+      // simply did not appear. Both paths are checked here.
+      const conditions: string[] = [`(a.enterprise_id = $1 OR ag_direct.enterprise_id = $1)`];
       const params: any[] = [enterpriseId];
       let idx = 1;
 
       if (filters.animalId) { idx++; conditions.push(`mr.animal_id = $${idx}`); params.push(filters.animalId); }
-      if (filters.groupId) { idx++; conditions.push(`a.group_id = $${idx}`); params.push(filters.groupId); }
+      if (filters.groupId) { idx++; conditions.push(`(a.group_id = $${idx} OR mr.group_id = $${idx})`); params.push(filters.groupId); }
       if (filters.recordType) { idx++; conditions.push(`mr.record_type = $${idx}`); params.push(filters.recordType); }
       if (filters.status) { idx++; conditions.push(`mr.status = $${idx}`); params.push(filters.status); }
       if (filters.severity) { idx++; conditions.push(`mr.severity = $${idx}`); params.push(filters.severity); }
@@ -1235,18 +1238,28 @@ export class MedicalRecordService {
                mr.created_by as "createdBy", mr.created_at as "createdAt", mr.updated_at as "updatedAt",
                a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
                a.unique_id as "animalUniqueId",
-               ag.name as "groupName",
+               COALESCE(ag_direct.name, ag.name) as "groupName",
+               mr.group_id as "groupId",
+               mr.head_count_treated as "headCountTreated",
+               mr.affected_count as "affectedCount",
+               mr.mortality_count as "mortalityCount",
+               mr.event_date as "eventDate",
+               mr.withdrawal_until_milk as "withdrawalUntilMilk",
+               mr.withdrawal_until_meat as "withdrawalUntilMeat",
+               mr.campaign_id as "campaignId",
                COALESCE(vet.first_name || ' ' || vet.last_name, '') as "veterinarianName"
         FROM medical_records mr
-        JOIN animals a ON a.id = mr.animal_id
+        LEFT JOIN animals a ON a.id = mr.animal_id
         LEFT JOIN animal_groups ag ON ag.id = a.group_id
+        LEFT JOIN animal_groups ag_direct ON ag_direct.id = mr.group_id
         LEFT JOIN users vet ON vet.id = mr.veterinarian_id
         ${where}
         ORDER BY mr.created_at DESC LIMIT $${idx + 1} OFFSET $${idx + 2}
       `;
       const countQuery = `
         SELECT COUNT(*) as count FROM medical_records mr
-        JOIN animals a ON a.id = mr.animal_id ${where}
+        LEFT JOIN animals a ON a.id = mr.animal_id
+        LEFT JOIN animal_groups ag_direct ON ag_direct.id = mr.group_id ${where}
       `;
 
       const [recordsResult, countResult] = await Promise.all([
@@ -1272,12 +1285,14 @@ export class MedicalRecordService {
     limit?: number; offset?: number;
   } = {}): Promise<{ vaccinations: any[]; total: number }> {
     try {
-      const conditions: string[] = [`a.enterprise_id = $1`];
+      // Same as listEnterpriseRecords: a vaccination reaches the enterprise via its animal OR
+      // its group. Joining only on animals hid every flock vaccination.
+      const conditions: string[] = [`(a.enterprise_id = $1 OR ag_direct.enterprise_id = $1)`];
       const params: any[] = [enterpriseId];
       let idx = 1;
 
       if (filters.animalId) { idx++; conditions.push(`vr.animal_id = $${idx}`); params.push(filters.animalId); }
-      if (filters.groupId) { idx++; conditions.push(`a.group_id = $${idx}`); params.push(filters.groupId); }
+      if (filters.groupId) { idx++; conditions.push(`(a.group_id = $${idx} OR vr.group_id = $${idx})`); params.push(filters.groupId); }
       if (filters.overdueOnly) { conditions.push(`vr.next_due_date < CURRENT_DATE`); }
       if (filters.upcomingOnly) { conditions.push(`vr.next_due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'`); }
 
@@ -1293,22 +1308,29 @@ export class MedicalRecordService {
                vr.is_valid as "isValid", vr.dosage, vr.reaction_notes as "reactionNotes",
                vr.created_at as "createdAt",
                a.name as "animalName", a.species as "animalSpecies", a.unique_id as "animalUniqueId",
-               ag.name as "groupName",
+               -- ag_direct is the group this vaccination is ABOUT; ag is the group its animal
+               -- happens to belong to. A flock vaccination has only the former.
+               COALESCE(ag_direct.name, ag.name) as "groupName",
+               vr.group_id as "groupId",
+               vr.head_count_treated as "headCountTreated",
+               vr.campaign_id as "campaignId",
                CASE
                  WHEN vr.next_due_date < CURRENT_DATE THEN 'overdue'
                  WHEN vr.next_due_date <= CURRENT_DATE + INTERVAL '30 days' THEN 'upcoming'
                  ELSE 'current'
                END as "dueStatus"
         FROM vaccination_records vr
-        JOIN animals a ON a.id = vr.animal_id
+        LEFT JOIN animals a ON a.id = vr.animal_id
         LEFT JOIN animal_groups ag ON ag.id = a.group_id
+        LEFT JOIN animal_groups ag_direct ON ag_direct.id = vr.group_id
         ${where}
         ORDER BY vr.next_due_date ASC NULLS LAST, vr.date_administered DESC
         LIMIT $${idx + 1} OFFSET $${idx + 2}
       `;
       const countQuery = `
         SELECT COUNT(*) as count FROM vaccination_records vr
-        JOIN animals a ON a.id = vr.animal_id ${where}
+        LEFT JOIN animals a ON a.id = vr.animal_id
+        LEFT JOIN animal_groups ag_direct ON ag_direct.id = vr.group_id ${where}
       `;
 
       const [data, cnt] = await Promise.all([
