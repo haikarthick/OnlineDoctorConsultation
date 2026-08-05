@@ -14,6 +14,26 @@ export class MedicalRecordController {
     }
     const userName = req.body._userName || '';
 
+    // A group-subject record must be one the caller can actually reach. Without this a group id
+    // would be a bearer token for writing into another enterprise's health history.
+    if (req.body.groupId) {
+      const allowed = await database.query(
+        `SELECT 1 FROM animal_groups ag
+           JOIN enterprises e ON e.id = ag.enterprise_id
+          WHERE ag.id = $1
+            AND ($2 = 'admin'
+                 OR e.owner_id = $3
+                 OR EXISTS (SELECT 1 FROM enterprise_members em
+                             WHERE em.enterprise_id = e.id AND em.user_id = $3 AND em.is_active = true))
+          LIMIT 1`,
+        [req.body.groupId, req.userRole, req.userId]
+      );
+      if (!allowed.rows.length) {
+        res.status(404).json({ success: false, message: 'Animal group not found' });
+        return;
+      }
+    }
+
     // HIGH FIX-6: CRITICAL - force userId to authenticated user
     // Prevents attacker from passing ?userId=victim in request body
     const safeData = { ...req.body };
@@ -129,9 +149,32 @@ export class MedicalRecordController {
   // ═══ VACCINATIONS ═════════════════════════════════════════
 
   async createVaccination(req: AuthRequest, res: Response): Promise<void> {
-    const { animalId, vaccineName, dateAdministered } = req.body;
-    if (!animalId || !vaccineName || !dateAdministered) {
-      throw new ValidationError('animalId, vaccineName, and dateAdministered are required');
+    const { animalId, groupId, vaccineName, dateAdministered } = req.body;
+    // ONE subject: an animal or a group. A batch group is vaccinated as a single population, so
+    // a 5,000-bird flock produces one record rather than 5,000.
+    if ((!animalId && !groupId) || !vaccineName || !dateAdministered) {
+      throw new ValidationError('animalId or groupId, plus vaccineName and dateAdministered, are required');
+    }
+    if (animalId && groupId) {
+      throw new ValidationError('A vaccination belongs to either an animal or a group, not both');
+    }
+    // A caller must actually be able to reach the group they are recording against.
+    if (groupId) {
+      const allowed = await database.query(
+        `SELECT 1 FROM animal_groups ag
+           JOIN enterprises e ON e.id = ag.enterprise_id
+          WHERE ag.id = $1
+            AND ($2 = 'admin'
+                 OR e.owner_id = $3
+                 OR EXISTS (SELECT 1 FROM enterprise_members em
+                             WHERE em.enterprise_id = e.id AND em.user_id = $3 AND em.is_active = true))
+          LIMIT 1`,
+        [groupId, req.userRole, req.userId]
+      );
+      if (!allowed.rows.length) {
+        res.status(404).json({ success: false, message: 'Animal group not found' });
+        return;
+      }
     }
     const record = await MedicalRecordService.createVaccination(animalId, req.body, req.userId!);
     res.status(201).json({ success: true, data: record });

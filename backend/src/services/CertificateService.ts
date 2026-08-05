@@ -1,5 +1,6 @@
 import database from '../utils/database';
 import logger from '../utils/logger';
+import BatchManagementService from './BatchManagementService';
 
 // 18 valid certificate types (14 original + 4 new farm/enterprise types)
 const VALID_CERT_TYPES = [
@@ -14,6 +15,13 @@ const VALID_CERT_TYPES = [
 export interface CertificateData {
   certificateType: string;
   animalId?: string;
+  /**
+   * A certificate about a whole group. herd_health_certificate, movement_permit,
+   * slaughter_fitness and export_health_certificate are inherently batch documents - the
+   * vocabulary existed from the start but the table had no group to point at.
+   */
+  groupId?: string;
+  cycleId?: string;
   petOwnerId?: string;
   consultationId?: string;
   bookingId?: string;
@@ -62,17 +70,25 @@ class CertificateService {
     if (!VALID_CERT_TYPES.includes(data.certificateType)) {
       throw new Error(`Invalid certificate type: ${data.certificateType}`);
     }
+    // A certificate declaring an animal fit for slaughter or export is precisely the document
+    // that must not exist while a meat withdrawal is running. Refuse rather than warn.
+    const FOOD_CHAIN_CERTS = ['slaughter_fitness', 'export_health_certificate'];
+    if (FOOD_CHAIN_CERTS.includes(data.certificateType)) {
+      await BatchManagementService.assertNotUnderWithdrawal(
+        { animalId: (data as any).animalId, groupId: (data as any).groupId }, 'meat'
+      );
+    }
     // Draft: no certificate number yet until issued
     const result = await database.query(
       `INSERT INTO vet_certificates (
          id, certificate_number, certificate_type, status, veterinarian_id,
-         pet_owner_id, animal_id, consultation_id, booking_id, enterprise_id,
+         pet_owner_id, animal_id, group_id, cycle_id, consultation_id, booking_id, enterprise_id,
          examination_date, clinical_findings, diagnosis, treatment_summary,
          recommendations, vaccination_details, travel_details, breeding_details,
          valuation_details, movement_details, herd_details, valid_until, notes
        ) VALUES (
          gen_random_uuid(), $1, $2, 'draft', $3,
-         $4, $5, $6, $7, $8,
+         $4, $5, $22, $23, $6, $7, $8,
          $9, $10, $11, $12,
          $13, $14, $15, $16,
          $17, $18, $19, $20, $21
@@ -93,6 +109,8 @@ class CertificateService {
         data.movementDetails ? JSON.stringify(data.movementDetails) : null,
         data.herdDetails ? JSON.stringify(data.herdDetails) : null,
         data.validUntil || null, data.notes || null,
+        // $22/$23 - the group this certificate is about, for herd-level documents.
+        data.groupId || null, data.cycleId || null,
       ]
     );
     return result.rows[0];
@@ -130,6 +148,7 @@ class CertificateService {
     setField('movement_details', data.movementDetails ? JSON.stringify(data.movementDetails) : undefined);
     setField('herd_details', data.herdDetails ? JSON.stringify(data.herdDetails) : undefined);
     if (data.animalId !== undefined) setField('animal_id', data.animalId);
+    if ((data as any).groupId !== undefined) setField('group_id', (data as any).groupId);
     if (data.petOwnerId !== undefined) setField('pet_owner_id', data.petOwnerId);
     if (data.consultationId !== undefined) setField('consultation_id', data.consultationId);
     if (data.enterpriseId !== undefined) setField('enterprise_id', data.enterpriseId || null);
@@ -212,6 +231,7 @@ class CertificateService {
        LEFT JOIN vet_profiles vp ON vp.user_id = vc.veterinarian_id
        LEFT JOIN users u_owner ON u_owner.id = vc.pet_owner_id
        LEFT JOIN animals a ON a.id = vc.animal_id
+       LEFT JOIN animal_groups ag ON ag.id = vc.group_id
        WHERE vc.id = $1`,
       [id]
     );
@@ -229,6 +249,7 @@ class CertificateService {
     if (params.type) { where += ` AND vc.certificate_type = $${p++}`; vals.push(params.type); }
     if (params.status) { where += ` AND vc.status = $${p++}`; vals.push(params.status); }
     if (params.animalId) { where += ` AND vc.animal_id = $${p++}`; vals.push(params.animalId); }
+    if ((params as any).groupId) { where += ` AND vc.group_id = $${p++}`; vals.push((params as any).groupId); }
     if (params.enterpriseId) { where += ` AND vc.enterprise_id = $${p++}`; vals.push(params.enterpriseId); }
 
     const countResult = await database.query(
@@ -244,6 +265,7 @@ class CertificateService {
        FROM vet_certificates vc
        LEFT JOIN users u_owner ON u_owner.id = vc.pet_owner_id
        LEFT JOIN animals a ON a.id = vc.animal_id
+       LEFT JOIN animal_groups ag ON ag.id = vc.group_id
        LEFT JOIN enterprises e ON e.id = vc.enterprise_id
        ${where}
        ORDER BY vc.created_at DESC LIMIT $${p} OFFSET $${p + 1}`,
@@ -262,6 +284,7 @@ class CertificateService {
     if (params.type) { where += ` AND vc.certificate_type = $${p++}`; vals.push(params.type); }
     if (params.status) { where += ` AND vc.status = $${p++}`; vals.push(params.status); }
     if (params.animalId) { where += ` AND vc.animal_id = $${p++}`; vals.push(params.animalId); }
+    if ((params as any).groupId) { where += ` AND vc.group_id = $${p++}`; vals.push((params as any).groupId); }
     if (params.enterpriseId) { where += ` AND vc.enterprise_id = $${p++}`; vals.push(params.enterpriseId); }
 
     const countResult = await database.query(
@@ -277,6 +300,7 @@ class CertificateService {
        FROM vet_certificates vc
        LEFT JOIN users u_vet ON u_vet.id = vc.veterinarian_id
        LEFT JOIN animals a ON a.id = vc.animal_id
+       LEFT JOIN animal_groups ag ON ag.id = vc.group_id
        LEFT JOIN enterprises e ON e.id = vc.enterprise_id
        ${where}
        ORDER BY vc.created_at DESC LIMIT $${p} OFFSET $${p + 1}`,
@@ -295,6 +319,7 @@ class CertificateService {
        LEFT JOIN users u_vet ON u_vet.id = vc.veterinarian_id
        LEFT JOIN users u_owner ON u_owner.id = vc.pet_owner_id
        LEFT JOIN animals a ON a.id = vc.animal_id
+       LEFT JOIN animal_groups ag ON ag.id = vc.group_id
        LEFT JOIN enterprises e ON e.id = vc.enterprise_id
        WHERE vc.animal_id = $1
        ORDER BY vc.created_at DESC`,
@@ -325,6 +350,7 @@ class CertificateService {
        LEFT JOIN users u_vet ON u_vet.id = vc.veterinarian_id
        LEFT JOIN users u_owner ON u_owner.id = vc.pet_owner_id
        LEFT JOIN animals a ON a.id = vc.animal_id
+       LEFT JOIN animal_groups ag ON ag.id = vc.group_id
        ${where}`, vals
     );
     const total = parseInt(countResult.rows[0].count, 10);
@@ -339,6 +365,7 @@ class CertificateService {
        LEFT JOIN users u_vet ON u_vet.id = vc.veterinarian_id
        LEFT JOIN users u_owner ON u_owner.id = vc.pet_owner_id
        LEFT JOIN animals a ON a.id = vc.animal_id
+       LEFT JOIN animal_groups ag ON ag.id = vc.group_id
        LEFT JOIN enterprises e ON e.id = vc.enterprise_id
        ${where}
        ORDER BY vc.created_at DESC LIMIT $${p} OFFSET $${p + 1}`,

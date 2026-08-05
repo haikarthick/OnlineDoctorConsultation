@@ -132,7 +132,83 @@ export class TreatmentCampaignService {
     params.push(id);
 
     await database.query(`UPDATE treatment_campaigns SET ${setClauses.join(', ')}, updated_at = NOW() WHERE id = $${idx}`, params);
+
+    // Completing a campaign now leaves a real health record.
+    //
+    // Until this existed, TreatmentCampaignService only ever moved completed_count. Vaccinating
+    // a whole flock through Campaigns therefore left NO history that any other screen could
+    // read: Herd Medical showed nothing, and there was no evidence of what had been treated.
+    // The record is written against the GROUP, so a 5,000-bird campaign is still one row.
+    if (data.status === 'completed') {
+      await this.emitCampaignHealthRecord(id);
+    }
+
     return this.getCampaign(id);
+  }
+
+  /**
+   * Write the group-subject health record for a completed campaign. Idempotent: re-completing a
+   * campaign must not produce a second record, so it checks campaign_id first.
+   */
+  private async emitCampaignHealthRecord(campaignId: string): Promise<void> {
+    try {
+      const c = await database.query(
+        `SELECT tc.*, e.owner_id
+           FROM treatment_campaigns tc
+           JOIN enterprises e ON e.id = tc.enterprise_id
+          WHERE tc.id = $1`, [campaignId]
+      );
+      if (!c.rows.length) return;
+      const camp = c.rows[0];
+
+      // A campaign with no group is enterprise-wide planning, not a treatment of a known
+      // population - there is no subject to attach a record to.
+      if (!camp.group_id) return;
+
+      const isVaccination = camp.campaign_type === 'vaccination';
+      const table = isVaccination ? 'vaccination_records' : 'medical_records';
+      const existing = await database.query(
+        `SELECT 1 FROM ${table} WHERE campaign_id = $1 LIMIT 1`, [campaignId]
+      );
+      if (existing.rows.length) return;
+
+      const cycle = await database.query(
+        `SELECT id FROM group_cycles WHERE group_id = $1 AND status = 'active' LIMIT 1`, [camp.group_id]
+      );
+      const cycleId = cycle.rows[0]?.id || null;
+      const head = camp.completed_count || camp.target_count || null;
+      const when = camp.completed_at ? new Date(camp.completed_at).toISOString().slice(0, 10)
+                                     : new Date().toISOString().slice(0, 10);
+
+      if (isVaccination) {
+        await database.query(
+          `INSERT INTO vaccination_records
+             (group_id, cycle_id, campaign_id, vaccine_name, dosage, date_administered,
+              head_count_treated, administered_by, created_by)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8)`,
+          [camp.group_id, cycleId, campaignId, camp.product_used || camp.name,
+           camp.dosage || null, when, head, camp.administered_by || camp.owner_id]
+        );
+      } else {
+        await database.query(
+          `INSERT INTO medical_records
+             (user_id, group_id, cycle_id, campaign_id, record_type, title, content,
+              event_date, head_count_treated, created_by)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$1)`,
+          [camp.owner_id, camp.group_id, cycleId, campaignId, 'other',
+           camp.name,
+           [camp.description, camp.product_used ? `Product: ${camp.product_used}` : null,
+            camp.dosage ? `Dosage: ${camp.dosage}` : null]
+             .filter(Boolean).join('\n') || camp.campaign_type,
+           when, head]
+        );
+      }
+      logger.info('Campaign health record emitted', { campaignId, groupId: camp.group_id, isVaccination });
+    } catch (err: any) {
+      // Never fail the campaign update because the derived record could not be written - the
+      // campaign itself is the user's action. Logged loudly so it is not lost.
+      logger.error('Failed to emit campaign health record', { campaignId, error: err.message });
+    }
   }
 
   async deleteCampaign(id: string): Promise<void> {

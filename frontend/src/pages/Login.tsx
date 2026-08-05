@@ -18,6 +18,10 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
+  // Set when the credentials were CORRECT but the account is blocked (pending_approval /
+  // frozen / suspended). That is not a mistake the user can fix by retrying, so it must not
+  // be rendered as a red failure alongside "wrong password".
+  const [accountStatus, setAccountStatus] = useState('')
   const [loading, setLoading] = useState(false)
   const [dbWaking, setDbWaking] = useState(false)
   const [retryCountdown, setRetryCountdown] = useState(0)
@@ -52,6 +56,7 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
     setLoading(true)
     if (!isAutoRetry) {
       setMessage('')
+      setAccountStatus('')
       setDbWaking(false)
       setRetryCountdown(0)
       if (autoRetryRef.current) clearTimeout(autoRetryRef.current)
@@ -64,12 +69,14 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
       setDbWaking(false)
     } catch (error) {
       const msg = error instanceof Error ? error.message : t('login.error')
+      const status = (error as { accountStatus?: string })?.accountStatus || ''
       if (msg.toLowerCase().includes('database is not ready') || msg.toLowerCase().includes('not ready yet')) {
         setDbWaking(true)
         setMessage('')
         scheduleAutoRetry(email, password, 30)
       } else {
         setDbWaking(false)
+        setAccountStatus(status)
         setMessage(msg)
       }
     } finally {
@@ -131,7 +138,30 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
               </div>
             )}
 
-            {message && (
+            {/* Credentials were right; the account is simply not usable yet. Rendered as its
+                own panel because the single most important thing to communicate - especially
+                for pending_approval - is that nothing is broken and there is nothing to retry.
+                A red "Login failed" here is what drove people to register a second time. */}
+            {message && accountStatus && (
+              <div className="message account-status" role="status" aria-live="polite">
+                <div className="account-status-icon" aria-hidden="true">
+                  {accountStatus === 'pending_approval' ? '📋' : '🔒'}
+                </div>
+                <div className="account-status-body">
+                  <strong className="account-status-title">
+                    {accountStatus === 'pending_approval'
+                      ? t('login.pendingTitle')
+                      : t('login.blockedTitle')}
+                  </strong>
+                  <p className="account-status-text">{message}</p>
+                  {accountStatus === 'pending_approval' && (
+                    <p className="account-status-note">{t('login.pendingNoReRegister')}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {message && !accountStatus && (
               <div
                 className={`message ${message.includes('✓') ? 'success' : 'error'}`}
                 role="status"

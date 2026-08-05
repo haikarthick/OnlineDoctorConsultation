@@ -251,10 +251,10 @@
   letter-spacing: 0.04em;
 }
 
-.pc-scope-badge-view_only  { background: #dbeafe; color: #1d4ed8; }
+.pc-scope-badge-view_only { background: #dbeafe; color: #1d4ed8; }
 .pc-scope-badge-full_history { background: #ede9fe; color: #6d28d9; }
-.pc-scope-badge-treatment  { background: #ffedd5; color: #c2410c; }
-.pc-scope-badge-emergency  { background: #fee2e2; color: #b91c1c; }
+.pc-scope-badge-treatment { background: #ffedd5; color: #c2410c; }
+.pc-scope-badge-emergency { background: #fee2e2; color: #b91c1c; }
 
 /* ── Status Badges ─────────────────────────────────────────── */
 .pc-status-badge {
@@ -267,7 +267,7 @@
   border-radius: 999px;
 }
 
-.pc-status-badge.active  { background: var(--success-light); color: var(--success); }
+.pc-status-badge.active { background: var(--success-light); color: var(--success); }
 .pc-status-badge.revoked { background: var(--gray-100); color: var(--gray-500); }
 
 /* ── Info Row ──────────────────────────────────────────────── */
@@ -301,7 +301,7 @@
   color: var(--gray-700);
 }
 
-.pc-permission-item.enabled  { color: var(--gray-800); }
+.pc-permission-item.enabled { color: var(--gray-800); }
 .pc-permission-item.disabled { color: var(--gray-400); text-decoration: line-through; }
 
 .pc-permission-icon {
@@ -517,10 +517,10 @@
   border-color: var(--gray-400);
 }
 
-.pc-scope-option.selected-view_only  { border-color: #3b82f6; background: #eff6ff; }
+.pc-scope-option.selected-view_only { border-color: #3b82f6; background: #eff6ff; }
 .pc-scope-option.selected-full_history { border-color: #8b5cf6; background: #f5f3ff; }
-.pc-scope-option.selected-treatment  { border-color: #f97316; background: #fff7ed; }
-.pc-scope-option.selected-emergency  { border-color: #ef4444; background: #fef2f2; }
+.pc-scope-option.selected-treatment { border-color: #f97316; background: #fff7ed; }
+.pc-scope-option.selected-emergency { border-color: #ef4444; background: #fef2f2; }
 
 .pc-scope-option-title {
   font-size: 14px;
@@ -692,7 +692,7 @@
     align-items: flex-start;
   }
 
-  .data-table-container {
+  :where(.pc-page) .data-table-container {
     overflow-x: auto;
   }
 }

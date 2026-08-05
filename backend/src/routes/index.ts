@@ -153,6 +153,7 @@ import VaccineProtocolService from '../services/VaccineProtocolService';
 import MasterDataService from '../services/MasterDataService';
 import VaccineScheduleService from '../services/VaccineScheduleService';
 import { asyncHandler } from '../utils/errorHandler';
+import BatchManagementService from '../services/BatchManagementService';
 import { AuthRequest } from '../middleware/auth';
 import { checkAnimalAccess, requireAnimalAccess, requireEnterpriseAccess } from '../middleware/hospitalDataIsolation';
 import emailService from '../services/EmailService';
@@ -683,6 +684,125 @@ router.get('/enterprises/:enterpriseId/groups', authMiddleware, asyncHandler((re
 router.post('/animal-groups/:id/assign', authMiddleware, validateBody(assignAnimalToGroupSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.assignAnimalToGroup(req, res)));
 router.delete('/animal-groups/:id/animals/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.removeAnimalFromGroup(req, res)));
 
+// ─── Batch (flock/herd) management ──────────────────────────────────────────
+// A health event has ONE subject - an animal or a group - so a 5,000-bird flock produces one
+// record, not 5,000. See docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md.
+//
+// Every route below is gated by ensureGroupAccess(): the caller must own the enterprise that
+// owns the group, be a member of it, or be a platform admin. A group id is a bearer of an
+// enterprise's data, so an unguarded :groupId here would be a cross-tenant read exactly like
+// the ones the network audits found.
+async function ensureGroupAccess(req: Request, res: Response): Promise<string | null> {
+  const authReq = req as any;
+  const groupId = req.params.groupId || req.params.id;
+  if (!groupId) { res.status(400).json({ success: false, message: 'Group id is required' }); return null; }
+
+  if (authReq.userRole === 'admin') return groupId;
+
+  const owned = await database.query(
+    `SELECT 1
+       FROM animal_groups ag
+       JOIN enterprises e ON e.id = ag.enterprise_id
+      WHERE ag.id = $1
+        AND (e.owner_id = $2
+             OR EXISTS (SELECT 1 FROM enterprise_members em
+                         WHERE em.enterprise_id = e.id AND em.user_id = $2 AND em.is_active = true))
+      LIMIT 1`,
+    [groupId, authReq.userId]
+  );
+  if (!owned.rows.length) {
+    // 404 not 403 - do not confirm that a group exists to someone with no claim on it.
+    res.status(404).json({ success: false, message: 'Animal group not found' });
+    return null;
+  }
+  return groupId;
+}
+
+router.get('/animal-groups/:groupId/cycles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  res.json({ success: true, data: await BatchManagementService.listCycles(groupId) });
+}));
+
+router.get('/animal-groups/:groupId/cycles/active', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  res.json({ success: true, data: await BatchManagementService.getActiveCycle(groupId) });
+}));
+
+router.post('/animal-groups/:groupId/cycles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  const { name, species, breed, placedCount, startedAt, notes } = req.body;
+  const cycle = await BatchManagementService.openCycle({
+    groupId, name, species, breed,
+    placedCount: Number(placedCount) || 0, startedAt, notes,
+    userId: (req as any).userId,
+  });
+  res.status(201).json({ success: true, data: cycle });
+}));
+
+router.post('/group-cycles/:cycleId/close', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  // The cycle is reached by its own id, so resolve its group first and guard on that.
+  const owner = await database.query(
+    `SELECT gc.group_id FROM group_cycles gc WHERE gc.id = $1`, [req.params.cycleId]
+  );
+  if (!owner.rows.length) { res.status(404).json({ success: false, message: 'Cycle not found' }); return; }
+  req.params.groupId = owner.rows[0].group_id;
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+
+  const cycle = await BatchManagementService.closeCycle(req.params.cycleId, authReq.userId, req.body?.reason);
+  res.json({ success: true, data: cycle });
+}));
+
+router.get('/animal-groups/:groupId/population-events', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  const events = await BatchManagementService.listPopulationEvents(groupId, req.query.cycleId as string | undefined);
+  res.json({ success: true, data: events });
+}));
+
+router.post('/animal-groups/:groupId/population-events', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  const { cycleId, eventType, quantity, eventDate, reason, sourceRef } = req.body;
+  const result = await BatchManagementService.recordPopulationEvent({
+    groupId, cycleId, eventType, quantity: Number(quantity),
+    eventDate, reason, sourceRef, userId: (req as any).userId,
+  });
+  res.status(201).json({ success: true, data: result });
+}));
+
+router.get('/animal-groups/:groupId/reconcile', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  res.json({ success: true, data: await BatchManagementService.reconcile(groupId) });
+}));
+
+// Flock health as RATES - mortality %, morbidity %, treatment coverage. "1 record" says
+// nothing about a flock of 5,000; these are the numbers a producer manages by.
+router.get('/animal-groups/:groupId/health-metrics', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  const metrics = await BatchManagementService.getGroupHealthMetrics(groupId, req.query.cycleId as string | undefined);
+  res.json({ success: true, data: metrics });
+}));
+
+router.get('/animal-groups/:groupId/withdrawal', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  res.json({ success: true, data: await BatchManagementService.getWithdrawalStatus({ groupId }) });
+}));
+
+router.post('/animal-groups/:groupId/promote', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  const { animalId, cycleId, reason } = req.body;
+  if (!animalId) { res.status(400).json({ success: false, message: 'animalId is required' }); return; }
+  const result = await BatchManagementService.promoteFromBatch({
+    animalId, groupId, cycleId, reason, userId: (req as any).userId,
+  });
+  res.status(201).json({ success: true, data: result });
+}));
+
+// An animal's FULL life story: its own records plus the group records that applied while it was
+// a member of that cycle. Composed at read time - nothing is ever copied down.
+router.get('/animals/:animalId/lifetime-history', authMiddleware, requireAnimalAccess('params:animalId', 'medical_records'), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await BatchManagementService.getAnimalLifetimeHistory(req.params.animalId) });
+}));
+
 // Locations
 router.post('/locations', authMiddleware, validateBody(createLocationSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.createLocation(req, res)));
 router.get('/locations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getLocation(req, res)));
@@ -908,6 +1028,83 @@ router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandle
   res.json({ success: true, message: 'Member updated successfully' });
 }));
 router.delete('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.removeNetworkMember(req, res)));
+
+// Candidate users for network membership.
+//
+// Scope: people already attached to one of THIS network's branch hospitals - as a doctor
+// (hospital_doctors) or as staff (staff_positions) - who are not already active members.
+// It is deliberately NOT a platform-wide user directory. The route this replaces
+// (GET /network-user-search) selected `FROM users WHERE role NOT IN ('pet_owner','farmer')`
+// with no network scoping at all and no network id in the request, so any corporate_admin
+// or hospital_director of ANY network could enumerate the name, email and role of every
+// professional account on the platform two characters at a time, and users who were already
+// members still appeared in the picker (then collided with UNIQUE(network_id, user_id)).
+//
+// An empty `q` returns the whole candidate list rather than nothing: the set is bounded by
+// the network's own hospitals, so it is safe to show before the admin types. Someone with no
+// prior attachment to a branch hospital is onboarded through POST /:id/invite-staff instead.
+router.get('/hospital-networks/:id/user-search', authMiddleware, requireNetworkAccess('addRemoveMembers'), asyncHandler(async (req: Request, res: Response) => {
+  const networkId = req.params.id;
+  // hospital_director / hospital_staff are branch-scoped, so they only see their own branch,
+  // exactly as getNetworkPatients does with the same field.
+  const branchScopeHospitalId = (req as NetworkAccessRequest).branchScopeHospitalId ?? null;
+  const search = ((req.query.q as string) || '').trim();
+
+  // Built positionally rather than with hardcoded $n offsets - the clauses are optional.
+  const params: any[] = [networkId];
+  let idx = 2;
+
+  let branchClause = '';
+  if (branchScopeHospitalId) {
+    branchClause = `AND hnh.hospital_id = $${idx++}`;
+    params.push(branchScopeHospitalId);
+  }
+
+  let searchClause = '';
+  if (search.length > 0) {
+    searchClause = `AND (u.email ILIKE $${idx} OR u.first_name ILIKE $${idx}
+                         OR u.last_name ILIKE $${idx}
+                         OR (u.first_name || ' ' || u.last_name) ILIKE $${idx})`;
+    params.push(`%${search}%`);
+    idx++;
+  }
+
+  try {
+    const result = await database.query(
+      `SELECT u.id, u.first_name AS "firstName", u.last_name AS "lastName", u.email, u.role
+         FROM users u
+        WHERE u.is_active = true
+          AND EXISTS (
+            SELECT 1
+              FROM hospital_network_hospitals hnh
+             WHERE hnh.network_id = $1
+               AND hnh.is_active = true
+               ${branchClause}
+               AND (
+                 EXISTS (SELECT 1 FROM hospital_doctors hd
+                          WHERE hd.hospital_id = hnh.hospital_id
+                            AND hd.doctor_id = u.id AND hd.is_active = true)
+                 OR EXISTS (SELECT 1 FROM staff_positions sp
+                             WHERE sp.hospital_id = hnh.hospital_id
+                               AND sp.user_id = u.id AND sp.is_active = true)
+               )
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM hospital_network_members m
+             WHERE m.network_id = $1 AND m.user_id = u.id AND m.is_active = true
+          )
+          ${searchClause}
+        ORDER BY u.first_name, u.last_name
+        LIMIT 50`,
+      params
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    logger.error('Network candidate search failed', { error: err.message, networkId });
+    res.status(500).json({ success: false, message: 'Search failed' });
+  }
+}));
+
 router.get('/hospital-networks/:id/departments', authMiddleware, requireNetworkAccess('viewNetworkDetails'), asyncHandler(async (req: Request, res: Response) => {
   const custom = await database.query(
     `SELECT DISTINCT department FROM hospital_network_members 
@@ -948,23 +1145,17 @@ router.get('/hospital-networks/:id/security-audit', authMiddleware, requireNetwo
   }
 }));
 
-// User search for network member invite (corporate_admin/hospital_director can search registered users by name/email)
-router.get('/network-user-search', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const authReq = req as any;
-  if (authReq.userRole !== 'admin') {
-    // Same gate as the actual invite action (POST /hospital-networks/:id/invite-staff) --
-    // this search is only useful as a precursor to inviting, so it shouldn't be reachable
-    // by anyone who couldn't actually send an invite (was previously any veterinarian/
-    // hospital_staff system role, with zero network-membership check at all).
-    const membership = await database.query(
-      `SELECT 1 FROM hospital_network_members WHERE user_id = $1 AND is_active = true
-         AND network_role IN ('corporate_admin', 'hospital_director') LIMIT 1`,
-      [authReq.userId]
-    );
-    if (!membership.rows.length) {
-      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can search users to invite' });
-    }
-  }
+// PLATFORM-WIDE user search. Its only remaining caller is /admin/staff-settings, which is
+// admin-only (Navigation.tsx roles: ['admin']) and legitimately needs to attach ANY user to
+// ANY hospital as a staff position.
+//
+// Gate narrowed to platform admin. It previously also admitted anyone holding
+// corporate_admin/hospital_director in ANY network, which - because the route takes no
+// network id and applies no network filter - let a network admin enumerate every
+// professional account on the platform. Network-scoped member picking now lives at
+// GET /hospital-networks/:id/user-search. Do NOT widen this gate again: the check here
+// cannot be network-scoped, because there is no network in the request to scope to.
+router.get('/network-user-search', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
   const search = ((req.query.q as string) || '').trim();
   if (!search || search.length < 2) { res.json({ success: true, data: [] }); return; }
   try {
@@ -4334,16 +4525,46 @@ async function guardNetworkPharmacy(req: Request, res: Response, networkId: stri
 router.get('/pharmacy/my-pharmacies', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const userId = authReq.userId;
-  // Find network(s) this user belongs to
+
+  // An empty list has two completely different causes and the screen used to show the same
+  // dead end for both: "Select a pharmacy", with nothing to select and no explanation. `reason`
+  // lets the UI say which precondition actually failed and what to do about it.
+  // See docs/DESIGN_SYSTEM.md section 5a.
+
+  // A platform admin is not a network member but must still be able to see and set pharmacies up.
+  if (authReq.userRole === 'admin') {
+    const all = await database.query(
+      `SELECT hp.*, vh.name AS hospital_name FROM hospital_pharmacies hp
+       LEFT JOIN vet_hospitals vh ON hp.hospital_id = vh.id
+       ORDER BY hp.is_primary_pharmacy DESC, hp.pharmacy_name ASC`
+    );
+    return res.json({
+      success: true, data: all.rows, networkId: null,
+      reason: all.rows.length ? 'ok' : 'no_pharmacy_in_network', canCreate: true,
+    });
+  }
+
   const memberRes = await database.query(
-    `SELECT DISTINCT hnm.network_id FROM hospital_network_members hnm WHERE hnm.user_id = $1 AND hnm.is_active = true`,
+    `SELECT hnm.network_id, hnm.network_role
+       FROM hospital_network_members hnm
+      WHERE hnm.user_id = $1 AND hnm.is_active = true
+        AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())`,
     [userId]
   );
   if (memberRes.rows.length === 0) {
-    return res.json({ success: true, data: [], networkId: null });
+    // The pharmacist exists but nobody has added them to a network, so there is no pharmacy
+    // they could possibly reach. Previously indistinguishable from "network has no pharmacy".
+    return res.json({
+      success: true, data: [], networkId: null,
+      reason: 'not_in_network', canCreate: false,
+    });
   }
-  // Use first network (pharmacist typically belongs to one network)
+
   const networkId = memberRes.rows[0].network_id;
+  // Only these roles may stand a new pharmacy up; the UI uses this to decide whether to offer
+  // the action or tell the user who to ask.
+  const canCreate = ['corporate_admin', 'hospital_director'].includes(memberRes.rows[0].network_role);
+
   const pharmaRes = await database.query(
     `SELECT hp.*, vh.name AS hospital_name FROM hospital_pharmacies hp
      LEFT JOIN vet_hospitals vh ON hp.hospital_id = vh.id
@@ -4351,7 +4572,11 @@ router.get('/pharmacy/my-pharmacies', authMiddleware, asyncHandler(async (req: R
      ORDER BY hp.is_primary_pharmacy DESC, hp.pharmacy_name ASC`,
     [networkId]
   );
-  res.json({ success: true, data: pharmaRes.rows, networkId });
+  res.json({
+    success: true, data: pharmaRes.rows, networkId,
+    reason: pharmaRes.rows.length ? 'ok' : 'no_pharmacy_in_network',
+    canCreate,
+  });
 }));
 
 // ── Pharmacy Setup ──────────────────────────────────────────

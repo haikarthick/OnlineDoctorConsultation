@@ -105,14 +105,14 @@
 }
 
 /* ═══ Module Tabs ═══ */
-.module-tabs {
+:where(.module-page) .module-tabs {
   display: flex;
   gap: 8px;
   margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
-.module-tab {
+:where(.module-page) .module-tab {
   padding: 10px 22px;
   border: 2px solid #e2e8f0;
   background: white;
@@ -124,19 +124,19 @@
   color: #555;
 }
 
-.module-tab:hover {
+:where(.module-page) .module-tab:hover {
   border-color: #667eea;
   color: #667eea;
 }
 
-.module-tab.active {
+:where(.module-page) .module-tab.active {
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border-color: transparent;
 }
 
 /* ═══ Module Buttons ═══ */
-.module-btn {
+:where(.module-page) .module-btn {
   padding: 10px 22px;
   border: 2px solid #e2e8f0;
   background: white;
@@ -148,24 +148,24 @@
   color: #555;
 }
 
-.module-btn:hover {
+:where(.module-page) .module-btn:hover {
   border-color: #667eea;
   color: #667eea;
 }
 
-.module-btn.primary {
+:where(.module-page) .module-btn.primary {
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border-color: transparent;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.module-btn.primary:hover {
+:where(.module-page) .module-btn.primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
-.module-btn.small {
+:where(.module-page) .module-btn.small {
   padding: 6px 14px;
   font-size: 12px;
   border-radius: 8px;
@@ -189,7 +189,7 @@
 .page-back-btn:hover { color: #2563eb; }
 
 /* ═══ Module Table ═══ */
-.module-table {
+:where(.module-page) .module-table {
   width: 100%;
   border-collapse: collapse;
   background: white;
@@ -197,11 +197,11 @@
   overflow: hidden;
 }
 
-.module-table thead {
+:where(.module-page) .module-table thead {
   background: linear-gradient(135deg, #f0f4ff 0%, #f9f6ff 100%);
 }
 
-.module-table th {
+:where(.module-page) .module-table th {
   padding: 12px 16px;
   text-align: left;
   font-weight: 700;
@@ -212,27 +212,27 @@
   border-bottom: 2px solid rgba(102, 126, 234, 0.2);
 }
 
-.module-table td {
+:where(.module-page) .module-table td {
   padding: 12px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   font-size: 13px;
   color: #1a1a1a;
 }
 
-.module-table tbody tr {
+:where(.module-page) .module-table tbody tr {
   transition: background 0.2s;
 }
 
-.module-table tbody tr:hover {
+:where(.module-page) .module-table tbody tr:hover {
   background: rgba(102, 126, 234, 0.04);
 }
 
-.module-table tbody tr:last-child td {
+:where(.module-page) .module-table tbody tr:last-child td {
   border-bottom: none;
 }
 
 /* ═══ Module Alerts ═══ */
-.module-alert {
+:where(.module-page) .module-alert {
   padding: 12px 16px;
   border-radius: 8px;
   font-size: 14px;
@@ -241,7 +241,7 @@
   align-items: center;
 }
 
-.module-alert.error {
+:where(.module-page) .module-alert.error {
   background: #fee2e2;
   color: #991b1b;
   border: 1px solid #fecaca;
@@ -249,22 +249,27 @@
 
 /* Error shake animation - applied globally by ErrorAutoScroll */
 @keyframes errorShake {
-  0%, 100% { transform: translateX(0); }
-  15%, 45%, 75% { transform: translateX(-6px); }
-  30%, 60%, 90% { transform: translateX(6px); }
+  0%,
+100% { transform: translateX(0); }
+  15%,
+45%,
+75% { transform: translateX(-6px); }
+  30%,
+60%,
+90% { transform: translateX(6px); }
 }
 
-.error-shake {
+:where(.module-page) .error-shake {
   animation: errorShake 0.5s ease-in-out;
 }
 
 /* Field-level error highlight */
-.input-error {
+:where(.module-page) .input-error {
   border-color: #ef4444 !important;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
 }
 
-.input-error-msg {
+:where(.module-page) .input-error-msg {
   color: #dc2626;
   font-size: 12px;
   margin-top: 4px;
@@ -272,7 +277,7 @@
 }
 
 /* ═══ Edit Form Panel - slide-in with overlay ═══ */
-.edit-form-overlay {
+:where(.module-page) .edit-form-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
@@ -290,7 +295,7 @@
   to { opacity: 1; }
 }
 
-.edit-form-panel {
+:where(.module-page) .edit-form-panel {
   position: relative;
   z-index: 9999;
   background: white;
@@ -302,7 +307,7 @@
   animation: formSlideIn 0.3s ease;
 }
 
-.edit-form-modal {
+:where(.module-page) .edit-form-modal {
   width: 95%;
   max-width: 720px;
   max-height: calc(100vh - 80px);
@@ -310,7 +315,7 @@
   margin: 0 auto;
 }
 
-.edit-form-close {
+:where(.module-page) .edit-form-close {
   position: absolute;
   top: 16px;
   right: 16px;
@@ -328,7 +333,7 @@
   transition: all 0.2s;
 }
 
-.edit-form-close:hover {
+:where(.module-page) .edit-form-close:hover {
   background: #fee2e2;
   color: #dc2626;
   border-color: #fca5a5;
@@ -339,13 +344,13 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.edit-form-panel h2 {
+:where(.module-page) .edit-form-panel h2 {
   margin: 0 0 4px;
   font-size: 18px;
   color: #1f2937;
 }
 
-.edit-form-panel .edit-form-badge {
+:where(.module-page) .edit-form-panel .edit-form-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -359,35 +364,35 @@
 }
 
 @media (max-width: 768px) {
-  .edit-form-panel {
+  :where(.module-page) .edit-form-panel {
     padding: 16px;
     border-radius: 12px;
   }
-  .edit-form-modal {
+  :where(.module-page) .edit-form-modal {
     width: 100%;
     max-height: calc(100vh - 40px);
   }
-  .edit-form-overlay {
+  :where(.module-page) .edit-form-overlay {
     padding: 20px 8px;
   }
 }
 
 @media (max-width: 480px) {
-  .edit-form-panel {
+  :where(.module-page) .edit-form-panel {
     padding: 12px;
   }
-  .edit-form-overlay {
+  :where(.module-page) .edit-form-overlay {
     padding: 10px 4px;
   }
 }
 
-.module-alert.success {
+:where(.module-page) .module-alert.success {
   background: #dcfce7;
   color: #166534;
   border: 1px solid #bbf7d0;
 }
 
-.module-alert button {
+:where(.module-page) .module-alert button {
   background: none;
   border: none;
   cursor: pointer;
@@ -397,11 +402,11 @@
 }
 
 /* ═══ Module Form Elements ═══ */
-.module-input,
-.module-input[type="number"],
-.module-input[type="datetime-local"],
-select.module-input,
-textarea.module-input {
+:where(.module-page) .module-input,
+:where(.module-page) .module-input[type="number"],
+:where(.module-page) .module-input[type="datetime-local"],
+:where(.module-page) select.module-input,
+:where(.module-page) textarea.module-input {
   width: 100%;
   padding: 10px 14px;
   border: 1.5px solid #e2e8f0;
@@ -415,23 +420,23 @@ textarea.module-input {
   font-family: inherit;
 }
 
-.module-input:focus {
+:where(.module-page) .module-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
 }
 
-.module-input::placeholder {
+:where(.module-page) .module-input::placeholder {
   color: #94a3b8;
 }
 
-textarea.module-input {
+:where(.module-page) textarea.module-input {
   min-height: 90px;
   resize: vertical;
   line-height: 1.5;
 }
 
-.module-label {
+:where(.module-page) .module-label {
   display: block;
   font-size: 13px;
   font-weight: 600;
@@ -446,7 +451,7 @@ textarea.module-input {
    this later file would outrank companion classes such as .metric-strip that
    set their own (measured: it forced 20px where 16px was intended). A rule that
    omits a property cannot override one that sets it, so leaving it out is safe. */
-.module-card {
+:where(.module-page) .module-card {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
@@ -454,7 +459,7 @@ textarea.module-input {
   overflow: hidden;
 }
 
-.module-badge {
+:where(.module-page) .module-badge {
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
@@ -467,63 +472,63 @@ textarea.module-input {
   color: #475569;
 }
 
-.module-badge.success {
+:where(.module-page) .module-badge.success {
   background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
   color: #2e7d32;
 }
 
-.module-badge.error {
+:where(.module-page) .module-badge.error {
   background: linear-gradient(135deg, #fecdd3 0%, #fda4af 100%);
   color: #be123c;
 }
 
-.module-stats {
+:where(.module-page) .module-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
 
-.module-form {
+:where(.module-page) .module-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.module-form-row {
+:where(.module-page) .module-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-.module-form-row-3 {
+:where(.module-page) .module-form-row-3 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
 }
 
-.module-form-group {
+:where(.module-page) .module-form-group {
   display: flex;
   flex-direction: column;
 }
 
 @media (max-width: 768px) {
-  .module-form-row,
-  .module-form-row-3 {
+  :where(.module-page) .module-form-row,
+:where(.module-page) .module-form-row-3 {
     grid-template-columns: 1fr;
   }
-  .module-stats {
+  :where(.module-page) .module-stats {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 480px) {
-  .module-stats {
+  :where(.module-page) .module-stats {
     grid-template-columns: 1fr;
   }
 }
 
-.module-page {
+:where(.module-page) .module-page {
   padding: 32px;
   animation: fadeIn 0.3s ease;
   background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%);
@@ -532,7 +537,7 @@ textarea.module-input {
   overflow-x: hidden;
 }
 
-.module-header {
+:where(.module-page) .module-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -541,7 +546,7 @@ textarea.module-input {
   border-bottom: 2px solid rgba(102, 126, 234, 0.1);
 }
 
-.module-header h1 {
+:where(.module-page) .module-header h1 {
   font-size: 32px;
   font-weight: 700;
   color: #1a1a1a;
@@ -554,14 +559,14 @@ textarea.module-input {
 }
 
 /* Prevent gradient text fill from cascading to interactive elements */
-.module-header button,
-.module-header select,
-.module-header input,
-.module-header textarea {
+:where(.module-page) .module-header button,
+:where(.module-page) .module-header select,
+:where(.module-page) .module-header input,
+:where(.module-page) .module-header textarea {
   -webkit-text-fill-color: initial;
 }
 
-.module-content {
+:where(.module-page) .module-content {
   background: white;
   border-radius: 14px;
   padding: 28px;
@@ -574,16 +579,16 @@ textarea.module-input {
   overflow-x: auto;
 }
 
-.data-table {
+:where(.module-page) .data-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.data-table thead {
+:where(.module-page) .data-table thead {
   background: linear-gradient(135deg, #f0f4ff 0%, #f9f6ff 100%);
 }
 
-.data-table th {
+:where(.module-page) .data-table th {
   padding: 14px 18px;
   text-align: left;
   font-weight: 700;
@@ -594,7 +599,7 @@ textarea.module-input {
   border-bottom: 2px solid rgba(102, 126, 234, 0.2);
 }
 
-.data-table td {
+:where(.module-page) .data-table td {
   padding: 16px 18px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.03);
   font-size: 14px;
@@ -602,20 +607,20 @@ textarea.module-input {
   font-weight: 500;
 }
 
-.data-table tbody tr {
+:where(.module-page) .data-table tbody tr {
   transition: all 0.3s ease;
 }
 
-.data-table tbody tr:hover {
+:where(.module-page) .data-table tbody tr:hover {
   background: rgba(102, 126, 234, 0.04);
 }
 
-.data-table tbody tr:last-child td {
+:where(.module-page) .data-table tbody tr:last-child td {
   border-bottom: none;
 }
 
 /* Badges */
-.badge {
+:where(.module-page) .badge {
   display: inline-block;
   padding: 6px 12px;
   border-radius: 6px;
@@ -625,19 +630,19 @@ textarea.module-input {
   letter-spacing: 0.3px;
 }
 
-.badge-scheduled {
+:where(.module-page) .badge-scheduled {
   background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
   color: #1565c0;
   box-shadow: 0 2px 8px rgba(21, 101, 192, 0.15);
 }
 
-.badge-pending {
+:where(.module-page) .badge-pending {
   background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
   color: #e65100;
   box-shadow: 0 2px 8px rgba(230, 81, 0, 0.15);
 }
 
-.badge-completed {
+:where(.module-page) .badge-completed {
   background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
   color: #2e7d32;
   box-shadow: 0 2px 8px rgba(46, 125, 50, 0.15);
@@ -801,7 +806,7 @@ textarea.module-input {
 }
 
 /* Buttons */
-.btn-primary {
+:where(.module-page) .btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   -webkit-text-fill-color: white;
@@ -816,7 +821,7 @@ textarea.module-input {
   letter-spacing: 0.3px;
 }
 
-.btn-primary:hover {
+:where(.module-page) .btn-primary:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
@@ -897,30 +902,34 @@ textarea.module-input {
 .tab-bar .btn-danger:hover { background: #dc2626; color: white; -webkit-text-fill-color: white; }
 
 /* ═══ Module Form ═══ */
-.module-form {
+:where(.module-page) .module-form {
   background: white; border-radius: 14px; padding: 28px;
   margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   border: 2px solid rgba(102,126,234,0.1);
 }
-.module-form h3 { margin: 0 0 20px; font-size: 18px; color: #333; }
-.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; margin-bottom: 16px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group label { font-weight: 700; font-size: 13px; color: #555; }
-.form-group input, .form-group select, .form-group textarea {
+:where(.module-page) .module-form h3 { margin: 0 0 20px; font-size: 18px; color: #333; }
+:where(.module-page) .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; margin-bottom: 16px; }
+:where(.module-page) .form-group { display: flex; flex-direction: column; gap: 6px; }
+:where(.module-page) .form-group label { font-weight: 700; font-size: 13px; color: #555; }
+:where(.module-page) .form-group input,
+:where(.module-page) .form-group select,
+:where(.module-page) .form-group textarea {
   padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px;
   font-size: 14px; font-weight: 500; background: #f8fafc;
   transition: border-color 0.2s;
 }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #667eea; outline: none; }
-.form-actions { display: flex; gap: 10px; margin-top: 16px; }
+:where(.module-page) .form-group input:focus,
+:where(.module-page) .form-group select:focus,
+:where(.module-page) .form-group textarea:focus { border-color: #667eea; outline: none; }
+:where(.module-page) .form-actions { display: flex; gap: 10px; margin-top: 16px; }
 
 /* ═══ Card / Dashboard Grid ═══ */
-.card {
+:where(.module-page) .card {
   background: white; border-radius: 14px; padding: 24px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04);
 }
-.card h3 { margin: 0 0 16px; font-size: 16px; color: #333; }
-.card.full-width { grid-column: 1 / -1; }
+:where(.module-page) .card h3 { margin: 0 0 16px; font-size: 16px; color: #333; }
+:where(.module-page) .card.full-width { grid-column: 1 / -1; }
 .dashboard-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 20px;
 }
@@ -932,7 +941,7 @@ textarea.module-input {
   flex: 1; min-width: 80px; padding: 12px 16px; background: #f8fafc;
   border-radius: 10px; text-align: center;
 }
-.stat-value { display: block; font-size: 28px; font-weight: 800; color: #333; }
+:where(.module-page) .stat-value { display: block; font-size: 28px; font-weight: 800; color: #333; }
 .stat-label { display: block; font-size: 12px; color: #888; text-transform: capitalize; margin-top: 4px; }
 
 .big-stat { font-size: 42px; font-weight: 800; color: #333; text-align: center; padding: 20px 0; }
@@ -950,14 +959,14 @@ textarea.module-input {
 .chart-label { font-size: 10px; color: #888; margin-top: 4px; }
 
 /* ═══ Buttons (sm) ═══ */
-.btn { cursor: pointer; font-weight: 700; border: none; border-radius: 8px; transition: all 0.2s; font-size: 13px; }
-.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; margin: 2px; }
-.btn-secondary { background: #e2e8f0; color: #555; padding: 10px 20px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
-.btn-secondary:hover { background: #cbd5e1; }
-.btn-success { background: #22c55e; color: white; }
-.btn-success:hover { background: #16a34a; }
-.btn-danger { background: #ef4444; color: white; }
-.btn-danger:hover { background: #dc2626; }
+:where(.module-page) .btn { cursor: pointer; font-weight: 700; border: none; border-radius: 8px; transition: all 0.2s; font-size: 13px; }
+:where(.module-page) .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; margin: 2px; }
+:where(.module-page) .btn-secondary { background: #e2e8f0; color: #555; padding: 10px 20px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+:where(.module-page) .btn-secondary:hover { background: #cbd5e1; }
+:where(.module-page) .btn-success { background: #22c55e; color: white; }
+:where(.module-page) .btn-success:hover { background: #16a34a; }
+:where(.module-page) .btn-danger { background: #ef4444; color: white; }
+:where(.module-page) .btn-danger:hover { background: #dc2626; }
 
 /* ═══ Appointment Card Grid ═══ */
 .appt-card-grid {
@@ -1041,14 +1050,15 @@ textarea.module-input {
 /* ═══ Text / Badge Variants ═══ */
 .text-success { color: #22c55e !important; font-weight: 700; }
 .text-danger { color: #ef4444 !important; font-weight: 700; }
-.badge-success { background: #dcfce7; color: #16a34a; }
+:where(.module-page) .badge-success { background: #dcfce7; color: #16a34a; }
 .badge-danger { background: #fee2e2; color: #dc2626; }
 .badge-warning { background: #fef3c7; color: #d97706; }
 
 /* ═══ Table row variants ═══ */
 .row-warning { background: #fffbeb !important; }
 .row-danger { background: #fff1f2 !important; }
-.data-table.compact td, .data-table.compact th { padding: 8px 12px; font-size: 13px; }
+:where(.module-page) .data-table.compact td,
+:where(.module-page) .data-table.compact th { padding: 8px 12px; font-size: 13px; }
 .inline-form { display: inline-flex; gap: 4px; align-items: center; }
 
 /* ═══ Alert list ═══ */
@@ -1075,7 +1085,7 @@ textarea.module-input {
 .alert-event-actions { display: flex; gap: 8px; }
 
 /* ═══ Alerts / Messages ═══ */
-.alert { padding: 14px 20px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; }
+:where(.module-page) .alert { padding: 14px 20px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; }
 .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
 .loading-text { text-align: center; color: #888; font-size: 16px; padding: 40px; }
@@ -1083,11 +1093,11 @@ textarea.module-input {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .module-page {
+  :where(.module-page) .module-page {
     padding: 16px;
   }
 
-  .module-header {
+  :where(.module-page) .module-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
@@ -1095,12 +1105,13 @@ textarea.module-input {
     padding-bottom: 20px;
   }
 
-  .module-header h1 {
+  :where(.module-page) .module-header h1 {
     font-size: 20px;
   }
 
   /* Wrap header actions so they don't overflow on small screens */
-  .module-header > div, .module-header > span {
+  :where(.module-page) .module-header > div,
+  :where(.module-page) .module-header > span {
     flex-wrap: wrap;
     gap: 8px;
   }
@@ -1111,13 +1122,13 @@ textarea.module-input {
     -webkit-overflow-scrolling: touch;
   }
 
-  .data-table {
+  :where(.module-page) .data-table {
     font-size: 12px;
     min-width: 480px; /* ensures horizontal scroll rather than column squish */
   }
 
-  .data-table th,
-  .data-table td {
+  :where(.module-page) .data-table th,
+:where(.module-page) .data-table td {
     padding: 10px 8px;
   }
 
@@ -1129,7 +1140,8 @@ textarea.module-input {
   .appt-card-actions {
     flex-wrap: wrap;
   }
-  .appt-card-actions button, .appt-card-actions a {
+  .appt-card-actions button,
+.appt-card-actions a {
     flex: 1;
     min-width: 120px;
     text-align: center;
@@ -1148,20 +1160,20 @@ textarea.module-input {
 }
 
 @media (max-width: 480px) {
-  .module-page {
+  :where(.module-page) .module-page {
     padding: 12px;
   }
 
-  .module-header h1 {
+  :where(.module-page) .module-header h1 {
     font-size: 18px;
   }
 
-  .module-content {
+  :where(.module-page) .module-content {
     padding: 16px;
   }
 
-  .data-table th,
-  .data-table td {
+  :where(.module-page) .data-table th,
+:where(.module-page) .data-table td {
     padding: 8px 4px;
     font-size: 11px;
   }
@@ -1178,7 +1190,7 @@ textarea.module-input {
     font-size: 12px;
   }
 
-  .btn-primary {
+  :where(.module-page) .btn-primary {
     padding: 8px 16px;
     font-size: 13px;
   }
@@ -1192,15 +1204,60 @@ textarea.module-input {
 /* AI Copilot markdown rendering */
 .ai-markdown > *:last-child { margin-bottom: 0 !important; }
 .ai-markdown p { margin: 0 0 10px; }
-.ai-markdown ul, .ai-markdown ol { margin: 0 0 10px; padding-left: 20px; }
+.ai-markdown ul,
+.ai-markdown ol { margin: 0 0 10px; padding-left: 20px; }
 .ai-markdown li { margin-bottom: 4px; line-height: 1.6; }
-.ai-markdown h1, .ai-markdown h2, .ai-markdown h3, .ai-markdown h4 { margin: 12px 0 6px; }
+.ai-markdown h1,
+.ai-markdown h2,
+.ai-markdown h3,
+.ai-markdown h4 { margin: 12px 0 6px; }
 .ai-markdown code { background: #edf2f7; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
 .ai-markdown blockquote { border-left: 3px solid #667eea; padding-left: 12px; margin: 8px 0; color: #555; }
 .ai-markdown strong { color: #2d3748; }
 
 /* Typing indicator dots */
 @keyframes pulse {
-  0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+  0%,
+80%,
+100% { transform: scale(0.7); opacity: 0.4; }
   40% { transform: scale(1); opacity: 1; }
+}
+
+/* ─── Herd Medical: animal-vs-group subject picker ───────────────────────────
+   Scoped under .module-page (this file is global - docs/DESIGN_SYSTEM.md section 2b). */
+:where(.module-page) .hm-subject-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+:where(.module-page) .hm-subject-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+:where(.module-page) .hm-subject-btn:hover {
+  border-color: #cbd5e1;
+}
+
+:where(.module-page) .hm-subject-btn--active {
+  border-color: #667eea;
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+/* Explains what a group record will actually cover, so "one record" is never a surprise. */
+:where(.module-page) .hm-subject-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64748b;
 }

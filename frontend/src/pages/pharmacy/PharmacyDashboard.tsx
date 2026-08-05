@@ -108,13 +108,23 @@ export default function PharmacyDashboard() {
   const [reviewTarget, setReviewTarget] = useState<PendingPrescription | null>(null)
   const [dispenseTarget, setDispenseTarget] = useState<ReadyDispensing | null>(null)
   const [networkId, setNetworkId] = useState<string | null>(null)
+  // Why the pharmacy list is empty: 'not_in_network' | 'no_pharmacy_in_network' | 'ok'.
+  // The screen previously showed the same dead end for both causes.
+  const [emptyReason, setEmptyReason] = useState<string>('')
+  const [canCreate, setCanCreate] = useState(false)
+  const [showCreate, setShowCreate] = useState(false)
+  const [createForm, setCreateForm] = useState({ pharmacy_name: '', license_number: '', phone: '', email: '', address: '' })
+  const [creating, setCreating] = useState(false)
   const [analyticsDays, setAnalyticsDays] = useState(30)
 
   const loadPharmacies = useCallback(async () => {
     try {
       const res = await client.get('/pharmacy/my-pharmacies')
-      const { data: list, networkId: nid } = res.data as { data: Pharmacy[]; networkId: string | null }
+      const { data: list, networkId: nid, reason, canCreate: mayCreate } =
+        res.data as { data: Pharmacy[]; networkId: string | null; reason?: string; canCreate?: boolean }
       setNetworkId(nid)
+      setEmptyReason(reason || '')
+      setCanCreate(!!mayCreate)
       setPharmacies(list || [])
       if (list && list.length > 0) {
         const primary = list.find(p => p.is_primary_pharmacy) || list[0]
@@ -195,7 +205,7 @@ export default function PharmacyDashboard() {
           <p>{selectedPharmacy?.pharmacy_name || t('pharmacy.selectPharmacy')}</p>
         </div>
         <div className="pharmacy-header-actions">
-          {pharmacies.length > 1 && (
+          {pharmacies.length > 0 && (
             <select
               className="pharmacy-select si-ef1e2ca0"
               value={selectedPharmacy?.id || ''}
@@ -213,6 +223,80 @@ export default function PharmacyDashboard() {
         </div>
       </div>
 
+      {/* Nothing to select, and previously no explanation either - the header just said
+          "Select a pharmacy" beside a control that only renders when one already exists. */}
+      {!loading && pharmacies.length === 0 && (
+        <div className="pharm-empty-state">
+          <div className="pharm-empty-icon" aria-hidden="true">💊</div>
+          <h2>{t('pharmacy.empty.title')}</h2>
+          <p>
+            {emptyReason === 'not_in_network'
+              ? t('pharmacy.empty.notInNetwork')
+              : t('pharmacy.empty.noPharmacy')}
+          </p>
+          {canCreate && emptyReason === 'no_pharmacy_in_network' && (
+            <button type="button" className="btn btn-primary" onClick={() => setShowCreate(true)}>
+              ➕ {t('pharmacy.empty.createCta')}
+            </button>
+          )}
+          {!canCreate && (
+            <p className="pharm-empty-hint">{t('pharmacy.empty.askAdmin')}</p>
+          )}
+        </div>
+      )}
+
+      {showCreate && (
+        <div className="pharm-modal-overlay" onClick={() => setShowCreate(false)}>
+          <div className="pharm-modal" onClick={e => e.stopPropagation()}>
+            <h3>{t('pharmacy.empty.createCta')}</h3>
+            <form
+              onSubmit={async e => {
+                e.preventDefault()
+                if (!networkId) return
+                setCreating(true); setError('')
+                try {
+                  await client.post(`/networks/${networkId}/pharmacies`, { ...createForm, is_primary_pharmacy: true })
+                  setShowCreate(false)
+                  setCreateForm({ pharmacy_name: '', license_number: '', phone: '', email: '', address: '' })
+                  await loadPharmacies()
+                } catch (err: any) {
+                  setError(err?.response?.data?.message || err?.response?.data?.error || err.message)
+                } finally { setCreating(false) }
+              }}
+            >
+              <div className="pharm-form-group">
+                <label>{t('pharmacy.empty.name')} *</label>
+                <input value={createForm.pharmacy_name} required
+                  onChange={e => setCreateForm(f => ({ ...f, pharmacy_name: e.target.value }))} />
+              </div>
+              <div className="pharm-form-group">
+                <label>{t('pharmacy.empty.licenseNumber')}</label>
+                <input value={createForm.license_number}
+                  onChange={e => setCreateForm(f => ({ ...f, license_number: e.target.value }))} />
+              </div>
+              <div className="pharm-form-group">
+                <label>{t('pharmacy.empty.phone')}</label>
+                <input value={createForm.phone}
+                  onChange={e => setCreateForm(f => ({ ...f, phone: e.target.value }))} />
+              </div>
+              <div className="pharm-form-group">
+                <label>{t('pharmacy.empty.address')}</label>
+                <input value={createForm.address}
+                  onChange={e => setCreateForm(f => ({ ...f, address: e.target.value }))} />
+              </div>
+              <div className="pharm-modal-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(false)}>
+                  {t('common.cancel')}
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={creating}>
+                  {creating ? t('common.saving') : t('pharmacy.empty.createCta')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="pharm-error si-7e63ec4f">
           ⚠️ {error}
@@ -220,7 +304,10 @@ export default function PharmacyDashboard() {
         </div>
       )}
 
-      {/* Tabs */}
+      {/* Tabs are pointless without a pharmacy: every loader short-circuits on
+          `if (!selectedPharmacy) return`, so they rendered as clickable buttons that silently
+          did nothing. Hidden until there is something to show. */}
+      {pharmacies.length > 0 && (
       <div className="pharmacy-tabs">
         {TABS.map(tabId => (
           <button
@@ -244,6 +331,7 @@ export default function PharmacyDashboard() {
           </button>
         ))}
       </div>
+      )}
 
       {/* ── Overview Tab ── */}
       {tab === 'overview' && (

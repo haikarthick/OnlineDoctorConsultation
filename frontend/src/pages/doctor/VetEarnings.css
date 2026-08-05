@@ -10,7 +10,7 @@
   justify-content: center;
   padding: 60px;
 }
-.loading-spinner {
+:where(.vet-earnings-page) .loading-spinner {
   width: 36px;
   height: 36px;
   border: 3px solid #e5e7eb;
@@ -25,17 +25,17 @@
   padding: 20px;
 }
 @media (max-width: 1200px) {
-  .module-stats { grid-template-columns: repeat(2, 1fr); }
+  :where(.vet-earnings-page) .module-stats { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 768px) {
-  .module-stats { grid-template-columns: repeat(2, 1fr); }
+  :where(.vet-earnings-page) .module-stats { grid-template-columns: repeat(2, 1fr); }
   .earnings-period-selector { flex-wrap: wrap; }
-  .data-table-container { overflow-x: auto; }
+  :where(.vet-earnings-page) .data-table-container { overflow-x: auto; }
 }
 @media (max-width: 640px) {
-  .module-stats { grid-template-columns: repeat(2, 1fr); }
+  :where(.vet-earnings-page) .module-stats { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 480px) {
-  .module-stats { grid-template-columns: 1fr; }
+  :where(.vet-earnings-page) .module-stats { grid-template-columns: 1fr; }
   .earnings-period-selector { flex-direction: column; }
 }

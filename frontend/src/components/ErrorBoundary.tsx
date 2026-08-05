@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react'
 import i18n from '../i18n'
+import { isStaleChunkError, reloadForStaleChunk } from '../utils/staleChunkRecovery'
 
 interface Props {
   children: ReactNode
@@ -21,8 +22,16 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error }
   }
 
-  componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
-    // Error is already captured by getDerivedStateFromError.
+  componentDidCatch(error: Error, _errorInfo: ErrorInfo) {
+    // A stale lazy chunk after a deploy is not a crash - the tab is just running an older
+    // build than the server has. Reload once and the user never sees an error screen. If the
+    // reload already happened (guard held inside reloadForStaleChunk) we fall through and
+    // render the fallback, so a genuinely missing chunk is still visible rather than looping.
+    if (isStaleChunkError(error)) {
+      reloadForStaleChunk()
+      return
+    }
+    // Otherwise: already captured by getDerivedStateFromError.
     // Add external error reporting here (e.g. Sentry) if needed.
   }
 

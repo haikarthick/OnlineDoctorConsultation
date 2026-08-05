@@ -4,8 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { registerServiceWorker, initInstallPrompt } from './pwa.ts'
+import { installStaleChunkRecovery, scheduleStaleChunkGuardRelease } from './utils/staleChunkRecovery'
 import { i18nInitialized } from './i18n'
 import './index.css'
+
+// Must run before anything can dynamically import a route chunk.
+installStaleChunkRecovery();
 
 // Register PWA service worker & install prompt
 registerServiceWorker();
@@ -28,6 +32,11 @@ const queryClient = new QueryClient({
 // before that resolves would flash raw translation keys (e.g. "nav.home")
 // since react-i18next's useSuspense is disabled.
 i18nInitialized.then(() => {
+  // We rendered, so any earlier chunk reload worked. Release the guard after a settle period
+  // so a LATER deploy can recover in this same tab, without re-arming fast enough to let a
+  // genuinely broken chunk reload-loop.
+  scheduleStaleChunkGuardRelease()
+
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>

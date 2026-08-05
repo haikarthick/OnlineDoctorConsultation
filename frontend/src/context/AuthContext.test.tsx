@@ -118,6 +118,67 @@ describe('AuthContext', () => {
       expect(result.current.isAuthenticated).toBe(false)
       expect(mockNavigate).not.toHaveBeenCalledWith('/dashboard')
     })
+
+    /**
+     * A blocked account replies { success:false, accountStatus, message } with NO `error` key.
+     * The extraction used to read only data.error, so the real explanation was dropped and the
+     * user got the literal string 'Login failed' - identical to a mistyped password. Vets
+     * waiting on approval concluded their registration had failed and signed up again.
+     */
+    describe('blocked account states', () => {
+      const PENDING_MSG =
+        'Your registration is currently under review by our platform team. ' +
+        'You will be notified by email once your credentials have been verified.'
+
+      async function loginExpectingThrow(body: unknown) {
+        globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, json: async () => body }) as any
+        const { result } = renderHook(() => useAuth(), { wrapper })
+        await waitFor(() => expect(result.current.loading).toBe(false))
+        let caught: (Error & { accountStatus?: string }) | undefined
+        await act(async () => {
+          await result.current.login('vet@example.com', 'Password1').catch((e) => { caught = e })
+        })
+        return caught
+      }
+
+      it('surfaces the pending_approval message instead of a bare "Login failed"', async () => {
+        const err = await loginExpectingThrow({
+          success: false, accountStatus: 'pending_approval', message: PENDING_MSG,
+        })
+        expect(err?.message).toBe(PENDING_MSG)
+        expect(err?.message).not.toBe('Login failed')
+      })
+
+      it('passes accountStatus through so the UI can render it as information', async () => {
+        const err = await loginExpectingThrow({
+          success: false, accountStatus: 'pending_approval', message: PENDING_MSG,
+        })
+        expect(err?.accountStatus).toBe('pending_approval')
+      })
+
+      it('surfaces frozen/suspended messages too', async () => {
+        const err = await loginExpectingThrow({
+          success: false, accountStatus: 'frozen', message: 'Temporarily restricted.',
+        })
+        expect(err?.message).toBe('Temporarily restricted.')
+        expect(err?.accountStatus).toBe('frozen')
+      })
+
+      it('leaves a genuine credential failure unchanged and carries no accountStatus', async () => {
+        const err = await loginExpectingThrow({
+          success: false,
+          message: 'Invalid email or password',
+          error: { message: 'Invalid email or password', code: 'UNAUTHORIZED' },
+        })
+        expect(err?.message).toBe('Invalid email or password')
+        expect(err?.accountStatus).toBeUndefined()
+      })
+
+      it('falls back to a generic message when the body carries nothing usable', async () => {
+        const err = await loginExpectingThrow({ success: false })
+        expect(err?.message).toBe('Login failed')
+      })
+    })
   })
 
   describe('logout', () => {

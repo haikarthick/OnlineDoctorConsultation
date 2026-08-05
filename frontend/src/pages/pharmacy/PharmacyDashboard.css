@@ -42,12 +42,12 @@
 }
 .pharmacy-stat-card:hover { transform: translateY(-2px); }
 .pharmacy-stat-card.warning { border-color: #ff9800; }
-.pharmacy-stat-card.danger  { border-color: #f44336; }
+.pharmacy-stat-card.danger { border-color: #f44336; }
 .pharmacy-stat-card.success { border-color: #4caf50; }
-.pharmacy-stat-card.info    { border-color: #2196f3; }
+.pharmacy-stat-card.info { border-color: #2196f3; }
 .pharmacy-stat-card.primary { border-color: #3949ab; }
-.stat-icon { font-size: 1.8rem; }
-.stat-value { font-size: 2rem; font-weight: 800; color: #1a237e; }
+:where(.pharmacy-page) .stat-icon { font-size: 1.8rem; }
+:where(.pharmacy-page) .stat-value { font-size: 2rem; font-weight: 800; color: #1a237e; }
 .stat-label { font-size: 0.82rem; color: #666; font-weight: 500; }
 
 /* ── Tabs ── */
@@ -129,14 +129,14 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.pharm-badge.pending    { background: #fff3e0; color: #e65100; }
-.pharm-badge.approved   { background: #e8f5e9; color: #2e7d32; }
-.pharm-badge.rejected   { background: #ffebee; color: #c62828; }
-.pharm-badge.dispensed  { background: #e3f2fd; color: #1565c0; }
-.pharm-badge.low        { background: #fff8e1; color: #f57f17; }
-.pharm-badge.ok         { background: #e8f5e9; color: #388e3c; }
-.pharm-badge.expiring   { background: #fff3e0; color: #e65100; }
-.pharm-badge.expired    { background: #ffebee; color: #c62828; }
+.pharm-badge.pending { background: #fff3e0; color: #e65100; }
+.pharm-badge.approved { background: #e8f5e9; color: #2e7d32; }
+.pharm-badge.rejected { background: #ffebee; color: #c62828; }
+.pharm-badge.dispensed { background: #e3f2fd; color: #1565c0; }
+.pharm-badge.low { background: #fff8e1; color: #f57f17; }
+.pharm-badge.ok { background: #e8f5e9; color: #388e3c; }
+.pharm-badge.expiring { background: #fff3e0; color: #e65100; }
+.pharm-badge.expired { background: #ffebee; color: #c62828; }
 
 /* ── Search & Filter Bar ── */
 .pharmacy-filter-bar {
@@ -166,10 +166,10 @@
 }
 
 /* ── Inventory color coding ── */
-.stock-expired  { color: #c62828; font-weight: 700; }
+.stock-expired { color: #c62828; font-weight: 700; }
 .stock-expiring { color: #e65100; font-weight: 600; }
-.stock-low      { color: #f57f17; font-weight: 600; }
-.stock-ok       { color: #2e7d32; }
+.stock-low { color: #f57f17; font-weight: 600; }
+.stock-ok { color: #2e7d32; }
 
 /* ── Modal overlay ── */
 .pharm-modal-overlay {
@@ -266,9 +266,9 @@
 
 /* ── Badge variants ── */
 .pharm-badge.needs_clarification { background: #fff8e1; color: #f57f17; }
-.pharm-badge.sent_to_supplier    { background: #e8eaf6; color: #3949ab; }
-.pharm-badge.received            { background: #f1f8e9; color: #33691e; }
-.pharm-badge.shipped             { background: #e3f2fd; color: #1565c0; }
+.pharm-badge.sent_to_supplier { background: #e8eaf6; color: #3949ab; }
+.pharm-badge.received { background: #f1f8e9; color: #33691e; }
+.pharm-badge.shipped { background: #e3f2fd; color: #1565c0; }
 
 /* ── Wide modal ── */
 .pharm-modal-wide { max-width: 720px; }
@@ -314,4 +314,70 @@
   .pharmacy-filter-bar { flex-direction: column; align-items: stretch; }
   .analytics-grid { grid-template-columns: 1fr; }
   .pharm-form-row { grid-template-columns: 1fr; }
+}
+
+/* ─── Empty state: no pharmacy to open ──────────────────────────────────────
+   The screen used to show "Select a pharmacy" beside a selector that only rendered when one
+   already existed - a dead end with no explanation. Scoped under .pharmacy-page because page
+   CSS is global here (docs/DESIGN_SYSTEM.md section 2b). */
+:where(.pharmacy-page) .pharm-empty-state {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+:where(.pharmacy-page) .pharm-empty-icon { font-size: 42px; line-height: 1; }
+
+:where(.pharmacy-page) .pharm-empty-state h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #1e293b;
+}
+
+:where(.pharmacy-page) .pharm-empty-state p {
+  margin: 0;
+  max-width: 460px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64748b;
+}
+
+:where(.pharmacy-page) .pharm-empty-hint { font-size: 13px; color: #94a3b8; }
+
+:where(.pharmacy-page) .pharm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+:where(.pharmacy-page) .pharm-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  /* min-width:0 keeps long values from widening the dialog past the viewport. */
+  min-width: 0;
+}
+
+:where(.pharmacy-page) .pharm-modal h3 { margin: 0 0 16px; font-size: 17px; color: #1e293b; }
+
+:where(.pharmacy-page) .pharm-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
 }

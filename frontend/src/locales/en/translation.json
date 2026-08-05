@@ -251,7 +251,10 @@
     "dbWakingUpNote": "This is normal on first visit. Please wait.",
     "success": "✓ Login successful! Redirecting...",
     "error": "Login failed",
-    "forgotPassword": "Forgot password?"
+    "forgotPassword": "Forgot password?",
+    "pendingTitle": "Registration received - awaiting approval",
+    "blockedTitle": "This account is not available",
+    "pendingNoReRegister": "Your details are already with us. Please do not register again - signing up a second time will not speed up the review."
   },
   "forgotPassword": {
     "title": "Forgot your password?",
@@ -918,7 +921,8 @@
         "title": "Grooming that is connected to real veterinary care",
         "desc": "A standalone grooming app ends at the appointment. Here, a groomer who spots something concerning raises a safety escalation, and you can book a licensed vet on the same platform, with the pet’s grooming history already attached. Groomers escalate. They never diagnose or prescribe. That boundary is enforced in the product, not just in policy."
       }
-    }
+    },
+    "ctaGrooming": "Book Grooming & Spa"
   },
   "dashboard": {
     "greeting": "Welcome, {{name}}!",
@@ -2035,7 +2039,9 @@
       "colorCode": "Color Code",
       "description": "Description",
       "updateBtn": "Update Group",
-      "createBtn": "Create Group"
+      "createBtn": "Create Group",
+      "selectType": "Select group type",
+      "selectPurpose": "Select purpose"
     },
     "purposeOptions": {
       "dairy": "Dairy",
@@ -2409,7 +2415,19 @@
       "allergenPlaceholder": "e.g. Penicillin",
       "reactionPlaceholder": "e.g. Hives, Swelling",
       "notesPlaceholder": "Additional notes...",
-      "titlePlaceholder": "Brief title for this record"
+      "titlePlaceholder": "Brief title for this record",
+      "subject": "This record is about",
+      "subjectAnimal": "One animal",
+      "subjectGroup": "A whole group",
+      "selectGroup": "Select a group",
+      "head": "head",
+      "noBatchGroups": "No batch-managed groups yet. Set a group to batch mode in Herds & Groups to record against the whole flock.",
+      "groupRecordNote": "One record will be created for this group of {{count}} - not one per animal.",
+      "groupRecordGeneric": "One record will be created for the whole group.",
+      "headCountTreated": "Head treated",
+      "affectedCount": "Affected",
+      "mortalityCount": "Deaths",
+      "eventDate": "Date of event"
     },
     "confirm": {
       "archiveRecord": "Archive this record?"
@@ -7274,6 +7292,17 @@
       "inStock": "In stock",
       "reorderPoint": "Reorder point",
       "reorder": "Reorder"
+    },
+    "empty": {
+      "title": "No pharmacy set up yet",
+      "notInNetwork": "Your account is not part of a hospital network yet, so there is no pharmacy to open. A corporate admin needs to add you to their network first.",
+      "noPharmacy": "Your network does not have a pharmacy yet. Create one to start managing stock, prescriptions and dispensing.",
+      "askAdmin": "Ask a corporate admin or hospital director in your network to set one up.",
+      "createCta": "Create pharmacy",
+      "name": "Pharmacy name",
+      "licenseNumber": "License number",
+      "phone": "Phone",
+      "address": "Address"
     }
   },
   "chat": {

@@ -175,8 +175,11 @@ export default function NetworkSubscriptions() {
 
   if (loading) return <div className="module-page"><div className="loading-spinner" /></div>
 
+  // netsub-page is this file's scope root: NetworkSubscriptions.css redefines the shared
+  // .modal-overlay/.modal-content, and page CSS is global here, so those rules must be
+  // confined to this screen. See docs/DESIGN_SYSTEM.md section 2b.
   return (
-    <div className="module-page">
+    <div className="module-page netsub-page">
       <div className="module-header">
         <h1>💳 {t('adminNetworkSubscriptions.title')}</h1>
         <p>{t('adminNetworkSubscriptions.subtitle')}</p>

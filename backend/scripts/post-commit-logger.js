@@ -19,7 +19,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const LOG_FILE = path.join(ROOT, 'memories', 'repo', 'auto-commit-log.md');
 
 function git(cmd) {
-  try { return execSync(`git ${cmd}`, { cwd: ROOT, encoding: 'utf8' }).trim(); }
+  // windowsHide + piped stdio: this runs on EVERY commit; the default pops a console window.
+  try { return execSync(`git ${cmd}`, { cwd: ROOT, encoding: 'utf8', stdio: 'pipe', windowsHide: true }).trim(); }
   catch { return ''; }
 }
 

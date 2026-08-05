@@ -43,11 +43,11 @@
   gap: 4px;
 }
 
-.hn-stat-blue  { border-top-color: #3b82f6; }
+.hn-stat-blue { border-top-color: #3b82f6; }
 .hn-stat-green { border-top-color: #22c55e; }
 .hn-stat-orange { border-top-color: #f97316; }
 .hn-stat-purple { border-top-color: #a855f7; }
-.hn-stat-teal  { border-top-color: #14b8a6; }
+.hn-stat-teal { border-top-color: #14b8a6; }
 
 .hn-stat-value {
   font-size: 28px;
@@ -238,14 +238,14 @@
   gap: 20px;
 }
 
-.hn-panel-header {
+:where(.hn-page) .hn-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px 0;
 }
 
-.hn-panel-header h3 {
+:where(.hn-page) .hn-panel-header h3 {
   font-size: 15px;
   font-weight: 700;
   color: #111827;
@@ -793,6 +793,14 @@
   flex: 1;
 }
 
+/* Explains what the candidate list is scoped to, so an admin who expected a
+   platform-wide directory understands why someone is missing. */
+.hn-field-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
 .hn-modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -820,7 +828,7 @@
 /* ─── Responsive: 1200px ─────────────────────────────── */
 @media (max-width: 1200px) {
   .hn-stats-row,
-  .hn-audit-stats {
+.hn-audit-stats {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
 }
@@ -832,18 +840,18 @@
   }
 
   .hn-filter-bar,
-  .hn-audit-filter-bar {
+.hn-audit-filter-bar {
     flex-direction: column;
     align-items: stretch;
   }
 
   .hn-search-input,
-  .hn-audit-filter-select {
+.hn-audit-filter-select {
     max-width: 100%;
   }
 
-  .data-table-container,
-  .hn-audit-table-wrapper {
+  :where(.hn-page) .data-table-container,
+.hn-audit-table-wrapper {
     overflow-x: auto;
   }
 
@@ -864,7 +872,7 @@
 /* ─── Responsive: 640px ──────────────────────────────── */
 @media (max-width: 640px) {
   .hn-stats-row,
-  .hn-audit-stats {
+.hn-audit-stats {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -882,7 +890,7 @@
 /* ─── Responsive: 480px ──────────────────────────────── */
 @media (max-width: 480px) {
   .hn-stats-row,
-  .hn-audit-stats {
+.hn-audit-stats {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }

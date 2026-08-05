@@ -732,7 +732,7 @@ const Marketplace: React.FC = () => {
   const sellSteps = [t('marketplace.sell.steps.basicInfo'), t('marketplace.sell.steps.animalDetails'), t('marketplace.sell.steps.healthCerts'), t('marketplace.sell.steps.pricingLocation'), t('marketplace.sell.steps.reviewPublish')]
 
   return (
-    <div className="module-page">
+    <div className="module-page mp-page">
       <div className="module-header">
         <div>
           <h1>{t('marketplace.pageTitle')}</h1>

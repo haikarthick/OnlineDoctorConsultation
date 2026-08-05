@@ -746,17 +746,32 @@
   transition: all 0.3s ease !important;
   box-shadow: 0 8px 20px rgba(0,0,0,0.2) !important;
 }
-.btn-secondary-outline {
+/* Inverse outline: white text on a transparent field. It is legible ONLY on a
+   dark surface, so it is scoped to the three dark bands instead of being
+   declared globally. Used anywhere else it now renders as a plain .btn (loud,
+   caught immediately) rather than white-on-white (invisible, caught by a user).
+   For a secondary CTA on a light surface use .btn-outline from modules.css.
+   See docs/DESIGN_SYSTEM.md section 2a. */
+.hero-section .btn-outline-inverse,
+.hospitals-cta-box .btn-outline-inverse,
+.cta-section .btn-outline-inverse {
   background: transparent !important;
   color: white !important;
   border: 2px solid rgba(255,255,255,0.6) !important;
   font-weight: 700 !important;
 }
-.btn-secondary-outline:hover {
+.hero-section .btn-outline-inverse:hover,
+.hospitals-cta-box .btn-outline-inverse:hover,
+.cta-section .btn-outline-inverse:hover {
   background: white !important;
   color: #667eea !important;
   border-color: white !important;
   transform: translateY(-2px) !important;
+}
+/* .btn-large's drop shadow is tuned for buttons sitting on dark gradients; at
+   that strength it reads as dirt under an outline button on a white card. */
+:where(.home-page) .btn-outline.btn-large {
+  box-shadow: var(--shadow) !important;
 }
 .btn-enterprise {
   background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
@@ -787,7 +802,7 @@
   font-size: 0.95rem;
   opacity: 0.9;
 }
-.link-button {
+:where(.home-page) .link-button {
   background: none;
   border: none;
   color: #fbbf24;
@@ -797,7 +812,7 @@
   text-decoration: underline;
   padding: 0;
 }
-.link-button:hover { color: #fcd34d; }
+:where(.home-page) .link-button:hover { color: #fcd34d; }
 
 /* Hero visual with floating cards */
 .hero-visual {
@@ -954,7 +969,7 @@
   padding: 0 20px;
   box-sizing: border-box;
 }
-.tab-button {
+:where(.home-page) .tab-button {
   padding: 10px 28px;
   border: 2px solid #e0e0e0;
   background: white;
@@ -966,11 +981,11 @@
   color: #666;
   letter-spacing: 0.2px;
 }
-.tab-button:hover {
+:where(.home-page) .tab-button:hover {
   border-color: #667eea;
   color: #667eea;
 }
-.tab-button.active {
+:where(.home-page) .tab-button.active {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border-color: transparent;
@@ -1240,8 +1255,8 @@
     gap: 0.35rem;
   }
   .home-nav-browse,
-  .home-nav-signin,
-  .home-nav-cta {
+.home-nav-signin,
+.home-nav-cta {
     font-size: 0.74rem;
     padding: 0.35rem 0.7rem;
   }
@@ -1263,8 +1278,8 @@
   .home-nav-badge { display: none; }
   .home-nav-actions { gap: 0.4rem; }
   .home-nav-browse,
-  .home-nav-signin,
-  .home-nav-cta {
+.home-nav-signin,
+.home-nav-cta {
     font-size: 0.72rem;
     padding: 0.32rem 0.65rem;
   }
@@ -1275,7 +1290,7 @@
 
 @media (max-width: 768px) {
   .home-nav-center,
-  .home-nav-actions { display: none; }
+.home-nav-actions { display: none; }
   .home-nav-mobile-toggle { display: flex; }
   .section-dots { display: none; }
   .back-to-top { right: 16px; bottom: 16px; width: 40px; height: 40px; font-size: 1rem; }
@@ -1336,7 +1351,7 @@
   .enterprise-types-grid { grid-template-columns: repeat(2, 1fr); }
   .stats-container { grid-template-columns: repeat(2, 1fr); }
   .tabs-container { gap: 8px; padding: 0 12px; }
-  .tab-button { padding: 8px 16px; font-size: 0.85rem; }
+  :where(.home-page) .tab-button { padding: 8px 16px; font-size: 0.85rem; }
   .section-title { font-size: 1.5rem; }
   .section-subtitle { font-size: 0.9rem; }
   .benefit-card { padding: 1.25rem 1rem; }
@@ -1348,7 +1363,7 @@
 @media (max-width: 360px) {
   .hero-title { font-size: 1.5rem; }
   .hero-nav-title { font-size: 1rem; }
-  .tab-button { padding: 6px 12px; font-size: 0.8rem; }
+  :where(.home-page) .tab-button { padding: 6px 12px; font-size: 0.8rem; }
   .hosp-step-chip { font-size: 0.72rem; padding: 0.25rem 0.6rem; }
 }
 
@@ -1573,6 +1588,20 @@
   transform: translateY(-1px);
 }
 
+/* Rose, because every other hero CTA is already spoken for: blue (pet owner), amber
+   (enterprise), green (hospital), outline (vet), indigo (marketplace). Follows
+   .btn-marketplace's pattern deliberately - no !important, so the surrounding context can
+   still correct it. See docs/DESIGN_SYSTEM.md section 2a. */
+.btn-grooming {
+  background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+  color: #fff;
+  border: none;
+}
+.btn-grooming:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 768px) {
   .marketplace-cta-section {
     padding: 2rem 1rem;
@@ -1768,7 +1797,7 @@
     font-size: 19px;
   }
   .grooming-home-list li,
-  .grooming-home-card-lede {
+.grooming-home-card-lede {
     font-size: 14px;
   }
 }

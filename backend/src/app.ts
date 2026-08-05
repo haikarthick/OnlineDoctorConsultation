@@ -194,10 +194,28 @@ app.get('/api', (_req: Request, res: Response) => {
 // API Routes
 app.use(`/api/${config.app.apiVersion}`, routes);
 
+/**
+ * A request for a build artefact - anything under /assets/, or any path ending in a static
+ * file extension. These must NEVER fall through to the SPA's index.html.
+ *
+ * Why this matters: Vite fingerprints every chunk (App-a1b2c3.js). A deploy rebuilds them with
+ * new hashes and the old files stop existing. A browser that still has the PREVIOUS index.html
+ * open - anyone who had a tab open across the deploy - will request an old chunk name the next
+ * time it navigates to a lazily-loaded route. The catch-all below used to answer that with
+ * index.html and HTTP 200, so the browser received HTML where a JavaScript module was expected
+ * and threw "Failed to fetch dynamically imported module", which surfaced as the generic
+ * "Something went wrong" screen. A clean 404 lets the client detect the condition and recover.
+ *
+ * Extension-matched rather than "contains a dot", so SPA routes with dots in a path segment
+ * still resolve to the app.
+ */
+const STATIC_ASSET_PATH = /(^\/assets\/)|\.(js|mjs|cjs|css|map|json|webmanifest|txt|xml|png|jpe?g|gif|svg|ico|webp|avif|woff2?|ttf|otf|eot|mp4|webm|wasm)$/i;
+
 // 404 Handler - must come before error handler
 app.use((req: Request, res: Response) => {
-  // In production/Render, serve index.html for non-API routes (SPA client-side routing)
-  if (hasFrontendDist && !req.path.startsWith('/api/')) {
+  // In production/Render, serve index.html for non-API routes (SPA client-side routing).
+  // Asset requests are deliberately excluded - see STATIC_ASSET_PATH above.
+  if (hasFrontendDist && !req.path.startsWith('/api/') && !STATIC_ASSET_PATH.test(req.path)) {
     return res.sendFile(path.join(frontendDistPath, 'index.html'));
   }
   res.status(404).json({

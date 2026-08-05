@@ -536,6 +536,12 @@ export interface AnimalGroup {
   purpose?: string
   targetCount: number
   currentCount: number
+  /**
+   * 'individual' = one animal row per head; 'batch' = a headcount maintained by the population
+   * ledger, with no per-head rows. Decides whether health records attach to an animal or to the
+   * group. See docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md.
+   */
+  managementMode?: 'individual' | 'batch'
   description?: string
   colorCode?: string
   isActive: boolean

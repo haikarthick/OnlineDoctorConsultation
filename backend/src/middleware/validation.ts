@@ -295,6 +295,14 @@ export const updateVetProfileSchema = createVetProfileSchema.fork(
 // ─── Medical Record ──────────────────────────────────────────
 export const createMedicalRecordSchema = Joi.object({
   animalId: uuid.optional(),
+  // A record has ONE subject: an animal or a group. `xor` enforces exactly one at the edge so a
+  // bad request never reaches the database CHECK. Group records carry the batch facts.
+  groupId: uuid.optional(),
+  cycleId: uuid.optional(),
+  eventDate: Joi.string().optional().allow('', null),
+  headCountTreated: Joi.number().integer().min(0).optional(),
+  affectedCount: Joi.number().integer().min(0).optional(),
+  mortalityCount: Joi.number().integer().min(0).optional(),
   consultationId: uuid.optional(),
   veterinarianId: uuid.optional(),
   // MEDIUM FIX-7: Validate recordType against DB CHECK constraint
@@ -310,7 +318,8 @@ export const createMedicalRecordSchema = Joi.object({
   fileUrl: Joi.string().uri().optional().allow('', null),
   userId: uuid.optional(),
   _userName: shortText().optional().allow('', null),
-});
+// Exactly one subject, rejected at the edge so a bad request never reaches the DB CHECK.
+}).xor('animalId', 'groupId');
 
 export const updateMedicalRecordSchema = createMedicalRecordSchema.fork(
   ['recordType', 'title', 'content'], (schema) => schema.optional()
@@ -324,7 +333,11 @@ export const deleteMedicalRecordSchema = Joi.object({
 
 // ─── Vaccination ─────────────────────────────────────────────
 export const createVaccinationSchema = Joi.object({
-  animalId: requiredUuid,
+  // animalId OR groupId - see createMedicalRecordSchema.
+  animalId: uuid.optional(),
+  groupId: uuid.optional(),
+  cycleId: uuid.optional(),
+  headCountTreated: Joi.number().integer().min(0).optional(),
   vaccineName: shortText().required(),
   vaccineType: shortText(100).optional().allow('', null),
   batchNumber: shortText(100).optional().allow('', null),
@@ -340,7 +353,8 @@ export const createVaccinationSchema = Joi.object({
   // this ID triggers auto-assignment in animal_vaccine_assignments so the
   // vaccination shows on the Vaccination Passport page.
   protocolId: uuid.optional(),
-});
+// Exactly one subject - see createMedicalRecordSchema.
+}).xor('animalId', 'groupId');
 
 export const updateVaccinationSchema = createVaccinationSchema.fork(
   ['animalId', 'vaccineName', 'dateAdministered'], (schema) => schema.optional()
@@ -588,6 +602,10 @@ export const createAnimalGroupSchema = Joi.object({
   targetCount: positiveInt.optional(),
   description: longText(2000).optional().allow('', null),
   colorCode: Joi.string().max(20).optional().allow('', null),
+  // 'batch' means the group is tracked as a population with a headcount rather than as
+  // individual animals - a 5,000-bird flock, not 5,000 rows. Omitted on create, it is derived
+  // from the species default. See docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md.
+  managementMode: Joi.string().valid('individual', 'batch').optional(),
 });
 
 export const updateAnimalGroupSchema = createAnimalGroupSchema.fork(

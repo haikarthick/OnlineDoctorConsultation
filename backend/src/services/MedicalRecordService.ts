@@ -241,17 +241,35 @@ export class MedicalRecordService {
           id, user_id, animal_id, consultation_id, veterinarian_id,
           record_type, record_number, title, content, severity, status,
           medications, attachments, is_confidential, follow_up_date, tags,
-          file_url, created_by, created_at, updated_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,NOW(),NOW())
+          file_url, created_by,
+          group_id, cycle_id, event_date, head_count_treated, affected_count, mortality_count,
+          created_at, updated_at
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
+                  $19,$20,COALESCE($21::date, CURRENT_DATE),$22,$23,$24,NOW(),NOW())
         RETURNING id
       `;
+      // A record has ONE subject. When a group is given, the cycle defaults to that group's
+      // open cycle so the record lands on the population it actually describes - matching a
+      // promoted animal's membership window later depends on it.
+      const groupId = (data as any).groupId || null;
+      let cycleId = (data as any).cycleId || null;
+      if (groupId && !cycleId) {
+        const active = await database.query(
+          `SELECT id FROM group_cycles WHERE group_id = $1 AND status = 'active' LIMIT 1`, [groupId]
+        );
+        cycleId = active.rows[0]?.id || null;
+      }
       await database.query(query, [
         id, targetUserId, data.animalId || null, data.consultationId || null,
         data.veterinarianId || null, data.recordType, recordNumber,
         data.title, data.content, data.severity || 'normal', 'active',
         JSON.stringify(data.medications || []), JSON.stringify(data.attachments || []),
         data.isConfidential || false, data.followUpDate || null,
-        data.tags || [], data.fileUrl || null, createdBy || userId
+        data.tags || [], data.fileUrl || null, createdBy || userId,
+        groupId, cycleId, (data as any).eventDate || null,
+        (data as any).headCountTreated ?? null,
+        (data as any).affectedCount ?? null,
+        (data as any).mortalityCount ?? null,
       ]);
       await logMedicalAudit(id, 'medical_record', 'CREATE', createdBy || userId, createdByName, null, { recordType: data.recordType, title: data.title });
       logger.info('Medical record created', { id, recordNumber, userId: targetUserId });
@@ -437,23 +455,34 @@ export class MedicalRecordService {
     try {
       const id = uuidv4();
       const protocolId: string | null = (data as any).protocolId || null;
+      // animalId OR groupId - a batch group is one subject, so a flock vaccination is one row.
+      const groupId = (data as any).groupId || null;
+      let cycleId = (data as any).cycleId || null;
+      if (groupId && !cycleId) {
+        const active = await database.query(
+          `SELECT id FROM group_cycles WHERE group_id = $1 AND status = 'active' LIMIT 1`, [groupId]
+        );
+        cycleId = active.rows[0]?.id || null;
+      }
       await database.query(`
         INSERT INTO vaccination_records (
           id, animal_id, vaccine_name, vaccine_type, batch_number, manufacturer,
           date_administered, next_due_date, administered_by, site_of_administration,
-          dosage, reaction_notes, is_valid, certificate_number, protocol_id, created_by, created_at, updated_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,NOW(),NOW())
+          dosage, reaction_notes, is_valid, certificate_number, protocol_id, created_by,
+          group_id, cycle_id, head_count_treated, created_at, updated_at
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,NOW(),NOW())
       `, [
-        id, animalId, data.vaccineName, data.vaccineType || null, data.batchNumber || null,
+        id, animalId || null, data.vaccineName, data.vaccineType || null, data.batchNumber || null,
         data.manufacturer || null, data.dateAdministered, data.nextDueDate || null,
         data.administeredBy || createdBy || null, data.siteOfAdministration || null,
         data.dosage || null, data.reactionNotes || null, true,
-        data.certificateNumber || null, protocolId, createdBy || null
+        data.certificateNumber || null, protocolId, createdBy || null,
+        groupId, cycleId, (data as any).headCountTreated ?? null,
       ]);
       // If a protocol was selected from the master list, auto-assign it to the animal so
       // the vaccination appears on the Vaccination Passport page. The assignProtocolToAnimal
       // call uses ON CONFLICT DO UPDATE - fully idempotent.
-      if (protocolId) {
+      if (protocolId && animalId) {
         try {
           await VaccineProtocolService.assignProtocolToAnimal(
             animalId,
@@ -807,9 +836,21 @@ export class MedicalRecordService {
         queries.push(database.query(`
           SELECT mr.id, mr.record_type as type, mr.title, mr.content as description,
                  mr.created_at as date, mr.severity, mr.status,
-                 mr.created_by, COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
-          FROM medical_records mr LEFT JOIN users u ON u.id = mr.created_by
-          WHERE mr.animal_id = $1 AND mr.status != 'archived'${dateClause} ORDER BY mr.created_at DESC LIMIT $2
+                 mr.created_by, COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName",
+                 mr.group_id as "groupId", ag.name as "groupName",
+                 mr.head_count_treated as "headCountTreated"
+          FROM medical_records mr
+          LEFT JOIN users u ON u.id = mr.created_by
+          LEFT JOIN animal_groups ag ON ag.id = mr.group_id
+          -- An animal's history is its OWN records plus the flock records that applied while it
+          -- was a member of that cycle. Composed here rather than copied down, so a 5,000-bird
+          -- treatment stays one row while every bird still shows a complete life story.
+          WHERE (mr.animal_id = $1
+                 OR (mr.group_id IS NOT NULL AND EXISTS (
+                       SELECT 1 FROM animal_group_memberships m
+                        WHERE m.animal_id = $1 AND m.cycle_id = mr.cycle_id
+                          AND mr.event_date BETWEEN m.joined_at AND COALESCE(m.left_at, CURRENT_DATE))))
+            AND mr.status != 'archived'${dateClause} ORDER BY mr.created_at DESC LIMIT $2
         `, params));
         queryTypes.push('medical_record');
       }
@@ -821,9 +862,19 @@ export class MedicalRecordService {
         if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND vr.date_administered <= $${params.length}`; }
         queries.push(database.query(`
           SELECT vr.id, vr.vaccine_name, vr.date_administered as date, vr.next_due_date, vr.is_valid,
-                 COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
-          FROM vaccination_records vr LEFT JOIN users u ON u.id = vr.administered_by
-          WHERE vr.animal_id = $1${dateClause} ORDER BY vr.date_administered DESC LIMIT $2
+                 COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName",
+                 vr.group_id as "groupId", ag.name as "groupName",
+                 vr.head_count_treated as "headCountTreated"
+          FROM vaccination_records vr
+          LEFT JOIN users u ON u.id = vr.administered_by
+          LEFT JOIN animal_groups ag ON ag.id = vr.group_id
+          -- Same membership roll-up as medical records; keyed on date_administered.
+          WHERE (vr.animal_id = $1
+                 OR (vr.group_id IS NOT NULL AND EXISTS (
+                       SELECT 1 FROM animal_group_memberships m
+                        WHERE m.animal_id = $1 AND m.cycle_id = vr.cycle_id
+                          AND vr.date_administered BETWEEN m.joined_at AND COALESCE(m.left_at, CURRENT_DATE))))
+            ${dateClause} ORDER BY vr.date_administered DESC LIMIT $2
         `, params));
         queryTypes.push('vaccination');
       }
@@ -1178,12 +1229,15 @@ export class MedicalRecordService {
     limit?: number; offset?: number;
   } = {}): Promise<{ records: MedicalRecord[]; total: number }> {
     try {
-      const conditions: string[] = [`a.enterprise_id = $1`];
+      // A record belongs to the enterprise through its ANIMAL or through its GROUP. An inner
+      // JOIN on animals silently dropped every group-subject record - a whole flock's history
+      // simply did not appear. Both paths are checked here.
+      const conditions: string[] = [`(a.enterprise_id = $1 OR ag_direct.enterprise_id = $1)`];
       const params: any[] = [enterpriseId];
       let idx = 1;
 
       if (filters.animalId) { idx++; conditions.push(`mr.animal_id = $${idx}`); params.push(filters.animalId); }
-      if (filters.groupId) { idx++; conditions.push(`a.group_id = $${idx}`); params.push(filters.groupId); }
+      if (filters.groupId) { idx++; conditions.push(`(a.group_id = $${idx} OR mr.group_id = $${idx})`); params.push(filters.groupId); }
       if (filters.recordType) { idx++; conditions.push(`mr.record_type = $${idx}`); params.push(filters.recordType); }
       if (filters.status) { idx++; conditions.push(`mr.status = $${idx}`); params.push(filters.status); }
       if (filters.severity) { idx++; conditions.push(`mr.severity = $${idx}`); params.push(filters.severity); }
@@ -1206,18 +1260,28 @@ export class MedicalRecordService {
                mr.created_by as "createdBy", mr.created_at as "createdAt", mr.updated_at as "updatedAt",
                a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
                a.unique_id as "animalUniqueId",
-               ag.name as "groupName",
+               COALESCE(ag_direct.name, ag.name) as "groupName",
+               mr.group_id as "groupId",
+               mr.head_count_treated as "headCountTreated",
+               mr.affected_count as "affectedCount",
+               mr.mortality_count as "mortalityCount",
+               mr.event_date as "eventDate",
+               mr.withdrawal_until_milk as "withdrawalUntilMilk",
+               mr.withdrawal_until_meat as "withdrawalUntilMeat",
+               mr.campaign_id as "campaignId",
                COALESCE(vet.first_name || ' ' || vet.last_name, '') as "veterinarianName"
         FROM medical_records mr
-        JOIN animals a ON a.id = mr.animal_id
+        LEFT JOIN animals a ON a.id = mr.animal_id
         LEFT JOIN animal_groups ag ON ag.id = a.group_id
+        LEFT JOIN animal_groups ag_direct ON ag_direct.id = mr.group_id
         LEFT JOIN users vet ON vet.id = mr.veterinarian_id
         ${where}
         ORDER BY mr.created_at DESC LIMIT $${idx + 1} OFFSET $${idx + 2}
       `;
       const countQuery = `
         SELECT COUNT(*) as count FROM medical_records mr
-        JOIN animals a ON a.id = mr.animal_id ${where}
+        LEFT JOIN animals a ON a.id = mr.animal_id
+        LEFT JOIN animal_groups ag_direct ON ag_direct.id = mr.group_id ${where}
       `;
 
       const [recordsResult, countResult] = await Promise.all([
@@ -1243,12 +1307,14 @@ export class MedicalRecordService {
     limit?: number; offset?: number;
   } = {}): Promise<{ vaccinations: any[]; total: number }> {
     try {
-      const conditions: string[] = [`a.enterprise_id = $1`];
+      // Same as listEnterpriseRecords: a vaccination reaches the enterprise via its animal OR
+      // its group. Joining only on animals hid every flock vaccination.
+      const conditions: string[] = [`(a.enterprise_id = $1 OR ag_direct.enterprise_id = $1)`];
       const params: any[] = [enterpriseId];
       let idx = 1;
 
       if (filters.animalId) { idx++; conditions.push(`vr.animal_id = $${idx}`); params.push(filters.animalId); }
-      if (filters.groupId) { idx++; conditions.push(`a.group_id = $${idx}`); params.push(filters.groupId); }
+      if (filters.groupId) { idx++; conditions.push(`(a.group_id = $${idx} OR vr.group_id = $${idx})`); params.push(filters.groupId); }
       if (filters.overdueOnly) { conditions.push(`vr.next_due_date < CURRENT_DATE`); }
       if (filters.upcomingOnly) { conditions.push(`vr.next_due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'`); }
 
@@ -1264,22 +1330,29 @@ export class MedicalRecordService {
                vr.is_valid as "isValid", vr.dosage, vr.reaction_notes as "reactionNotes",
                vr.created_at as "createdAt",
                a.name as "animalName", a.species as "animalSpecies", a.unique_id as "animalUniqueId",
-               ag.name as "groupName",
+               -- ag_direct is the group this vaccination is ABOUT; ag is the group its animal
+               -- happens to belong to. A flock vaccination has only the former.
+               COALESCE(ag_direct.name, ag.name) as "groupName",
+               vr.group_id as "groupId",
+               vr.head_count_treated as "headCountTreated",
+               vr.campaign_id as "campaignId",
                CASE
                  WHEN vr.next_due_date < CURRENT_DATE THEN 'overdue'
                  WHEN vr.next_due_date <= CURRENT_DATE + INTERVAL '30 days' THEN 'upcoming'
                  ELSE 'current'
                END as "dueStatus"
         FROM vaccination_records vr
-        JOIN animals a ON a.id = vr.animal_id
+        LEFT JOIN animals a ON a.id = vr.animal_id
         LEFT JOIN animal_groups ag ON ag.id = a.group_id
+        LEFT JOIN animal_groups ag_direct ON ag_direct.id = vr.group_id
         ${where}
         ORDER BY vr.next_due_date ASC NULLS LAST, vr.date_administered DESC
         LIMIT $${idx + 1} OFFSET $${idx + 2}
       `;
       const countQuery = `
         SELECT COUNT(*) as count FROM vaccination_records vr
-        JOIN animals a ON a.id = vr.animal_id ${where}
+        LEFT JOIN animals a ON a.id = vr.animal_id
+        LEFT JOIN animal_groups ag_direct ON ag_direct.id = vr.group_id ${where}
       `;
 
       const [data, cnt] = await Promise.all([
@@ -1308,8 +1381,10 @@ export class MedicalRecordService {
         ),
         database.query(
           `SELECT COUNT(*) as count, mr.record_type as type
-           FROM medical_records mr JOIN animals a ON a.id = mr.animal_id
-           WHERE a.enterprise_id = $1 GROUP BY mr.record_type`,
+           FROM medical_records mr
+           LEFT JOIN animals a ON a.id = mr.animal_id
+           LEFT JOIN animal_groups agx ON agx.id = mr.group_id
+           WHERE (a.enterprise_id = $1 OR agx.enterprise_id = $1) GROUP BY mr.record_type`,
           [enterpriseId]
         ),
         database.query(
@@ -1317,28 +1392,35 @@ export class MedicalRecordService {
                   COUNT(CASE WHEN vr.next_due_date < CURRENT_DATE THEN 1 END) as overdue,
                   COUNT(CASE WHEN vr.next_due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days' THEN 1 END) as upcoming_due,
                   COUNT(CASE WHEN vr.date_administered >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as recent
-           FROM vaccination_records vr JOIN animals a ON a.id = vr.animal_id
-           WHERE a.enterprise_id = $1`,
+           FROM vaccination_records vr
+           LEFT JOIN animals a ON a.id = vr.animal_id
+           LEFT JOIN animal_groups agx ON agx.id = vr.group_id
+           WHERE (a.enterprise_id = $1 OR agx.enterprise_id = $1)`,
           [enterpriseId]
         ),
         database.query(
           `SELECT COUNT(*) as total, COUNT(CASE WHEN ar.is_active THEN 1 END) as active
-           FROM allergy_records ar JOIN animals a ON a.id = ar.animal_id
-           WHERE a.enterprise_id = $1`,
+           FROM allergy_records ar
+           LEFT JOIN animals a ON a.id = ar.animal_id
+           LEFT JOIN animal_groups agx ON agx.id = ar.group_id
+           WHERE (a.enterprise_id = $1 OR agx.enterprise_id = $1)`,
           [enterpriseId]
         ),
         database.query(
           `SELECT COUNT(*) as total,
                   COUNT(CASE WHEN lr.status = 'pending' THEN 1 END) as pending,
                   COUNT(CASE WHEN lr.status = 'completed' THEN 1 END) as completed
-           FROM lab_results lr JOIN animals a ON a.id = lr.animal_id
-           WHERE a.enterprise_id = $1`,
+           FROM lab_results lr
+           LEFT JOIN animals a ON a.id = lr.animal_id
+           LEFT JOIN animal_groups agx ON agx.id = lr.group_id
+           WHERE (a.enterprise_id = $1 OR agx.enterprise_id = $1)`,
           [enterpriseId]
         ),
         database.query(
           `SELECT COUNT(*) as count FROM medical_records mr
-           JOIN animals a ON a.id = mr.animal_id
-           WHERE a.enterprise_id = $1
+           LEFT JOIN animals a ON a.id = mr.animal_id
+           LEFT JOIN animal_groups agx ON agx.id = mr.group_id
+           WHERE (a.enterprise_id = $1 OR agx.enterprise_id = $1)
              AND mr.follow_up_date IS NOT NULL
              AND mr.follow_up_date >= CURRENT_DATE
              AND mr.follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`,
@@ -1346,23 +1428,28 @@ export class MedicalRecordService {
         ),
         database.query(
           `SELECT mr.id, mr.title, mr.record_type as "recordType", mr.severity, mr.status,
-                  mr.created_at as "createdAt", a.name as "animalName", a.species as "animalSpecies"
-           FROM medical_records mr JOIN animals a ON a.id = mr.animal_id
-           WHERE a.enterprise_id = $1
+                  mr.created_at as "createdAt", a.name as "animalName", a.species as "animalSpecies",
+                  agx.name as "groupName", mr.head_count_treated as "headCountTreated"
+           FROM medical_records mr LEFT JOIN animals a ON a.id = mr.animal_id
+           LEFT JOIN animal_groups agx ON agx.id = mr.group_id
+           WHERE (a.enterprise_id = $1 OR agx.enterprise_id = $1)
            ORDER BY mr.created_at DESC LIMIT 10`,
           [enterpriseId]
         ),
         database.query(
-          `SELECT ag.id, ag.name, ag.group_type as "groupType",
-                  COUNT(DISTINCT a.id) as "animalCount",
+          `SELECT ag.id, ag.name, ag.group_type as "groupType", ag.management_mode as "managementMode",
+                  -- A batch group has no animals rows; its population is the stored headcount.
+                  CASE WHEN ag.management_mode = 'batch' THEN ag.current_count
+                       ELSE COUNT(DISTINCT a.id) END as "animalCount",
+                  -- Records reached through a member animal OR attached to the group itself.
                   COUNT(DISTINCT mr.id) as "recordCount",
                   COUNT(DISTINCT CASE WHEN vr.next_due_date < CURRENT_DATE THEN vr.id END) as "overdueVaccinations"
            FROM animal_groups ag
            LEFT JOIN animals a ON a.group_id = ag.id AND a.is_active = true
-           LEFT JOIN medical_records mr ON mr.animal_id = a.id
-           LEFT JOIN vaccination_records vr ON vr.animal_id = a.id
+           LEFT JOIN medical_records mr ON mr.animal_id = a.id OR mr.group_id = ag.id
+           LEFT JOIN vaccination_records vr ON vr.animal_id = a.id OR vr.group_id = ag.id
            WHERE ag.enterprise_id = $1 AND ag.is_active = true
-           GROUP BY ag.id, ag.name, ag.group_type
+           GROUP BY ag.id, ag.name, ag.group_type, ag.management_mode, ag.current_count
            ORDER BY ag.name`,
           [enterpriseId]
         ),

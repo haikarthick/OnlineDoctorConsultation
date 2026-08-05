@@ -85,7 +85,7 @@
   letter-spacing: -0.5px;
 }
 
-.subtitle {
+:where(.auth-page) .subtitle {
   color: #666;
   margin-bottom: 2.5rem;
   font-size: 0.95rem;
@@ -99,13 +99,13 @@
   margin-bottom: 2rem;
 }
 
-.form-group {
+:where(.auth-page) .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-group label {
+:where(.auth-page) .form-group label {
   font-weight: 600;
   color: #1a1a1a;
   font-size: 0.9rem;
@@ -114,8 +114,8 @@
   letter-spacing: 0.2px;
 }
 
-.form-group input,
-.form-group select {
+:where(.auth-page) .form-group input,
+:where(.auth-page) .form-group select {
   padding: 1rem;
   border: 2px solid #e8e8e8;
   border-radius: 10px;
@@ -126,19 +126,19 @@
   width: 100%;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+:where(.auth-page) .form-group input:focus,
+:where(.auth-page) .form-group select:focus {
   outline: none;
   border-color: #667eea;
   background: white;
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
-.form-group input::placeholder {
+:where(.auth-page) .form-group input::placeholder {
   color: #999;
 }
 
-.btn {
+:where(.auth-page) .btn {
   padding: 1.1rem;
   border: none;
   border-radius: 10px;
@@ -152,41 +152,41 @@
   font-size: 0.95rem;
 }
 
-.btn:disabled {
+:where(.auth-page) .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.btn-primary {
+:where(.auth-page) .btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-.btn-primary:hover:not(:disabled) {
+:where(.auth-page) .btn-primary:hover:not(:disabled) {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
 }
 
-.btn-primary:active:not(:disabled) {
+:where(.auth-page) .btn-primary:active:not(:disabled) {
   transform: translateY(-1px);
 }
 
-.btn-secondary {
+:where(.auth-page) .btn-secondary {
   background: #f5f5f5;
   color: #333;
   border: 2px solid #e8e8e8;
   font-weight: 600;
 }
 
-.btn-secondary:hover:not(:disabled) {
+:where(.auth-page) .btn-secondary:hover:not(:disabled) {
   background: white;
   border-color: #667eea;
   color: #667eea;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
-.message {
+:where(.auth-page) .message {
   padding: 1.1rem;
   border-radius: 10px;
   text-align: center;
@@ -201,21 +201,21 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.message.success {
+:where(.auth-page) .message.success {
   background: linear-gradient(135deg, #d4edda 0%, #c8e6c9 100%);
   color: #155724;
   border: 1px solid #b1dfbb;
   box-shadow: 0 2px 8px rgba(21, 87, 36, 0.1);
 }
 
-.message.error {
+:where(.auth-page) .message.error {
   background: linear-gradient(135deg, #f8d7da 0%, #f6cdd1 100%);
   color: #721c24;
   border: 1px solid #f1b0b7;
   box-shadow: 0 2px 8px rgba(114, 28, 36, 0.1);
 }
 
-.message.db-waking {
+:where(.auth-page) .message.db-waking {
   background: linear-gradient(135deg, #e8f4fd 0%, #d1e9f9 100%);
   color: #1a5276;
   border: 1px solid #aed6f1;
@@ -224,6 +224,59 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+/* Informational, not a failure. Register.tsx has always applied `message info` for the
+   pending-approval confirmation, but no .info rule existed, so it rendered as bare text with
+   no colour and read like an afterthought next to the styled success/error states. */
+:where(.auth-page) .message.info {
+  background: linear-gradient(135deg, #e8f4fd 0%, #d1e9f9 100%);
+  color: #1a5276;
+  border: 1px solid #aed6f1;
+  box-shadow: 0 2px 8px rgba(26, 82, 118, 0.1);
+}
+
+/* A correct password against an account that is not usable yet. Deliberately NOT red: there
+   is no user error to correct, and treating it as a failure is what made people register a
+   second time. */
+:where(.auth-page) .message.account-status {
+  background: linear-gradient(135deg, #eef4ff 0%, #e0e9fd 100%);
+  color: #1e3a8a;
+  border: 1px solid #bfd3f7;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+}
+
+:where(.auth-page) .account-status-icon {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+:where(.auth-page) .account-status-body {
+  /* min-width:0 lets long words wrap instead of forcing the panel wider than the card. */
+  min-width: 0;
+}
+
+:where(.auth-page) .account-status-title {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+:where(.auth-page) .account-status-text {
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+:where(.auth-page) .account-status-note {
+  margin: 8px 0 0;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 .auth-divider {
@@ -264,13 +317,13 @@
   line-height: 1.6;
 }
 
-.features-list {
+:where(.auth-page) .features-list {
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
 }
 
-.feature {
+:where(.auth-page) .feature {
   display: flex;
   align-items: center;
   gap: 1.2rem;
@@ -281,12 +334,12 @@
   transition: all 0.3s ease;
 }
 
-.feature:hover {
+:where(.auth-page) .feature:hover {
   transform: translateX(8px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
-.feature .icon {
+:where(.auth-page) .feature .icon {
   font-size: 1.8rem;
   display: flex;
   align-items: center;
@@ -294,14 +347,14 @@
   min-width: 2.5rem;
 }
 
-.feature span:last-child {
+:where(.auth-page) .feature span:last-child {
   color: #1a1a1a;
   font-weight: 500;
   font-size: 0.95rem;
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
+:where(.auth-page) @media (max-width: 1200px) {
   .auth-container {
     max-width: 500px;
   }
@@ -318,16 +371,16 @@
   }
 
   .auth-card,
-  .auth-info {
+.auth-info {
     padding: 2.5rem;
   }
 
   .auth-card h1,
-  .auth-info h2 {
+.auth-info h2 {
     font-size: 1.5rem;
   }
 
-  .btn {
+  :where(.auth-page) .btn {
     padding: 1rem;
   }
 }
@@ -338,7 +391,7 @@
   }
 
   .auth-card,
-  .auth-info {
+.auth-info {
     padding: 2rem;
   }
 
@@ -353,33 +406,33 @@
   }
 
   .auth-card,
-  .auth-info {
+.auth-info {
     padding: 1.8rem;
     border-radius: 16px;
   }
 
   .auth-card h1,
-  .auth-info h2 {
+.auth-info h2 {
     font-size: 1.3rem;
   }
 
-  .form-group input,
-  .form-group select {
+  :where(.auth-page) .form-group input,
+:where(.auth-page) .form-group select {
     padding: 0.8rem;
     font-size: 16px;
   }
 
-  .btn {
+  :where(.auth-page) .btn {
     padding: 0.9rem;
     font-size: 0.9rem;
   }
 
-  .feature {
+  :where(.auth-page) .feature {
     padding: 1rem;
     gap: 1rem;
   }
 
-  .feature .icon {
+  :where(.auth-page) .feature .icon {
     font-size: 1.5rem;
   }
 }
@@ -406,7 +459,7 @@
 /* ═══════════════════════════════════════════════
    SHARED: Back button, link button, top bars
    ═══════════════════════════════════════════════ */
-.back-home-btn {
+:where(.auth-page) .back-home-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -421,13 +474,13 @@
   transition: all 0.2s;
 }
 
-.back-home-btn:hover {
+:where(.auth-page) .back-home-btn:hover {
   border-color: #6366f1;
   color: #6366f1;
   background: #eef2ff;
 }
 
-.link-btn {
+:where(.auth-page) .link-btn {
   background: none;
   border: none;
   color: #6366f1;
@@ -440,18 +493,18 @@
   transition: color 0.2s;
 }
 
-.link-btn:hover {
+:where(.auth-page) .link-btn:hover {
   color: #4338ca;
 }
 
-.btn-loading {
+:where(.auth-page) .btn-loading {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
 }
 
-.spinner {
+:where(.auth-page) .spinner {
   display: inline-block;
   width: 16px;
   height: 16px;
@@ -674,20 +727,20 @@
   outline: none;
 }
 
-.form-row {
+:where(.auth-page) .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
 /* ── Role selector ── */
-.role-selector {
+:where(.auth-page) .role-selector {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
 }
 
-.role-option {
+:where(.auth-page) .role-option {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -701,36 +754,36 @@
   position: relative;
 }
 
-.role-option input[type="radio"] {
+:where(.auth-page) .role-option input[type="radio"] {
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.role-option:hover {
+:where(.auth-page) .role-option:hover {
   border-color: #a5b4fc;
   background: #eef2ff;
 }
 
-.role-option.selected {
+:where(.auth-page) .role-option.selected {
   border-color: #6366f1;
   background: #eef2ff;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
-.role-icon {
+:where(.auth-page) .role-icon {
   font-size: 1.4rem;
   margin-bottom: 0.2rem;
 }
 
-.role-label {
+:where(.auth-page) .role-label {
   font-size: 0.78rem;
   font-weight: 600;
   color: #1f2937;
 }
 
-.role-desc {
+:where(.auth-page) .role-desc {
   font-size: 0.64rem;
   color: #9ca3af;
   line-height: 1.3;
@@ -775,7 +828,7 @@
 }
 
 /* ── Register responsive ── */
-@media (max-width: 1200px) {
+:where(.auth-page) @media (max-width: 1200px) {
   .register-brand {
     width: 260px;
     min-width: 260px;
@@ -788,9 +841,9 @@
   }
 
   .register-form-panel > .register-form-header,
-  .register-form,
-  .register-form-panel > .message,
-  .register-form-panel > .register-footer {
+.register-form,
+.register-form-panel > .message,
+.register-form-panel > .register-footer {
     padding-left: 1.8rem;
     padding-right: 1.8rem;
   }
@@ -833,24 +886,24 @@
 }
 
 @media (max-width: 520px) {
-  .form-row {
+  :where(.auth-page) .form-row {
     grid-template-columns: 1fr;
     gap: 0.6rem;
   }
 
-  .role-selector {
+  :where(.auth-page) .role-selector {
     grid-template-columns: 1fr;
     gap: 0.4rem;
   }
 
-  .role-option {
+  :where(.auth-page) .role-option {
     flex-direction: row;
     text-align: left;
     gap: 0.6rem;
     padding: 0.6rem 0.8rem;
   }
 
-  .role-icon {
+  :where(.auth-page) .role-icon {
     margin-bottom: 0;
   }
 
@@ -866,9 +919,9 @@
   }
 
   .register-form-panel > .register-form-header,
-  .register-form,
-  .register-form-panel > .message,
-  .register-form-panel > .register-footer {
+.register-form,
+.register-form-panel > .message,
+.register-form-panel > .register-footer {
     padding-left: 1.2rem;
     padding-right: 1.2rem;
   }
@@ -1005,7 +1058,7 @@
   flex-shrink: 0;
 }
 
-.browse-marketplace-link {
+:where(.auth-page) .browse-marketplace-link {
   background: linear-gradient(135deg, #059669, #10b981);
   color: #fff;
   border: none;
@@ -1018,7 +1071,7 @@
   white-space: nowrap;
 }
 
-.browse-marketplace-link:hover {
+:where(.auth-page) .browse-marketplace-link:hover {
   background: linear-gradient(135deg, #047857, #059669);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
@@ -1101,7 +1154,7 @@
 }
 
 /* ── Login responsive ── */
-@media (max-width: 1200px) {
+:where(.auth-page) @media (max-width: 1200px) {
   .login-brand {
     width: 300px;
     min-width: 300px;
@@ -1161,7 +1214,7 @@
     gap: 0.4rem;
   }
 
-  .browse-marketplace-link {
+  :where(.auth-page) .browse-marketplace-link {
     font-size: 0.72rem;
     padding: 0.3rem 0.6rem;
   }
@@ -1180,28 +1233,28 @@
   grid-template-columns: repeat(4, 1fr);
 }
 
-.role-option--info {
+:where(.auth-page) .role-option--info {
   border: 2px dashed #6366f1;
   background: #f5f3ff;
   cursor: default;
   opacity: 0.92;
 }
 
-.role-option--info:hover {
+:where(.auth-page) .role-option--info:hover {
   border-color: #6366f1;
   background: #ede9fe;
 }
 
-.role-option--info .role-label {
+:where(.auth-page) .role-option--info .role-label {
   color: #4f46e5;
 }
 
-.role-option--info .role-desc {
+:where(.auth-page) .role-option--info .role-desc {
   color: #7c3aed;
 }
 
 /* ── Hospital pathway callout ── */
-.hospital-callout {
+:where(.auth-page) .hospital-callout {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
@@ -1213,31 +1266,31 @@
   margin-top: 0.5rem;
 }
 
-.hospital-callout-icon {
+:where(.auth-page) .hospital-callout-icon {
   font-size: 1.5rem;
   flex-shrink: 0;
   line-height: 1;
 }
 
-.hospital-callout-body {
+:where(.auth-page) .hospital-callout-body {
   font-size: 0.82rem;
   color: #374151;
   line-height: 1.5;
 }
 
-.hospital-callout-body strong {
+:where(.auth-page) .hospital-callout-body strong {
   display: block;
   color: #1e1b4b;
   font-size: 0.85rem;
   margin-bottom: 0.3rem;
 }
 
-.hospital-callout-body p {
+:where(.auth-page) .hospital-callout-body p {
   margin: 0;
   color: #4b5563;
 }
 
-.hospital-callout-body em {
+:where(.auth-page) .hospital-callout-body em {
   font-style: italic;
   color: #4338ca;
 }
@@ -1252,19 +1305,19 @@
   .register-form .role-selector {
     grid-template-columns: repeat(2, 1fr);
   }
-  .role-option--info {
+  :where(.auth-page) .role-option--info {
     flex-direction: row;
     text-align: left;
     gap: 0.6rem;
     padding: 0.6rem 0.8rem;
   }
-  .role-option--info .role-icon {
+  :where(.auth-page) .role-option--info .role-icon {
     margin-bottom: 0;
   }
-  .hospital-callout {
+  :where(.auth-page) .hospital-callout {
     padding: 0.75rem 0.85rem;
   }
-  .hospital-callout-icon {
+  :where(.auth-page) .hospital-callout-icon {
     font-size: 1.2rem;
   }
 }
