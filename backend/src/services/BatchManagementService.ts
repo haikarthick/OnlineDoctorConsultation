@@ -396,6 +396,45 @@ export class BatchManagementService {
   }
 
   /**
+   * Ensure an animal has an OPEN membership row for a batch group.
+   *
+   * Membership is what makes lifetime history work: without a row saying "this bird was in this
+   * cycle between these dates", the flock's treatments can never be attributed to it. Nothing
+   * created these rows, so the composition was correct but always returned nothing.
+   *
+   * Idempotent, and only meaningful for batch groups - an individual group's animals each have
+   * their own records already. Defaults joined_at to the cycle start, so a bird added to a
+   * running flock inherits the treatments it was actually present for.
+   */
+  async ensureMembership(animalId: string, groupId: string, joinedAt?: string): Promise<void> {
+    const grp = await database.query(
+      `SELECT management_mode FROM animal_groups WHERE id = $1`, [groupId]
+    );
+    if (grp.rows[0]?.management_mode !== 'batch') return;
+
+    const open = await database.query(
+      `SELECT 1 FROM animal_group_memberships
+        WHERE animal_id = $1 AND group_id = $2 AND left_at IS NULL LIMIT 1`,
+      [animalId, groupId]
+    );
+    if (open.rows.length) return;
+
+    const cyc = await database.query(
+      `SELECT id, started_at FROM group_cycles WHERE group_id = $1 AND status = 'active' LIMIT 1`,
+      [groupId]
+    );
+    const cycleId = cyc.rows[0]?.id || null;
+    const start = joinedAt || cyc.rows[0]?.started_at || null;
+
+    await database.query(
+      `INSERT INTO animal_group_memberships (animal_id, group_id, cycle_id, joined_at)
+       VALUES ($1,$2,$3,COALESCE($4::date, CURRENT_DATE))`,
+      [animalId, groupId, cycleId, start]
+    );
+    logger.info('Batch membership opened', { animalId, groupId, cycleId });
+  }
+
+  /**
    * Move an animal out of a batch into individual tracking. One transaction: close the
    * membership window, decrement the population through the ledger, and stamp the animal's
    * origin so its provenance survives.
@@ -413,6 +452,23 @@ export class BatchManagementService {
         cycleId = active.rows.length ? active.rows[0].id : null;
       }
 
+      // If the bird was never given a membership row, open one covering this cycle before
+      // closing it - otherwise promoting would leave it with no flock history at all.
+      const openRow = await client.query(
+        `SELECT 1 FROM animal_group_memberships
+          WHERE animal_id = $1 AND group_id = $2 AND left_at IS NULL LIMIT 1`,
+        [data.animalId, data.groupId]
+      );
+      if (!openRow.rows.length) {
+        const start = await client.query(
+          `SELECT started_at FROM group_cycles WHERE id = $1`, [cycleId]
+        );
+        await client.query(
+          `INSERT INTO animal_group_memberships (animal_id, group_id, cycle_id, joined_at)
+           VALUES ($1,$2,$3,COALESCE($4::date, CURRENT_DATE))`,
+          [data.animalId, data.groupId, cycleId, start.rows[0]?.started_at || null]
+        );
+      }
       await client.query(
         `UPDATE animal_group_memberships
             SET left_at = CURRENT_DATE, exit_reason = 'promoted'

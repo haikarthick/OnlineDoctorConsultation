@@ -302,9 +302,19 @@ export class EnterpriseService {
 
   // ─── Dashboard Stats ──────────────────────────────────────
   async getEnterpriseStats(enterpriseId: string): Promise<any> {
-    const [animals, groups, locations, campaigns, members, vaccStats, medRecords] = await Promise.all([
+    const [animals, groups, batchHead, locations, campaigns, members, vaccStats, medRecords] = await Promise.all([
       database.query(`SELECT COUNT(*) as count, species FROM animals WHERE enterprise_id = $1 AND is_active = true GROUP BY species`, [enterpriseId]),
       database.query(`SELECT COUNT(*) as count FROM animal_groups WHERE enterprise_id = $1 AND is_active = true`, [enterpriseId]),
+      // Batch groups hold a headcount with no per-animal rows, so counting `animals` alone
+      // reports a 5,000-bird farm as having 0 birds. Surfaced separately rather than folded
+      // into totalAnimals, because the two numbers mean different things: one is individually
+      // tracked animals, the other is population under management.
+      database.query(
+        `SELECT COALESCE(SUM(current_count), 0) AS head
+           FROM animal_groups
+          WHERE enterprise_id = $1 AND is_active = true AND management_mode = 'batch'`,
+        [enterpriseId]
+      ),
       database.query(`SELECT COUNT(*) as count FROM locations WHERE enterprise_id = $1 AND is_active = true`, [enterpriseId]),
       database.query(`SELECT COUNT(*) as count, status FROM treatment_campaigns WHERE enterprise_id = $1 GROUP BY status`, [enterpriseId]),
       database.query(`SELECT COUNT(*) as count FROM enterprise_members WHERE enterprise_id = $1 AND is_active = true`, [enterpriseId]),
@@ -312,15 +322,23 @@ export class EnterpriseService {
         `SELECT COUNT(*) as total,
                 COUNT(CASE WHEN vr.next_due_date < CURRENT_DATE THEN 1 END) as overdue,
                 COUNT(CASE WHEN vr.next_due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days' THEN 1 END) as upcoming
-         FROM vaccination_records vr JOIN animals a ON a.id = vr.animal_id
-         WHERE a.enterprise_id = $1`,
+         FROM vaccination_records vr
+         LEFT JOIN animals a ON a.id = vr.animal_id
+         LEFT JOIN animal_groups ag ON ag.id = vr.group_id
+         -- A vaccination belongs to the enterprise through its animal OR its group. The inner
+         -- join here counted only animal-subject rows, so every flock vaccination was missing
+         -- from the tile - the counter read 0 while the work had been done.
+         WHERE a.enterprise_id = $1 OR ag.enterprise_id = $1`,
         [enterpriseId]
       ),
       database.query(
         `SELECT COUNT(*) as total,
                 COUNT(CASE WHEN mr.created_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as recent
-         FROM medical_records mr JOIN animals a ON a.id = mr.animal_id
-         WHERE a.enterprise_id = $1`,
+         FROM medical_records mr
+         LEFT JOIN animals a ON a.id = mr.animal_id
+         LEFT JOIN animal_groups ag ON ag.id = mr.group_id
+         -- Same as above: group-subject records were not counted.
+         WHERE a.enterprise_id = $1 OR ag.enterprise_id = $1`,
         [enterpriseId]
       ),
     ]);
@@ -332,6 +350,8 @@ export class EnterpriseService {
       totalAnimals: animals.rows.reduce((sum: number, r: any) => sum + parseInt(r.count), 0),
       animalsBySpecies: animals.rows.map((r: any) => ({ species: r.species, count: parseInt(r.count) })),
       totalGroups: parseInt(groups.rows[0]?.count || '0'),
+      /** Head held in batch-managed groups - flocks that have no individual animal rows. */
+      batchHeadCount: parseInt(batchHead.rows[0]?.head || '0'),
       totalLocations: parseInt(locations.rows[0]?.count || '0'),
       campaignsByStatus: campaigns.rows.reduce((acc: any, r: any) => { acc[r.status] = parseInt(r.count); return acc; }, {}),
       totalMembers: parseInt(members.rows[0]?.count || '0'),

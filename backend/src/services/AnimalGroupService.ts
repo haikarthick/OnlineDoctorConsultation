@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
 import { DatabaseError, NotFoundError } from '../utils/errors';
 import logger from '../utils/logger';
+import BatchManagementService from './BatchManagementService';
 
 // ─── Interfaces ──────────────────────────────────────────────
 export interface AnimalGroup {
@@ -155,6 +156,9 @@ export class AnimalGroupService {
       `UPDATE animals SET group_id = $1, enterprise_id = $2, updated_at = NOW() WHERE id = $3`,
       [groupId, group.enterpriseId, animalId]
     );
+    // A batch group needs a membership window, or this animal can never inherit the flock's
+    // health history. No-op for individual groups.
+    await BatchManagementService.ensureMembership(animalId, groupId);
     await this.updateGroupCount(groupId);
   }
 
