@@ -3489,6 +3489,27 @@ router.get('/vaccination-passport/compliance-summary', authMiddleware, asyncHand
   res.json({ success: true, data });
 }));
 
+// Group vaccination passport - the passport for a batch herd/flock is the group's, not a bird's.
+// Farmers/vets/admins may view any group they can see; pet owners are blocked (groups are farm assets).
+router.get('/vaccination-passport/group/:groupId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  if (authReq.userRole === 'pet_owner') {
+    return res.status(403).json({ success: false, message: 'Access denied' });
+  }
+  if (authReq.userRole !== 'admin' && authReq.userRole !== 'veterinarian') {
+    // farmer: only their own enterprise's group
+    const { rows } = await database.query(
+      `SELECT 1 FROM animal_groups ag
+         JOIN enterprises e ON e.id = ag.enterprise_id
+        WHERE ag.id = $1 AND e.owner_id = $2`,
+      [req.params.groupId, authReq.userId]
+    );
+    if (!rows[0]) return res.status(403).json({ success: false, message: 'Access denied' });
+  }
+  const passport = await VaccineProtocolService.getGroupVaccinationPassport(req.params.groupId);
+  res.json({ success: true, data: passport });
+}));
+
 // ─── Certificate log routes ───────────────────────────────────
 router.post('/vaccine-certificate-log', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import { useMasterData } from '../../context/MasterDataContext'
 import apiService from '../../services/api'
+import { GROUP_TYPE_LABELS, AnimalGroupType } from '../../types'
 import CertificatePrintView, { CertificatePrintData, CertificateTemplate } from '../../components/CertificatePrintView'
 import '../../styles/modules.css'
 import './CertificateWriter.css'
@@ -25,6 +26,10 @@ const CERT_TYPES_FARM = [
 
 // Herd-level certs: animal selection optional (cert covers a group)
 const CERT_TYPES_HERD = ['herd_health_certificate']
+
+// Group-capable certs: can name a real animal_groups row (batch herd/flock) as the subject.
+// These are the inherently-batch document types the backend persists group_id/cycle_id for.
+const CERT_TYPES_GROUP = ['herd_health_certificate', 'movement_permit', 'slaughter_fitness', 'export_health_certificate']
 
 interface VaccineRow {
   vaccine: string; batchNo: string; dateAdministered: string; nextDue: string; manufacturer: string
@@ -73,6 +78,12 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const isFarmerOrAdmin = user?.role === 'farmer' || user?.role === 'admin'
 
+  // Group subject (herd/group certificates) - selects a real animal_groups row
+  const [groups, setGroups] = useState<{ id: string; name: string; groupType?: string; currentCount?: number; species?: string; managementMode?: string; animalCount?: number }[]>([])
+  const [selectedGroupId, setSelectedGroupId] = useState('')
+  const [selectedGroup, setSelectedGroup] = useState<any>(null)
+  const [loadingGroups, setLoadingGroups] = useState(false)
+
   // Step 2: Clinical fields
   const [clinicalFindings, setClinicalFindings] = useState('')
   const [diagnosis, setDiagnosis] = useState('')
@@ -118,6 +129,8 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
   const isValuation = certType === 'animal_valuation'
   const isMovement = ['movement_permit', 'slaughter_fitness', 'export_health_certificate'].includes(certType)
   const isHerd = CERT_TYPES_HERD.includes(certType)
+  // A group-capable cert can name a whole animal_groups row (batch herd/flock) as subject.
+  const isGroupCapable = CERT_TYPES_GROUP.includes(certType)
 
   // ── Load edit data ──
   useEffect(() => {
@@ -129,6 +142,8 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
         if (!cert) return
         setCertType(cert.certificateType || '')
         setSelectedAnimalId(cert.animalId || '')
+        setSelectedGroupId(cert.groupId || '')
+        if (cert.groupId) setSelectedGroup(cert.herdDetails?.groupName ? { id: cert.groupId, name: cert.herdDetails.groupName } : { id: cert.groupId, name: cert.herdDetails?.groupName || 'Group' })
         setSelectedOwnerId(cert.petOwnerId || '')
         setSelectedConsultationId(cert.consultationId || '')
         setExaminationDate(cert.examinationDate ? cert.examinationDate.slice(0, 10) : new Date().toISOString().slice(0, 10))
@@ -183,6 +198,22 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
       setEnterpriseOptions(items.map((e: any) => ({ id: e.id, name: e.name })))
     }).catch(() => setError(t('certificateWriter.failedToLoadEnterprises')))
   }, [isFarmerOrAdmin, t])
+
+  // ── Load animal groups for a farm cert when an enterprise is selected ──
+  const isGroupCapableAny = CERT_TYPES_GROUP.includes(certType)
+  useEffect(() => {
+    if (!isGroupCapableAny || !selectedEnterpriseId) { setGroups([]); setSelectedGroupId(''); return }
+    let isCancelled = false
+    setLoadingGroups(true)
+    apiService.listAnimalGroups(selectedEnterpriseId, { limit: 200 }).then(res => {
+      if (isCancelled) return
+      setGroups((res.data?.items || []).map((g: any) => ({
+        id: g.id, name: g.name, groupType: g.groupType, currentCount: g.currentCount,
+        species: g.species, managementMode: g.managementMode, animalCount: g.animalCount || g.currentCount,
+      })))
+    }).catch(() => { if (!isCancelled) setGroups([]) }).finally(() => { if (!isCancelled) setLoadingGroups(false) })
+    return () => { isCancelled = true }
+  }, [isGroupCapableAny, selectedEnterpriseId, certType])
 
   // ── Search owners ──
   const searchOwners = useCallback(async (q: string) => {
@@ -250,6 +281,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
     const payload: any = {
       certificateType: certType,
       animalId: selectedAnimalId || undefined,
+      groupId: selectedGroupId || undefined,
       petOwnerId: selectedOwnerId || undefined,
       consultationId: selectedConsultationId || undefined,
       enterpriseId: selectedEnterpriseId || undefined,
@@ -386,6 +418,19 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
     setOwnerSearch(o.name)
     setOwners([])
     setSelectedAnimalId('')
+  }
+
+  // Pick a whole group (batch herd/flock) as the certificate subject. Pre-fills the
+  // free-typed herd details so the certificate always points at a real animal_groups row.
+  const selectGroup = (g: { id: string; name: string; groupType?: string; currentCount?: number; species?: string; animalCount?: number }) => {
+    setSelectedGroupId(g.id)
+    setSelectedGroup(g)
+    setHerdGroupName(g.name)
+    const count = g.animalCount ?? g.currentCount
+    if (count != null) setHerdAnimalCount(String(count))
+    if (g.species) setHerdSpecies(g.species)
+    // Movement/export certs: default the origin to the group's enterprise context
+    if (isMovement) setMovementFrom(g.name)
   }
 
   const certTypeLabel = (type: string) => t(`vetCertificates.certTypes.${type}` as any) || type.replace(/_/g, ' ')
@@ -549,6 +594,38 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
             </div>
           )}
 
+          {/* Group subject picker - for batch herd/flock certificates */}
+          {isGroupCapable && (
+            <div className="module-form-group">
+              <label className="module-label">🐄 {t('certificateWriter.selectGroup')}</label>
+              {loadingGroups ? (
+                <div className="si-ad8ab961">{t('common.loading')}</div>
+              ) : groups.length === 0 ? (
+                <div className="si-c22a66cc">{t('certificateWriter.noGroups')}</div>
+              ) : (
+                <select
+                  className="module-input"
+                  value={selectedGroupId}
+                  onChange={e => {
+                    const g = groups.find(x => x.id === e.target.value)
+                    selectGroup(g || { id: e.target.value, name: '' })
+                  }}
+                >
+                  <option value="">- {t('certificateWriter.selectGroup')} -</option>
+                  {groups.map(g => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}{g.groupType ? ` (${GROUP_TYPE_LABELS[g.groupType as AnimalGroupType] || g.groupType})` : ''}
+                      {g.animalCount != null ? ` · ${g.animalCount} head` : ''}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {selectedGroupId && (
+                <p className="cw-hint">✓ {t('certificateWriter.groupLinked', { name: selectedGroup?.name || selectedGroupId })}</p>
+              )}
+            </div>
+          )}
+
           {!selectedOwnerId && !(CERT_TYPES_FARM.includes(certType) && selectedEnterpriseId) && (
             <p className="cw-hint">ℹ {t('certificateWriter.selectOwnerFirst')}</p>
           )}
@@ -585,7 +662,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           <div className="cw-next-bar">
             <button
               className="module-btn primary"
-              disabled={!certType || !selectedOwnerId || (!isHerd && !selectedAnimalId)}
+              disabled={!certType || !selectedOwnerId || (!isHerd && !isGroupCapable && !selectedAnimalId) || (isGroupCapable && !selectedAnimalId && !selectedGroupId)}
               onClick={() => setStep(2)}
             >
               {t('certificateWriter.next')} →
@@ -861,8 +938,8 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                 <div className="cw-review-value">{certTypeLabel(certType)}</div>
               </div>
               <div>
-                <div className="cw-review-label">{t('certificateWriter.reviewAnimal')}</div>
-                <div className="cw-review-value">{animals.find(a => a.id === selectedAnimalId)?.name || '-'}</div>
+                <div className="cw-review-label">{selectedGroupId ? t('certificateWriter.reviewGroup') : t('certificateWriter.reviewAnimal')}</div>
+                <div className="cw-review-value">{selectedGroupId ? (selectedGroup?.name || selectedGroupId) : (animals.find(a => a.id === selectedAnimalId)?.name || '-')}</div>
               </div>
               <div>
                 <div className="cw-review-label">{t('certificateWriter.reviewOwner')}</div>
@@ -901,7 +978,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
               <button
                 className="module-btn primary"
                 onClick={handleIssue}
-                disabled={submitting || !certType || (!isHerd && !selectedAnimalId) || !selectedOwnerId}
+                disabled={submitting || !certType || (!isHerd && !isGroupCapable && !selectedAnimalId) || (isGroupCapable && !selectedAnimalId && !selectedGroupId) || !selectedOwnerId}
               >
                 {submitting ? t('common.saving') : `✅ ${t('certificateWriter.issueNow')}`}
               </button>

@@ -6437,3 +6437,760 @@
 </details>
 
 ---
+
+## 2026-07-29 15:08 · `f0c4af2` · 🔧 CHORE
+
+**Commit:** chore: sync auto-commit log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-08-03 09:56 · `9db0067` · OTHER
+
+**Commit:** @  
+**Author:** haikarthick  
+**Categories:** API  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - .env.production.template
+  - backend/src/routes/index.ts
+  - backend/tests/integration/emergencyDiagnostics.integration.test.ts
+
+</details>
+
+---
+
+## 2026-08-03 09:57 · `528db02` · OTHER
+
+**Commit:** fix(security): gate the two emergency diagnostic endpoints behind a break-glass token  
+**Author:** haikarthick  
+**Categories:** API  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - .env.production.template
+  - backend/src/routes/index.ts
+  - backend/tests/integration/emergencyDiagnostics.integration.test.ts
+
+</details>
+
+---
+
+## 2026-08-03 10:05 · `154b343` · OTHER
+
+**Commit:** fix(frontend): repair three data paths that were failing silently  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/MedicalRecords.tsx
+  - frontend/src/pages/pharmacy/PharmacyInventory.tsx
+  - frontend/src/utils/pharmacyStock.test.ts
+  - frontend/src/utils/pharmacyStock.ts
+
+</details>
+
+---
+
+## 2026-08-03 10:13 · `beaedbb` · OTHER
+
+**Commit:** fix(i18n): add keys that resolved to nothing in every language, and guard the class  
+**Author:** haikarthick  
+**Categories:** i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - frontend/src/i18n/localeParity.test.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+
+</details>
+
+---
+
+## 2026-08-03 10:21 · `f9cb17a` · OTHER
+
+**Commit:** fix(roles): give 'support' a real dashboard instead of admin UI it cannot open  
+**Author:** haikarthick  
+**Categories:** UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/i18n/localeParity.test.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Dashboard.tsx
+
+</details>
+
+---
+
+## 2026-08-03 10:30 · `9ab1f41` · OTHER
+
+**Commit:** feat(bookings): wire the patient no-show flow into the vet UI  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Consultations.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-08-03 10:34 · `5c43a6e` · OTHER
+
+**Commit:** refactor(frontend): delete the abandoned second API layer (1,630 lines)  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (17)</summary>
+
+  - frontend/src/services/api/adminApi.ts
+  - frontend/src/services/api/animalApi.ts
+  - frontend/src/services/api/authApi.ts
+  - frontend/src/services/api/bookingApi.ts
+  - frontend/src/services/api/consultationApi.ts
+  - frontend/src/services/api/enterpriseApi.ts
+  - frontend/src/services/api/index.ts
+  - frontend/src/services/api/medicalApi.ts
+  - frontend/src/services/api/notificationApi.ts
+  - frontend/src/services/api/paymentApi.ts
+  - frontend/src/services/api/prescriptionApi.ts
+  - frontend/src/services/api/reviewApi.ts
+  - frontend/src/services/api/tier2Api.ts
+  - frontend/src/services/api/tier3Api.ts
+  - frontend/src/services/api/tier4Api.ts
+  - frontend/src/services/api/vetProfileApi.ts
+  - frontend/src/services/api/videoApi.ts
+
+</details>
+
+---
+
+## 2026-08-03 10:47 · `7b36ddc` · OTHER
+
+**Commit:** feat(pharmacy): surface stock alerts, including the shortages nothing could show  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/pharmacy/PharmacyAlerts.tsx
+  - frontend/src/pages/pharmacy/PharmacyDashboard.tsx
+
+</details>
+
+---
+
+## 2026-08-03 10:54 · `1e694ed` · OTHER
+
+**Commit:** feat(grooming): add the admin dispute queue and settle against a visible ledger  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/GroomingProvidersAdmin.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-08-03 11:10 · `b0f5519` · OTHER
+
+**Commit:** fix(network): route five hand-rolled membership gates through resolveNetworkAccess  
+**Author:** haikarthick  
+**Categories:** API  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/routes/index.ts
+
+</details>
+
+---
+
+## 2026-08-03 11:17 · `cbc50a4` · OTHER
+
+**Commit:** feat(network): surface the configuration audit trail and cross-pharmacy reports  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - frontend/src/pages/pharmacy/PharmacyDashboard.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-08-03 13:28 · `03ddc78` · OTHER
+
+**Commit:** feat(home): add a Grooming & Spa section for both pet owners and providers  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Home.css
+  - frontend/src/pages/Home.tsx
+  - frontend/src/pages/Register.test.tsx
+  - frontend/src/pages/Register.tsx
+
+</details>
+
+---
+
+## 2026-08-03 14:26 · `d55b5d8` · OTHER
+
+**Commit:** fix(ui): give .module-card the padding it never had  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - frontend/src/pages/ModulePage.css
+  - frontend/src/pages/grooming/GroomingProvider.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-08-03 16:12 · `326b318` · OTHER
+
+**Commit:** style: replace the em-dash across the application  
+**Author:** haikarthick  
+**Categories:** CONFIG · MIGRATION · TOOLING · API · SERVICE · UTILS · DB · DB-SCHEMA · UI · AUTH/PERM · i18n · BUILD · DEPLOY  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (322)</summary>
+
+  - .env.production.template
+  - .env.render
+  - .github/workflows/ci-cd.yml
+  - .github/workflows/setup-demo-env.yml
+  - .github/workflows/uptime-monitor.yml
+  - backend/.env.example
+  - backend/ecosystem.config.js
+  - backend/migrations/001_baseline.sql
+  - backend/migrations/009_hospital_networks.sql
+  - backend/migrations/012_payment_module.sql
+  - backend/migrations/019_cleanup_broken_local_media.sql
+  - backend/migrations/020_animal_class_terms.sql
+  - backend/migrations/021_drop_unused_animal_columns.sql
+  - backend/migrations/022_master_data_tables.sql
+  - backend/migrations/023_marketplace_eligible_species.sql
+  - backend/migrations/024_species_label_key.sql
+  - backend/migrations/025_species_per_locale_labels.sql
+  - backend/migrations/026_child_master_data_per_locale_labels.sql
+  - backend/migrations/027_role_change_profile_payload.sql
+  - backend/migrations/029_grooming_module.sql
+  - ... and 302 more
+
+</details>
+
+---
+
+## 2026-08-04 07:16 · `5d27bfd` · OTHER
+
+**Commit:** fix(ui): two invisible CTAs from a dark-surface button class used on light cards  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - docs/DESIGN_SYSTEM.md
+  - frontend/src/pages/Home.css
+  - frontend/src/pages/Home.tsx
+
+</details>
+
+---
+
+## 2026-08-04 10:19 · `d86632b` · OTHER
+
+**Commit:** fix(network): scope Add Member's user picker to the network, and list it by default  
+**Author:** haikarthick  
+**Categories:** API · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/routes/index.ts
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.css
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-08-04 10:45 · `84c1f04` · OTHER
+
+**Commit:** fix(db): hospital_doctors default its own CHECK rejects; stop console popups on Windows  
+**Author:** haikarthick  
+**Categories:** MIGRATION · TOOLING · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - backend/migrations/040_fix_hospital_doctors_role_default.sql
+  - backend/scripts/post-commit-logger.js
+  - backend/scripts/pre-deploy.js
+  - backend/scripts/runtime-verify.js
+  - docker/init.sql
+
+</details>
+
+---
+
+## 2026-08-04 11:03 · `81949f0` · OTHER
+
+**Commit:** fix(auth): tell a pending-approval user their registration worked, instead of "Login failed"  
+**Author:** haikarthick  
+**Categories:** AUTH/PERM · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (12)</summary>
+
+  - docs/DESIGN_SYSTEM.md
+  - frontend/src/context/AuthContext.test.tsx
+  - frontend/src/context/AuthContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Auth.css
+  - frontend/src/pages/Login.test.tsx
+  - frontend/src/pages/Login.tsx
+
+</details>
+
+---
+
+## 2026-08-04 12:18 · `b13965b` · OTHER
+
+**Commit:** feat(home): add the missing Grooming & Spa call to action to both hero and closing CTA  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Home.css
+  - frontend/src/pages/Home.tsx
+  - frontend/src/pages/Login.test.tsx
+
+</details>
+
+---
+
+## 2026-08-04 13:27 · `65826be` · OTHER
+
+**Commit:** fix(deploy): stale chunk after redeploy showed "Something went wrong" until manual reload  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - backend/src/app.ts
+  - frontend/public/sw.js
+  - frontend/src/components/ErrorBoundary.tsx
+  - frontend/src/main.tsx
+  - frontend/src/utils/staleChunkRecovery.test.ts
+  - frontend/src/utils/staleChunkRecovery.ts
+
+</details>
+
+---
+
+## 2026-08-04 14:01 · `aa82937` · OTHER
+
+**Commit:** fix(ui): Total Area input collapsed to 28px - Auth.css was styling every form in the app  
+**Author:** haikarthick  
+**Categories:** TOOLING · DEPS · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - backend/scripts/pre-deploy.js
+  - docs/DESIGN_SYSTEM.md
+  - frontend/package.json
+  - frontend/scripts/check-css-scoping.cjs
+  - frontend/scripts/css-scoping-allowlist.json
+  - frontend/src/pages/Auth.css
+
+</details>
+
+---
+
+## 2026-08-04 14:23 · `af99772` · OTHER
+
+**Commit:** fix(ui): scope all 118 leaking page-CSS selectors; the allowlist is now empty  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (22)</summary>
+
+  - docs/DESIGN_SYSTEM.md
+  - frontend/scripts/check-css-scoping.cjs
+  - frontend/scripts/css-scoping-allowlist.json
+  - frontend/src/pages/Dashboard.css
+  - frontend/src/pages/Home.css
+  - frontend/src/pages/Marketplace.css
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/pages/ModulePage.css
+  - frontend/src/pages/VaccinationPassport.css
+  - frontend/src/pages/VaccinationPassport.tsx
+  - frontend/src/pages/VetHospitals.css
+  - frontend/src/pages/admin/NetworkSubscriptions.css
+  - frontend/src/pages/admin/NetworkSubscriptions.tsx
+  - frontend/src/pages/admin/VaccineProtocolAdmin.css
+  - frontend/src/pages/admin/VaccineProtocolAdmin.tsx
+  - frontend/src/pages/doctor/CertificateWriter.css
+  - frontend/src/pages/doctor/CertificateWriter.tsx
+  - frontend/src/pages/doctor/VetEarnings.css
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.css
+  - frontend/src/pages/petowner/PatientConsent.css
+  - ... and 2 more
+
+</details>
+
+---
+
+## 2026-08-04 14:42 · `384f00c` · OTHER
+
+**Commit:** fix(ui): meaningless "Filter" dropdown placeholder, and "[Farmer] Farmer" in the herd header  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/AnimalGroups.tsx
+  - frontend/src/pages/HerdMedicalManagement.tsx
+
+</details>
+
+---
+
+## 2026-08-04 14:55 · `38fa651` · 📝 DOCS
+
+**Commit:** docs: plan for batch (flock/herd) animal management  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md
+
+</details>
+
+---
+
+## 2026-08-04 15:15 · `fcd9166` · 📝 DOCS
+
+**Commit:** docs: record owner decisions on batch management, and two problems they surface  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md
+
+</details>
+
+---
+
+## 2026-08-04 16:05 · `1af8c11` · OTHER
+
+**Commit:** feat(db): batch (flock/herd) animal management - Phase 1 schema foundation  
+**Author:** haikarthick  
+**Categories:** MIGRATION · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/migrations/041_batch_animal_management.sql
+  - docker/init.sql
+  - docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md
+
+</details>
+
+---
+
+## 2026-08-04 16:57 · `50acc15` · OTHER
+
+**Commit:** feat(api): batch management service and routes - cycles, population ledger, lifetime history  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/AnimalGroupService.ts
+  - backend/src/services/BatchManagementService.ts
+
+</details>
+
+---
+
+## 2026-08-05 00:55 · `e293270` · OTHER
+
+**Commit:** feat(herd): record medical entries and vaccinations against a whole group  
+**Author:** haikarthick  
+**Categories:** SERVICE · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (13)</summary>
+
+  - backend/src/controllers/MedicalRecordController.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/services/MedicalRecordService.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/HerdMedicalManagement.tsx
+  - frontend/src/pages/ModulePage.css
+  - frontend/src/services/api.ts
+  - frontend/src/types/index.ts
+
+</details>
+
+---
+
+## 2026-08-05 01:06 · `25166e7` · OTHER
+
+**Commit:** feat(safety): Phase 2 - withdrawal periods now BLOCK movement and food-chain certificates  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/services/BatchManagementService.ts
+  - backend/src/services/CertificateService.ts
+  - backend/src/services/MovementService.ts
+
+</details>
+
+---
+
+## 2026-08-05 01:22 · `9a0bac1` · OTHER
+
+**Commit:** feat(herd): Phase 3+4 - campaigns emit real records, and group records stop being invisible  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/services/MedicalRecordService.ts
+  - backend/src/services/TreatmentCampaignService.ts
+
+</details>
+
+---
+
+## 2026-08-05 01:25 · `111285a` · 📝 DOCS
+
+**Commit:** docs: batch management status - Phases 1-3 complete, Phase 4 partial, Phase 5 open  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md
+
+</details>
+
+---
+
+## 2026-08-05 01:45 · `9e09b58` · OTHER
+
+**Commit:** feat(herd): Phase 4 - stat tiles count flock work, and an animal's timeline shows its flock history  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/services/AnimalGroupService.ts
+  - backend/src/services/BatchManagementService.ts
+  - backend/src/services/EnterpriseService.ts
+  - backend/src/services/MedicalRecordService.ts
+
+</details>
+
+---
+
+## 2026-08-05 01:59 · `33edcf9` · OTHER
+
+**Commit:** feat(herd): Phase 4 - group certificates and flock health as RATES  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/services/BatchManagementService.ts
+  - backend/src/services/CertificateService.ts
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-08-05 02:17 · `f7d2a02` · OTHER
+
+**Commit:** fix(pharmacy): the module was unreachable - no way to create a pharmacy, and a dead-end empty state  
+**Author:** haikarthick  
+**Categories:** API · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - backend/src/routes/index.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/pharmacy/PharmacyDashboard.css
+  - frontend/src/pages/pharmacy/PharmacyDashboard.tsx
+
+</details>
+
+---

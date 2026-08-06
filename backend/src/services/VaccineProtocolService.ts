@@ -476,6 +476,102 @@ class VaccineProtocolService {
       bySpecies,
     };
   }
+
+  /**
+   * Vaccination passport for a whole batch group (herd/flock). The vaccine history is the
+   * GROUP's - one vaccination_records row with group_id, not one row per animal. Coverage is
+   * measured against the group's placed/current population (rates, not row counts).
+   */
+  async getGroupVaccinationPassport(groupId: string): Promise<any> {
+    const [groupRes, cycleRes, vaxRes] = await Promise.all([
+      database.query(
+        `SELECT id, name, group_type, species, management_mode, enterprise_id,
+                COALESCE(current_count, 0) AS current_count
+         FROM animal_groups WHERE id = $1`, [groupId]
+      ),
+      database.query(
+        `SELECT id, cycle_number, status, placed_at, closed_at, head_count
+         FROM group_cycles WHERE group_id = $1 ORDER BY cycle_number DESC LIMIT 1`, [groupId]
+      ),
+      database.query(
+        `SELECT vaccine_name, vaccine_type AS vaccine_type, dosage, batch_number, manufacturer,
+                date_administered, next_due_date, head_count_treated, cycle_id, campaign_id,
+                site_of_administration, administered_by, created_at
+         FROM vaccination_records
+         WHERE group_id = $1
+         ORDER BY date_administered ASC`, [groupId]
+      ),
+    ]);
+
+    const group = groupRes.rows[0];
+    if (!group) throw new Error('Group not found');
+    const cycle = cycleRes.rows[0] || null;
+    const placedCount = cycle?.head_count ?? group.current_count;
+
+    // Aggregate per vaccine type
+    const byVaccine: Record<string, any> = {};
+    for (const r of vaxRes.rows) {
+      const key = r.vaccine_name || 'Unknown vaccine';
+      if (!byVaccine[key]) {
+        byVaccine[key] = {
+          vaccineName: key,
+          vaccineType: r.vaccine_type || null,
+          applications: 0,
+          headCountTreated: 0,
+          lastAdministeredAt: null,
+          nextDueDate: null,
+          batchNumbers: new Set<string>(),
+          fromCampaign: false,
+          cyclesCovered: new Set<string>(),
+        };
+      }
+      const v = byVaccine[key];
+      v.applications += 1;
+      v.headCountTreated += r.head_count_treated ? parseInt(r.head_count_treated) : 0;
+      if (v.lastAdministeredAt === null || new Date(r.date_administered) > new Date(v.lastAdministeredAt)) {
+        v.lastAdministeredAt = r.date_administered;
+        v.nextDueDate = r.next_due_date || v.nextDueDate;
+      }
+      if (r.batch_number) v.batchNumbers.add(r.batch_number);
+      if (r.campaign_id) v.fromCampaign = true;
+      if (r.cycle_id) v.cyclesCovered.add(r.cycle_id);
+    }
+
+    const vaccines = Object.values(byVaccine).map((v: any) => ({
+      vaccineName: v.vaccineName,
+      vaccineType: v.vaccineType,
+      applications: v.applications,
+      headCountTreated: v.headCountTreated,
+      batchNumbers: Array.from(v.batchNumbers),
+      cyclesCovered: Array.from(v.cyclesCovered),
+      fromCampaign: v.fromCampaign,
+      lastAdministeredAt: v.lastAdministeredAt,
+      nextDueDate: v.nextDueDate,
+      coveragePercent: placedCount > 0 ? Math.min(100, Math.round((v.headCountTreated / placedCount) * 100)) : null,
+    }));
+
+    return {
+      group: {
+        id: group.id,
+        name: group.name,
+        groupType: group.group_type,
+        species: group.species,
+        managementMode: group.management_mode,
+        currentCount: group.current_count,
+      },
+      cycle: cycle ? {
+        id: cycle.id,
+        cycleNumber: cycle.cycle_number,
+        status: cycle.status,
+        placedAt: cycle.placed_at,
+        closedAt: cycle.closed_at,
+        headCount: cycle.head_count,
+        placedCount,
+      } : null,
+      vaccines,
+      totalApplications: vaxRes.rows.length,
+    };
+  }
 }
 
 export default new VaccineProtocolService();

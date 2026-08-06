@@ -106,7 +106,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [activeTab, setActiveTab] = useState<'passport' | 'compliance' | 'history'>('passport')
+  const [activeTab, setActiveTab] = useState<'passport' | 'compliance' | 'history' | 'group'>('passport')
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // Passport data - keyed by animalId
@@ -128,6 +128,21 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
 
   // Selected animal for certificate history dropdown
   const [selectedAnimalForHistory, setSelectedAnimalForHistory] = useState<string>('')
+
+  // Group vaccination passport (batch herd/flock) - farmer/vet/admin
+  interface GroupPassportData {
+    group?: { id: string; name: string; groupType?: string; species?: string; managementMode?: string; currentCount?: number }
+    cycle?: any
+    vaccines?: { vaccineName: string; vaccineType?: string; applications: number; headCountTreated: number; batchNumbers: string[]; cyclesCovered: string[]; fromCampaign?: boolean; lastAdministeredAt?: string; nextDueDate?: string; coveragePercent?: number | null }[]
+    totalApplications?: number
+  }
+  const [groupEnterprises, setGroupEnterprises] = useState<{ id: string; name: string }[]>([])
+  const [groupEnterpriseId, setGroupEnterpriseId] = useState('')
+  const [groupOptions, setGroupOptions] = useState<{ id: string; name: string; species?: string; groupType?: string; animalCount?: number }[]>([])
+  const [groupPassport, setGroupPassport] = useState<GroupPassportData | null>(null)
+  const [groupLoading, setGroupLoading] = useState(false)
+  const [groupError, setGroupError] = useState('')
+  const [groupSelectedId, setGroupSelectedId] = useState('')
 
   const isAdmin = user?.role === 'admin'
   const isVet = user?.role === 'veterinarian'
@@ -200,6 +215,37 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
       setCertLoading(false)
     }
   }, [])
+
+  // ── Group vaccination passport loaders (batch herd/flock) ──
+  useEffect(() => {
+    if (activeTab !== 'group' || !(isAdmin || isVet || isFarmer)) return
+    if (groupEnterprises.length === 0) {
+      apiService.listEnterprises({ limit: 100 }).then(res => {
+        const items = res.data?.items || res.data?.enterprises || (Array.isArray(res.data) ? res.data : [])
+        setGroupEnterprises(items.map((e: any) => ({ id: e.id, name: e.name })))
+      }).catch(() => setGroupError(t('vaccinationPassport.groupLoadEnterprisesFailed')))
+    }
+  }, [activeTab, isAdmin, isVet, isFarmer, t]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!groupEnterpriseId) { setGroupOptions([]); setGroupSelectedId(''); setGroupPassport(null); return }
+    setGroupLoading(true)
+    setGroupError('')
+    apiService.listAnimalGroups(groupEnterpriseId, { limit: 200 }).then(res => {
+      setGroupOptions((res.data?.items || []).map((g: any) => ({
+        id: g.id, name: g.name, species: g.species, groupType: g.groupType, animalCount: g.animalCount || g.currentCount,
+      })))
+    }).catch(() => setGroupOptions([])).finally(() => setGroupLoading(false))
+  }, [groupEnterpriseId, t])
+
+  useEffect(() => {
+    if (!groupSelectedId) { setGroupPassport(null); return }
+    setGroupLoading(true)
+    setGroupError('')
+    apiService.getGroupVaccinationPassport(groupSelectedId).then(res => {
+      setGroupPassport(res.data || null)
+    }).catch(() => { setGroupPassport(null); setGroupError(t('vaccinationPassport.groupLoadFailed')) }).finally(() => setGroupLoading(false))
+  }, [groupSelectedId, t])
 
   useEffect(() => {
     loadPassports()
@@ -452,6 +498,112 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
     )
   }
 
+  // ── Render group vaccination passport (batch herd/flock) ───
+  const renderGroupPassport = () => (
+    <div className="vp-group-tab">
+      {(isAdmin || isVet || isFarmer) && (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 16 }}>
+            <div className="module-form-group">
+              <label className="module-label">{t('vaccinationPassport.enterprise')}</label>
+              <select className="module-input" value={groupEnterpriseId} onChange={e => setGroupEnterpriseId(e.target.value)}>
+                <option value="">- {t('vaccinationPassport.select')} -</option>
+                {groupEnterprises.map(e => (
+                  <option key={e.id} value={e.id}>{e.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="module-form-group">
+              <label className="module-label">{t('vaccinationPassport.group')}</label>
+              <select className="module-input" value={groupSelectedId} onChange={e => setGroupSelectedId(e.target.value)} disabled={!groupEnterpriseId}>
+                <option value="">- {t('vaccinationPassport.select')} -</option>
+                {groupOptions.map(g => (
+                  <option key={g.id} value={g.id}>{g.name}{g.species ? ` (${speciesLabel(g.species, t)})` : ''}{g.animalCount != null ? ` · ${g.animalCount}` : ''}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {groupError && <div className="module-alert error">{groupError}</div>}
+          {groupLoading ? (
+            <div className="vp-loading">{t('vaccinationPassport.loading')}</div>
+          ) : groupPassport ? (
+            <div>
+              {groupPassport.group && (
+                <div className="module-stats" style={{ marginBottom: 16 }}>
+                  <div className="stat-card">
+                    <div className="stat-icon">🐄</div>
+                    <div className="stat-value">{groupPassport.group.name}</div>
+                    <div className="stat-label">{t('vaccinationPassport.groupName')}</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-icon">📊</div>
+                    <div className="stat-value">{groupPassport.totalApplications ?? 0}</div>
+                    <div className="stat-label">{t('vaccinationPassport.groupApplications')}</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-icon">🔢</div>
+                    <div className="stat-value">{groupPassport.group.currentCount ?? 0}</div>
+                    <div className="stat-label">{t('vaccinationPassport.groupPopulation')}</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-icon">😷</div>
+                    <div className="stat-value">{groupPassport.vaccines?.length ?? 0}</div>
+                    <div className="stat-label">{t('vaccinationPassport.groupVaccines')}</div>
+                  </div>
+                </div>
+              )}
+              {(!groupPassport.vaccines || groupPassport.vaccines.length === 0) ? (
+                <div className="vp-empty">{t('vaccinationPassport.noGroupVaccines')}</div>
+              ) : (
+                <div className="data-table-container">
+                  <table className="module-table">
+                    <thead>
+                      <tr>
+                        <th>{t('vaccinationPassport.groupVaccine')}</th>
+                        <th>{t('vaccinationPassport.groupType')}</th>
+                        <th>{t('vaccinationPassport.groupApps')}</th>
+                        <th>{t('vaccinationPassport.groupHeadTreated')}</th>
+                        <th>{t('vaccinationPassport.groupCoverage')}</th>
+                        <th>{t('vaccinationPassport.groupLast')}</th>
+                        <th>{t('vaccinationPassport.groupNext')}</th>
+                        <th>{t('vaccinationPassport.groupSource')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {groupPassport.vaccines.map((v, i) => (
+                        <tr key={i}>
+                          <td><strong>{v.vaccineName}</strong></td>
+                          <td>{v.vaccineType || '-'}</td>
+                          <td>{v.applications}</td>
+                          <td>{v.headCountTreated}</td>
+                          <td>
+                            {v.coveragePercent == null ? (
+                              <span className="vp-compliance-na">{t('vaccinationPassport.complianceNA')}</span>
+                            ) : (
+                              <ComplianceMeter percent={v.coveragePercent} />
+                            )}
+                          </td>
+                          <td>{v.lastAdministeredAt ? formatDate(v.lastAdministeredAt) : '-'}</td>
+                          <td>{v.nextDueDate ? formatDate(v.nextDueDate) : '-'}</td>
+                          <td>{v.fromCampaign ? t('vaccinationPassport.groupSourceCampaign') : t('vaccinationPassport.groupSourceManual')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="vp-empty">{t('vaccinationPassport.groupSelectHint')}</div>
+          )}
+        </>
+      )}
+      {!(isAdmin || isVet || isFarmer) && (
+        <div className="vp-empty">{t('vaccinationPassport.groupRoleHint')}</div>
+      )}
+    </div>
+  )
+
   // ── Render compliance summary ───────────────────────────────
   const renderComplianceSummary = () => (
     <div>
@@ -656,6 +808,14 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
         >
           {t('vaccinationPassport.tabs.history')}
         </button>
+        {(isAdmin || isVet || isFarmer) && (
+          <button
+            className={`module-tab ${activeTab === 'group' ? 'active' : ''}`}
+            onClick={() => setActiveTab('group')}
+          >
+            🐄 {t('vaccinationPassport.tabs.group')}
+          </button>
+        )}
       </div>
 
       {/* Tab content */}
@@ -676,6 +836,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
         )}
         {activeTab === 'compliance' && renderComplianceSummary()}
         {activeTab === 'history' && renderCertHistory()}
+        {activeTab === 'group' && renderGroupPassport()}
       </div>
 
       {/* ── Print/Preview Modal ────────────────────────────── */}

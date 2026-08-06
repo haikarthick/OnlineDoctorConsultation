@@ -512,7 +512,8 @@ class ApiService {
     examinationDate?: string; clinicalFindings?: string; diagnosis?: string;
     treatmentSummary?: string; recommendations?: string;
     vaccinationDetails?: object; travelDetails?: object;
-    breedingDetails?: object; valuationDetails?: object;
+    breedingDetails?: object; valuationDetails?: object; movementDetails?: object; herdDetails?: object;
+    groupId?: string; cycleId?: string;
     validUntil?: string; notes?: string;
   }) {
     const response = await this.client.post('/certificates', data)
@@ -538,7 +539,8 @@ class ApiService {
     examinationDate?: string; clinicalFindings?: string; diagnosis?: string;
     treatmentSummary?: string; recommendations?: string;
     vaccinationDetails?: object; travelDetails?: object;
-    breedingDetails?: object; valuationDetails?: object;
+    breedingDetails?: object; valuationDetails?: object; movementDetails?: object; herdDetails?: object;
+    groupId?: string; cycleId?: string;
     validUntil?: string; notes?: string; animalId?: string; petOwnerId?: string; consultationId?: string;
   }) {
     const response = await this.client.put(`/certificates/${id}`, data)
@@ -2732,6 +2734,11 @@ class ApiService {
 
   async getVaccinationPassport(animalId: string) {
     const response = await this.client.get(`/vaccination-passport/animal/${animalId}`)
+    return response.data
+  }
+
+  async getGroupVaccinationPassport(groupId: string) {
+    const response = await this.client.get(`/vaccination-passport/group/${groupId}`)
     return response.data
   }
 

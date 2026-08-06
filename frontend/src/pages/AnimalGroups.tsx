@@ -50,6 +50,13 @@ const AnimalGroups: React.FC = () => {
   // ── Reassignment confirmation state ──
   const [confirmReassign, setConfirmReassign] = useState<SimpleAnimal | null>(null)
 
+  // ── Group health (flock health as RATES) modal state ──
+  const [healthGroup, setHealthGroup] = useState<AnimalGroup | null>(null)
+  const [healthMetrics, setHealthMetrics] = useState<any>(null)
+  const [withdrawal, setWithdrawal] = useState<any>(null)
+  const [healthLoading, setHealthLoading] = useState(false)
+  const [healthError, setHealthError] = useState('')
+
   useEffect(() => {
     const fetchEnterprises = async () => {
       try {
@@ -195,6 +202,29 @@ const AnimalGroups: React.FC = () => {
     }
   }
 
+  // ══════════════════════════════════════════════════════════
+  // GROUP HEALTH AS RATES (batch/flock)
+  // ══════════════════════════════════════════════════════════
+  const openGroupHealth = async (group: AnimalGroup) => {
+    setHealthGroup(group)
+    setHealthError('')
+    setHealthMetrics(null)
+    setWithdrawal(null)
+    setHealthLoading(true)
+    try {
+      const [metricsRes, withdrawalRes] = await Promise.allSettled([
+        apiService.getGroupHealthMetrics(group.id),
+        apiService.getGroupWithdrawal(group.id),
+      ])
+      if (metricsRes.status === 'fulfilled') setHealthMetrics(metricsRes.value.data)
+      else setHealthError(t('animalGroups.health.loadFailed'))
+      if (withdrawalRes.status === 'fulfilled') setWithdrawal(withdrawalRes.value.data)
+    } catch { setHealthError(t('animalGroups.health.loadFailed')) }
+    finally { setHealthLoading(false) }
+  }
+
+  const fmtPct = (v: number | null | undefined) => (v == null ? '–' : `${v}%`)
+
   // Animals available to assign: owned by user, not already in this group
   const availableAnimals = allMyAnimals.filter(a => {
     const notInGroup = !a.groupId || a.groupId !== manageGroup?.id
@@ -266,6 +296,11 @@ const AnimalGroups: React.FC = () => {
               </div>
               {g.description && <p className="si-9cbc3f5c">{g.description}</p>}
               <div className="si-0eca3602">
+                {g.managementMode === 'batch' && (
+                  <button className="btn btn-sm btn-secondary" onClick={() => openGroupHealth(g)} title={t('animalGroups.health.view')}>
+                    {t('animalGroups.health.view')}
+                  </button>
+                )}
                 <button className="btn btn-sm btn-primary" onClick={() => openManageAnimals(g)} title={t('animalGroups.manageAnimals')}>
                   {t('animalGroups.manageAnimals')}
                 </button>
@@ -413,6 +448,74 @@ const AnimalGroups: React.FC = () => {
                >
                 {t('animalGroups.reassign.confirmBtn')}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ Group Health (flock health as rates) Modal ══ */}
+      {healthGroup && (
+        <div className="modal-overlay" onClick={() => setHealthGroup(null)}>
+          <div className="modal-content si-1e3f280a" onClick={e => e.stopPropagation()}>
+            <div className="si-ae9b91a7">
+              <div>
+                <h2 className="si-44087c4b">{t('animalGroups.health.title', { name: healthGroup.name })}</h2>
+                <p className="si-34b83357">
+                  {GROUP_TYPE_LABELS[healthGroup.groupType as AnimalGroupType] || healthGroup.groupType}
+                  {healthGroup.species ? ` • ${speciesLabel(healthGroup.species, t)}` : ''}
+                  {healthGroup.managementMode === 'batch' ? ` • ${t('animalGroups.health.batch')}` : ''}
+                </p>
+              </div>
+              <button onClick={() => setHealthGroup(null)} className="si-2d49037b">✕</button>
+            </div>
+
+            {withdrawal && (withdrawal.milkActive || withdrawal.meatActive) && (
+              <div className="alert alert-error si-2bef5018">
+                ⚠️ {t('animalGroups.health.withdrawalBanner', {
+                  kind: withdrawal.meatActive ? t('animalGroups.health.meat') : t('animalGroups.health.milk'),
+                  date: withdrawal.meatActive ? withdrawal.meatUntil : withdrawal.milkUntil,
+                })}
+              </div>
+            )}
+
+            {healthError && <div className="alert alert-error si-2bef5018">{healthError}</div>}
+
+            {healthLoading ? (
+              <div className="si-41acd90c">{t('common.loading')}</div>
+            ) : !healthMetrics ? (
+              <div className="si-41acd90c">{t('animalGroups.health.noData')}</div>
+            ) : (
+              <div className="si-0adf99df">
+                <div className="si-bbfa5d5e" style={{ marginBottom: 12 }}>
+                  <span className="badge si-8c23064b">{t('animalGroups.health.placed')}: {healthMetrics.placedCount ?? 0}</span>
+                  <span className="badge si-8c23064b">{t('animalGroups.health.current')}: {healthMetrics.currentCount ?? 0}</span>
+                  {healthMetrics.cycleNumber != null && (
+                    <span className="badge si-8c23064b">{t('animalGroups.health.cycle')} #{healthMetrics.cycleNumber}</span>
+                  )}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+                  {[
+                    { label: t('animalGroups.health.mortalityRate'), value: fmtPct(healthMetrics.mortalityRate), icon: '☠️' },
+                    { label: t('animalGroups.health.cullRate'), value: fmtPct(healthMetrics.cullRate), icon: '🗑️' },
+                    { label: t('animalGroups.health.survivalRate'), value: fmtPct(healthMetrics.survivalRate), icon: '💚' },
+                    { label: t('animalGroups.health.morbidityRate'), value: fmtPct(healthMetrics.morbidityRate), icon: '🩺' },
+                    { label: t('animalGroups.health.treatmentCoverage'), value: fmtPct(healthMetrics.treatmentCoverage), icon: '💊' },
+                  ].map((m, i) => (
+                    <div key={i} style={{ padding: '0.75rem', borderRadius: 8, border: '1px solid var(--gray-200, #e5e7eb)' }}>
+                      <div style={{ fontSize: 20 }}>{m.icon}</div>
+                      <div style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--primary, #4F46E5)' }}>{m.value}</div>
+                      <div style={{ fontSize: 12, opacity: 0.7 }}>{m.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <p className="si-9cbc3f5c" style={{ textAlign: 'left', marginTop: 12 }}>
+                  {t('animalGroups.health.ratesNote')}
+                </p>
+              </div>
+            )}
+
+            <div className="si-64c669e9">
+              <button className="btn btn-secondary" onClick={() => setHealthGroup(null)}>{t('common.close')}</button>
             </div>
           </div>
         </div>
