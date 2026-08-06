@@ -7194,3 +7194,32 @@
 </details>
 
 ---
+
+## 2026-08-06 11:55 · `98191aa` · OTHER
+
+**Commit:** feat(herd): Phase 4 - group vaccination passport, group certificates, flock rates, timeline roll-up  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (14)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/services/VaccineProtocolService.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/AnimalGroups.tsx
+  - frontend/src/pages/AnimalTimeline.tsx
+  - frontend/src/pages/VaccinationPassport.tsx
+  - frontend/src/pages/doctor/CertificateWriter.tsx
+  - frontend/src/services/api.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
