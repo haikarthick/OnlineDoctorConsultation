@@ -9,21 +9,27 @@ class PrescriptionService {
     const id = uuidv4();
     const now = new Date();
 
-    // Auto-lookup petOwnerId and animalId from consultation if not provided
+        // Auto-lookup petOwnerId and subject (animal or group) from consultation if not provided.
+    // A batch prescription targets a whole group (herd/flock) in one row - never a fan-out
+    // into one prescription per head (see BATCH_ANIMAL_MANAGEMENT_PLAN.md).
     let petOwnerId = data.petOwnerId;
     let animalId = data.animalId || null;
-    if (data.consultationId && (!petOwnerId || !animalId)) {
+    let groupId = data.groupId || null;
+    if (data.consultationId && (!petOwnerId || (!animalId && !groupId))) {
       try {
         const consultResult = await database.query(
-          `SELECT user_id, animal_id FROM consultations WHERE id = $1`,
+          `SELECT user_id, animal_id, group_id FROM consultations WHERE id = $1`,
           [data.consultationId]
         );
         if (consultResult.rows.length > 0) {
           if (!petOwnerId) petOwnerId = consultResult.rows[0].user_id;
-          if (!animalId) animalId = consultResult.rows[0].animal_id || null;
+          if (!animalId && !groupId) {
+            animalId = consultResult.rows[0].animal_id || null;
+            groupId = consultResult.rows[0].group_id || null;
+          }
         }
       } catch (err) {
-        logger.warn('Could not auto-lookup consultation for prescription', { consultationId: data.consultationId, error: err });
+        logger.warn('Could not lookup consultation for prescription', { consultationId: data.consultationId, error: err });
       }
     }
 
@@ -49,20 +55,25 @@ class PrescriptionService {
           targetPharmacyId = pharmaResult.rows[0].id;
           isNetworkCoordinated = true;
         }
-      } catch (err) {
+            } catch (err) {
         logger.warn('Could not auto-assign pharmacy for network prescription', { networkId, error: err });
       }
     }
 
+    const cycleId = data.cycleId || null;
+    const headCountTreated = data.headCountTreated ?? null;
+
     const result = await database.query(
       `INSERT INTO prescriptions (id, consultation_id, veterinarian_id, pet_owner_id, animal_id,
+       group_id, cycle_id, head_count_treated,
        medications, instructions, valid_until, is_active, network_id, is_network_coordinated, target_pharmacy_id, review_status, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
        RETURNING id, consultation_id as "consultationId", veterinarian_id as "veterinarianId",
-       pet_owner_id as "petOwnerId", animal_id as "animalId", medications, instructions,
+       pet_owner_id as "petOwnerId", animal_id as "animalId", group_id as "groupId",
+       cycle_id as "cycleId", head_count_treated as "headCountTreated", medications, instructions,
        valid_until as "validUntil", is_active as "isActive",
        created_at as "createdAt", updated_at as "updatedAt"`,
-      [id, data.consultationId, veterinarianId, petOwnerId, animalId,
+      [id, data.consultationId, veterinarianId, petOwnerId, animalId, groupId, cycleId, headCountTreated,
        JSON.stringify(data.medications), data.instructions, validUntil, true,
        networkId, isNetworkCoordinated, targetPharmacyId,
        isNetworkCoordinated ? 'pending_review' : null,
@@ -131,8 +142,10 @@ class PrescriptionService {
 
   async getPrescription(id: string): Promise<Prescription> {
     const result = await database.query(
-      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
-       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
+            `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.group_id as "groupId",
+       p.cycle_id as "cycleId", p.head_count_treated as "headCountTreated",
+       p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(v.first_name || ' ' || v.last_name, 'Unknown') as "vetName",
@@ -140,6 +153,8 @@ class PrescriptionService {
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
        a.unique_id as "animalUniqueId",
        a.date_of_birth as "animalDob", a.gender as "animalGender", a.animal_class as "animalClass",
+       g.name as "groupName", g.management_mode as "groupManagementMode",
+       gc.name as "cycleName", gc.cycle_number as "cycleNumber",
        c.diagnosis, c.symptom_description as "chiefComplaints",
        vp.license_number as "vetLicense",
        vp.specializations as "vetSpecializations",
@@ -150,6 +165,8 @@ class PrescriptionService {
        LEFT JOIN users v ON v.id = p.veterinarian_id
        LEFT JOIN users o ON o.id = p.pet_owner_id
        LEFT JOIN animals a ON a.id = p.animal_id
+       LEFT JOIN animal_groups g ON g.id = p.group_id
+       LEFT JOIN group_cycles gc ON gc.id = p.cycle_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
        LEFT JOIN vet_profiles vp ON vp.user_id = p.veterinarian_id
        WHERE p.id = $1`,
@@ -167,18 +184,21 @@ class PrescriptionService {
 
   async listByConsultation(consultationId: string): Promise<Prescription[]> {
     const result = await database.query(
-      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
-       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
+            `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.group_id as "groupId",
+       p.cycle_id as "cycleId", p.head_count_treated as "headCountTreated",
+       p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(v.first_name || ' ' || v.last_name, 'Unknown') as "vetName",
        COALESCE(o.first_name || ' ' || o.last_name, 'Unknown') as "petOwnerName",
-       a.name as "animalName",
+       a.name as "animalName", g.name as "groupName",
        c.diagnosis
        FROM prescriptions p
        LEFT JOIN users v ON v.id = p.veterinarian_id
        LEFT JOIN users o ON o.id = p.pet_owner_id
        LEFT JOIN animals a ON a.id = p.animal_id
+       LEFT JOIN animal_groups g ON g.id = p.group_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
        WHERE p.consultation_id = $1 ORDER BY p.created_at DESC`,
       [consultationId]
@@ -194,8 +214,10 @@ class PrescriptionService {
     const offset = params?.offset || 0;
 
     const result = await database.query(
-      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
-       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
+            `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.group_id as "groupId",
+       p.cycle_id as "cycleId", p.head_count_treated as "headCountTreated",
+       p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
        p.review_status as "reviewStatus",
        p.is_network_coordinated as "isNetworkCoordinated",
@@ -205,6 +227,8 @@ class PrescriptionService {
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
        a.unique_id as "animalUniqueId",
        a.gender as "animalGender", a.animal_class as "animalClass",
+       g.name as "groupName", g.management_mode as "groupManagementMode",
+       gc.name as "cycleName", gc.cycle_number as "cycleNumber",
        c.diagnosis,
        hp.pharmacy_name as "pharmacyName",
        dr.dispensing_status as "dispensingStatus",
@@ -213,6 +237,8 @@ class PrescriptionService {
        FROM prescriptions p
        LEFT JOIN users u ON u.id = p.veterinarian_id
        LEFT JOIN animals a ON a.id = p.animal_id
+       LEFT JOIN animal_groups g ON g.id = p.group_id
+       LEFT JOIN group_cycles gc ON gc.id = p.cycle_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
        LEFT JOIN hospital_pharmacies hp ON hp.id = p.target_pharmacy_id
        LEFT JOIN dispensing_records dr ON dr.prescription_id = p.id AND dr.dispensing_status != 'cancelled'
@@ -230,8 +256,10 @@ class PrescriptionService {
     const offset = params?.offset || 0;
 
     const result = await database.query(
-      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
-       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
+            `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.group_id as "groupId",
+       p.cycle_id as "cycleId", p.head_count_treated as "headCountTreated",
+       p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
        p.review_status as "reviewStatus",
        p.is_network_coordinated as "isNetworkCoordinated",
@@ -241,6 +269,8 @@ class PrescriptionService {
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
        a.unique_id as "animalUniqueId",
        a.gender as "animalGender", a.animal_class as "animalClass",
+       g.name as "groupName", g.management_mode as "groupManagementMode",
+       gc.name as "cycleName", gc.cycle_number as "cycleNumber",
        c.diagnosis,
        hp.pharmacy_name as "pharmacyName",
        dr.dispensing_status as "dispensingStatus",
@@ -248,6 +278,8 @@ class PrescriptionService {
        FROM prescriptions p
        LEFT JOIN users u ON u.id = p.pet_owner_id
        LEFT JOIN animals a ON a.id = p.animal_id
+       LEFT JOIN animal_groups g ON g.id = p.group_id
+       LEFT JOIN group_cycles gc ON gc.id = p.cycle_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
        LEFT JOIN hospital_pharmacies hp ON hp.id = p.target_pharmacy_id
        LEFT JOIN dispensing_records dr ON dr.prescription_id = p.id AND dr.dispensing_status != 'cancelled'
@@ -265,18 +297,22 @@ class PrescriptionService {
     const offset = params?.offset || 0;
 
     const result = await database.query(
-      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
-       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
+            `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.group_id as "groupId",
+       p.cycle_id as "cycleId", p.head_count_treated as "headCountTreated",
+       p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
        p.review_status as "reviewStatus", p.is_network_coordinated as "isNetworkCoordinated",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "veterinarianName",
+       g.name as "groupName",
        c.diagnosis,
        hp.pharmacy_name as "pharmacyName",
        dr.dispensing_status as "dispensingStatus", dr.dispensing_method as "dispensingMethod",
        dr.created_at as "dispensedAt"
        FROM prescriptions p
        LEFT JOIN users u ON u.id = p.veterinarian_id
+       LEFT JOIN animal_groups g ON g.id = p.group_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
        LEFT JOIN hospital_pharmacies hp ON hp.id = p.target_pharmacy_id
        LEFT JOIN dispensing_records dr ON dr.prescription_id = p.id AND dr.dispensing_status != 'cancelled'
@@ -292,6 +328,47 @@ class PrescriptionService {
         if (typeof row.medications === 'string') row.medications = JSON.parse(row.medications);
         return row;
       }),
+            total: parseInt(countResult.rows[0]?.count || '0', 10),
+    };
+  }
+
+  async listByGroup(groupId: string, params?: { limit?: number; offset?: number }): Promise<{ prescriptions: Prescription[]; total: number }> {
+    const limit = params?.limit || 50;
+    const offset = params?.offset || 0;
+
+    const result = await database.query(
+      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.group_id as "groupId",
+       p.cycle_id as "cycleId", p.head_count_treated as "headCountTreated",
+       p.medications, p.instructions,
+       p.valid_until as "validUntil", p.is_active as "isActive",
+       p.review_status as "reviewStatus", p.is_network_coordinated as "isNetworkCoordinated",
+       p.created_at as "createdAt", p.updated_at as "updatedAt",
+       COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "veterinarianName",
+       g.name as "groupName", gc.name as "cycleName", gc.cycle_number as "cycleNumber",
+       c.diagnosis,
+       hp.pharmacy_name as "pharmacyName",
+       dr.dispensing_status as "dispensingStatus", dr.dispensing_method as "dispensingMethod",
+       dr.created_at as "dispensedAt"
+       FROM prescriptions p
+       LEFT JOIN users u ON u.id = p.veterinarian_id
+       LEFT JOIN animal_groups g ON g.id = p.group_id
+       LEFT JOIN group_cycles gc ON gc.id = p.cycle_id
+       LEFT JOIN consultations c ON c.id = p.consultation_id
+       LEFT JOIN hospital_pharmacies hp ON hp.id = p.target_pharmacy_id
+       LEFT JOIN dispensing_records dr ON dr.prescription_id = p.id AND dr.dispensing_status != 'cancelled'
+       WHERE p.group_id = $1 ORDER BY p.created_at DESC LIMIT $2 OFFSET $3`,
+      [groupId, limit, offset]
+    );
+    const countResult = await database.query(
+      `SELECT COUNT(*) as count FROM prescriptions WHERE group_id = $1`,
+      [groupId]
+    );
+    return {
+      prescriptions: result.rows.map((row: any) => {
+        if (typeof row.medications === 'string') row.medications = JSON.parse(row.medications);
+        return row;
+      }),
       total: parseInt(countResult.rows[0]?.count || '0', 10),
     };
   }
@@ -301,19 +378,23 @@ class PrescriptionService {
     const offset = params?.offset || 0;
 
     const result = await database.query(
-      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
-       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
+            `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.group_id as "groupId",
+       p.cycle_id as "cycleId", p.head_count_treated as "headCountTreated",
+       p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(v.first_name || ' ' || v.last_name, 'Unknown') as "vetName",
        COALESCE(o.first_name || ' ' || o.last_name, 'Unknown') as "petOwnerName",
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
        a.gender as "animalGender", a.animal_class as "animalClass",
+       g.name as "groupName",
        c.diagnosis
        FROM prescriptions p
        LEFT JOIN users v ON v.id = p.veterinarian_id
        LEFT JOIN users o ON o.id = p.pet_owner_id
        LEFT JOIN animals a ON a.id = p.animal_id
+       LEFT JOIN animal_groups g ON g.id = p.group_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
        ORDER BY p.created_at DESC LIMIT $1 OFFSET $2`,
       [limit, offset]

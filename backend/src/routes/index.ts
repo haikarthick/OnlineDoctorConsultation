@@ -505,6 +505,12 @@ router.get('/prescriptions/patients', authMiddleware, roleMiddleware(['admin', '
 }));
 router.get('/prescriptions/me', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listMyPrescriptions(req, res)));
 router.get('/prescriptions/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'prescriptions'), asyncHandler((req: Request, res: Response) => PrescriptionController.listByAnimal(req, res)));
+// Group-subject (batch herd/flock) prescriptions. Gated by ensureGroupAccess() so a :groupId
+// here can't be a cross-tenant read - the caller must own/member the enterprise that owns the group.
+router.get('/prescriptions/group/:groupId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  await PrescriptionController.listByGroup(req, res);
+}));
 router.get('/prescriptions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.getPrescription(req, res)));
 router.get('/prescriptions/consultation/:consultationId', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listByConsultation(req, res)));
 router.put('/prescriptions/:id/deactivate', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.deactivatePrescription(req, res)));

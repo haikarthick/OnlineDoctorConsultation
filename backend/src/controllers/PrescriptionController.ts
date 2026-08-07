@@ -78,6 +78,16 @@ class PrescriptionController {
     res.json({ success: true, data: result });
   }
 
+  async listByGroup(req: Request, res: Response) {
+    const { groupId } = req.params;
+    const params = {
+      limit: parseInt(req.query.limit as string) || 50,
+      offset: parseInt(req.query.offset as string) || 0
+    };
+    const result = await PrescriptionService.listByGroup(groupId, params);
+    res.json({ success: true, data: result });
+  }
+
   async deactivatePrescription(req: Request, res: Response) {
     const authReq = req as AuthRequest;
     if (authReq.userRole !== 'veterinarian' && authReq.userRole !== 'admin') {
