@@ -7239,3 +7239,41 @@
 </details>
 
 ---
+
+## 2026-08-06 12:18 · `15b7691` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-08-07 12:06 · `9fc5b3f` · OTHER
+
+**Commit:** feat(herd): group-subject (batch flock/herd) prescriptions  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - backend/migrations/042_prescription_group_subject.sql
+  - backend/src/controllers/PrescriptionController.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/models/types.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/PrescriptionService.ts
+  - docker/init.sql
+
+</details>
+
+---
