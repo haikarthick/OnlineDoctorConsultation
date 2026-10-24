@@ -655,7 +655,7 @@ class PostgresDatabase {
       { key: 'booking.maxReschedules', value: '1', category: 'booking', description: 'Maximum times a user can reschedule before doctor acceptance (0 = unlimited)' },
       { key: 'payment.currency', value: 'INR', category: 'payment', description: 'Platform currency code (e.g. USD, INR, EUR, GBP)' },
       // Prescription template defaults
-      { key: 'prescription.clinicName', value: 'VetCare Platform', category: 'prescription', description: 'Clinic / platform name shown on prescription letterhead' },
+      { key: 'prescription.clinicName', value: 'waytovet Platform', category: 'prescription', description: 'Clinic / platform name shown on prescription letterhead' },
       { key: 'prescription.clinicTagline', value: 'Compassionate Care for Your Animals', category: 'prescription', description: 'Tagline shown below clinic name on prescriptions' },
       { key: 'prescription.clinicAddress', value: '123 Veterinary Avenue, Chennai, Tamil Nadu 600001, India', category: 'prescription', description: 'Full clinic address for prescription footer' },
       { key: 'prescription.clinicPhone', value: '+91 44 1234 5678', category: 'prescription', description: 'Phone number printed on prescriptions' },
@@ -665,7 +665,7 @@ class PostgresDatabase {
       { key: 'prescription.clinicLogo', value: '', category: 'prescription', description: 'Logo URL or base64 for prescription letterhead (leave blank to use default icon)' },
       { key: 'prescription.footerText', value: 'This prescription is digitally generated and valid until the date specified. Contact the prescribing veterinarian for queries.', category: 'prescription', description: 'Disclaimer text in prescription footer' },
       // Certificate template defaults
-      { key: 'cert.clinicName', value: 'VetCare Platform', category: 'cert', description: 'Clinic / platform name shown on certificate letterhead' },
+      { key: 'cert.clinicName', value: 'waytovet Platform', category: 'cert', description: 'Clinic / platform name shown on certificate letterhead' },
       { key: 'cert.clinicAddress', value: '123 Veterinary Avenue, Chennai, Tamil Nadu 600001, India', category: 'cert', description: 'Full clinic address for certificate letterhead' },
       { key: 'cert.clinicPhone', value: '+91 44 1234 5678', category: 'cert', description: 'Phone number printed on certificates' },
       { key: 'cert.clinicEmail', value: 'care@vetcareplatform.com', category: 'cert', description: 'Email address printed on certificates' },
@@ -1619,7 +1619,7 @@ class PostgresDatabase {
     await this.pool.query(`
       INSERT INTO system_settings (key, value, description, category) VALUES
         ('email.devRedirect', '', 'Dev/demo email redirect address (all emails go here when set)', 'email'),
-        ('email.fromName', 'VetCare', 'Email sender display name', 'email'),
+        ('email.fromName', 'waytovet', 'Email sender display name', 'email'),
         ('email.fromAddress', 'noreply@vetcare.app', 'Email sender address', 'email')
       ON CONFLICT (key) DO NOTHING
     `).catch(() => {});

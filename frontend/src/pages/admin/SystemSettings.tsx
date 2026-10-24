@@ -106,8 +106,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
   // Email settings card state
   const [emailDevRedirect, setEmailDevRedirect] = useState('')
-  const [emailFromName, setEmailFromName] = useState('VetCare')
-  const [emailFromAddress, setEmailFromAddress] = useState('noreply@vetcare.app')
+  const [emailFromName, setEmailFromName] = useState('waytovet')
+  const [emailFromAddress, setEmailFromAddress] = useState('noreply@waytovet.app')
   const [emailSaving, setEmailSaving] = useState(false)
   const [emailSaved, setEmailSaved] = useState(false)
   const [testEmailTo, setTestEmailTo] = useState('')
@@ -1234,13 +1234,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                 <label className="module-label">From Name</label>
                 <input type="text" className="module-input" value={emailFromName} style={inputStyle}
                   onChange={e => setEmailFromName(e.target.value)}
-                  placeholder="VetCare" />
+                  placeholder="waytovet" />
               </div>
               <div className="module-form-group">
                 <label className="module-label">From Address</label>
                 <input type="email" className="module-input" value={emailFromAddress} style={inputStyle}
                   onChange={e => setEmailFromAddress(e.target.value)}
-                  placeholder="noreply@vetcare.app" />
+                  placeholder="noreply@waytovet.app" />
               </div>
             </div>
           </div>

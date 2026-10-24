@@ -369,7 +369,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
     try {
       const tplMap = await apiService.getCertificateTemplate()
       const tpl: CertificateTemplate = {
-        clinicName: tplMap.clinicName || 'VetCare Platform',
+        clinicName: tplMap.clinicName || 'waytovet Platform',
         clinicAddress: tplMap.clinicAddress || '',
         clinicPhone: tplMap.clinicPhone || '',
         clinicEmail: tplMap.clinicEmail || '',

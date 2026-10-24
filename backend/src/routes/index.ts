@@ -2403,8 +2403,8 @@ router.post('/admin/settings/test-email', authMiddleware, roleMiddleware(['admin
   try {
     const result = await emailService.send({
       to,
-      subject: 'VetCare - Test Email',
-      html: `<div style="font-family:Arial,sans-serif;padding:24px"><h2>✅ Email is working!</h2><p>This is a test email from VetCare admin panel.</p><p>Sent at: ${new Date().toISOString()}</p><p>Dev redirect: ${devRedirect || 'off'}</p></div>`,
+      subject: 'waytovet - Test Email',
+      html: `<div style="font-family:Arial,sans-serif;padding:24px"><h2>✅ Email is working!</h2><p>This is a test email from waytovet admin panel.</p><p>Sent at: ${new Date().toISOString()}</p><p>Dev redirect: ${devRedirect || 'off'}</p></div>`,
       text: `Email is working! Sent at: ${new Date().toISOString()}`,
     });
     const mode = result.mode || emailService.getMode();

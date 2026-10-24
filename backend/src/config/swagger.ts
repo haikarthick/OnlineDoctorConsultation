@@ -2,7 +2,7 @@
  * Swagger / OpenAPI Configuration
  *
  * Generates comprehensive API documentation from a programmatic spec
- * covering all 200+ endpoints in the VetCare platform.
+ * covering all 200+ endpoints in the waytovet platform.
  */
 
 import swaggerJsdoc from 'swagger-jsdoc';
@@ -13,10 +13,10 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.3',
     info: {
-      title: 'VetCare API',
+      title: 'waytovet API',
       version: '1.0.0',
       description: 'Enterprise Veterinary Consultation Platform - complete REST API documentation.',
-      contact: { name: 'VetCare Team', email: 'support@vetcare.app' },
+      contact: { name: 'waytovet Team', email: 'support@vetcare.app' },
       license: { name: 'MIT' },
     },
     servers: [

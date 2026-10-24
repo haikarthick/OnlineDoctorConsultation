@@ -363,7 +363,7 @@
     "signIn": "Sign In",
     "getStarted": "Get Started Free",
     "heroTitle": "The Complete Platform for Animal Health & Enterprise Management",
-    "heroSubtitle": "From a single pet to 10,000-head livestock operations, VetCare delivers 24/7 veterinary consultations, AI-powered disease prediction, IoT monitoring, and full enterprise management in one unified platform.",
+    "heroSubtitle": "From a single pet to 10,000-head livestock operations, waytovet delivers 24/7 veterinary consultations, AI-powered disease prediction, IoT monitoring, and full enterprise management in one unified platform.",
     "ctaPrimary": "Start Free: Pet Owner",
     "ctaEnterprise": "🏢 Enterprise Sign Up",
     "ctaVet": "Join as Veterinarian",
@@ -448,7 +448,7 @@
       "step3": "Add Doctors",
       "step4": "Go Live"
     },
-    "featuresTitle": "Why Choose VetCare?",
+    "featuresTitle": "Why Choose waytovet?",
     "tabs": {
       "petOwners": "Pet Owners",
       "enterprises": "Enterprises",
@@ -713,7 +713,7 @@
       }
     },
     "dataPrivacyTitle": "Data Privacy Commitment:",
-    "dataPrivacyText": "VetCare does not sell, share, or monetize your health data. All medical records are protected with the same standards used in human healthcare. Every access is audited. Every user has full visibility into their data footprint.",
+    "dataPrivacyText": "waytovet does not sell, share, or monetize your health data. All medical records are protected with the same standards used in human healthcare. Every access is audited. Every user has full visibility into their data footprint.",
     "howItWorksTitle": "How It Works",
     "steps": {
       "owner": {
@@ -794,7 +794,7 @@
       "0": {
         "name": "Sarah Mitchell",
         "role": "Pet Owner",
-        "text": "VetCare saved my cat's life! Quick diagnosis at 2 AM when every clinic was closed. The video consultation was seamless."
+        "text": "waytovet saved my cat's life! Quick diagnosis at 2 AM when every clinic was closed. The video consultation was seamless."
       },
       "1": {
         "name": "Robert Hargrove",
@@ -804,7 +804,7 @@
       "2": {
         "name": "Dr. James Wilson",
         "role": "Veterinarian",
-        "text": "I serve 12 enterprise clients and dozens of pet owners through VetCare. The platform handles scheduling, records, and billing beautifully."
+        "text": "I serve 12 enterprise clients and dozens of pet owners through waytovet. The platform handles scheduling, records, and billing beautifully."
       },
       "3": {
         "name": "Maria Chen",
@@ -814,7 +814,7 @@
       "4": {
         "name": "Dr. Priya Nair",
         "role": "Director, City Paws Veterinary Hospital",
-        "text": "We set up our hospital profile, added 8 doctors across 4 departments and went live in one afternoon. Bookings started the same day. VetCare is the best thing to happen to our clinic."
+        "text": "We set up our hospital profile, added 8 doctors across 4 departments and went live in one afternoon. Bookings started the same day. waytovet is the best thing to happen to our clinic."
       },
       "5": {
         "name": "Thomas Eriksen",
@@ -823,7 +823,7 @@
       }
     },
     "ctaTitle": "Ready to Transform Your Animal Care?",
-    "ctaSubtitle": "Join thousands of pet owners, enterprises, and veterinarians on VetCare",
+    "ctaSubtitle": "Join thousands of pet owners, enterprises, and veterinarians on waytovet",
     "footer": {
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
@@ -1899,7 +1899,7 @@
     },
     "privacy": {
       "title": "🔐 Privacy & Data",
-      "description": "Review your data footprint and manage privacy settings. VetCare follows HIPAA-aligned data protection practices.",
+      "description": "Review your data footprint and manage privacy settings. waytovet follows HIPAA-aligned data protection practices.",
       "loading": "⏳ Loading...",
       "viewDataSummary": "📊 View My Data Summary",
       "medicalRecords": "Medical Records",
@@ -3655,7 +3655,7 @@
       "welfareAttestation": "🛡️ I attest that the animal(s) listed are healthy, well-cared-for, and not subjected to cruelty as per the Prevention of Cruelty to Animals Act, 1960",
       "welfareHint": "This attestation is required under the Prevention of Cruelty to Animals Act, 1960 (PCA Act). By checking this, you confirm the animal is in good health and has been treated humanely.",
       "legalTitle": "Legal Compliance & Terms",
-      "legalDisclaimer": "This platform operates as an animal classifieds board in compliance with Indian animal welfare laws. All listings must comply with the Prevention of Cruelty to Animals Act, 1960, the PCA (Dog Breeding & Marketing) Rules, 2017, and the PCA (Pet Shop) Rules, 2018. VetCare does not facilitate direct sales. All transactions occur offline between parties.",
+      "legalDisclaimer": "This platform operates as an animal classifieds board in compliance with Indian animal welfare laws. All listings must comply with the Prevention of Cruelty to Animals Act, 1960, the PCA (Dog Breeding & Marketing) Rules, 2017, and the PCA (Pet Shop) Rules, 2018. waytovet does not facilitate direct sales. All transactions occur offline between parties.",
       "termsAccept": "⚖️ I accept the Terms & Conditions and confirm this listing complies with all applicable animal welfare laws of India",
       "breederNote": "As a registered breeder, your PCA registration certificate number will be displayed on your listing. Admin may verify your registration status. Listing without valid registration may be rejected per Rule 3 of PCA (Dog Breeding & Marketing) Rules, 2017.",
       "complianceTitle": "Compliance & Welfare",
@@ -3664,7 +3664,7 @@
       "attested": "Welfare Attested (PCA Act 1960)",
       "accepted": "Accepted",
       "verified": "Verified",
-      "detailDisclaimer": "This listing is published on an animal classifieds board. VetCare does not facilitate direct sales. All transactions occur offline. Comply with PCA Act 1960 and applicable state regulations.",
+      "detailDisclaimer": "This listing is published on an animal classifieds board. waytovet does not facilitate direct sales. All transactions occur offline. Comply with PCA Act 1960 and applicable state regulations.",
       "adoptDontShop": "🐾 Adopt, Don't Shop: Consider adopting from shelters and rescue organizations"
     },
     "monetization": {
@@ -3765,7 +3765,7 @@
       "howStep2": "Connect and inspect the animal in person",
       "howStep3": "Pay the seller directly (cash / your own UPI)",
       "howStep4": "Both confirm here to complete the deal",
-      "freeNote": "This marketplace is 100% free. VetCare never handles the payment. Settle directly with the other party.",
+      "freeNote": "This marketplace is 100% free. waytovet never handles the payment. Settle directly with the other party.",
       "tabNote": "Deals are settled directly between buyer and seller. After you meet and settle, both parties confirm here to complete the deal.",
       "currentlyReserved": "Currently reserved by a buyer",
       "actionsCol": "Deal Actions",
@@ -4424,7 +4424,7 @@
     "isPublicDesc": "Public reviews help other pet owners make informed decisions",
     "helpRequired": "Please select a rating and write at least 10 characters to submit",
     "submittedFor": "Your review for {{name}} has been submitted.",
-    "helpCommunity": "Thank you for helping the VetCare community!"
+    "helpCommunity": "Thank you for helping the waytovet community!"
   },
   "doctorDashboard": {
     "title": "Doctor Dashboard",
@@ -5014,7 +5014,7 @@
     "userAgent": "User Agent",
     "severity": "Severity",
     "hipaaChecklist": "HIPAA Compliance Checklist",
-    "hipaaChecklistDesc": "Status of HIPAA technical safeguards, administrative controls, and data privacy measures implemented in VetCare",
+    "hipaaChecklistDesc": "Status of HIPAA technical safeguards, administrative controls, and data privacy measures implemented in waytovet",
     "control": "Control",
     "status": "Status",
     "detailsHeader": "Details",
@@ -5756,7 +5756,7 @@
     "failedToAccept": "Failed to accept invitation",
     "passwordMinLength": "Password must be at least 8 characters",
     "passwordsMismatch": "Passwords do not match",
-    "successTitle": "Welcome to VetCare!",
+    "successTitle": "Welcome to waytovet!",
     "successMsg": "Your account has been created and linked to the hospital. You can now log in to start managing patients and appointments.",
     "goToLogin": "Go to Login",
     "inviteProblem": "Invitation Problem",
@@ -6827,7 +6827,7 @@
     "accountCreatedDesc": "Welcome to {{network}}. You can now log in with your email and password.",
     "proceedToLogin": "Log In Now",
     "acceptInviteTitle": "Accept Hospital Invite",
-    "acceptInviteSubtitle": "You've been invited to join {{hospital}} on VetCare.",
+    "acceptInviteSubtitle": "You've been invited to join {{hospital}} on waytovet.",
     "email": "Email",
     "position": "Position",
     "hospital": "Hospital",
@@ -7356,7 +7356,7 @@
     "couldNotStartSession": "Could not start chat session",
     "failedToSendMessage": "Failed to send message",
     "couldNotCreateSession": "Could not create chat session",
-    "aiBuddyHelper": "VetCare AI",
+    "aiBuddyHelper": "waytovet AI",
     "thinking": "Thinking...",
     "userAssistant": "Your Assistant",
     "yourAssistant": "Your Assistant",
@@ -7367,7 +7367,7 @@
     "iKnowAbout": "I can help with",
     "askMeAnything": "Ask me anything about your pets and their health",
     "askMeAnythingGeneral": "Ask me anything",
-    "askAiBuddy": "Ask VetCare AI..."
+    "askAiBuddy": "Ask waytovet AI..."
   },
   "payment": {
     "title": "Complete Your Payment",

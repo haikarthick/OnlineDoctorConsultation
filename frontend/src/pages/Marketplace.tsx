@@ -1022,7 +1022,7 @@ const Marketplace: React.FC = () => {
                         const vcId = sel?.uniqueId || sel?.unique_id
                         return vcId ? (
                           <div className="si-a85540c4"
-                            title="VetCare Animal ID - click to copy"
+                            title="waytovet Animal ID - click to copy"
                             onClick={() => navigator.clipboard?.writeText(vcId).then(() => {
                               setCopiedId(vcId)
                               setTimeout(() => setCopiedId(prev => (prev === vcId ? null : prev)), 1500)
@@ -2179,7 +2179,7 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
           {hasCert && <span className="mp-metric cert">{t('marketplace.card.certified')}</span>}
           {welfareAtt && <span className="mp-metric welfare">🛡️ {t('marketplace.card.welfareAttested')}</span>}
           {sellerType === 'registered_breeder' && <span className={`mp-metric breeder ${breederVerified ? 'verified' : ''}`}>{breederVerified ? '✅' : '📋'} {t('marketplace.card.registeredBreeder')}</span>}
-          {hasHealthPassport && <span className="mp-metric cert" title="Vaccination records verified in VetCare system">🏥 {t('marketplace.card.healthPassport')}</span>}
+          {hasHealthPassport && <span className="mp-metric cert" title="Vaccination records verified in waytovet system">🏥 {t('marketplace.card.healthPassport')}</span>}
           {isFairDeal && <span className="mp-metric si-7cbce2ec">💚 {t('marketplace.card.fairDeal')} ({fairDealPct}%)</span>}
           {isPremiumPriced && <span className="mp-metric si-aa4985c8">⭐ {t('marketplace.card.premiumPriced')}</span>}
         </div>

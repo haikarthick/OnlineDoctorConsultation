@@ -66,12 +66,12 @@ interface Props {
 }
 
 const DEFAULT_TEMPLATE: PrescriptionTemplate = {
-  clinicName: 'VetCare Platform',
+  clinicName: 'waytovet Platform',
   clinicTagline: 'Compassionate Care for Your Animals',
   clinicAddress: '123 Veterinary Avenue, Chennai, Tamil Nadu 600001, India',
   clinicPhone: '+91 44 1234 5678',
-  clinicEmail: 'care@vetcareplatform.com',
-  clinicWebsite: 'www.vetcareplatform.com',
+  clinicEmail: 'care@waytovet.com',
+  clinicWebsite: 'www.waytovet.com',
   registrationNumber: 'VET-REG-2024-001',
   clinicLogo: '',
   footerText: 'This prescription is digitally generated and valid until the date specified. Contact the prescribing veterinarian for queries.',

@@ -183,7 +183,7 @@ if (hasFrontendDist) {
 // API welcome route (only in development, or as /api fallback)
 app.get('/api', (_req: Request, res: Response) => {
   res.json({
-    name: 'VetCare API',
+    name: 'waytovet API',
     version: config.app.apiVersion,
     status: 'running',
     docs: `/api/${config.app.apiVersion}/health`,

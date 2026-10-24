@@ -123,7 +123,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
       const fullCert = certRes.data?.certificate || certRes.data
 
       const tpl: CertificateTemplate = {
-        clinicName: tplMap.clinicName || 'VetCare Platform',
+        clinicName: tplMap.clinicName || 'waytovet Platform',
         clinicAddress: tplMap.clinicAddress || '',
         clinicPhone: tplMap.clinicPhone || '',
         clinicEmail: tplMap.clinicEmail || '',

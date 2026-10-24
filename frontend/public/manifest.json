@@ -1,6 +1,6 @@
 {
-  "name": "VetCare - Veterinary Consultation Platform",
-  "short_name": "VetCare",
+  "name": "waytovet - Veterinary Consultation Platform",
+  "short_name": "waytovet",
   "description": "Complete veterinary telemedicine platform for pet owners, farmers, and veterinarians",
   "start_url": "/",
   "display": "standalone",

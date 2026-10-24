@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-// VetCare Service Worker
+// waytovet Service Worker
 // Provides offline caching, background sync, and push notification support
 
 const CACHE_NAME = 'vetcare-v2';
@@ -166,7 +166,7 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data.json();
   } catch {
-    data = { title: 'VetCare', body: event.data.text() };
+    data = { title: 'waytovet', body: event.data.text() };
   }
 
   const options = {
@@ -182,7 +182,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'VetCare', options)
+    self.registration.showNotification(data.title || 'waytovet', options)
   );
 });
 

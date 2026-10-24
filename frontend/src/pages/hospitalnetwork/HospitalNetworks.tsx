@@ -758,7 +758,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
           {!selectedUser && (
             <p className="si-513c70eb">⚠️ Required: Search and select a user above to enable adding</p>
           )}
-          <p className="si-2c2a1863">* Required field. User must already have a VetCare account.</p>
+          <p className="si-2c2a1863">* Required field. User must already have a waytovet account.</p>
         </div>
 
         <div className="hn-modal-actions si-70412b08">

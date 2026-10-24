@@ -393,7 +393,7 @@ const Animals: React.FC = () => {
   </style>
 </head>
 <body>
-  <h1>&#x1F43E; VetCare Health Passport</h1>
+  <h1>&#x1F43E; waytovet Health Passport</h1>
   <p style="color:#666; margin:0;">Generated on ${new Date().toLocaleDateString()}</p>
   <h2>Animal Information</h2>
   <div class="info-grid">

@@ -2,7 +2,7 @@
   "name": "vetcare-platform",
   "version": "1.0.0",
   "private": true,
-  "description": "VetCare - Online Veterinary Doctor Consultation Platform",
+  "description": "waytovet - Online Veterinary Doctor Consultation Platform",
   "scripts": {
     "install:all": "cd frontend && npm install && cd ../backend && npm install",
     "build:frontend": "cd frontend && npm install && npm run build",
