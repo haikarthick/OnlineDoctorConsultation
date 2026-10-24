@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>waytovet - Logo Preview</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #f5f7fa; color: #1f2540;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .lead { color: #6b7280; margin: 0 0 28px; font-size: 13px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; margin: 32px 0 12px; }
+  .row { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+  .tile {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 18px 22px; border-radius: 14px; background: #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06); min-height: 80px;
+  }
+  .tile.darknav { background: linear-gradient(135deg,#1e2a4a 0%,#1a2744 100%); }
+  .tile.darklogin { background: linear-gradient(180deg,#0f172a 0%,#1e293b 40%,#334155 100%); }
+  .tile.white { background: #fff; }
+  .tile.tint { background: linear-gradient(135deg,#f0f4ff 0%,#f5f0ff 100%); }
+  .label { font-size: 11px; color: #9ca3af; margin-top: 6px; }
+  .stack { display: flex; flex-direction: column; align-items: center; }
+  .ico { border-radius: 16px; display:block; }
+  .wordmark {
+    font-weight: 800; letter-spacing: -0.04em; line-height: 1;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wordmark .to { color: #667eea; }
+  .logo-wrap { display:inline-flex; align-items:center; gap:0.28em; }
+  .logo-wrap.onDark .wordmark { color:#fff; }
+  .logo-wrap.onDark .wordmark .to { color:#c4b5fd; }
+  .note { font-size:12px; color:#6b7280; margin-top:24px; line-height:1.6; border-left:3px solid #667eea; padding-left:12px; }
+</style>
+</head>
+<body>
+<h1>waytovet - Logo Preview</h1>
+<p class="lead">Review the mark against every real surface before rollout. Colours: #667eea &rarr; #764ba2 badge, #fbbf24 path accent (all from the existing UI palette).</p>
+
+<h2>Full lockup - desktop nav (dark header)</h2>
+<div class="row">
+  <div class="tile darknav">
+    <span class="logo-wrap onDark">
+      <svg class="ico" width="34" height="34" viewBox="0 0 64 64"><use href="#mark"/></svg>
+      <span class="wordmark" style="font-size:21px;">way<span class="to">to</span>vet</span>
+    </span>
+  </div>
+  <div class="tile white">
+    <span class="logo-wrap">
+      <svg class="ico" width="34" height="34" viewBox="0 0 64 64"><use href="#mark"/></svg>
+      <span class="wordmark" style="font-size:21px;">way<span class="to">to</span>vet</span>
+    </span>
+  </div>
+  <div class="tile darklogin">
+    <span class="logo-wrap onDark">
+      <svg class="ico" width="40" height="40" viewBox="0 0 64 64"><use href="#mark"/></svg>
+      <span class="wordmark" style="font-size:24px;">way<span class="to">to</span>vet</span>
+    </span>
+  </div>
+</div>
+
+<h2>Mark only - collapsed sidebar rail, favicon, app icon</h2>
+<div class="row">
+  <div class="tile white stack"><svg class="ico" width="44" height="44" viewBox="0 0 64 64"><use href="#mark"/></svg><span class="label">44px</span></div>
+  <div class="tile darknav stack"><svg class="ico" width="44" height="44" viewBox="0 0 64 64"><use href="#mark"/></svg><span class="label">on dark</span></div>
+  <div class="tile white stack"><svg class="ico" width="28" height="28" viewBox="0 0 64 64"><use href="#mark"/></svg><span class="label">28px</span></div>
+  <div class="tile white stack"><svg class="ico" width="16" height="16" viewBox="0 0 64 64"><use href="#mark"/></svg><span class="label">16px favicon</span></div>
+  <div class="tile tint stack"><svg class="ico" width="96" height="96" viewBox="0 0 64 64"><use href="#mark"/></svg><span class="label">96px hero</span></div>
+</div>
+
+<h2>Scale ladder - mobile &rarr; tablet &rarr; desktop</h2>
+<div class="row">
+  <div class="tile white stack"><span class="logo-wrap" style="gap:7px;"><svg width="22" height="22" viewBox="0 0 64 64"><use href="#mark"/></svg><span class="wordmark" style="font-size:14px;">way<span class="to">to</span>vet</span></span><span class="label">mobile 22px</span></div>
+  <div class="tile white stack"><span class="logo-wrap" style="gap:9px;"><svg width="30" height="30" viewBox="0 0 64 64"><use href="#mark"/></svg><span class="wordmark" style="font-size:19px;">way<span class="to">to</span>vet</span></span><span class="label">tablet 30px</span></div>
+  <div class="tile white stack"><span class="logo-wrap" style="gap:11px;"><svg width="36" height="36" viewBox="0 0 64 64"><use href="#mark"/></svg><span class="wordmark" style="font-size:22px;">way<span class="to">to</span>vet</span></span><span class="label">desktop 36px</span></div>
+</div>
+
+<p class="note">
+  <strong>Concept:</strong> "way to vet" = a path leading to care. The four toe pads are stepping stones along a route; the golden dashed curve is the "way" climbing into the main pad - the destination - topped with a glowing dot. It reads as a paw at a glance (instantly veterinary) while telling the "way to vet" story. Gradient badge matches the site's primary #667eea&rarr;#764ba2 so it drops into the existing layout seamlessly.
+</p>
+
+<!-- Shared SVG symbol so the preview is a faithful copy of the component geometry -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#667eea"/><stop offset="100%" stop-color="#764ba2"/></linearGradient>
+  <linearGradient id="pad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#e5e9ff"/></linearGradient>
+  <linearGradient id="path" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#fcd34d"/></linearGradient>
+  <g id="mark">
+    <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bg)"/>
+    <g fill="url(#pad)">
+      <ellipse cx="20" cy="22" rx="5.4" ry="6.4" transform="rotate(-18 20 22)"/>
+      <ellipse cx="30" cy="17.5" rx="5" ry="6.2" transform="rotate(-4 30 17.5)"/>
+      <ellipse cx="41" cy="18.5" rx="5" ry="6.2" transform="rotate(8 41 18.5)"/>
+      <ellipse cx="49.5" cy="25" rx="5.2" ry="6.2" transform="rotate(22 49.5 25)"/>
+    </g>
+    <path d="M32 30c7.4 0 13 5.4 13 12.2 0 6.6-5.6 10.8-13 10.8s-13-4.2-13-10.8C19 35.4 24.6 30 32 30z" fill="url(#pad)"/>
+    <path d="M22 51c3.5-3 4.2-8 7.2-10.4 2.6-2.1 5.6-1.6 7.8.4" fill="none" stroke="url(#path)" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0.5 4.6" opacity="0.95"/>
+    <circle cx="38" cy="41" r="3.1" fill="#fbbf24"/>
+    <circle cx="38" cy="41" r="1.3" fill="#7c3aed"/>
+  </g>
+</defs></svg>
+</body>
+</html>

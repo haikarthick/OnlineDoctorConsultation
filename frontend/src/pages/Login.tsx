@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import PasswordInput from '../components/PasswordInput'
+import { WayToVetLogo } from '../components/WayToVetLogo'
 import './Auth.css'
 
 interface LoginProps {
@@ -90,8 +91,10 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
         {/* Left brand panel */}
         <div className="login-brand">
           <div className="login-brand-inner">
-            <div className="login-logo">🏥</div>
-            <h2>VetCare</h2>
+            <div className="login-logo">
+              <WayToVetLogo size={64} variant="mark" title="waytovet" />
+            </div>
+            <h2>waytovet</h2>
             <p className="login-tagline">{t('login.welcome')}</p>
             <div className="login-features">
               <div className="login-feat"><span className="login-feat-check">✓</span><span>{t('login.features.consultations')}</span></div>

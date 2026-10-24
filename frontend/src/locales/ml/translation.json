@@ -44,7 +44,7 @@
     "male": "ആൺ",
     "female": "പെൺ",
     "loadingPage": "ലോഡ് ചെയ്യുന്നു…",
-    "brand": "VetCare",
+    "brand": "waytovet",
     "enterprise": "എന്റർപ്രൈസ്",
     "trustBadge": "ലോകമെമ്പാടുമുള്ള 3,000+ എന്റർപ്രൈസുകൾ വിശ്വസിക്കുന്നു",
     "species": {
@@ -109,7 +109,7 @@
     "hidePassword": "പാസ്‌വേഡ് മറയ്ക്കുക"
   },
   "nav": {
-    "brand": "VetCare",
+    "brand": "waytovet",
     "dashboard": "ഡാഷ്‌ബോർഡ്",
     "consultations": "കൺസൾട്ടേഷനുകൾ",
     "findDoctor": "ഡോക്ടറെ കണ്ടെത്തുക",
@@ -830,9 +830,9 @@
       "compliance": "അനുപാലനം",
       "contact": "ഞങ്ങളെ ബന്ധപ്പെടുക",
       "signIn": "ലോഗിൻ ചെയ്യുക",
-      "brand": "VetCare Enterprise",
+      "brand": "waytovet Enterprise",
       "hipaa": "HIPAA-അനുസൃതം",
-      "copyright": "© 2026 VetCare. എല്ലാ അവകാശങ്ങളും സംരക്ഷിതം."
+      "copyright": "© 2026 waytovet. എല്ലാ അവകാശങ്ങളും സംരക്ഷിതം."
     },
     "howItWorks": {
       "petOwners": "വളർത്തുമൃഗ ഉടമകൾക്ക്",
@@ -6723,15 +6723,12 @@
     "overdueLabel": "Overdue Doses",
     "dueSoon": "Due Soon (30d)",
     "tabs": {
-      "passport": "My Passports",
-      "compliance": "Compliance Summary",
-      "history": "Certificate History"
+      "group": "കൂട്ടങ്ങൾ"
     },
     "noAnimals": "No animals found. Add animals to see their vaccination passports.",
     "noProtocols": "No vaccine protocols assigned to this animal yet.",
     "noData": "No compliance data available.",
     "noCertLogs": "No certificates have been generated yet.",
-    "tabs": { "group": "കൂട്ടങ്ങൾ" },
     "enterprise": "സ്ഥാപനം",
     "group": "കൂട്ടം",
     "select": "തിരഞ്ഞെടുക്കുക",
@@ -7056,10 +7053,10 @@
     "failedToCreate": "Failed to create certificate",
     "failedToLoadEnterprises": "എന്റർപ്രൈസ് ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
     "noCertTypeSelected": "Please select a certificate type",
-      "selectGroup": "മൃഗ കൂട്ടം തിരഞ്ഞെടുക്കുക",
-      "noGroups": "ഈ സ്ഥാപനത്തിന് മൃഗ കൂട്ടങ്ങളൊന്നും കണ്ടെത്തിയില്ല. ആദ്യം ഹെർഡ്സ് & ഗ്രൂപ്പ്‌സിൽ കൂട്ടം ചേർക്കുക.",
-      "groupLinked": "കൂട്ടം ലിങ്ക് ചെയ്തു: {{name}}",
-      "reviewGroup": "സർട്ടിഫിക്കറ്റ് കൂട്ടം",
+    "selectGroup": "മൃഗ കൂട്ടം തിരഞ്ഞെടുക്കുക",
+    "noGroups": "ഈ സ്ഥാപനത്തിന് മൃഗ കൂട്ടങ്ങളൊന്നും കണ്ടെത്തിയില്ല. ആദ്യം ഹെർഡ്സ് & ഗ്രൂപ്പ്‌സിൽ കൂട്ടം ചേർക്കുക.",
+    "groupLinked": "കൂട്ടം ലിങ്ക് ചെയ്തു: {{name}}",
+    "reviewGroup": "സർട്ടിഫിക്കറ്റ് കൂട്ടം",
     "viewAllCertificates": "View All Certificates",
     "createAnother": "Create Another",
     "reviewCertType": "Certificate Type",

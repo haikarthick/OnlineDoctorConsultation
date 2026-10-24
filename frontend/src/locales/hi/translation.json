@@ -44,7 +44,7 @@
     "male": "नर",
     "female": "मादा",
     "loadingPage": "लोड हो रहा है…",
-    "brand": "VetCare",
+    "brand": "waytovet",
     "enterprise": "एंटरप्राइज़",
     "trustBadge": "दुनिया भर में 3,000+ उद्यमों द्वारा विश्वसनीय",
     "myAnimals": "My Animals",
@@ -109,7 +109,7 @@
     "hidePassword": "पासवर्ड छिपाएँ"
   },
   "nav": {
-    "brand": "VetCare",
+    "brand": "waytovet",
     "dashboard": "डैशबोर्ड",
     "consultations": "परामर्श",
     "findDoctor": "डॉक्टर खोजें",
@@ -830,9 +830,9 @@
       "compliance": "अनुपालन",
       "contact": "संपर्क करें",
       "signIn": "साइन इन करें",
-      "brand": "VetCare एंटरप्राइज़",
+      "brand": "waytovet एंटरप्राइज़",
       "hipaa": "HIPAA-अनुरूप",
-      "copyright": "© 2026 VetCare। सर्वाधिकार सुरक्षित।"
+      "copyright": "© 2026 waytovet। सर्वाधिकार सुरक्षित।"
     },
     "howItWorks": {
       "petOwners": "पालतू मालिकों के लिए",
@@ -5967,15 +5967,12 @@
     "overdueLabel": "लंबित खुराकें",
     "dueSoon": "जल्द देय (30 दिन)",
     "tabs": {
-      "passport": "मेरे पासपोर्ट",
-      "compliance": "अनुपालन सारांश",
-      "history": "प्रमाण पत्र इतिहास"
+      "group": "समूह"
     },
     "noAnimals": "कोई पशु नहीं मिला।",
     "noProtocols": "इस पशु के लिए कोई वैक्सीन प्रोटोकॉल नहीं।",
     "noData": "कोई अनुपालन डेटा उपलब्ध नहीं।",
     "noCertLogs": "अभी तक कोई प्रमाण पत्र नहीं बनाया गया।",
-    "tabs": { "group": "समूह" },
     "enterprise": "उद्यम",
     "group": "समूह",
     "select": "चुनें",
@@ -6299,10 +6296,10 @@
     "failedToCreate": "प्रमाणपत्र बनाने में विफल",
     "failedToLoadEnterprises": "एंटरप्राइज़ सूची लोड करने में विफल",
     "noCertTypeSelected": "कृपया प्रमाणपत्र प्रकार चुनें",
-      "selectGroup": "पशु समूह चुनें",
-      "noGroups": "इस उद्यम के लिए कोई पशु समूह नहीं मिला। पहले हर्ड्स एवं ग्रुप्स में झुंड/समूह जोड़ें।",
-      "groupLinked": "समूह लिंक किया गया: {{name}}",
-      "reviewGroup": "प्रमाणपत्र समूह",
+    "selectGroup": "पशु समूह चुनें",
+    "noGroups": "इस उद्यम के लिए कोई पशु समूह नहीं मिला। पहले हर्ड्स एवं ग्रुप्स में झुंड/समूह जोड़ें।",
+    "groupLinked": "समूह लिंक किया गया: {{name}}",
+    "reviewGroup": "प्रमाणपत्र समूह",
     "viewAllCertificates": "सभी प्रमाणपत्र देखें",
     "createAnother": "अन्य बनाएं",
     "reviewCertType": "प्रमाणपत्र प्रकार",

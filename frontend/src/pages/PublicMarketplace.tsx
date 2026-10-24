@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing } from '../types'
 import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
 import { useMasterData } from '../context/MasterDataContext'
+import { WayToVetLogo } from '../components/WayToVetLogo'
 import './Marketplace.css'
 import './PublicMarketplace.css'
 
@@ -125,7 +126,7 @@ const PublicMarketplace: React.FC = () => {
         <button className="pub-mp-topnav-back" onClick={() => navigate(-1)}>
           ← {t('common.back')}
         </button>
-        <span className="pub-mp-topnav-logo">🐾 VetCare</span>
+        <span className="pub-mp-topnav-logo"><WayToVetLogo size={22} variant="full" title={t('common.brand')} /></span>
         {isAuthenticated && (
           <button className="pub-mp-topnav-cta" onClick={() => navigate('/marketplace')}>
             {t('publicMarketplace.goToFullMarketplace')}

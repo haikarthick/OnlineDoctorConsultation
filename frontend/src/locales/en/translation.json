@@ -50,7 +50,7 @@
     "male": "Male",
     "female": "Female",
     "loadingPage": "Loading…",
-    "brand": "VetCare",
+    "brand": "waytovet",
     "enterprise": "ENTERPRISE",
     "trustBadge": "Trusted by 3,000+ enterprises worldwide",
     "booking": "Booking",
@@ -109,7 +109,7 @@
     "hidePassword": "Hide password"
   },
   "nav": {
-    "brand": "VetCare",
+    "brand": "waytovet",
     "dashboard": "Dashboard",
     "consultations": "Consultations",
     "findDoctor": "Find Doctor",
@@ -830,9 +830,9 @@
       "compliance": "Compliance",
       "contact": "Contact Us",
       "signIn": "Sign In",
-      "brand": "VetCare Enterprise",
+      "brand": "waytovet Enterprise",
       "hipaa": "HIPAA-Aligned",
-      "copyright": "© 2026 VetCare. All rights reserved."
+      "copyright": "© 2026 waytovet. All rights reserved."
     },
     "howItWorks": {
       "petOwners": "For Pet Owners",
@@ -5962,15 +5962,12 @@
     "overdueLabel": "Overdue Doses",
     "dueSoon": "Due Soon (30d)",
     "tabs": {
-      "passport": "My Passports",
-      "compliance": "Compliance Summary",
-      "history": "Certificate History"
+      "group": "Groups"
     },
     "noAnimals": "No animals found. Add animals to see their vaccination passports.",
     "noProtocols": "No vaccine protocols assigned to this animal yet.",
     "noData": "No compliance data available.",
     "noCertLogs": "No certificates have been generated yet.",
-    "tabs": { "group": "Groups" },
     "enterprise": "Enterprise",
     "group": "Group",
     "select": "Select",
@@ -6295,10 +6292,10 @@
     "failedToCreate": "Failed to create certificate",
     "failedToLoadEnterprises": "Failed to load enterprises list",
     "noCertTypeSelected": "Please select a certificate type",
-      "selectGroup": "Select Animal Group",
-      "noGroups": "No animal groups found for this enterprise. Add a herd or flock group in Herds & Groups first.",
-      "groupLinked": "Group linked: {{name}}",
-      "reviewGroup": "Certificate Group",
+    "selectGroup": "Select Animal Group",
+    "noGroups": "No animal groups found for this enterprise. Add a herd or flock group in Herds & Groups first.",
+    "groupLinked": "Group linked: {{name}}",
+    "reviewGroup": "Certificate Group",
     "viewAllCertificates": "View All Certificates",
     "createAnother": "Create Another",
     "reviewCertType": "Certificate Type",

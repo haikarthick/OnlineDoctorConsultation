@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#667eea"/>
+      <stop offset="100%" stop-color="#764ba2"/>
+    </linearGradient>
+    <linearGradient id="pad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e5e9ff"/>
+    </linearGradient>
+    <linearGradient id="path" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#fcd34d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded-square brand badge (site primary gradient) -->
+  <rect x="16" y="16" width="480" height="480" rx="128" fill="url(#bg)"/>
+
+  <!-- Four toe pads arranged as stepping stones along the route (scaled 8x from 64 grid) -->
+  <g fill="url(#pad)">
+    <ellipse cx="160" cy="176" rx="43.2" ry="51.2" transform="rotate(-18 160 176)"/>
+    <ellipse cx="240" cy="140" rx="40" ry="49.6" transform="rotate(-4 240 140)"/>
+    <ellipse cx="328" cy="148" rx="40" ry="49.6" transform="rotate(8 328 148)"/>
+    <ellipse cx="396" cy="200" rx="41.6" ry="49.6" transform="rotate(22 396 200)"/>
+  </g>
+
+  <!-- Main pad - the destination landing point -->
+  <path d="M256 240c59.2 0 104 43.2 104 97.6 0 52.8-44.8 86.4-104 86.4s-104-33.6-104-86.4C152 283.2 196.8 240 256 240z" fill="url(#pad)"/>
+
+  <!-- The "way" - a luminous curving path climbing toward the pad -->
+  <path d="M176 408c28-24 33.6-64 57.6-83.2 20.8-16.8 44.8-12.8 62.4 3.2"
+        fill="none" stroke="url(#path)" stroke-width="19.2" stroke-linecap="round"
+        stroke-dasharray="4 36.8" opacity="0.95"/>
+  <!-- Destination dot where the path meets the pad -->
+  <circle cx="304" cy="328" r="24.8" fill="#fbbf24"/>
+  <circle cx="304" cy="328" r="10.4" fill="#7c3aed"/>
+</svg>
