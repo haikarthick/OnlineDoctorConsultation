@@ -7309,3 +7309,48 @@
 </details>
 
 ---
+
+## 2026-08-07 12:08 · `51a9a68` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-10-24 03:46 · `6ccc848` · OTHER
+
+**Commit:** feat(brand): rebrand VetCare to waytovet with new SVG logo mark  
+**Author:** haikarthick  
+**Categories:** UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (14)</summary>
+
+  - frontend/public/icons/waytovet-icon.svg
+  - frontend/public/logo-preview.html
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/components/WayToVetLogo.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Home.tsx
+  - frontend/src/pages/Login.tsx
+  - frontend/src/pages/PublicMarketplace.tsx
+  - frontend/src/pages/Register.tsx
+
+</details>
+
+---
