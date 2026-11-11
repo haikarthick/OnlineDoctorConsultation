@@ -90,11 +90,11 @@ interface Props {
 }
 
 const DEFAULT_TEMPLATE: CertificateTemplate = {
-  clinicName: 'VetCare Platform',
+  clinicName: 'waytovet Platform',
   clinicAddress: '123 Veterinary Avenue, Chennai, Tamil Nadu 600001, India',
   clinicPhone: '+91 44 1234 5678',
-  clinicEmail: 'care@vetcareplatform.com',
-  clinicWebsite: 'www.vetcareplatform.com',
+  clinicEmail: 'care@waytovet.com',
+  clinicWebsite: 'www.waytovet.com',
   registrationNumber: 'VET-REG-2024-001',
   clinicLogo: '',
   footerText:

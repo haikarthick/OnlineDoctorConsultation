@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
 import PasswordInput from '../components/PasswordInput'
+import { WayToVetLogo } from '../components/WayToVetLogo'
 import './Auth.css'
 
 interface RegisterProps {
@@ -189,8 +190,10 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
         {/* Left: Branding strip */}
         <div className="register-brand">
           <div className="register-brand-inner">
-            <div className="register-logo">🏥</div>
-            <h2>VetCare</h2>
+            <div className="register-logo">
+              <WayToVetLogo size={56} variant="mark" title="waytovet" />
+            </div>
+            <h2>waytovet</h2>
             <p className="register-tagline">{t('register.tagline')}</p>
             <div className="register-features">
               <div className="register-feat"><span className="register-feat-icon">🩺</span><div><strong>{t('register.features.expertCare')}</strong><span>{t('register.features.expertCareDesc')}</span></div></div>

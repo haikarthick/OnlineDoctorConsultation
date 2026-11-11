@@ -505,6 +505,12 @@ router.get('/prescriptions/patients', authMiddleware, roleMiddleware(['admin', '
 }));
 router.get('/prescriptions/me', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listMyPrescriptions(req, res)));
 router.get('/prescriptions/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'prescriptions'), asyncHandler((req: Request, res: Response) => PrescriptionController.listByAnimal(req, res)));
+// Group-subject (batch herd/flock) prescriptions. Gated by ensureGroupAccess() so a :groupId
+// here can't be a cross-tenant read - the caller must own/member the enterprise that owns the group.
+router.get('/prescriptions/group/:groupId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
+  await PrescriptionController.listByGroup(req, res);
+}));
 router.get('/prescriptions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.getPrescription(req, res)));
 router.get('/prescriptions/consultation/:consultationId', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listByConsultation(req, res)));
 router.put('/prescriptions/:id/deactivate', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.deactivatePrescription(req, res)));
@@ -2397,8 +2403,8 @@ router.post('/admin/settings/test-email', authMiddleware, roleMiddleware(['admin
   try {
     const result = await emailService.send({
       to,
-      subject: 'VetCare - Test Email',
-      html: `<div style="font-family:Arial,sans-serif;padding:24px"><h2>✅ Email is working!</h2><p>This is a test email from VetCare admin panel.</p><p>Sent at: ${new Date().toISOString()}</p><p>Dev redirect: ${devRedirect || 'off'}</p></div>`,
+      subject: 'waytovet - Test Email',
+      html: `<div style="font-family:Arial,sans-serif;padding:24px"><h2>✅ Email is working!</h2><p>This is a test email from waytovet admin panel.</p><p>Sent at: ${new Date().toISOString()}</p><p>Dev redirect: ${devRedirect || 'off'}</p></div>`,
       text: `Email is working! Sent at: ${new Date().toISOString()}`,
     });
     const mode = result.mode || emailService.getMode();
@@ -3487,6 +3493,27 @@ router.get('/vaccination-passport/compliance-summary', authMiddleware, asyncHand
     species: species || undefined,
   });
   res.json({ success: true, data });
+}));
+
+// Group vaccination passport - the passport for a batch herd/flock is the group's, not a bird's.
+// Farmers/vets/admins may view any group they can see; pet owners are blocked (groups are farm assets).
+router.get('/vaccination-passport/group/:groupId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  if (authReq.userRole === 'pet_owner') {
+    return res.status(403).json({ success: false, message: 'Access denied' });
+  }
+  if (authReq.userRole !== 'admin' && authReq.userRole !== 'veterinarian') {
+    // farmer: only their own enterprise's group
+    const { rows } = await database.query(
+      `SELECT 1 FROM animal_groups ag
+         JOIN enterprises e ON e.id = ag.enterprise_id
+        WHERE ag.id = $1 AND e.owner_id = $2`,
+      [req.params.groupId, authReq.userId]
+    );
+    if (!rows[0]) return res.status(403).json({ success: false, message: 'Access denied' });
+  }
+  const passport = await VaccineProtocolService.getGroupVaccinationPassport(req.params.groupId);
+  res.json({ success: true, data: passport });
 }));
 
 // ─── Certificate log routes ───────────────────────────────────

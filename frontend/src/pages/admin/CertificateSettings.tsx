@@ -23,7 +23,7 @@ const FIELDS: SettingField[] = [
     key: 'cert.clinicName',
     label: 'certificateSettings.clinicName',
     description: 'certificateSettings.clinicNameDesc',
-    placeholder: 'e.g. VetCare Clinic',
+    placeholder: 'e.g. waytovet Clinic',
     type: 'text',
   },
   {
@@ -52,7 +52,7 @@ const FIELDS: SettingField[] = [
     key: 'cert.clinicWebsite',
     label: 'certificateSettings.clinicWebsite',
     description: 'certificateSettings.clinicWebsiteDesc',
-    placeholder: 'e.g. www.vetcareplatform.com',
+    placeholder: 'e.g. www.waytovet.com',
     type: 'url',
   },
   {
@@ -360,7 +360,7 @@ const CertificateSettings: React.FC<CertificateSettingsProps> = ({ onNavigate })
                 )}
                 <div className="si-6acd75e8">
                   <div className="si-71a6f790">
-                    {values['cert.clinicName'] || 'VetCare Platform'}
+                    {values['cert.clinicName'] || 'waytovet Platform'}
                   </div>
                   <div className="si-2992a603">
                     {values['cert.clinicPhone'] && <span>📞 {values['cert.clinicPhone']}</span>}

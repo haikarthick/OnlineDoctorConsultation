@@ -21,7 +21,7 @@ const FIELDS: SettingField[] = [
     key: 'prescription.clinicName',
     label: 'prescriptionSettings.clinicName',
     description: 'prescriptionSettings.clinicNameDesc',
-    placeholder: 'e.g. VetCare Clinic',
+    placeholder: 'e.g. waytovet Clinic',
     type: 'text',
   },
   {
@@ -57,7 +57,7 @@ const FIELDS: SettingField[] = [
     key: 'prescription.clinicWebsite',
     label: 'prescriptionSettings.clinicWebsite',
     description: 'prescriptionSettings.clinicWebsiteDesc',
-    placeholder: 'e.g. www.vetcareplatform.com',
+    placeholder: 'e.g. www.waytovet.com',
     type: 'url',
   },
   {
@@ -199,7 +199,7 @@ const PrescriptionSettings: React.FC<PrescriptionSettingsProps> = ({ onNavigate 
 
   const logoValue = values['prescription.clinicLogo'] || ''
   const previewTemplate = {
-    clinicName: values['prescription.clinicName'] || 'VetCare Platform',
+    clinicName: values['prescription.clinicName'] || 'waytovet Platform',
     clinicTagline: values['prescription.clinicTagline'] || '',
     clinicAddress: values['prescription.clinicAddress'] || '',
     clinicPhone: values['prescription.clinicPhone'] || '',

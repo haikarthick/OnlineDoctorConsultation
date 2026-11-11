@@ -64,7 +64,7 @@ async function runGroomingGatewayFlow(
       amount: payload.amountPaise,
       currency: payload.currency || 'INR',
       order_id: payload.orderId,
-      name: 'VetCare Grooming',
+      name: 'waytovet Grooming',
       description,
       handler: async (r: any) => {
         try {

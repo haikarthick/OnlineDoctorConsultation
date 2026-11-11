@@ -28,6 +28,18 @@ interface AnimalOption {
   ownerName?: string
 }
 
+interface GroupHistoryItem {
+  source: 'own' | 'group'
+  id: string
+  recordType: string
+  title: string
+  content: string | null
+  eventDate: string
+  groupId: string | null
+  groupName: string | null
+  headCountTreated: number | null
+}
+
 // ─── Event type config ──────────────────────────────────────
 const EVENT_TYPES: Record<string, { label: string; icon: string; color: string; bg: string; navPath?: string }> = {
   vaccination:        { label: 'Vaccination',      icon: '💉', color: '#4caf50', bg: '#e8f5e9', navPath: '/medical-records' },
@@ -104,6 +116,11 @@ const AnimalTimeline: React.FC = () => {
   const [selectedAnimalId, setSelectedAnimalId] = useState('')
   const [events, setEvents]                 = useState<TimelineEvent[]>([])
   const [loading, setLoading]               = useState(false)
+
+  // Batch group history rolled up from getAnimalLifetimeHistory - the group events (treatments/
+  // vaccinations) that applied to this animal while it was a member of a batch herd/flock.
+  const [groupHistory, setGroupHistory]     = useState<GroupHistoryItem[]>([])
+  const [groupHistoryLoading, setGroupHistoryLoading] = useState(false)
   const [animalsLoading, setAnimalsLoading] = useState(true)
 
   const [searchQuery, setSearchQuery]       = useState('')
@@ -163,6 +180,19 @@ const AnimalTimeline: React.FC = () => {
   }, [selectedAnimalId, dateFrom, dateTo])
 
   useEffect(() => { loadTimeline() }, [loadTimeline])
+
+  // Load rolled-up batch group history (group treatments/vaccinations that applied during membership)
+  useEffect(() => {
+    let isCancelled = false
+    if (!selectedAnimalId) { setGroupHistory([]); return }
+    setGroupHistoryLoading(true)
+    apiService.getAnimalLifetimeHistory(selectedAnimalId).then(res => {
+      if (isCancelled) return
+      const items = (res.data || (Array.isArray(res) ? res : [])) as GroupHistoryItem[]
+      setGroupHistory(items.filter((e: GroupHistoryItem) => e.source === 'group' && e.groupId))
+    }).catch(() => { if (!isCancelled) setGroupHistory([]) }).finally(() => { if (!isCancelled) setGroupHistoryLoading(false) })
+    return () => { isCancelled = true }
+  }, [selectedAnimalId])
 
   // ── Filtered events ──
   const filteredEvents = useMemo(() => {
@@ -569,6 +599,38 @@ const AnimalTimeline: React.FC = () => {
               <span className="tl-stat-lbl">{s.label}</span>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Batch group context - group treatments/vaccinations that applied during membership */}
+      {selectedAnimalId && (
+        <div className="tl-group-panel">
+          <div className="tl-group-panel-header">
+            <span className="tl-group-panel-title">🐄 {t('timeline.groupHistoryTitle', 'Batch Group History')}</span>
+            <span className="tl-group-panel-sub">{t('timeline.groupHistorySub', 'Group herd/flock events that applied to this animal')}</span>
+          </div>
+          {groupHistoryLoading ? (
+            <div className="tl-loading"><div className="tl-spinner" /><p>{t('timeline.loadingTimeline')}</p></div>
+          ) : groupHistory.length === 0 ? (
+            <div className="tl-group-empty">{t('timeline.noGroupHistory', 'No batch group events applied to this animal yet.')}</div>
+          ) : (
+            <div className="tl-group-list">
+              {groupHistory.map((ev, i) => (
+                <div className="tl-group-item" key={`${ev.id}-${i}`}>
+                  <span className="tl-group-item-icon">🐄</span>
+                  <div className="tl-group-item-body">
+                    <div className="tl-group-item-title">{ev.title || ev.recordType}</div>
+                    <div className="tl-group-item-meta">
+                      {ev.groupName ? <span className="tl-group-chip">🌾 {ev.groupName}</span> : null}
+                      {ev.headCountTreated != null && <span>· {ev.headCountTreated} {t('timeline.headTreated', 'head treated')}</span>}
+                      <span>· {ev.eventDate ? formatEventDate(ev.eventDate) : ''}</span>
+                    </div>
+                    {ev.content && <div className="tl-group-item-content">{ev.content}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

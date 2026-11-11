@@ -53,9 +53,9 @@ class AdminController {
       const EmailService = (await import('../services/EmailService')).default;
       await EmailService.send({
         to: user.email,
-        subject: 'Your VetCare registration has been approved',
+        subject: 'Your waytovet registration has been approved',
         html: `<div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
-          <h2 style="color:#1e3a5f;">Welcome to VetCare!</h2>
+          <h2 style="color:#1e3a5f;">Welcome to waytovet!</h2>
           <p>Dear ${user.firstName},</p>
           <p>We are pleased to inform you that your registration as a <strong>${user.role.replace('_', ' ')}</strong> has been reviewed and approved by our platform team.</p>
           <p>You may now log in and access the platform.</p>
@@ -79,11 +79,11 @@ class AdminController {
       const EmailService = (await import('../services/EmailService')).default;
       await EmailService.send({
         to: user.email,
-        subject: 'Update regarding your VetCare registration',
+        subject: 'Update regarding your waytovet registration',
         html: `<div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
           <h2 style="color:#1e3a5f;">Registration Update</h2>
           <p>Dear ${user.firstName},</p>
-          <p>Thank you for your interest in joining VetCare. After reviewing your registration, we are unable to approve your account at this time.</p>
+          <p>Thank you for your interest in joining waytovet. After reviewing your registration, we are unable to approve your account at this time.</p>
           ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
           <p>If you believe this decision was made in error or wish to provide additional information, please contact us at support@vetcare.com.</p>
         </div>`,
@@ -105,7 +105,7 @@ class AdminController {
       const EmailService = (await import('../services/EmailService')).default;
       await EmailService.send({
         to: user.email,
-        subject: 'Important notice regarding your VetCare account',
+        subject: 'Important notice regarding your waytovet account',
         html: `<div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
           <h2 style="color:#1e3a5f;">Account Notice</h2>
           <p>Dear ${user.firstName},</p>
@@ -130,7 +130,7 @@ class AdminController {
       const EmailService = (await import('../services/EmailService')).default;
       await EmailService.send({
         to: user.email,
-        subject: 'Your VetCare account has been restored',
+        subject: 'Your waytovet account has been restored',
         html: `<div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
           <h2 style="color:#1e3a5f;">Account Restored</h2>
           <p>Dear ${user.firstName},</p>

@@ -185,13 +185,13 @@ const VetHospitalProfile: React.FC = () => {
             <div className="trust-header">
               <h3 className="si-44087c4b">🛡 Trust & Verification</h3>
               {hospital.isVerified
-                ? <span className="trust-verified-badge">✓ VetCare Verified</span>
+                ? <span className="trust-verified-badge">✓ waytovet Verified</span>
                 : <span className="trust-pending-badge">⏳ Verification Pending</span>}
             </div>
             {hospital.isVerified ? (
               <>
                 <p className="trust-desc">
-                  This hospital has been independently verified by VetCare. All compliance documents
+                  This hospital has been independently verified by waytovet. All compliance documents
                   have been reviewed and approved by our team - so you can be confident this is a
                   legitimate, licensed facility.
                 </p>
@@ -204,12 +204,12 @@ const VetHospitalProfile: React.FC = () => {
                   ))}
                 </div>
                 <div className="trust-footer">
-                  Last verified by VetCare admin team
+                  Last verified by waytovet admin team
                 </div>
               </>
             ) : (
               <p className="trust-desc pending">
-                This hospital's compliance documents are currently being reviewed by the VetCare team.
+                This hospital's compliance documents are currently being reviewed by the waytovet team.
                 Verification is typically completed within 2-3 business days.
               </p>
             )}

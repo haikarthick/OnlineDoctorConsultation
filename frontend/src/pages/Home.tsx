@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supportedLanguages } from '../i18n'
 import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
+import { WayToVetLogo } from '../components/WayToVetLogo'
 import './Home.css'
 
 interface HomeProps {
@@ -166,8 +167,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       <nav className={`home-nav${navScrolled ? ' home-nav--scrolled' : ''}`}>
         <div className="home-nav-inner">
           <div className="home-nav-brand si-3c1f81b9" onClick={scrollToTop}>
-            <span className="home-nav-logo">🏥</span>
-            <span className="home-nav-title">{t('common.brand')}</span>
+            <WayToVetLogo size={30} variant="full" onDark title={t('common.brand')} />
             <span className="home-nav-badge">{t('common.enterprise')}</span>
           </div>
           <div className="home-nav-center" ref={sectionsDropRef}>
@@ -368,7 +368,9 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
                 <small>{t('home.heroCard3Sub')}</small>
               </div>
             </div>
-            <div className="hero-icon-large">🏥</div>
+            <div className="hero-icon-large">
+              <WayToVetLogo size={140} variant="mark" title={t('common.brand')} />
+            </div>
             <div className="hero-badge">{t('home.heroBadge')}</div>
           </div>
         </div>
@@ -797,7 +799,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       <footer className="home-footer" id="footer">
         <div className="footer-content">
           <div className="footer-brand">
-            <span>🏥</span> <strong>{t('home.footer.brand')}</strong>
+            <WayToVetLogo size={26} variant="full" onDark title={t('home.footer.brand')} />
             <span className="si-3a41c16c">{t('home.footer.hipaa')}</span>
           </div>
           <p>{t('home.footer.copyright')}</p>

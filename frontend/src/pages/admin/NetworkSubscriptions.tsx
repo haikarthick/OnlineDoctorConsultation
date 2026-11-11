@@ -492,7 +492,7 @@ function PricingVisibilityPanel({ settings, onSave }: { settings: Record<string,
           </div>
           <div className="module-form-group">
             <label className="module-label">CTA Email</label>
-            <input className="module-input" type="email" value={form['pricing.cta_email'] || ''} onChange={e => set('pricing.cta_email', e.target.value)} placeholder="sales@vetcare.com" />
+            <input className="module-input" type="email" value={form['pricing.cta_email'] || ''} onChange={e => set('pricing.cta_email', e.target.value)} placeholder="sales@waytovet.com" />
           </div>
           <div className="module-form-group">
             <label className="module-label">CTA Phone</label>

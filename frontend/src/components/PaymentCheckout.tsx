@@ -108,7 +108,7 @@ export default function PaymentCheckout({ bookingId, amount, expiresAt, onSucces
           amount: data.checkoutPayload.amountPaise,
           currency: data.checkoutPayload.currency || 'INR',
           order_id: data.checkoutPayload.orderId,
-          name: 'VetCare',
+          name: 'waytovet',
           description: t('payment.consultationFee'),
           handler: async (resp: any) => {
             try {

@@ -158,7 +158,7 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
         reviewStatus: rx.reviewStatus,
       }
       const template: PrescriptionTemplate = {
-        clinicName: tpl.clinicName || 'VetCare Platform',
+        clinicName: tpl.clinicName || 'waytovet Platform',
         clinicTagline: tpl.clinicTagline || '',
         clinicAddress: tpl.clinicAddress || '',
         clinicPhone: tpl.clinicPhone || '',

@@ -222,13 +222,19 @@ const medicationSchema = Joi.object({
 export const createPrescriptionSchema = Joi.object({
   consultationId: uuid.optional().allow('', null),
   petOwnerId: uuid.optional(),
+  // A prescription has ONE subject: an animal OR a group - never both. `xor` enforces exactly
+  // one at the edge so a bad request never reaches the database CHECK. Group records carry the
+  // batch facts (head count + production cycle). See docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md.
   animalId: uuid.optional(),
+  groupId: uuid.optional(),
+  cycleId: uuid.optional(),
+  headCountTreated: Joi.number().integer().min(0).optional(),
   medications: Joi.array().items(medicationSchema).min(1).required(),
   instructions: Joi.string().max(5000).optional().allow('', null),
   validUntil: Joi.string().optional().allow('', null),
   diagnosis: longText().optional().allow('', null),
   followUpDate: Joi.string().optional().allow('', null),
-});
+}).xor('animalId', 'groupId');
 
 // ─── Animal ──────────────────────────────────────────────────
 export const createAnimalSchema = Joi.object({

@@ -171,10 +171,13 @@ export interface Medication {
 // ─── Prescription ───────────────────────────────────────────
 export interface Prescription {
   id: string;
-  consultationId: string;
+  consultationId?: string;
   veterinarianId: string;
   petOwnerId: string;
   animalId?: string;
+  groupId?: string;
+  cycleId?: string;
+  headCountTreated?: number;
   medications: Medication[];
   instructions: string;
   validUntil: Date;
@@ -364,6 +367,9 @@ export interface CreatePrescriptionDTO {
   consultationId: string;
   petOwnerId?: string;
   animalId?: string;
+  groupId?: string;
+  cycleId?: string;
+  headCountTreated?: number;
   medications: Medication[];
   instructions: string;
   validUntil?: string;

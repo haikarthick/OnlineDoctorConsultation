@@ -87,7 +87,7 @@ export default function AcceptHospitalInvite() {
     return (
       <div className="invite-page">
         <div className="invite-card">
-          <div className="invite-logo">🐾 VetCare</div>
+          <div className="invite-logo">🐾 waytovet</div>
           <div className="loading-spinner" />
           <p>{t('hospitalStaff.validatingInvite')}</p>
         </div>
@@ -99,7 +99,7 @@ export default function AcceptHospitalInvite() {
     return (
       <div className="invite-page">
         <div className="invite-card">
-          <div className="invite-logo">🐾 VetCare</div>
+          <div className="invite-logo">🐾 waytovet</div>
           <div className="invite-error-icon">⛔</div>
           <h2>{t('hospitalStaff.invalidInvite')}</h2>
           <p className="invite-error-msg">{errorMsg}</p>
@@ -114,7 +114,7 @@ export default function AcceptHospitalInvite() {
     return (
       <div className="invite-page">
         <div className="invite-card">
-          <div className="invite-logo">🐾 VetCare</div>
+          <div className="invite-logo">🐾 waytovet</div>
           <div className="invite-success-icon">✅</div>
           <h2>{t('hospitalStaff.accountCreated')}</h2>
           <p>{t('hospitalStaff.accountCreatedDesc', { network: inviteInfo?.networkName })}</p>
@@ -127,7 +127,7 @@ export default function AcceptHospitalInvite() {
   return (
     <div className="invite-page">
       <div className="invite-card">
-        <div className="invite-logo">🐾 VetCare</div>
+        <div className="invite-logo">🐾 waytovet</div>
         <div className="invite-header">
           <h2>{t('hospitalStaff.acceptInviteTitle')}</h2>
           <p>{t('hospitalStaff.acceptInviteSubtitle', { network: inviteInfo?.networkName, hospital: inviteInfo?.hospitalName || inviteInfo?.networkName })}</p>

@@ -4945,3 +4945,30 @@ CREATE INDEX IF NOT EXISTS idx_medical_records_withdrawal_group
 CREATE INDEX IF NOT EXISTS idx_medical_records_withdrawal_animal
   ON medical_records(animal_id, withdrawal_until_meat, withdrawal_until_milk)
   WHERE animal_id IS NOT NULL AND (withdrawal_until_meat IS NOT NULL OR withdrawal_until_milk IS NOT NULL);
+
+
+
+-- ============================================================
+-- 60.5 GROUP-SUBJECT PRESCRIPTIONS (Phase 5, non-network)
+-- ============================================================
+-- Mirrors backend/migrations/042_prescription_group_subject.sql so a fresh install and an
+-- upgraded database end up with the same schema. A batch prescription covers a whole group
+-- (herd/flock) in one row - never a fan-out into one prescription per head. Same exactly-one
+-- subject rule as the health tables (section 60.5), plus a stored head_count_treated so the
+-- obligation survives later flock shrinkage.
+ALTER TABLE prescriptions
+  ADD COLUMN IF NOT EXISTS group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL;
+ALTER TABLE prescriptions
+  ADD COLUMN IF NOT EXISTS cycle_id UUID REFERENCES group_cycles(id) ON DELETE SET NULL;
+ALTER TABLE prescriptions
+  ADD COLUMN IF NOT EXISTS head_count_treated INTEGER;
+
+DO $$ BEGIN
+  ALTER TABLE prescriptions ADD CONSTRAINT prescriptions_subject_ck
+    CHECK ((animal_id IS NOT NULL) <> (group_id IS NOT NULL));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+CREATE INDEX IF NOT EXISTS idx_prescriptions_group
+  ON prescriptions(group_id) WHERE group_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_prescriptions_cycle
+  ON prescriptions(cycle_id) WHERE cycle_id IS NOT NULL;

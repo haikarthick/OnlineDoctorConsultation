@@ -50,7 +50,7 @@
     "male": "Male",
     "female": "Female",
     "loadingPage": "Loading…",
-    "brand": "VetCare",
+    "brand": "waytovet",
     "enterprise": "ENTERPRISE",
     "trustBadge": "Trusted by 3,000+ enterprises worldwide",
     "booking": "Booking",
@@ -109,7 +109,7 @@
     "hidePassword": "Hide password"
   },
   "nav": {
-    "brand": "VetCare",
+    "brand": "waytovet",
     "dashboard": "Dashboard",
     "consultations": "Consultations",
     "findDoctor": "Find Doctor",
@@ -363,7 +363,7 @@
     "signIn": "Sign In",
     "getStarted": "Get Started Free",
     "heroTitle": "The Complete Platform for Animal Health & Enterprise Management",
-    "heroSubtitle": "From a single pet to 10,000-head livestock operations, VetCare delivers 24/7 veterinary consultations, AI-powered disease prediction, IoT monitoring, and full enterprise management in one unified platform.",
+    "heroSubtitle": "From a single pet to 10,000-head livestock operations, waytovet delivers 24/7 veterinary consultations, AI-powered disease prediction, IoT monitoring, and full enterprise management in one unified platform.",
     "ctaPrimary": "Start Free: Pet Owner",
     "ctaEnterprise": "🏢 Enterprise Sign Up",
     "ctaVet": "Join as Veterinarian",
@@ -448,7 +448,7 @@
       "step3": "Add Doctors",
       "step4": "Go Live"
     },
-    "featuresTitle": "Why Choose VetCare?",
+    "featuresTitle": "Why Choose waytovet?",
     "tabs": {
       "petOwners": "Pet Owners",
       "enterprises": "Enterprises",
@@ -713,7 +713,7 @@
       }
     },
     "dataPrivacyTitle": "Data Privacy Commitment:",
-    "dataPrivacyText": "VetCare does not sell, share, or monetize your health data. All medical records are protected with the same standards used in human healthcare. Every access is audited. Every user has full visibility into their data footprint.",
+    "dataPrivacyText": "waytovet does not sell, share, or monetize your health data. All medical records are protected with the same standards used in human healthcare. Every access is audited. Every user has full visibility into their data footprint.",
     "howItWorksTitle": "How It Works",
     "steps": {
       "owner": {
@@ -794,7 +794,7 @@
       "0": {
         "name": "Sarah Mitchell",
         "role": "Pet Owner",
-        "text": "VetCare saved my cat's life! Quick diagnosis at 2 AM when every clinic was closed. The video consultation was seamless."
+        "text": "waytovet saved my cat's life! Quick diagnosis at 2 AM when every clinic was closed. The video consultation was seamless."
       },
       "1": {
         "name": "Robert Hargrove",
@@ -804,7 +804,7 @@
       "2": {
         "name": "Dr. James Wilson",
         "role": "Veterinarian",
-        "text": "I serve 12 enterprise clients and dozens of pet owners through VetCare. The platform handles scheduling, records, and billing beautifully."
+        "text": "I serve 12 enterprise clients and dozens of pet owners through waytovet. The platform handles scheduling, records, and billing beautifully."
       },
       "3": {
         "name": "Maria Chen",
@@ -814,7 +814,7 @@
       "4": {
         "name": "Dr. Priya Nair",
         "role": "Director, City Paws Veterinary Hospital",
-        "text": "We set up our hospital profile, added 8 doctors across 4 departments and went live in one afternoon. Bookings started the same day. VetCare is the best thing to happen to our clinic."
+        "text": "We set up our hospital profile, added 8 doctors across 4 departments and went live in one afternoon. Bookings started the same day. waytovet is the best thing to happen to our clinic."
       },
       "5": {
         "name": "Thomas Eriksen",
@@ -823,16 +823,16 @@
       }
     },
     "ctaTitle": "Ready to Transform Your Animal Care?",
-    "ctaSubtitle": "Join thousands of pet owners, enterprises, and veterinarians on VetCare",
+    "ctaSubtitle": "Join thousands of pet owners, enterprises, and veterinarians on waytovet",
     "footer": {
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "compliance": "Compliance",
       "contact": "Contact Us",
       "signIn": "Sign In",
-      "brand": "VetCare Enterprise",
+      "brand": "waytovet Enterprise",
       "hipaa": "HIPAA-Aligned",
-      "copyright": "© 2026 VetCare. All rights reserved."
+      "copyright": "© 2026 waytovet. All rights reserved."
     },
     "howItWorks": {
       "petOwners": "For Pet Owners",
@@ -1508,6 +1508,10 @@
     "distribution": "Event Distribution",
     "loadingAnimals": "Loading animals...",
     "loadingTimeline": "Loading timeline...",
+    "groupHistoryTitle": "Batch Group History",
+    "groupHistorySub": "Group herd/flock events that applied to this animal",
+    "noGroupHistory": "No batch group events applied to this animal yet.",
+    "headTreated": "head treated",
     "noMatching": "No matching events",
     "noEventsYet": "No events yet",
     "tryClearingFilters": "Try clearing filters.",
@@ -1895,7 +1899,7 @@
     },
     "privacy": {
       "title": "🔐 Privacy & Data",
-      "description": "Review your data footprint and manage privacy settings. VetCare follows HIPAA-aligned data protection practices.",
+      "description": "Review your data footprint and manage privacy settings. waytovet follows HIPAA-aligned data protection practices.",
       "loading": "⏳ Loading...",
       "viewDataSummary": "📊 View My Data Summary",
       "medicalRecords": "Medical Records",
@@ -2066,6 +2070,25 @@
     },
     "manageAnimals": "🐾 Manage Animals",
     "bookConsultation": "📅 Book Consultation",
+    "health": {
+      "view": "Health",
+      "title": "Flock Health, {{name}}",
+      "batch": "Batch managed",
+      "placed": "Placed",
+      "current": "Current",
+      "cycle": "Cycle",
+      "mortalityRate": "Mortality",
+      "cullRate": "Culled",
+      "survivalRate": "Survival",
+      "morbidityRate": "Morbidity",
+      "treatmentCoverage": "Treatment coverage",
+      "meat": "meat",
+      "milk": "milk",
+      "withdrawalBanner": "Under a {{kind}} withdrawal until {{date}} — keep treated animals out of the food chain until it ends.",
+      "ratesNote": "Batch health is measured as rates against the placed population, not row counts. Treatment coverage can exceed 100% (treating a flock twice is two treatments of the population).",
+      "loadFailed": "Could not load flock health metrics.",
+      "noData": "No cycle recorded yet — open a cycle to see mortality, morbidity and treatment rates."
+    },
     "manage": {
       "title": "🐾 Manage Animals, {{name}}",
       "inGroup": "✅ Animals in this group ({{count}})",
@@ -3632,7 +3655,7 @@
       "welfareAttestation": "🛡️ I attest that the animal(s) listed are healthy, well-cared-for, and not subjected to cruelty as per the Prevention of Cruelty to Animals Act, 1960",
       "welfareHint": "This attestation is required under the Prevention of Cruelty to Animals Act, 1960 (PCA Act). By checking this, you confirm the animal is in good health and has been treated humanely.",
       "legalTitle": "Legal Compliance & Terms",
-      "legalDisclaimer": "This platform operates as an animal classifieds board in compliance with Indian animal welfare laws. All listings must comply with the Prevention of Cruelty to Animals Act, 1960, the PCA (Dog Breeding & Marketing) Rules, 2017, and the PCA (Pet Shop) Rules, 2018. VetCare does not facilitate direct sales. All transactions occur offline between parties.",
+      "legalDisclaimer": "This platform operates as an animal classifieds board in compliance with Indian animal welfare laws. All listings must comply with the Prevention of Cruelty to Animals Act, 1960, the PCA (Dog Breeding & Marketing) Rules, 2017, and the PCA (Pet Shop) Rules, 2018. waytovet does not facilitate direct sales. All transactions occur offline between parties.",
       "termsAccept": "⚖️ I accept the Terms & Conditions and confirm this listing complies with all applicable animal welfare laws of India",
       "breederNote": "As a registered breeder, your PCA registration certificate number will be displayed on your listing. Admin may verify your registration status. Listing without valid registration may be rejected per Rule 3 of PCA (Dog Breeding & Marketing) Rules, 2017.",
       "complianceTitle": "Compliance & Welfare",
@@ -3641,7 +3664,7 @@
       "attested": "Welfare Attested (PCA Act 1960)",
       "accepted": "Accepted",
       "verified": "Verified",
-      "detailDisclaimer": "This listing is published on an animal classifieds board. VetCare does not facilitate direct sales. All transactions occur offline. Comply with PCA Act 1960 and applicable state regulations.",
+      "detailDisclaimer": "This listing is published on an animal classifieds board. waytovet does not facilitate direct sales. All transactions occur offline. Comply with PCA Act 1960 and applicable state regulations.",
       "adoptDontShop": "🐾 Adopt, Don't Shop: Consider adopting from shelters and rescue organizations"
     },
     "monetization": {
@@ -3742,7 +3765,7 @@
       "howStep2": "Connect and inspect the animal in person",
       "howStep3": "Pay the seller directly (cash / your own UPI)",
       "howStep4": "Both confirm here to complete the deal",
-      "freeNote": "This marketplace is 100% free. VetCare never handles the payment. Settle directly with the other party.",
+      "freeNote": "This marketplace is 100% free. waytovet never handles the payment. Settle directly with the other party.",
       "tabNote": "Deals are settled directly between buyer and seller. After you meet and settle, both parties confirm here to complete the deal.",
       "currentlyReserved": "Currently reserved by a buyer",
       "actionsCol": "Deal Actions",
@@ -4401,7 +4424,7 @@
     "isPublicDesc": "Public reviews help other pet owners make informed decisions",
     "helpRequired": "Please select a rating and write at least 10 characters to submit",
     "submittedFor": "Your review for {{name}} has been submitted.",
-    "helpCommunity": "Thank you for helping the VetCare community!"
+    "helpCommunity": "Thank you for helping the waytovet community!"
   },
   "doctorDashboard": {
     "title": "Doctor Dashboard",
@@ -4991,7 +5014,7 @@
     "userAgent": "User Agent",
     "severity": "Severity",
     "hipaaChecklist": "HIPAA Compliance Checklist",
-    "hipaaChecklistDesc": "Status of HIPAA technical safeguards, administrative controls, and data privacy measures implemented in VetCare",
+    "hipaaChecklistDesc": "Status of HIPAA technical safeguards, administrative controls, and data privacy measures implemented in waytovet",
     "control": "Control",
     "status": "Status",
     "detailsHeader": "Details",
@@ -5733,7 +5756,7 @@
     "failedToAccept": "Failed to accept invitation",
     "passwordMinLength": "Password must be at least 8 characters",
     "passwordsMismatch": "Passwords do not match",
-    "successTitle": "Welcome to VetCare!",
+    "successTitle": "Welcome to waytovet!",
     "successMsg": "Your account has been created and linked to the hospital. You can now log in to start managing patients and appointments.",
     "goToLogin": "Go to Login",
     "inviteProblem": "Invitation Problem",
@@ -5939,14 +5962,34 @@
     "overdueLabel": "Overdue Doses",
     "dueSoon": "Due Soon (30d)",
     "tabs": {
-      "passport": "My Passports",
-      "compliance": "Compliance Summary",
-      "history": "Certificate History"
+      "group": "Groups"
     },
     "noAnimals": "No animals found. Add animals to see their vaccination passports.",
     "noProtocols": "No vaccine protocols assigned to this animal yet.",
     "noData": "No compliance data available.",
     "noCertLogs": "No certificates have been generated yet.",
+    "enterprise": "Enterprise",
+    "group": "Group",
+    "select": "Select",
+    "groupName": "Herd / Flock",
+    "groupApplications": "Applications",
+    "groupPopulation": "Group head",
+    "groupVaccines": "Vaccines used",
+    "noGroupVaccines": "No group vaccinations recorded yet. Vaccinate the group via Herd Medical or a Treatment Campaign.",
+    "groupVaccine": "Vaccine",
+    "groupType": "Type",
+    "groupApps": "Apps",
+    "groupHeadTreated": "Head treated",
+    "groupCoverage": "Coverage",
+    "groupLast": "Last",
+    "groupNext": "Next due",
+    "groupSource": "Source",
+    "groupSourceCampaign": "Campaign",
+    "groupSourceManual": "Manual",
+    "groupSelectHint": "Select an enterprise, then a group to see its vaccination passport. Coverage is the share of the group's placed population protected - rates, not row counts.",
+    "groupRoleHint": "Group vaccination passports are available to farmers, veterinarians and admins.",
+    "groupLoadFailed": "Could not load the group vaccination passport.",
+    "groupLoadEnterprisesFailed": "Could not load your enterprises.",
     "complianceNA": "N/A",
     "assignProtocolsFirst": "Assign vaccination protocols to enable download",
     "contactVetForProtocols": "Contact your vet to set up vaccination protocols",
@@ -6249,6 +6292,10 @@
     "failedToCreate": "Failed to create certificate",
     "failedToLoadEnterprises": "Failed to load enterprises list",
     "noCertTypeSelected": "Please select a certificate type",
+    "selectGroup": "Select Animal Group",
+    "noGroups": "No animal groups found for this enterprise. Add a herd or flock group in Herds & Groups first.",
+    "groupLinked": "Group linked: {{name}}",
+    "reviewGroup": "Certificate Group",
     "viewAllCertificates": "View All Certificates",
     "createAnother": "Create Another",
     "reviewCertType": "Certificate Type",
@@ -6780,7 +6827,7 @@
     "accountCreatedDesc": "Welcome to {{network}}. You can now log in with your email and password.",
     "proceedToLogin": "Log In Now",
     "acceptInviteTitle": "Accept Hospital Invite",
-    "acceptInviteSubtitle": "You've been invited to join {{hospital}} on VetCare.",
+    "acceptInviteSubtitle": "You've been invited to join {{hospital}} on waytovet.",
     "email": "Email",
     "position": "Position",
     "hospital": "Hospital",
@@ -7309,7 +7356,7 @@
     "couldNotStartSession": "Could not start chat session",
     "failedToSendMessage": "Failed to send message",
     "couldNotCreateSession": "Could not create chat session",
-    "aiBuddyHelper": "VetCare AI",
+    "aiBuddyHelper": "waytovet AI",
     "thinking": "Thinking...",
     "userAssistant": "Your Assistant",
     "yourAssistant": "Your Assistant",
@@ -7320,7 +7367,7 @@
     "iKnowAbout": "I can help with",
     "askMeAnything": "Ask me anything about your pets and their health",
     "askMeAnythingGeneral": "Ask me anything",
-    "askAiBuddy": "Ask VetCare AI..."
+    "askAiBuddy": "Ask waytovet AI..."
   },
   "payment": {
     "title": "Complete Your Payment",

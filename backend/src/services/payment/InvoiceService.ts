@@ -99,7 +99,7 @@ class InvoiceService {
       const total = parseFloat(String(r.amount));
       const taxAmount = tax.ratePercent > 0 ? round2(total * tax.ratePercent / (100 + tax.ratePercent)) : 0;
       const subtotal = round2(total - taxAmount);
-      const platformName = await PaymentModuleConfig.getString('tax.platformLegalName', 'VetCare Platform');
+      const platformName = await PaymentModuleConfig.getString('tax.platformLegalName', 'waytovet Platform');
       const platformGstin = await PaymentModuleConfig.getString('tax.platformGstin', '');
 
       const client = await database.getPool().connect();
@@ -175,7 +175,7 @@ class InvoiceService {
       const total = parseFloat(String(r.amount));
       const taxAmount = tax.ratePercent > 0 ? round2(total * tax.ratePercent / (100 + tax.ratePercent)) : 0;
       const subtotal = round2(total - taxAmount);
-      const platformName = await PaymentModuleConfig.getString('tax.platformLegalName', 'VetCare Platform');
+      const platformName = await PaymentModuleConfig.getString('tax.platformLegalName', 'waytovet Platform');
       const lineItems = r.line_items || [{ description: `Medication for ${r.animal_name || 'patient'}`, quantity: 1, amount: total }];
 
       const client = await database.getPool().connect();
@@ -238,7 +238,7 @@ class InvoiceService {
       const tax = await this.getTaxCode('998599');
       const taxAmount = tax.ratePercent > 0 ? round2(commissionTotal * tax.ratePercent / (100 + tax.ratePercent)) : 0;
       const subtotal = round2(commissionTotal - taxAmount);
-      const platformName = await PaymentModuleConfig.getString('tax.platformLegalName', 'VetCare Platform');
+      const platformName = await PaymentModuleConfig.getString('tax.platformLegalName', 'waytovet Platform');
       const platformGstin = await PaymentModuleConfig.getString('tax.platformGstin', '');
 
       const client = await database.getPool().connect();

@@ -357,7 +357,7 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
             <div className="si-e295240a">
               {[
                 { title: 'Data Collection & Purpose', icon: '📝',
-                  content: 'VetCare collects user data (name, email, phone), animal health records (diagnoses, prescriptions, lab results, imaging), consultation records, and payment information. Data is collected solely to provide veterinary telemedicine, health management, and enterprise animal care services.' },
+                  content: 'waytovet collects user data (name, email, phone), animal health records (diagnoses, prescriptions, lab results, imaging), consultation records, and payment information. Data is collected solely to provide veterinary telemedicine, health management, and enterprise animal care services.' },
                 { title: 'Data Storage & Encryption', icon: '🔒',
                   content: 'All data is stored in PostgreSQL databases hosted on Render.com with TLS encryption in transit. Database connections use SSL. Passwords are hashed using bcrypt with salt rounds. Session tokens use JWT with expiration.' },
                 { title: 'Access Controls', icon: '🛡️',

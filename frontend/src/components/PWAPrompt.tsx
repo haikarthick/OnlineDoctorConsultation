@@ -11,7 +11,7 @@ export function PWAPrompt() {
           <span className="pwa-banner-icon">🔄</span>
           <div className="pwa-banner-text">
             <strong>Update Available</strong>
-            <span>A new version of VetCare is ready.</span>
+            <span>A new version of waytovet is ready.</span>
           </div>
         </div>
         <div className="pwa-banner-actions">
@@ -28,7 +28,7 @@ export function PWAPrompt() {
         <div className="pwa-banner-content">
           <span className="pwa-banner-icon">📲</span>
           <div className="pwa-banner-text">
-            <strong>Install VetCare</strong>
+            <strong>Install waytovet</strong>
             <span>Add to your home screen for quick access.</span>
           </div>
         </div>

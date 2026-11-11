@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { usePermission, NAV_PERMISSION_MAP } from '../context/PermissionContext'
 import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
 import { LanguageSwitcher } from './LanguageSwitcher'
+import { WayToVetLogo } from './WayToVetLogo'
 import { MenuItem, UserRole } from '../types'
 import './Navigation.css'
 
@@ -426,8 +427,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       {/* Mobile Header */}
       <div className="nav-mobile-header" role="banner">
         <div className="nav-brand">
-          <span className="nav-logo" aria-hidden="true">🏥</span>
-          <span className="nav-title">VetCare</span>
+          <WayToVetLogo size={26} variant="full" onDark title={t('nav.brand')} />
         </div>
         <button
           className="nav-mobile-toggle"
@@ -449,8 +449,9 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
         {/* Header with collapse toggle */}
         <div className="nav-header">
           <div className="nav-brand-desktop">
-            <span className="nav-logo" aria-hidden="true">🏥</span>
-            {!isCollapsed && <span className="nav-title">VetCare</span>}
+            {isCollapsed
+              ? <WayToVetLogo size={30} variant="mark" title={t('nav.brand')} />
+              : <WayToVetLogo size={30} variant="full" title={t('nav.brand')} />}
           </div>
           <button
             className="nav-collapse-btn"

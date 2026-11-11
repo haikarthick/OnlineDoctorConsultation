@@ -456,7 +456,7 @@ export class HospitalDocumentService {
           h.rows[0].owner_id,
           'hospital_approved',
           'Hospital Account Approved! 🎉',
-          `Congratulations! Your hospital "${h.rows[0].name}" has been verified and is now live on VetCare. Patients can now discover and book appointments.`,
+          `Congratulations! Your hospital "${h.rows[0].name}" has been verified and is now live on waytovet. Patients can now discover and book appointments.`,
           'all',
           { hospitalId },
         ).catch(() => {});
