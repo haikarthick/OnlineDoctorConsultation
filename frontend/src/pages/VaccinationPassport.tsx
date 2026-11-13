@@ -6,96 +6,15 @@ import { useTranslation } from 'react-i18next'
 import '../styles/modules.css'
 import './VaccinationPassport.css'
 import { useMasterData } from '../context/MasterDataContext'
-
-// ─── Types ───────────────────────────────────────────────────
-interface PassportDose {
-  scheduleId: string
-  doseNumber: number
-  dueDate: string
-  administeredAt: string | null
-  status: 'pending' | 'administered' | 'overdue' | 'skipped' | 'waived'
-  reminderSent: boolean
-  vaccinationRecordId: string | null
-}
-
-interface PassportProtocol {
-  protocolId: string
-  protocolName: string
-  disease: string
-  category: string
-  isZoonotic: boolean
-  assignedAt: string
-  waived: boolean
-  waiverReason: string | null
-  compliancePercent: number
-  lastAdministeredAt: string | null
-  nextDueDate: string | null
-  overdueCount: number
-  doses: PassportDose[]
-}
-
-interface PassportAnimal {
-  animalId: string
-  animalName: string
-  animalUniqueId?: string
-  species: string
-  breed: string | null
-  gender: string | null
-  dateOfBirth: string | null
-  ownerName?: string | null
-  overallCompliancePercent: number
-  protocols: PassportProtocol[]
-}
-
-interface ComplianceSummaryRow {
-  animalId: string
-  animalName: string
-  species: string
-  ownerName: string | null
-  totalProtocols: number
-  administeredDoses: number
-  totalDoses: number
-  overdueDoses: number
-  dueSoon: number
-  compliancePercent: number
-}
-
-interface CertificateLog {
-  id: string
-  animalId: string
-  animalName: string | null
-  vaccinationRecordId: string | null
-  certificateType: string
-  fileName: string | null
-  generatedByName: string | null
-  generatedAt: string
-}
+import type { PassportAnimal, ComplianceSummaryRow, CertificateLog, GroupPassportData } from '../components/vaccinationPassport/vaccinationPassportShared'
+import { PassportCard } from '../components/vaccinationPassport/PassportCard'
+import { GroupPassportTab } from '../components/vaccinationPassport/GroupPassportTab'
+import { ComplianceSummaryTab } from '../components/vaccinationPassport/ComplianceSummaryTab'
+import { CertHistoryTab } from '../components/vaccinationPassport/CertHistoryTab'
+import { PrintPreviewModal } from '../components/vaccinationPassport/PrintPreviewModal'
 
 interface VaccinationPassportProps {
   onNavigate: (path: string) => void
-}
-
-// ─── Status badge helper ─────────────────────────────────────
-function StatusBadge({ status, t }: { status: string; t: (k: string) => string }) {
-  const map: Record<string, string> = {
-    administered: 'badge-success',
-    pending: 'badge-pending',
-    overdue: 'badge-error',
-    skipped: 'badge-pending',
-    waived: 'badge-pending',
-  }
-  return <span className={`module-badge ${map[status] || 'badge-pending'}`}>{t(`vaccinationPassport.status.${status}`)}</span>
-}
-
-// ─── Compliance meter ─────────────────────────────────────────
-function ComplianceMeter({ percent }: { percent: number }) {
-  const color = percent >= 80 ? '#22c55e' : percent >= 50 ? '#f59e0b' : '#ef4444'
-  return (
-    <div className="vp-compliance-meter">
-      <div className="vp-compliance-bar" style={{ width: `${percent}%`, backgroundColor: color }} />
-      <span className="vp-compliance-label" style={{ color }}>{percent}%</span>
-    </div>
-  )
 }
 
 const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _onNavigate }) => {
@@ -130,12 +49,6 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
   const [selectedAnimalForHistory, setSelectedAnimalForHistory] = useState<string>('')
 
   // Group vaccination passport (batch herd/flock) - farmer/vet/admin
-  interface GroupPassportData {
-    group?: { id: string; name: string; groupType?: string; species?: string; managementMode?: string; currentCount?: number }
-    cycle?: any
-    vaccines?: { vaccineName: string; vaccineType?: string; applications: number; headCountTreated: number; batchNumbers: string[]; cyclesCovered: string[]; fromCampaign?: boolean; lastAdministeredAt?: string; nextDueDate?: string; coveragePercent?: number | null }[]
-    totalApplications?: number
-  }
   const [groupEnterprises, setGroupEnterprises] = useState<{ id: string; name: string }[]>([])
   const [groupEnterpriseId, setGroupEnterpriseId] = useState('')
   const [groupOptions, setGroupOptions] = useState<{ id: string; name: string; species?: string; groupType?: string; animalCount?: number }[]>([])
@@ -295,7 +208,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Vaccination Passport \u2014 ${animal.animalName}</title>
+  <title>Vaccination Passport — ${animal.animalName}</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; color: #1a1a2e; }
     h1 { color: #6366f1; border-bottom: 2px solid #6366f1; padding-bottom: 8px; }
@@ -348,369 +261,17 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
     }
   }
 
-  // ── Render passport card ─────────────────────────────────────
-  const renderPassportCard = (animal: PassportAnimal) => {
-    const isExpanded = expandedAnimal === animal.animalId
-    const icon = speciesIcon(animal.species)
-    return (
-      <div key={animal.animalId} className="vp-passport-card">
-        {/* Card header */}
-        <div
-          className="vp-card-header"
-          onClick={() => setExpandedAnimal(isExpanded ? null : animal.animalId)}
-        >
-          <div className="vp-card-identity">
-            <span className="vp-species-icon">{icon}</span>
-            <div>
-              <div className="vp-animal-name">{animal.animalName}</div>
-              {animal.animalUniqueId && (
-                <div
-                  className="vc-id-badge si-4af0b366"
-                  title={`waytovet ID - click to copy`}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    const id = animal.animalUniqueId!
-                    navigator.clipboard?.writeText(id).then(() => {
-                      setCopiedId(id)
-                      setTimeout(() => setCopiedId(prev => (prev === id ? null : prev)), 1500)
-                    }).catch(() => setError(t('common.copyFailed')))
-                  }}
-                 
-                >
-                  {copiedId === animal.animalUniqueId ? `✅ ${t('common.copied')}` : `🏷️ ${animal.animalUniqueId}`}
-                </div>
-              )}
-              <div className="vp-animal-meta">
-                {speciesLabel(animal.species, t)}
-                {animal.breed ? ` · ${animal.breed}` : ''}
-                {animal.gender ? ` · ${animal.gender}` : ''}
-                {animal.dateOfBirth
-                  ? ` · ${t('vaccinationPassport.dob')}: ${formatDate(animal.dateOfBirth)}`
-                  : ''}
-                {(isAdmin || isVet) && animal.ownerName
-                  ? ` · ${t('vaccinationPassport.owner')}: ${animal.ownerName}`
-                  : ''}
-              </div>
-            </div>
-          </div>
-          <div className="vp-card-actions">
-            {animal.protocols.length === 0 ? (
-              <span className="vp-compliance-na">{t('vaccinationPassport.complianceNA')}</span>
-            ) : (
-              <ComplianceMeter percent={animal.overallCompliancePercent} />
-            )}
-            {animal.protocols.length === 0 ? (
-              <div className="vp-no-protocols-action">
-                {(isAdmin || isVet) ? (
-                  <span className="vp-no-protocols-note">{t('vaccinationPassport.assignProtocolsFirst')}</span>
-                ) : (
-                  <span className="vp-no-protocols-note">{t('vaccinationPassport.contactVetForProtocols')}</span>
-                )}
-              </div>
-            ) : (
-              <button
-                className="module-btn primary small"
-                onClick={(e) => { e.stopPropagation(); handlePrintPassport(animal) }}
-                disabled={downloadingAnimal === animal.animalId}
-              >
-                {downloadingAnimal === animal.animalId
-                  ? t('vaccinationPassport.downloading')
-                  : t('vaccinationPassport.downloadPassport')}
-              </button>
-            )}
-            <span className={`vp-expand-icon ${isExpanded ? 'expanded' : ''}`}>▼</span>
-          </div>
-        </div>
-
-        {/* Expanded protocol list */}
-        {isExpanded && (
-          <div className="vp-protocol-list">
-            {animal.protocols.length === 0 ? (
-              <div className="vp-empty-protocols">{t('vaccinationPassport.noProtocols')}</div>
-            ) : (
-              animal.protocols.map((proto) => {
-                const protKey = `${animal.animalId}-${proto.protocolId}`
-                const protExpanded = expandedProtocol === protKey
-                return (
-                  <div key={proto.protocolId} className={`vp-protocol-row ${proto.waived ? 'vp-waived' : ''}`}>
-                    <div
-                      className="vp-protocol-summary"
-                      onClick={() => setExpandedProtocol(protExpanded ? null : protKey)}
-                    >
-                      <div className="vp-proto-name">
-                        <span className="vp-proto-title">{proto.protocolName}</span>
-                        {proto.isZoonotic && (
-                          <span className="vp-zoonotic-chip">{t('vaccinationPassport.zoonotic')}</span>
-                        )}
-                        <span className={`module-badge badge-${proto.category === 'Mandatory' ? 'error' : proto.category === 'Core' ? 'success' : 'pending'}`}>
-                          {proto.category}
-                        </span>
-                        {proto.waived && (
-                          <span className="module-badge badge-pending">{t('vaccinationPassport.waived')}</span>
-                        )}
-                      </div>
-                      <div className="vp-proto-stats">
-                        <span>{t('vaccinationPassport.disease')}: <strong>{proto.disease}</strong></span>
-                        <span>{t('vaccinationPassport.lastDose')}: <strong>{proto.lastAdministeredAt ? formatDate(proto.lastAdministeredAt) : '-'}</strong></span>
-                        <span>{t('vaccinationPassport.nextDue')}: <strong>{proto.nextDueDate ? formatDate(proto.nextDueDate) : '-'}</strong></span>
-                        {proto.overdueCount > 0 && (
-                          <span className="vp-overdue-warning">⚠ {proto.overdueCount} {t('vaccinationPassport.overdueDoses')}</span>
-                        )}
-                      </div>
-                      <div className="vp-proto-compliance">
-                        <ComplianceMeter percent={proto.compliancePercent} />
-                        <span className="vp-expand-icon-sm">{protExpanded ? '▲' : '▼'}</span>
-                      </div>
-                    </div>
-
-                    {/* Dose history */}
-                    {protExpanded && (
-                      <div className="vp-dose-table-wrap">
-                        <table className="module-table vp-dose-table">
-                          <thead>
-                            <tr>
-                              <th>{t('vaccinationPassport.dose')}</th>
-                              <th>{t('vaccinationPassport.dueDate')}</th>
-                              <th>{t('vaccinationPassport.administeredDate')}</th>
-                              <th>{t('vaccinationPassport.doseStatus')}</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {proto.doses.map((dose) => (
-                              <tr key={dose.scheduleId}>
-                                <td>#{dose.doseNumber}</td>
-                                <td>{formatDate(dose.dueDate)}</td>
-                                <td>{dose.administeredAt ? formatDate(dose.administeredAt) : '-'}</td>
-                                <td><StatusBadge status={dose.status} t={t} /></td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                )
-              })
-            )}
-          </div>
-        )}
-      </div>
-    )
+  const handleCopyId = (id: string) => {
+    navigator.clipboard?.writeText(id).then(() => {
+      setCopiedId(id)
+      setTimeout(() => setCopiedId(prev => (prev === id ? null : prev)), 1500)
+    }).catch(() => setError(t('common.copyFailed')))
   }
 
-  // ── Render group vaccination passport (batch herd/flock) ───
-  const renderGroupPassport = () => (
-    <div className="vp-group-tab">
-      {(isAdmin || isVet || isFarmer) && (
-        <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 16 }}>
-            <div className="module-form-group">
-              <label className="module-label">{t('vaccinationPassport.enterprise')}</label>
-              <select className="module-input" value={groupEnterpriseId} onChange={e => setGroupEnterpriseId(e.target.value)}>
-                <option value="">- {t('vaccinationPassport.select')} -</option>
-                {groupEnterprises.map(e => (
-                  <option key={e.id} value={e.id}>{e.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="module-form-group">
-              <label className="module-label">{t('vaccinationPassport.group')}</label>
-              <select className="module-input" value={groupSelectedId} onChange={e => setGroupSelectedId(e.target.value)} disabled={!groupEnterpriseId}>
-                <option value="">- {t('vaccinationPassport.select')} -</option>
-                {groupOptions.map(g => (
-                  <option key={g.id} value={g.id}>{g.name}{g.species ? ` (${speciesLabel(g.species, t)})` : ''}{g.animalCount != null ? ` · ${g.animalCount}` : ''}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          {groupError && <div className="module-alert error">{groupError}</div>}
-          {groupLoading ? (
-            <div className="vp-loading">{t('vaccinationPassport.loading')}</div>
-          ) : groupPassport ? (
-            <div>
-              {groupPassport.group && (
-                <div className="module-stats" style={{ marginBottom: 16 }}>
-                  <div className="stat-card">
-                    <div className="stat-icon">🐄</div>
-                    <div className="stat-value">{groupPassport.group.name}</div>
-                    <div className="stat-label">{t('vaccinationPassport.groupName')}</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-icon">📊</div>
-                    <div className="stat-value">{groupPassport.totalApplications ?? 0}</div>
-                    <div className="stat-label">{t('vaccinationPassport.groupApplications')}</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-icon">🔢</div>
-                    <div className="stat-value">{groupPassport.group.currentCount ?? 0}</div>
-                    <div className="stat-label">{t('vaccinationPassport.groupPopulation')}</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-icon">😷</div>
-                    <div className="stat-value">{groupPassport.vaccines?.length ?? 0}</div>
-                    <div className="stat-label">{t('vaccinationPassport.groupVaccines')}</div>
-                  </div>
-                </div>
-              )}
-              {(!groupPassport.vaccines || groupPassport.vaccines.length === 0) ? (
-                <div className="vp-empty">{t('vaccinationPassport.noGroupVaccines')}</div>
-              ) : (
-                <div className="data-table-container">
-                  <table className="module-table">
-                    <thead>
-                      <tr>
-                        <th>{t('vaccinationPassport.groupVaccine')}</th>
-                        <th>{t('vaccinationPassport.groupType')}</th>
-                        <th>{t('vaccinationPassport.groupApps')}</th>
-                        <th>{t('vaccinationPassport.groupHeadTreated')}</th>
-                        <th>{t('vaccinationPassport.groupCoverage')}</th>
-                        <th>{t('vaccinationPassport.groupLast')}</th>
-                        <th>{t('vaccinationPassport.groupNext')}</th>
-                        <th>{t('vaccinationPassport.groupSource')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {groupPassport.vaccines.map((v, i) => (
-                        <tr key={i}>
-                          <td><strong>{v.vaccineName}</strong></td>
-                          <td>{v.vaccineType || '-'}</td>
-                          <td>{v.applications}</td>
-                          <td>{v.headCountTreated}</td>
-                          <td>
-                            {v.coveragePercent == null ? (
-                              <span className="vp-compliance-na">{t('vaccinationPassport.complianceNA')}</span>
-                            ) : (
-                              <ComplianceMeter percent={v.coveragePercent} />
-                            )}
-                          </td>
-                          <td>{v.lastAdministeredAt ? formatDate(v.lastAdministeredAt) : '-'}</td>
-                          <td>{v.nextDueDate ? formatDate(v.nextDueDate) : '-'}</td>
-                          <td>{v.fromCampaign ? t('vaccinationPassport.groupSourceCampaign') : t('vaccinationPassport.groupSourceManual')}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="vp-empty">{t('vaccinationPassport.groupSelectHint')}</div>
-          )}
-        </>
-      )}
-      {!(isAdmin || isVet || isFarmer) && (
-        <div className="vp-empty">{t('vaccinationPassport.groupRoleHint')}</div>
-      )}
-    </div>
-  )
-
-  // ── Render compliance summary ───────────────────────────────
-  const renderComplianceSummary = () => (
-    <div>
-      {summaryLoading ? (
-        <div className="vp-loading">{t('vaccinationPassport.loading')}</div>
-      ) : complianceSummary.length === 0 ? (
-        <div className="vp-empty">{t('vaccinationPassport.noData')}</div>
-      ) : (
-        <div className="data-table-container">
-          <table className="module-table">
-            <thead>
-              <tr>
-                <th>{t('vaccinationPassport.animal')}</th>
-                <th>{t('vaccinationPassport.species')}</th>
-                <th>{t('vaccinationPassport.owner')}</th>
-                <th>{t('vaccinationPassport.protocols')}</th>
-                <th>{t('vaccinationPassport.compliance')}</th>
-                <th>{t('vaccinationPassport.overdue')}</th>
-                <th>{t('vaccinationPassport.dueSoon')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {complianceSummary.map((row) => (
-                <tr key={row.animalId}>
-                  <td>
-                    <span className="vp-table-icon">{speciesIcon(row.species)}</span>
-                    {row.animalName}
-                  </td>
-                  <td>{speciesLabel(row.species, t)}</td>
-                  <td>{row.ownerName || '-'}</td>
-                  <td>{row.totalProtocols}</td>
-                  <td>
-                    {row.totalProtocols === 0 ? (
-                      <span className="vp-compliance-na">{t('vaccinationPassport.complianceNA')}</span>
-                    ) : (
-                      <ComplianceMeter percent={row.compliancePercent} />
-                    )}
-                  </td>
-                  <td>
-                    {row.overdueDoses > 0 ? (
-                      <span className="module-badge badge-error">{row.overdueDoses}</span>
-                    ) : (
-                      <span className="module-badge badge-success">0</span>
-                    )}
-                  </td>
-                  <td>
-                    {row.dueSoon > 0 ? (
-                      <span className="module-badge badge-pending">{row.dueSoon}</span>
-                    ) : (
-                      <span className="module-badge badge-success">0</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  )
-
-  // ── Render certificate history ──────────────────────────────
-  const renderCertHistory = () => (
-    <div className="vp-cert-history">
-      <div className="vp-cert-filter">
-        <select
-          className="module-input"
-          value={selectedAnimalForHistory}
-          onChange={(e) => {
-            setSelectedAnimalForHistory(e.target.value)
-            loadCertLogs(e.target.value)
-          }}
-        >
-          <option value="">{t('vaccinationPassport.selectAnimal')}</option>
-          {passports.map((a) => (
-            <option key={a.animalId} value={a.animalId}>
-              {speciesIcon(a.species)} {a.animalName} ({speciesLabel(a.species, t)}){(isAdmin || isVet) && a.ownerName ? ` - ${a.ownerName}` : ''}
-            </option>
-          ))}
-        </select>
-      </div>
-      {certLoading ? (
-        <div className="vp-loading">{t('vaccinationPassport.loading')}</div>
-      ) : certLogs.length === 0 ? (
-        <div className="vp-empty">{t('vaccinationPassport.noCertLogs')}</div>
-      ) : (
-        <div className="vp-cert-timeline">
-          {certLogs.map((log) => (
-            <div key={log.id} className="vp-cert-entry">
-              <div className="vp-cert-dot" />
-              <div className="vp-cert-info">
-                <div className="vp-cert-title">
-                  <span className="vp-cert-type">{log.certificateType}</span>
-                  {log.fileName && <span className="vp-cert-filename">{log.fileName}</span>}
-                </div>
-                <div className="vp-cert-meta">
-                  {t('vaccinationPassport.generatedBy')}: <strong>{log.generatedByName || '-'}</strong>
-                  &nbsp;·&nbsp;
-                  {log.generatedAt ? formatDate(log.generatedAt) : '-'}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
+  const handleSelectAnimalForHistory = (animalId: string) => {
+    setSelectedAnimalForHistory(animalId)
+    loadCertLogs(animalId)
+  }
 
   // ── Passport stats (top) ─────────────────────────────────────
   const totalProtocols = passports.reduce((s, a) => s + a.protocols.length, 0)
@@ -830,46 +391,76 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                 <div>{t('vaccinationPassport.noAnimals')}</div>
               </div>
             ) : (
-              passports.map(renderPassportCard)
+              passports.map((animal) => (
+                <PassportCard
+                  key={animal.animalId}
+                  animal={animal}
+                  isExpanded={expandedAnimal === animal.animalId}
+                  onToggleExpand={() => setExpandedAnimal(expandedAnimal === animal.animalId ? null : animal.animalId)}
+                  expandedProtocolKey={expandedProtocol}
+                  onToggleProtocol={(key) => setExpandedProtocol(expandedProtocol === key ? null : key)}
+                  copiedId={copiedId}
+                  onCopyId={handleCopyId}
+                  downloadingAnimal={downloadingAnimal}
+                  onPrintPassport={handlePrintPassport}
+                  isAdmin={isAdmin}
+                  isVet={isVet}
+                  speciesIcon={speciesIcon}
+                  speciesLabel={speciesLabel}
+                  formatDate={formatDate}
+                  t={t}
+                />
+              ))
             )}
           </div>
         )}
-        {activeTab === 'compliance' && renderComplianceSummary()}
-        {activeTab === 'history' && renderCertHistory()}
-        {activeTab === 'group' && renderGroupPassport()}
+        {activeTab === 'compliance' && (
+          <ComplianceSummaryTab
+            summaryLoading={summaryLoading}
+            complianceSummary={complianceSummary}
+            speciesIcon={speciesIcon}
+            speciesLabel={speciesLabel}
+            t={t}
+          />
+        )}
+        {activeTab === 'history' && (
+          <CertHistoryTab
+            selectedAnimalForHistory={selectedAnimalForHistory}
+            onSelectAnimal={handleSelectAnimalForHistory}
+            passports={passports}
+            isAdmin={isAdmin}
+            isVet={isVet}
+            speciesIcon={speciesIcon}
+            speciesLabel={speciesLabel}
+            certLoading={certLoading}
+            certLogs={certLogs}
+            formatDate={formatDate}
+            t={t}
+          />
+        )}
+        {activeTab === 'group' && (
+          <GroupPassportTab
+            isAdmin={isAdmin}
+            isVet={isVet}
+            isFarmer={isFarmer}
+            groupEnterprises={groupEnterprises}
+            groupEnterpriseId={groupEnterpriseId}
+            onGroupEnterpriseChange={setGroupEnterpriseId}
+            groupOptions={groupOptions}
+            groupSelectedId={groupSelectedId}
+            onGroupSelectedChange={setGroupSelectedId}
+            groupError={groupError}
+            groupLoading={groupLoading}
+            groupPassport={groupPassport}
+            speciesLabel={speciesLabel}
+            formatDate={formatDate}
+            t={t}
+          />
+        )}
       </div>
 
       {/* ── Print/Preview Modal ────────────────────────────── */}
-      {printHtml && (
-        <div className="vp-print-overlay" onClick={() => setPrintHtml(null)}>
-          <div className="vp-print-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="vp-print-modal-header">
-              <span>{t('vaccinationPassport.passportPreview')}</span>
-              <div className="vp-print-modal-actions">
-                <button
-                  className="module-btn primary small"
-                  onClick={() => {
-                    const iframe = document.getElementById('vp-print-iframe') as HTMLIFrameElement
-                    if (iframe?.contentWindow) {
-                      iframe.contentWindow.focus()
-                      iframe.contentWindow.print()
-                    }
-                  }}
-                >
-                  🖨️ {t('vaccinationPassport.printSavePdf')}
-                </button>
-                <button className="module-btn small" onClick={() => setPrintHtml(null)}>✕</button>
-              </div>
-            </div>
-            <iframe
-              id="vp-print-iframe"
-              className="vp-print-iframe"
-              srcDoc={printHtml}
-              title="Vaccination Passport"
-            />
-          </div>
-        </div>
-      )}
+      <PrintPreviewModal printHtml={printHtml} onClose={() => setPrintHtml(null)} t={t} />
     </div>
   )
 }
