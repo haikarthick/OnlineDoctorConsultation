@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
-import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import { VideoSession, ChatMessage } from '../../types'
 import { useWebRTC } from '../../hooks/useWebRTC'
+import EndedSessionView from '../../components/videoConsultation/EndedSessionView'
+import VideoStage from '../../components/videoConsultation/VideoStage'
+import ChatPanel from '../../components/videoConsultation/ChatPanel'
+import { formatDuration } from '../../components/videoConsultation/videoConsultationShared'
 import '../../styles/modules.css'
 
 interface VideoConsultationProps {
@@ -15,7 +18,6 @@ interface VideoConsultationProps {
 const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, onNavigate }) => {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { formatTime, formatDate } = useSettings()
   const [session, setSession] = useState<VideoSession | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
@@ -524,15 +526,6 @@ setError(t('videoConsultation.failedToStartRecording'))
     }
   }
 
-  const formatDuration = (seconds: number) => {
-    const h = Math.floor(seconds / 3600)
-    const m = Math.floor((seconds % 3600) / 60)
-    const s = seconds % 60
-    return h > 0
-      ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-      : `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-  }
-
   if (loading) {
     return (
       <div className="module-page">
@@ -547,87 +540,15 @@ setError(t('videoConsultation.failedToStartRecording'))
   // Session ended view
   if (session?.status === 'ended') {
     return (
-      <div className="module-page">
-        <div className="si-bd60beb2">
-          <div className="si-7615cf7c">📹</div>
-          <h1 className="si-dab75309">{t('videoConsultation.ended')}</h1>
-          <p className="si-712f4327">
-            {t('videoConsultation.duration')}: {formatDuration(session.duration || callDuration)}
-          </p>
-          {(session.recordingUrl || recordingUrl) && (
-            <div className="si-ef14b2c1">
-              <p className="si-c338391d">
-                🎬 {t('videoConsultation.recordingAvailable')}
-              </p>
-              {recordingUrl && (
-                <>
-                  <video
-                    src={recordingUrl}
-                    controls
-                    className="si-a7540650"
-                  />
-                  <br />
-                  <a
-                    href={recordingUrl}
-                    download={`consultation-${conId}-${new Date().toISOString().slice(0,10)}.webm`}
-                    className="btn btn-outline si-315b6ed5"
-                   
-                  >
-                    ⬇️ {t('videoConsultation.downloadRecording')}
-                  </a>
-                </>
-              )}
-              {!recordingUrl && session.recordingUrl && (
-                <p className="si-c3b93ebb">{t('videoConsultation.recordingSaved')}</p>
-              )}
-            </div>
-          )}
-          <div className="si-cf8b12ae">
-            <button className="btn btn-primary" onClick={() => onNavigate('/consultations')}>
-              {t('videoConsultation.viewConsultations')}
-            </button>
-            <button className="btn btn-outline" onClick={() => onNavigate('/dashboard')}>
-              {t('videoConsultation.dashboard')}
-            </button>
-          </div>
-          {/* Chat transcript */}
-          {messages.length > 0 && (
-            <div className="si-969bb5a5">
-              <h3 className="si-bab8e8bc">💬 {t('videoConsultation.chatTranscript')} ({messages.length} {t('videoConsultation.messages')})</h3>
-              <div className="si-cfed40cb">
-                {messages.map(msg => (
-                  <div key={msg.id} className="si-4815af7f">
-                    <strong>{msg.senderName}</strong>: {msg.message}
-                    <span className="si-a69da2c2">
-                      {formatTime(msg.timestamp)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          {/* Prescriptions */}
-          {prescriptions.length > 0 && (
-            <div className="si-8b56bd22">
-              <h3 className="si-bab8e8bc">💊 {t('videoConsultation.prescriptions')} ({prescriptions.length})</h3>
-              {prescriptions.map((rx: any) => (
-                <div key={rx.id} className="si-7731684c">
-                  {Array.isArray(rx.medications) && rx.medications.map((med: any, mi: number) => (
-                    <div key={mi} style={{ marginBottom: mi < rx.medications.length - 1 ? 8 : 0 }}>
-                      <div className="si-d1107ba4">💊 {med.name || t('videoConsultation.medication')}</div>
-                      {med.dosage && <p className="si-b04aa309"><strong>{t('videoConsultation.dosage')}:</strong> {med.dosage}</p>}
-                      {med.frequency && <p className="si-b04aa309"><strong>{t('videoConsultation.frequency')}:</strong> {med.frequency}</p>}
-                      {med.duration && <p className="si-b04aa309"><strong>{t('videoConsultation.durationLabel')}:</strong> {med.duration}</p>}
-                    </div>
-                  ))}
-                  {rx.instructions && <p className="si-4bdc4082"><strong>{t('videoConsultation.instructions')}:</strong> {rx.instructions}</p>}
-                  <p className="si-3341a4cc">{t('videoConsultation.validUntil')}: {rx.validUntil ? formatDate(rx.validUntil) : 'N/A'}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      <EndedSessionView
+        session={session}
+        recordingUrl={recordingUrl}
+        callDuration={callDuration}
+        conId={conId}
+        messages={messages}
+        prescriptions={prescriptions}
+        onNavigate={onNavigate}
+      />
     )
   }
 
@@ -675,190 +596,38 @@ setError(t('videoConsultation.failedToStartRecording'))
         </div>
       ) : (
         <div className="video-container">
-          {/* Main Video Area */}
-          <div className="video-main">
-            {/* Main view: remote peer video when connected, placeholder otherwise */}
-            {session.status === 'active' ? (
-              <>
-                <video
-                  ref={remoteVideoRef}
-                  autoPlay
-                  playsInline
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    background: '#000',
-                    display: remoteStream ? 'block' : 'none'
-                  }}
-                />
-                {!remoteStream && (
-                  <div className="video-placeholder">
-                    <div className="video-avatar">{user?.role === 'veterinarian' ? '🧑' : '👨‍⚕️'}</div>
-                    <p>{connectionState === 'connecting' ? t('videoConsultation.connectingDoctor') : t('videoConsultation.waitingDoctorVideo')}</p>
-                    {mediaMode === 'audio-only' && (
-                      <p className="si-8e438b3b">🎤 {t('videoConsultation.audioOnlyMode')}</p>
-                    )}
-                    {mediaMode === 'none' && (
-                      <p className="si-ff8aeeff">💬 {t('videoConsultation.chatOnlyMode')}</p>
-                    )}
-                  </div>
-                )}
-                {isScreenSharing && (
-                  <div className="si-1ded27be">
-                    🖥️ {t('videoConsultation.screenSharingActive')}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="video-placeholder">
-                <div className="video-avatar">👨‍⚕️</div>
-                <p>{t('videoConsultation.waitingForDoctor')}</p>
-              </div>
-            )}
+          <VideoStage
+            session={session}
+            remoteVideoRef={remoteVideoRef}
+            localVideoRef={localVideoRef}
+            remoteStream={remoteStream}
+            connectionState={connectionState}
+            mediaMode={mediaMode}
+            isScreenSharing={isScreenSharing}
+            isCameraOff={isCameraOff}
+            cameraError={cameraError}
+            isRecording={isRecording}
+            callDuration={callDuration}
+            userRole={user?.role}
+            isMuted={isMuted}
+            onToggleMute={toggleMute}
+            onToggleCamera={toggleCamera}
+            onToggleScreenShare={toggleScreenShare}
+            onToggleRecording={toggleRecording}
+            onEndSession={handleEndSession}
+            onStartSession={handleStartSession}
+          />
 
-            {/* Camera error / info message */}
-            {cameraError && (
-              <div style={{
-                position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)',
-                background: mediaMode === 'none' ? 'rgba(220,38,38,.85)' : 'rgba(217,119,6,.85)',
-                color: 'white', padding: '8px 16px',
-                borderRadius: 8, fontSize: 13, maxWidth: '80%', textAlign: 'center', zIndex: 10
-              }}>
-                {mediaMode === 'audio-only' ? '🎤' : '⚠️'} {cameraError}
-              </div>
-            )}
-
-            {/* Self view - real camera feed or status indicator */}
-            <div className="video-self" style={isCameraOff || mediaMode !== 'video' ? {} : { padding: 0, overflow: 'hidden' }}>
-              {isCameraOff || mediaMode !== 'video' ? (
-                <span className="si-ecda976e">
-                  {mediaMode === 'audio-only' ? t('videoConsultation.audioOnly') : mediaMode === 'none' ? t('videoConsultation.chatOnly') : t('videoConsultation.cameraOff')}
-                </span>
-              ) : (
-                <video
-                  ref={localVideoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="si-cb5aeea0"
-                />
-              )}
-            </div>
-
-            {/* Controls */}
-            {session.status === 'active' && (
-              <div className="video-controls">
-                <button
-                  className={`video-control-btn ${!isMuted ? 'active' : ''}`}
-                  onClick={toggleMute}
-                  title={isMuted ? t('videoConsultation.unmute') : t('videoConsultation.mute')}
-                >
-                  {isMuted ? '🔇' : '🎤'}
-                </button>
-                <button
-                  className={`video-control-btn ${!isCameraOff ? 'active' : ''}`}
-                  onClick={toggleCamera}
-                  title={isCameraOff ? t('videoConsultation.turnOnCamera') : t('videoConsultation.turnOffCamera')}
-                >
-                  {isCameraOff ? '📷' : '📹'}
-                </button>
-                <button
-                  className={`video-control-btn ${isScreenSharing ? 'active' : ''}`}
-                  onClick={toggleScreenShare}
-                  title={t('videoConsultation.shareScreen')}
-                >
-                  🖥️
-                </button>
-                <button
-                  className={`video-control-btn ${isRecording ? 'recording' : ''}`}
-                  onClick={toggleRecording}
-                  title={isRecording ? t('videoConsultation.stopRecording') : t('videoConsultation.startRecording')}
-                  style={isRecording ? { background: '#dc2626', color: 'white', animation: 'pulse 1.5s infinite' } : {}}
-                >
-                  {isRecording ? '⏹️' : '⏺️'}
-                </button>
-                <button
-                  className="video-control-btn end-call"
-                  onClick={handleEndSession}
-                  title={t('videoConsultation.endCallTitle')}
-                >
-                  📞
-                </button>
-              </div>
-            )}
-
-            {session.status === 'waiting' && (
-              <div className="video-controls si-fdd5bef3">
-                <button className="btn btn-success btn-lg" onClick={handleStartSession}>
-                  ▶ {t('videoConsultation.joinCall')}
-                </button>
-              </div>
-            )}
-
-            {isRecording && (
-              <div className="si-fe782970">
-                <span className="si-00e70c6a" />
-                REC {formatDuration(callDuration)}
-              </div>
-            )}
-          </div>
-
-          {/* Chat Panel */}
-          {showChat && (
-            <div className="chat-panel">
-              <div className="card-header">
-                <h3>💬 {t('videoConsultation.chat')}</h3>
-                <button className="btn btn-sm btn-outline" onClick={() => setShowChat(false)}>✕</button>
-              </div>
-
-              <div className="chat-messages">
-                {messages.length === 0 && (
-                  <div className="si-4f4232ea">
-                    <p>{t('videoConsultation.noMessages')}</p>
-                    <p className="si-0a803082">{t('videoConsultation.startConversation')}</p>
-                  </div>
-                )}
-                {messages.map(msg => (
-                  <div
-                    key={msg.id}
-                    className={`chat-message ${msg.senderId === user?.id ? 'sent' : 'received'}`}
-                  >
-                    <div className="msg-sender">{msg.senderName}</div>
-                    <div>{msg.message}</div>
-                    <div className="msg-time">
-                      {formatTime(msg.timestamp)}
-                    </div>
-                  </div>
-                ))}
-                <div ref={chatEndRef} />
-              </div>
-
-              <div className="chat-input-area">
-                <input
-                  className="chat-input"
-                  type="text"
-                  placeholder={t('videoConsultation.typeMessage')}
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                />
-                <button className="chat-send-btn" onClick={handleSendMessage}>
-                  ➤
-                </button>
-              </div>
-            </div>
-          )}
-
-          {!showChat && (
-            <button
-              className="btn btn-outline si-b34d9cba"
-             
-              onClick={() => setShowChat(true)}
-            >
-              💬 {t('videoConsultation.chat')}
-            </button>
-          )}
+          <ChatPanel
+            showChat={showChat}
+            setShowChat={setShowChat}
+            messages={messages}
+            currentUserId={user?.id}
+            newMessage={newMessage}
+            setNewMessage={setNewMessage}
+            onSend={handleSendMessage}
+            chatEndRef={chatEndRef}
+          />
         </div>
       )}
     </div>
