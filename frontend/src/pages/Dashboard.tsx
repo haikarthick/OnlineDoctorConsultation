@@ -9,20 +9,42 @@ import './Dashboard.css'
 import { useTranslation } from 'react-i18next'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
+import { DashStats, ActivityItem, EnterpriseOverviewStats, FeatureCardDef } from '../components/dashboard/dashboardShared'
+import { buildStatCards, buildQuickActions } from '../components/dashboard/dashboardRoleConfig'
+import DashboardStatsGrid from '../components/dashboard/DashboardStatsGrid'
+import HospitalStaffStatsPanel from '../components/dashboard/HospitalStaffStatsPanel'
+import PendingApprovalsPanel from '../components/dashboard/PendingApprovalsPanel'
+import QuickActionsPanel from '../components/dashboard/QuickActionsPanel'
+import RecentActivityPanel from '../components/dashboard/RecentActivityPanel'
+import UpcomingBookingsPanel from '../components/dashboard/UpcomingBookingsPanel'
+import RecentConsultationsPanel from '../components/dashboard/RecentConsultationsPanel'
+import FarmerEnterpriseOverviewPanel from '../components/dashboard/FarmerEnterpriseOverviewPanel'
+import FeatureCardGrid from '../components/dashboard/FeatureCardGrid'
+import ProTipsPanel from '../components/dashboard/ProTipsPanel'
 
-/* ════════════════════════════════════════════════════════
- * TYPES
- * ════════════════════════════════════════════════════════ */
-interface DashStats { bookings: number; consultations: number; animals: number; pending: number; enterprises?: number }
-interface ActivityItem { type: string; description: string; time: string; status: string }
-interface QuickAction { icon: string; label: string; path: string; color: string; description?: string }
-interface EnterpriseOverviewStats { totalAnimals: number; activeGroups: number; pendingMovements: number; activeCampaigns: number }
+const FARMER_FEATURES: FeatureCardDef[] = [
+  { icon: '💊', iconClass: 'si-237b0eb5', titleKey: 'dashboard.features.herdMedicalTitle', descKey: 'dashboard.features.herdMedicalDesc', path: '/herd-medical' },
+  { icon: '🧬', iconClass: 'si-decf142f', titleKey: 'dashboard.features.breedingTitle', descKey: 'dashboard.features.breedingDesc', path: '/breeding' },
+  { icon: '🌾', iconClass: 'si-9861cb6d', titleKey: 'dashboard.features.feedTitle', descKey: 'dashboard.features.feedDesc', path: '/feed-inventory' },
+]
+
+const PET_OWNER_FEATURES: FeatureCardDef[] = [
+  { icon: '💚', iconClass: 'si-0545d449', titleKey: 'dashboard.features.wellnessTitle', descKey: 'dashboard.features.wellnessDesc', path: '/wellness' },
+  { icon: '🏪', iconClass: 'si-bdf67f5f', titleKey: 'dashboard.features.marketplaceTitle', descKey: 'dashboard.features.marketplaceDesc', path: '/marketplace' },
+  { icon: '🤖', iconClass: 'si-f4bcf8a7', titleKey: 'dashboard.features.aiHealthTitle', descKey: 'dashboard.features.aiHealthDesc', path: '/ai-copilot' },
+]
+
+const VETERINARIAN_FEATURES: FeatureCardDef[] = [
+  { icon: '🧠', iconClass: 'si-237b0eb5', titleKey: 'dashboard.features.diseaseAITitle', descKey: 'dashboard.features.diseaseAIDesc', path: '/disease-prediction' },
+  { icon: '📊', iconClass: 'si-bdf67f5f', titleKey: 'dashboard.features.reportBuilderTitle', descKey: 'dashboard.features.reportBuilderDesc', path: '/report-builder' },
+  { icon: '🤖', iconClass: 'si-f4bcf8a7', titleKey: 'dashboard.features.aiCopilotTitle', descKey: 'dashboard.features.aiCopilotDesc', path: '/ai-copilot' },
+]
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation()
 
   const { user } = useAuth()
-  const { formatDate, formatSlotTime } = useSettings()
+  const { formatDate } = useSettings()
   const { hasPermission } = usePermission()
   const navigate = useNavigate()
   const [stats, setStats] = useState<DashStats>({ bookings: 0, consultations: 0, animals: 0, pending: 0, enterprises: 0 })
@@ -219,188 +241,16 @@ const Dashboard: React.FC = () => {
    * ════════════════════════════════════════════════════════ */
 
   // Stat cards - different per role
-  const statCards = useMemo(() => {
-    const base = [
-      { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
-      { label: t('dashboard.stats.consultations'), value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
-    ]
-
-    if (isFarmer) {
-      return [
-        ...base,
-        { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐄', color: '#10b981', path: '/animals' },
-        { label: t('dashboard.stats.enterprises'), value: stats.enterprises || 0, icon: '🏢', color: '#f59e0b', path: '/enterprises' },
-        { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
-      ]
-    }
-
-    if (isPetOwner) {
-      return [
-        ...base,
-        { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
-        { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
-      ]
-    }
-
-    if (isVeterinarian) {
-      const tiles = [
-        { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
-        { label: t('dashboard.stats.consultations'), value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
-        { label: t('dashboard.stats.patients'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
-        { label: t('dashboard.stats.pending'), value: stats.pending, icon: '🔔', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
-      ]
-      // Only shown once this vet has ever sent a prescription into a network pharmacy
-      if (vetPharmacyStats && (vetPharmacyStats.pendingReview + vetPharmacyStats.rejectedThisWeek + vetPharmacyStats.dispensedCount) > 0) {
-        tiles.push(
-          { label: t('dashboard.stats.rxPendingReview'), value: vetPharmacyStats.pendingReview, icon: '💊', color: '#3949ab', path: '/doctor/prescriptions' },
-          { label: t('dashboard.stats.rxRejectedThisWeek'), value: vetPharmacyStats.rejectedThisWeek, icon: '❌', color: '#dc2626', path: '/doctor/prescriptions' },
-          { label: t('dashboard.stats.rxDispensed'), value: vetPharmacyStats.dispensedCount, icon: '✅', color: '#15803d', path: '/doctor/prescriptions' },
-        )
-      }
-      return tiles
-    }
-
-    if (isCorporateAdmin) {
-      return [
-        { label: t('dashboard.stats.totalNetworks'), value: corpStats.totalNetworks, icon: '🌐', color: '#667eea', path: '/hospital-networks' },
-        { label: t('dashboard.stats.approvedNetworks'), value: corpStats.approvedNetworks, icon: '✅', color: '#10b981', path: '/hospital-networks' },
-        { label: t('dashboard.stats.pendingApproval'), value: corpStats.pendingNetworks, icon: '⏳', color: '#f59e0b', path: '/hospital-networks' },
-        { label: t('dashboard.stats.branchHospitals'), value: corpStats.totalHospitals, icon: '🏥', color: '#06b6d4', path: '/hospital-networks' },
-        { label: t('dashboard.stats.networkMembers'), value: corpStats.totalMembers, icon: '👥', color: '#8b5cf6', path: '/hospital-networks' },
-      ]
-    }
-
-    // Hospital staff: dedicated stat section renders separately below - no generic tiles
-    if (isHospitalStaff) return []
-
-    // Pharmacist - redirected to /pharmacy, but guard against any fallthrough
-    if (isPharmacist) {
-      return [
-        { label: t('pharmacy.stats.pendingReviews'), value: 0, icon: '📋', color: '#3949ab', path: '/pharmacy' },
-        { label: t('pharmacy.stats.readyToDispense'), value: 0, icon: '✅', color: '#4caf50', path: '/pharmacy' },
-        { label: t('pharmacy.stats.lowStock'), value: 0, icon: '⚠️', color: '#f44336', path: '/pharmacy' },
-      ]
-    }
-
-    // Platform support: the quick actions below are the navigation surface. No
-    // generic tiles rather than tiles of zeroes - support holds none of the
-    // permissions those counts describe.
-    if (isSupport) return []
-
-    // Admin. Explicitly guarded: this used to be the bare fallback, so every
-    // role without a branch above (support) silently inherited the admin tiles
-    // and quick actions and got redirected back here on clicking any of them.
-    if (isAdmin) {
-      return [
-        { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
-        { label: t('dashboard.stats.consultations'), value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
-        { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
-        { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
-      ]
-    }
-
-    return []
-  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, corpStats, vetPharmacyStats, t])
+  const statCards = useMemo(
+    () => buildStatCards({ isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, stats, corpStats, vetPharmacyStats, t }),
+    [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, corpStats, vetPharmacyStats, t]
+  )
 
   // Quick actions - role-specific
-  const quickActions: QuickAction[] = useMemo(() => {
-    if (isFarmer) {
-      return [
-        { icon: '📝', label: t('dashboard.quickActions.bookConsultation'), path: '/book-consultation', color: '#667eea', description: t('dashboard.quickActions.desc.scheduleVetVisit') },
-        { icon: '🐄', label: t('dashboard.quickActions.myAnimals'), path: '/animals', color: '#10b981', description: t('dashboard.quickActions.desc.manageYourLivestock') },
-        { icon: '🏢', label: t('dashboard.quickActions.farmEnterprise'), path: '/enterprises', color: '#f59e0b', description: t('dashboard.quickActions.desc.manageYourFarm') },
-        { icon: '🐾', label: t('dashboard.quickActions.herdManagement'), path: '/animal-groups', color: '#8b5cf6', description: t('dashboard.quickActions.desc.organizeAnimalGroups') },
-        { icon: '📋', label: t('dashboard.quickActions.medicalRecords'), path: '/medical-records', color: '#06b6d4', description: t('dashboard.quickActions.desc.healthHistory') },
-        { icon: '💊', label: t('dashboard.quickActions.herdMedical'), path: '/herd-medical', color: '#ec4899', description: t('dashboard.quickActions.desc.herdHealthMgmt') },
-        { icon: '💉', label: t('dashboard.quickActions.campaigns'), path: '/campaigns', color: '#14b8a6', description: t('dashboard.quickActions.desc.treatmentCampaigns') },
-        { icon: '📈', label: t('dashboard.quickActions.healthAnalytics'), path: '/health-analytics', color: '#6366f1', description: t('dashboard.quickActions.desc.insightsAndTrends') },
-        { icon: '🏥', label: t('dashboard.quickActions.findHospital'), path: '/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.browseVetHospitals') },
-      ]
-    }
-
-    if (isPetOwner) {
-      return [
-        { icon: '📝', label: t('dashboard.quickActions.bookConsultation'), path: '/book-consultation', color: '#667eea', description: t('dashboard.quickActions.desc.scheduleVetVisit') },
-        { icon: '🔍', label: t('dashboard.quickActions.findDoctor'), path: '/find-doctor', color: '#8b5cf6', description: t('dashboard.quickActions.desc.searchVeterinarians') },
-        { icon: '🐾', label: t('dashboard.quickActions.myAnimals'), path: '/animals', color: '#10b981', description: t('dashboard.quickActions.desc.manageYourPets') },
-        { icon: '📋', label: t('dashboard.quickActions.medicalRecords'), path: '/medical-records', color: '#06b6d4', description: t('dashboard.quickActions.desc.petHealthHistory') },
-        { icon: '💚', label: t('dashboard.quickActions.wellnessPortal'), path: '/wellness', color: '#14b8a6', description: t('dashboard.quickActions.desc.petWellnessTips') },
-        { icon: '✍️', label: t('dashboard.quickActions.writeReview'), path: '/write-review', color: '#f59e0b', description: t('dashboard.quickActions.desc.rateYourVet') },
-        { icon: '🏥', label: t('dashboard.quickActions.findHospital'), path: '/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.browseVetHospitals') },
-      ]
-    }
-
-    if (isVeterinarian) {
-      return [
-        { icon: '🏥', label: t('dashboard.quickActions.viewConsultations'), path: '/consultations', color: '#667eea', description: t('dashboard.quickActions.desc.viewAllConsultations') },
-        { icon: '🗓️', label: t('dashboard.quickActions.manageSchedule'), path: '/doctor/manage-schedule', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageAvailability') },
-        { icon: '💊', label: t('dashboard.quickActions.prescriptions'), path: '/doctor/prescriptions', color: '#10b981', description: t('dashboard.quickActions.desc.writePrescriptions') },
-        { icon: '📋', label: t('dashboard.quickActions.medicalRecords'), path: '/medical-records', color: '#06b6d4', description: t('dashboard.quickActions.desc.patientRecords') },
-        { icon: '📈', label: t('dashboard.quickActions.healthAnalytics'), path: '/health-analytics', color: '#f59e0b', description: t('dashboard.quickActions.desc.healthInsights') },
-        { icon: '🧠', label: t('dashboard.quickActions.diseaseAI'), path: '/disease-prediction', color: '#ec4899', description: t('dashboard.quickActions.desc.aiDiagnosisAssist') },
-        { icon: '⭐', label: t('dashboard.quickActions.myReviews'), path: '/doctor/reviews', color: '#14b8a6', description: t('dashboard.quickActions.desc.patientFeedback') },
-        { icon: '🔔', label: t('dashboard.quickActions.smartAlerts'), path: '/alerts', color: '#ef4444', description: t('dashboard.quickActions.desc.healthNotifications') },
-        { icon: '🏨', label: t('dashboard.quickActions.myHospital'), path: '/vet-hospitals/manage', color: '#0ea5e9', description: t('dashboard.quickActions.desc.hospitalDashboard') },
-      ]
-    }
-
-    if (isHospitalStaff) {
-      return [
-        { icon: '🔄', label: t('dashboard.quickActions.hospitalWorkflow'), path: '/hospital-workflow', color: '#667eea', description: t('dashboard.quickActions.desc.patientQueue') },
-        { icon: '🛏️', label: t('dashboard.quickActions.inpatient'), path: '/inpatient', color: '#10b981', description: t('dashboard.quickActions.desc.inpatientBoarding') },
-        { icon: '📋', label: t('dashboard.quickActions.medicalRecords'), path: '/medical-records', color: '#06b6d4', description: t('dashboard.quickActions.desc.patientRecords') },
-        { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
-      ]
-    }
-
-    if (isCorporateAdmin) {
-      return [
-        { icon: '🌐', label: t('dashboard.quickActions.hospitalNetworks'), path: '/hospital-networks', color: '#667eea', description: t('dashboard.quickActions.desc.manageYourNetworks') },
-        { icon: '📊', label: t('dashboard.quickActions.healthAnalytics'), path: '/health-analytics', color: '#10b981', description: t('dashboard.quickActions.desc.networkHealthInsights') },
-        { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
-      ]
-    }
-
-    // Pharmacist - home is /pharmacy, redirect handles it but provide fallback actions
-    if (isPharmacist) {
-      return [
-        { icon: '💊', label: t('pharmacy.tabs.overview'), path: '/pharmacy', color: '#3949ab', description: t('pharmacy.pendingReview') },
-        { icon: '📋', label: t('pharmacy.tabs.review'), path: '/pharmacy', color: '#f57f17', description: t('pharmacy.noPendingReviews') },
-        { icon: '📦', label: t('pharmacy.tabs.inventory'), path: '/pharmacy', color: '#388e3c', description: t('pharmacy.inventory.title') },
-        { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
-      ]
-    }
-
-    // Platform support - exactly the pages its DEFAULT_ROLE_PERMISSIONS grant
-    // (dispute_management, admin_cancellation_dashboard, settings). Anything
-    // more would render a tile that RoleRoute bounces straight back here.
-    if (isSupport) {
-      return [
-        { icon: '⚖️', label: t('disputeManagement.title'), path: '/admin/disputes', color: '#667eea', description: t('dashboard.quickActions.desc.resolveDisputes') },
-        { icon: '📊', label: t('nav.cancellations'), path: '/admin/cancellation-dashboard', color: '#f59e0b', description: t('dashboard.quickActions.desc.cancellationOversight') },
-        { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
-      ]
-    }
-
-    // Admin - explicitly guarded, see the note on the stat cards above.
-    if (isAdmin) {
-      return [
-        { icon: '🛡️', label: t('dashboard.quickActions.adminPanel'), path: '/admin/dashboard', color: '#667eea', description: t('dashboard.quickActions.desc.systemOverview') },
-        { icon: '👥', label: t('dashboard.quickActions.users'), path: '/admin/users', color: '#8b5cf6', description: t('dashboard.quickActions.desc.userManagement') },
-        { icon: '🩺', label: t('dashboard.quickActions.viewConsultations'), path: '/admin/consultations', color: '#10b981', description: t('dashboard.quickActions.desc.allConsultations') },
-        { icon: '💳', label: t('dashboard.quickActions.payments'), path: '/admin/payments', color: '#f59e0b', description: t('dashboard.quickActions.desc.paymentManagement') },
-        { icon: '⚖️', label: t('dashboard.quickActions.reviews'), path: '/admin/reviews', color: '#06b6d4', description: t('dashboard.quickActions.desc.reviewModeration') },
-        { icon: '📜', label: t('dashboard.quickActions.auditLogs'), path: '/admin/audit-logs', color: '#ef4444', description: t('dashboard.quickActions.desc.systemActivity') },
-        { icon: '🏥', label: t('dashboard.quickActions.hospitalMgmt'), path: '/admin/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.hospitalOversight') },
-      ]
-    }
-
-    // Only reached by a role added to the backend without a branch here. An
-    // empty action list is honest; the admin list was not.
-    return [
-      { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
-    ]
-  }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, t])
+  const quickActions = useMemo(
+    () => buildQuickActions({ isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, t }),
+    [isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, t]
+  )
 
   // Subtitle per role
   const subtitle = useMemo(() => {
@@ -414,6 +264,8 @@ const Dashboard: React.FC = () => {
     if (isSupport) return t('dashboard.subtitles.support')
     return t('dashboard.greeting', { name: user?.firstName })
   }, [isVeterinarian, isPetOwner, isFarmer, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, isSupport, t, user?.firstName])
+
+  const extraTipIcon = isFarmer ? '🌾' : isPetOwner ? '🐾' : isVeterinarian ? '🩺' : undefined
 
   return (
     <div className="dashboard-container">
@@ -437,163 +289,29 @@ const Dashboard: React.FC = () => {
 
       {/* ── Stats Cards ── */}
       {hasPermission('dashboard_stats') && (
-        <div className="dashboard-stats-grid">
-          {statCards.map((stat, index) => (
-            <div key={index} className="stat-card" onClick={() => navigate(stat.path)} title={`${t('common.view')} ${stat.label}`}>
-              <div className="stat-icon" style={{ background: `${stat.color}15`, color: stat.color }}>
-                <span>{stat.icon}</span>
-              </div>
-              <div className="stat-content">
-                <div className="stat-value">{loading ? '-' : stat.value}</div>
-                <div className="stat-label">{stat.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <DashboardStatsGrid statCards={statCards} loading={loading} />
       )}
 
       {/* ── Hospital Staff Dashboard ── */}
       {isHospitalStaff && staffDashboard && (
-        <div className="module-stats si-af65fe13">
-          <div className="stat-card">
-            <div className="stat-icon">🏥</div>
-            <div className="stat-value">{staffDashboard.hospitalName || t('dashboard.noHospital')}</div>
-            <div className="stat-label">{t('dashboard.stats.myHospital')}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">🐾</div>
-            <div className="stat-value">{staffDashboard.enrolledPatients || 0}</div>
-            <div className="stat-label">{t('dashboard.stats.enrolledPatients')}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">📋</div>
-            <div className="stat-value">{staffDashboard.todayQueueCount || 0}</div>
-            <div className="stat-label">{t('dashboard.stats.todayQueue')}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">🛏️</div>
-            <div className="stat-value">{staffDashboard.activeInpatients || 0}</div>
-            <div className="stat-label">{t('dashboard.stats.activeInpatients')}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">🔄</div>
-            <div className="stat-value">{staffDashboard.pendingReferrals || 0}</div>
-            <div className="stat-label">{t('dashboard.stats.pendingReferrals')}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">👥</div>
-            <div className="stat-value">{staffDashboard.staffCount || 0}</div>
-            <div className="stat-label">{t('dashboard.stats.branchStaff')}</div>
-          </div>
-        </div>
+        <HospitalStaffStatsPanel staffDashboard={staffDashboard} />
       )}
 
       {/* ── Pending Booking Approvals - vet/admin only ── */}
       {hasPermission('dashboard_pending_approvals') && pendingBookings.length > 0 && (
-        <div className="dashboard-alert-section">
-          <div className="alert-card alert-warning">
-            <div className="alert-header">
-              <span className="alert-header-icon">🔔</span>
-              <h3>{t('dashboard.pendingBookings')} ({pendingBookings.filter(booking => {
-                const d = new Date(booking.scheduledDate + 'T' + (booking.timeSlotEnd || '23:59') + ':00')
-                return d >= new Date()
-              }).length})</h3>
-            </div>
-            <div className="alert-body">
-              {pendingBookings.map(booking => {
-                const expired = booking.status === 'pending' && (() => {
-                  const d = new Date(booking.scheduledDate + 'T' + (booking.timeSlotEnd || '23:59') + ':00')
-                  return d < new Date()
-                })()
-                // Skip expired pending bookings - backend auto-transitions these to missed
-                if (expired) return null
-                return (
-                <div key={booking.id} className="alert-item">
-                  <div className="alert-item-info">
-                    <strong>{booking.petOwnerName || t('dashboard.pending.patient')}</strong>
-                    <span className="alert-item-meta">
-                      {formatDate(booking.scheduledDate, { weekday: 'short', month: 'short', day: 'numeric' })} {t('common.at')} {formatSlotTime(booking.timeSlotStart)}
-                      {' · '}{booking.bookingType === 'video_call' ? t('dashboard.pending.video') : t('dashboard.pending.chat')}
-                    </span>
-                    <span className="alert-item-reason">
-                      {booking.reasonForVisit || booking.reason || t('dashboard.pending.generalConsultation')}
-                      {(booking.priority === 'urgent' || booking.priority === 'emergency') && (
-                        <span className="priority-tag"> ⚠️ {t(`common.${booking.priority}`)?.toUpperCase()}</span>
-                      )}
-                    </span>
-                  </div>
-                  <div className="alert-item-actions">
-                    <button className="btn-confirm" onClick={() => handleConfirm(booking.id)}>{t('dashboard.pending.confirm')}</button>
-                    <button className="btn-decline" onClick={() => handleCancel(booking.id)}>{t('dashboard.pending.decline')}</button>
-                  </div>
-                </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
+        <PendingApprovalsPanel pendingBookings={pendingBookings} onConfirm={handleConfirm} onCancel={handleCancel} />
       )}
 
       {/* ── Main Grid: Quick Actions + Activity ── */}
       <div className="dashboard-main-grid">
         {/* Quick Actions */}
         {hasPermission('dashboard_quick_actions') && (
-          <section className="dashboard-section quick-actions-section">
-            <div className="section-header">
-              <h2 className="section-title">{t('dashboard.quickActionsTitle')}</h2>
-            </div>
-            <div className="quick-actions-grid">
-              {quickActions.map((action, i) => (
-                <button key={i} className="action-card" onClick={() => navigate(action.path)}>
-                  <div className="action-card-icon" style={{ background: `${action.color}12`, color: action.color }}>
-                    <span>{action.icon}</span>
-                  </div>
-                  <div className="action-card-content">
-                    <span className="action-card-label">{action.label}</span>
-                    {action.description && <span className="action-card-desc">{action.description}</span>}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </section>
+          <QuickActionsPanel quickActions={quickActions} />
         )}
 
         {/* Recent Activity */}
         {hasPermission('dashboard_recent_activity') && (
-          <section className="dashboard-section activity-section">
-            <div className="section-header">
-              <h2 className="section-title">{t('dashboard.recentActivity')}</h2>
-              <button className="section-link" onClick={() => navigate('/consultations?tab=bookings')}>{t('dashboard.viewAll')}</button>
-            </div>
-            <div className="activity-list">
-              {activities.length === 0 && !loading && (
-                <div className="empty-state">
-                  <span className="empty-icon">📭</span>
-                  <p>{t('dashboard.noActivity')}</p>
-                  {hasPermission('book_consultation') && (
-                    <button className="empty-action" onClick={() => navigate('/book-consultation')}>
-                      {t('dashboard.bookFirst')}
-                    </button>
-                  )}
-                </div>
-              )}
-              {activities.map((activity, index) => (
-                <div key={index} className="activity-item">
-                  <div className="activity-icon">
-                    {activity.type === 'Consultation' ? '🩺' : '📅'}
-                  </div>
-                  <div className="activity-content">
-                    <div className="activity-title">{activity.type}</div>
-                    <div className="activity-description">{activity.description}</div>
-                  </div>
-                  <div className="activity-meta">
-                    <span className={`activity-status status-${activity.status}`}>{t(`common.${activity.status}`) || activity.status}</span>
-                    <span className="activity-time">{activity.time}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+          <RecentActivityPanel activities={activities} loading={loading} />
         )}
       </div>
 
@@ -601,74 +319,11 @@ const Dashboard: React.FC = () => {
       {(hasPermission('dashboard_upcoming_bookings') || hasPermission('dashboard_recent_consultations')) && (
         <div className="dashboard-two-col">
           {hasPermission('dashboard_upcoming_bookings') && (
-            <section className="dashboard-section">
-              <div className="section-header">
-                <h2 className="section-title">{t('dashboard.upcomingBookings')}</h2>
-                <button className="section-link" onClick={() => navigate('/consultations?tab=bookings&status=confirmed')}>{t('dashboard.viewAll')}</button>
-              </div>
-              {upcomingBookings.length === 0 ? (
-                <div className="empty-state">
-                  <p>{t('dashboard.noUpcoming')}</p>
-                  {hasPermission('view_schedule') && (
-                    <button className="empty-action" onClick={() => navigate('/consultations?tab=schedule')}>
-                      {t('dashboard.manageSchedule')}
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="booking-list">
-                  {upcomingBookings.map(booking => (
-                    <div key={booking.id} className="booking-item">
-                      <div className="booking-item-info">
-                        <strong>{booking.petOwnerName || t('dashboard.pending.patient')}</strong>
-                        <span className="booking-item-meta">
-                          {formatDate(booking.scheduledDate)} {t('common.at')} {booking.timeSlotStart}
-                        </span>
-                        <span className="booking-item-meta">
-                          {booking.bookingType === 'video_call' ? t('dashboard.pending.video') : t('dashboard.pending.chat')} ·{' '}
-                          <span style={{ color: booking.priority === 'urgent' || booking.priority === 'emergency' ? '#dc2626' : undefined }}>
-                            {t(`common.${booking.priority || 'normal'}`) || booking.priority}
-                          </span>
-                        </span>
-                      </div>
-                      <span className={`status-pill status-${booking.status}`}>{t(`common.${booking.status}`) || booking.status}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+            <UpcomingBookingsPanel upcomingBookings={upcomingBookings} />
           )}
 
           {hasPermission('dashboard_recent_consultations') && (
-            <section className="dashboard-section">
-              <div className="section-header">
-                <h2 className="section-title">{t('dashboard.recentConsultations')}</h2>
-              </div>
-              {recentConsultations.length === 0 ? (
-                <div className="empty-state">
-                  <p>{t('dashboard.noRecent')}</p>
-                  {hasPermission('book_consultation') && (
-                    <button className="empty-action" onClick={() => navigate('/find-doctor')}>
-                      {t('dashboard.findDoctor')}
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="booking-list">
-                  {recentConsultations.map(consultation => (
-                    <div key={consultation.id} className="booking-item">
-                      <div className="booking-item-info">
-                        <strong>{consultation.title || t('dashboard.pending.consultation')}</strong>
-                        <span className="booking-item-meta">
-                          {formatDate(consultation.createdAt || '')}
-                        </span>
-                      </div>
-                      <span className={`status-pill status-${consultation.status}`}>{t(`common.${consultation.status}`) || consultation.status}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+            <RecentConsultationsPanel recentConsultations={recentConsultations} />
           )}
         </div>
       )}
@@ -677,179 +332,18 @@ const Dashboard: React.FC = () => {
 
       {/* Farmer Enterprise Overview */}
       {isFarmer && enterpriseOverview && (
-        <div className="module-card si-1e52b2bd">
-          <div className="si-6625e7cc">
-            <h3 className="si-657b8a7c">🏢 {t('dashboard.enterpriseOverview', 'Enterprise Overview')}</h3>
-            <button className="btn btn-sm btn-secondary" onClick={() => navigate('/enterprises')}>{t('common.viewAll', 'View All')}</button>
-          </div>
-          <div className="module-stats si-2d6a231a">
-            <div className="stat-card si-3c1f81b9" onClick={() => navigate('/animals')}>
-              <div className="stat-icon">🐄</div>
-              <div className="stat-value">{enterpriseOverview.totalAnimals}</div>
-              <div className="stat-label">{t('dashboard.stats.myAnimals', 'Total Animals')}</div>
-            </div>
-            <div className="stat-card si-3c1f81b9" onClick={() => navigate('/campaigns')}>
-              <div className="stat-icon">💉</div>
-              <div className="stat-value">{enterpriseOverview.activeCampaigns}</div>
-              <div className="stat-label">{t('dashboard.enterpriseStats.activeCampaigns', 'Active Campaigns')}</div>
-            </div>
-            <div className="stat-card si-3c1f81b9" onClick={() => navigate('/movement-log')}>
-              <div className="stat-icon">⏳</div>
-              <div className="stat-value">{enterpriseOverview.pendingMovements}</div>
-              <div className="stat-label">{t('dashboard.enterpriseStats.pendingApprovals', 'Pending Approvals')}</div>
-            </div>
-            <div className="stat-card si-3c1f81b9" onClick={() => navigate('/animal-groups')}>
-              <div className="stat-icon">📂</div>
-              <div className="stat-value">{enterpriseOverview.activeGroups}</div>
-              <div className="stat-label">{t('dashboard.enterpriseStats.groups', 'Enterprise Groups')}</div>
-            </div>
-          </div>
-          <div className="si-44eb72fc">
-            <button className="btn btn-secondary si-1a1e3482" onClick={() => navigate('/herd-medical')}>💊 {t('dashboard.features.herdMedicalTitle', 'Herd Medical')}</button>
-            <button className="btn btn-secondary si-1a1e3482" onClick={() => navigate('/campaigns')}>💉 {t('dashboard.features.treatmentCampaigns', 'Campaigns')}</button>
-            <button className="btn btn-secondary si-1a1e3482" onClick={() => navigate('/movement-log')}>🔄 {t('movementLog.pageTitle', 'Movement Log')}</button>
-            <button className="btn btn-secondary si-1a1e3482" onClick={() => navigate('/feed-inventory')}>🌾 {t('dashboard.features.feedTitle', 'Feed Inventory')}</button>
-          </div>
-        </div>
+        <FarmerEnterpriseOverviewPanel enterpriseOverview={enterpriseOverview} />
       )}
 
-      {isFarmer && (
-        <div className="dashboard-feature-grid">
-          <div className="feature-card" onClick={() => navigate('/herd-medical')}>
-            <div className="feature-card-icon si-237b0eb5">💊</div>
-            <div className="feature-card-body">
-              <h3>{t('dashboard.features.herdMedicalTitle')}</h3>
-              <p>{t('dashboard.features.herdMedicalDesc')}</p>
-            </div>
-            <span className="feature-arrow">→</span>
-          </div>
-          <div className="feature-card" onClick={() => navigate('/breeding')}>
-            <div className="feature-card-icon si-decf142f">🧬</div>
-            <div className="feature-card-body">
-              <h3>{t('dashboard.features.breedingTitle')}</h3>
-              <p>{t('dashboard.features.breedingDesc')}</p>
-            </div>
-            <span className="feature-arrow">→</span>
-          </div>
-          <div className="feature-card" onClick={() => navigate('/feed-inventory')}>
-            <div className="feature-card-icon si-9861cb6d">🌾</div>
-            <div className="feature-card-body">
-              <h3>{t('dashboard.features.feedTitle')}</h3>
-              <p>{t('dashboard.features.feedDesc')}</p>
-            </div>
-            <span className="feature-arrow">→</span>
-          </div>
-        </div>
-      )}
+      {isFarmer && <FeatureCardGrid features={FARMER_FEATURES} />}
 
-      {isPetOwner && (
-        <div className="dashboard-feature-grid">
-          <div className="feature-card" onClick={() => navigate('/wellness')}>
-            <div className="feature-card-icon si-0545d449">💚</div>
-            <div className="feature-card-body">
-              <h3>{t('dashboard.features.wellnessTitle')}</h3>
-              <p>{t('dashboard.features.wellnessDesc')}</p>
-            </div>
-            <span className="feature-arrow">→</span>
-          </div>
-          <div className="feature-card" onClick={() => navigate('/marketplace')}>
-            <div className="feature-card-icon si-bdf67f5f">🏪</div>
-            <div className="feature-card-body">
-              <h3>{t('dashboard.features.marketplaceTitle')}</h3>
-              <p>{t('dashboard.features.marketplaceDesc')}</p>
-            </div>
-            <span className="feature-arrow">→</span>
-          </div>
-          <div className="feature-card" onClick={() => navigate('/ai-copilot')}>
-            <div className="feature-card-icon si-f4bcf8a7">🤖</div>
-            <div className="feature-card-body">
-              <h3>{t('dashboard.features.aiHealthTitle')}</h3>
-              <p>{t('dashboard.features.aiHealthDesc')}</p>
-            </div>
-            <span className="feature-arrow">→</span>
-          </div>
-        </div>
-      )}
+      {isPetOwner && <FeatureCardGrid features={PET_OWNER_FEATURES} />}
 
-      {isVeterinarian && (
-        <div className="dashboard-feature-grid">
-          <div className="feature-card" onClick={() => navigate('/disease-prediction')}>
-            <div className="feature-card-icon si-237b0eb5">🧠</div>
-            <div className="feature-card-body">
-              <h3>{t('dashboard.features.diseaseAITitle')}</h3>
-              <p>{t('dashboard.features.diseaseAIDesc')}</p>
-            </div>
-            <span className="feature-arrow">→</span>
-          </div>
-          <div className="feature-card" onClick={() => navigate('/report-builder')}>
-            <div className="feature-card-icon si-bdf67f5f">📊</div>
-            <div className="feature-card-body">
-              <h3>{t('dashboard.features.reportBuilderTitle')}</h3>
-              <p>{t('dashboard.features.reportBuilderDesc')}</p>
-            </div>
-            <span className="feature-arrow">→</span>
-          </div>
-          <div className="feature-card" onClick={() => navigate('/ai-copilot')}>
-            <div className="feature-card-icon si-f4bcf8a7">🤖</div>
-            <div className="feature-card-body">
-              <h3>{t('dashboard.features.aiCopilotTitle')}</h3>
-              <p>{t('dashboard.features.aiCopilotDesc')}</p>
-            </div>
-            <span className="feature-arrow">→</span>
-          </div>
-        </div>
-      )}
+      {isVeterinarian && <FeatureCardGrid features={VETERINARIAN_FEATURES} />}
 
       {/* ── Pro Tips (all roles) ── */}
       {hasPermission('dashboard_tips') && (
-        <section className="dashboard-section tips-section">
-          <div className="section-header">
-            <h2 className="section-title">{t('dashboard.proTips')}</h2>
-          </div>
-          <div className="tips-grid">
-            <div className="tip-card">
-              <span className="tip-icon">💡</span>
-              <div>
-                <h4>{t('dashboard.tips.appointmentTitle')}</h4>
-                <p>{t('dashboard.tips.appointmentDesc')}</p>
-              </div>
-            </div>
-            <div className="tip-card">
-              <span className="tip-icon">📱</span>
-              <div>
-                <h4>{t('dashboard.tips.healthTitle')}</h4>
-                <p>{t('dashboard.tips.healthDesc')}</p>
-              </div>
-            </div>
-            {isFarmer && (
-              <div className="tip-card">
-                <span className="tip-icon">🌾</span>
-                <div>
-                  <h4>{t('dashboard.tips.communityTitle')}</h4>
-                  <p>{t('dashboard.tips.communityDesc')}</p>
-                </div>
-              </div>
-            )}
-            {isPetOwner && (
-              <div className="tip-card">
-                <span className="tip-icon">🐾</span>
-                <div>
-                  <h4>{t('dashboard.tips.communityTitle')}</h4>
-                  <p>{t('dashboard.tips.communityDesc')}</p>
-                </div>
-              </div>
-            )}
-            {isVeterinarian && (
-              <div className="tip-card">
-                <span className="tip-icon">🩺</span>
-                <div>
-                  <h4>{t('dashboard.tips.communityTitle')}</h4>
-                  <p>{t('dashboard.tips.communityDesc')}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
+        <ProTipsPanel extraTipIcon={extraTipIcon} />
       )}
     </div>
   )

@@ -86,7 +86,6 @@
         "src/pages/BreedingManager.tsx",
         "src/pages/ComplianceDocs.tsx",
         "src/pages/Consultations.tsx",
-        "src/pages/Dashboard.tsx",
         "src/pages/DigitalTwin.tsx",
         "src/pages/DiseasePrediction.tsx",
         "src/pages/FeedInventory.tsx",
