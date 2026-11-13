@@ -8109,3 +8109,49 @@
 </details>
 
 ---
+
+## 2026-11-13 17:09 · `256ae86` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 17:25 · `7d72b36` · OTHER
+
+**Commit:** refactor(pages): split the 858-line Dashboard.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (15)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/dashboard/DashboardStatsGrid.tsx
+  - frontend/src/components/dashboard/FarmerEnterpriseOverviewPanel.tsx
+  - frontend/src/components/dashboard/FeatureCardGrid.tsx
+  - frontend/src/components/dashboard/HospitalStaffStatsPanel.tsx
+  - frontend/src/components/dashboard/PendingApprovalsPanel.tsx
+  - frontend/src/components/dashboard/ProTipsPanel.tsx
+  - frontend/src/components/dashboard/QuickActionsPanel.tsx
+  - frontend/src/components/dashboard/RecentActivityPanel.tsx
+  - frontend/src/components/dashboard/RecentConsultationsPanel.tsx
+  - frontend/src/components/dashboard/UpcomingBookingsPanel.tsx
+  - frontend/src/components/dashboard/dashboardRoleConfig.ts
+  - frontend/src/components/dashboard/dashboardShared.ts
+  - frontend/src/pages/Dashboard.css
+  - frontend/src/pages/Dashboard.tsx
+
+</details>
+
+---
