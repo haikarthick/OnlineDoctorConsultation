@@ -140,7 +140,6 @@
         "src/pages/hospitalnetwork/HospitalNetworks.tsx",
         "src/pages/hospitalnetwork/NetworkRoleMatrix.tsx",
         "src/pages/petowner/BookConsultation.tsx",
-        "src/pages/petowner/FindDoctor.tsx",
         "src/pages/petowner/VetProfilePage.tsx",
         "src/pages/petowner/VideoConsultation.tsx",
         "src/pages/pharmacy/DispensingHistory.tsx",
