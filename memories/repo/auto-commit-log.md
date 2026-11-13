@@ -8284,3 +8284,44 @@
 </details>
 
 ---
+
+## 2026-11-13 17:58 · `d13ca36` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 18:07 · `5fcd6b7` · OTHER
+
+**Commit:** refactor(pages): split the 877-line VaccinationPassport.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/vaccinationPassport/CertHistoryTab.tsx
+  - frontend/src/components/vaccinationPassport/ComplianceSummaryTab.tsx
+  - frontend/src/components/vaccinationPassport/GroupPassportTab.tsx
+  - frontend/src/components/vaccinationPassport/PassportCard.tsx
+  - frontend/src/components/vaccinationPassport/PrintPreviewModal.tsx
+  - frontend/src/components/vaccinationPassport/VaccinationPassportHelpers.tsx
+  - frontend/src/components/vaccinationPassport/vaccinationPassportShared.ts
+  - frontend/src/pages/VaccinationPassport.css
+  - frontend/src/pages/VaccinationPassport.tsx
+
+</details>
+
+---
