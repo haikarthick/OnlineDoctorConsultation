@@ -15,7 +15,9 @@ Frontend: React 18 + TypeScript + Vite, CSS modules are **global** (no scoping �
 ## Key directories
 ```
 backend/src/controllers/   HTTP layer
-backend/src/services/      business logic + DB queries (76 files, well split)
+backend/src/services/      business logic + DB queries (76 files, well split; the two that
+                            weren't — database.ts, HospitalNetworkService.ts — are now class
+                            skeletons delegating to utils/database/ and services/hospitalNetwork/)
 backend/src/routes/index.ts  pure aggregator, 36 lines — mounts every routes/<module>.routes.ts
 backend/src/routes/<module>.routes.ts  one module's routes per file, 15 files total
 backend/src/middleware/     auth, validation, upload, hospitalDataIsolation
