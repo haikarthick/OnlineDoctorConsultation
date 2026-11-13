@@ -7986,3 +7986,44 @@
 </details>
 
 ---
+
+## 2026-11-13 16:38 · `96dca6f` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 16:48 · `747481d` · OTHER
+
+**Commit:** refactor(pages): split the 726-line FindDoctor.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/findDoctor/AvailabilityPanel.tsx
+  - frontend/src/components/findDoctor/Pagination.tsx
+  - frontend/src/components/findDoctor/ResultsToolbar.tsx
+  - frontend/src/components/findDoctor/SearchFiltersBar.tsx
+  - frontend/src/components/findDoctor/VetCard.tsx
+  - frontend/src/components/findDoctor/findDoctorShared.ts
+  - frontend/src/pages/petowner/FindDoctor.tsx
+  - frontend/src/styles/extracted-inline-styles.css
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
