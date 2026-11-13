@@ -8240,3 +8240,47 @@
 </details>
 
 ---
+
+## 2026-11-13 17:47 · `6751853` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 17:57 · `fdd8517` · OTHER
+
+**Commit:** refactor(pages): split the 869-line ManageSchedule.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (13)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/manageSchedule/BlockModal.tsx
+  - frontend/src/components/manageSchedule/CalendarTab.tsx
+  - frontend/src/components/manageSchedule/HolidayModal.tsx
+  - frontend/src/components/manageSchedule/HolidaysTab.tsx
+  - frontend/src/components/manageSchedule/OverrideModal.tsx
+  - frontend/src/components/manageSchedule/ScheduleFormModal.tsx
+  - frontend/src/components/manageSchedule/TimeBlocksTab.tsx
+  - frontend/src/components/manageSchedule/VacationModal.tsx
+  - frontend/src/components/manageSchedule/WeeklyScheduleTab.tsx
+  - frontend/src/components/manageSchedule/manageScheduleShared.ts
+  - frontend/src/pages/doctor/ManageSchedule.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
