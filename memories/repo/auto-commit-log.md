@@ -7752,3 +7752,38 @@
 </details>
 
 ---
+
+## 2026-11-13 13:46 · `75e4c64` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 14:19 · `213c1f9` · OTHER
+
+**Commit:** refactor(pages): split the 606-line PublicMarketplace.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - frontend/src/components/marketplace/PublicListingCard.tsx
+  - frontend/src/components/marketplace/PublicListingDetail.tsx
+  - frontend/src/components/marketplace/publicListingShared.ts
+  - frontend/src/pages/PublicMarketplace.tsx
+
+</details>
+
+---
