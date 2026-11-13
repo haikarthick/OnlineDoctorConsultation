@@ -25,10 +25,22 @@ that caused the bug, and broke registration for every user in production. Read
 `docs/VERIFICATION.md` for the full story — it's worth the few minutes, because "it compiled and
 the tests passed" is exactly the confidence level that incident disproves.
 
-## The one thing to actively remember: run it yourself before pushing
+## Gate 5 runs in CI now, not on this laptop, by default
 
-If your change touched a **database migration, a route, a constraint, or auth**, run this
-yourself rather than trusting the push hook to be your first signal:
+As of 2026-11-13, `npm run pre-deploy` **skips** runtime verification locally unless
+`RUN_RUNTIME_VERIFY=1` is set. This isn't a weakening — it moved, it didn't disappear. The
+identical check runs in GitHub Actions on every push (`runtime-verify` job), and `vetcare-dev`'s
+Render service deploys `After CI Checks Pass` rather than on raw push, so a broken change still
+cannot reach Render before this gate has run. The reason it moved: on Windows, this gate boots a
+real throwaway Postgres cluster, and Windows has no `fork()` — Postgres has to relaunch itself as
+a new process for every connection, which flashes a console window each time and is genuinely
+heavy for ~2-3 minutes. That's not acceptable as a silent default on a modest laptop, and it no
+longer needs to be the only line of defense.
+
+**Still run it yourself** (`RUN_RUNTIME_VERIFY=1 npm run pre-deploy`, or directly below) when you
+want confidence before waiting ~3 minutes for CI, when working offline, or — most importantly —
+**always for a network-hospital-zone change**, since the extra wait between push and CI result is
+exactly the kind of gap that area's change-approval discipline shouldn't casually accept:
 
 ```bash
 cd backend
@@ -45,8 +57,12 @@ cd frontend && npm run build && npx playwright install chromium
 ```
 
 Takes 2–3 minutes. If Postgres isn't on the default path: `PGBIN="<path>\bin" npm run
-verify:runtime`. A missing Postgres **fails** the gate, it does not skip it — `SKIP_RUNTIME_VERIFY=1`
-exists but using it should come with a reason in the commit message, not silence.
+verify:runtime`. Once it's running, a missing Postgres **fails** the gate rather than skipping it
+— `SKIP_RUNTIME_VERIFY=1` (a different flag — see `docs/VERIFICATION.md`) exists to no-op that
+specific case, and using it should come with a reason in the commit message, not silence.
+
+If `vetcare-demo` has not also been switched to deploy after CI checks pass, treat anything headed
+for `demo` with the old level of caution — run this locally before pushing, don't assume.
 
 ## For a UI change specifically
 

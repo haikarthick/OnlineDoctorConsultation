@@ -32,9 +32,12 @@ docs/modules/              per-module deep-dive docs (load only the one you're t
 Never push directly to `demo`/`main`; promote via the GitHub Actions workflow.
 
 ## Before shipping anything that touches DB, routes, or auth
-Static checks (`tsc`, `vitest`, `npm run build`) cannot see SQL or runtime behavior. Run
-`npm run verify:runtime` (backend) before calling a DB/route/constraint change done — full
-rationale and the production incident that proved it necessary: `docs/VERIFICATION.md`.
+Static checks (`tsc`, `vitest`, `npm run build`) cannot see SQL or runtime behavior — only
+`npm run verify:runtime` (backend) does. Since 2026-11-13 it runs in CI on every push rather than
+locally by default (it's heavy and, on Windows, flashes console windows — see
+`docs/VERIFICATION.md`), and `vetcare-dev` deploys only after CI checks pass, so a broken change
+still can't reach Render undetected. Run it locally yourself (`RUN_RUNTIME_VERIFY=1`) when you
+want confidence before waiting on CI, or when working offline.
 
 ## Route split (done, 2025-11-13)
 `backend/src/routes/index.ts` was a single ~5,800-line file holding every module's routes — the

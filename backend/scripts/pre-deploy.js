@@ -94,8 +94,24 @@ runCheck('CSS Scoping (page styles stay in their page)', 'node scripts/check-css
 //    constraint violation, a migration that fails on a real DB, or startup code that silently
 //    reverts a migration. That blind spot shipped the groomer-registration bug (2026-07-27) -
 //    tsc, vitest and the production build were ALL green while the feature was broken for every
-//    user. Slow (~2-3 min) and worth every second. See backend/scripts/runtime-verify.js.
-runCheck('Runtime Verification (real DB + real server)', 'node scripts/runtime-verify.js', BACKEND, 900000);
+//    user. See backend/scripts/runtime-verify.js.
+//
+//    SKIPPED HERE BY DEFAULT since 2026-11-13. It spins up a real throwaway Postgres cluster on
+//    Windows, which has to re-launch itself as a new process for every connection/worker (no
+//    fork() on Windows) - each one briefly flashes a console window and the whole run is
+//    genuinely heavy for ~2-3 minutes, which tied up the owner's laptop on a modest machine.
+//    It is no longer the only thing standing between a broken change and a live deploy: this
+//    exact check now runs in GitHub Actions on every push (`runtime-verify` job in
+//    .github/workflows/ci-cd.yml), and vetcare-dev's Render service is set to deploy "After CI
+//    Checks Pass" rather than on raw push - so a broken change can no longer reach Render before
+//    this check has run, it just runs on GitHub's machine instead of this one.
+//    Opt back in with RUN_RUNTIME_VERIFY=1 (e.g. working offline, or wanting local confidence
+//    before waiting ~3 min for CI) - see docs/VERIFICATION.md.
+if (process.env.RUN_RUNTIME_VERIFY === '1') {
+  runCheck('Runtime Verification (real DB + real server)', 'node scripts/runtime-verify.js', BACKEND, 900000);
+} else {
+  console.log(`  Runtime Verification (real DB + real server) ... ${DIM}skipped locally - runs in CI (RUN_RUNTIME_VERIFY=1 to force)${RESET}`);
+}
 
 // 5. Memory staleness check - warn if code changed but memory wasn't updated
 // (non-blocking: only prints warning, doesn't fail the push)

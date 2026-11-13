@@ -30,6 +30,19 @@ migration on every boot) is invisible to every static tool, and invisible in the
 | 4 | E2E route coverage | routes with no test | static |
 | 5 | **Runtime verification** | **everything the above cannot see** | **executes** |
 
+**Gate 5 runs in CI on every push, not locally by default (since 2026-11-13).** It still runs —
+just on GitHub's machine instead of the developer's. On Windows, this gate boots a real throwaway
+Postgres cluster, and Windows has no `fork()`, so Postgres has to relaunch itself as a new process
+for every connection/worker — each one briefly flashes a console window, and the run is genuinely
+heavy (~2-3 min of real CPU/DB/browser load) on a modest laptop. That stopped being an acceptable
+local default once two things were true: the identical check runs in GitHub Actions on every push
+(`runtime-verify` job, `.github/workflows/ci-cd.yml`), and `vetcare-dev`'s Render service deploys
+`After CI Checks Pass` rather than on raw push — so a broken change genuinely cannot reach Render
+before this gate has run; it just doesn't have to run on the developer's hardware to do it.
+Set `RUN_RUNTIME_VERIFY=1` to opt back in locally (e.g. offline, or wanting confidence before
+waiting ~3 minutes for CI). If `vetcare-demo` is not *also* set to deploy after CI checks pass,
+treat pushes destined for `demo` with the same caution as before this change.
+
 ## Gate 5 — `backend/scripts/runtime-verify.js`
 
 Builds a throwaway PostgreSQL the way production is built, then drives the real server.
@@ -95,6 +108,11 @@ Beyond the bug it was built for, immediately and unprompted:
 None were reachable by any static check.
 
 ## Running it
+
+Two separate env vars, two separate layers — don't confuse them: `RUN_RUNTIME_VERIFY=1` tells
+`npm run pre-deploy` (the push gate) to run this gate locally at all (see above — off by default
+now). `SKIP_RUNTIME_VERIFY=1`, below, tells `runtime-verify.js` *itself* to no-op if it can't find
+a local Postgres, once it's already decided to run.
 
 ```bash
 cd backend
