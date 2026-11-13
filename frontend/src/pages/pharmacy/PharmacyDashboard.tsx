@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSettings } from '../../context/SettingsContext'
-import { useMasterData } from '../../context/MasterDataContext'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import client from '../../services/api/client'
 import './PharmacyDashboard.css'
@@ -18,70 +16,12 @@ import MedicationTransfers from './MedicationTransfers'
 import PharmacyAlerts from './PharmacyAlerts'
 import PrescriptionReviewModal from './PrescriptionReviewModal'
 import DispensingModal from './DispensingModal'
+import PharmacyCreateModal from './PharmacyCreateModal'
+import PharmacyOverviewTab from './PharmacyOverviewTab'
+import PharmacyAnalyticsTab from './PharmacyAnalyticsTab'
+import type { Pharmacy, DashboardSummary, PendingPrescription, ReadyDispensing, Analytics, NetworkPharmacyRow } from './pharmacyDashboardShared'
 
-interface Pharmacy {
-  id: string
-  pharmacy_name: string
-  network_id: string
-  hospital_id: string
-  is_primary_pharmacy: boolean
-  phone?: string
-  email?: string
-  address?: string
-}
-
-interface DashboardSummary {
-  pending_reviews: number
-  ready_to_dispense: number
-  low_stock_count: number
-  expiring_soon_count: number
-  pending_reorders: number
-  todays_dispensed: number
-  todays_revenue: number
-}
-
-interface PendingPrescription {
-  id: string
-  pet_name: string
-  owner_name: string
-  vet_name: string
-  medication_names: string
-  medications?: any
-  animal_species?: string
-  created_at: string
-  review_status: string
-}
-
-interface ReadyDispensing {
-  id: string
-  pet_name: string
-  owner_name: string
-  vet_name?: string
-  medication_names: string
-  medications?: any
-  animal_species?: string
-  target_pharmacy_id: string
-  review_status: string
-}
-
-interface Analytics {
-  total_revenue: number
-  dispensing_count: number
-  pending_reviews: number
-  top_medications: { med_name: string; total_dispensed: number; total_revenue: number }[]
-  low_stock_count: number
-  expiring_count: number
-}
-
-/** One row of /networks/:networkId/pharmacy-reports */
-interface NetworkPharmacyRow {
-  pharmacy_id: string
-  pharmacy_name: string
-  revenue: number
-  dispensing_count: number
-}
-
-const TABS = ['overview', 'review', 'dispense', 'inventory', 'alerts', 'catalog', 'suppliers', 'history', 'reorders', 'transfers', 'analytics', 'settings'] as const
+const TABS =['overview', 'review', 'dispense', 'inventory', 'alerts', 'catalog', 'suppliers', 'history', 'reorders', 'transfers', 'analytics', 'settings'] as const
 type Tab = typeof TABS[number]
 
 const TAB_ICONS: Record<Tab, string> = {
@@ -92,8 +32,6 @@ const TAB_ICONS: Record<Tab, string> = {
 
 export default function PharmacyDashboard() {
   const { t } = useTranslation()
-  const { formatCurrency } = useSettings()
-  const { speciesLabel } = useMasterData()
 
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([])
   const [selectedPharmacy, setSelectedPharmacy] = useState<Pharmacy | null>(null)
@@ -113,8 +51,6 @@ export default function PharmacyDashboard() {
   const [emptyReason, setEmptyReason] = useState<string>('')
   const [canCreate, setCanCreate] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
-  const [createForm, setCreateForm] = useState({ pharmacy_name: '', license_number: '', phone: '', email: '', address: '' })
-  const [creating, setCreating] = useState(false)
   const [analyticsDays, setAnalyticsDays] = useState(30)
 
   const loadPharmacies = useCallback(async () => {
@@ -213,7 +149,7 @@ export default function PharmacyDashboard() {
                 const p = pharmacies.find(x => x.id === e.target.value)
                 if (p) setSelectedPharmacy(p)
               }}
-             
+
             >
               {pharmacies.map(p => (
                 <option key={p.id} value={p.id} className="si-856e6b88">{p.pharmacy_name}</option>
@@ -245,56 +181,13 @@ export default function PharmacyDashboard() {
         </div>
       )}
 
-      {showCreate && (
-        <div className="pharm-modal-overlay" onClick={() => setShowCreate(false)}>
-          <div className="pharm-modal" onClick={e => e.stopPropagation()}>
-            <h3>{t('pharmacy.empty.createCta')}</h3>
-            <form
-              onSubmit={async e => {
-                e.preventDefault()
-                if (!networkId) return
-                setCreating(true); setError('')
-                try {
-                  await client.post(`/networks/${networkId}/pharmacies`, { ...createForm, is_primary_pharmacy: true })
-                  setShowCreate(false)
-                  setCreateForm({ pharmacy_name: '', license_number: '', phone: '', email: '', address: '' })
-                  await loadPharmacies()
-                } catch (err: any) {
-                  setError(err?.response?.data?.message || err?.response?.data?.error || err.message)
-                } finally { setCreating(false) }
-              }}
-            >
-              <div className="pharm-form-group">
-                <label>{t('pharmacy.empty.name')} *</label>
-                <input value={createForm.pharmacy_name} required
-                  onChange={e => setCreateForm(f => ({ ...f, pharmacy_name: e.target.value }))} />
-              </div>
-              <div className="pharm-form-group">
-                <label>{t('pharmacy.empty.licenseNumber')}</label>
-                <input value={createForm.license_number}
-                  onChange={e => setCreateForm(f => ({ ...f, license_number: e.target.value }))} />
-              </div>
-              <div className="pharm-form-group">
-                <label>{t('pharmacy.empty.phone')}</label>
-                <input value={createForm.phone}
-                  onChange={e => setCreateForm(f => ({ ...f, phone: e.target.value }))} />
-              </div>
-              <div className="pharm-form-group">
-                <label>{t('pharmacy.empty.address')}</label>
-                <input value={createForm.address}
-                  onChange={e => setCreateForm(f => ({ ...f, address: e.target.value }))} />
-              </div>
-              <div className="pharm-modal-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(false)}>
-                  {t('common.cancel')}
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={creating}>
-                  {creating ? t('common.saving') : t('pharmacy.empty.createCta')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {showCreate && networkId && (
+        <PharmacyCreateModal
+          networkId={networkId}
+          onClose={() => setShowCreate(false)}
+          onCreated={loadPharmacies}
+          onError={setError}
+        />
       )}
 
       {error && (
@@ -333,146 +226,16 @@ export default function PharmacyDashboard() {
       </div>
       )}
 
-      {/* ── Overview Tab ── */}
       {tab === 'overview' && (
-        <>
-          {/* Stats tiles */}
-          <div className="pharmacy-stats">
-            <div className="pharmacy-stat-card warning si-3c1f81b9" onClick={() => setTab('review')}>
-              <span className="stat-icon">📋</span>
-              <span className="stat-value">{summary?.pending_reviews ?? '-'}</span>
-              <span className="stat-label">{t('pharmacy.stats.pendingReviews')}</span>
-            </div>
-            <div className="pharmacy-stat-card success si-3c1f81b9" onClick={() => setTab('dispense')}>
-              <span className="stat-icon">✅</span>
-              <span className="stat-value">{summary?.ready_to_dispense ?? '-'}</span>
-              <span className="stat-label">{t('pharmacy.stats.readyToDispense')}</span>
-            </div>
-            {/* These two link to Alerts, not Inventory: the inventory table lists
-                one row per batch, so a medication that has run out entirely has
-                nothing to show there and the count led to a page it was absent
-                from. */}
-            <div className="pharmacy-stat-card danger si-3c1f81b9" onClick={() => setTab('alerts')}>
-              <span className="stat-icon">⚠️</span>
-              <span className="stat-value">{summary?.low_stock_count ?? '-'}</span>
-              <span className="stat-label">{t('pharmacy.stats.lowStock')}</span>
-            </div>
-            <div className="pharmacy-stat-card warning si-3c1f81b9" onClick={() => setTab('alerts')}>
-              <span className="stat-icon">⏰</span>
-              <span className="stat-value">{summary?.expiring_soon_count ?? '-'}</span>
-              <span className="stat-label">{t('pharmacy.stats.expiringSoon')}</span>
-            </div>
-            <div className="pharmacy-stat-card info si-3c1f81b9" onClick={() => setTab('reorders')}>
-              <span className="stat-icon">🔄</span>
-              <span className="stat-value">{summary?.pending_reorders ?? '-'}</span>
-              <span className="stat-label">{t('pharmacy.stats.pendingReorders')}</span>
-            </div>
-            <div className="pharmacy-stat-card primary">
-              <span className="stat-icon">💰</span>
-              <span className="stat-value">{formatCurrency(summary?.todays_revenue ?? 0)}</span>
-              <span className="stat-label">{t('pharmacy.stats.todaysRevenue')}</span>
-            </div>
-          </div>
-
-          {/* Pending Review Queue */}
-          <div className="pharmacy-card">
-            <div className="pharmacy-card-header">
-              <h3>📋 {t('pharmacy.pendingReview')}</h3>
-              <button type="button" className="module-btn small" onClick={() => setTab('review')}>{t('common.viewAll')}</button>
-            </div>
-            {loading ? (
-              <p className="si-6a9f93ca">{t('common.loading')}</p>
-            ) : pendingRx.length === 0 ? (
-              <div className="pharmacy-empty si-8a6436c0">
-                <p>✅ {t('pharmacy.noPendingReviews')}</p>
-              </div>
-            ) : (
-              <div className="pharmacy-table-wrap">
-                <table className="pharmacy-table">
-                  <thead>
-                    <tr>
-                      <th>{t('pharmacy.table.patient')}</th>
-                      <th>{t('pharmacy.table.owner')}</th>
-                      <th>{t('pharmacy.table.vet')}</th>
-                      <th>{t('pharmacy.table.medications')}</th>
-                      <th>{t('pharmacy.table.date')}</th>
-                      <th>{t('common.action')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pendingRx.slice(0, 5).map(rx => (
-                      <tr key={rx.id}>
-                        <td>
-                          <strong>{rx.pet_name || '-'}</strong>
-                          {rx.animal_species && <small className="si-1a0c0bfa">{speciesLabel(rx.animal_species, t)}</small>}
-                        </td>
-                        <td>{rx.owner_name || '-'}</td>
-                        <td>{rx.vet_name || '-'}</td>
-                        <td className="si-cf8f70f1">{rx.medication_names || '-'}</td>
-                        <td className="si-86931177">{rx.created_at ? new Date(rx.created_at).toLocaleDateString() : '-'}</td>
-                        <td>
-                          <button type="button" className="module-btn small primary" onClick={() => setReviewTarget(rx)}>
-                            {t('pharmacy.actions.review')}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {pendingRx.length > 5 && (
-                  <div className="si-c0b3a91c">
-                    <button type="button" className="module-btn small" onClick={() => setTab('review')}>
-                      +{pendingRx.length - 5} more → {t('common.viewAll')}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Ready to Dispense */}
-          <div className="pharmacy-card">
-            <div className="pharmacy-card-header">
-              <h3>✅ {t('pharmacy.readyToDispense')}</h3>
-              <button type="button" className="module-btn small" onClick={() => setTab('dispense')}>{t('common.viewAll')}</button>
-            </div>
-            {readyDispense.length === 0 ? (
-              <div className="pharmacy-empty si-8a6436c0">
-                <p>{t('pharmacy.noReadyDispense')}</p>
-              </div>
-            ) : (
-              <div className="pharmacy-table-wrap">
-                <table className="pharmacy-table">
-                  <thead>
-                    <tr>
-                      <th>{t('pharmacy.table.patient')}</th>
-                      <th>{t('pharmacy.table.owner')}</th>
-                      <th>{t('pharmacy.table.medications')}</th>
-                      <th>{t('common.action')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {readyDispense.slice(0, 5).map(rx => (
-                      <tr key={rx.id}>
-                        <td>
-                          <strong>{rx.pet_name || '-'}</strong>
-                          {rx.animal_species && <small className="si-1a0c0bfa">{speciesLabel(rx.animal_species, t)}</small>}
-                        </td>
-                        <td>{rx.owner_name || '-'}</td>
-                        <td className="si-4a370a4e">{rx.medication_names || '-'}</td>
-                        <td>
-                          <button type="button" className="module-btn small primary" onClick={() => setDispenseTarget(rx)}>
-                            {t('pharmacy.actions.dispense')}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </>
+        <PharmacyOverviewTab
+          summary={summary}
+          pendingRx={pendingRx}
+          readyDispense={readyDispense}
+          loading={loading}
+          onTabChange={setTab}
+          onReview={setReviewTarget}
+          onDispense={setDispenseTarget}
+        />
       )}
 
       {tab === 'review' && selectedPharmacy && (
@@ -511,116 +274,14 @@ export default function PharmacyDashboard() {
         <MedicationTransfers networkId={networkId} />
       )}
 
-      {/* Analytics Tab */}
       {tab === 'analytics' && selectedPharmacy && (
-        <div>
-          <div className="pharmacy-card">
-            <div className="pharmacy-card-header">
-              <h3>📊 {t('pharmacy.analytics.title')}</h3>
-              <select className="pharmacy-select" value={analyticsDays} onChange={e => setAnalyticsDays(parseInt(e.target.value))}>
-                <option value={7}>7 {t('pharmacy.analytics.days')}</option>
-                <option value={30}>30 {t('pharmacy.analytics.days')}</option>
-                <option value={90}>90 {t('pharmacy.analytics.days')}</option>
-              </select>
-            </div>
-            {!analytics ? (
-              <p className="si-43f86130">{t('common.loading')}</p>
-            ) : (
-              <>
-                <div className="analytics-grid">
-                  <div className="analytics-card">
-                    <div className="value">{formatCurrency(analytics.total_revenue)}</div>
-                    <div className="label">{t('pharmacy.analytics.totalRevenue')}</div>
-                  </div>
-                  <div className="analytics-card">
-                    <div className="value">{analytics.dispensing_count}</div>
-                    <div className="label">{t('pharmacy.analytics.dispensingCount')}</div>
-                  </div>
-                  <div className="analytics-card">
-                    <div className="value" style={{ color: analytics.pending_reviews > 0 ? '#e65100' : '#2e7d32' }}>
-                      {analytics.pending_reviews}
-                    </div>
-                    <div className="label">{t('pharmacy.analytics.pendingReviews')}</div>
-                  </div>
-                  <div className="analytics-card">
-                    <div className="value" style={{ color: analytics.low_stock_count > 0 ? '#f57f17' : '#2e7d32' }}>
-                      {analytics.low_stock_count}
-                    </div>
-                    <div className="label">{t('pharmacy.analytics.lowStock')}</div>
-                  </div>
-                  <div className="analytics-card">
-                    <div className="value" style={{ color: analytics.expiring_count > 0 ? '#e65100' : '#2e7d32' }}>
-                      {analytics.expiring_count}
-                    </div>
-                    <div className="label">{t('pharmacy.analytics.expiringSoon')}</div>
-                  </div>
-                </div>
-
-                {analytics.top_medications?.length > 0 && (
-                  <div className="si-138c678b">
-                    <h4 className="si-fe789c18">
-                      🏆 {t('pharmacy.analytics.topMedications')}
-                    </h4>
-                    <div className="si-977f8af1">
-                      {analytics.top_medications.map((med, i) => {
-                        const maxDispensed = analytics.top_medications[0]?.total_dispensed || 1
-                        const pct = Math.round((med.total_dispensed / maxDispensed) * 100)
-                        return (
-                          <div key={i} className="si-98d3a741">
-                            <span className="si-bed43d56">#{i + 1}</span>
-                            <div className="si-6acd75e8">
-                              <div className="si-50d7f990">
-                                <strong>{med.med_name}</strong>
-                                <span className="si-40d2db53">{med.total_dispensed} units · {formatCurrency(med.total_revenue)}</span>
-                              </div>
-                              <div className="si-9a7e25d0">
-                                <div style={{ height: '100%', background: '#3949ab', borderRadius: 4, width: `${pct}%` }} />
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Network-wide comparison. Every other view on this page is scoped to
-              the one selected pharmacy; this is the only place a network
-              operator can see them side by side. */}
-          {networkReport && networkReport.pharmacies?.length > 0 && (
-            <div className="pharmacy-card">
-              <div className="pharmacy-card-header">
-                <h3>🌐 {t('pharmacy.analytics.networkTitle')}</h3>
-              </div>
-              <div className="table-scroll">
-                <table className="pharmacy-table">
-                  <thead>
-                    <tr>
-                      <th>{t('pharmacy.analytics.pharmacy')}</th>
-                      <th>{t('pharmacy.analytics.revenue')}</th>
-                      <th>{t('pharmacy.analytics.dispensings')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {networkReport.pharmacies.map(p => (
-                      <tr key={p.pharmacy_id} className={p.pharmacy_id === selectedPharmacy.id ? 'is-current' : undefined}>
-                        <td>
-                          {p.pharmacy_name}
-                          {p.pharmacy_id === selectedPharmacy.id && ` - ${t('pharmacy.analytics.thisPharmacy')}`}
-                        </td>
-                        <td>{formatCurrency(Number(p.revenue) || 0)}</td>
-                        <td>{p.dispensing_count}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
+        <PharmacyAnalyticsTab
+          selectedPharmacyId={selectedPharmacy.id}
+          analytics={analytics}
+          networkReport={networkReport}
+          analyticsDays={analyticsDays}
+          onDaysChange={setAnalyticsDays}
+        />
       )}
 
       {tab === 'settings' && selectedPharmacy && (

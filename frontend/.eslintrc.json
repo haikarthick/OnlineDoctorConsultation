@@ -148,7 +148,6 @@
         "src/pages/pharmacy/DispensingModal.tsx",
         "src/pages/pharmacy/MedicationCatalog.tsx",
         "src/pages/pharmacy/MedicationTransfers.tsx",
-        "src/pages/pharmacy/PharmacyDashboard.tsx",
         "src/pages/pharmacy/PrescriptionReviewModal.tsx",
         "src/pages/pharmacy/ReordersManagement.tsx"
       ],
