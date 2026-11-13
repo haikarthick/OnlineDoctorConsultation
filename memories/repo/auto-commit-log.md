@@ -8155,3 +8155,50 @@
 </details>
 
 ---
+
+## 2026-11-13 17:25 · `b2005d5` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 17:36 · `ec9fd92` · OTHER
+
+**Commit:** refactor(pages): split the 863-line Settings.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (16)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/settings/BecomeGroomerCard.tsx
+  - frontend/src/components/settings/CertificateServicesPanel.tsx
+  - frontend/src/components/settings/ClinicAvailabilitySection.tsx
+  - frontend/src/components/settings/ConsultationFeeSection.tsx
+  - frontend/src/components/settings/NotificationPreferencesPanel.tsx
+  - frontend/src/components/settings/PreferencesSection.tsx
+  - frontend/src/components/settings/PrivacyDataSection.tsx
+  - frontend/src/components/settings/ProfileSection.tsx
+  - frontend/src/components/settings/RoleAndAccountSection.tsx
+  - frontend/src/components/settings/RoleChangeHistoryTable.tsx
+  - frontend/src/components/settings/RoleChangeRequestPanel.tsx
+  - frontend/src/components/settings/VetProfessionalSection.tsx
+  - frontend/src/components/settings/settingsShared.ts
+  - frontend/src/pages/Settings.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
