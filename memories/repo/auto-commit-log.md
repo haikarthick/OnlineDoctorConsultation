@@ -8368,3 +8368,40 @@
 </details>
 
 ---
+
+## 2026-11-13 18:25 · `2880a83` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 18:34 · `07a49cf` · OTHER
+
+**Commit:** refactor(pages): split the 1,002-line CertificateWriter.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - frontend/src/components/certificateWriter/IssuedSuccessScreen.tsx
+  - frontend/src/components/certificateWriter/Step1AnimalAndType.tsx
+  - frontend/src/components/certificateWriter/Step2ClinicalDetails.tsx
+  - frontend/src/components/certificateWriter/Step3Review.tsx
+  - frontend/src/components/certificateWriter/certificateWriterShared.ts
+  - frontend/src/pages/doctor/CertificateWriter.tsx
+
+</details>
+
+---
