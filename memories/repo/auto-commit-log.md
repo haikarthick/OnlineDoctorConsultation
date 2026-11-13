@@ -7908,3 +7908,41 @@
 </details>
 
 ---
+
+## 2026-11-13 16:18 · `ea1a6c0` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 16:28 · `354ddd6` · OTHER
+
+**Commit:** refactor(pages): split the 649-line PharmacyDashboard.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/pages/pharmacy/PharmacyAnalyticsTab.tsx
+  - frontend/src/pages/pharmacy/PharmacyCreateModal.tsx
+  - frontend/src/pages/pharmacy/PharmacyDashboard.css
+  - frontend/src/pages/pharmacy/PharmacyDashboard.tsx
+  - frontend/src/pages/pharmacy/PharmacyOverviewTab.tsx
+  - frontend/src/pages/pharmacy/pharmacyDashboardShared.ts
+
+</details>
+
+---
