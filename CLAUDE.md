@@ -81,6 +81,9 @@ as their own `routes/<module>.routes.ts` from the start.
 
 ## Project skills (`.claude/skills/`)
 Invoke these for the workflows they cover rather than improvising each time:
+- `feature-delivery` — **the default pipeline for any new feature/enhancement/module request**:
+  requirements clarification → design → build → review (chains the skills below) → ship. Starts
+  automatically when the user describes new functionality; don't skip its phases.
 - `add-module` — scaffolding a new module (route file, controller/service layering, DB,
   frontend page, i18n, feature flag)
 - `ui-review` — DESIGN_SYSTEM.md gates + an Apple-HIG-style polish pass for any screen
