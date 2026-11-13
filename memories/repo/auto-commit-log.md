@@ -7354,3 +7354,369 @@
 </details>
 
 ---
+
+## 2026-11-13 05:34 · `fe7f5c5` · 📝 DOCS
+
+**Commit:** docs: add root CLAUDE.md and docs/modules index for progressive context disclosure  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - CLAUDE.md
+  - docs/modules/README.md
+
+</details>
+
+---
+
+## 2026-11-13 06:04 · `989415f` · OTHER
+
+**Commit:** refactor(routes): extract pharmacy and grooming into their own route files  
+**Author:** haikarthick  
+**Categories:** API  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - CLAUDE.md
+  - backend/src/routes/grooming.routes.ts
+  - backend/src/routes/index.ts
+  - backend/src/routes/pharmacy.routes.ts
+
+</details>
+
+---
+
+## 2026-11-13 06:27 · `5b93f65` · OTHER
+
+**Commit:** refactor(routes): split 8 more modules out of routes/index.ts  
+**Author:** haikarthick  
+**Categories:** API  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - CLAUDE.md
+  - backend/src/routes/admin-and-permissions.routes.ts
+  - backend/src/routes/catalog-and-roles.routes.ts
+  - backend/src/routes/core-clinical.routes.ts
+  - backend/src/routes/enterprise-farm.routes.ts
+  - backend/src/routes/index.ts
+  - backend/src/routes/marketplace.routes.ts
+  - backend/src/routes/medical-records.routes.ts
+  - backend/src/routes/payments-and-reviews.routes.ts
+  - backend/src/routes/pricing-visibility.routes.ts
+
+</details>
+
+---
+
+## 2026-11-13 08:00 · `c0e0dea` · OTHER
+
+**Commit:** refactor(routes): finish the route split - extract network-hospital zone  
+**Author:** haikarthick  
+**Categories:** API  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - CLAUDE.md
+  - backend/src/routes/hospital-network.routes.ts
+  - backend/src/routes/hospital-staff-invites.routes.ts
+  - backend/src/routes/index.ts
+  - backend/src/routes/network-financial-summary.routes.ts
+  - backend/src/routes/network-permissions-and-workflow.routes.ts
+  - backend/src/routes/network-subscriptions.routes.ts
+
+</details>
+
+---
+
+## 2026-11-13 08:19 · `802d3da` · OTHER
+
+**Commit:** feat(skills): add 4 project skills for module scaffolding, UI, security, and shipping  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - .claude/skills/add-module/SKILL.md
+  - .claude/skills/pre-ship/SKILL.md
+  - .claude/skills/tenant-isolation-review/SKILL.md
+  - .claude/skills/ui-review/SKILL.md
+  - CLAUDE.md
+
+</details>
+
+---
+
+## 2026-11-13 09:01 · `2c99230` · OTHER
+
+**Commit:** fix(ci): repair GitHub Actions pipeline, broken on every push since 2026-08-05  
+**Author:** haikarthick  
+**Categories:** CONFIG  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - .github/workflows/ci-cd.yml
+  - backend/tests/unit/AnimalGroupService.test.ts
+  - backend/tests/unit/EnterpriseService.test.ts
+  - backend/tests/unit/MovementService.test.ts
+  - backend/tests/unit/validation.extended.test.ts
+  - backend/tests/unit/validation.test.ts
+
+</details>
+
+---
+
+## 2026-11-13 09:58 · `ccb3762` · OTHER
+
+**Commit:** fix(dev-harness): stop running runtime-verify locally by default  
+**Author:** haikarthick  
+**Categories:** TOOLING  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - .claude/skills/pre-ship/SKILL.md
+  - CLAUDE.md
+  - backend/scripts/pre-deploy.js
+  - docs/VERIFICATION.md
+
+</details>
+
+---
+
+## 2026-11-13 10:17 · `faf4c70` · OTHER
+
+**Commit:** feat(skills): add ui-resilience-review for animation performance and edge-case data  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - .claude/skills/ui-resilience-review/SKILL.md
+  - CLAUDE.md
+
+</details>
+
+---
+
+## 2026-11-13 10:35 · `6417237` · OTHER
+
+**Commit:** feat(skills): add feature-delivery as the default BA-Dev-QA-ship pipeline  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - .claude/skills/feature-delivery/SKILL.md
+  - CLAUDE.md
+
+</details>
+
+---
+
+## 2026-11-13 11:03 · `98328bb` · OTHER
+
+**Commit:** refactor(i18n): split each locale's 8,400-line translation.json into 16 module files  
+**Author:** haikarthick  
+**Categories:** i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (108)</summary>
+
+  - .claude/skills/add-module/SKILL.md
+  - CLAUDE.md
+  - docs/DESIGN_SYSTEM.md
+  - frontend/scripts/copy-locales.cjs
+  - frontend/src/i18n/index.ts
+  - frontend/src/i18n/localeParity.test.ts
+  - frontend/src/locales/en/modules/admin.json
+  - frontend/src/locales/en/modules/analytics.json
+  - frontend/src/locales/en/modules/animals.json
+  - frontend/src/locales/en/modules/auth.json
+  - frontend/src/locales/en/modules/common.json
+  - frontend/src/locales/en/modules/consultations.json
+  - frontend/src/locales/en/modules/dashboard.json
+  - frontend/src/locales/en/modules/enterprise.json
+  - frontend/src/locales/en/modules/grooming.json
+  - frontend/src/locales/en/modules/home.json
+  - frontend/src/locales/en/modules/hospital.json
+  - frontend/src/locales/en/modules/hospitalNetwork.json
+  - frontend/src/locales/en/modules/marketplace.json
+  - frontend/src/locales/en/modules/medicalRecords.json
+  - ... and 88 more
+
+</details>
+
+---
+
+## 2026-11-13 12:15 · `0594c8f` · OTHER
+
+**Commit:** refactor(types): split frontend/src/types/index.ts into 12 module files  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (13)</summary>
+
+  - frontend/src/types/analytics.ts
+  - frontend/src/types/animals.ts
+  - frontend/src/types/automation.ts
+  - frontend/src/types/clientPortal.ts
+  - frontend/src/types/common.ts
+  - frontend/src/types/consultations.ts
+  - frontend/src/types/core.ts
+  - frontend/src/types/enterprise.ts
+  - frontend/src/types/hospital.ts
+  - frontend/src/types/index.ts
+  - frontend/src/types/marketplace.ts
+  - frontend/src/types/medicalRecords.ts
+  - frontend/src/types/vetProfile.ts
+
+</details>
+
+---
+
+## 2026-11-13 12:29 · `c74f68e` · OTHER
+
+**Commit:** refactor(api): split the 3,561-line ApiService class into 16 module files  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (19)</summary>
+
+  - frontend/src/services/api.ts
+  - frontend/src/services/api/core.ts
+  - frontend/src/services/api/modules/admin.ts
+  - frontend/src/services/api/modules/analytics.ts
+  - frontend/src/services/api/modules/auth.ts
+  - frontend/src/services/api/modules/automation.ts
+  - frontend/src/services/api/modules/clientPortal.ts
+  - frontend/src/services/api/modules/consultations.ts
+  - frontend/src/services/api/modules/enterprise.ts
+  - frontend/src/services/api/modules/grooming.ts
+  - frontend/src/services/api/modules/hospital.ts
+  - frontend/src/services/api/modules/marketplace.ts
+  - frontend/src/services/api/modules/medicalRecords.ts
+  - frontend/src/services/api/modules/networkReferralsAdmin.ts
+  - frontend/src/services/api/modules/networkSubscriptions.ts
+  - frontend/src/services/api/modules/patientConsentRoles.ts
+  - frontend/src/services/api/modules/payments.ts
+  - frontend/src/services/api/modules/schedule.ts
+  - frontend/src/services/api/utils.ts
+
+</details>
+
+---
+
+## 2026-11-13 12:48 · `0c0cc97` · OTHER
+
+**Commit:** refactor(validation): split the 2,113-line Joi schema file into 14 module files  
+**Author:** haikarthick  
+**Categories:** TOOLING  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (17)</summary>
+
+  - backend/scripts/runtime-verify.js
+  - backend/src/middleware/validation.ts
+  - backend/src/middleware/validation/admin.ts
+  - backend/src/middleware/validation/auth.ts
+  - backend/src/middleware/validation/automation.ts
+  - backend/src/middleware/validation/clientPortal.ts
+  - backend/src/middleware/validation/consultations.ts
+  - backend/src/middleware/validation/core.ts
+  - backend/src/middleware/validation/enterprise.ts
+  - backend/src/middleware/validation/grooming.ts
+  - backend/src/middleware/validation/hospital.ts
+  - backend/src/middleware/validation/hospitalNetwork.ts
+  - backend/src/middleware/validation/marketplace.ts
+  - backend/src/middleware/validation/masterData.ts
+  - backend/src/middleware/validation/medicalRecords.ts
+  - backend/src/middleware/validation/payments.ts
+  - backend/src/middleware/validation/tier3.ts
+
+</details>
+
+---
+
+## 2026-11-13 13:17 · `9dde6fc` · OTHER
+
+**Commit:** refactor(database): split the 2,101-line database.ts - the highest-risk file in this audit  
+**Author:** haikarthick  
+**Categories:** TOOLING · UTILS · DB  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (16)</summary>
+
+  - backend/scripts/runtime-verify.js
+  - backend/scripts/schema-check.js
+  - backend/src/utils/database.ts
+  - backend/src/utils/database/constants.ts
+  - backend/src/utils/database/ensurePaymentModuleSchema.ts
+  - backend/src/utils/database/ensureSchemaPublic.ts
+  - backend/src/utils/database/helpers.ts
+  - backend/src/utils/database/repairSchema.ts
+  - backend/src/utils/database/runSQLMigrations.ts
+  - backend/src/utils/database/seed/phase1GeneralSafetyNets.ts
+  - backend/src/utils/database/seed/phase2AnimalsAndMore.ts
+  - backend/src/utils/database/seed/phase3NetworkSubscriptions.ts
+  - backend/src/utils/database/seed/phase4Pharmacy.ts
+  - backend/src/utils/database/seed/phase5PharmacyBillingAndPasswordReset.ts
+  - backend/src/utils/database/syncBookingStatuses.ts
+  - docs/VERIFICATION.md
+
+</details>
+
+---
+
+## 2026-11-13 13:43 · `a3f9cce` · OTHER
+
+**Commit:** refactor(services): split the 2,345-line HospitalNetworkService.ts  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (13)</summary>
+
+  - backend/src/services/HospitalNetworkService.ts
+  - backend/src/services/hospitalNetwork/analyticsAndCompliance.ts
+  - backend/src/services/hospitalNetwork/consentAndPatientId.ts
+  - backend/src/services/hospitalNetwork/dashboard.ts
+  - backend/src/services/hospitalNetwork/enrollment.ts
+  - backend/src/services/hospitalNetwork/financialSummary.ts
+  - backend/src/services/hospitalNetwork/leaveAndTransfer.ts
+  - backend/src/services/hospitalNetwork/members.ts
+  - backend/src/services/hospitalNetwork/networkCrud.ts
+  - backend/src/services/hospitalNetwork/referralsAndBranch.ts
+  - backend/src/services/hospitalNetwork/rowMappersAndDeactivate.ts
+  - backend/src/services/hospitalNetwork/standaloneExports.ts
+  - backend/src/services/hospitalNetwork/types.ts
+
+</details>
+
+---
