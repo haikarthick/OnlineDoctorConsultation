@@ -8064,3 +8064,48 @@
 </details>
 
 ---
+
+## 2026-11-13 16:57 · `0e8889d` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 17:08 · `ee4df21` · OTHER
+
+**Commit:** refactor(pages): split the 821-line Home.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (14)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/home/AdvancedCapabilitiesSection.tsx
+  - frontend/src/components/home/ClosingSections.tsx
+  - frontend/src/components/home/EnterpriseTypesSection.tsx
+  - frontend/src/components/home/FeaturesTabsSection.tsx
+  - frontend/src/components/home/GroomingHomeSection.tsx
+  - frontend/src/components/home/HeroSection.tsx
+  - frontend/src/components/home/HomeNavChrome.tsx
+  - frontend/src/components/home/HospitalsSection.tsx
+  - frontend/src/components/home/HowItWorksSection.tsx
+  - frontend/src/components/home/MarketplaceCtaSection.tsx
+  - frontend/src/components/home/homeContent.ts
+  - frontend/src/pages/Home.css
+  - frontend/src/pages/Home.tsx
+
+</details>
+
+---
