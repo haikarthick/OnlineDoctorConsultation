@@ -98,7 +98,6 @@
         "src/pages/HerdMedicalManagement.tsx",
         "src/pages/Home.tsx",
         "src/pages/HospitalWorkflow.tsx",
-        "src/pages/InpatientManagement.tsx",
         "src/pages/IoTSensors.tsx",
         "src/pages/LocationManagement.tsx",
         "src/pages/MedicalRecords.tsx",

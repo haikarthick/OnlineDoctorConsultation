@@ -2574,3 +2574,88 @@ textarea.module-input {
 .metric-value.is-success { color: var(--success); }
 .metric-value.is-warning { color: var(--warning); }
 .metric-value.is-info { color: var(--primary); }
+
+/* ── Inpatient Management (status-driven colors; finite status enum → static classes, no inline style) ── */
+.inpatient-stat-tile {
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  border-left: 4px solid var(--tile-c);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+.inpatient-stat-tile.is-active { background: var(--tile-c); box-shadow: 0 2px 8px var(--tile-shadow); outline-color: var(--tile-c); }
+.inpatient-stat-tile .tile-label { font-size: 12px; color: #64748b; }
+.inpatient-stat-tile.is-active .tile-label { color: rgba(255,255,255,0.85); }
+.inpatient-stat-tile .tile-value { font-size: 22px; font-weight: 700; color: var(--tile-c); }
+.inpatient-stat-tile.is-active .tile-value { color: #fff; }
+.inpatient-stat-tile.status-total { --tile-c: #2563eb; --tile-shadow: #2563eb44; }
+.inpatient-stat-tile.status-admitted { --tile-c: #1d4ed8; --tile-shadow: #1d4ed844; }
+.inpatient-stat-tile.status-in_treatment { --tile-c: #b45309; --tile-shadow: #b4530944; }
+.inpatient-stat-tile.status-recovering { --tile-c: #166534; --tile-shadow: #16653444; }
+.inpatient-stat-tile.status-ready_to_discharge { --tile-c: #0ea5e9; --tile-shadow: #0ea5e944; }
+.inpatient-stat-tile.status-discharged { --tile-c: #64748b; --tile-shadow: #64748b44; }
+.inpatient-stat-tile.status-icu { --tile-c: #991b1b; --tile-shadow: #991b1b44; }
+
+.inpatient-filter-chip {
+  padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; white-space: nowrap; font-weight: 600;
+  border: 2px solid transparent; background: #e2e8f0; color: #475569;
+}
+.inpatient-filter-chip.is-active { background: #2563eb; color: #fff; }
+.inpatient-filter-chip.status-admitted { background: #dbeafe; color: #1d4ed8; }
+.inpatient-filter-chip.status-admitted.is-active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.inpatient-filter-chip.status-in_treatment { background: #fef3c7; color: #b45309; }
+.inpatient-filter-chip.status-in_treatment.is-active { background: #b45309; color: #fff; border-color: #b45309; }
+.inpatient-filter-chip.status-recovering { background: #dcfce7; color: #166534; }
+.inpatient-filter-chip.status-recovering.is-active { background: #166534; color: #fff; border-color: #166534; }
+.inpatient-filter-chip.status-ready_to_discharge { background: #ecfdf5; color: #0ea5e9; }
+.inpatient-filter-chip.status-ready_to_discharge.is-active { background: #0ea5e9; color: #fff; border-color: #0ea5e9; }
+.inpatient-filter-chip.status-discharged { background: #f1f5f9; color: #64748b; }
+.inpatient-filter-chip.status-discharged.is-active { background: #64748b; color: #fff; border-color: #64748b; }
+
+.inpatient-card {
+  background: #fff; border-radius: 12px; padding: 16px 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  border-top: 3px solid var(--card-c);
+  border-left: 4px solid var(--card-c);
+}
+.inpatient-card.status-admitted { --card-c: #1d4ed8; }
+.inpatient-card.status-in_treatment { --card-c: #b45309; }
+.inpatient-card.status-recovering { --card-c: #166534; }
+.inpatient-card.status-ready_to_discharge { --card-c: #0ea5e9; }
+.inpatient-card.status-discharged { --card-c: #64748b; }
+.inpatient-card.status-icu { --card-c: #991b1b; }
+
+.inpatient-status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.inpatient-status-badge.status-admitted { background: #dbeafe; color: #1d4ed8; }
+.inpatient-status-badge.status-in_treatment { background: #fef3c7; color: #b45309; }
+.inpatient-status-badge.status-recovering { background: #dcfce7; color: #166534; }
+.inpatient-status-badge.status-ready_to_discharge { background: #ecfdf5; color: #0ea5e9; }
+.inpatient-status-badge.status-discharged { background: #f1f5f9; color: #64748b; }
+.inpatient-status-badge.status-icu { background: #fee2e2; color: #991b1b; }
+
+.admission-type-btn {
+  padding: 6px 12px; border-radius: 8px; border: 1px solid #d1d5db;
+  background: #fff; color: #475569; cursor: pointer; font-size: 12px; font-weight: 400; text-transform: capitalize;
+}
+.admission-type-btn.is-selected { border: 2px solid #2563eb; background: #eff6ff; color: #2563eb; font-weight: 700; }
+
+.btn-admit-submit {
+  padding: 10px 20px; background: #2563eb; color: #fff; border: none; border-radius: 8px;
+  cursor: pointer; font-weight: 700; font-size: 14px; min-width: 140px;
+}
+.btn-admit-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+
+.btn-save-vitals {
+  padding: 8px 16px; background: #8b5cf6; color: #fff; border: none; border-radius: 8px;
+  cursor: pointer; font-weight: 600; min-width: 120px;
+}
+.btn-save-vitals:disabled { background: #94a3b8; cursor: not-allowed; }
+
+.vitals-entry { background: #f8fafc; border-radius: 10px; padding: 12px 16px; border: 1px solid #e2e8f0; }
+.vitals-entry.is-latest { background: #f5f3ff; border: 1px solid #ddd6fe; }
+.vitals-entry-label { font-weight: 700; font-size: 13px; color: #374151; }
+.vitals-entry.is-latest .vitals-entry-label { color: #7c3aed; }
