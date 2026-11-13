@@ -8027,3 +8027,40 @@
 </details>
 
 ---
+
+## 2026-11-13 16:49 · `0908e8b` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 16:56 · `0c200c4` · OTHER
+
+**Commit:** refactor(pages): split the 758-line PatientConsent.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - frontend/src/components/patientConsent/AnimalSidebar.tsx
+  - frontend/src/components/patientConsent/ConsentCard.tsx
+  - frontend/src/components/patientConsent/GrantConsentModal.tsx
+  - frontend/src/components/patientConsent/Toggle.tsx
+  - frontend/src/components/patientConsent/patientConsentShared.ts
+  - frontend/src/pages/petowner/PatientConsent.tsx
+
+</details>
+
+---
