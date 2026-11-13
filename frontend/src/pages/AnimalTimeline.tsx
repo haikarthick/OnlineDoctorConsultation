@@ -6,100 +6,18 @@ import { useMasterData } from '../context/MasterDataContext'
 import apiService from '../services/api'
 import { useTranslation } from 'react-i18next'
 import './AnimalTimeline.css'
-
-// ─── Types ──────────────────────────────────────────────────
-interface TimelineEvent {
-  id: string
-  type: string
-  title: string
-  description: string
-  date: string
-  severity?: string
-  status?: string
-  createdBy?: string
-  createdByName?: string
-  metadata?: Record<string, unknown>
-}
-
-interface AnimalOption {
-  id: string
-  name: string
-  species: string
-  ownerName?: string
-}
-
-interface GroupHistoryItem {
-  source: 'own' | 'group'
-  id: string
-  recordType: string
-  title: string
-  content: string | null
-  eventDate: string
-  groupId: string | null
-  groupName: string | null
-  headCountTreated: number | null
-}
-
-// ─── Event type config ──────────────────────────────────────
-const EVENT_TYPES: Record<string, { label: string; icon: string; color: string; bg: string; navPath?: string }> = {
-  vaccination:        { label: 'Vaccination',      icon: '💉', color: '#4caf50', bg: '#e8f5e9', navPath: '/medical-records' },
-  record_diagnosis:   { label: 'Diagnosis',        icon: '🩺', color: '#2196f3', bg: '#e3f2fd', navPath: '/medical-records' },
-  record_surgery:     { label: 'Surgery',          icon: '🔪', color: '#f44336', bg: '#ffebee', navPath: '/medical-records' },
-  record_imaging:     { label: 'Imaging',          icon: '📷', color: '#607d8b', bg: '#eceff1', navPath: '/medical-records' },
-  record_follow_up:   { label: 'Follow-up',        icon: '🔄', color: '#00bcd4', bg: '#e0f7fa', navPath: '/medical-records' },
-  record_vaccination: { label: 'Vaccination Rec',  icon: '💉', color: '#4caf50', bg: '#e8f5e9', navPath: '/medical-records' },
-  record_prescription:{ label: 'Prescription',     icon: '💊', color: '#9c27b0', bg: '#f3e5f5', navPath: '/prescriptions' },
-  record_lab_report:  { label: 'Lab Report',       icon: '🧪', color: '#ff9800', bg: '#fff3e0', navPath: '/medical-records' },
-  record_other:       { label: 'Other Record',     icon: '📄', color: '#78909c', bg: '#eceff1', navPath: '/medical-records' },
-  prescription:       { label: 'Prescription',     icon: '💊', color: '#9c27b0', bg: '#f3e5f5', navPath: '/prescriptions' },
-  lab_result:         { label: 'Lab Result',       icon: '🧪', color: '#ff9800', bg: '#fff3e0', navPath: '/medical-records' },
-  weight:             { label: 'Weight Entry',     icon: '⚖️', color: '#009688', bg: '#e0f2f1', navPath: '/medical-records' },
-  booking:            { label: 'Booking',          icon: '📅', color: '#3f51b5', bg: '#e8eaf6', navPath: '/consultations' },
-  consultation:       { label: 'Consultation',     icon: '🏥', color: '#673ab7', bg: '#ede7f6', navPath: '/consultations' },
-  allergy:            { label: 'Allergy',          icon: '⚠️', color: '#ff5722', bg: '#fbe9e7', navPath: '/medical-records' },
-}
-
-const FILTER_CATEGORIES = [
-  { key: 'vaccination',  label: 'Vaccinations',   icon: '💉', matchTypes: ['vaccination', 'record_vaccination'] },
-  { key: 'diagnosis',    label: 'Diagnosis',       icon: '🩺', matchTypes: ['record_diagnosis'] },
-  { key: 'surgery',      label: 'Surgery',         icon: '🔪', matchTypes: ['record_surgery'] },
-  { key: 'prescription', label: 'Prescriptions',   icon: '💊', matchTypes: ['prescription', 'record_prescription'] },
-  { key: 'lab_result',   label: 'Lab Results',     icon: '🧪', matchTypes: ['lab_result', 'record_lab_report'] },
-  { key: 'weight',       label: 'Weight',          icon: '⚖️', matchTypes: ['weight'] },
-  { key: 'booking',      label: 'Bookings',        icon: '📅', matchTypes: ['booking'] },
-  { key: 'consultation', label: 'Consultations',   icon: '🏥', matchTypes: ['consultation'] },
-  { key: 'allergy',      label: 'Allergies',       icon: '⚠️', matchTypes: ['allergy'] },
-  { key: 'other',        label: 'Other',           icon: '📄', matchTypes: ['record_imaging', 'record_follow_up', 'record_other'] },
-]
-
-const getEventConfig = (type: string) =>
-  EVENT_TYPES[type] || { label: type, icon: '📋', color: '#78909c', bg: '#eceff1' }
-
-const severityColor = (sev?: string) => {
-  switch (sev) {
-    case 'critical': return '#d32f2f'
-    case 'high':     return '#f44336'
-    case 'medium':   return '#ff9800'
-    case 'low':      return '#4caf50'
-    default:         return ''
-  }
-}
-
-const ZOOM_LEVELS = [30, 60, 90, 180, 365, 730]
-
-function assignLanes(events: TimelineEvent[]): Map<string, number> {
-  const sorted = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-  const laneEndDate: number[] = []
-  const laneMap = new Map<string, number>()
-  sorted.forEach(ev => {
-    const d = new Date(ev.date).getTime()
-    let lane = laneEndDate.findIndex(end => d > end + 1000 * 60 * 60 * 24 * 3)
-    if (lane === -1) { lane = laneEndDate.length; laneEndDate.push(0) }
-    laneEndDate[lane] = d + 1000 * 60 * 60 * 24 * 14
-    laneMap.set(ev.id, lane)
-  })
-  return laneMap
-}
+import {
+  TimelineEvent, AnimalOption, GroupHistoryItem,
+  FILTER_CATEGORIES, getEventConfig, severityColor, ZOOM_LEVELS, assignLanes,
+} from '../components/animalTimeline/animalTimelineShared'
+import TimelineHeader from '../components/animalTimeline/TimelineHeader'
+import TimelineStatsBar from '../components/animalTimeline/TimelineStatsBar'
+import GroupHistoryPanel from '../components/animalTimeline/GroupHistoryPanel'
+import TimelineFilterPanel from '../components/animalTimeline/TimelineFilterPanel'
+import TimelineRail from '../components/animalTimeline/TimelineRail'
+import TimelineScrubberBar from '../components/animalTimeline/TimelineScrubberBar'
+import EventHoverTooltip from '../components/animalTimeline/EventHoverTooltip'
+import EventDetailDrawer from '../components/animalTimeline/EventDetailDrawer'
 
 const AnimalTimeline: React.FC = () => {
   const { t } = useTranslation()
@@ -524,154 +442,59 @@ const AnimalTimeline: React.FC = () => {
         ← {t('common.back')}
       </button>
 
-      {/* Header */}
-      <div className="tl-header">
-        <div className="tl-header-left">
-          <h1>📅 {t('timeline.title', 'Animal Life Timeline')}</h1>
-          <p className="tl-subtitle">
-            {t('timeline.showing', 'Showing')} {filteredEvents.length !== events.length ? `${filteredEvents.length} of` : ''} {events.length} {t('timeline.events', 'events')}
-            {selectedAnimal && <> - <strong>{selectedAnimal.name}</strong> ({speciesLabel(selectedAnimal.species, t)})</>}
-          </p>
-        </div>
-        <div className="tl-toolbar">
-          <select className="tl-select" value={selectedAnimalId} onChange={e => setSelectedAnimalId(e.target.value)}>
-            {animals.length === 0 && <option value="">No animals</option>}
-            {animals.map(a => (
-              <option key={a.id} value={a.id}>
-                {a.name} ({speciesLabel(a.species, t)}){(isAdmin || isVet) && a.ownerName ? ` - ${a.ownerName}` : ''}
-              </option>
-            ))}
-          </select>
-          <div className="tl-search-wrap" ref={searchWrapRef}>
-            <span className="tl-search-icon">🔍</span>
-            <input
-              type="text"
-              className="tl-search"
-              placeholder={t('timeline.searchPlaceholder', 'Search events...')}
-              value={searchQuery}
-              onChange={e => { setSearchQuery(e.target.value); setSearchDropdownOpen(true) }}
-              onFocus={() => setSearchDropdownOpen(true)}
-            />
-            {searchQuery && <button className="tl-search-clear" onClick={() => { setSearchQuery(''); setSearchDropdownOpen(false) }}>×</button>}
-            {searchDropdownOpen && filteredSuggestions.length > 0 && (
-              <div className="tl-search-dropdown">
-                {filteredSuggestions.map((s, i) => (
-                  <button
-                    key={`${s.type}-${s.value}-${i}`}
-                    className="tl-search-dropdown-item"
-                    onMouseDown={e => e.preventDefault()}
-                    onClick={() => { setSearchQuery(s.value); setSearchDropdownOpen(false) }}
-                  >
-                    <span className="tl-search-dropdown-icon" style={{ color: s.color }}>{s.icon}</span>
-                    <span className="tl-search-dropdown-label">{s.label}</span>
-                    <span className="tl-search-dropdown-count">{s.count}</span>
-                    <span className="tl-search-dropdown-type">{s.type}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="tl-zoom-group">
-            <button className="tl-zoom-btn" onClick={() => setZoomIndex(z => Math.max(0, z - 1))} disabled={zoomIndex === 0} title={t('timeline.zoomIn')}>+</button>
-            <span className="tl-zoom-label">{ZOOM_LEVELS[zoomIndex]}d</span>
-            <button className="tl-zoom-btn" onClick={() => setZoomIndex(z => Math.min(ZOOM_LEVELS.length - 1, z + 1))} disabled={zoomIndex === ZOOM_LEVELS.length - 1} title={t('timeline.zoomOut')}>−</button>
-          </div>
-          <button className="tl-sort-btn" onClick={() => setSortAsc(s => !s)}>{sortAsc ? `↑ ${t('timeline.oldest')}` : `↓ ${t('timeline.newest')}`}</button>
-          <button className={`tl-filter-btn ${filterPanelOpen ? 'active' : ''}`} onClick={() => setFilterPanelOpen(o => !o)}>
-            ▼ Filters {activeFilterCount > 0 && <span className="tl-filter-badge">{activeFilterCount}</span>}
-          </button>
-          <button className="tl-icon-btn" onClick={loadTimeline} title={t('timeline.refresh')}>↻</button>
-        </div>
-      </div>
+      <TimelineHeader
+        t={t}
+        eventsCount={events.length}
+        filteredEventsCount={filteredEvents.length}
+        selectedAnimal={selectedAnimal}
+        speciesLabel={speciesLabel}
+        animals={animals}
+        selectedAnimalId={selectedAnimalId}
+        setSelectedAnimalId={setSelectedAnimalId}
+        isAdmin={isAdmin}
+        isVet={isVet}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        searchDropdownOpen={searchDropdownOpen}
+        setSearchDropdownOpen={setSearchDropdownOpen}
+        searchWrapRef={searchWrapRef}
+        filteredSuggestions={filteredSuggestions}
+        zoomIndex={zoomIndex}
+        setZoomIndex={setZoomIndex}
+        sortAsc={sortAsc}
+        setSortAsc={setSortAsc}
+        filterPanelOpen={filterPanelOpen}
+        setFilterPanelOpen={setFilterPanelOpen}
+        activeFilterCount={activeFilterCount}
+        loadTimeline={loadTimeline}
+      />
 
-      {/* Stats */}
-      {events.length > 0 && (
-        <div className="tl-stats">
-          {[
-            { icon: '📊', value: stats.total,   label: t('timeline.stats.totalEvents')  },
-            { icon: '📋', value: stats.types,   label: t('timeline.stats.eventTypes')   },
-            { icon: '✅', value: stats.active,  label: t('timeline.stats.activeItems')  },
-            ...(stats.highSev > 0 ? [{ icon: '🔴', value: stats.highSev, label: t('timeline.stats.highSeverity') }] : []),
-          ].map(s => (
-            <div className="tl-stat" key={s.label}>
-              <span className="tl-stat-icon">{s.icon}</span>
-              <span className="tl-stat-val">{s.value}</span>
-              <span className="tl-stat-lbl">{s.label}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      <TimelineStatsBar t={t} eventsCount={events.length} stats={stats} />
 
-      {/* Batch group context - group treatments/vaccinations that applied during membership */}
-      {selectedAnimalId && (
-        <div className="tl-group-panel">
-          <div className="tl-group-panel-header">
-            <span className="tl-group-panel-title">🐄 {t('timeline.groupHistoryTitle', 'Batch Group History')}</span>
-            <span className="tl-group-panel-sub">{t('timeline.groupHistorySub', 'Group herd/flock events that applied to this animal')}</span>
-          </div>
-          {groupHistoryLoading ? (
-            <div className="tl-loading"><div className="tl-spinner" /><p>{t('timeline.loadingTimeline')}</p></div>
-          ) : groupHistory.length === 0 ? (
-            <div className="tl-group-empty">{t('timeline.noGroupHistory', 'No batch group events applied to this animal yet.')}</div>
-          ) : (
-            <div className="tl-group-list">
-              {groupHistory.map((ev, i) => (
-                <div className="tl-group-item" key={`${ev.id}-${i}`}>
-                  <span className="tl-group-item-icon">🐄</span>
-                  <div className="tl-group-item-body">
-                    <div className="tl-group-item-title">{ev.title || ev.recordType}</div>
-                    <div className="tl-group-item-meta">
-                      {ev.groupName ? <span className="tl-group-chip">🌾 {ev.groupName}</span> : null}
-                      {ev.headCountTreated != null && <span>· {ev.headCountTreated} {t('timeline.headTreated', 'head treated')}</span>}
-                      <span>· {ev.eventDate ? formatEventDate(ev.eventDate) : ''}</span>
-                    </div>
-                    {ev.content && <div className="tl-group-item-content">{ev.content}</div>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <GroupHistoryPanel
+        t={t}
+        selectedAnimalId={selectedAnimalId}
+        groupHistoryLoading={groupHistoryLoading}
+        groupHistory={groupHistory}
+        formatEventDate={formatEventDate}
+      />
 
       {/* Main area */}
       <div className="tl-main">
-        {/* Filter panel */}
-        <div className={`tl-filter-panel ${filterPanelOpen ? 'open' : ''}`}>
-          <div className="tl-fp-header">
-            <span>{t('timeline.filters.title')}</span>
-            <button className="tl-fp-close" onClick={() => setFilterPanelOpen(false)}>×</button>
-          </div>
-          <div className="tl-fp-section">
-            <div className="tl-fp-label">{t('timeline.filters.typesToShow')}</div>
-            {FILTER_CATEGORIES.map(cat => {
-              const count   = categoryCounts[cat.key] || 0
-              const isActive = activeFilters.has(cat.key)
-              return (
-                <label key={cat.key} className={`tl-fp-check ${isActive ? 'checked' : ''}`}>
-                  <input type="checkbox" checked={isActive} onChange={() => {
-                    setActiveFilters(prev => { const n = new Set(prev); isActive ? n.delete(cat.key) : n.add(cat.key); return n })
-                  }} />
-                  <span className="tl-fp-check-icon">{cat.icon}</span>
-                  <span className="tl-fp-check-label">{cat.label}</span>
-                  {count > 0 && <span className="tl-fp-check-count">{count}</span>}
-                </label>
-              )
-            })}
-          </div>
-          <div className="tl-fp-section">
-            <div className="tl-fp-label">{t('timeline.filters.dateRange')}</div>
-            <label className="tl-fp-date-label">{t('timeline.filters.from')}</label>
-            <input type="date" className="tl-fp-date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
-            <label className="tl-fp-date-label">{t('timeline.filters.to')}</label>
-            <input type="date" className="tl-fp-date" value={dateTo} onChange={e => setDateTo(e.target.value)} />
-            {(dateFrom || dateTo) && (
-              <div className="tl-fp-date-range-badge">{dateFrom || '...'} to {dateTo || '...'}</div>
-            )}
-          </div>
-          {activeFilterCount > 0 && <button className="tl-fp-clear" onClick={clearAll}>✕ {t('timeline.filters.clearAll')}</button>}
-          <button className="tl-fp-apply" onClick={() => setFilterPanelOpen(false)}>{t('timeline.filters.apply')}</button>
-        </div>
+        <TimelineFilterPanel
+          t={t}
+          filterPanelOpen={filterPanelOpen}
+          setFilterPanelOpen={setFilterPanelOpen}
+          categoryCounts={categoryCounts}
+          activeFilters={activeFilters}
+          setActiveFilters={setActiveFilters}
+          dateFrom={dateFrom}
+          setDateFrom={setDateFrom}
+          dateTo={dateTo}
+          setDateTo={setDateTo}
+          activeFilterCount={activeFilterCount}
+          clearAll={clearAll}
+        />
 
         {/* Canvas */}
         <div className="tl-canvas-wrap">
@@ -686,102 +509,40 @@ const AnimalTimeline: React.FC = () => {
             </div>
           ) : (
             <>
-              {/* Rail */}
-              <div
-                className="tl-rail-wrap"
-                ref={railRef}
-                style={{ height: railHeight, cursor: 'grab' }}
-                onMouseDown={onRailMouseDown}
-                onTouchStart={onRailTouchStart}
-                onTouchMove={onRailTouchMove}
-              >
-                {ticks.map((tick, i) => (
-                  <React.Fragment key={i}>
-                    <div className="tl-tick-line"  style={{ left: tick.x }} />
-                    <div className="tl-tick-label" style={{ left: tick.x }}>{tick.label}</div>
-                  </React.Fragment>
-                ))}
-                {(() => {
-                  const todayX = msToX(Date.now())
-                  if (todayX < 0 || todayX > railWidth) return null
-                  return (
-                    <div className="tl-today-line" style={{ left: todayX }}>
-                      <span className="tl-today-label">Today</span>
-                    </div>
-                  )
-                })()}
-                {filteredEvents.map(ev => {
-                  const cfg  = getEventConfig(ev.type)
-                  const x    = msToX(new Date(ev.date).getTime())
-                  const lane = laneMap.get(ev.id) ?? 0
-                  const top  = RAIL_PAD_T + lane * LANE_H
-                  const sevCol = severityColor(ev.severity)
-                  if (x < -60 || x > railWidth + 60) return null
-                  return (
-                    <div
-                      key={ev.id}
-                      className="tl-node"
-                      style={{ left: x, top }}
-                      onMouseEnter={e => showHover(ev, e)}
-                      onMouseLeave={hideHover}
-                      onClick={e => { e.stopPropagation(); setHoverEvent(null); setDrawerEvent(ev) }}
-                    >
-                      {sevCol && <div className="tl-node-sev-ring" style={{ borderColor: sevCol }} />}
-                      <div className="tl-node-dot" style={{ background: cfg.color }}>{cfg.icon}</div>
-                      <div className="tl-node-label">
-                        <span className="tl-node-title">{ev.title}</span>
-                        <span className="tl-node-date">{formatEventDate(ev.date)}</span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+              <TimelineRail
+                railRef={railRef}
+                railHeight={railHeight}
+                railWidth={railWidth}
+                onRailMouseDown={onRailMouseDown}
+                onRailTouchStart={onRailTouchStart}
+                onRailTouchMove={onRailTouchMove}
+                ticks={ticks}
+                msToX={msToX}
+                filteredEvents={filteredEvents}
+                laneMap={laneMap}
+                railPadTop={RAIL_PAD_T}
+                laneHeight={LANE_H}
+                formatEventDate={formatEventDate}
+                showHover={showHover}
+                hideHover={hideHover}
+                setHoverEvent={setHoverEvent}
+                setDrawerEvent={setDrawerEvent}
+              />
 
-              {/* Distribution bar */}
-              <div className="tl-dist-bar-wrap">
-                <span className="tl-dist-label">Showing: {new Date(viewStartMs).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} - {new Date(viewStartMs + daysVisible * 86400000).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} · {daysVisible} day(s) · {filteredEvents.length} item(s)</span>
-                <div className="tl-dist-bar">
-                  {minimapSegments.map(seg => (
-                    <div key={seg.label} className="tl-dist-seg" style={{ width: `${seg.pct}%`, background: seg.color }} title={`${seg.label} (${Math.round(seg.pct)}%)`} />
-                  ))}
-                </div>
-                <div className="tl-dist-legend">
-                  {minimapSegments.map(seg => (
-                    <span key={seg.label} className="tl-dist-legend-item">
-                      <span className="tl-dist-dot" style={{ background: seg.color }} />{seg.label}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Scrubber */}
-              <div className="tl-scrubber-wrap">
-                <div className="tl-scrubber-track" ref={scrubberRef}>
-                  <span className="tl-scrubber-min">{new Date(minMs).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}</span>
-                  <span className="tl-scrubber-max">{new Date(maxMs).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}</span>
-                  {scrubDots.map(dot => (
-                    <div key={dot.id} className="tl-scrubber-dot" style={{ left: `${Math.max(0, Math.min(100, dot.pct))}%`, background: dot.color }} />
-                  ))}
-                  <div
-                    className="tl-scrubber-thumb"
-                    style={{ left: `${thumbLeftPct}%`, width: `${thumbWidthPct}%` }}
-                    onMouseDown={onScrubThumbDown}
-                  />
-                </div>
-                <div className="tl-scrubber-years">
-                  {(() => {
-                    const years: { label: string; pct: number }[] = []
-                    for (let y = new Date(minMs).getFullYear(); y <= new Date(maxMs).getFullYear(); y++) {
-                      const ms  = new Date(y, 0, 1).getTime()
-                      const pct = ((ms - minMs) / fullRangeMs) * 100
-                      if (pct >= 0 && pct <= 100) years.push({ label: String(y), pct })
-                    }
-                    return years.map(y => (
-                      <span key={y.label} className="tl-scrubber-year" style={{ left: `${y.pct}%` }}>{y.label}</span>
-                    ))
-                  })()}
-                </div>
-              </div>
+              <TimelineScrubberBar
+                viewStartMs={viewStartMs}
+                daysVisible={daysVisible}
+                filteredEventsCount={filteredEvents.length}
+                minimapSegments={minimapSegments}
+                scrubberRef={scrubberRef}
+                minMs={minMs}
+                maxMs={maxMs}
+                fullRangeMs={fullRangeMs}
+                scrubDots={scrubDots}
+                thumbLeftPct={thumbLeftPct}
+                thumbWidthPct={thumbWidthPct}
+                onScrubThumbDown={onScrubThumbDown}
+              />
             </>
           )}
         </div>
@@ -789,109 +550,34 @@ const AnimalTimeline: React.FC = () => {
 
       {/* Hover tooltip */}
       {hoverEvent && (
-        <div
-          className="tl-tooltip"
-          style={{ left: Math.min(hoverPos.x + 14, window.innerWidth - 270), top: Math.min(hoverPos.y - 10, window.innerHeight - 260) }}
-          onMouseEnter={keepHover}
-          onMouseLeave={hideHover}
-        >
-          <div className="tl-tt-header">
-            <span className="tl-tt-icon" style={{ background: getEventConfig(hoverEvent.type).bg, color: getEventConfig(hoverEvent.type).color }}>
-              {getEventConfig(hoverEvent.type).icon}
-            </span>
-            <div>
-              <div className="tl-tt-title">{hoverEvent.title}</div>
-              <div className="tl-tt-meta">{formatEventDate(hoverEvent.date)}</div>
-            </div>
-          </div>
-          {hoverEvent.status && (
-            <div className="tl-tt-row">
-              <span className="tl-tt-key">{t('common.status')}</span>
-              <span className="tl-tt-val" style={{ color: hoverEvent.status === 'active' || hoverEvent.status === 'valid' ? '#2e7d32' : '#757575' }}>{hoverEvent.status}</span>
-            </div>
-          )}
-          {hoverEvent.severity && (
-            <div className="tl-tt-row">
-              <span className="tl-tt-key">{t('timeline.severity')}</span>
-              <span className="tl-tt-val" style={{ color: severityColor(hoverEvent.severity) || undefined }}>{hoverEvent.severity}</span>
-            </div>
-          )}
-          {hoverEvent.description && (
-            <div className="tl-tt-desc">{hoverEvent.description.slice(0, 90)}{hoverEvent.description.length > 90 ? '...' : ''}</div>
-          )}
-          <div className="tl-tt-actions">
-            <button className="tl-tt-action" onClick={() => { setDrawerEvent(hoverEvent); setHoverEvent(null) }}>📋 {t('timeline.details')}</button>
-            {getEventConfig(hoverEvent.type).navPath && (
-              <button className="tl-tt-action" onClick={() => { navigate(buildRecordPath(hoverEvent)); setHoverEvent(null) }}>🔗 {t('timeline.openRecord')}</button>
-            )}
-            {(hoverEvent.type === 'booking' || hoverEvent.type === 'consultation') && (
-              <button className="tl-tt-action tl-tt-action-primary" onClick={() => { navigate('/consultations'); setHoverEvent(null) }}>🏥 {t('timeline.consultation')}</button>
-            )}
-          </div>
-        </div>
+        <EventHoverTooltip
+          t={t}
+          hoverEvent={hoverEvent}
+          hoverPos={hoverPos}
+          formatEventDate={formatEventDate}
+          keepHover={keepHover}
+          hideHover={hideHover}
+          onShowDetails={() => { setDrawerEvent(hoverEvent); setHoverEvent(null) }}
+          onOpenRecord={() => { navigate(buildRecordPath(hoverEvent)); setHoverEvent(null) }}
+          onGoToConsultation={() => { navigate('/consultations'); setHoverEvent(null) }}
+        />
       )}
 
       {/* Detail drawer */}
       {drawerEvent && (
-        <div className="tl-drawer-overlay" onClick={() => setDrawerEvent(null)}>
-          <div className="tl-drawer" onClick={e => e.stopPropagation()}>
-            <div className="tl-drawer-header" style={{ background: getEventConfig(drawerEvent.type).bg }}>
-              <span className="tl-drawer-icon" style={{ color: getEventConfig(drawerEvent.type).color }}>{getEventConfig(drawerEvent.type).icon}</span>
-              <div className="tl-drawer-title-wrap">
-                <h2 className="tl-drawer-title">{drawerEvent.title}</h2>
-                <span className="tl-drawer-type-pill" style={{ background: getEventConfig(drawerEvent.type).color, color: '#fff' }}>{getEventConfig(drawerEvent.type).label}</span>
-              </div>
-              <button className="tl-drawer-close" onClick={() => setDrawerEvent(null)}>×</button>
-            </div>
-            <div className="tl-drawer-body">
-              {[
-                { k: t('common.date'),        v: formatEventDate(drawerEvent.date) },
-                { k: t('common.animal'),      v: selectedAnimal ? `${selectedAnimal.name} (${speciesLabel(selectedAnimal.species, t)})` : undefined },
-                { k: t('common.status'),      v: drawerEvent.status,       col: drawerEvent.status === 'active' || drawerEvent.status === 'valid' ? '#2e7d32' : undefined },
-                { k: t('timeline.severity'),    v: drawerEvent.severity,     col: severityColor(drawerEvent.severity) || undefined },
-                { k: t('timeline.recordedBy'), v: drawerEvent.createdByName },
-                { k: t('common.description'), v: drawerEvent.description },
-              ].filter(r => r.v).map(row => (
-                <div className="tl-drawer-row" key={row.k}>
-                  <span className="tl-drawer-key">{row.k}</span>
-                  <span className="tl-drawer-val" style={{ color: (row as any).col }}>{row.v}</span>
-                </div>
-              ))}
-              {drawerEvent.metadata && Object.entries(drawerEvent.metadata).filter(([, v]) => v).map(([k, v]) => (
-                <div className="tl-drawer-row" key={k}>
-                  <span className="tl-drawer-key">{k.replace(/([A-Z])/g, ' $1').trim()}</span>
-                  <span className="tl-drawer-val">{String(v)}</span>
-                </div>
-              ))}
-            </div>
-            <div className="tl-drawer-actions">
-              {getEventConfig(drawerEvent.type).navPath && (
-                <button className="tl-drawer-action-primary" onClick={() => navigate(buildRecordPath(drawerEvent))}>🔗 {t('timeline.openFullRecord')}</button>
-              )}
-              {(drawerEvent.type === 'booking' || drawerEvent.type === 'consultation') && (
-                <button className="tl-drawer-action-primary" onClick={() => navigate('/consultations')}>🏥 {t('timeline.viewConsultation')}</button>
-              )}
-              {(drawerEvent.type === 'prescription' || drawerEvent.type === 'record_prescription') && (
-                <button className="tl-drawer-action" onClick={() => navigate(`/medical-records?animalId=${selectedAnimalId}&tab=prescriptions&recordId=${drawerEvent.id}`)}>💊 {t('timeline.viewPrescriptions')}</button>
-              )}
-              <div className="tl-drawer-nav">
-                <button className="tl-drawer-action"
-                  disabled={filteredEvents.findIndex(e => e.id === drawerEvent.id) === 0}
-                  onClick={() => { const i = filteredEvents.findIndex(e => e.id === drawerEvent.id); if (i > 0) setDrawerEvent(filteredEvents[i - 1]) }}>
-                  ← {t('vetHospitals.prev')}
-                </button>
-                <span className="tl-drawer-nav-pos">
-                  {filteredEvents.findIndex(e => e.id === drawerEvent.id) + 1} / {filteredEvents.length}
-                </span>
-                <button className="tl-drawer-action"
-                  disabled={filteredEvents.findIndex(e => e.id === drawerEvent.id) === filteredEvents.length - 1}
-                  onClick={() => { const i = filteredEvents.findIndex(e => e.id === drawerEvent.id); if (i < filteredEvents.length - 1) setDrawerEvent(filteredEvents[i + 1]) }}>
-                  {t('vetHospitals.next')} →
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <EventDetailDrawer
+          t={t}
+          drawerEvent={drawerEvent}
+          selectedAnimal={selectedAnimal}
+          speciesLabel={speciesLabel}
+          formatEventDate={formatEventDate}
+          filteredEvents={filteredEvents}
+          onClose={() => setDrawerEvent(null)}
+          setDrawerEvent={setDrawerEvent}
+          onOpenFullRecord={(ev) => navigate(buildRecordPath(ev))}
+          onGoToConsultation={() => navigate('/consultations')}
+          onViewPrescriptions={(ev) => navigate(`/medical-records?animalId=${selectedAnimalId}&tab=prescriptions&recordId=${ev.id}`)}
+        />
       )}
     </div>
   )

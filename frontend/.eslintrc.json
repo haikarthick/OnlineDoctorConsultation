@@ -81,7 +81,6 @@
         "src/pages/AICopilot.tsx",
         "src/pages/AlertCenter.tsx",
         "src/pages/AnimalGroups.tsx",
-        "src/pages/AnimalTimeline.tsx",
         "src/pages/Animals.tsx",
         "src/pages/BreedingManager.tsx",
         "src/pages/ComplianceDocs.tsx",
