@@ -7946,3 +7946,43 @@
 </details>
 
 ---
+
+## 2026-11-13 16:28 · `4f2ea98` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 16:37 · `e0c1f0f` · OTHER
+
+**Commit:** refactor(components): split the 669-line CertificatePrintView.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/CertificatePrintView.css
+  - frontend/src/components/CertificatePrintView.tsx
+  - frontend/src/components/certificates/CertificateFooter.tsx
+  - frontend/src/components/certificates/CertificateHeader.tsx
+  - frontend/src/components/certificates/CertificateInfoGrid.tsx
+  - frontend/src/components/certificates/CertificateTypeDetails.tsx
+  - frontend/src/components/certificates/CertificateVaccineTable.tsx
+  - frontend/src/components/certificates/certificatePrintShared.tsx
+
+</details>
+
+---
