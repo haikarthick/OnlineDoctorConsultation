@@ -76,6 +76,15 @@ closed if unset, responds 404 not 401/403. This matches the 2026-08-03 fix recor
 New modules should be feature-flagged (pattern: `grooming.enabled`, `payment.enabled`) and ship
 as their own `routes/<module>.routes.ts` from the start.
 
+## Project skills (`.claude/skills/`)
+Invoke these for the workflows they cover rather than improvising each time:
+- `add-module` — scaffolding a new module (route file, controller/service layering, DB,
+  frontend page, i18n, feature flag)
+- `ui-review` — DESIGN_SYSTEM.md gates + an Apple-HIG-style polish pass for any screen
+- `tenant-isolation-review` — the cross-tenant/IDOR checklist for any route taking a
+  network/enterprise/pharmacy/group id
+- `pre-ship` — what "done" actually requires, beyond a green `tsc`
+
 ## Module docs
 - *(add a line here per module as `docs/modules/<name>.md` is written)*
 
