@@ -123,7 +123,11 @@ jobs:
   # See docs/VERIFICATION.md and backend/scripts/runtime-verify.js.
   runtime-verify:
     name: Runtime Verification (${{ matrix.mode }})
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: that rolls forward on its own schedule, and the pinned
+    # @playwright/test version doesn't support `--with-deps` on every new release the moment it
+    # lands (broke silently when runners moved to ubuntu26.04 - see the 2026-11-13 CI-repair
+    # commit). Bump this deliberately alongside a Playwright upgrade, not by GitHub's default.
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     strategy:
       fail-fast: false
@@ -209,97 +213,70 @@ jobs:
         run: node e2e/generate-tests.cjs
 
   # ═════════════════════════════════════════════
-  #  2c. E2E Tests (Playwright)
+  #  2c. Full legacy E2E suite (informational, not a gate)
   # ═════════════════════════════════════════════
-  e2e-test:
-    name: E2E Tests (Playwright)
-    runs-on: ubuntu-latest
+  # This used to hand-roll its own Postgres service container + `npm start` + `npx playwright
+  # test` with no schema ever applied to that container - it had been failing on infrastructure
+  # grounds alone, unrelated to any actual test content, since at least 2026-08-05. `runtime-verify`
+  # above already does this correctly (its own throwaway cluster, real init.sql + migrations,
+  # real server boot) and already runs the @critical-tagged suite as part of PHASE 7. Duplicating
+  # that by hand here added nothing but a second place to get the setup wrong.
+  #
+  # What's actually missing a home is the FULL 462-test legacy suite - docs/VERIFICATION.md
+  # documents it as not reliably green yet (a block of admin.spec.ts times out) and deliberately
+  # excludes it from the push gate. `npm run verify:runtime:full` is the existing, tested way to
+  # run it. This job runs that, informationally, so the legacy suite's real pass/fail state is
+  # visible somewhere instead of nowhere - it must NOT block anything until that suite is
+  # triaged (continue-on-error: true is intentional, not a placeholder to remove casually).
+  e2e-full-suite:
+    name: Full E2E Suite (informational - known not fully green)
+    runs-on: ubuntu-24.04
     needs: [frontend-test]
     if: github.event_name == 'push'
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: veterinary_consultation
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports: ['5432:5432']
-
+    continue-on-error: true
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install backend deps
+      - name: Install PostgreSQL server
+        run: sudo apt-get update && sudo apt-get install -y postgresql
+
+      - name: Install backend dependencies
         working-directory: backend
         run: npm ci
 
-      - name: Install frontend deps
+      - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
 
-      - name: Install Playwright browsers
+      - name: Build backend
+        working-directory: backend
+        run: NODE_ENV=production npm run build
+
+      - name: Build frontend
+        working-directory: frontend
+        run: NODE_ENV=production npm run build
+
+      - name: Install Playwright chromium
         working-directory: frontend
         run: npx playwright install --with-deps chromium
 
-      - name: Start backend server
+      - name: Run full legacy E2E suite
         working-directory: backend
-        run: npm start &
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: veterinary_consultation
-          JWT_SECRET: e2e-test-secret
-          PORT: 3000
-          NODE_ENV: test
+        run: npm run verify:runtime:full
 
-      - name: Start frontend dev server
-        working-directory: frontend
-        run: npx vite --port 5173 &
-        env:
-          VITE_API_URL: http://localhost:3000
-
-      - name: Wait for servers
-        run: |
-          echo "Waiting for backend..."
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:3000/api/v1/health > /dev/null 2>&1 && break
-            sleep 2
-          done
-          echo "Waiting for frontend..."
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:5173 > /dev/null 2>&1 && break
-            sleep 2
-          done
-
-      - name: Run Playwright E2E tests
-        working-directory: frontend
-        run: npx playwright test
-        env:
-          E2E_BASE_URL: http://localhost:5173
-
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+      - name: Upload Playwright artifacts
         if: always()
-        with:
-          name: playwright-report
-          path: frontend/playwright-report/
-          retention-days: 14
-
-      - name: Upload test results
         uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: playwright-results
-          path: frontend/test-results/
+          name: e2e-full-suite-playwright
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
           retention-days: 7
 
   # ═════════════════════════════════════════════
@@ -467,5 +444,3 @@ jobs:
 
     outputs:
       image_tag: ${{ steps.meta.outputs.sha_short }}
-            echo "Deployment successful!"
-            docker image prune -f

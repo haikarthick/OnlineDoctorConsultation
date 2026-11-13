@@ -23,6 +23,7 @@ describe('MovementService', () => {
     it('should create a movement record', async () => {
       const movement = { id: 'mock-uuid', enterprise_id: 'e1', animal_id: 'a1', from_location_id: 'l1', to_location_id: 'l2', movement_type: 'transfer', reason: 'Rotation', recorded_by: 'u1' };
       (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ milk: null, meat: null }] }) // withdrawal status check
         .mockResolvedValueOnce({ rows: [movement] })   // INSERT
         .mockResolvedValueOnce({ rows: [] });           // UPDATE animal location
       const result = await movementService.createMovement('u1', { enterpriseId: 'e1', animalId: 'a1', fromLocationId: 'l1', toLocationId: 'l2', movementType: 'transfer', reason: 'Rotation' });

@@ -128,13 +128,14 @@ describe('EnterpriseService', () => {
   describe('getEnterpriseStats', () => {
     it('should return enterprise stats', async () => {
       (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ count: '10' }] })
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [{ count: '3' }] })
-        .mockResolvedValueOnce({ rows: [{ count: '5' }] })
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [{ count: '4' }] })
-        .mockResolvedValueOnce({ rows: [{ total: '20', recent: '5', vaccinations: '15', overdue: '2', upcoming: '3' }] });
+        .mockResolvedValueOnce({ rows: [{ count: '10' }] })  // animals
+        .mockResolvedValueOnce({ rows: [] })                 // groups
+        .mockResolvedValueOnce({ rows: [{ head: '0' }] })    // batchHead
+        .mockResolvedValueOnce({ rows: [{ count: '3' }] })   // locations
+        .mockResolvedValueOnce({ rows: [{ count: '5' }] })   // campaigns
+        .mockResolvedValueOnce({ rows: [] })                 // members
+        .mockResolvedValueOnce({ rows: [{ count: '4' }] })   // vaccStats
+        .mockResolvedValueOnce({ rows: [{ total: '20', recent: '5', vaccinations: '15', overdue: '2', upcoming: '3' }] }); // medRecords
       const result = await enterpriseService.getEnterpriseStats('e1');
       expect(result).toBeDefined();
       expect(result).toHaveProperty('totalAnimals');

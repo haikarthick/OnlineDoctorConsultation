@@ -79,7 +79,10 @@ describe('Extended Validation Schemas', () => {
   });
 
   describe('updateMedicalRecordSchema', () => {
-    it('accepts partial', () => { expect(updateMedicalRecordSchema.validate({ content: 'Updated' }).error).toBeUndefined(); });
+    // animalId/groupId stays required (xor, inherited from createMedicalRecordSchema) even on
+    // update - the record has exactly one subject, and that doesn't become optional just
+    // because this request only changes `content`.
+    it('accepts partial', () => { expect(updateMedicalRecordSchema.validate({ animalId: u, content: 'Updated' }).error).toBeUndefined(); });
   });
 
   describe('deleteMedicalRecordSchema', () => {

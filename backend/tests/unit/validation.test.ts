@@ -184,6 +184,7 @@ describe('Validation Schemas', () => {
   describe('createPrescriptionSchema', () => {
     const valid = {
       consultationId: '550e8400-e29b-41d4-a716-446655440000',
+      animalId: '550e8400-e29b-41d4-a716-446655440000',
       medications: [{ name: 'Amoxicillin', dosage: '250mg', frequency: 'Twice daily', duration: '7 days' }],
       instructions: 'Take with food',
     }

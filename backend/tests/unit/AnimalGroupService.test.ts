@@ -18,7 +18,9 @@ describe('AnimalGroupService', () => {
   describe('createGroup', () => {
     it('should create an animal group', async () => {
       const group = { id: 'mock-uuid', enterprise_id: 'e1', name: 'Dairy Herd A', group_type: 'herd', current_count: '0' };
-      (database.query as jest.Mock).mockResolvedValueOnce({ rows: [group] });
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ default_management_mode: 'individual' }] }) // master_species lookup
+        .mockResolvedValueOnce({ rows: [group] }); // INSERT
       const result = await animalGroupService.createGroup({ enterpriseId: 'e1', name: 'Dairy Herd A', groupType: 'herd' });
       expect(result).toEqual(expect.objectContaining({ id: 'mock-uuid', name: 'Dairy Herd A' }));
       expect(database.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO animal_groups'), expect.any(Array));
