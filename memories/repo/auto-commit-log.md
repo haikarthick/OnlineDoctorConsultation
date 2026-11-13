@@ -7828,3 +7828,45 @@
 </details>
 
 ---
+
+## 2026-11-13 14:32 · `fa98a67` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 16:10 · `5055f88` · OTHER
+
+**Commit:** refactor(pages): split the 617-line InpatientManagement.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/inpatient/AdmitPatientModal.tsx
+  - frontend/src/components/inpatient/InpatientCard.tsx
+  - frontend/src/components/inpatient/InpatientStatsPanel.tsx
+  - frontend/src/components/inpatient/InpatientStatusFilters.tsx
+  - frontend/src/components/inpatient/MedicalHistoryModal.tsx
+  - frontend/src/components/inpatient/RecordVitalsModal.tsx
+  - frontend/src/components/inpatient/VitalsHistoryModal.tsx
+  - frontend/src/components/inpatient/inpatientShared.ts
+  - frontend/src/pages/InpatientManagement.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
