@@ -102,7 +102,6 @@
         "src/pages/PaymentsHistory.tsx",
         "src/pages/ReportBuilder.tsx",
         "src/pages/ResetPassword.tsx",
-        "src/pages/Settings.tsx",
         "src/pages/SupplyChain.tsx",
         "src/pages/Sustainability.tsx",
         "src/pages/TreatmentCampaigns.tsx",

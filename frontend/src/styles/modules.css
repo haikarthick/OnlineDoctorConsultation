@@ -1710,6 +1710,10 @@
   padding: 20px;
 }
 
+.module-card-narrow {
+  max-width: 640px;
+}
+
 /* A card built from card-header/card-body, wrapping a full-bleed data table, or
    nesting a module-content already manages its own padding - and the header's
    bottom border and the table both have to reach the card edge, which an outer
