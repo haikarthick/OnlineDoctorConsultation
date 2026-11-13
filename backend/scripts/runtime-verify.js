@@ -563,7 +563,7 @@ async function http(method, url, body, token) {
           if (problems.length > 10) lines.push(`... and ${problems.length - 10} more`);
           lines.push('');
           lines.push('Server startup code overwrote schema that a tracked migration established.');
-          lines.push('Look in backend/src/utils/database.ts (ensureSchemaPublic / ensure*Table):');
+          lines.push('Look in backend/src/utils/database/ (ensureSchemaPublic.ts, ensurePaymentModuleSchema.ts, seed/phase*.ts):');
           lines.push('those blocks run on EVERY boot, AFTER migrations, and are not tracked.');
           fail(`${problems.length} schema object(s) CHANGED or REMOVED by server startup.`, lines);
         } else {

@@ -186,8 +186,11 @@ delete the block.
 1. `docker/init.sql` — fresh installs
 2. a migration in `backend/migrations/` — existing databases (**never hardcode `public.`**;
    bare identifiers resolve through the runner's `search_path`)
-3. `backend/src/utils/database.ts` — check whether the self-heal rebuilds that constraint. If
-   it does, derive it from a shared constant (`SYSTEM_ROLES`, `INVOICE_TYPES`); **never inline
-   the list**, that is precisely how it falls behind
+3. `backend/src/utils/database/` (split from the old single `database.ts` on 2026-11-13 - see
+   `constants.ts`, `ensureSchemaPublic.ts`, `ensurePaymentModuleSchema.ts`, `seed/phase*.ts`) —
+   check whether the self-heal rebuilds that constraint. If it does, derive it from a shared
+   constant in `database/constants.ts` (`SYSTEM_ROLES`, `INVOICE_TYPES`, `PAYMENT_SOURCES`,
+   `PAYMENT_STATUSES`, `BOOKING_STATUSES`, `BOOKING_TYPES`); **never inline the list**, that is
+   precisely how it falls behind
 4. the app-level validator (`validation.ts`, `PermissionService.ts`, …)
 5. run `npm run verify:runtime` and watch phases 5 and 6

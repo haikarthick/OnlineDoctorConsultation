@@ -17,6 +17,12 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const INIT_SQL = path.join(ROOT, 'docker', 'init.sql');
 const DB_UTILS = path.join(ROOT, 'backend', 'src', 'utils', 'database.ts');
+// database.ts was split 2026-11-13 (one ~2,100-line file holding every ALTER TABLE ADD COLUMN
+// self-heal statement, unmanageable for a small addition) into database/*.ts and
+// database/seed/phase*.ts - the ALTER statements this script looks for now live there, not in
+// the single file above. Scan the whole directory tree too, or this reports every self-heal
+// column as "missing" the moment it moved, not the moment it actually went missing.
+const DB_UTILS_DIR = path.join(ROOT, 'backend', 'src', 'utils', 'database');
 const SERVICES_DIR = path.join(ROOT, 'backend', 'src', 'services');
 const CONTROLLERS_DIR = path.join(ROOT, 'backend', 'src', 'controllers');
 
@@ -82,6 +88,22 @@ function parseAlterColumns(filePath, tables) {
     }
     tables[table].add(column);
   }
+}
+
+// Recursively find every .ts file under a directory (database/ and database/seed/).
+function findTsFilesRecursive(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...findTsFilesRecursive(full));
+    else if (entry.name.endsWith('.ts')) out.push(full);
+  }
+  return out;
+}
+
+function parseAlterColumnsDir(dir, tables) {
+  for (const file of findTsFilesRecursive(dir)) parseAlterColumns(file, tables);
 }
 
 // ── Step 3: Parse migration files for additional tables ─────
@@ -209,7 +231,7 @@ function validate(tables, inserts) {
     console.log(`  ${YELLOW}${file}${RESET}`);
     for (const item of items) {
       console.log(`    ${RED}Line ${item.line}:${RESET} column "${item.column}" does not exist in table "${item.table}"`);
-      console.log(`    ${DIM}Fix: Add column to docker/init.sql AND backend/src/utils/database.ts${RESET}`);
+      console.log(`    ${DIM}Fix: Add column to docker/init.sql AND backend/src/utils/database/ (the relevant seed/phase*.ts or ensure*.ts file)${RESET}`);
     }
     console.log('');
   }
@@ -383,6 +405,7 @@ function main() {
   // Parse all schema sources
   const tables = parseInitSql(INIT_SQL);
   parseAlterColumns(DB_UTILS, tables);
+  parseAlterColumnsDir(DB_UTILS_DIR, tables);
   parseMigrations(path.join(ROOT, 'backend', 'migrations'), tables);
 
   // Scan all service and controller files for SQL
