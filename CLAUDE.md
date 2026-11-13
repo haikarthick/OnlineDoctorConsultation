@@ -84,6 +84,8 @@ Invoke these for the workflows they cover rather than improvising each time:
 - `add-module` — scaffolding a new module (route file, controller/service layering, DB,
   frontend page, i18n, feature flag)
 - `ui-review` — DESIGN_SYSTEM.md gates + an Apple-HIG-style polish pass for any screen
+- `ui-resilience-review` — animation performance discipline + real-world edge-case data
+  (long names in every locale, huge lists, missing fields) for any public-facing screen
 - `tenant-isolation-review` — the cross-tenant/IDOR checklist for any route taking a
   network/enterprise/pharmacy/group id
 - `pre-ship` — what "done" actually requires, beyond a green `tsc`
