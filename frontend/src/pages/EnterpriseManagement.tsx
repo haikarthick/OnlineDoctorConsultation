@@ -4,9 +4,22 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, ENTERPRISE_TYPE_LABELS, EnterpriseType, EnterpriseStats, EnterpriseMember } from '../types'
-import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
+import { EnterpriseMapOverview } from '../components/enterprise/EnterpriseMapOverview'
+import { EnterpriseCard } from '../components/enterprise/EnterpriseCard'
+import { EnterpriseStatsPanel } from '../components/enterprise/EnterpriseStatsPanel'
+import { EnterpriseMembersPanel } from '../components/enterprise/EnterpriseMembersPanel'
+import { InviteMemberModal } from '../components/enterprise/InviteMemberModal'
+import { EnterpriseFormModal, EnterpriseFormData } from '../components/enterprise/EnterpriseFormModal'
+
+const EMPTY_FORM: EnterpriseFormData = {
+  name: '', enterpriseType: '' as EnterpriseType, description: '',
+  address: '', city: '', state: '', country: 'US', postalCode: '',
+  totalArea: '', areaUnit: 'acres', licenseNumber: '', regulatoryId: '',
+  taxId: '', phone: '', email: '', website: '',
+  gpsLatitude: '', gpsLongitude: ''
+}
 
 const EnterpriseManagement: React.FC = () => {
   const { t } = useTranslation()
@@ -28,19 +41,14 @@ const EnterpriseManagement: React.FC = () => {
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteError, setInviteError] = useState('')
   const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
-    name: '', enterpriseType: '' as EnterpriseType, description: '',
-    address: '', city: '', state: '', country: 'US', postalCode: '',
-    totalArea: '', areaUnit: 'acres', licenseNumber: '', regulatoryId: '',
-    taxId: '', phone: '', email: '', website: '',
-    gpsLatitude: '', gpsLongitude: ''
-  })
+  const [formData, setFormData] = useState<EnterpriseFormData>(EMPTY_FORM)
   const [showMapOverview, setShowMapOverview] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
 
   const isAdmin = user?.role === 'admin'
+  const canManageSelected = !!selectedEnterprise && (isAdmin || selectedEnterprise.ownerId === user?.id)
 
   const fetchEnterprises = async () => {
     try {
@@ -121,13 +129,7 @@ const EnterpriseManagement: React.FC = () => {
   }
 
   const resetForm = () => {
-    setFormData({
-      name: '', enterpriseType: '' as EnterpriseType, description: '',
-      address: '', city: '', state: '', country: 'US', postalCode: '',
-      totalArea: '', areaUnit: 'acres', licenseNumber: '', regulatoryId: '',
-      taxId: '', phone: '', email: '', website: '',
-      gpsLatitude: '', gpsLongitude: ''
-    })
+    setFormData(EMPTY_FORM)
     setEditingEnterprise(null)
     setError('')
   }
@@ -200,16 +202,6 @@ const EnterpriseManagement: React.FC = () => {
     (ENTERPRISE_TYPE_LABELS[e.enterpriseType] || '').toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const typeIcon = (t: EnterpriseType) => {
-    const icons: Record<string, string> = {
-      dairy_farm: '🐄', poultry_farm: '🐔', cattle_ranch: '🐂', mixed_farm: '🌾',
-      zoo: '🦁', breeding_facility: '🧬', pet_shop: '🐾', sanctuary: '🏔️',
-      equestrian_center: '🐴', aquaculture: '🐟', wildlife_reserve: '🌿',
-      veterinary_clinic: '🏥', kennel: '🐕', cattery: '🐈', aviary: '🦜', other: '🏢'
-    }
-    return icons[t] || '🏢'
-  }
-
   return (
     <div className="module-page">
       <div className="module-header">
@@ -238,37 +230,8 @@ const EnterpriseManagement: React.FC = () => {
         />
       </div>
 
-      {/* Enterprise Map Overview */}
       {showMapOverview && (
-        <div className="si-a87c8813">
-          <div className="si-5214c8b8">
-            <h3 className="si-44087c4b">🗺️ Enterprise Locations</h3>
-            <p className="si-29492778">
-              {enterprises.filter(e => e.gpsLatitude && e.gpsLongitude).length} of {enterprises.length} enterprises have GPS coordinates
-            </p>
-          </div>
-          <MapView
-            height={400}
-            markers={enterprises.filter(e => e.gpsLatitude && e.gpsLongitude).map(ent => ({
-              id: ent.id,
-              lat: +(ent.gpsLatitude || 0),
-              lng: +(ent.gpsLongitude || 0),
-              color: selectedEnterprise?.id === ent.id ? '#3b82f6' : '#22c55e',
-              pulse: selectedEnterprise?.id === ent.id,
-              popup: (
-                <div>
-                  <strong>{typeIcon(ent.enterpriseType)} {ent.name}</strong><br />
-                  <span className="si-756a9f21">{ENTERPRISE_TYPE_LABELS[ent.enterpriseType] || ent.enterpriseType}</span><br />
-                  {ent.city && <span className="si-756a9f21">{ent.city}{ent.state ? `, ${ent.state}` : ''}</span>}
-                  <div className="si-692258ce">
-                    👥 {ent.memberCount || 0} members · 🐾 {ent.animalCount || 0} animals
-                  </div>
-                </div>
-              ),
-            }))}
-            fitToData={enterprises.filter(e => e.gpsLatitude && e.gpsLongitude).length > 0}
-          />
-        </div>
+        <EnterpriseMapOverview enterprises={enterprises} selectedEnterprise={selectedEnterprise} />
       )}
 
       <div className="si-dcfaac94">
@@ -288,30 +251,17 @@ const EnterpriseManagement: React.FC = () => {
           ) : (
             <div className="cards-grid si-243e7be2">
               {filtered.map(ent => (
-                <div key={ent.id}
-                  className={`card ${selectedEnterprise?.id === ent.id ? 'card-selected' : ''}`}
-                  style={{ cursor: 'pointer', border: selectedEnterprise?.id === ent.id ? '2px solid var(--primary)' : '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}
-                  onClick={() => selectEnterprise(ent)}
-                >
-                  <div className="si-d2493201">
-                    <span className="si-fc27df36">{typeIcon(ent.enterpriseType)}</span>
-                    <div>
-                      <h3 className="si-2a119c30">{ent.name}</h3>
-                      <span className="badge si-8c23064b">{ENTERPRISE_TYPE_LABELS[ent.enterpriseType] || ent.enterpriseType}</span>
-                    </div>
-                  </div>
-                  {ent.address && <p className="si-cf622af4">📍 {ent.city ? `${ent.city}, ${ent.state || ''}` : ent.address}</p>}
-                  <div className="si-53035512">
-                    <span>👥 {ent.memberCount || 0} members</span>
-                    <span>🐾 {ent.animalCount || 0} animals</span>
-                  </div>
-                  <div className="si-3429dc13">
-                    <button className="btn btn-sm btn-secondary" onClick={e => { e.stopPropagation(); openEdit(ent) }}>{t('common.edit')}</button>
-                    {(isAdmin || ent.ownerId === user?.id) && (
-                      <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); handleDelete(ent.id) }}>{t('common.delete')}</button>
-                    )}
-                  </div>
-                </div>
+                <EnterpriseCard
+                  key={ent.id}
+                  ent={ent}
+                  isSelected={selectedEnterprise?.id === ent.id}
+                  canManage={isAdmin || ent.ownerId === user?.id}
+                  editLabel={t('common.edit')}
+                  deleteLabel={t('common.delete')}
+                  onSelect={selectEnterprise}
+                  onEdit={openEdit}
+                  onDelete={handleDelete}
+                />
               ))}
             </div>
           )}
@@ -319,289 +269,48 @@ const EnterpriseManagement: React.FC = () => {
 
         {/* Stats Panel */}
         {selectedEnterprise && stats && (
-          <div className="si-78b34307">
-            <h3 className="si-7f683059">{selectedEnterprise.name} - Overview</h3>
-            <div className="si-b2577ace">
-              <div className="si-6e899795">
-                <div className="si-7729e24e">{stats.totalAnimals}</div>
-                <div className="si-93f5e4c5">Animals</div>
-              </div>
-              <div className="si-6e899795">
-                <div className="si-7729e24e">{stats.totalGroups}</div>
-                <div className="si-93f5e4c5">Groups</div>
-              </div>
-              <div className="si-6e899795">
-                <div className="si-7729e24e">{stats.totalLocations}</div>
-                <div className="si-93f5e4c5">Locations</div>
-              </div>
-              <div className="si-6e899795">
-                <div className="si-7729e24e">{stats.totalMembers}</div>
-                <div className="si-93f5e4c5">Members</div>
-              </div>
-            </div>
-            {stats.animalsBySpecies.length > 0 && (
-              <div className="si-216c99b7">
-                <h4 className="si-305f3e0a">Animals by Species</h4>
-                {stats.animalsBySpecies.map(s => (
-                  <div key={s.species} className="si-4721f179">
-                    <span>{speciesLabel(s.species, t)}</span>
-                    <span className="si-b2cfcbec">{s.count}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            {selectedEnterprise.licenseNumber && (
-              <div className="si-c9622f6f">
-                📋 License: {selectedEnterprise.licenseNumber}
-              </div>
-            )}
-            {selectedEnterprise.regulatoryId && (
-              <div className="si-62bd76f7">
-                🏛️ Regulatory ID: {selectedEnterprise.regulatoryId}
-              </div>
-            )}
-            {selectedEnterprise.gpsLatitude && selectedEnterprise.gpsLongitude && (
-              <div className="si-1f1ebdcd">
-                <MapView
-                  height={180}
-                  center={[+(selectedEnterprise.gpsLatitude), +(selectedEnterprise.gpsLongitude)]}
-                  zoom={14}
-                  markers={[{
-                    id: 'selected-ent',
-                    lat: +(selectedEnterprise.gpsLatitude),
-                    lng: +(selectedEnterprise.gpsLongitude),
-                    color: '#3b82f6',
-                    popup: <div><strong>{selectedEnterprise.name}</strong></div>,
-                  }]}
-                />
-              </div>
-            )}
-          </div>
+          <EnterpriseStatsPanel enterprise={selectedEnterprise} stats={stats} speciesLabel={speciesLabel} t={t} />
         )}
 
         {/* Members Panel */}
         {selectedEnterprise && (
-          <div className="si-78b34307">
-            <div className="si-c66b816b">
-              <h3 className="si-1b87764a">👥 {t('enterpriseManagement.tabs.members')}</h3>
-              {(isAdmin || selectedEnterprise.ownerId === user?.id) && (
-                <button className="btn btn-sm btn-primary" onClick={() => { setShowInviteModal(true); setInviteError('') }}>+ Invite</button>
-              )}
-            </div>
-            {membersLoading ? (
-              <p className="si-62bd76f7">Loading...</p>
-            ) : members.length === 0 ? (
-              <p className="si-62bd76f7">No members yet</p>
-            ) : (
-              <div className="si-bbd60ea4">
-                {members.map(m => (
-                  <div key={m.userId} className="si-e162b4a6">
-                    <div className="si-26d7edc3">
-                      <div className="si-2d596e02">{m.userName || m.userEmail || m.userId.slice(0, 8)}</div>
-                      <div className="si-93f5e4c5">{m.userEmail}</div>
-                    </div>
-                    {m.role !== 'owner' && (isAdmin || selectedEnterprise.ownerId === user?.id) ? (
-                      <>
-                        <select
-                          value={m.role}
-                          disabled={updatingMemberId === m.userId}
-                          className="si-9c640ad7"
-                          onChange={e => handleUpdateMemberRole(m.userId, e.target.value)}
-                        >
-                          <option value="manager">Manager</option>
-                          <option value="supervisor">Supervisor</option>
-                          <option value="farm_vet">Farm Vet</option>
-                          <option value="worker">Worker</option>
-                          <option value="viewer">Viewer</option>
-                        </select>
-                        <button className="btn btn-sm btn-danger si-a517fcb0" onClick={() => handleRemoveMember(m.userId)}>✗</button>
-                      </>
-                    ) : (
-                      <span className="badge si-a517fcb0">{m.role}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <EnterpriseMembersPanel
+            members={members}
+            membersLoading={membersLoading}
+            canManage={canManageSelected}
+            updatingMemberId={updatingMemberId}
+            membersLabel={t('enterpriseManagement.tabs.members')}
+            onInviteClick={() => { setShowInviteModal(true); setInviteError('') }}
+            onUpdateRole={handleUpdateMemberRole}
+            onRemoveMember={handleRemoveMember}
+          />
         )}
       </div>
 
-      {/* Invite Member Modal */}
-      {showInviteModal && <div className="edit-form-overlay" onClick={() => setShowInviteModal(false)} />}
       {showInviteModal && (
-        <div className="edit-form-panel si-4b1b6758">
-          <div className="si-c66b816b">
-            <h2 className="si-44087c4b">Invite Member</h2>
-            <button className="btn btn-sm btn-secondary" onClick={() => setShowInviteModal(false)}>✕</button>
-          </div>
-          <form onSubmit={handleInviteMember}>
-            {inviteError && <div className="alert alert-error si-1cb81cae">{inviteError}</div>}
-            <div className="form-group">
-              <label>Email Address <span className="si-4fb20e94">*</span></label>
-              <input
-                type="email" required
-                value={inviteEmail}
-                onChange={e => setInviteEmail(e.target.value)}
-                placeholder="user@example.com"
-                className="module-input"
-              />
-            </div>
-            <div className="form-group">
-              <label>Role <span className="si-4fb20e94">*</span></label>
-              <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className="module-input">
-                <option value="manager">Manager</option>
-                <option value="supervisor">Supervisor</option>
-                <option value="farm_vet">Farm Vet</option>
-                <option value="worker">Worker</option>
-                <option value="viewer">Viewer</option>
-              </select>
-            </div>
-            {!inviteEmail && <p className="si-6ea836c5">⚠️ Enter a registered user's email to proceed</p>}
-            <p className="si-5047a40e">* Required field</p>
-            <div className="si-7a8f2044">
-              <button type="button" className="btn btn-secondary" onClick={() => setShowInviteModal(false)}>Cancel</button>
-              <button type="submit" className="btn btn-primary" disabled={!inviteEmail || inviteLoading}>
-                {inviteLoading ? '⏳ Inviting...' : '+ Invite Member'}
-              </button>
-            </div>
-          </form>
-        </div>
+        <InviteMemberModal
+          inviteEmail={inviteEmail}
+          inviteRole={inviteRole}
+          inviteError={inviteError}
+          inviteLoading={inviteLoading}
+          onEmailChange={setInviteEmail}
+          onRoleChange={setInviteRole}
+          onSubmit={handleInviteMember}
+          onClose={() => setShowInviteModal(false)}
+        />
       )}
 
-      {/* Create/Edit Form Modal */}
-      {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
       {showForm && (
-        <div ref={formRef} className="edit-form-panel">
-            <h2>{editingEnterprise ? t('enterpriseManagement.modal.editTitle') : t('enterpriseManagement.modal.createTitle')}</h2>
-            <form onSubmit={handleSubmit}>
-              {error && <div className="alert alert-error">{error}</div>}
-
-              <div className="si-ec24da01">
-                <div className="form-group si-06af062a">
-                  <label>Enterprise Name *</label>
-                  <input type="text" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} required />
-                </div>
-
-                <div className="form-group">
-                  <label>Enterprise Type *</label>
-                  <select value={formData.enterpriseType} onChange={e => setFormData(f => ({ ...f, enterpriseType: e.target.value as EnterpriseType }))} required>
-                    <option value="">Select type...</option>
-                    {Object.entries(ENTERPRISE_TYPE_LABELS).map(([k, v]) => (
-                      <option key={k} value={k}>{v}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Phone</label>
-                  <input type="tel" value={formData.phone} onChange={e => setFormData(f => ({ ...f, phone: e.target.value }))} />
-                </div>
-
-                <div className="form-group si-06af062a">
-                  <label>Description</label>
-                  <textarea rows={2} value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} />
-                </div>
-
-                <div className="form-group si-06af062a">
-                  <label>Address</label>
-                  <input type="text" value={formData.address} onChange={e => setFormData(f => ({ ...f, address: e.target.value }))} />
-                </div>
-
-                <div className="form-group">
-                  <label>City</label>
-                  <input type="text" value={formData.city} onChange={e => setFormData(f => ({ ...f, city: e.target.value }))} />
-                </div>
-
-                <div className="form-group">
-                  <label>State</label>
-                  <input type="text" value={formData.state} onChange={e => setFormData(f => ({ ...f, state: e.target.value }))} />
-                </div>
-
-                <div className="form-group">
-                  <label>Country</label>
-                  <input type="text" value={formData.country} onChange={e => setFormData(f => ({ ...f, country: e.target.value }))} />
-                </div>
-
-                <div className="form-group">
-                  <label>Postal Code</label>
-                  <input type="text" value={formData.postalCode} onChange={e => setFormData(f => ({ ...f, postalCode: e.target.value }))} />
-                </div>
-
-                <div className="form-group">
-                  <label>Total Area</label>
-                  <div className="si-6fdaaf49">
-                    <input type="number" step="0.01" value={formData.totalArea} onChange={e => setFormData(f => ({ ...f, totalArea: e.target.value }))} className="si-6acd75e8" />
-                    <select value={formData.areaUnit} onChange={e => setFormData(f => ({ ...f, areaUnit: e.target.value }))} className="si-fccc6ec7">
-                      <option value="acres">Acres</option>
-                      <option value="hectares">Hectares</option>
-                      <option value="sqft">Sq Ft</option>
-                      <option value="sqm">Sq M</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>Email</label>
-                  <input type="email" value={formData.email} onChange={e => setFormData(f => ({ ...f, email: e.target.value }))} />
-                </div>
-
-                <div className="form-group">
-                  <label>License Number</label>
-                  <input type="text" value={formData.licenseNumber} onChange={e => setFormData(f => ({ ...f, licenseNumber: e.target.value }))} />
-                </div>
-
-                <div className="form-group">
-                  <label>Regulatory ID</label>
-                  <input type="text" value={formData.regulatoryId} onChange={e => setFormData(f => ({ ...f, regulatoryId: e.target.value }))} />
-                </div>
-
-                <div className="form-group">
-                  <label>Tax ID</label>
-                  <input type="text" value={formData.taxId} onChange={e => setFormData(f => ({ ...f, taxId: e.target.value }))} />
-                </div>
-
-                <div className="form-group">
-                  <label>Website</label>
-                  <input type="url" value={formData.website} onChange={e => setFormData(f => ({ ...f, website: e.target.value }))} placeholder="https://" />
-                </div>
-
-                <div className="form-group">
-                  <label>GPS Latitude</label>
-                  <input type="number" step="0.000001" placeholder="Click map below" value={formData.gpsLatitude} onChange={e => setFormData(f => ({ ...f, gpsLatitude: e.target.value }))} />
-                </div>
-                <div className="form-group">
-                  <label>GPS Longitude</label>
-                  <input type="number" step="0.000001" placeholder="Click map below" value={formData.gpsLongitude} onChange={e => setFormData(f => ({ ...f, gpsLongitude: e.target.value }))} />
-                </div>
-
-                <div className="form-group si-06af062a">
-                  <label>📍 Set Location on Map</label>
-                  <div className="si-acec1d66">
-                    <MapView
-                      height={200}
-                      markers={formData.gpsLatitude && formData.gpsLongitude ? [{
-                        id: 'ent-form-loc',
-                        lat: +formData.gpsLatitude,
-                        lng: +formData.gpsLongitude,
-                        color: '#3b82f6',
-                        pulse: true,
-                        popup: <div><strong>{formData.name || 'Enterprise'}</strong></div>,
-                      }] : []}
-                      onClick={(lat, lng) => setFormData(f => ({ ...f, gpsLatitude: lat.toFixed(6), gpsLongitude: lng.toFixed(6) }))}
-                      center={formData.gpsLatitude && formData.gpsLongitude ? [+formData.gpsLatitude, +formData.gpsLongitude] : undefined}
-                      zoom={formData.gpsLatitude ? 13 : undefined}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="si-9a4d96fa">
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
-                <button type="submit" className="btn btn-primary">{editingEnterprise ? 'Update' : 'Create'} Enterprise</button>
-              </div>
-            </form>
-        </div>
+        <EnterpriseFormModal
+          formRef={formRef}
+          editingEnterprise={editingEnterprise}
+          formData={formData}
+          error={error}
+          t={t}
+          onChange={updater => setFormData(updater)}
+          onSubmit={handleSubmit}
+          onCancel={() => { setShowForm(false); resetForm() }}
+        />
       )}
     </div>
   )

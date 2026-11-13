@@ -159,6 +159,16 @@
   padding: 20px;
 }
 
+/* Selectable card (e.g. enterprise/network list → detail panel) */
+.card-clickable {
+  cursor: pointer;
+  padding: 1.25rem;
+}
+
+.card-clickable.card-selected {
+  border: 2px solid var(--primary);
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
