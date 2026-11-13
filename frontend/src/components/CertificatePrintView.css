@@ -176,6 +176,7 @@
   gap: 4px 14px;
 }
 .cert-contact-line span { display: inline-flex; align-items: center; gap: 3px; }
+.cert-contact-line-spaced { margin-top: 2px; }
 
 .cert-reg-badge { margin-top: 4px; font-size: 8pt; color: #718096; }
 
@@ -276,6 +277,8 @@
   line-height: 1.55;
   padding: 0 2px;
 }
+.cert-section-header-danger { color: #e53e3e; border-bottom-color: #e53e3e; }
+.cert-section-body-danger { color: #9b2c2c; }
 
 /* ── Vaccination table ── */
 .cert-vacc-table {
@@ -334,6 +337,7 @@
 }
 .cert-signature-name { font-size: 10pt; font-weight: 700; margin: 0; }
 .cert-signature-sub  { font-size: 8.5pt; color: #718096; margin: 1px 0 0; }
+.cert-signature-sub-small { margin-top: 2px; font-size: 7.5pt; }
 
 /* ── Document footer disclaimer ── */
 .cert-doc-footer {

@@ -70,7 +70,6 @@
       "files": [
         "src/App.tsx",
         "src/components/AnimalSearchPicker.tsx",
-        "src/components/CertificatePrintView.tsx",
         "src/components/ErrorBoundary.tsx",
         "src/components/FloatingChatWidget.tsx",
         "src/components/MapView.tsx",
