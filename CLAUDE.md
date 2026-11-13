@@ -16,7 +16,8 @@ Frontend: React 18 + TypeScript + Vite, CSS modules are **global** (no scoping �
 ```
 backend/src/controllers/   HTTP layer
 backend/src/services/      business logic + DB queries (76 files, well split)
-backend/src/routes/index.ts  remaining monolithic routes, ~4,500 lines — being split per-module, see below
+backend/src/routes/index.ts  remaining routes, ~2,000 lines — the network-hospital permission/
+                              visibility zone (change-protected, needs approval before touching)
 backend/src/routes/<module>.routes.ts  routes extracted from the monolith, one module per file
 backend/src/middleware/     auth, validation, upload, hospitalDataIsolation
 docker/init.sql            canonical schema, ONE transaction (any error wipes the schema)
@@ -43,12 +44,28 @@ main scalability and editor-performance risk as more modules are added. Splittin
 `index.ts`, in the exact original position (route match order matters) so nothing reorders across
 modules. Each split is verified with `npm run build` + `npm run verify:runtime` before the next.
 
-Done: `pharmacy.routes.ts`, `grooming.routes.ts` (2025-11-13). `index.ts` is now ~4,500 lines.
-Remaining in the monolith: auth, consultations, bookings, video, schedules, prescriptions,
-animals, vet profiles, enterprise/farm, hospital network, medical records, payments/wallet,
-reviews, admin, permissions, marketplace, vet hospital, vaccine protocols, master data, role
-change requests, network subscriptions, staff invites. Extract one module at a time, smallest/
-most self-contained next — don't attempt the rest in one pass.
+Done (2025-11-13), `index.ts` is now ~2,000 lines (from ~5,800):
+- `pharmacy.routes.ts`, `grooming.routes.ts`
+- `core-clinical.routes.ts` — auth, consultations, bookings, video, schedules, prescriptions,
+  animal/vet-profile CRUD (exports `ensureGroupAccess`, imported by nothing else currently)
+- `enterprise-farm.routes.ts` — enterprise/farm, animal groups, batch/herd management (defines
+  and exports `ensureGroupAccess`, imported by `core-clinical.routes.ts`)
+- `medical-records.routes.ts` — medical records, vaccinations, weight/allergy/lab, notifications
+- `payments-and-reviews.routes.ts` — payments, referrals, withdrawals, legal docs, wallet, reviews
+- `admin-and-permissions.routes.ts` — admin user/content management, system-role permissions
+- `marketplace.routes.ts` — marketplace/auctions/wellness/sustainability/geospatial (Tier4Controller)
+- `catalog-and-roles.routes.ts` — vet hospital CRUD, vaccine protocols, master data, role-change
+  requests
+
+**NOT touched, left inline in `index.ts` — change-protected, approval required first**
+([[feedback-network-hospital-change-approval]]): hospital network CRUD + patient enrollment,
+network role permissions + custom roles CRUD, network subscription plans/admin, hospital staff
+invites, network financial summary. These banner sections are NOT reliably pure — they contain
+interleaved unrelated content (Tier2/3/4 AI-copilot/sustainability routes, enterprise medical
+records, a stray undocumented `/repair-schema` debug endpoint) found while mapping dependencies
+for the split above, so don't assume a banner's title describes everything under it. Get explicit
+approval before extracting any of this, and re-verify its true contents first — don't rely on
+banner comments.
 
 New modules should be feature-flagged (pattern: `grooming.enabled`, `payment.enabled`) and ship
 as their own `routes/<module>.routes.ts` from the start rather than growing the monolith further.
