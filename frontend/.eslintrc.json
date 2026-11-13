@@ -129,7 +129,6 @@
         "src/pages/admin/SystemSettings.tsx",
         "src/pages/admin/VetHospitalAdmin.tsx",
         "src/pages/doctor/ConsultationRoom.tsx",
-        "src/pages/doctor/ManageSchedule.tsx",
         "src/pages/doctor/MyReviews.tsx",
         "src/pages/doctor/PrescriptionWriter.tsx",
         "src/pages/doctor/Prescriptions.tsx",

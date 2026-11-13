@@ -2781,3 +2781,65 @@ textarea.module-input {
 .fd-results { gap: 16px; }
 .fd-results.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
 .fd-results.list { display: flex; flex-direction: column; }
+
+/* ── ManageSchedule (doctor) ──────────────────────────────── */
+.ms-stat-value { font-size: 22px; font-weight: 700; }
+.ms-stat-value.color-green { color: #16a34a; }
+.ms-stat-value.color-red { color: #dc2626; }
+.ms-stat-value.color-blue { color: #2563eb; }
+.ms-stat-value.color-amber { color: #ca8a04; }
+
+.ms-tab-btn {
+  flex: 1; padding: 10px 8px; border-radius: 8px; border: none; cursor: pointer;
+  background: transparent; box-shadow: none; font-weight: 400; font-size: 13px; transition: all 0.2s;
+}
+.ms-tab-btn.is-active { background: white; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); font-weight: 600; }
+
+.ms-week-tile { border-radius: 10px; padding: 10px 8px; text-align: center; background: #f9fafb; border: 2px solid #e5e7eb; min-height: 100px; }
+.ms-week-tile.is-active { background: #f0fdf4; border-color: #86efac; }
+.ms-week-tile.is-off { background: #fef2f2; border-color: #fca5a5; }
+.ms-week-tile-label { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: #6b7280; }
+.ms-week-tile.is-active .ms-week-tile-label { color: #166534; }
+
+.ms-legend-swatch, .ms-cal-cell { background: #f9fafb; border: 2px solid #e5e7eb; }
+.ms-legend-swatch.status-available, .ms-cal-cell.status-available { background: #f0fdf4; border-color: #86efac; }
+.ms-legend-swatch.status-custom, .ms-cal-cell.status-custom { background: #eff6ff; border-color: #93c5fd; }
+.ms-legend-swatch.status-unavailable, .ms-cal-cell.status-unavailable { background: #fef2f2; border-color: #fca5a5; }
+.ms-legend-swatch.status-holiday, .ms-cal-cell.status-holiday { background: #fefce8; border-color: #fde047; }
+
+.ms-legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
+.ms-legend-label.status-available { color: #166534; }
+.ms-legend-label.status-custom { color: #1e40af; }
+.ms-legend-label.status-unavailable { color: #991b1b; }
+.ms-legend-label.status-holiday { color: #854d0e; }
+.ms-legend-label.status-none { color: #9ca3af; }
+
+.ms-cal-cell { padding: 8px 6px; border-radius: 8px; text-align: center; cursor: pointer; min-height: 56px; position: relative; }
+.ms-cal-cell.is-past { cursor: default; background: #f9fafb; border-color: #e5e7eb; opacity: 0.5; }
+.ms-cal-daynum { font-size: 14px; font-weight: 500; color: #9ca3af; }
+.ms-cal-cell.status-available .ms-cal-daynum { color: #166534; }
+.ms-cal-cell.status-custom .ms-cal-daynum { color: #1e40af; }
+.ms-cal-cell.status-unavailable .ms-cal-daynum { color: #991b1b; }
+.ms-cal-cell.status-holiday .ms-cal-daynum { color: #854d0e; }
+.ms-cal-cell.is-past .ms-cal-daynum { color: #9ca3af; }
+.ms-cal-daynum.is-today {
+  font-weight: 800; background: #2563eb; color: white; border-radius: 50%;
+  width: 24px; height: 24px; line-height: 24px; margin: 0 auto;
+}
+.ms-cal-status-icon { font-size: 9px; margin-top: 3px; font-weight: 500; color: #9ca3af; }
+.ms-cal-cell.status-available .ms-cal-status-icon { color: #166534; }
+.ms-cal-cell.status-custom .ms-cal-status-icon { color: #1e40af; }
+.ms-cal-cell.status-unavailable .ms-cal-status-icon { color: #991b1b; }
+.ms-cal-cell.status-holiday .ms-cal-status-icon { color: #854d0e; }
+
+.ms-override-card { padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3b82f6; }
+.ms-override-card.type-unavailable { border-left-color: #ef4444; }
+
+.ms-holiday-card { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #eab308; }
+.ms-holiday-card.type-emergency { border-left-color: #ef4444; }
+.ms-holiday-card.is-past { opacity: 0.5; }
+
+.ms-radio-chip { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 8px 14px; border-radius: 8px; background: #f9fafb; border: 2px solid #e5e7eb; }
+.ms-radio-chip.variant-danger.is-selected { background: #fef2f2; border-color: #fca5a5; }
+.ms-radio-chip.variant-info.is-selected { background: #eff6ff; border-color: #93c5fd; }
+.ms-radio-chip.variant-success.is-selected { background: #f0fdf4; border-color: #86efac; }
