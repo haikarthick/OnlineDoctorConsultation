@@ -8202,3 +8202,41 @@
 </details>
 
 ---
+
+## 2026-11-13 17:37 · `4ac0ece` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 17:46 · `e40e84c` · OTHER
+
+**Commit:** refactor(pages): split the 868-line VideoConsultation.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/videoConsultation/ChatPanel.tsx
+  - frontend/src/components/videoConsultation/EndedSessionView.tsx
+  - frontend/src/components/videoConsultation/VideoStage.tsx
+  - frontend/src/components/videoConsultation/videoConsultationShared.ts
+  - frontend/src/pages/petowner/VideoConsultation.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
