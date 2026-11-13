@@ -299,11 +299,13 @@ function diffSnapshots(before, after) {
 
 // ── Registerable roles, parsed from the Joi schema (single source of truth) ──
 function registerableRoles() {
-  const src = fs.readFileSync(path.join(BACKEND, 'src', 'middleware', 'validation.ts'), 'utf8');
+  // registerSchema lives in validation/auth.ts, not validation.ts directly, since 2026-11-13
+  // (validation.ts split into validation/<module>.ts - validation.ts is now just a barrel).
+  const src = fs.readFileSync(path.join(BACKEND, 'src', 'middleware', 'validation', 'auth.ts'), 'utf8');
   // The register schema's role field, e.g.
   //   role: Joi.string().valid('pet_owner', 'farmer', ..., 'groomer').default('pet_owner')
   const m = src.match(/role:\s*Joi\.string\(\)\s*\.valid\(([^)]*)\)\s*\.default\(/);
-  if (!m) throw new Error('Could not parse the registration role list from validation.ts - ' +
+  if (!m) throw new Error('Could not parse the registration role list from validation/auth.ts - ' +
     'if the schema was refactored, update registerableRoles() so this stays in sync.');
   const roles = [...m[1].matchAll(/'([a-z_]+)'/g)].map(x => x[1]);
   if (roles.length === 0) throw new Error('Parsed an empty role list from validation.ts');
