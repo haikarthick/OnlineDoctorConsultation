@@ -7787,3 +7787,44 @@
 </details>
 
 ---
+
+## 2026-11-13 14:20 · `0263f54` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 14:31 · `14f2e0f` · OTHER
+
+**Commit:** refactor(pages): split the 610-line EnterpriseManagement.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/enterprise/EnterpriseCard.tsx
+  - frontend/src/components/enterprise/EnterpriseFormModal.tsx
+  - frontend/src/components/enterprise/EnterpriseMapOverview.tsx
+  - frontend/src/components/enterprise/EnterpriseMembersPanel.tsx
+  - frontend/src/components/enterprise/EnterpriseStatsPanel.tsx
+  - frontend/src/components/enterprise/InviteMemberModal.tsx
+  - frontend/src/components/enterprise/enterpriseShared.ts
+  - frontend/src/pages/EnterpriseManagement.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
