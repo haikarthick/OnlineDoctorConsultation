@@ -8325,3 +8325,46 @@
 </details>
 
 ---
+
+## 2026-11-13 18:08 · `204f957` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 18:24 · `9cb5218` · OTHER
+
+**Commit:** refactor(pages): split the 900-line AnimalTimeline.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (12)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/animalTimeline/EventDetailDrawer.tsx
+  - frontend/src/components/animalTimeline/EventHoverTooltip.tsx
+  - frontend/src/components/animalTimeline/GroupHistoryPanel.tsx
+  - frontend/src/components/animalTimeline/TimelineFilterPanel.tsx
+  - frontend/src/components/animalTimeline/TimelineHeader.tsx
+  - frontend/src/components/animalTimeline/TimelineRail.tsx
+  - frontend/src/components/animalTimeline/TimelineScrubberBar.tsx
+  - frontend/src/components/animalTimeline/TimelineStatsBar.tsx
+  - frontend/src/components/animalTimeline/animalTimelineShared.ts
+  - frontend/src/pages/AnimalTimeline.css
+  - frontend/src/pages/AnimalTimeline.tsx
+
+</details>
+
+---
