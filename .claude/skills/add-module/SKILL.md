@@ -86,9 +86,12 @@ self-heal rebuilds the same constraint on every boot (it has silently reverted m
   also a `services/api/` directory — a second, unfinished modular rewrite that a barrel import
   silently resolves away from. Add your calls to `api.ts`. If you're not sure which one a page
   already uses, check its import, don't assume.
-- New UI copy needs a key in **all six locales**: `en, hi, kn, ml, ta, te`. Edit files under
-  `frontend/src/locales/` — `public/locales` is generated, editing it directly is a no-op on the
-  next build. A raw i18n key rendered on screen is a shipped bug, not a cosmetic one.
+- New UI copy needs a key in **all six locales**: `en, hi, kn, ml, ta, te`. Edit
+  `frontend/src/locales/<lang>/modules/<module>.json` — each locale is split by module (16 files,
+  e.g. `pharmacy.json`, `grooming.json`), not one giant file. For a brand-new module, add a new
+  module file per locale rather than piling onto an existing one. `public/locales` is generated
+  from these by `copy-locales.cjs`, editing it directly is a no-op on the next build. A raw i18n
+  key rendered on screen is a shipped bug, not a cosmetic one.
 
 ## 5. Before calling it done
 

@@ -9,7 +9,25 @@ import HttpBackend from 'i18next-http-backend'
 // from public/locales/{{lng}}/translation.json - each is 400-500KB, and
 // bundling all 6 into the JS entry chunk regardless of the user's chosen
 // language used to account for ~85% of the initial bundle size.
-import en from '../locales/en/translation.json'
+//
+// English itself is split into src/locales/en/modules/*.json (grooming.json,
+// pharmacy.json, ...) for editability - a single ~8,400-line file was
+// unmanageable. Merged back into one `en` object at module-eval time via
+// import.meta.glob, so this is the only place the split is visible; every
+// translation call site elsewhere in the app is unaffected.
+const enModules = import.meta.glob('../locales/en/modules/*.json', { eager: true }) as Record<
+  string,
+  { default: Record<string, unknown> }
+>
+const en: Record<string, unknown> = {}
+for (const mod of Object.values(enModules)) {
+  for (const key of Object.keys(mod.default)) {
+    if (Object.prototype.hasOwnProperty.call(en, key)) {
+      throw new Error(`[i18n] Duplicate top-level key "${key}" across en/modules/*.json files.`)
+    }
+    en[key] = mod.default[key]
+  }
+}
 
 export const supportedLanguages = [
   { code: 'en', label: 'English', nativeLabel: 'English', flag: '🇬🇧' },

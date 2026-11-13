@@ -211,7 +211,10 @@ consistency one. `:hover` and `:focus-visible` in CSS cover both.
 Carried over from the usability standard — Admin screens are held to these too:
 
 - **No raw i18n keys rendered.** Every label resolves; every new key lands in all six locales
-  (`en, hi, kn, ml, ta, te`). Edit `src/locales` — `public/locales` is generated.
+  (`en, hi, kn, ml, ta, te`). Edit `src/locales/<lang>/modules/<module>.json` (split by module
+  since 2026-11-13 — a single ~8,400-line file per locale was unmanageable to edit); add the key
+  to the module file matching the feature, not a new file. `public/locales` is generated from
+  these by `copy-locales.cjs` — never edit it directly.
 - **Every role gets a real branch.** No persona sees an empty or dead screen.
 - **Overflow protection.** Long names truncate or wrap; tables scroll inside
   `.data-table-container` rather than breaking the page.

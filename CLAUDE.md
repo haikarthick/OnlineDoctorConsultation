@@ -24,6 +24,9 @@ backend/migrations/        numbered SQL migrations for existing DBs — never ha
 frontend/src/pages/<role-or-module>/   one subdirectory per role/module
 frontend/src/services/api.ts   the class-based API client every page uses (there's also
                                 services/api/ — a second, modular set; update BOTH when relevant)
+frontend/src/locales/<lang>/modules/<module>.json  i18n per module per locale, 16 files x 6
+                                locales (was one ~8,400-line file per locale until 2026-11-13);
+                                public/locales is generated from these, never edit it directly
 docs/modules/              per-module deep-dive docs (load only the one you're touching)
 ```
 
@@ -78,6 +81,31 @@ closed if unset, responds 404 not 401/403. This matches the 2026-08-03 fix recor
 
 New modules should be feature-flagged (pattern: `grooming.enabled`, `payment.enabled`) and ship
 as their own `routes/<module>.routes.ts` from the start.
+
+## i18n split (done, 2026-11-13)
+Same debt pattern as the route split, same fix shape. Each locale was a single ~8,400-line
+`translation.json` (143 flat top-level keys) — one stray comma broke every feature's translations
+for that whole language. Split into `frontend/src/locales/<lang>/modules/<module>.json` (16 files
+per locale: common, auth, home, dashboard, consultations, medicalRecords, animals, enterprise,
+analytics, hospital, hospitalNetwork, pharmacy, grooming, marketplace, payments, admin), grouped
+by the same module boundaries as the route split. Runtime is unchanged — `copy-locales.cjs` now
+merges the module files into the one `translation.json` per locale that `i18next-http-backend`
+already fetched, and `src/i18n/index.ts` merges English's modules the same way via
+`import.meta.glob` instead of one static import — no `t()` call site anywhere changed. Verified
+by deep-equality against the original files before deleting them, plus `localeParity.test.ts`
+(updated to read the split files), a full `vitest run` (74 tests), and the frontend build.
+
+Along the way, `localeParity.test.ts` surfaced a real pre-existing bug (not caused by the split —
+proven by the deep-equality check): `VaccinationPassport.tsx`'s `tabs.passport/compliance/history`
+had never been defined in any locale, only `tabs.group` existed. Fixed by reusing real existing
+translations from the same file (`vaccinationPassport.compliance`, the transliterated "Passport"
+word already inside `vaccinationPassport.title`) rather than inventing fresh ones; `history` uses
+the English word in every locale, matching every other `tabs.history` label in the codebase
+(`pharmacy.tabs.history` etc.), which is untranslated everywhere too — a known, deliberately
+deferred gap (see `codebase-audit-2026-08-03` in memory), not something to paper over silently.
+
+Adding a new module's translations: add a new module file per locale (don't grow an existing
+one), per the `add-module` skill.
 
 ## Project skills (`.claude/skills/`)
 Invoke these for the workflows they cover rather than improvising each time:
