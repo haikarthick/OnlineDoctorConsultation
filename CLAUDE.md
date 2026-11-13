@@ -16,7 +16,8 @@ Frontend: React 18 + TypeScript + Vite, CSS modules are **global** (no scoping �
 ```
 backend/src/controllers/   HTTP layer
 backend/src/services/      business logic + DB queries (76 files, well split)
-backend/src/routes/index.ts  ALL routes, ~5,800 lines — known scalability debt, see below
+backend/src/routes/index.ts  remaining monolithic routes, ~4,500 lines — being split per-module, see below
+backend/src/routes/<module>.routes.ts  routes extracted from the monolith, one module per file
 backend/src/middleware/     auth, validation, upload, hospitalDataIsolation
 docker/init.sql            canonical schema, ONE transaction (any error wipes the schema)
 backend/migrations/        numbered SQL migrations for existing DBs — never hardcode `public.`
@@ -35,12 +36,22 @@ Static checks (`tsc`, `vitest`, `npm run build`) cannot see SQL or runtime behav
 `npm run verify:runtime` (backend) before calling a DB/route/constraint change done — full
 rationale and the production incident that proved it necessary: `docs/VERIFICATION.md`.
 
-## Known structural debt (tracked, not yet fixed)
-`backend/src/routes/index.ts` is a single ~5,800-line file holding every module's routes. It's
-the main scalability and editor-performance risk as more modules are added — splitting it into
-`routes/<module>.ts` is planned. Until then, keep new routes grouped and commented by module
-inside the file, and feature-flag new modules (pattern: `grooming.enabled`, `payment.enabled`)
-rather than wiring them in unconditionally.
+## Known structural debt (in progress)
+`backend/src/routes/index.ts` was a single ~5,800-line file holding every module's routes — the
+main scalability and editor-performance risk as more modules are added. Splitting it into
+`routes/<module>.routes.ts`, each a self-contained `Router()` mounted with `router.use(...)` in
+`index.ts`, in the exact original position (route match order matters) so nothing reorders across
+modules. Each split is verified with `npm run build` + `npm run verify:runtime` before the next.
+
+Done: `pharmacy.routes.ts`, `grooming.routes.ts` (2025-11-13). `index.ts` is now ~4,500 lines.
+Remaining in the monolith: auth, consultations, bookings, video, schedules, prescriptions,
+animals, vet profiles, enterprise/farm, hospital network, medical records, payments/wallet,
+reviews, admin, permissions, marketplace, vet hospital, vaccine protocols, master data, role
+change requests, network subscriptions, staff invites. Extract one module at a time, smallest/
+most self-contained next — don't attempt the rest in one pass.
+
+New modules should be feature-flagged (pattern: `grooming.enabled`, `payment.enabled`) and ship
+as their own `routes/<module>.routes.ts` from the start rather than growing the monolith further.
 
 ## Module docs
 - *(add a line here per module as `docs/modules/<name>.md` is written)*
