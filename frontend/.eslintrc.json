@@ -95,7 +95,6 @@
         "src/pages/GeospatialAnalytics.tsx",
         "src/pages/HealthAnalytics.tsx",
         "src/pages/HerdMedicalManagement.tsx",
-        "src/pages/Home.tsx",
         "src/pages/HospitalWorkflow.tsx",
         "src/pages/IoTSensors.tsx",
         "src/pages/LocationManagement.tsx",
