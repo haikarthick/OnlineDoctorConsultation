@@ -4,40 +4,18 @@ import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import { useMasterData } from '../../context/MasterDataContext'
 import apiService from '../../services/api'
-import { GROUP_TYPE_LABELS, AnimalGroupType } from '../../types'
 import CertificatePrintView, { CertificatePrintData, CertificateTemplate } from '../../components/CertificatePrintView'
+import { CERT_TYPES_FARM, CERT_TYPES_HERD, CERT_TYPES_GROUP, VaccineRow, emptyVaccineRow } from '../../components/certificateWriter/certificateWriterShared'
+import IssuedSuccessScreen from '../../components/certificateWriter/IssuedSuccessScreen'
+import Step1AnimalAndType from '../../components/certificateWriter/Step1AnimalAndType'
+import Step2ClinicalDetails from '../../components/certificateWriter/Step2ClinicalDetails'
+import Step3Review from '../../components/certificateWriter/Step3Review'
 import '../../styles/modules.css'
 import './CertificateWriter.css'
 
 interface CertificateWriterProps {
   onNavigate: (path: string) => void
 }
-
-const CERT_TYPES_PET = [
-  'health_certificate', 'fitness_to_travel', 'rabies_vaccination', 'vaccination_record',
-  'pre_travel', 'sterilization', 'treatment', 'animal_injury', 'post_mortem',
-  'fitness_for_sale',
-]
-
-const CERT_TYPES_FARM = [
-  'breeding_soundness', 'pregnancy_diagnosis', 'infertility_evaluation', 'animal_valuation',
-  'movement_permit', 'herd_health_certificate', 'slaughter_fitness', 'export_health_certificate',
-]
-
-// Herd-level certs: animal selection optional (cert covers a group)
-const CERT_TYPES_HERD = ['herd_health_certificate']
-
-// Group-capable certs: can name a real animal_groups row (batch herd/flock) as the subject.
-// These are the inherently-batch document types the backend persists group_id/cycle_id for.
-const CERT_TYPES_GROUP = ['herd_health_certificate', 'movement_permit', 'slaughter_fitness', 'export_health_certificate']
-
-interface VaccineRow {
-  vaccine: string; batchNo: string; dateAdministered: string; nextDue: string; manufacturer: string
-}
-
-const emptyVaccineRow = (): VaccineRow => ({
-  vaccine: '', batchNo: '', dateAdministered: '', nextDue: '', manufacturer: ''
-})
 
 const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => {
   const { t } = useTranslation()
@@ -433,27 +411,9 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
     if (isMovement) setMovementFrom(g.name)
   }
 
-  const certTypeLabel = (type: string) => t(`vetCertificates.certTypes.${type}` as any) || type.replace(/_/g, ' ')
-
   // ── Issued success screen ──
   if (issued) {
-    return (
-      <div className="module-page cw-page">
-        <div className="module-card cw-success-card">
-          <p className="cw-success-icon">✅</p>
-          <h2>{t('certificateWriter.certificateIssued')}</h2>
-          <p className="cw-success-type">{certTypeLabel(certType)}</p>
-          <div className="cw-success-actions">
-            <button className="module-btn" onClick={() => onNavigate('/vet-certificates')}>
-              {t('certificateWriter.viewAllCertificates')}
-            </button>
-            <button className="module-btn primary" onClick={() => window.location.reload()}>
-              {t('certificateWriter.createAnother')}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+    return <IssuedSuccessScreen t={t} certType={certType} onNavigate={onNavigate} />
   }
 
   return (
@@ -498,493 +458,58 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
         ))}
       </div>
 
-      {/* ════════════════════════════════
-          STEP 1: Animal & Type
-      ══════════════════════════════ */}
       {step === 1 && (
-        <div className="module-card cw-card">
-          <h3 className="cw-step-title">1. {t('certificateWriter.step1')}</h3>
-
-          {/* Certificate type - grouped by context */}
-          <div className="module-form-group">
-            <label className="module-label">{t('certificateWriter.selectType')} *</label>
-            <select
-              className="module-input"
-              value={certType}
-              onChange={e => setCertType(e.target.value)}
-            >
-              <option value="">{t('certificateWriter.selectType')}</option>
-              <optgroup label="🐾 Pet / General">
-                {CERT_TYPES_PET.map(ct => (
-                  <option key={ct} value={ct}>{certTypeLabel(ct)}</option>
-                ))}
-              </optgroup>
-              <optgroup label="🐄 Farm / Enterprise">
-                {CERT_TYPES_FARM.map(ct => (
-                  <option key={ct} value={ct}>{certTypeLabel(ct)}</option>
-                ))}
-              </optgroup>
-            </select>
-          </div>
-
-          {/* Enterprise selector (farmer/admin only) */}
-          {isFarmerOrAdmin && enterpriseOptions.length > 0 && (
-            <div className="module-form-group">
-              <label className="module-label">🏢 {t('certificateWriter.enterprise')}</label>
-              <select
-                className="module-input"
-                value={selectedEnterpriseId}
-                onChange={e => setSelectedEnterpriseId(e.target.value)}
-              >
-                <option value="">- {t('certificateWriter.noEnterprise')} -</option>
-                {enterpriseOptions.map(e => (
-                  <option key={e.id} value={e.id}>{e.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Owner search */}
-          <div className="module-form-group cw-owner-search-wrap">
-            <label className="module-label">{t('certificateWriter.searchOwner')} *</label>
-            <input
-              className="module-input"
-              type="text"
-              placeholder={t('certificateWriter.searchOwner')}
-              value={ownerSearch}
-              onChange={e => { setOwnerSearch(e.target.value); if (!e.target.value) { setSelectedOwnerId(''); setSelectedOwner(null) } }}
-            />
-            {loadingOwners && <div className="cw-loading-hint">{t('common.loading')}</div>}
-            {owners.length > 0 && (
-              <div className="cw-dropdown">
-                {owners.map(o => (
-                  <div key={o.id} className="cw-dropdown-item" onClick={() => selectOwner(o)}>
-                    <strong>{o.name}</strong>
-                    <span className="cw-dropdown-item-email">· {o.email}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Animal select - shown when owner selected OR enterprise selected for farm certs */}
-          {(selectedOwnerId || (CERT_TYPES_FARM.includes(certType) && selectedEnterpriseId)) && (
-            <div className="module-form-group">
-              <label className="module-label">
-                {t('certificateWriter.selectAnimal')} {isHerd ? `(${t('certificateWriter.optionalForHerd')})` : '*'}
-              </label>
-              {loadingAnimals ? (
-                <div className="si-ad8ab961">{t('common.loading')}</div>
-              ) : animals.length === 0 ? (
-                <div className="si-c22a66cc">{t('certificateWriter.noAnimals')}</div>
-              ) : (
-                <select
-                  className="module-input"
-                  value={selectedAnimalId}
-                  onChange={e => setSelectedAnimalId(e.target.value)}
-                >
-                  <option value="">{isHerd ? `- ${t('certificateWriter.optionalForHerd')} -` : t('certificateWriter.selectAnimal')}</option>
-                  {animals.map(a => (
-                    <option key={a.id} value={a.id}>
-                      {a.uniqueId ? `[${a.uniqueId}] ` : ''}{a.name} ({speciesLabel(a.species, t)}{a.breed ? ', ' + a.breed : ''})
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-          )}
-
-          {/* Group subject picker - for batch herd/flock certificates */}
-          {isGroupCapable && (
-            <div className="module-form-group">
-              <label className="module-label">🐄 {t('certificateWriter.selectGroup')}</label>
-              {loadingGroups ? (
-                <div className="si-ad8ab961">{t('common.loading')}</div>
-              ) : groups.length === 0 ? (
-                <div className="si-c22a66cc">{t('certificateWriter.noGroups')}</div>
-              ) : (
-                <select
-                  className="module-input"
-                  value={selectedGroupId}
-                  onChange={e => {
-                    const g = groups.find(x => x.id === e.target.value)
-                    selectGroup(g || { id: e.target.value, name: '' })
-                  }}
-                >
-                  <option value="">- {t('certificateWriter.selectGroup')} -</option>
-                  {groups.map(g => (
-                    <option key={g.id} value={g.id}>
-                      {g.name}{g.groupType ? ` (${GROUP_TYPE_LABELS[g.groupType as AnimalGroupType] || g.groupType})` : ''}
-                      {g.animalCount != null ? ` · ${g.animalCount} head` : ''}
-                    </option>
-                  ))}
-                </select>
-              )}
-              {selectedGroupId && (
-                <p className="cw-hint">✓ {t('certificateWriter.groupLinked', { name: selectedGroup?.name || selectedGroupId })}</p>
-              )}
-            </div>
-          )}
-
-          {!selectedOwnerId && !(CERT_TYPES_FARM.includes(certType) && selectedEnterpriseId) && (
-            <p className="cw-hint">ℹ {t('certificateWriter.selectOwnerFirst')}</p>
-          )}
-
-          {/* Optional consultation link */}
-          {selectedOwnerId && consultations.length > 0 && (
-            <div className="module-form-group">
-              <label className="module-label">{t('certificateWriter.linkConsultation')}</label>
-              <select
-                className="module-input"
-                value={selectedConsultationId}
-                onChange={e => setSelectedConsultationId(e.target.value)}
-              >
-                <option value="">- None -</option>
-                {consultations.map(c => (
-                  <option key={c.id} value={c.id}>{c.label}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Examination date */}
-          <div className="module-form-group">
-            <label className="module-label">{t('certificateWriter.examinationDate')}</label>
-            <input
-              className="module-input"
-              type="date"
-              value={examinationDate}
-              onChange={e => setExaminationDate(e.target.value)}
-              max={new Date().toISOString().slice(0, 10)}
-            />
-          </div>
-
-          <div className="cw-next-bar">
-            <button
-              className="module-btn primary"
-              disabled={!certType || !selectedOwnerId || (!isHerd && !isGroupCapable && !selectedAnimalId) || (isGroupCapable && !selectedAnimalId && !selectedGroupId)}
-              onClick={() => setStep(2)}
-            >
-              {t('certificateWriter.next')} →
-            </button>
-          </div>
-        </div>
+        <Step1AnimalAndType
+          t={t} speciesLabel={speciesLabel} certType={certType} setCertType={setCertType}
+          isFarmerOrAdmin={isFarmerOrAdmin} enterpriseOptions={enterpriseOptions}
+          selectedEnterpriseId={selectedEnterpriseId} setSelectedEnterpriseId={setSelectedEnterpriseId}
+          ownerSearch={ownerSearch} setOwnerSearch={setOwnerSearch}
+          setSelectedOwnerId={setSelectedOwnerId} setSelectedOwner={setSelectedOwner}
+          loadingOwners={loadingOwners} owners={owners} selectOwner={selectOwner} selectedOwnerId={selectedOwnerId}
+          isHerd={isHerd} isGroupCapable={isGroupCapable} selectedAnimalId={selectedAnimalId}
+          setSelectedAnimalId={setSelectedAnimalId} loadingAnimals={loadingAnimals} animals={animals}
+          loadingGroups={loadingGroups} groups={groups} selectedGroupId={selectedGroupId}
+          selectGroup={selectGroup} selectedGroup={selectedGroup} consultations={consultations}
+          selectedConsultationId={selectedConsultationId} setSelectedConsultationId={setSelectedConsultationId}
+          examinationDate={examinationDate} setExaminationDate={setExaminationDate} setStep={setStep}
+        />
       )}
 
-      {/* ════════════════════════════════
-          STEP 2: Clinical Details
-      ══════════════════════════════ */}
       {step === 2 && (
-        <div className="module-card cw-card">
-          <h3 className="cw-step-title">2. {t('certificateWriter.step2')}</h3>
-
-          {/* Summary of step 1 */}
-          <div className="cw-step-summary">
-            <strong className="cw-summary-name">{certTypeLabel(certType)}</strong>
-            {selectedAnimalId && animals.find(a => a.id === selectedAnimalId) && (
-              <span> - {animals.find(a => a.id === selectedAnimalId)?.name}</span>
-            )}
-            <span className="cw-summary-owner">({selectedOwner?.name || ''})</span>
-          </div>
-
-          {/* Vaccination-specific */}
-          {isVaccRelated && (
-            <div className="module-form-group">
-              <label className="module-label">💉 {t('certificateWriter.vaccinationDetails')}</label>
-              {vaccineRows.map((row, i) => (
-                <div key={i} className="cw-vaccine-row">
-                  <div className="module-form-row-3">
-                    <div className="module-form-group">
-                      <label className="module-label cw-label-sm">Vaccine Name</label>
-                      <input className="module-input" value={row.vaccine} onChange={e => setVaccineRows(r => r.map((x, j) => j === i ? { ...x, vaccine: e.target.value } : x))} placeholder="e.g. Rabies" />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label cw-label-sm">Batch No.</label>
-                      <input className="module-input" value={row.batchNo} onChange={e => setVaccineRows(r => r.map((x, j) => j === i ? { ...x, batchNo: e.target.value } : x))} placeholder="Batch number" />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label cw-label-sm">Manufacturer</label>
-                      <input className="module-input" value={row.manufacturer} onChange={e => setVaccineRows(r => r.map((x, j) => j === i ? { ...x, manufacturer: e.target.value } : x))} placeholder="Manufacturer" />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label cw-label-sm">Date Administered</label>
-                      <input className="module-input" type="date" value={row.dateAdministered} onChange={e => setVaccineRows(r => r.map((x, j) => j === i ? { ...x, dateAdministered: e.target.value } : x))} />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label cw-label-sm">Next Due</label>
-                      <input className="module-input" type="date" value={row.nextDue} onChange={e => setVaccineRows(r => r.map((x, j) => j === i ? { ...x, nextDue: e.target.value } : x))} />
-                    </div>
-                    <div className="module-form-group">
-                      {vaccineRows.length > 1 && (
-                        <button className="module-btn small danger" onClick={() => setVaccineRows(r => r.filter((_, j) => j !== i))}>
-                          Remove
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-              <button className="module-btn small" onClick={() => setVaccineRows(r => [...r, emptyVaccineRow()])}>
-                + Add Vaccine
-              </button>
-            </div>
-          )}
-
-          {/* Travel-specific */}
-          {isTravelRelated && (
-            <div className="module-form-group">
-              <label className="module-label">✈️ {t('certificateWriter.travelDetails')}</label>
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.destination')} *</label>
-                  <input className="module-input" value={destination} onChange={e => setDestination(e.target.value)} placeholder="e.g. United Kingdom" />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.departureDate')}</label>
-                  <input className="module-input" type="date" value={departureDate} onChange={e => setDepartureDate(e.target.value)} />
-                </div>
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">{t('certificateWriter.airline')}</label>
-                <input className="module-input" value={airline} onChange={e => setAirline(e.target.value)} placeholder="e.g. IndiGo, Air India" />
-              </div>
-            </div>
-          )}
-
-          {/* Breeding-specific */}
-          {isBreedingRelated && (
-            <div className="module-form-group">
-              <label className="module-label">🐄 {t('certificateWriter.breedingDetails')}</label>
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.breedingSoundness')}</label>
-                  <select className="module-input" value={breedingSoundness} onChange={e => setBreedingSoundness(e.target.value)}>
-                    <option value="">- Select -</option>
-                    <option value="Sound">Sound</option>
-                    <option value="Questionable">Questionable</option>
-                    <option value="Unsound">Unsound</option>
-                  </select>
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.pregnancyStatus')}</label>
-                  <select className="module-input" value={pregnancyStatus} onChange={e => setPregnancyStatus(e.target.value)}>
-                    <option value="">- Select -</option>
-                    <option value="Pregnant">Pregnant</option>
-                    <option value="Not Pregnant">Not Pregnant</option>
-                    <option value="Undetermined">Undetermined</option>
-                  </select>
-                </div>
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">{t('certificateWriter.estimatedGestation')}</label>
-                <input className="module-input" value={estimatedGestation} onChange={e => setEstimatedGestation(e.target.value)} placeholder="e.g. 6 weeks" />
-              </div>
-            </div>
-          )}
-
-          {/* Valuation-specific */}
-          {isValuation && (
-            <div className="module-form-group">
-              <label className="module-label">💰 {t('certificateWriter.valuationDetails')}</label>
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.valuationAmount')} *</label>
-                  <input className="module-input" type="number" min="0" value={valuationAmount} onChange={e => setValuationAmount(e.target.value)} placeholder="e.g. 50000" />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.valuationBasis')}</label>
-                  <input className="module-input" value={valuationBasis} onChange={e => setValuationBasis(e.target.value)} placeholder="e.g. Market value based on breed and age" />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Movement-specific (movement_permit, slaughter_fitness, export_health_certificate) */}
-          {isMovement && (
-            <div className="module-form-group">
-              <label className="module-label">🚛 {t('certificateWriter.movementDetails')}</label>
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.movementFrom')} *</label>
-                  <input className="module-input" value={movementFrom} onChange={e => setMovementFrom(e.target.value)} placeholder="e.g. Farm Name, Village, District" />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.movementTo')} *</label>
-                  <input className="module-input" value={movementTo} onChange={e => setMovementTo(e.target.value)} placeholder="e.g. Slaughterhouse, Export Port, Market" />
-                </div>
-              </div>
-              <div className="module-form-row-3">
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.vehicleNumber')}</label>
-                  <input className="module-input" value={vehicleNumber} onChange={e => setVehicleNumber(e.target.value)} placeholder="e.g. TN 01 AB 1234" />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.transportDate')}</label>
-                  <input className="module-input" type="date" value={transportDate} onChange={e => setTransportDate(e.target.value)} />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.driverName')}</label>
-                  <input className="module-input" value={driverName} onChange={e => setDriverName(e.target.value)} placeholder="Driver / Transporter name" />
-                </div>
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">{t('certificateWriter.movementPurpose')}</label>
-                <select className="module-input" value={movementPurpose} onChange={e => setMovementPurpose(e.target.value)}>
-                  <option value="">- Select purpose -</option>
-                  <option value="Sale">Sale</option>
-                  <option value="Slaughter">Slaughter</option>
-                  <option value="Export">Export</option>
-                  <option value="Breeding">Breeding</option>
-                  <option value="Treatment">Treatment / Veterinary Care</option>
-                  <option value="Exhibition">Exhibition / Show</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-            </div>
-          )}
-
-          {/* Herd-specific (herd_health_certificate) */}
-          {isHerd && (
-            <div className="module-form-group">
-              <label className="module-label">🐄 {t('certificateWriter.herdDetails')}</label>
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.herdGroupName')} *</label>
-                  <input className="module-input" value={herdGroupName} onChange={e => setHerdGroupName(e.target.value)} placeholder="e.g. Block A Cattle, Pen 3 Sheep" />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.herdAnimalCount')} *</label>
-                  <input className="module-input" type="number" min="1" value={herdAnimalCount} onChange={e => setHerdAnimalCount(e.target.value)} placeholder="Total number of animals" />
-                </div>
-              </div>
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.herdSpecies')}</label>
-                  <select className="module-input" value={herdSpecies} onChange={e => setHerdSpecies(e.target.value)}>
-                    <option value="">- Select species -</option>
-                    <option value="Cattle">Cattle / Bovine</option>
-                    <option value="Sheep">Sheep</option>
-                    <option value="Goat">Goat</option>
-                    <option value="Pig">Pig / Swine</option>
-                    <option value="Poultry">Poultry</option>
-                    <option value="Horse">Horse / Equine</option>
-                    <option value="Mixed">Mixed Species</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('certificateWriter.herdPurpose')}</label>
-                  <select className="module-input" value={herdPurpose} onChange={e => setHerdPurpose(e.target.value)}>
-                    <option value="">- Select purpose -</option>
-                    <option value="Dairy">Dairy Production</option>
-                    <option value="Meat">Meat Production</option>
-                    <option value="Breeding">Breeding Stock</option>
-                    <option value="Draft">Draft / Work Animals</option>
-                    <option value="Mixed">Mixed Purpose</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Common clinical fields */}
-          <div className="module-form-group">
-            <label className="module-label">{t('certificateWriter.clinicalFindings')}</label>
-            <textarea className="module-input si-3f7753b6" rows={4} value={clinicalFindings} onChange={e => setClinicalFindings(e.target.value)} placeholder={t('certificateWriter.clinicalFindingsPlaceholder')} />
-          </div>
-          <div className="module-form-group">
-            <label className="module-label">{t('certificateWriter.diagnosis')}</label>
-            <textarea className="module-input si-3f7753b6" rows={3} value={diagnosis} onChange={e => setDiagnosis(e.target.value)} placeholder="Assessment or diagnostic conclusion..." />
-          </div>
-          <div className="module-form-group">
-            <label className="module-label">{t('certificateWriter.treatmentSummary')}</label>
-            <textarea className="module-input si-3f7753b6" rows={3} value={treatmentSummary} onChange={e => setTreatmentSummary(e.target.value)} placeholder="Describe treatments or procedures performed..." />
-          </div>
-          <div className="module-form-group">
-            <label className="module-label">{t('certificateWriter.recommendations')}</label>
-            <textarea className="module-input si-3f7753b6" rows={2} value={recommendations} onChange={e => setRecommendations(e.target.value)} placeholder="Post-certificate recommendations..." />
-          </div>
-          <div className="module-form-row">
-            <div className="module-form-group">
-              <label className="module-label">{t('certificateWriter.validUntil')}</label>
-              <input className="module-input" type="date" value={validUntil} onChange={e => setValidUntil(e.target.value)} min={examinationDate} />
-            </div>
-          </div>
-          <div className="module-form-group">
-            <label className="module-label">{t('certificateWriter.notes')}</label>
-            <textarea className="module-input si-3f7753b6" rows={2} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Any additional notes..." />
-          </div>
-
-          <div className="cw-actions">
-            <button className="module-btn" onClick={() => setStep(1)}>← {t('certificateWriter.back')}</button>
-            <button className="module-btn primary" onClick={() => setStep(3)}>{t('certificateWriter.next')} →</button>
-          </div>
-        </div>
+        <Step2ClinicalDetails
+          t={t} certType={certType} selectedAnimalId={selectedAnimalId} animals={animals} selectedOwner={selectedOwner}
+          isVaccRelated={isVaccRelated} vaccineRows={vaccineRows} setVaccineRows={setVaccineRows}
+          isTravelRelated={isTravelRelated} destination={destination} setDestination={setDestination}
+          departureDate={departureDate} setDepartureDate={setDepartureDate} airline={airline} setAirline={setAirline}
+          isBreedingRelated={isBreedingRelated} breedingSoundness={breedingSoundness} setBreedingSoundness={setBreedingSoundness}
+          pregnancyStatus={pregnancyStatus} setPregnancyStatus={setPregnancyStatus}
+          estimatedGestation={estimatedGestation} setEstimatedGestation={setEstimatedGestation}
+          isValuation={isValuation} valuationAmount={valuationAmount} setValuationAmount={setValuationAmount}
+          valuationBasis={valuationBasis} setValuationBasis={setValuationBasis}
+          isMovement={isMovement} movementFrom={movementFrom} setMovementFrom={setMovementFrom}
+          movementTo={movementTo} setMovementTo={setMovementTo} vehicleNumber={vehicleNumber} setVehicleNumber={setVehicleNumber}
+          transportDate={transportDate} setTransportDate={setTransportDate} driverName={driverName} setDriverName={setDriverName}
+          movementPurpose={movementPurpose} setMovementPurpose={setMovementPurpose}
+          isHerd={isHerd} herdGroupName={herdGroupName} setHerdGroupName={setHerdGroupName}
+          herdAnimalCount={herdAnimalCount} setHerdAnimalCount={setHerdAnimalCount}
+          herdSpecies={herdSpecies} setHerdSpecies={setHerdSpecies} herdPurpose={herdPurpose} setHerdPurpose={setHerdPurpose}
+          clinicalFindings={clinicalFindings} setClinicalFindings={setClinicalFindings}
+          diagnosis={diagnosis} setDiagnosis={setDiagnosis}
+          treatmentSummary={treatmentSummary} setTreatmentSummary={setTreatmentSummary}
+          recommendations={recommendations} setRecommendations={setRecommendations}
+          validUntil={validUntil} setValidUntil={setValidUntil} examinationDate={examinationDate}
+          notes={notes} setNotes={setNotes} setStep={setStep}
+        />
       )}
 
-      {/* ════════════════════════════════
-          STEP 3: Review & Issue
-      ══════════════════════════════ */}
       {step === 3 && (
-        <div className="module-card cw-card">
-          <h3 className="cw-step-title">3. {t('certificateWriter.step3')}</h3>
-
-          {/* Review summary */}
-          <div className="cw-review-summary">
-            <div className="cw-review-grid">
-              <div>
-                <div className="cw-review-label">{t('certificateWriter.reviewCertType')}</div>
-                <div className="cw-review-value">{certTypeLabel(certType)}</div>
-              </div>
-              <div>
-                <div className="cw-review-label">{selectedGroupId ? t('certificateWriter.reviewGroup') : t('certificateWriter.reviewAnimal')}</div>
-                <div className="cw-review-value">{selectedGroupId ? (selectedGroup?.name || selectedGroupId) : (animals.find(a => a.id === selectedAnimalId)?.name || '-')}</div>
-              </div>
-              <div>
-                <div className="cw-review-label">{t('certificateWriter.reviewOwner')}</div>
-                <div className="cw-review-value">{selectedOwner?.name || '-'}</div>
-              </div>
-              <div>
-                <div className="cw-review-label">{t('certificateWriter.reviewExamDate')}</div>
-                <div className="cw-review-value">{examinationDate ? formatDate(examinationDate) : '-'}</div>
-              </div>
-              <div>
-                <div className="cw-review-label">{t('certificateWriter.reviewValidUntil')}</div>
-                <div className="cw-review-value">{validUntil ? formatDate(validUntil) : t('certificateWriter.reviewNoExpiry')}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="cw-preview-bar">
-            <button className="module-btn" onClick={handlePreview}>
-              👁 {t('certificateWriter.preview')}
-            </button>
-          </div>
-
-          <div className="cw-warning-note">
-            <strong>⚠ {t('certificateWriter.issueNotePrefix')}:</strong>{' '}
-            {t('certificateWriter.issueNoteText')}
-          </div>
-
-          <div className="cw-actions">
-            <button className="module-btn" onClick={() => setStep(2)} disabled={submitting}>
-              ← {t('certificateWriter.back')}
-            </button>
-            <div className="cw-actions-right">
-              <button className="module-btn" onClick={handleSaveDraft} disabled={submitting}>
-                {submitting ? t('common.saving') : `💾 ${t('certificateWriter.saveDraft')}`}
-              </button>
-              <button
-                className="module-btn primary"
-                onClick={handleIssue}
-                disabled={submitting || !certType || (!isHerd && !isGroupCapable && !selectedAnimalId) || (isGroupCapable && !selectedAnimalId && !selectedGroupId) || !selectedOwnerId}
-              >
-                {submitting ? t('common.saving') : `✅ ${t('certificateWriter.issueNow')}`}
-              </button>
-            </div>
-          </div>
-        </div>
+        <Step3Review
+          t={t} certType={certType} selectedGroupId={selectedGroupId} selectedGroup={selectedGroup}
+          animals={animals} selectedAnimalId={selectedAnimalId} selectedOwnerId={selectedOwnerId} selectedOwner={selectedOwner}
+          examinationDate={examinationDate} validUntil={validUntil} formatDate={formatDate}
+          handlePreview={handlePreview} submitting={submitting} setStep={setStep}
+          handleSaveDraft={handleSaveDraft} handleIssue={handleIssue} isHerd={isHerd} isGroupCapable={isGroupCapable}
+        />
       )}
 
       {/* ── Preview modal ── */}
