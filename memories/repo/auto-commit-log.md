@@ -8405,3 +8405,43 @@
 </details>
 
 ---
+
+## 2026-11-13 18:35 · `ff74912` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 18:49 · `06c985b` · OTHER
+
+**Commit:** refactor(pages): split the 1,017-line Animals.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/animals/AnimalCard.tsx
+  - frontend/src/components/animals/AnimalDetailModal.tsx
+  - frontend/src/components/animals/AnimalFilterBar.tsx
+  - frontend/src/components/animals/AnimalFormModal.tsx
+  - frontend/src/components/animals/BulkImportModal.tsx
+  - frontend/src/components/animals/animalsShared.tsx
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
