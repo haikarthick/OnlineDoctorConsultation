@@ -101,7 +101,6 @@
         "src/pages/Sustainability.tsx",
         "src/pages/TreatmentCampaigns.tsx",
         "src/pages/VetCertificates.tsx",
-        "src/pages/VetHospitalManage.tsx",
         "src/pages/VetHospitalProfile.tsx",
         "src/pages/Wallet.tsx",
         "src/pages/WellnessPortal.tsx",
