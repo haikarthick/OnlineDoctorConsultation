@@ -70,7 +70,10 @@ the change "looks small," small changes are exactly where a skipped review goes 
 3. **`ui-review` skill** — if there's a UI surface.
 4. **`ui-resilience-review` skill** — if there's a UI surface with any list, name, count, or
    animation/transition.
-5. Fix what the reviews find before moving to Phase 5. A review that finds nothing worth fixing
+5. **`farm-domain-review` skill** — if the feature is anything a farmer records or reads, or
+   touches species/breed/class/group-type master data. Also consult it in Phase 1.
+6. **`mobile-farmer-ux` skill** — if a farmer uses the screen (assume on a phone).
+7. Fix what the reviews find before moving to Phase 5. A review that finds nothing worth fixing
    is a valid outcome; a review that didn't run is not.
 
 ## Phase 5 — Ship

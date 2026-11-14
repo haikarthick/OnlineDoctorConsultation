@@ -119,6 +119,10 @@ Invoke these for the workflows they cover rather than improvising each time:
 - `ui-review` — DESIGN_SYSTEM.md gates + an Apple-HIG-style polish pass for any screen
 - `ui-resilience-review` — animation performance discipline + real-world edge-case data
   (long names in every locale, huge lists, missing fields) for any public-facing screen
+- `farm-domain-review` — functional gate for any farm feature: species-correct terms, life-stage
+  groups, the farmer's daily record-keeping loop, NBAGR breeds, vet-sees-what-farmer-recorded
+- `mobile-farmer-ux` — phone-first rules for any farmer screen: tap counts, bottom tab bar,
+  cards not tables, tap-not-type entry, never lose an entry offline
 - `tenant-isolation-review` — the cross-tenant/IDOR checklist for any route taking a
   network/enterprise/pharmacy/group id
 - `pre-ship` — what "done" actually requires, beyond a green `tsc`
