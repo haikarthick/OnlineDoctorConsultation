@@ -15,6 +15,25 @@ Prompt Farm365, Herdwatch, Farmtree) all share the same core — a per-animal pr
 breeding/calving events, health/treatment records, per-cow milk records, reports, and offline entry
 with later sync. Anything outside that core is optional; anything missing from it is a gap.
 
+## 0. Every farm type, not just dairy
+
+Farmer feedback usually arrives about one species. The platform serves all of them, and a design
+that only fits a dairy cow is wrong. Before accepting any farm design, walk it through each row
+and say what the farmer records and sees:
+
+| Farm type | Managed as | Daily record | Key events | What they watch |
+|---|---|---|---|---|
+| Dairy (cattle, buffalo) | individual | milk per session | heat, AI, pregnancy check, dry-off, calving | yield, calving interval |
+| Goat / sheep | individual or flock | weight; milk only for dairy goats | mating, kidding/lambing, weaning, sale | growth, kids per doe |
+| Pig | individual sows, batch fatteners | feed | service, farrowing (litter size), weaning | litter size, growth |
+| Poultry broiler | batch + cycle | mortality, feed, sample weight | placement, sale/clear-out | mortality %, feed conversion, days to market |
+| Poultry layer | batch + cycle | eggs collected, mortality, feed | placement, cull | lay %, mortality % |
+| Mixed smallholder | both | whichever applies | all of the above | simple totals |
+
+Batch-managed stock never gets one row per head (`docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md`). A daily
+record, an event, or a "due" reminder must take either an animal or a group as its subject —
+build it once for both, not as a cattle feature with poultry bolted on later.
+
 ## 1. Does the farmer have a reason to open this today?
 
 Every farm feature must attach to one of the loops below. If it attaches to none, question it.

@@ -7,6 +7,13 @@ pharmacist (invite-only). Full role/network-role detail: ask for it, it's covere
 This file is intentionally short. It's the always-loaded root of a **progressive-disclosure**
 context model — don't grow it; add detail to `docs/modules/<module>.md` instead and link it below.
 
+## Mandatory: seamless across modules
+Data, functionality, look and feel and usability must be the same across every module, role and
+screen, admin through every user role. Before planning any functional change, trace every module
+and persona that reads or writes the data it touches and say what changes for each (the
+`feature-delivery` skill's Phase 1 cross-module trace). Shared UI patterns go in the shared
+layer, never as a one-role special.
+
 ## Tech stack
 Backend: Node 18 + Express + TypeScript, PostgreSQL (`gen_random_uuid()`), Redis, Socket.IO, JWT.
 Frontend: React 18 + TypeScript + Vite, CSS modules are **global** (no scoping — see

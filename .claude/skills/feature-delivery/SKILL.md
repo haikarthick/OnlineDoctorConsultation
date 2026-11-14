@@ -19,6 +19,15 @@ Restate the request back in concrete terms before writing code: what should happ
 role(s), and what does success look like. Then actively surface what the request leaves unstated
 — don't wait for these to surface as bugs later:
 
+- **Cross-module trace — mandatory, done before any plan is presented.** The owner's basic rule
+  for this application: data, functionality, look and feel and usability are seamless across
+  every module, role and screen. So for every table, column, field or UI pattern the request
+  touches, grep its name across `backend/src/services` and `frontend/src` and list every module
+  and persona that reads or writes it (farmer, pet owner, vet consultation, prescription,
+  certificates, medical records, marketplace, dashboards, analytics, hospital network, pharmacy,
+  admin). State for each what changes, or why nothing does. A captured field that another
+  persona needs but cannot see is a defect in the requirement, not a follow-up. "Not yet checked"
+  is not an acceptable line in a plan — check it, then present.
 - **Which roles are affected?** This platform has 7+ roles with genuinely different screens and
   permissions (`pet_owner`, `farmer`, `veterinarian`, `admin`, `corporate_admin`,
   `hospital_staff`, `pharmacist`, plus network roles). A request phrased for one role usually
