@@ -131,7 +131,6 @@
         "src/pages/doctor/VetEarnings.tsx",
         "src/pages/hospitalnetwork/HospitalNetworks.tsx",
         "src/pages/hospitalnetwork/NetworkRoleMatrix.tsx",
-        "src/pages/petowner/BookConsultation.tsx",
         "src/pages/petowner/VetProfilePage.tsx",
         "src/pages/pharmacy/DispensingHistory.tsx",
         "src/pages/pharmacy/DispensingModal.tsx",

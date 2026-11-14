@@ -6,22 +6,15 @@ import { useSettings } from '../../context/SettingsContext'
 import { useMasterData } from '../../context/MasterDataContext'
 import { VetProfile, TimeSlot, Animal } from '../../types'
 import PaymentCheckout from '../../components/PaymentCheckout'
+import { Enterprise, AnimalGroup, filterFutureSlots } from '../../components/bookConsultation/bookConsultationShared'
+import BookingProgressSteps from '../../components/bookConsultation/BookingProgressSteps'
+import DoctorInfoPanel from '../../components/bookConsultation/DoctorInfoPanel'
+import Step1SelectDoctor from '../../components/bookConsultation/Step1SelectDoctor'
+import Step2ChooseTime from '../../components/bookConsultation/Step2ChooseTime'
+import Step3Details from '../../components/bookConsultation/Step3Details'
+import Step4Confirm from '../../components/bookConsultation/Step4Confirm'
+import BookingSuccessScreen from '../../components/bookConsultation/BookingSuccessScreen'
 import '../../styles/modules.css'
-
-/** Filter out past time slots for today using browser local time + 15min buffer */
-const filterFutureSlots = <T extends { startTime: string; isAvailable: boolean }>(slots: T[], forDate: string): T[] => {
-  const now = new Date()
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-  return slots.filter(s => {
-    if (!s.isAvailable) return false
-    if (forDate !== todayStr) return true
-    const [h, m] = (s.startTime || '00:00').split(':').map(Number)
-    return h * 60 + m > now.getHours() * 60 + now.getMinutes() + 15
-  })
-}
-
-interface Enterprise { id: string; name: string; type: string; location?: string }
-interface AnimalGroup { id: string; name: string; type: string; animalCount?: number }
 
 interface BookConsultationProps {
   onNavigate: (path: string) => void
@@ -369,6 +362,42 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
     }
   }
 
+  const handleDateChange = (date: string) => {
+    setSelectedDate(date)
+    setSelectedSlot(null)
+    setAutoSelectedDate(false)
+  }
+
+  const handleSelectionModeChange = (mode: 'individual' | 'enterprise') => {
+    setSelectionMode(mode)
+    if (mode === 'individual') {
+      setSelectedEnterprise('')
+      setSelectedGroup('')
+      setSelectedAnimal('')
+    } else {
+      setSelectedAnimal('')
+    }
+  }
+
+  const handleCertPurposeChange = (ct: string) => {
+    setCertPurpose(ct)
+    if (ct) {
+      const label = ct.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
+      setReasonForVisit(`Certificate: ${label}`)
+    } else {
+      setReasonForVisit('')
+    }
+  }
+
+  const handleStep3Continue = () => {
+    if (reasonForVisit.trim().length < 3) {
+      setStep3Error(t('bookConsultation.reasonTooShort'))
+      return
+    }
+    setStep3Error('')
+    setStep(4)
+  }
+
   if (paymentInfo && !success) {
     return (
       <div className="module-page">
@@ -384,25 +413,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
   }
 
   if (success) {
-    return (
-      <div className="module-page">
-        <div className="si-bd60beb2">
-          <div className="si-7615cf7c">✅</div>
-          <h1 className="si-dab75309">{t('bookConsultation.successTitle')}</h1>
-          <p className="si-6bc9c38d">
-            {t('bookConsultation.successMessage')}
-          </p>
-          <div className="si-7b7a3b80">
-            <button className="btn btn-primary" onClick={() => onNavigate('/my-bookings')}>
-              {t('bookConsultation.viewMyBookings')}
-            </button>
-            <button className="btn btn-outline" onClick={() => onNavigate('/dashboard')}>
-              {t('bookConsultation.goToDashboard')}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+    return <BookingSuccessScreen onNavigate={onNavigate} />
   }
 
   if (loading && step === 1) {
@@ -430,33 +441,15 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Progress Steps */}
-      <div className="si-8b072f33">
-        {[t('bookConsultation.steps.selectDoctor'), t('bookConsultation.steps.chooseTime'), t('bookConsultation.steps.details'), t('bookConsultation.steps.confirm')].map((label, i) => (
-          <div key={label} className="si-267eb255">
-            <div className="si-4977896d">
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%', display: 'flex',
-                alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600,
-                background: step > i + 1 ? '#059669' : step === i + 1 ? '#2563eb' : '#e5e7eb',
-                color: step >= i + 1 ? 'white' : '#9ca3af'
-              }}>
-                {step > i + 1 ? '✓' : i + 1}
-              </div>
-              <span style={{ fontSize: 12, color: step === i + 1 ? '#2563eb' : '#9ca3af', fontWeight: 500 }}>
-                {label}
-              </span>
-            </div>
-            {i < 3 && (
-              <div style={{
-                width: 60, height: 2, margin: '0 8px',
-                background: step > i + 1 ? '#059669' : '#e5e7eb',
-                marginBottom: 20
-              }} />
-            )}
-          </div>
-        ))}
-      </div>
+      <BookingProgressSteps
+        step={step}
+        labels={[
+          t('bookConsultation.steps.selectDoctor'),
+          t('bookConsultation.steps.chooseTime'),
+          t('bookConsultation.steps.details'),
+          t('bookConsultation.steps.confirm')
+        ]}
+      />
 
       {error && (
         <div className="toast toast-error si-ef1b80b9">
@@ -464,590 +457,99 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* Persistent Doctor Info Panel - visible on steps 2, 3, 4 */}
       {selectedVet && step > 1 && (
-        <div className="card si-aff059cd">
-          <div className="card-body si-bc0f1da3">
-            <div className="si-668bc06f">
-              {selectedVet.firstName?.charAt(0) || '🐾'}
-            </div>
-            <div className="si-26d7edc3">
-              <div className="si-fcbdf47a">
-                {t('bookConsultation.bookingWith')} Dr. {selectedVet.firstName} {selectedVet.lastName}
-              </div>
-              <div className="si-9ac294d9">
-                {(selectedVet.specializations || []).join(', ') || t('bookConsultation.generalVeterinarian')}
-              </div>
-              {selectedVet.clinicName && (
-                <div className="si-d93f66e1">🏥 {selectedVet.clinicName}</div>
-              )}
-            </div>
-            <div className="si-d4499730">
-              <div className="si-e9b1e170">
-                {formatCurrency(selectedVet.consultationFee || 0)}
-              </div>
-              <div className="si-48a0b045">{t('bookConsultation.perSession')}</div>
-              {(selectedVet.rating ?? 0) > 0 && (
-                <div className="si-0d975b1f">
-                  ⭐ {(selectedVet.rating ?? 0).toFixed(1)}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <DoctorInfoPanel selectedVet={selectedVet} formatCurrency={formatCurrency} />
       )}
 
-      {/* Step 1: Select Doctor */}
       {step === 1 && (
-        <div>
-          <h2 className="si-7e63ec4f">{t('bookConsultation.selectVet')}</h2>
-          <div className="vet-grid">
-            {vets.map(vet => (
-              <div
-                key={vet.id}
-                className="vet-card"
-                style={{
-                  cursor: 'pointer',
-                  border: selectedVet?.id === vet.id ? '2px solid #2563eb' : undefined
-                }}
-                onClick={() => setSelectedVet(vet)}
-              >
-                <div className="vet-avatar">
-                  {vet.firstName?.charAt(0) || '🐾'}
-                </div>
-                <h3 className="vet-name">Dr. {vet.firstName || ''} {vet.lastName || ''}</h3>
-                <p className="vet-specialty">{(vet.specializations || []).join(', ') || 'General Veterinarian'}</p>
-                <div className="vet-fee">{formatCurrency(vet.consultationFee || 0)}/session</div>
-              </div>
-            ))}
-          </div>
-          {vets.length === 0 && (
-            <div className="empty-state">
-              <div className="empty-icon">👨‍⚕️</div>
-              <h3>{t('bookConsultation.noVets')}</h3>
-              <p>{t('bookConsultation.checkBackLater')}</p>
-            </div>
-          )}
-          <div className="si-07572340">
-            <button
-              className="btn btn-primary btn-lg"
-              disabled={!selectedVet}
-              onClick={() => setStep(2)}
-            >
-              Continue →
-            </button>
-          </div>
-        </div>
+        <Step1SelectDoctor
+          vets={vets}
+          selectedVet={selectedVet}
+          onSelectVet={setSelectedVet}
+          onContinue={() => setStep(2)}
+          formatCurrency={formatCurrency}
+        />
       )}
 
-      {/* Step 2: Choose Time */}
       {step === 2 && (
-        <div>
-          <h2 className="si-7e63ec4f">{t('bookConsultation.chooseDateTime')}</h2>
-          <div className="card si-478be2e9">
-            <div className="card-body">
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">{t('bookConsultation.selectDate')}</label>
-                  {dateSearching ? (
-                    <div className="si-7a759a78">
-                      <div className="loading-spinner si-34eb3f90" />
-                      <span className="si-c3e04596">{t('bookConsultation.findingNextDate')}</span>
-                    </div>
-                  ) : (
-                    <>
-                      <input
-                        type="date"
-                        className="form-input"
-                        value={selectedDate}
-                        min={(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })()}
-                        onChange={(e) => {
-                          setSelectedDate(e.target.value)
-                          setSelectedSlot(null)
-                          setAutoSelectedDate(false)
-                        }}
-                      />
-                      {autoSelectedDate && selectedDate && (
-                        <p className="si-b21ad2cf">
-                          ✓ {t('bookConsultation.nextAvailableAutoSelected')}
-                        </p>
-                      )}
-                    </>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label className="form-label">{t('bookConsultation.consultationType')}</label>
-                  <select
-                    className="form-select"
-                    value={bookingType}
-                    onChange={(e) => setBookingType(e.target.value)}
-                  >
-                    <option value="video_call">📹 {t('bookConsultation.videoCall')}</option>
-                    <option value="phone">📞 {t('bookConsultation.phoneCall')}</option>
-                    <option value="in_person">🏥 {t('bookConsultation.inPerson')}</option>
-                    <option value="chat">💬 {t('bookConsultation.chatType')}</option>
-                    {(user?.role === 'farmer' || selectionMode === 'enterprise') && (
-                      <option value="farm_visit">🚜 {t('bookConsultation.farmVisit')}</option>
-                    )}
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {selectedDate && (
-            <div className="card">
-              <div className="card-header">
-                <h3>{t('bookConsultation.availableSlots')}</h3>
-              </div>
-              <div className="card-body">
-                {slotsLoading ? (
-                  <div className="loading-container si-944918f6">
-                    <div className="loading-spinner" />
-                  </div>
-                ) : (() => {
-                  const futureSlots = filterFutureSlots(availableSlots, selectedDate)
-                  return futureSlots.length === 0 ? (
-                    <div className="empty-state si-95d82b41">
-                      <p>{availableSlots.length === 0
-                        ? t('bookConsultation.noSlotsAvailable')
-                        : t('bookConsultation.allSlotsPassed')}</p>
-                    </div>
-                  ) : (
-                    <div className="time-slots-grid">
-                      {futureSlots.map((slot, idx) => (
-                        <div
-                          key={idx}
-                          className={`time-slot ${selectedSlot?.startTime === slot.startTime ? 'selected' : ''}`}
-                          onClick={() => setSelectedSlot(slot)}
-                        >
-                          {formatSlotTime(slot.startTime)} - {formatSlotTime(slot.endTime)}
-                        </div>
-                      ))}
-                    </div>
-                  )
-                })()}
-              </div>
-            </div>
-          )}
-
-          <div className="si-2595c296">
-            <button className="btn btn-outline" onClick={() => setStep(1)}>{t('bookConsultation.back')}</button>
-            <button
-              className="btn btn-primary btn-lg"
-              disabled={!selectedSlot}
-              onClick={() => setStep(3)}
-            >
-              Continue →
-            </button>
-          </div>
-        </div>
+        <Step2ChooseTime
+          selectedDate={selectedDate}
+          onDateChange={handleDateChange}
+          dateSearching={dateSearching}
+          autoSelectedDate={autoSelectedDate}
+          bookingType={bookingType}
+          onBookingTypeChange={setBookingType}
+          isFarmerOrEnterprise={user?.role === 'farmer' || selectionMode === 'enterprise'}
+          slotsLoading={slotsLoading}
+          availableSlots={availableSlots}
+          selectedSlot={selectedSlot}
+          onSelectSlot={setSelectedSlot}
+          onBack={() => setStep(1)}
+          onContinue={() => setStep(3)}
+          formatSlotTime={formatSlotTime}
+        />
       )}
 
-      {/* Step 3: Details */}
       {step === 3 && (
-        <div>
-          <h2 className="si-7e63ec4f">{t('bookConsultation.consultationDetails')}</h2>
-
-          {/* Pre-filled context banner */}
-          {prefilledContext && (
-            <div className="si-a028abe6">
-              <strong>ℹ️ Pre-selected:</strong>{' '}
-              {prefilledContext.animalName && <span>Animal: <strong>{prefilledContext.animalName}</strong></span>}
-              {prefilledContext.enterpriseName && <span>Enterprise: <strong>{prefilledContext.enterpriseName}</strong></span>}
-              {prefilledContext.groupName && <span> → Group: <strong>{prefilledContext.groupName}</strong></span>}
-              <span className="si-824a7a1e">
-                (You can change the selection below if needed)
-              </span>
-            </div>
-          )}
-
-          {/* Selection Mode Toggle (Farmers & Admins) */}
-          {(isFarmer || isAdmin) && (
-            <div className="card si-7e63ec4f">
-              <div className="card-body si-5792103e">
-                <label className="form-label si-dab75309">{t('bookConsultation.bookingFor')}</label>
-                <div className="si-d223efb3">
-                  <button
-                    type="button"
-                    style={{
-                      flex: 1, padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer',
-                      border: selectionMode === 'individual' ? '2px solid #2563eb' : '1px solid #d1d5db',
-                      background: selectionMode === 'individual' ? '#eff6ff' : 'white',
-                      color: selectionMode === 'individual' ? '#2563eb' : '#374151'
-                    }}
-                    onClick={() => { setSelectionMode('individual'); setSelectedEnterprise(''); setSelectedGroup(''); setSelectedAnimal('') }}
-                  >
-                    🐾 {t('bookConsultation.individualPet')}
-                  </button>
-                  <button
-                    type="button"
-                    style={{
-                      flex: 1, padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer',
-                      border: selectionMode === 'enterprise' ? '2px solid #059669' : '1px solid #d1d5db',
-                      background: selectionMode === 'enterprise' ? '#ecfdf5' : 'white',
-                      color: selectionMode === 'enterprise' ? '#059669' : '#374151'
-                    }}
-                    onClick={() => { setSelectionMode('enterprise'); setSelectedAnimal('') }}
-                  >
-                    🏢 {t('bookConsultation.farmEnterprise')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="card">
-            <div className="card-body">
-
-              {/* Enterprise Mode: Farm → Group → Animal cascade */}
-              {selectionMode === 'enterprise' && (isFarmer || isAdmin) && (
-                <>
-                  <div className="form-group">
-                    <label className="form-label">🏢 {t('bookConsultation.selectFarm')}</label>
-                    <select
-                      className="form-select"
-                      value={selectedEnterprise}
-                      onChange={(e) => handleEnterpriseChange(e.target.value)}
-                    >
-                      <option value="">-- {t('bookConsultation.selectFarmPlaceholder')} --</option>
-                      {enterprises.map(ent => (
-                        <option key={ent.id} value={ent.id}>
-                          {ent.name} - {ent.type}{ent.location ? ` (${ent.location})` : ''}
-                        </option>
-                      ))}
-                    </select>
-                    {enterprises.length === 0 && (
-                      <p className="si-322b324f">
-                        {t('bookConsultation.noEnterprises')}
-                      </p>
-                    )}
-                  </div>
-
-                  {selectedEnterprise && (
-                    <div className="form-group">
-                      <label className="form-label">🐄 {t('bookConsultation.selectHerd')}</label>
-                      {loadingEnterpriseData ? (
-                        <div className="si-83bdeb6c">
-                          <div className="loading-spinner si-22c0fd35" />
-                        </div>
-                      ) : (
-                        <select
-                          className="form-select"
-                          value={selectedGroup}
-                          onChange={(e) => handleGroupChange(e.target.value)}
-                        >
-                          <option value="">-- {t('bookConsultation.allAnimalsNoFilter')} --</option>
-                          {groups.map(g => (
-                            <option key={g.id} value={g.id}>
-                              {g.name} - {g.type}{g.animalCount != null ? ` (${g.animalCount} animals)` : ''}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                    </div>
-                  )}
-
-                  {selectedEnterprise && !loadingEnterpriseData && (
-                    <div className="form-group">
-                      <label className="form-label">🐾 {t('bookConsultation.selectAnimal')}</label>
-                      <select
-                        className="form-select"
-                        value={selectedAnimal}
-                        onChange={(e) => setSelectedAnimal(e.target.value)}
-                      >
-                        <option value="">-- {t('bookConsultation.selectAnimalOptional')} --</option>
-                        {filteredEnterpriseAnimals.map((a: any) => (
-                          <option key={a.id} value={a.id}>
-                            {a.name} - {speciesLabel(a.species, t)}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}
-                          </option>
-                        ))}
-                      </select>
-                      {filteredEnterpriseAnimals.length === 0 && (
-                        <div className="si-ae724942">
-                          <strong className="si-31823d6c">⚠️ {selectedGroup ? t('bookConsultation.noAnimalsInGroup') : t('bookConsultation.noAnimalsInEnterprise')}</strong>
-                          <p className="si-645dbab8">
-                            {t('bookConsultation.toAddAnimals')}{' '}
-                            <button type="button" onClick={() => onNavigate('/animals')}
-                              className="si-7e869b25">
-                              {t('bookConsultation.registerNewAnimal')}
-                            </button>
-                            {' '}{t('bookConsultation.andAssign')}{' '}
-                            <button type="button" onClick={() => onNavigate('/animal-groups')}
-                              className="si-7e869b25">
-                              {t('bookConsultation.herdsAndGroups')}
-                            </button>
-                            {' '}{t('bookConsultation.toAssignExisting')}
-                          </p>
-                          <p className="si-d7b1325f">
-                            {t('bookConsultation.canStillProceed')}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Quick summary of selection */}
-                  {selectedEnterprise && (
-                    <div className="si-08054a82">
-                      <strong className="si-27f26492">📋 Selection:</strong>{' '}
-                      <span className="si-f2153d80">
-                        {selectedEnterpriseName}
-                        {selectedGroupName ? ` → ${selectedGroupName}` : ''}
-                        {selectedAnimalObj ? ` → ${selectedAnimalObj.name}` : ' (general / herd-level)'}
-                      </span>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {/* Individual Mode: Flat pet selection */}
-              {selectionMode === 'individual' && (
-                <div className="form-group">
-                  <label className="form-label">{t('bookConsultation.selectYourPet')}</label>
-                  {animals.length === 0 ? (
-                    <div className="si-db6c70c7">
-                      <div>
-                        <strong className="si-852e3180">🐾 {t('bookConsultation.noPetsRegistered')}</strong>
-                        <p className="si-1118237b">{t('bookConsultation.noPetsHint')}</p>
-                      </div>
-                      <button
-                        type="button"
-                        className="module-btn primary si-7a2c0aef"
-                       
-                        onClick={() => onNavigate('/animals')}
-                      >
-                        + {t('bookConsultation.addPet')}
-                      </button>
-                    </div>
-                  ) : (
-                    <select
-                      className="form-select"
-                      value={selectedAnimal}
-                      onChange={(e) => setSelectedAnimal(e.target.value)}
-                    >
-                      <option value="">-- {t('bookConsultation.selectPetOptional')} --</option>
-                      {animals.map(a => (
-                        <option key={a.id} value={a.id}>{a.name} - {speciesLabel(a.species, t)}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}</option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-              )}
-
-              <div className="form-group">
-                <label className="form-label">Certificate Purpose (optional)</label>
-                <select
-                  className="form-input"
-                  value={certPurpose}
-                  onChange={e => {
-                    const ct = e.target.value
-                    setCertPurpose(ct)
-                    if (ct) {
-                      const label = ct.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
-                      setReasonForVisit(`Certificate: ${label}`)
-                    } else {
-                      setReasonForVisit('')
-                    }
-                  }}
-                >
-                  <option value="">Regular Consultation</option>
-                  {['health_certificate','fitness_to_travel','rabies_vaccination','vaccination_record','pre_travel','sterilization','treatment','animal_injury','post_mortem','breeding_soundness','pregnancy_diagnosis','infertility_evaluation','fitness_for_sale','animal_valuation'].map(ct => (
-                    <option key={ct} value={ct}>{ct.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{t('bookConsultation.reasonForVisit')}</label>
-                <input
-                  type="text"
-                  className={`form-input${step3Error && reasonForVisit.trim().length < 3 ? ' input-error' : ''}`}
-                  placeholder={t('bookConsultation.reasonPlaceholder')}
-                  value={reasonForVisit}
-                  onChange={(e) => {
-                    setReasonForVisit(e.target.value)
-                    if (step3Error) setStep3Error('')
-                  }}
-                />
-                {step3Error && (
-                  <p className="si-4bdfd452">
-                    ⚠ {step3Error}
-                  </p>
-                )}
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{t('bookConsultation.symptoms')}</label>
-                <textarea
-                  className="form-textarea"
-                  placeholder={t('bookConsultation.symptomsPlaceholder')}
-                  value={symptoms}
-                  onChange={(e) => setSymptoms(e.target.value)}
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">{t('bookConsultation.priority')}</label>
-                  <select
-                    className="form-select"
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value)}
-                  >
-                    <option value="low">{t('bookConsultation.priorityLow')}</option>
-                    <option value="normal">{t('bookConsultation.priorityNormal')}</option>
-                    <option value="high">{t('bookConsultation.priorityHigh')}</option>
-                    <option value="emergency">🚨 {t('bookConsultation.priorityEmergency')}</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{t('bookConsultation.additionalNotes')}</label>
-                <textarea
-                  className="form-textarea"
-                  placeholder={t('bookConsultation.notesPlaceholder')}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={3}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="si-2595c296">
-            <button className="btn btn-outline" onClick={() => setStep(2)}>{t('bookConsultation.back')}</button>
-            <button
-              className="btn btn-primary btn-lg"
-              disabled={!reasonForVisit.trim()}
-              onClick={() => {
-                if (reasonForVisit.trim().length < 3) {
-                  setStep3Error(t('bookConsultation.reasonTooShort'))
-                  return
-                }
-                setStep3Error('')
-                setStep(4)
-              }}
-            >
-              {t('bookConsultation.reviewBooking')}
-            </button>
-          </div>
-        </div>
+        <Step3Details
+          prefilledContext={prefilledContext}
+          isFarmer={isFarmer}
+          isAdmin={isAdmin}
+          selectionMode={selectionMode}
+          onSelectionModeChange={handleSelectionModeChange}
+          enterprises={enterprises}
+          selectedEnterprise={selectedEnterprise}
+          selectedEnterpriseName={selectedEnterpriseName}
+          onEnterpriseChange={handleEnterpriseChange}
+          groups={groups}
+          selectedGroup={selectedGroup}
+          selectedGroupName={selectedGroupName}
+          onGroupChange={handleGroupChange}
+          loadingEnterpriseData={loadingEnterpriseData}
+          filteredEnterpriseAnimals={filteredEnterpriseAnimals}
+          animals={animals}
+          selectedAnimal={selectedAnimal}
+          onSelectedAnimalChange={setSelectedAnimal}
+          selectedAnimalObj={selectedAnimalObj}
+          onNavigate={onNavigate}
+          speciesLabel={speciesLabel}
+          certPurpose={certPurpose}
+          onCertPurposeChange={handleCertPurposeChange}
+          reasonForVisit={reasonForVisit}
+          onReasonForVisitChange={setReasonForVisit}
+          step3Error={step3Error}
+          onClearStep3Error={() => setStep3Error('')}
+          symptoms={symptoms}
+          onSymptomsChange={setSymptoms}
+          priority={priority}
+          onPriorityChange={setPriority}
+          notes={notes}
+          onNotesChange={setNotes}
+          onBack={() => setStep(2)}
+          onContinue={handleStep3Continue}
+        />
       )}
 
-      {/* Step 4: Confirm */}
       {step === 4 && (
-        <div>
-          <h2 className="si-7e63ec4f">{t('bookConsultation.reviewConfirm')}</h2>
-          <div className="card si-478be2e9">
-            <div className="card-body">
-              <div className="si-e295240a">
-                <div className="si-f23844fb">
-                  <div>
-                    <strong className="si-c3b93ebb">{t('bookConsultation.veterinarianLabel')}</strong>
-                    <p className="si-7ddbf1dd">
-                      Dr. {selectedVet?.firstName} {selectedVet?.lastName}
-                    </p>
-                  </div>
-                  <div>
-                    <strong className="si-c3b93ebb">{t('bookConsultation.feeLabel')}</strong>
-                    <p className="si-0112c347">
-                      {formatCurrency(selectedVet?.consultationFee || 0)}
-                    </p>
-                  </div>
-                </div>
-                <div className="si-f23844fb">
-                  <div>
-                    <strong className="si-c3b93ebb">{t('bookConsultation.dateTimeLabel')}</strong>
-                    <p className="si-7ddbf1dd">
-                      {selectedDate} | {selectedSlot?.startTime} - {selectedSlot?.endTime}
-                    </p>
-                  </div>
-                  <div>
-                    <strong className="si-c3b93ebb">{t('bookConsultation.typeLabel')}</strong>
-                    <p className="si-69225186">
-                      {bookingType.replace('_', ' ')}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Enterprise / Group / Animal info */}
-                {selectionMode === 'enterprise' && selectedEnterprise && (
-                  <div className="si-42727ee6">
-                    <strong className="si-85f9b19e">🏢 {t('bookConsultation.farmDetails')}</strong>
-                    <div className="si-33fa0800">
-                      <div>
-                        <span className="si-48a0b045">{t('bookConsultation.enterpriseLabel')}:</span>
-                        <p className="si-3611a35f">{selectedEnterpriseName}</p>
-                      </div>
-                      {selectedGroupName && (
-                        <div>
-                          <span className="si-48a0b045">{t('bookConsultation.herdGroupLabel')}:</span>
-                          <p className="si-3611a35f">{selectedGroupName}</p>
-                        </div>
-                      )}
-                    </div>
-                    {selectedAnimalObj && (
-                      <div className="si-f48bb60f">
-                        <span className="si-48a0b045">{t('bookConsultation.animalLabel')}:</span>
-                        <p className="si-3611a35f">
-                          {selectedAnimalObj.name} - {speciesLabel(selectedAnimalObj.species, t)}
-                          {selectedAnimalObj.breed ? ` / ${selectedAnimalObj.breed}` : ''}
-                        </p>
-                      </div>
-                    )}
-                    {!selectedAnimalObj && (
-                      <p className="si-e2573780">
-                        {t('bookConsultation.generalConsultation')}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {selectionMode === 'individual' && selectedAnimalObj && (
-                  <div>
-                    <strong className="si-c3b93ebb">{t('bookConsultation.petLabel')}</strong>
-                    <p className="si-4dc4c991">
-                      {selectedAnimalObj.name} - {selectedAnimalObj.species}
-                      {selectedAnimalObj.breed ? ` / ${selectedAnimalObj.breed}` : ''}
-                    </p>
-                  </div>
-                )}
-
-                <div>
-                  <strong className="si-c3b93ebb">{t('bookConsultation.reasonLabel')}</strong>
-                  <p className="si-4dc4c991">{reasonForVisit}</p>
-                </div>
-                {symptoms && (
-                  <div>
-                    <strong className="si-c3b93ebb">{t('bookConsultation.symptomsLabel')}</strong>
-                    <p className="si-4dc4c991">{symptoms}</p>
-                  </div>
-                )}
-                <div>
-                  <strong className="si-c3b93ebb">{t('bookConsultation.priorityReviewLabel')}</strong>
-                  <p className="si-4dc4c991">
-                    <span className={`badge badge-${priority === 'emergency' ? 'cancelled' : priority === 'high' ? 'pending' : 'confirmed'}`}>
-                      {priority}
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="si-2595c296">
-            <button className="btn btn-outline" onClick={() => setStep(3)}>{t('bookConsultation.back')}</button>
-            <button
-              className="btn btn-success btn-lg"
-              disabled={loading}
-              onClick={handleSubmitBooking}
-            >
-              {loading ? t('bookConsultation.booking') : t('bookConsultation.confirmBooking')}
-            </button>
-          </div>
-        </div>
+        <Step4Confirm
+          selectedVet={selectedVet}
+          selectedDate={selectedDate}
+          selectedSlot={selectedSlot}
+          bookingType={bookingType}
+          selectionMode={selectionMode}
+          selectedEnterprise={selectedEnterprise}
+          selectedEnterpriseName={selectedEnterpriseName}
+          selectedGroupName={selectedGroupName}
+          selectedAnimalObj={selectedAnimalObj}
+          reasonForVisit={reasonForVisit}
+          symptoms={symptoms}
+          priority={priority}
+          loading={loading}
+          onBack={() => setStep(3)}
+          onSubmit={handleSubmitBooking}
+          formatCurrency={formatCurrency}
+          speciesLabel={speciesLabel}
+        />
       )}
     </div>
   )
