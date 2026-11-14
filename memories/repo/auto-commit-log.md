@@ -8760,3 +8760,52 @@
 </details>
 
 ---
+
+## 2026-11-14 02:09 · `5a7876c` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 02:28 · `65ba35e` · OTHER
+
+**Commit:** refactor(pages): split the 1,400-line MedicalRecords.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (18)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/medicalRecords/AllergiesTab.tsx
+  - frontend/src/components/medicalRecords/CertificatesTab.tsx
+  - frontend/src/components/medicalRecords/ConsultationsTab.tsx
+  - frontend/src/components/medicalRecords/HospitalVisitsTab.tsx
+  - frontend/src/components/medicalRecords/LabResultsTab.tsx
+  - frontend/src/components/medicalRecords/MedicalRecordsHeader.tsx
+  - frontend/src/components/medicalRecords/OverviewTab.tsx
+  - frontend/src/components/medicalRecords/PrescriptionsTab.tsx
+  - frontend/src/components/medicalRecords/RecordModals.tsx
+  - frontend/src/components/medicalRecords/RecordsTab.tsx
+  - frontend/src/components/medicalRecords/TabsNav.tsx
+  - frontend/src/components/medicalRecords/TimelineTab.tsx
+  - frontend/src/components/medicalRecords/VaccinationsTab.tsx
+  - frontend/src/components/medicalRecords/WeightTab.tsx
+  - frontend/src/components/medicalRecords/medicalRecordsShared.tsx
+  - frontend/src/pages/MedicalRecords.tsx
+  - frontend/src/pages/ModulePage.css
+
+</details>
+
+---
