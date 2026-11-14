@@ -8809,3 +8809,52 @@
 </details>
 
 ---
+
+## 2026-11-14 02:29 · `b9b5470` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 02:42 · `f88e09b` · OTHER
+
+**Commit:** refactor(pages): split the 1,441-line SystemSettings.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (18)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/systemSettings/AddSettingModal.tsx
+  - frontend/src/components/systemSettings/BookingCard.tsx
+  - frontend/src/components/systemSettings/CancellationPolicyCard.tsx
+  - frontend/src/components/systemSettings/ConsultationCard.tsx
+  - frontend/src/components/systemSettings/CurrencyCard.tsx
+  - frontend/src/components/systemSettings/DisplayCard.tsx
+  - frontend/src/components/systemSettings/EmailConfigCard.tsx
+  - frontend/src/components/systemSettings/EmailTemplateEditModal.tsx
+  - frontend/src/components/systemSettings/EmailTemplatesCard.tsx
+  - frontend/src/components/systemSettings/MaintenanceCard.tsx
+  - frontend/src/components/systemSettings/OtherSettingsSection.tsx
+  - frontend/src/components/systemSettings/PaymentGatewayCard.tsx
+  - frontend/src/components/systemSettings/RazorpayCredentialsCard.tsx
+  - frontend/src/components/systemSettings/SettingsNav.tsx
+  - frontend/src/components/systemSettings/systemSettingsShared.ts
+  - frontend/src/pages/admin/SystemSettings.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
