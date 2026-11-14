@@ -8445,3 +8445,52 @@
 </details>
 
 ---
+
+## 2026-11-13 18:50 · `4c7ad13` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 00:55 · `b8976dc` · OTHER
+
+**Commit:** refactor(pages): split the 1,025-line HerdMedicalManagement.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (18)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/herdMedical/AddAllergyModal.tsx
+  - frontend/src/components/herdMedical/AddLabResultModal.tsx
+  - frontend/src/components/herdMedical/AddRecordModal.tsx
+  - frontend/src/components/herdMedical/AddVaccinationModal.tsx
+  - frontend/src/components/herdMedical/AllergiesTab.tsx
+  - frontend/src/components/herdMedical/AnimalSelect.tsx
+  - frontend/src/components/herdMedical/GroupFilterSelect.tsx
+  - frontend/src/components/herdMedical/LabResultsTab.tsx
+  - frontend/src/components/herdMedical/OverviewTab.tsx
+  - frontend/src/components/herdMedical/RecordsTab.tsx
+  - frontend/src/components/herdMedical/RoleInfoBanner.tsx
+  - frontend/src/components/herdMedical/SubjectPicker.tsx
+  - frontend/src/components/herdMedical/VaccinationsTab.tsx
+  - frontend/src/components/herdMedical/ViewRecordModal.tsx
+  - frontend/src/components/herdMedical/herdMedicalShared.ts
+  - frontend/src/pages/HerdMedicalManagement.tsx
+  - frontend/src/pages/ModulePage.css
+
+</details>
+
+---
