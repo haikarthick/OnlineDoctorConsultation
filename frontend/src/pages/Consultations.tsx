@@ -6,80 +6,14 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
-
-interface BookingRow {
-  id: string; petOwnerName?: string; petOwnerId?: string; vetName?: string; scheduledDate: string;
-  timeSlotStart: string; timeSlotEnd: string; bookingType?: string;
-  reasonForVisit?: string; reason?: string; symptoms?: string;
-  priority?: string; status: string; veterinarianId?: string;
-  consultationId?: string | null; animalId?: string;
-  // Enterprise / group / animal context
-  enterpriseId?: string; groupId?: string;
-  animalName?: string; animalSpecies?: string; animalBreed?: string; animalUniqueId?: string;
-  enterpriseName?: string; enterpriseType?: string;
-  groupName?: string; groupType?: string;
-  rescheduleCount?: number;
-  missedBy?: 'doctor' | 'patient' | 'both';
-  cancelledBy?: string;
-  cancelledAt?: string;
-  confirmedAt?: string;
-}
-interface ConsultRow {
-  id: string; animalType?: string; symptomDescription?: string;
-  status: string; diagnosis?: string; scheduledAt?: string;
-  createdAt?: string; veterinarianId?: string;
-  networkId?: string; networkName?: string;
-}
-interface TimeSlot { startTime: string; endTime: string; isAvailable: boolean }
-
-/** Filter out past time slots for today using browser local time + 15min buffer */
-const filterFutureSlots = (slots: TimeSlot[], forDate: string) => {
-  const now = new Date()
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-  return slots.filter(s => {
-    if (!s.isAvailable) return false
-    if (forDate !== todayStr) return true
-
-    const [h, m] = (s.startTime || '00:00').split(':').map(Number)
-    return h * 60 + m > now.getHours() * 60 + now.getMinutes() + 15
-  })
-}
-
-/** Check if a booking's scheduled time has already passed (browser local time) */
-const isExpiredPending = (b: BookingRow): boolean => {
-  if (b.status !== 'pending') return false
-  const d = new Date(b.scheduledDate + 'T' + b.timeSlotEnd + ':00')
-  return d < new Date()
-}
-
-/**
- * Whether the booked slot has finished (browser local time).
- * A no-show can only be judged after the appointment window has closed - the
- * backend accepts confirmed/pending bookings at any time, so the UI is what
- * stops a slot being written off while the patient could still turn up.
- */
-const hasSlotEnded = (b: BookingRow): boolean => {
-  const end = new Date(b.scheduledDate + 'T' + b.timeSlotEnd + ':00')
-  return end < new Date()
-}
-
-/** Check if a user can reschedule (within limit) */
-const canReschedule = (b: BookingRow, maxReschedules: number, patientNoShowLimit: number): boolean => {
-  // Expired pending → always allowed (not user's fault)
-  if (isExpiredPending(b)) return true
-  // For pending pre-acceptance reschedules, check limit
-  if (b.status === 'pending') return maxReschedules === 0 || (b.rescheduleCount || 0) < maxReschedules
-  // Missed booking logic
-  if (b.status === 'missed') {
-    const missedBy = b.missedBy
-    // Doctor no-show → unlimited reschedules for patient
-    if (!missedBy || missedBy === 'doctor') return true
-    // Patient/both no-show → check patientNoShowLimit
-    return patientNoShowLimit === 0 || (b.rescheduleCount || 0) < patientNoShowLimit
-  }
-  // confirmed → always allowed
-  return true
-}
+import { BookingRow, ConsultRow, TimeSlot } from '../components/consultations/consultationsShared'
+import TabsAndFilters from '../components/consultations/TabsAndFilters'
+import BookingCard from '../components/consultations/BookingCard'
+import HistoryCard from '../components/consultations/HistoryCard'
+import RescheduleModal from '../components/consultations/RescheduleModal'
+import ActionLogModal from '../components/consultations/ActionLogModal'
+import CancelBookingModal from '../components/consultations/CancelBookingModal'
+import NoShowModal from '../components/consultations/NoShowModal'
 
 const Consultations: React.FC = () => {
   const { t } = useTranslation()
@@ -204,7 +138,7 @@ const Consultations: React.FC = () => {
   }
   useAutoRefresh(['bookings', 'consultations'], loadData)
 
-  const handleConfirmBooking= async (id: string) => {
+  const handleConfirmBooking = async (id: string) => {
     setActionLoading(id)
     try { await apiService.confirmBooking(id); loadData() }
     catch (err: any) { setError(err?.response?.data?.error?.message || t('consultations.failedToConfirm')) }
@@ -288,8 +222,8 @@ const Consultations: React.FC = () => {
       setRescheduleSlotsLoading(true)
       const result = await apiService.getVetAvailability(targetVetId, date)
       const data = result.data || result || {}
-      if (data.holiday) setRescheduleDateMsg(`\uD83C\uDF89 Holiday: ${data.holiday}`)
-      else if (data.unavailableReason) setRescheduleDateMsg(`\uD83D\uDEAB ${data.unavailableReason}`)
+      if (data.holiday) setRescheduleDateMsg(`🎉 Holiday: ${data.holiday}`)
+      else if (data.unavailableReason) setRescheduleDateMsg(`🚫 ${data.unavailableReason}`)
       setRescheduleSlots(data.slots || [])
     } catch (err: any) {
       console.error('Failed to load reschedule slots:', err?.message)
@@ -383,31 +317,13 @@ const Consultations: React.FC = () => {
     catch { return d }
   }
 
-  const badge = (status: string) => {
-    const m: Record<string, { bg: string; fg: string }> = {
-      pending: { bg: '#fff3cd', fg: '#856404' }, confirmed: { bg: '#d4edda', fg: '#155724' },
-      scheduled: { bg: '#cce5ff', fg: '#004085' }, in_progress: { bg: '#e7f3ff', fg: '#0366d6' },
-      completed: { bg: '#d4edda', fg: '#155724' }, cancelled: { bg: '#f8d7da', fg: '#721c24' },
-      rescheduled: { bg: '#fef3c7', fg: '#92400e' }, missed: { bg: '#fde8e8', fg: '#c53030' },
-      active: { bg: '#c3f7c8', fg: '#0d5415' }, ended: { bg: '#e2e2e2', fg: '#555' },
-    }
-    const s = m[status] || { bg: '#f0f0f0', fg: '#333' }
-    return <span style={{ background: s.bg, color: s.fg, padding: '4px 12px', borderRadius: 12, fontSize: 12, fontWeight: 600, textTransform: 'capitalize' as const }}>{t(`consultations.statuses.${status}`, status.replace(/_/g, ' '))}</span>
+  const handleNavigateToConsultation = (consultationId: string) => {
+    if (isVet) navigate(`/doctor/consultation-room/${consultationId}`)
+    else navigate(`/video-consultation/${consultationId}`)
   }
 
-  const missedBadge = (missedBy?: 'doctor' | 'patient' | 'both') => {
-    if (!missedBy) return null
-    const config = {
-      doctor:  { bg: '#fef3c7', fg: '#92400e', icon: '🩺', label: t('consultations.missedLabels.doctorNoShow') },
-      patient: { bg: '#ede9fe', fg: '#6d28d9', icon: '🙋', label: t('consultations.missedLabels.patientNoShow') },
-      both:    { bg: '#f1f5f9', fg: '#475569', icon: '❌', label: t('consultations.missedLabels.bothNoShow') },
-    }
-    const c = config[missedBy]
-    return (
-      <span style={{ background: c.bg, color: c.fg, padding: '3px 10px', borderRadius: 10, fontSize: 11, fontWeight: 600, display: 'inline-block', marginTop: 4 }}>
-        {c.icon} {c.label}
-      </span>
-    )
+  const handleNavigateToReview = (consultationId: string, veterinarianId?: string) => {
+    navigate(`/write-review?consultationId=${consultationId}&veterinarianId=${veterinarianId}`)
   }
 
   if (loading) return (
@@ -418,6 +334,9 @@ const Consultations: React.FC = () => {
       </div>
     </div>
   )
+
+  const cancelBooking = cancelModal.show ? bookings.find(b => b.id === cancelModal.bookingId) : undefined
+  const refundEstimate = cancelBooking ? estimateRefund(cancelBooking.scheduledDate, cancelBooking.timeSlotStart, 500) : null
 
   return (
     <div className="module-page">
@@ -440,35 +359,17 @@ const Consultations: React.FC = () => {
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="si-49b00590">
-        {[{ key: 'bookings' as const, label: t('consultations.tabs.appointments'), count: activeBookings.length },
-          { key: 'consultations' as const, label: t('consultations.tabs.history'), count: historyBookings.length }
-        ].map(t => (
-          <button key={t.key} type="button" onClick={() => handleTabSwitch(t.key)}
-            style={{ padding: '12px 24px', fontWeight: 600, fontSize: 14, cursor: 'pointer', border: 'none', background: 'none',
-              borderBottom: activeTab === t.key ? '3px solid #667eea' : '3px solid transparent',
-              color: activeTab === t.key ? '#667eea' : '#6b7280'
-            }}>
-            {t.label} ({t.count})
-          </button>
-        ))}
-      </div>
-
-      {/* Filters */}
-      <div className="si-ad0381af">
-        <span className="si-c3b93ebb">{t('consultations.filterLabel')}:</span>
-        {['', ...currentFilterStatuses].map(s => (
-          <button key={s} type="button" onClick={() => setStatusFilter(s)}
-            style={{ padding: '5px 14px', borderRadius: 16, fontSize: 12, fontWeight: 500, cursor: 'pointer',
-              border: statusFilter === s ? '2px solid #667eea' : '1px solid #d1d5db',
-              background: statusFilter === s ? '#eef2ff' : 'white', color: statusFilter === s ? '#667eea' : '#6b7280'
-            }}>
-            {s ? t(`consultations.statuses.${s}`, s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())) : t('consultations.filterAll')}
-          </button>
-        ))}
-        <button type="button" onClick={loadData} className="si-a5c246fd">{t('common.refresh')}</button>
-      </div>
+      <TabsAndFilters
+        t={t}
+        activeTab={activeTab}
+        onTabSwitch={handleTabSwitch}
+        activeCount={activeBookings.length}
+        historyCount={historyBookings.length}
+        currentFilterStatuses={currentFilterStatuses}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        onRefresh={loadData}
+      />
 
       {/* Appointments Tab - items needing attention or upcoming */}
       {activeTab === 'bookings' && (
@@ -483,208 +384,27 @@ const Consultations: React.FC = () => {
           ) : (
             <div className="appt-card-grid">
               {filteredActive.map(b => (
-                <div key={b.id} className="appt-card">
-                  {/* Card Header */}
-                  <div className="appt-card-header">
-                    <div className="appt-card-who">
-                      {isVet && <strong>{b.petOwnerName || t('common.patient')}</strong>}
-                      {isPetOwner && <strong>{b.vetName || t('common.doctor')}</strong>}
-                      {isAdmin && <span>{b.petOwnerName || '-'} / {b.vetName || '-'}</span>}
-                    </div>
-                    <div className="si-0fb5fcc7">
-                      <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: 11, fontWeight: 600,
-                        background: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#fef2f2' : '#f0f0f0',
-                        color: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#dc2626' : '#555'
-                      }}>{b.priority ? t(`consultations.priorities.${b.priority}`, b.priority) : t('common.normal')}</span>
-                      {badge(b.status)}
-                    </div>
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="appt-card-body">
-                    {/* Animal / Farm info */}
-                    <div className="appt-card-animal">
-                      {b.enterpriseName ? (
-                        <>
-                          <span className="si-e5391e22">🏢 {b.enterpriseName}</span>
-                          {b.groupName && <span className="si-23033f05"> · 📋 {b.groupName}</span>}
-                          {b.animalName ? <span> · 🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</span>
-                            : <span className="si-bce9b403"> · {t('consultations.herdLevel')}</span>}
-                        </>
-                      ) : b.animalName ? (
-                        <span>🐾 {b.animalName}{b.animalSpecies ? ` - ${b.animalSpecies}` : ''}{b.animalBreed ? ` / ${b.animalBreed}` : ''}</span>
-                      ) : (
-                        <span className="si-e70e9abd">-</span>
-                      )}
-                    </div>
-
-                    {/* Date, Time, Type row */}
-                    <div className="appt-card-meta">
-                      <span>📅 {fmt(b.scheduledDate)}</span>
-                      <span>⏰ {formatSlotTime(b.timeSlotStart)} - {formatSlotTime(b.timeSlotEnd)}</span>
-                      <span>{b.bookingType === 'video_call' ? t('consultations.types.video') : b.bookingType === 'phone' ? t('consultations.types.phone') : b.bookingType === 'in_person' ? t('consultations.types.inPerson') : t('consultations.types.chat')}</span>
-                    </div>
-
-                    {/* Reason */}
-                    {(b.reasonForVisit || b.reason) && (
-                      <div className="appt-card-reason">{b.reasonForVisit || b.reason}</div>
-                    )}
-
-                    {/* ─── Status-specific info banners ─── */}
-
-                    {/* PENDING - awaiting vet confirmation */}
-                    {b.status === 'pending' && !isExpiredPending(b) && (
-                      <div className="si-f3ba3645">
-                        {isPetOwner && t('consultations.pendingMessages.petOwner')}
-                        {isVet && t('consultations.pendingMessages.vet')}
-                        {isAdmin && t('consultations.pendingMessages.admin')}
-                      </div>
-                    )}
-
-                    {/* PENDING but expired (safety fallback - backend normally auto-expires these) */}
-                    {isExpiredPending(b) && (
-                      <div className="si-d3e4ea8a">
-                        {isPetOwner ? t('consultations.expiredPendingMessages.petOwner') : t('consultations.expiredPendingMessages.general')}
-                      </div>
-                    )}
-
-                    {/* CONFIRMED - appointment is set */}
-                    {b.status === 'confirmed' && (
-                      <div className="si-ad9785fc">
-                        {isPetOwner && t('consultations.confirmedMessages.petOwner')}
-                        {isVet && t('consultations.confirmedMessages.vet')}
-                        {isAdmin && t('consultations.confirmedMessages.admin')}
-                      </div>
-                    )}
-
-                    {/* MISSED - distinguish pending→missed vs confirmed→missed */}
-                    {b.status === 'missed' && (
-                      <div className="si-cbfb1eb8">
-                        {missedBadge(b.missedBy)}
-
-                        {/* Doctor missed - was never confirmed (pending → missed) */}
-                        {b.missedBy === 'doctor' && !b.confirmedAt && (
-                          <>
-                            {isPetOwner && (
-                              <div className="si-3e55ea7f">
-                                {t('consultations.doctorMissedPending.petOwner')}
-                              </div>
-                            )}
-                            {isVet && (
-                              <div className="si-3e55ea7f">
-                                {t('consultations.doctorMissedPending.vet')}
-                              </div>
-                            )}
-                            {isAdmin && (
-                              <div className="si-3e55ea7f">
-                                {t('consultations.doctorMissedPending.admin')}
-                              </div>
-                            )}
-                          </>
-                        )}
-
-                        {/* Doctor missed - was confirmed but didn't show up (confirmed → missed) */}
-                        {b.missedBy === 'doctor' && b.confirmedAt && (
-                          <>
-                            {isPetOwner && (
-                              <div className="si-3e55ea7f">
-                                {t('consultations.doctorMissedConfirmed.petOwner')}
-                              </div>
-                            )}
-                            {isVet && (
-                              <div className="si-3e55ea7f">
-                                {t('consultations.doctorMissedConfirmed.vet')}
-                              </div>
-                            )}
-                            {isAdmin && (
-                              <div className="si-3e55ea7f">
-                                {t('consultations.doctorMissedConfirmed.admin')}
-                              </div>
-                            )}
-                          </>
-                        )}
-
-                        {/* Patient missed */}
-                        {isPetOwner && (b.missedBy === 'patient' || b.missedBy === 'both') && (() => {
-                          const used = b.rescheduleCount || 0
-                          const limit = patientNoShowRescheduleLimit
-                          const remaining = limit === 0 ? null : Math.max(0, limit - used)
-                          return (
-                            <div className="si-f9e66937">
-                              {b.missedBy === 'both' ? t('consultations.missedMessages.bothMissed') : t('consultations.missedMessages.youMissed')}{' '}
-                              {limit === 0
-                                ? t('consultations.missedMessages.rescheduleAnytime')
-                                : remaining !== null && remaining > 0
-                                  ? t('consultations.missedMessages.rescheduleRemaining', { count: remaining })
-                                  : t('consultations.missedMessages.rescheduleUsed')}
-                            </div>
-                          )
-                        })()}
-                        {isVet && b.missedBy === 'patient' && (
-                          <div className="si-f9e66937">
-                            {t('consultations.missedMessages.patientNoJoin')}
-                          </div>
-                        )}
-                        {isVet && b.missedBy === 'both' && (
-                          <div className="si-f1d7a58f">
-                            {t('consultations.missedMessages.neitherJoined')}
-                          </div>
-                        )}
-                        {isAdmin && (b.missedBy === 'patient' || b.missedBy === 'both') && (
-                          <div className="si-f9e66937">
-                            {b.missedBy === 'patient' ? t('consultations.adminMissed.patientNoShow') : t('consultations.adminMissed.bothMissed')}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Card Actions */}
-                  <div className="appt-card-actions">
-                    {isVet && b.status === 'pending' && !isExpiredPending(b) && (
-                      <button className="btn-small si-0e51a69a" disabled={actionLoading === b.id} onClick={() => handleConfirmBooking(b.id)}>{actionLoading === b.id ? '⏳' : t('consultations.actions.confirm')}</button>
-                    )}
-                    {(isVet || isAdmin) && b.status === 'confirmed' && b.bookingType === 'video_call' && (
-                      isJoinable(b.scheduledDate, b.timeSlotStart, b.timeSlotEnd)
-                        ? <button className="btn-small si-af66012c" onClick={() => handleStartConsultation(b)}>{t('consultations.actions.start')}</button>
-                        : <button className="btn-small si-33f445bc" disabled title={t('consultations.joinWindowTooltip', { minutes: appSettings.joinWindowMinutes })}>{t('consultations.actions.notYet')}</button>
-                    )}
-                    {isPetOwner && b.status === 'confirmed' && b.bookingType === 'video_call' && (
-                      isJoinable(b.scheduledDate, b.timeSlotStart, b.timeSlotEnd)
-                        ? <button className="btn-small si-af66012c" onClick={() => handleStartConsultation(b)}>{t('consultations.actions.join')}</button>
-                        : <button className="btn-small si-33f445bc" disabled title={t('consultations.joinWindowTooltip', { minutes: appSettings.joinWindowMinutes })}>{t('consultations.actions.notYet')}</button>
-                    )}
-                    {/* Reschedule button - conditional on who missed and reschedule limits */}
-                    {(b.status === 'confirmed' || (b.status === 'pending' && canReschedule(b, maxReschedules, patientNoShowRescheduleLimit)) || (b.status === 'missed' && canReschedule(b, maxReschedules, patientNoShowRescheduleLimit))) && (
-                      <button className="btn-small" style={{
-                        background: isExpiredPending(b) ? '#dc2626' : '#f59e0b',
-                        color: 'white', border: 'none'
-                      }} onClick={() => openRescheduleModal(b)}>
-                        {isExpiredPending(b) ? `⚠️ ${t('consultations.actions.reschedule')}` : `🔄 ${t('consultations.actions.reschedule')}`}
-                      </button>
-                    )}
-                    {(b.status === 'pending' || b.status === 'confirmed') && (
-                      <button className="btn-small si-b2f36fe7" onClick={() => handleCancelBooking(b.id)}>{t('consultations.actions.cancelBooking')}</button>
-                    )}
-                    {isAdmin && b.status === 'pending' && !isExpiredPending(b) && (
-                      <button className="btn-small si-0e51a69a" disabled={actionLoading === b.id} onClick={() => handleConfirmBooking(b.id)}>{actionLoading === b.id ? '⏳' : t('consultations.actions.confirm')}</button>
-                    )}
-                    {/* Patient no-show. Vet/admin only, and only once the slot has
-                        ended - the backend allows it earlier, so this is the guard
-                        that stops a slot being written off while the patient could
-                        still arrive. */}
-                    {(isVet || isAdmin) && (b.status === 'confirmed' || b.status === 'pending') && hasSlotEnded(b) && (
-                      <button
-                        className="btn-small btn-warning"
-                        onClick={() => { setNoShowModal(b); setNoShowError('') }}
-                        title={t('consultations.noShow.tooltip')}
-                      >
-                        🙋 {t('consultations.actions.markNoShow')}
-                      </button>
-                    )}
-                    <button className="btn-small si-1827a52c" onClick={() => openActionLog(b.id)} title={t('consultations.viewActionHistory')}>{t('consultations.actions.log')}</button>
-                  </div>
-                </div>
+                <BookingCard
+                  key={b.id}
+                  b={b}
+                  t={t}
+                  isVet={isVet}
+                  isPetOwner={isPetOwner}
+                  isAdmin={isAdmin}
+                  fmt={fmt}
+                  formatSlotTime={formatSlotTime}
+                  isJoinable={isJoinable}
+                  joinWindowMinutes={appSettings.joinWindowMinutes}
+                  maxReschedules={maxReschedules}
+                  patientNoShowRescheduleLimit={patientNoShowRescheduleLimit}
+                  actionLoading={actionLoading}
+                  onConfirm={handleConfirmBooking}
+                  onStartConsultation={handleStartConsultation}
+                  onOpenReschedule={openRescheduleModal}
+                  onCancel={handleCancelBooking}
+                  onMarkNoShow={(booking) => { setNoShowModal(booking); setNoShowError('') }}
+                  onOpenActionLog={openActionLog}
+                />
               ))}
             </div>
           )}
@@ -706,90 +426,23 @@ const Consultations: React.FC = () => {
                 const diagnosis = b.consultationId ? diagnosisMap.get(b.consultationId) : ''
                 const networkInfo = b.consultationId ? networkMap.get(b.consultationId) : undefined
                 return (
-                  <div key={b.id} className="appt-card">
-                    {/* Card Header */}
-                    <div className="appt-card-header">
-                      <div className="appt-card-who">
-                        {isVet && <strong>{b.petOwnerName || t('common.patient')}</strong>}
-                        {isPetOwner && <strong>{b.vetName || t('common.doctor')}</strong>}
-                        {isAdmin && <span>{b.petOwnerName || '-'} / {b.vetName || '-'}</span>}
-                      </div>
-                      <div className="si-0fb5fcc7">
-                        {networkInfo && networkInfo.networkName && (
-                          <span className="badge si-3969f1f4">
-                            🏥 {networkInfo.networkName}
-                          </span>
-                        )}
-                        {badge(b.status)}
-                      </div>
-                    </div>
-
-                    {/* Card Body */}
-                    <div className="appt-card-body">
-                      <div className="appt-card-animal">
-                        {b.enterpriseName ? (
-                          <>
-                            <span className="si-e5391e22">🏢 {b.enterpriseName}</span>
-                            {b.groupName && <span className="si-23033f05"> · 📋 {b.groupName}</span>}
-                            {b.animalName && <span> · 🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</span>}
-                          </>
-                        ) : b.animalName ? (
-                          <span>🐾 {b.animalName}{b.animalSpecies ? ` - ${b.animalSpecies}` : ''}</span>
-                        ) : (
-                          <span className="si-e70e9abd">-</span>
-                        )}
-                      </div>
-
-                      <div className="appt-card-meta">
-                        <span>📅 {fmt(b.scheduledDate)}</span>
-                        <span>⏰ {formatSlotTime(b.timeSlotStart)} - {formatSlotTime(b.timeSlotEnd)}</span>
-                      </div>
-
-                      {(b.reasonForVisit || b.reason) && (
-                        <div className="appt-card-reason">{b.reasonForVisit || b.reason}</div>
-                      )}
-
-                      {diagnosis && (
-                        <div className="si-8c7a9026">🩺 {diagnosis}</div>
-                      )}
-
-                      {/* Cancelled by indicator */}
-                      {b.status === 'cancelled' && b.cancelledBy && (
-                        <div style={{ fontSize: 12, marginTop: 6, padding: '4px 10px', borderRadius: 6,
-                          background: b.cancelledBy === user?.id ? '#fef3c7' : '#fef2f2',
-                          color: b.cancelledBy === user?.id ? '#92400e' : '#991b1b' }}>
-                          {b.cancelledBy === user?.id ? t('consultations.cancelledByYou') : t('consultations.cancelledByOther')}
-                          {b.cancelledAt && <span className="si-a69da2c2">
-                            {formatDate(b.cancelledAt)}
-                          </span>}
-                        </div>
-                      )}
-
-                      {/* Rescheduled indicator - this is the OLD booking that was superseded */}
-                      {b.status === 'rescheduled' && (
-                        <div className="si-01262b7b">
-                          {t('consultations.rescheduledNotice')}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Card Actions */}
-                    <div className="appt-card-actions">
-                      {b.status === 'completed' && b.consultationId && (
-                        <button className="btn-small si-26ca7215"
-                          onClick={() => {
-                            if (isVet) navigate(`/doctor/consultation-room/${b.consultationId}`)
-                            else navigate(`/video-consultation/${b.consultationId}`)
-                          }}>{t('consultations.actions.view')}</button>
-                      )}
-                      {b.status === 'completed' && isPetOwner && b.consultationId && (
-                        <button className="btn-small" onClick={() => navigate(`/write-review?consultationId=${b.consultationId}&veterinarianId=${b.veterinarianId}`)}>{t('consultations.actions.review')}</button>
-                      )}
-                      {b.status === 'cancelled' && (
-                        <button className="btn-small si-1827a52c" onClick={() => openActionLog(b.id)} title={t('consultations.viewCancellationDetails')}>{t('consultations.actions.details')}</button>
-                      )}
-                    </div>
-                  </div>
+                  <HistoryCard
+                    key={b.id}
+                    b={b}
+                    t={t}
+                    isVet={isVet}
+                    isPetOwner={isPetOwner}
+                    isAdmin={isAdmin}
+                    fmt={fmt}
+                    formatSlotTime={formatSlotTime}
+                    formatDate={formatDate}
+                    diagnosis={diagnosis}
+                    networkInfo={networkInfo}
+                    currentUserId={user?.id}
+                    onNavigateToConsultation={handleNavigateToConsultation}
+                    onNavigateToReview={handleNavigateToReview}
+                    onOpenActionLog={openActionLog}
+                  />
                 )
               })}
             </div>
@@ -799,356 +452,73 @@ const Consultations: React.FC = () => {
 
       {/* ─── Reschedule Modal ──────────────────────────────── */}
       {rescheduleBooking && (
-        <div className="si-10f9485f" onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}>
-          <div className="si-f9e05bb3" onClick={e => e.stopPropagation()}>
-            <div className="si-fe2d5bfb">
-              <h2 className="si-44087c4b">{t('consultations.reschedule.title')}</h2>
-              <button type="button" onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
-                className="si-6a334ebc">✕</button>
-            </div>
-
-            {/* Current booking info */}
-            <div className="si-9c52ec04">
-              <p className="si-75f3eb54">{t('consultations.reschedule.originalLabel')}</p>
-              <p className="si-63d91992">
-                {rescheduleBooking.vetName || t('common.doctor')} - {fmt(rescheduleBooking.scheduledDate)} {t('common.at')} {formatSlotTime(rescheduleBooking.timeSlotStart)} - {formatSlotTime(rescheduleBooking.timeSlotEnd)}
-              </p>
-            </div>
-
-            {/* Reschedule count info */}
-            {rescheduleBooking.status === 'pending' && !isExpiredPending(rescheduleBooking) && appSettings.maxReschedules > 0 && (
-              <div className="si-b8a27886">
-                {t('consultations.reschedule.rescheduleCount', { current: (rescheduleBooking.rescheduleCount || 0) + 1, max: appSettings.maxReschedules })}
-              </div>
-            )}
-
-            {/* Missed booking context */}
-            {rescheduleBooking.status === 'missed' && (
-              <div style={{ padding: '10px 14px', borderRadius: 8, marginBottom: 16, fontSize: 13,
-                background: !rescheduleBooking.missedBy || rescheduleBooking.missedBy === 'doctor' ? '#fef9c3' : '#f5f3ff',
-                border: !rescheduleBooking.missedBy || rescheduleBooking.missedBy === 'doctor' ? '1px solid #fde68a' : '1px solid #ddd6fe',
-                color: !rescheduleBooking.missedBy || rescheduleBooking.missedBy === 'doctor' ? '#78350f' : '#5b21b6',
-              }}>
-                {!rescheduleBooking.missedBy || rescheduleBooking.missedBy === 'doctor'
-                  ? (rescheduleBooking.confirmedAt
-                    ? t('consultations.reschedule.doctorConfirmedNoShow')
-                    : t('consultations.reschedule.doctorNoConfirm'))
-                  : (() => {
-                      const used = rescheduleBooking.rescheduleCount || 0
-                      const limit = patientNoShowRescheduleLimit
-                      return limit === 0
-                        ? t('consultations.reschedule.patientNoShowNoLimit')
-                        : t('consultations.reschedule.patientNoShowLimit', { current: used + 1, max: limit })
-                    })()
-                }
-              </div>
-            )}
-
-            {/* Expired pending notice */}
-            {isExpiredPending(rescheduleBooking) && (
-              <div className="si-a2619258">
-                {t('consultations.reschedule.expiredPendingNotice')}
-              </div>
-            )}
-
-            {/* Doctor selection */}
-            <div className="si-7e63ec4f">
-              <label className="si-e68e52cd">
-                {isExpiredPending(rescheduleBooking) ? t('consultations.reschedule.selectDoctor') : t('consultations.reschedule.selectDoctorOptional')}
-              </label>
-              {vetListLoading ? (
-                <div className="si-3f8e0459">{t('consultations.reschedule.loadingDoctors')}</div>
-              ) : (
-                <select
-                  value={rescheduleVetId}
-                  onChange={(e) => handleVetChange(e.target.value)}
-                  className="si-92bee81f"
-                >
-                  <option value="">{t('consultations.reschedule.keepCurrentDoctor')}</option>
-                  {vetList.map(v => (
-                    <option key={v.id} value={v.id}>
-                      {v.name}{v.specialization ? ` - ${v.specialization}` : ''}{v.id === rescheduleBooking.veterinarianId ? ` ${t('consultations.reschedule.currentDoctor')}` : ''}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            {/* New date picker */}
-            <div className="si-7e63ec4f">
-              <label className="si-e68e52cd">{t('consultations.reschedule.dateLabel')}</label>
-              <input
-                type="date"
-                className="si-d0e0df59"
-                value={rescheduleDate}
-                min={(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })()}
-                onChange={(e) => loadRescheduleSlots(e.target.value)}
-              />
-            </div>
-
-            {/* Available slots */}
-            {rescheduleDate && (() => {
-              const futureSlots = filterFutureSlots(rescheduleSlots, rescheduleDate)
-              return (
-              <div className="si-478be2e9">
-                <label className="si-efbbcec8">{t('consultations.reschedule.slotsTitle')}</label>
-                {rescheduleSlotsLoading ? (
-                  <div className="si-5686f5eb">
-                    <div className="loading-spinner si-8d6ac58b" />
-                  </div>
-                ) : rescheduleDateMsg ? (
-                  <div className="si-88c863bb">
-                    {rescheduleDateMsg} - {t('consultations.reschedule.selectAnotherDate')}
-                  </div>
-                ) : futureSlots.length === 0 ? (
-                  <p className="si-ed4d0fb3">
-                    {t('consultations.reschedule.noSlots')}
-                  </p>
-                ) : (
-                  <div className="si-d925f834">
-                    {futureSlots.map((slot, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setRescheduleSelectedSlot(slot)}
-                        style={{
-                          padding: '10px 8px', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer',
-                          border: rescheduleSelectedSlot?.startTime === slot.startTime ? '2px solid #667eea' : '1px solid #d1d5db',
-                          background: rescheduleSelectedSlot?.startTime === slot.startTime ? '#eef2ff' : 'white',
-                          color: rescheduleSelectedSlot?.startTime === slot.startTime ? '#667eea' : '#374151'
-                        }}
-                      >
-                        {slot.startTime ? formatSlotTime(slot.startTime) : ''} - {slot.endTime ? formatSlotTime(slot.endTime) : ''}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              )
-            })()}
-
-            {/* Doctor approval note for pet owners */}
-            {isPetOwner && rescheduleSelectedSlot && (
-              <div className="si-c72eca10">
-                {t('consultations.reschedule.approvalNote')}
-              </div>
-            )}
-
-            {/* Error banner */}
-            {rescheduleError && (
-              <div className="si-919b5437">
-                ⚠ {rescheduleError}
-              </div>
-            )}
-
-            {/* Confirm reschedule */}
-            <div className="si-7be0b9bd">
-              <button type="button" onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
-                className="si-60c838b7"
-              >{t('common.cancel')}</button>
-              <button
-                onClick={handleRescheduleSubmit}
-                disabled={!rescheduleDate || !rescheduleSelectedSlot || rescheduleSubmitting}
-                style={{
-                  padding: '10px 24px', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer',
-                  background: (!rescheduleDate || !rescheduleSelectedSlot) ? '#e5e7eb' : '#667eea',
-                  color: (!rescheduleDate || !rescheduleSelectedSlot) ? '#6b7280' : 'white'
-                }}
-              >
-                {rescheduleSubmitting ? t('consultations.reschedule.confirming') : t('consultations.reschedule.confirmBtn')}
-              </button>
-            </div>
-          </div>
-        </div>
+        <RescheduleModal
+          t={t}
+          rescheduleBooking={rescheduleBooking}
+          rescheduleDate={rescheduleDate}
+          rescheduleSlots={rescheduleSlots}
+          rescheduleSelectedSlot={rescheduleSelectedSlot}
+          rescheduleDateMsg={rescheduleDateMsg}
+          rescheduleSlotsLoading={rescheduleSlotsLoading}
+          rescheduleSubmitting={rescheduleSubmitting}
+          rescheduleError={rescheduleError}
+          rescheduleVetId={rescheduleVetId}
+          vetList={vetList}
+          vetListLoading={vetListLoading}
+          isPetOwner={isPetOwner}
+          maxReschedules={maxReschedules}
+          patientNoShowRescheduleLimit={patientNoShowRescheduleLimit}
+          fmt={fmt}
+          formatSlotTime={formatSlotTime}
+          onClose={() => { setRescheduleBooking(null); setRescheduleError('') }}
+          onVetChange={handleVetChange}
+          onDateChange={(date) => loadRescheduleSlots(date)}
+          onSelectSlot={setRescheduleSelectedSlot}
+          onSubmit={handleRescheduleSubmit}
+        />
       )}
 
       {/* Action Log Modal */}
       {actionLogBookingId && (
-        <div className="si-8d03dc26" onClick={() => setActionLogBookingId(null)}>
-          <div className="si-49aa5192" onClick={e => e.stopPropagation()}>
-            <div className="si-101fd1d0">
-              <h2 className="si-670df8d2">{t('consultations.actionLog.title')}</h2>
-              <button type="button" onClick={() => setActionLogBookingId(null)} className="si-60f45c55">✕</button>
-            </div>
-
-            {actionLogsLoading && <p className="si-23033f05">{t('consultations.actionLog.loading')}</p>}
-
-            {!actionLogsLoading && actionLogs.length === 0 && (
-              <p className="si-8a6a7c8a">{t('consultations.actionLog.empty')}</p>
-            )}
-
-            {!actionLogsLoading && actionLogs.length > 0 && (
-              <div className="si-3edfa4b6">
-                {actionLogs.map((log, idx) => (
-                  <div key={log.id} style={{
-                    display: 'flex', gap: 12, padding: '12px 0',
-                    borderBottom: idx < actionLogs.length - 1 ? '1px solid #f3f4f6' : 'none'
-                  }}>
-                    <div style={{
-                      width: 8, height: 8, borderRadius: '50%', marginTop: 6, flexShrink: 0,
-                      background: log.action === 'BOOKING_CREATED' ? '#3b82f6'
-                        : log.action === 'BOOKING_CONFIRMED' ? '#10b981'
-                        : log.action === 'BOOKING_CANCELLED' ? '#ef4444'
-                        : log.action === 'BOOKING_RESCHEDULED' ? '#f59e0b' : '#6b7280'
-                    }} />
-                    <div className="si-6acd75e8">
-                      <div className="si-807dc7b4">
-                        {actionLabel(log.action)}
-                      </div>
-                      <div className="si-d93f66e1">
-                        {t('consultations.actionLog.by')} <strong>{log.userName || t('consultations.actionLog.system')}</strong>
-                        {log.details?.role && <span> ({log.details.role})</span>}
-                        {' · '}
-                        {log.createdAt ? new Date(log.createdAt).toLocaleString() : '-'}
-                      </div>
-                      {log.action === 'BOOKING_RESCHEDULED' && log.details && (
-                        <div className="si-e4117c98">
-                          {t('consultations.actionLog.newSlot')} {log.details.newDate} {formatSlotTime(log.details.newTimeSlotStart)}-{formatSlotTime(log.details.newTimeSlotEnd)}
-                          {log.details.newStatus === 'pending' && (
-                            // Check if a subsequent confirmation exists in the log
-                            actionLogs.some((l, j) => j > idx && l.action === 'BOOKING_CONFIRMED')
-                              ? <span className="si-487e8582"> {t('consultations.actionLog.approved')}</span>
-                              : <span className="si-cdb09cc1"> {t('consultations.actionLog.awaitingApproval')}</span>
-                          )}
-                          {log.details.newStatus === 'confirmed' && <span className="si-487e8582"> {t('consultations.actionLog.autoConfirmed')}</span>}
-                        </div>
-                      )}
-                      {log.action === 'BOOKING_CANCELLED' && (
-                        <div className="si-9e7b17f4">
-                          {log.details?.cancelledByRole && <span>{t('consultations.actionLog.cancelledBy', { role: log.details.cancelledByRole })} </span>}
-                          {log.details?.reason && <span>{t('consultations.actionLog.reason', { reason: log.details.reason })}</span>}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="si-87877f89">
-              <button type="button" className="btn-small si-71810deb" onClick={() => setActionLogBookingId(null)}>{t('consultations.actionLog.close')}</button>
-            </div>
-          </div>
-        </div>
+        <ActionLogModal
+          t={t}
+          actionLogs={actionLogs}
+          actionLogsLoading={actionLogsLoading}
+          formatSlotTime={formatSlotTime}
+          actionLabel={actionLabel}
+          onClose={() => setActionLogBookingId(null)}
+        />
       )}
 
       {/* ─── Cancel Booking Modal ──────────────────────────── */}
-      {cancelModal.show && (() => {
-        const cancelBooking = bookings.find(b => b.id === cancelModal.bookingId)
-        const refundEstimate = cancelBooking ? estimateRefund(cancelBooking.scheduledDate, cancelBooking.timeSlotStart, 500) : null
-        const reasonPresets = isVet
-          ? (t('consultations.cancelModal.reasonPresetsVet', { returnObjects: true }) as string[])
-          : (t('consultations.cancelModal.reasonPresetsPatient', { returnObjects: true }) as string[])
-        return (
-        <div className="si-10f9485f" onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}>
-          <div className="si-b6bf627f" onClick={e => e.stopPropagation()}>
-            <div className="si-101fd1d0">
-              <h2 className="si-670df8d2">{t('consultations.cancelModal.title')}</h2>
-              <button type="button" onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
-                className="si-60f45c55">✕</button>
-            </div>
-            <div className="si-941430f8">
-              {t('consultations.cancelModal.warning')}
-            </div>
-
-            {/* Refund Policy Preview (for patients) */}
-            {isPetOwner && refundEstimate && (
-              <div style={{
-                background: refundEstimate.percent === 100 ? '#d1fae5' : refundEstimate.percent > 0 ? '#fef3c7' : '#fee2e2',
-                border: `1px solid ${refundEstimate.percent === 100 ? '#6ee7b7' : refundEstimate.percent > 0 ? '#fcd34d' : '#fca5a5'}`,
-                borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 13
-              }}>
-                <strong>{refundEstimate.percent === 100 ? '✅' : refundEstimate.percent > 0 ? '⚠️' : '❌'} {t('consultations.cancelModal.refundPolicy')}:</strong>
-                <div className="si-f48bb60f">{refundEstimate.reason}</div>
-              </div>
-            )}
-
-            {/* Quick reason presets */}
-            <div className="si-bab8e8bc">
-              <label className="si-e68e52cd">{t('consultations.cancelModal.quickReasons')}</label>
-              <div className="si-50c82988">
-                {reasonPresets.map(r => (
-                  <button key={r}
-                    type="button"
-                    className={`btn btn-sm ${cancelModal.reason === r ? 'btn-primary' : 'btn-outline'} si-756a9f21`}
-                    onClick={() => setCancelModal({ ...cancelModal, reason: r })}
-                   
-                  >{r}</button>
-                ))}
-              </div>
-            </div>
-
-            <div className="si-7e63ec4f">
-              <label className="si-e68e52cd">{t('consultations.cancelModal.reasonLabel')}</label>
-              <textarea
-                placeholder={t('consultations.cancelModal.reasonPlaceholder')}
-                value={cancelModal.reason}
-                onChange={(e) => setCancelModal({ ...cancelModal, reason: e.target.value })}
-                className="si-6c17b3f3"
-              />
-            </div>
-            {cancelError && (
-              <div className="si-919b5437">
-                ⚠ {cancelError}
-              </div>
-            )}
-            <div className="si-7be0b9bd">
-              <button
-                type="button"
-                onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
-                className="si-60c838b7"
-              >{t('consultations.cancelModal.keepBooking')}</button>
-              <button
-                onClick={() => handleCancelBooking()}
-                disabled={!cancelModal.reason.trim()}
-                style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: cancelModal.reason.trim() ? '#dc2626' : '#e5e7eb', color: cancelModal.reason.trim() ? 'white' : '#9ca3af', cursor: cancelModal.reason.trim() ? 'pointer' : 'not-allowed', fontWeight: 600 }}
-              >{t('consultations.cancelModal.confirmCancel')}</button>
-            </div>
-          </div>
-        </div>
-        )
-      })()}
+      {cancelModal.show && (
+        <CancelBookingModal
+          t={t}
+          reason={cancelModal.reason}
+          cancelError={cancelError}
+          isVet={isVet}
+          isPetOwner={isPetOwner}
+          refundEstimate={refundEstimate}
+          onClose={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
+          onReasonChange={(reason) => setCancelModal({ ...cancelModal, reason })}
+          onConfirm={() => handleCancelBooking()}
+        />
+      )}
 
       {/* No-show confirmation. Deliberately a dialog and not a one-click action:
           confirming settles the booking as missed, triggers doctor compensation
           on paid bookings, and counts against the patient's reschedule limit. */}
       {noShowModal && (
-        <div className="si-10f9485f" onClick={() => { setNoShowModal(null); setNoShowError('') }}>
-          <div className="si-b6bf627f" onClick={e => e.stopPropagation()}>
-            <div className="si-101fd1d0">
-              <h2 className="si-670df8d2">{t('consultations.noShow.title')}</h2>
-              <button type="button" onClick={() => { setNoShowModal(null); setNoShowError('') }}
-                className="si-60f45c55">✕</button>
-            </div>
-            <div className="si-941430f8">
-              {t('consultations.noShow.warning')}
-            </div>
-            <p className="slot-hint">
-              {t('consultations.noShow.forBooking', {
-                animal: noShowModal.animalName || '-',
-                date: formatDate(new Date(noShowModal.scheduledDate)),
-                time: formatSlotTime(noShowModal.timeSlotStart),
-              })}
-            </p>
-            {noShowError && (
-              <div className="si-919b5437">
-                ⚠ {noShowError}
-              </div>
-            )}
-            <div className="si-7be0b9bd">
-              <button
-                type="button"
-                onClick={() => { setNoShowModal(null); setNoShowError('') }}
-                className="si-60c838b7"
-              >{t('common.cancel')}</button>
-              <button
-                type="button"
-                className="btn btn-danger"
-                disabled={noShowSaving}
-                onClick={handleMarkNoShow}
-              >{noShowSaving ? '⏳' : t('consultations.noShow.confirm')}</button>
-            </div>
-          </div>
-        </div>
+        <NoShowModal
+          t={t}
+          noShowModal={noShowModal}
+          noShowError={noShowError}
+          noShowSaving={noShowSaving}
+          formatDate={formatDate}
+          formatSlotTime={formatSlotTime}
+          onClose={() => { setNoShowModal(null); setNoShowError('') }}
+          onConfirm={handleMarkNoShow}
+        />
       )}
     </div>
   )
