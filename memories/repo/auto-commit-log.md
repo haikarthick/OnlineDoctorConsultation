@@ -8494,3 +8494,46 @@
 </details>
 
 ---
+
+## 2026-11-14 00:56 · `cb2b167` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 01:05 · `cbd6d41` · OTHER
+
+**Commit:** refactor(pages): split the 1,056-line BookConsultation.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (12)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/bookConsultation/BookingProgressSteps.tsx
+  - frontend/src/components/bookConsultation/BookingSuccessScreen.tsx
+  - frontend/src/components/bookConsultation/DoctorInfoPanel.tsx
+  - frontend/src/components/bookConsultation/EnterpriseAnimalSelector.tsx
+  - frontend/src/components/bookConsultation/Step1SelectDoctor.tsx
+  - frontend/src/components/bookConsultation/Step2ChooseTime.tsx
+  - frontend/src/components/bookConsultation/Step3Details.tsx
+  - frontend/src/components/bookConsultation/Step4Confirm.tsx
+  - frontend/src/components/bookConsultation/bookConsultationShared.ts
+  - frontend/src/pages/petowner/BookConsultation.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
