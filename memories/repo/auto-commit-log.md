@@ -8663,3 +8663,51 @@
 </details>
 
 ---
+
+## 2026-11-14 01:40 · `2af0ffe` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 01:54 · `b64a91e` · OTHER
+
+**Commit:** refactor(pages): split the 1,317-line HospitalWorkflow.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (17)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/hospitalWorkflow/CaseDetailModal.tsx
+  - frontend/src/components/hospitalWorkflow/CasesList.tsx
+  - frontend/src/components/hospitalWorkflow/CheckInModal.tsx
+  - frontend/src/components/hospitalWorkflow/NewCaseModal.tsx
+  - frontend/src/components/hospitalWorkflow/NewReferralModal.tsx
+  - frontend/src/components/hospitalWorkflow/QueueList.tsx
+  - frontend/src/components/hospitalWorkflow/QueueStatsTiles.tsx
+  - frontend/src/components/hospitalWorkflow/ReferralsList.tsx
+  - frontend/src/components/hospitalWorkflow/StagePipelineFilter.tsx
+  - frontend/src/components/hospitalWorkflow/TransitionModal.tsx
+  - frontend/src/components/hospitalWorkflow/TriageModal.tsx
+  - frontend/src/components/hospitalWorkflow/WalkInRegisterForm.tsx
+  - frontend/src/components/hospitalWorkflow/WorkflowStatsGrid.tsx
+  - frontend/src/components/hospitalWorkflow/hospitalWorkflowShared.ts
+  - frontend/src/pages/HospitalWorkflow.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
