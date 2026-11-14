@@ -118,7 +118,6 @@
         "src/pages/admin/ReviewModeration.tsx",
         "src/pages/admin/Settlements.tsx",
         "src/pages/admin/StaffSettings.tsx",
-        "src/pages/admin/SystemSettings.tsx",
         "src/pages/admin/VetHospitalAdmin.tsx",
         "src/pages/doctor/MyReviews.tsx",
         "src/pages/doctor/PrescriptionWriter.tsx",

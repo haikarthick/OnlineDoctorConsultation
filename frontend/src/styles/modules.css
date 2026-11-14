@@ -3064,3 +3064,27 @@ textarea.module-input {
 .hw-triage-derived.lvl-3 .hw-triage-derived-value { background: #d97706; }
 .hw-triage-derived.lvl-4 .hw-triage-derived-value { background: #2563eb; }
 .hw-triage-derived.lvl-5 .hw-triage-derived-value { background: #6b7280; }
+
+/* ─── SystemSettings (admin) ─── */
+.ss-field { color: var(--gray-900); -webkit-text-fill-color: var(--gray-900); }
+.ss-mt-8 { margin-top: 8px; }
+.ss-num-input { width: 70px; padding: 4px 8px; font-size: 13px; text-align: center; }
+.ss-select-wide { font-size: 14px; padding: 8px 12px; min-width: 220px; }
+.ss-field-readonly { background: var(--gray-50); }
+.ss-flex-1 { flex: 1; }
+.ss-edit-inline { flex: 1; font-size: 13px; min-width: 120px; }
+
+.ss-nav-pill {
+  padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--gray-200); background: white; color: var(--gray-600);
+  cursor: pointer; transition: all 0.15s;
+}
+.ss-nav-pill.is-active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+
+.ss-maintenance-on { background: var(--danger); border-color: var(--danger); }
+
+.ss-razorpay-env-live { border-top: 1px solid var(--gray-100); padding-top: 16px; margin-top: 16px; }
+
+.ss-test-email-result { margin-top: 8px; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+.ss-test-email-result.is-success { background: var(--success-light); color: var(--success); }
+.ss-test-email-result.is-error { background: var(--danger-light); color: var(--danger); }
