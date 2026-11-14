@@ -2902,3 +2902,165 @@ textarea.module-input {
 .cr-referral-submit-btn:disabled { background: #94a3b8; cursor: not-allowed; }
 
 .cr-rx-template-item:hover { background: #e5e7eb; }
+
+/* ─── HospitalWorkflow (page) ─────────────────────────────────── */
+.hw-tab-btn { padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer; background: transparent; color: #64748b; font-weight: 400; font-size: 14px; transition: all .2s; }
+.hw-tab-btn.is-active { background: #2563eb; color: #fff; font-weight: 600; }
+
+.hw-stat-tile { border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.08); transition: all .15s; background: #fff; cursor: default; }
+.hw-stat-tile.is-clickable { cursor: pointer; }
+.hw-stat-tile-label { font-size: 12px; margin-bottom: 4px; color: #64748b; }
+.hw-stat-tile-value { font-size: 22px; font-weight: 700; }
+.hw-stat-tile.is-active .hw-stat-tile-label,
+.hw-stat-tile.is-active .hw-stat-tile-value { color: #fff; }
+
+.hw-stat-tile--waiting { border-left: 4px solid #f59e0b; }
+.hw-stat-tile--triage { border-left: 4px solid #8b5cf6; }
+.hw-stat-tile--exam { border-left: 4px solid #2563eb; }
+.hw-stat-tile--treatment { border-left: 4px solid #059669; }
+.hw-stat-tile--emergency { border-left: 4px solid #dc2626; }
+.hw-stat-tile--avgwait { border-left: 4px solid #64748b; }
+.hw-stat-tile--total { border-left: 4px solid #0ea5e9; }
+
+.hw-stat-tile--waiting.is-active { background: #f59e0b; outline: 2px solid #f59e0b; box-shadow: 0 4px 12px #f59e0b40; }
+.hw-stat-tile--triage.is-active { background: #8b5cf6; outline: 2px solid #8b5cf6; box-shadow: 0 4px 12px #8b5cf640; }
+.hw-stat-tile--exam.is-active { background: #2563eb; outline: 2px solid #2563eb; box-shadow: 0 4px 12px #2563eb40; }
+.hw-stat-tile--treatment.is-active { background: #059669; outline: 2px solid #059669; box-shadow: 0 4px 12px #05966940; }
+.hw-stat-tile--emergency.is-active { background: #dc2626; outline: 2px solid #dc2626; box-shadow: 0 4px 12px #dc262640; }
+.hw-stat-tile--avgwait.is-active { background: #64748b; outline: 2px solid #64748b; box-shadow: 0 4px 12px #64748b40; }
+.hw-stat-tile--total.is-active { background: #0ea5e9; outline: 2px solid #0ea5e9; box-shadow: 0 4px 12px #0ea5e940; }
+
+.hw-stat-tile--waiting:not(.is-active) .hw-stat-tile-value { color: #f59e0b; }
+.hw-stat-tile--triage:not(.is-active) .hw-stat-tile-value { color: #8b5cf6; }
+.hw-stat-tile--exam:not(.is-active) .hw-stat-tile-value { color: #2563eb; }
+.hw-stat-tile--treatment:not(.is-active) .hw-stat-tile-value { color: #059669; }
+.hw-stat-tile--emergency:not(.is-active) .hw-stat-tile-value { color: #dc2626; }
+.hw-stat-tile--avgwait:not(.is-active) .hw-stat-tile-value { color: #64748b; }
+.hw-stat-tile--total:not(.is-active) .hw-stat-tile-value { color: #0ea5e9; }
+
+.hw-queue-row { background: #fff; border-radius: 10px; padding: 14px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.06); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; border-left: 4px solid #2563eb; }
+.hw-case-card { background: #fff; border-radius: 10px; padding: 14px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.06); cursor: pointer; transition: box-shadow .2s; border-left: 4px solid #2563eb; }
+.hw-case-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+.hw-referral-card { background: #fff; border-radius: 10px; padding: 14px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.06); border-left: 4px solid #2563eb; }
+
+.hw-queue-row.pri-emergency, .hw-case-card.pri-emergency, .hw-referral-card.pri-emergency { border-left-color: #dc2626; }
+.hw-queue-row.pri-urgent, .hw-case-card.pri-urgent, .hw-referral-card.pri-urgent { border-left-color: #ea580c; }
+.hw-queue-row.pri-high, .hw-case-card.pri-high, .hw-referral-card.pri-high { border-left-color: #d97706; }
+.hw-queue-row.pri-normal, .hw-case-card.pri-normal, .hw-referral-card.pri-normal { border-left-color: #2563eb; }
+.hw-queue-row.pri-low, .hw-case-card.pri-low, .hw-referral-card.pri-low { border-left-color: #6b7280; }
+
+.hw-priority-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #2563eb20; color: #2563eb; }
+.hw-priority-badge.pri-emergency { background: #dc262620; color: #dc2626; }
+.hw-priority-badge.pri-urgent { background: #ea580c20; color: #ea580c; }
+.hw-priority-badge.pri-high { background: #d9770620; color: #d97706; }
+.hw-priority-badge.pri-normal { background: #2563eb20; color: #2563eb; }
+.hw-priority-badge.pri-low { background: #6b728020; color: #6b7280; }
+
+.hw-priority-text { color: #2563eb; }
+.hw-priority-text.pri-emergency { color: #dc2626; }
+.hw-priority-text.pri-urgent { color: #ea580c; }
+.hw-priority-text.pri-high { color: #d97706; }
+.hw-priority-text.pri-normal { color: #2563eb; }
+.hw-priority-text.pri-low { color: #6b7280; }
+
+.hw-med-status { font-size: 11px; margin-top: 2px; color: #b45309; }
+.hw-med-status.is-dispensed { color: #6b7280; }
+.hw-med-status.is-ready { color: #15803d; }
+.hw-med-status.is-pending { color: #b45309; }
+
+.hw-priority-pill { flex: 1; padding: 8px 4px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; font-weight: 600; cursor: pointer; font-size: 12px; text-transform: capitalize; color: #374151; }
+.hw-priority-pill.pri-emergency { color: #dc2626; }
+.hw-priority-pill.pri-urgent { color: #ea580c; }
+.hw-priority-pill.pri-high { color: #d97706; }
+.hw-priority-pill.pri-normal { color: #2563eb; }
+.hw-priority-pill.pri-low { color: #6b7280; }
+.hw-priority-pill.is-selected.pri-emergency { border: 2px solid #dc2626; background: #dc262615; }
+.hw-priority-pill.is-selected.pri-urgent { border: 2px solid #ea580c; background: #ea580c15; }
+.hw-priority-pill.is-selected.pri-high { border: 2px solid #d97706; background: #d9770615; }
+.hw-priority-pill.is-selected.pri-normal { border: 2px solid #2563eb; background: #2563eb15; }
+.hw-priority-pill.is-selected.pri-low { border: 2px solid #6b7280; background: #6b728015; }
+
+.hw-checkin-submit { padding: 10px 20px; background: #2563eb; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; min-width: 120px; }
+.hw-checkin-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+.hw-walkin-submit { padding: 10px 20px; background: #15803d; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; min-width: 140px; }
+.hw-walkin-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+.hw-create-case-btn { padding: 8px 16px; background: #2563eb; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.hw-create-case-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+.hw-referral-submit-btn { padding: 8px 16px; background: #2563eb; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.hw-referral-submit-btn:disabled { background: #93c5fd; cursor: not-allowed; }
+
+.hw-photo-circle { width: 80px; height: 80px; border-radius: 50%; border: 2px dashed #d1d5db; background: #f8fafc; cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
+.hw-photo-circle.has-preview { background: transparent; }
+
+.hw-referral-reason-input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #d1d5db; box-sizing: border-box; }
+.hw-referral-reason-input.is-invalid { border-color: #fca5a5; }
+
+.hw-referral-status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #fecaca; color: #991b1b; }
+.hw-referral-status-badge.status-pending { background: #fef3c7; color: #92400e; }
+.hw-referral-status-badge.status-accepted { background: #dcfce7; color: #166534; }
+.hw-referral-status-badge.status-completed { background: #dbeafe; color: #1d4ed8; }
+.hw-referral-status-badge.status-declined { background: #fecaca; color: #991b1b; }
+
+.hw-case-status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #f1f5f9; color: #64748b; }
+.hw-case-status-badge.is-active { background: #dcfce7; color: #166534; }
+
+.hw-stage-filter-btn { padding: 6px 14px; border-radius: 20px; border: none; cursor: pointer; background: #e2e8f0; color: #475569; font-weight: 600; font-size: 13px; white-space: nowrap; }
+.hw-stage-filter-btn.is-active { background: #2563eb; color: #fff; }
+
+.hw-case-stage-step { flex: 1; text-align: center; padding: 8px 4px; border-radius: 8px; background: #f1f5f9; color: #94a3b8; font-weight: 500; font-size: 12px; }
+.hw-case-stage-step.is-active { background: #2563eb; color: #fff; font-weight: 700; }
+.hw-case-stage-step.is-past { background: #dcfce7; color: #166534; }
+
+.hw-advance-btn { padding: 8px 14px; background: #2563eb; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; }
+.hw-advance-btn.is-discharge { background: #059669; }
+
+.hw-triage-option { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; cursor: pointer; text-align: left; border: 2px solid #e5e7eb; background: #fafafa; transition: all .15s; }
+.hw-triage-num { width: 32px; height: 32px; border-radius: 8px; background: #e5e7eb; color: #6b7280; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; }
+.hw-triage-label { font-size: 14px; font-weight: 700; color: #374151; min-width: 70px; }
+.hw-triage-desc { font-size: 12px; color: #94a3b8; }
+
+.hw-triage-option.lvl-1.is-selected { border-color: #dc2626; background: #fee2e2; }
+.hw-triage-option.lvl-2.is-selected { border-color: #ea580c; background: #ffedd5; }
+.hw-triage-option.lvl-3.is-selected { border-color: #d97706; background: #fef3c7; }
+.hw-triage-option.lvl-4.is-selected { border-color: #2563eb; background: #dbeafe; }
+.hw-triage-option.lvl-5.is-selected { border-color: #6b7280; background: #f1f5f9; }
+
+.hw-triage-option.lvl-1.is-selected .hw-triage-num { background: #dc2626; color: #fff; }
+.hw-triage-option.lvl-2.is-selected .hw-triage-num { background: #ea580c; color: #fff; }
+.hw-triage-option.lvl-3.is-selected .hw-triage-num { background: #d97706; color: #fff; }
+.hw-triage-option.lvl-4.is-selected .hw-triage-num { background: #2563eb; color: #fff; }
+.hw-triage-option.lvl-5.is-selected .hw-triage-num { background: #6b7280; color: #fff; }
+
+.hw-triage-option.lvl-1.is-selected .hw-triage-label { color: #dc2626; }
+.hw-triage-option.lvl-2.is-selected .hw-triage-label { color: #ea580c; }
+.hw-triage-option.lvl-3.is-selected .hw-triage-label { color: #d97706; }
+.hw-triage-option.lvl-4.is-selected .hw-triage-label { color: #2563eb; }
+.hw-triage-option.lvl-5.is-selected .hw-triage-label { color: #6b7280; }
+
+.hw-triage-option.lvl-1.is-selected .hw-triage-desc { color: #dc2626; }
+.hw-triage-option.lvl-2.is-selected .hw-triage-desc { color: #ea580c; }
+.hw-triage-option.lvl-3.is-selected .hw-triage-desc { color: #d97706; }
+.hw-triage-option.lvl-4.is-selected .hw-triage-desc { color: #2563eb; }
+.hw-triage-option.lvl-5.is-selected .hw-triage-desc { color: #6b7280; }
+
+.hw-triage-derived { border-radius: 8px; padding: 8px 14px; display: flex; align-items: center; gap: 8px; }
+.hw-triage-derived-label { font-size: 12px; font-weight: 600; }
+.hw-triage-derived-value { padding: 2px 10px; border-radius: 10px; color: #fff; font-weight: 700; font-size: 12px; text-transform: uppercase; }
+
+.hw-triage-derived.lvl-1 { background: #fee2e2; border: 1px solid #dc262640; }
+.hw-triage-derived.lvl-2 { background: #ffedd5; border: 1px solid #ea580c40; }
+.hw-triage-derived.lvl-3 { background: #fef3c7; border: 1px solid #d9770640; }
+.hw-triage-derived.lvl-4 { background: #dbeafe; border: 1px solid #2563eb40; }
+.hw-triage-derived.lvl-5 { background: #f1f5f9; border: 1px solid #6b728040; }
+
+.hw-triage-derived.lvl-1 .hw-triage-derived-label { color: #dc2626; }
+.hw-triage-derived.lvl-2 .hw-triage-derived-label { color: #ea580c; }
+.hw-triage-derived.lvl-3 .hw-triage-derived-label { color: #d97706; }
+.hw-triage-derived.lvl-4 .hw-triage-derived-label { color: #2563eb; }
+.hw-triage-derived.lvl-5 .hw-triage-derived-label { color: #6b7280; }
+
+.hw-triage-derived.lvl-1 .hw-triage-derived-value { background: #dc2626; }
+.hw-triage-derived.lvl-2 .hw-triage-derived-value { background: #ea580c; }
+.hw-triage-derived.lvl-3 .hw-triage-derived-value { background: #d97706; }
+.hw-triage-derived.lvl-4 .hw-triage-derived-value { background: #2563eb; }
+.hw-triage-derived.lvl-5 .hw-triage-derived-value { background: #6b7280; }
