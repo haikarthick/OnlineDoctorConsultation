@@ -123,7 +123,6 @@
         "src/pages/doctor/PrescriptionWriter.tsx",
         "src/pages/doctor/Prescriptions.tsx",
         "src/pages/doctor/VetEarnings.tsx",
-        "src/pages/hospitalnetwork/HospitalNetworks.tsx",
         "src/pages/hospitalnetwork/NetworkRoleMatrix.tsx",
         "src/pages/petowner/VetProfilePage.tsx",
         "src/pages/pharmacy/DispensingHistory.tsx",

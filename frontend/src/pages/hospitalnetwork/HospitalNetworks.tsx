@@ -9,768 +9,29 @@ import '../ModulePage.css'
 import './HospitalNetworks.css'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface HospitalNetwork {
-  id: string
-  name: string
-  legalName?: string
-  registrationNumber?: string
-  taxId?: string
-  networkType?: string
-  country?: string
-  headquartersCity?: string
-  headquartersState?: string
-  contactEmail?: string
-  contactPhone?: string
-  website?: string
-  isActive: boolean
-  isApproved: boolean
-  createdAt: string
-  updatedAt?: string
-  approvedByName?: string
-  memberCount?: number
-  hospitalCount?: number
-  idPrefix?: string
-}
-
-interface NetworkMember {
-  id: string
-  networkId: string
-  userId: string
-  networkRole: string
-  hospitalId?: string
-  isActive: boolean
-  grantedAt: string
-  userName?: string
-  userEmail?: string
-  userRole?: string
-  hospitalName?: string
-}
-
-interface NetworkDashboard {
-  totalMembers: number
-  totalHospitals: number
-  totalPatients: number
-  activeConsents: number
-  recentAccessLogs?: any[]
-  membersByRole?: Record<string, number>
-}
-
-interface NetworkHospital {
-  id: string
-  name: string
-  city?: string
-  state?: string
-  hospitalType?: string
-  contactEmail?: string
-  contactPhone?: string
-  isVerified?: boolean
-  isNetworkBranch?: boolean
-  specializations?: string[]
-  staffCount?: number
-}
-
-interface AuditEntry {
-  id: string
-  accessedBy: string
-  accessorName: string
-  accessorEmail: string
-  accessorRole: string
-  animalId: string
-  animalName: string
-  animalUniqueId: string
-  recordType: string
-  accessType: string
-  accessGranted: boolean
-  denialReason: string
-  consentId: string
-  accessedAt: string
-}
-
-interface AuditStats {
-  total: number
-  granted: number
-  denied: number
-  last7days: number
-}
-
-interface PatientSearchResult {
-  userId: string
-  userName: string
-  userEmail: string
-  userPhone?: string
-  animals: Array<{ id: string; name: string; species: string; uniqueId?: string; }>
-}
-
-interface EnrollmentRecord {
-  id: string
-  animalId: string
-  enrollmentStatus: string
-  networkPatientId?: string
-  enrollmentRequestedAt: string
-  enrollmentRespondedAt?: string
-  animalName: string
-  species: string
-  ownerName: string
-  ownerEmail: string
-}
-
-interface WalkInInviteForm {
-  patientName: string
-  patientEmail: string
-  patientPhone: string
-  animalName: string
-  animalSpecies: string
-  message: string
-}
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-const NETWORK_TYPES = [
-  { value: 'private', label: 'Private' },
-  { value: 'government', label: 'Government' },
-  { value: 'ngo', label: 'NGO' },
-  { value: 'cooperative', label: 'Cooperative' },
-  { value: 'franchise', label: 'Franchise' },
-]
-
-const MEMBER_ROLES = [
-  { value: 'corporate_admin', label: 'Corporate Admin' },
-  { value: 'hospital_director', label: 'Hospital Director' },
-  { value: 'compliance_officer', label: 'Compliance Officer' },
-  { value: 'auditor', label: 'Auditor' },
-  { value: 'hospital_staff', label: 'Hospital Staff' },
-]
-
-const AUDIT_RECORD_TYPE_LABELS: Record<string, string> = {
-  animal_profile: 'Profile',
-  consultations: 'Consultations',
-  prescriptions: 'Prescriptions',
-  vaccinations: 'Vaccinations',
-}
-
-const AUDIT_ROLE_STYLES: Record<string, { bg: string; color: string }> = {
-  veterinarian: { bg: '#dbeafe', color: '#1d4ed8' },
-  admin: { bg: '#fee2e2', color: '#dc2626' },
-  farmer: { bg: '#dcfce7', color: '#15803d' },
-  pet_owner: { bg: '#f3e8ff', color: '#7e22ce' },
-}
-
-// ─── RoleBadge ────────────────────────────────────────────────────────────────
-interface RoleBadgeProps { role: string }
-const RoleBadge: React.FC<RoleBadgeProps> = ({ role }) => {
-  const label = MEMBER_ROLES.find(r => r.value === role)?.label ?? role
-  return <span className={`hn-role-badge hn-role-badge-${role}`}>{label}</span>
-}
-
-// ─── NetworkTypeLabel ─────────────────────────────────────────────────────────
-interface NetworkTypeLabelProps { type?: string }
-const NetworkTypeLabel: React.FC<NetworkTypeLabelProps> = ({ type }) => {
-  const label = NETWORK_TYPES.find(t => t.value === type)?.label ?? type ?? '-'
-  return <span>{label}</span>
-}
-
-// ─── Create/Edit Modal ────────────────────────────────────────────────────────
-interface NetworkModalProps {
-  editing: HospitalNetwork | null
-  onClose: () => void
-  onSaved: (network: HospitalNetwork) => void
-  t: (key: string) => string
-}
-
-const EMPTY_FORM = {
-  name: '', legalName: '', registrationNumber: '', taxId: '',
-  networkType: 'private', country: '', headquartersCity: '', headquartersState: '',
-  contactEmail: '', contactPhone: '', website: '',
-  dpoName: '', dpoEmail: '', dataResidencyRegion: '',
-  idPrefix: '',
-}
-
-const NetworkModal: React.FC<NetworkModalProps> = ({ editing, onClose, onSaved, t }) => {
-  const [form, setForm] = useState({ ...EMPTY_FORM })
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    if (editing) {
-      setForm({
-        name: editing.name ?? '',
-        legalName: editing.legalName ?? '',
-        registrationNumber: editing.registrationNumber ?? '',
-        taxId: editing.taxId ?? '',
-        networkType: editing.networkType ?? 'private',
-        country: editing.country ?? '',
-        headquartersCity: editing.headquartersCity ?? '',
-        headquartersState: editing.headquartersState ?? '',
-        contactEmail: editing.contactEmail ?? '',
-        contactPhone: editing.contactPhone ?? '',
-        website: editing.website ?? '',
-        dpoName: (editing as any).dpoName ?? '',
-        dpoEmail: (editing as any).dpoEmail ?? '',
-        dataResidencyRegion: (editing as any).dataResidencyRegion ?? '',
-        idPrefix: editing.idPrefix ?? '',
-      })
-    } else {
-      setForm({ ...EMPTY_FORM })
-    }
-  }, [editing])
-
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form.name.trim()) { setError('Network name is required'); return }
-    setSaving(true); setError('')
-    try {
-      let result: any
-      if (editing) {
-        result = await apiService.updateHospitalNetwork(editing.id, form)
-      } else {
-        result = await apiService.createHospitalNetwork(form)
-      }
-      onSaved(result.data ?? result)
-    } catch (err: any) {
-      setError(err?.response?.data?.message ?? err?.message ?? 'An error occurred')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div className="hn-modal-overlay" onClick={onClose}>
-      <div className="hn-modal" onClick={e => e.stopPropagation()}>
-        <div className="hn-modal-header">
-          <h2>{editing ? t('hospitalNetworks.modal.editTitle') : t('hospitalNetworks.modal.createTitle')}</h2>
-          <button type="button" className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
-        </div>
-        <div className="hn-modal-body">
-          {error && <div className="module-alert error">{error}</div>}
-          <form className="module-form" onSubmit={handleSubmit}>
-            <div className="module-form-row">
-              <div className="module-form-group">
-                <label className="module-label">Network Name <span className="hn-required">*</span></label>
-                <input className="module-input" value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. PawCare Group" />
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">Legal Name</label>
-                <input className="module-input" value={form.legalName} onChange={e => set('legalName', e.target.value)} placeholder="Registered legal name" />
-              </div>
-            </div>
-            <div className="module-form-row">
-              <div className="module-form-group">
-                <label className="module-label">{t('hospitalNetworks.form.idPrefix')}</label>
-                <input className="module-input" value={(form as any).idPrefix} onChange={e => set('idPrefix', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))} placeholder="e.g. APOLLO, NH1, TNGOV" maxLength={10} />
-                <small className="si-fd547d99">{t('hospitalNetworks.form.idPrefixHint')}</small>
-              </div>
-            </div>
-            <div className="module-form-row">
-              <div className="module-form-group">
-                <label className="module-label">Registration Number</label>
-                <input className="module-input" value={form.registrationNumber} onChange={e => set('registrationNumber', e.target.value)} />
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">Tax ID</label>
-                <input className="module-input" value={form.taxId} onChange={e => set('taxId', e.target.value)} />
-              </div>
-            </div>
-            <div className="module-form-row">
-              <div className="module-form-group">
-                <label className="module-label">Network Type</label>
-                <select className="module-input" value={form.networkType} onChange={e => set('networkType', e.target.value)}>
-                  {NETWORK_TYPES.map(nt => <option key={nt.value} value={nt.value}>{nt.label}</option>)}
-                </select>
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">Country</label>
-                <input className="module-input" value={form.country} onChange={e => set('country', e.target.value)} placeholder="e.g. India" />
-              </div>
-            </div>
-            <div className="module-form-row">
-              <div className="module-form-group">
-                <label className="module-label">Headquarters City</label>
-                <input className="module-input" value={form.headquartersCity} onChange={e => set('headquartersCity', e.target.value)} />
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">Headquarters State</label>
-                <input className="module-input" value={form.headquartersState} onChange={e => set('headquartersState', e.target.value)} />
-              </div>
-            </div>
-            <div className="module-form-row">
-              <div className="module-form-group">
-                <label className="module-label">Contact Email</label>
-                <input className="module-input" type="email" value={form.contactEmail} onChange={e => set('contactEmail', e.target.value)} />
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">Contact Phone</label>
-                <input className="module-input" value={form.contactPhone} onChange={e => set('contactPhone', e.target.value)} />
-              </div>
-            </div>
-            <div className="module-form-group">
-              <label className="module-label">Website</label>
-              <input className="module-input" value={form.website} onChange={e => set('website', e.target.value)} placeholder="https://" />
-            </div>
-            <div className="hn-section-title">Data Protection</div>
-            <div className="module-form-row">
-              <div className="module-form-group">
-                <label className="module-label">DPO Name</label>
-                <input className="module-input" value={form.dpoName} onChange={e => set('dpoName', e.target.value)} placeholder="Data Protection Officer" />
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">DPO Email</label>
-                <input className="module-input" type="email" value={form.dpoEmail} onChange={e => set('dpoEmail', e.target.value)} />
-              </div>
-            </div>
-            <div className="module-form-group">
-              <label className="module-label">Data Residency Region</label>
-              <input className="module-input" value={form.dataResidencyRegion} onChange={e => set('dataResidencyRegion', e.target.value)} placeholder="e.g. Asia-South1" />
-            </div>
-            <div className="hn-modal-actions">
-              <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
-              <button type="submit" className="module-btn primary" disabled={saving}>
-                {saving ? t('common.saving') : (editing ? t('common.update') : t('common.create'))}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Create Branch Hospital Modal ─────────────────────────────────────────────
-interface BranchHospitalFormData {
-  name: string;
-  hospitalType: string;
-  address: string;
-  city: string;
-  state: string;
-  country: string;
-  postalCode: string;
-  phone: string;
-  email: string;
-  description: string;
-  operatingHours?: string;
-  specializations?: string[];
-}
-
-const CreateBranchHospitalModal: React.FC<{
-  networkId: string;
-  onSuccess: () => void;
-  onClose: () => void;
-  t: any;
-}> = ({ networkId, onSuccess, onClose, t }) => {
-  const [form, setForm] = useState<BranchHospitalFormData>({
-    name: '', hospitalType: 'multi_specialty', address: '', city: '',
-    state: '', country: 'IN', postalCode: '', phone: '', email: '', description: '',
-    operatingHours: '', specializations: []
-  })
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form.name.trim()) { setError('Hospital name is required'); return }
-    setSaving(true)
-    setError('')
-    try {
-      await apiService.createBranchHospital(networkId, form)
-      onSuccess()
-      onClose()
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || 'Failed to create branch hospital')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div className="hn-modal-overlay" onClick={onClose}>
-      <div className="hn-modal si-dde6b9b9" onClick={e => e.stopPropagation()}>
-        <div className="hn-modal-header">
-          <h3>🏥 Create Branch Hospital</h3>
-          <button type="button" className="hn-modal-close" onClick={onClose}>✕</button>
-        </div>
-        <form onSubmit={handleSubmit} className="si-3834fcb3">
-          <div className="si-28fc7e41">
-            {error && <div className="module-alert error si-af843d88">{error}</div>}
-            <div className="module-form">
-              <div className="module-form-group">
-                <label className="module-label">Hospital Name <span className="si-19136384">*</span></label>
-                <input className="module-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Chennai Branch - North" required />
-              </div>
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">Type</label>
-                  <select className="module-input" value={form.hospitalType} onChange={e => setForm(f => ({ ...f, hospitalType: e.target.value }))}>
-                    <option value="multi_specialty">Multi Specialty</option>
-                    <option value="specialty">Specialty</option>
-                    <option value="clinic">Clinic</option>
-                    <option value="emergency">Emergency</option>
-                    <option value="referral">Referral</option>
-                  </select>
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">Phone</label>
-                  <input className="module-input" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+91 ..." />
-                </div>
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">Email</label>
-                <input className="module-input" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="branch@hospital.com" />
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">Address</label>
-                <input className="module-input" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="Street address" />
-              </div>
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">City</label>
-                  <input className="module-input" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} placeholder="City" />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">State</label>
-                  <input className="module-input" value={form.state} onChange={e => setForm(f => ({ ...f, state: e.target.value }))} placeholder="State" />
-                </div>
-              </div>
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">Country</label>
-                  <input className="module-input" value={form.country} onChange={e => setForm(f => ({ ...f, country: e.target.value }))} placeholder="IN" />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">Postal Code</label>
-                  <input className="module-input" value={form.postalCode} onChange={e => setForm(f => ({ ...f, postalCode: e.target.value }))} placeholder="600001" />
-                </div>
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">Description <span className="si-f7764c70">(optional)</span></label>
-                <textarea className="module-input" rows={2} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description of this branch..." />
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">{t('networkSettings.operatingHours')} <span className="si-f7764c70">(optional)</span></label>
-                <input
-                  className="module-input"
-                  value={form.operatingHours || ''}
-                  onChange={e => setForm(f => ({ ...f, operatingHours: e.target.value }))}
-                  placeholder={t('hospitalNetworks.operatingHoursPlaceholder')}
-                />
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">{t('networkSettings.specializations')} <span className="si-f7764c70">(optional)</span></label>
-                <div className="si-4526a3dd">
-                  {(form.specializations || []).map(spec => (
-                    <span key={spec} className="si-bbabfb92">
-                      {spec}
-                      <button type="button" onClick={() => setForm(f => ({ ...f, specializations: (f.specializations || []).filter(s => s !== spec) }))} className="si-f021bb7e">×</button>
-                    </span>
-                  ))}
-                </div>
-                <div className="si-50c82988">
-                  {['Cardiology', 'Surgery', 'Emergency', 'Orthopedics', 'Dermatology', 'Ophthalmology', 'Neurology', 'Oncology', 'Internal Medicine', 'General Practice'].map(spec => (
-                    <button
-                      key={spec}
-                      type="button"
-                      onClick={() => setForm(f => ({
-                        ...f,
-                        specializations: (f.specializations || []).includes(spec)
-                          ? (f.specializations || []).filter(s => s !== spec)
-                          : [...(f.specializations || []), spec]
-                      }))}
-                      style={{
-                        padding: '3px 10px', borderRadius: 20, fontSize: 12, cursor: 'pointer', border: '1px solid',
-                        background: (form.specializations || []).includes(spec) ? '#4f46e5' : '#f3f4f6',
-                        color: (form.specializations || []).includes(spec) ? '#fff' : '#374151',
-                        borderColor: (form.specializations || []).includes(spec) ? '#4f46e5' : '#d1d5db'
-                      }}
-                    >
-                      {spec}
-                    </button>
-                  ))}
-                </div>
-                <p className="si-ada3b9d6">{t('hospitalNetworks.specializationsHint')}</p>
-              </div>
-            </div>
-          </div>
-          <div className="si-23022006">
-            <p className="si-a089afbe">* Name required</p>
-            <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
-            <button type="submit" className="module-btn primary" disabled={saving || !form.name.trim()}>
-              {saving ? '⏳ Creating...' : '🏥 Create Branch Hospital'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
-
-// ─── Edit Branch Hospital Modal ───────────────────────────────────────────────
-const EditBranchHospitalModal: React.FC<{
-  networkId: string;
-  hospital: NetworkHospital;
-  onSuccess: () => void;
-  onClose: () => void;
-  t: any;
-}> = ({ networkId, hospital, onSuccess, onClose, t }) => {
-  const [form, setForm] = useState<BranchHospitalFormData>({
-    name: hospital.name || '',
-    hospitalType: hospital.hospitalType || 'multi_specialty',
-    address: '',
-    city: hospital.city || '',
-    state: hospital.state || '',
-    country: 'IN',
-    postalCode: '',
-    phone: hospital.contactPhone || '',
-    email: hospital.contactEmail || '',
-    description: '',
-  })
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form.name.trim()) { setError('Hospital name is required'); return }
-    setSaving(true); setError('')
-    try {
-      await apiService.updateBranchHospital(networkId, hospital.id, form)
-      onSuccess()
-      onClose()
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || 'Failed to update branch hospital')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div className="hn-modal-overlay" onClick={onClose}>
-      <div className="hn-modal si-dde6b9b9" onClick={e => e.stopPropagation()}>
-        <div className="hn-modal-header">
-          <h3>✏️ Edit Branch Hospital</h3>
-          <button type="button" className="hn-modal-close" onClick={onClose}>✕</button>
-        </div>
-        <form onSubmit={handleSubmit} className="si-3834fcb3">
-          <div className="si-28fc7e41">
-            {error && <div className="module-alert error si-af843d88">{error}</div>}
-            <div className="module-form">
-              <div className="module-form-group">
-                <label className="module-label">Hospital Name <span className="si-19136384">*</span></label>
-                <input className="module-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
-              </div>
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">Type</label>
-                  <select className="module-input" value={form.hospitalType} onChange={e => setForm(f => ({ ...f, hospitalType: e.target.value }))}>
-                    <option value="multi_specialty">Multi Specialty</option>
-                    <option value="specialty">Specialty</option>
-                    <option value="clinic">Clinic</option>
-                    <option value="emergency">Emergency</option>
-                    <option value="referral">Referral</option>
-                  </select>
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">Phone</label>
-                  <input className="module-input" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+91 ..." />
-                </div>
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">Email</label>
-                <input className="module-input" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">Address</label>
-                <input className="module-input" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="Street address" />
-              </div>
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">City</label>
-                  <input className="module-input" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">State</label>
-                  <input className="module-input" value={form.state} onChange={e => setForm(f => ({ ...f, state: e.target.value }))} />
-                </div>
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">Description <span className="si-f7764c70">(optional)</span></label>
-                <textarea className="module-input" rows={2} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
-              </div>
-            </div>
-          </div>
-          <div className="si-de5a14e5">
-            <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
-            <button type="submit" className="module-btn primary" disabled={saving || !form.name.trim()}>
-              {saving ? '⏳ Saving...' : '✏️ Save Changes'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
-
-// ─── Add Member Modal ─────────────────────────────────────────────────────────
-interface AddMemberModalProps {
-  networkId: string
-  networkHospitals: NetworkHospital[]
-  onClose: () => void
-  onAdded: () => void
-  onInviteInstead: () => void
-  t: (key: string) => string
-}
-
-const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospitals, onClose, onAdded, onInviteInstead, t }) => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<Array<{ id: string; firstName: string; lastName: string; email: string; role: string }>>([])
-  const [selectedUser, setSelectedUser] = useState<{ id: string; firstName: string; lastName: string; email: string; role: string } | null>(null)
-  const [searching, setSearching] = useState(false)
-  const [networkRole, setNetworkRole] = useState('hospital_staff')
-  const [hospitalId, setHospitalId] = useState('')
-  const [notes, setNotes] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-
-  // The candidate list is bounded by this network's own hospitals, so it is small enough to
-  // load up front - an empty query returns every eligible person. That is why there is no
-  // minimum length here any more: typing filters an already-visible list rather than being
-  // the only way to see one.
-  useEffect(() => {
-    if (selectedUser) return
-    const timer = setTimeout(async () => {
-      setSearching(true)
-      try {
-        const res = await apiService.searchNetworkUsers(networkId, searchQuery)
-        setSearchResults(res.data?.data || [])
-      } catch { setSearchResults([]) }
-      finally { setSearching(false) }
-    }, searchQuery ? 350 : 0)
-    return () => clearTimeout(timer)
-  }, [searchQuery, selectedUser, networkId])
-
-  const handleAdd = async () => {
-    if (!selectedUser) { setError('Please search and select a user first'); return }
-    setSaving(true); setError('')
-    try {
-      await apiService.addNetworkMember(networkId, {
-        userId: selectedUser.id,
-        networkRole,
-        hospitalId: hospitalId || undefined,
-        notes: notes || undefined,
-      })
-      onAdded()
-    } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Failed to add member')
-    } finally { setSaving(false) }
-  }
-
-  return (
-    <div className="hn-modal-overlay" onClick={onClose}>
-      <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
-        <div className="hn-modal-header">
-          <h2>➕ {t('hospitalNetworks.detail.addMember')}</h2>
-          <button type="button" className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
-        </div>
-        <div className="hn-modal-body">
-          {error && <div className="module-alert error">{error}</div>}
-
-          <div className="module-form-group">
-            <label className="module-label">Search User <span className="si-19136384">*</span></label>
-            <input
-              className="module-input"
-              value={searchQuery}
-              onChange={e => { setSearchQuery(e.target.value); setSelectedUser(null) }}
-              placeholder="Filter by name or email..."
-              autoFocus
-            />
-            <p className="hn-field-hint">
-              Staff and doctors at this network&apos;s hospitals who are not members yet.
-            </p>
-            {searching && <p className="si-acff8193">🔍 Searching...</p>}
-
-            {searchResults.length > 0 && !selectedUser && (
-              <div className="si-22cbcd6a">
-                {searchResults.map(u => (
-                  <div
-                    key={u.id}
-                    onClick={() => { setSelectedUser(u); setSearchQuery(`${u.firstName} ${u.lastName} (${u.email})`) }}
-                    className="si-632b9cb5"
-                    onMouseEnter={e => (e.currentTarget.style.background = '#f9fafb')}
-                    onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
-                  >
-                    <span className="si-a9b7f385">{u.firstName} {u.lastName}</span>
-                    <span className="si-48a0b045">{u.email} • {u.role}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            {searchResults.length === 0 && !searching && !selectedUser && (
-              <div className="si-fa4fc649">
-                <p className="si-519a52ea">
-                  {searchQuery
-                    ? `No one at this network's hospitals matches "${searchQuery}".`
-                    : 'Everyone at this network’s hospitals is already a member.'}
-                </p>
-                <p className="si-79d4f0fa">
-                  To bring in someone who does not work at a branch hospital yet, invite them by email.
-                </p>
-                <button
-                  type="button"
-                  onClick={onInviteInstead}
-                  className="si-20f10f40"
-                >
-                  ✉️ Invite them by email instead →
-                </button>
-              </div>
-            )}
-
-            {selectedUser && (
-              <div className="si-b6f52d6c">
-                <div>
-                  <span className="si-b2cfcbec">✅ {selectedUser.firstName} {selectedUser.lastName}</span>
-                  <span className="si-824a7a1e">{selectedUser.email}</span>
-                </div>
-                <button type="button" className="si-4b47cdf7" onClick={() => { setSelectedUser(null); setSearchQuery('') }}>✕</button>
-              </div>
-            )}
-          </div>
-
-          <div className="module-form-group">
-            <label className="module-label">Network Role</label>
-            <select className="module-input" value={networkRole} onChange={e => setNetworkRole(e.target.value)}>
-              {MEMBER_ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-            </select>
-          </div>
-
-          {networkHospitals.length > 0 && (
-            <div className="module-form-group">
-              <label className="module-label">Assign to Branch Hospital <span className="si-f7764c70">(optional)</span></label>
-              <select className="module-input" value={hospitalId} onChange={e => setHospitalId(e.target.value)}>
-                <option value="">- Not assigned to specific hospital -</option>
-                {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-              </select>
-            </div>
-          )}
-
-          <div className="module-form-group">
-            <label className="module-label">Notes <span className="si-f7764c70">(optional)</span></label>
-            <input className="module-input" value={notes} onChange={e => setNotes(e.target.value)} placeholder="e.g. Head of Cardiology" />
-          </div>
-
-          {!selectedUser && (
-            <p className="si-513c70eb">⚠️ Required: Search and select a user above to enable adding</p>
-          )}
-          <p className="si-2c2a1863">* Required field. User must already have a waytovet account.</p>
-        </div>
-
-        <div className="hn-modal-actions si-70412b08">
-          <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
-          <button type="button" className="module-btn primary" disabled={saving || !selectedUser} onClick={handleAdd}>
-            {saving ? '⏳ Adding...' : `➕ ${t('hospitalNetworks.detail.addMember')}`}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
+import {
+  HospitalNetwork, NetworkMember, NetworkDashboard, NetworkHospital,
+  AuditEntry, AuditStats, PatientSearchResult, EnrollmentRecord, WalkInInviteForm,
+} from '../../components/hospitalNetwork/hospitalNetworksShared'
+import NetworkModal from '../../components/hospitalNetwork/NetworkModal'
+import CreateBranchHospitalModal from '../../components/hospitalNetwork/CreateBranchHospitalModal'
+import EditBranchHospitalModal from '../../components/hospitalNetwork/EditBranchHospitalModal'
+import DeleteBranchConfirmModal from '../../components/hospitalNetwork/DeleteBranchConfirmModal'
+import AddMemberModal from '../../components/hospitalNetwork/AddMemberModal'
+import EditMemberModal from '../../components/hospitalNetwork/EditMemberModal'
+import InviteStaffModal from '../../components/hospitalNetwork/InviteStaffModal'
+import WalkInInviteModal from '../../components/hospitalNetwork/WalkInInviteModal'
+import WalkInRegisterModal from '../../components/hospitalNetwork/WalkInRegisterModal'
+import OnboardingChecklistModal from '../../components/hospitalNetwork/OnboardingChecklistModal'
+import ComplianceExportModal from '../../components/hospitalNetwork/ComplianceExportModal'
+import ApprovalActionModal, { ApprovalActionKind } from '../../components/hospitalNetwork/ApprovalActionModal'
+import NetworksListTab from '../../components/hospitalNetwork/NetworksListTab'
+import NetworkDetailTab from '../../components/hospitalNetwork/NetworkDetailTab'
+import AuditTab from '../../components/hospitalNetwork/AuditTab'
+import PatientsTab from '../../components/hospitalNetwork/PatientsTab'
+import ReferralsTab from '../../components/hospitalNetwork/ReferralsTab'
+import LeaveManagementTab from '../../components/hospitalNetwork/LeaveManagementTab'
+import AnalyticsTab from '../../components/hospitalNetwork/AnalyticsTab'
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const HospitalNetworks: React.FC = () => {
@@ -793,7 +54,7 @@ const HospitalNetworks: React.FC = () => {
   // P6-APPROVAL state
   const [approvalHistory, setApprovalHistory] = useState<any[]>([])
   const [approvalLoading, setApprovalLoading] = useState(false)
-  const [showApprovalModal, setShowApprovalModal] = useState<null | 'info_requested' | 'approved' | 'rejected' | 'suspended' | 'reactivated'>(null)
+  const [showApprovalModal, setShowApprovalModal] = useState<ApprovalActionKind | null>(null)
   const [approvalNotes, setApprovalNotes] = useState('')
   const [approvalSaving, setApprovalSaving] = useState(false)
 
@@ -1134,11 +395,15 @@ const HospitalNetworks: React.FC = () => {
     }
   }, [selectedNetwork, referralDirection, t]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (activeTab === 'referrals') loadReferrals(referralDirection)
-    if (activeTab === 'leave') loadLeaveRequests()
-    if (activeTab === 'analytics' && selectedNetwork) loadAnalytics(selectedNetwork.id)
-  }, [activeTab, selectedNetwork, referralDirection]) // eslint-disable-line react-hooks/exhaustive-deps
+  const loadLeaveRequests = async () => {
+    if (!selectedNetwork) return
+    try {
+      const res = await apiService.listLeaveRequests(selectedNetwork.id)
+      setLeaveRequests(res.data?.data?.rows || res.data?.rows || res.data?.data || [])
+    } catch (err: any) {
+      console.error('Failed to load leave requests:', err?.message)
+    }
+  }
 
   const loadAnalytics = async (networkId: string) => {
     setAnalyticsLoading(true); setAnalyticsError('')
@@ -1151,6 +416,12 @@ const HospitalNetworks: React.FC = () => {
       setAnalyticsLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (activeTab === 'referrals') loadReferrals(referralDirection)
+    if (activeTab === 'leave') loadLeaveRequests()
+    if (activeTab === 'analytics' && selectedNetwork) loadAnalytics(selectedNetwork.id)
+  }, [activeTab, selectedNetwork, referralDirection]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleExportCompliance = async () => {
     if (!selectedNetwork || !complianceFrom || !complianceTo) return
@@ -1170,17 +441,6 @@ const HospitalNetworks: React.FC = () => {
       setComplianceError(err?.response?.data?.message || err?.message || 'Failed to generate report')
     } finally {
       setComplianceGenerating(false)
-    }
-  }
-
-  // ─── Leave Management logic ─────────────────────────────────────────────────
-  const loadLeaveRequests = async () => {
-    if (!selectedNetwork) return
-    try {
-      const res = await apiService.listLeaveRequests(selectedNetwork.id)
-      setLeaveRequests(res.data?.data?.rows || res.data?.rows || res.data?.data || [])
-    } catch (err: any) {
-      console.error('Failed to load leave requests:', err?.message)
     }
   }
 
@@ -1401,6 +661,113 @@ const HospitalNetworks: React.FC = () => {
     }
   }
 
+  const handleSendStaffInvite = async () => {
+    if (!selectedNetwork) return
+    setInviteStaffLoading(true)
+    try {
+      const res = await apiService.inviteHospitalStaff(selectedNetwork.id, {
+        inviteeEmail: inviteStaffForm.email,
+        inviteeName: inviteStaffForm.name,
+        staffPosition: inviteStaffForm.position,
+        hospitalId: inviteStaffForm.hospitalId || undefined,
+      })
+      if (res.success) {
+        setInviteStaffSuccess(t('hospitalNetworks.staff.inviteSent'))
+        const token = res.data?.inviteToken || res.data?.token
+        setInviteLink(res.data?.inviteUrl || (token ? `${window.location.origin}/accept-staff-invite?token=${token}` : ''))
+        setInviteStaffForm({ email: '', name: '', position: 'receptionist', hospitalId: '' })
+        // Refresh pending invites list
+        apiService.listStaffInvites(selectedNetwork.id).then((r: any) => setPendingInvites(r.data ?? r ?? [])).catch(() => {})
+      } else {
+        setInviteStaffError(res.message || res.error || 'Failed to send invite')
+      }
+    } catch (e: any) {
+      const errMsg = e.response?.data?.error || e.response?.data?.message || e.message || 'Failed to send invite'
+      setInviteStaffError(
+        e.response?.status === 409
+          ? (errMsg.includes('already a member') ? 'This email is already a member of this network.' : 'A pending invitation already exists for this email. Check the pending invites list below.')
+          : errMsg
+      )
+    } finally {
+      setInviteStaffLoading(false)
+    }
+  }
+
+  const handleCloseInviteStaffModal = () => {
+    setShowInviteStaff(false); setInviteStaffSuccess(''); setInviteStaffError(''); setInviteLink('')
+  }
+
+  const handleCopyInviteLink = (inv: any) => {
+    const token = inv.inviteToken ?? inv.invite_token
+    const link = `${window.location.origin}/accept-staff-invite?token=${token}`
+    navigator.clipboard.writeText(link)
+    alert(t('hospitalNetworks.detail.inviteLinkCopied'))
+  }
+
+  const handleRevokeInvite = async (inv: any) => {
+    if (!selectedNetwork) return
+    if (!window.confirm(t('hospitalNetworks.detail.revokeConfirm'))) return
+    try {
+      await apiService.revokeStaffInvite(selectedNetwork.id, inv.id)
+      setPendingInvites(prev => prev.filter(i => i.id !== inv.id))
+    } catch {
+      alert(t('hospitalNetworks.detail.revokeFailed'))
+    }
+  }
+
+  const handleDeleteBranch = async () => {
+    if (!selectedNetwork || !deletingBranch) return
+    try {
+      await apiService.deleteBranchHospital(selectedNetwork.id, deletingBranch.id)
+      setSuccessMsg('Branch hospital removed.')
+      setDeletingBranch(null)
+      loadDetail(selectedNetwork)
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Failed to remove hospital')
+      setDeletingBranch(null)
+    }
+  }
+
+  const handleCreateLeaveRequest = async (ev: React.FormEvent<HTMLFormElement>) => {
+    ev.preventDefault()
+    if (!selectedNetwork) return
+    const fd = new FormData(ev.currentTarget)
+    try {
+      await apiService.createLeaveRequest(selectedNetwork.id, {
+        leave_type: fd.get('leave_type'),
+        start_date: fd.get('start_date'),
+        end_date: fd.get('end_date'),
+        reason: fd.get('reason'),
+      })
+      setShowLeaveModal(false)
+      loadLeaveRequests()
+    } catch (err: any) { console.error(err) }
+  }
+
+  const handleApproveLeave = async (lr: any) => {
+    if (!selectedNetwork) return
+    try {
+      await apiService.updateLeaveRequest(selectedNetwork.id, lr.id, { status: 'approved' })
+      loadLeaveRequests()
+    } catch (err: any) { console.error(err) }
+  }
+
+  const handleRejectLeave = async (lr: any) => {
+    if (!selectedNetwork) return
+    try {
+      await apiService.updateLeaveRequest(selectedNetwork.id, lr.id, { status: 'rejected', rejectionReason: 'Declined by admin' })
+      loadLeaveRequests()
+    } catch (err: any) { console.error(err) }
+  }
+
+  const handleCompleteTransfer = async (transfer: any) => {
+    if (!selectedNetwork) return
+    try {
+      await apiService.completePatientTransfer(selectedNetwork.id, transfer.id)
+      loadTransfers()
+    } catch (err: any) { console.error(err) }
+  }
+
   const filteredNetworks = networks.filter(n => {
     const matchesSearch = !searchTerm || n.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (n.headquartersCity ?? '').toLowerCase().includes(searchTerm.toLowerCase())
@@ -1410,13 +777,6 @@ const HospitalNetworks: React.FC = () => {
   })
 
   const userNetworkRole = networkMembers.find(m => m.userId === user?.id)?.networkRole
-
-  const stats = {
-    total: networks.length,
-    approved: networks.filter(n => n.isApproved).length,
-    pending: networks.filter(n => !n.isApproved).length,
-    hospitals: networks.reduce((sum, n) => sum + (n.hospitalCount ?? 0), 0),
-  }
 
   const filteredAuditLogs = auditLogs.filter(e => {
     if (!auditSearch) return true
@@ -1556,985 +916,115 @@ const HospitalNetworks: React.FC = () => {
         )}
       </div>
 
-      {/* ════ TAB 1: NETWORKS ════ */}
       {activeTab === 'networks' && (
-        <div className="hn-tab-content">
-          <div className="hn-stats-row">
-            <div className="hn-stat-card hn-stat-blue">
-              <div className="hn-stat-value">{stats.total}</div>
-              <div className="hn-stat-label">{t('hospitalNetworks.stats.total')}</div>
-            </div>
-            <div className="hn-stat-card hn-stat-green">
-              <div className="hn-stat-value">{stats.approved}</div>
-              <div className="hn-stat-label">{t('hospitalNetworks.stats.approved')}</div>
-            </div>
-            <div className="hn-stat-card hn-stat-orange">
-              <div className="hn-stat-value">{stats.pending}</div>
-              <div className="hn-stat-label">{t('hospitalNetworks.stats.pending')}</div>
-            </div>
-            <div className="hn-stat-card hn-stat-purple">
-              <div className="hn-stat-value">{stats.hospitals}</div>
-              <div className="hn-stat-label">{t('hospitalNetworks.stats.hospitals')}</div>
-            </div>
-          </div>
-
-          <div className="hn-filter-bar">
-            <div className="hn-filter-toggle">
-              {(['all', 'approved', 'pending'] as const).map(f => (
-                <button
-                  key={f}
-                  className={`module-btn small${statusFilter === f ? ' primary' : ''}`}
-                  onClick={() => setStatusFilter(f)}
-                >
-                  {f === 'all' ? t('common.all') : f === 'approved' ? t('hospitalNetworks.stats.approved') : t('hospitalNetworks.stats.pending')}
-                </button>
-              ))}
-            </div>
-            <input
-              className="module-input hn-search-input"
-              placeholder={`🔍 ${t('common.search')} networks…`}
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          {loading ? (
-            <div className="hn-loading">⏳ {t('common.loading')}</div>
-          ) : filteredNetworks.length === 0 ? (
-            <div className="hn-empty-state">
-              <div className="hn-empty-icon">🏢</div>
-              <div className="hn-empty-title">No networks found</div>
-              <div className="hn-empty-desc">
-                {searchTerm || statusFilter !== 'all'
-                  ? 'Try adjusting your filters.'
-                  : 'Create the first hospital network to get started.'}
-              </div>
-            </div>
-          ) : (
-            <div className="data-table-container">
-              <table className="module-table">
-                <thead>
-                  <tr>
-                    <th>{t('hospitalNetworks.table.name')}</th>
-                    <th>{t('hospitalNetworks.table.type')}</th>
-                    <th>{t('hospitalNetworks.table.headquarters')}</th>
-                    <th>{t('hospitalNetworks.table.members')}</th>
-                    <th>{t('hospitalNetworks.table.hospitals')}</th>
-                    <th>{t('hospitalNetworks.table.status')}</th>
-                    <th>{t('hospitalNetworks.table.created')}</th>
-                    <th>{t('hospitalNetworks.table.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredNetworks.map(network => (
-                    <tr key={network.id}>
-                      <td>
-                        <div className="hn-network-name">{network.name}</div>
-                        {network.legalName && <div className="hn-network-legal">{network.legalName}</div>}
-                        {network.idPrefix && <span className="module-badge si-a42e1735">{network.idPrefix}-*</span>}
-                      </td>
-                      <td><NetworkTypeLabel type={network.networkType} /></td>
-                      <td>
-                        {[network.headquartersCity, network.headquartersState, network.country]
-                          .filter(Boolean).join(', ') || '-'}
-                      </td>
-                      <td>{network.memberCount ?? '-'}</td>
-                      <td>{network.hospitalCount ?? '-'}</td>
-                      <td>
-                        {network.isApproved
-                          ? <span className="badge badge-success">{t('hospitalNetworks.status.approved')}</span>
-                          : <span className="badge badge-pending">{t('hospitalNetworks.status.pending')}</span>
-                        }
-                      </td>
-                      <td>{formatDate(network.createdAt)}</td>
-                      <td>
-                        <div className="hn-actions">
-                          <button className="module-btn small" onClick={() => handleView(network)}>
-                            {t('hospitalNetworks.actions.view')}
-                          </button>
-                          <button className="module-btn small" onClick={() => setEditingNetwork(network)}>
-                            {t('hospitalNetworks.actions.edit')}
-                          </button>
-                          {!network.isApproved && user?.role === 'admin' && (
-                            approveState[network.id] === 'confirming' ? (
-                              <div className="hn-confirm-row">
-                                <span className="hn-confirm-label">Sure?</span>
-                                <button type="button" className="module-btn small primary" onClick={() => handleApproveConfirm(network)}>Yes</button>
-                                <button type="button" className="module-btn small" onClick={() => setApproveState(s => ({ ...s, [network.id]: 'idle' }))}>No</button>
-                              </div>
-                            ) : (
-                              <button type="button" className="module-btn small hn-btn-approve" onClick={() => handleApproveClick(network)}>
-                                {t('hospitalNetworks.actions.approve')}
-                              </button>
-                            )
-                          )}
-                          {/* Pending badge for non-admin users */}
-                          {!network.isApproved && user?.role !== 'admin' && (
-                            <span className="module-badge badge-pending" title="Awaiting platform admin approval">⏳ Pending Admin Approval</span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <NetworksListTab
+          networks={networks}
+          filteredNetworks={filteredNetworks}
+          loading={loading}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          approveState={approveState}
+          userRole={user?.role}
+          formatDate={formatDate}
+          onView={handleView}
+          onEdit={setEditingNetwork}
+          onApproveClick={handleApproveClick}
+          onApproveConfirm={handleApproveConfirm}
+          onApproveCancel={(networkId) => setApproveState(s => ({ ...s, [networkId]: 'idle' }))}
+          t={t}
+        />
       )}
 
-      {/* ════ TAB 2: NETWORK DETAIL ════ */}
       {activeTab === 'detail' && (
-        <div className="hn-tab-content">
-          {!selectedNetwork ? (
-            <div className="hn-empty-state">
-              <div className="hn-empty-icon">🔍</div>
-              <div className="hn-empty-title">{t('hospitalNetworks.selectNetwork')}</div>
-            </div>
-          ) : detailLoading ? (
-            <div className="hn-loading">⏳ {t('common.loading')}</div>
-          ) : (
-            <>
-              <div className="hn-detail-header module-card">
-                <div className="hn-detail-title-row">
-                  <h2 className="hn-detail-name">{selectedNetwork.name}</h2>
-                  <div className="hn-detail-badges">
-                    {selectedNetwork.isApproved
-                      ? <span className="badge badge-success">{t('hospitalNetworks.status.approved')}</span>
-                      : <span className="badge badge-pending">{t('hospitalNetworks.status.pending')}</span>
-                    }
-                  </div>
-                  {(userNetworkRole === 'corporate_admin' || user?.role === 'admin') && (
-                    <button className="module-btn small" onClick={() => setEditingNetwork(selectedNetwork)}>
-                      ✏ {t('hospitalNetworks.actions.edit')}
-                    </button>
-                  )}
-                  {userNetworkRole === 'corporate_admin' && (
-                    <button
-                      className="module-btn small si-42e8005b"
-                     
-                      onClick={() => handleDeactivateNetwork(selectedNetwork.id)}
-                    >
-                      ⚠️ {t('hospitalNetworks.deactivate')}
-                    </button>
-                  )}
-                </div>
-                <div className="hn-detail-meta">
-                  {selectedNetwork.networkType && (
-                    <span className="hn-detail-meta-item">
-                      🏷 <NetworkTypeLabel type={selectedNetwork.networkType} />
-                    </span>
-                  )}
-                  {selectedNetwork.contactEmail && (
-                    <span className="hn-detail-meta-item">✉ {selectedNetwork.contactEmail}</span>
-                  )}
-                  {selectedNetwork.contactPhone && (
-                    <span className="hn-detail-meta-item">📞 {selectedNetwork.contactPhone}</span>
-                  )}
-                  {selectedNetwork.website && (
-                    <a href={selectedNetwork.website} target="_blank" rel="noopener noreferrer" className="hn-detail-meta-item hn-website-link">
-                      🌐 Website
-                    </a>
-                  )}
-                  {selectedNetwork.country && (
-                    <span className="hn-detail-meta-item">
-                      📍 {[selectedNetwork.headquartersCity, selectedNetwork.headquartersState, selectedNetwork.country].filter(Boolean).join(', ')}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {dashboard && (
-                <div className="hn-stats-row">
-                  <div className="hn-stat-card hn-stat-blue">
-                    <div className="hn-stat-value">{dashboard.totalMembers ?? 0}</div>
-                    <div className="hn-stat-label">Members</div>
-                  </div>
-                  <div className="hn-stat-card hn-stat-green">
-                    <div className="hn-stat-value">{dashboard.totalHospitals ?? 0}</div>
-                    <div className="hn-stat-label">Hospitals</div>
-                  </div>
-                  <div className="hn-stat-card hn-stat-purple">
-                    <div className="hn-stat-value">{dashboard.totalPatients ?? 0}</div>
-                    <div className="hn-stat-label">Patients</div>
-                  </div>
-                  <div className="hn-stat-card hn-stat-teal">
-                    <div className="hn-stat-value">{dashboard.activeConsents ?? 0}</div>
-                    <div className="hn-stat-label">Active Consents</div>
-                  </div>
-                </div>
-              )}
-
-              {financialData && (
-                <div className="module-card hn-financial-card">
-                  <div className="card-header">
-                    <h3>📊 {t('hospitalNetworks.financial.title')}</h3>
-                  </div>
-                  <div className="card-body">
-                    <div className="module-stats">
-                      <div className="stat-card">
-                        <div className="stat-icon">📋</div>
-                        <div className="stat-value">{financialData.totalConsultations || 0}</div>
-                        <div className="stat-label">{t('hospitalNetworks.financial.consultations')}</div>
-                      </div>
-                      <div className="stat-card">
-                        <div className="stat-icon">📅</div>
-                        <div className="stat-value">{financialData.totalBookings || 0}</div>
-                        <div className="stat-label">{t('hospitalNetworks.financial.bookings')}</div>
-                      </div>
-                    </div>
-                    {financialData.hospitalBreakdown?.length > 0 && (
-                      <div className="data-table-container hn-financial-table">
-                        <table className="module-table">
-                          <thead>
-                            <tr>
-                              <th>{t('hospitalNetworks.financial.hospital')}</th>
-                              <th>{t('hospitalNetworks.financial.bookings')}</th>
-                              <th>{t('hospitalNetworks.financial.queueVisits')}</th>
-                              <th>{t('hospitalNetworks.financial.inpatients')}</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {financialData.hospitalBreakdown.map((h: any) => (
-                              <tr key={h.id}>
-                                <td>{h.name}</td>
-                                <td>{h.bookings}</td>
-                                <td>{h.queueVisits}</td>
-                                <td>{h.inpatients}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <div className="hn-detail-panels">
-                <div className="module-card">
-                  <div className="hn-panel-header">
-                    <h3>{t('hospitalNetworks.detail.hospitals')}</h3>
-                    <button type="button" className="module-btn small primary" onClick={() => setShowCreateBranch(true)}>
-                      + Add Branch Hospital
-                    </button>
-                  </div>
-                  <div className="card-body">
-                    {networkHospitals.length === 0 ? (
-                      <div className="hn-panel-empty">🏥 {t('hospitalNetworks.detail.noHospitals')}</div>
-                    ) : (
-                      <div className="hn-hospital-list">
-                        {networkHospitals.map(h => (
-                          <div key={h.id} className="hn-hospital-item si-418b4a36">
-                            <span className="hn-hospital-icon">🏥</span>
-                            <div className="hn-hospital-info si-6acd75e8">
-                              <div className="hn-hospital-name">
-                                {h.name}
-                                {h.isNetworkBranch && <span className="si-dfca5832">Branch</span>}
-                                {h.isVerified && <span className="si-31f987da">✓ Verified</span>}
-                              </div>
-                              <div className="si-c9661b3b">
-                                {h.city && <span>📍 {h.city}{h.state ? `, ${h.state}` : ''}</span>}
-                                {h.hospitalType && <span>🏷️ {h.hospitalType.replace(/_/g, ' ')}</span>}
-                                {h.staffCount != null && <span>👥 {h.staffCount} staff</span>}
-                                {h.contactPhone && <span>📞 {h.contactPhone}</span>}
-                              </div>
-                            </div>
-                            {h.isNetworkBranch && (
-                              <div className="si-542ae40d">
-                                <button
-                                  type="button"
-                                  title="Edit branch hospital"
-                                  onClick={() => setEditingBranch(h)}
-                                  className="si-9acabb0d"
-                                >✏️</button>
-                                <button
-                                  type="button"
-                                  title="Remove branch hospital"
-                                  onClick={() => setDeletingBranch(h)}
-                                  className="si-19b6a27c"
-                                >🗑️</button>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* P6-APPROVAL: Approval Workflow Panel */}
-                {(['admin', 'corporate_admin', 'compliance_officer'] as string[]).includes(user?.role ?? '') && (
-                  <div className="module-card">
-                    <div className="hn-panel-header">
-                      <h3>📋 {t('networkApproval.title')}</h3>
-                      {user?.role === 'admin' && !selectedNetwork.isApproved && (
-                        <div className="si-d223efb3">
-                          <button className="module-btn small si-e54ed6c3" onClick={() => setShowApprovalModal('info_requested')}>
-                            ❓ {t('networkApproval.requestInfo')}
-                          </button>
-                          <button className="module-btn small primary" onClick={() => setShowApprovalModal('approved')}>
-                            ✅ {t('networkApproval.approveNetwork')}
-                          </button>
-                          <button className="module-btn small si-42e8005b" onClick={() => setShowApprovalModal('rejected')}>
-                            ❌ {t('networkApproval.rejectNetwork')}
-                          </button>
-                        </div>
-                      )}
-                      {user?.role === 'admin' && selectedNetwork.isApproved && (
-                        <button className="module-btn small si-01fda312" onClick={() => setShowApprovalModal('suspended')}>
-                          ⏸ Suspend Network
-                        </button>
-                      )}
-                    </div>
-                    <div className="card-body">
-                      {approvalLoading ? (
-                        <div className="hn-loading">⏳ {t('common.loading')}</div>
-                      ) : approvalHistory.length === 0 ? (
-                        <div className="hn-panel-empty">📋 {t('networkApproval.noHistory')}</div>
-                      ) : (
-                        <div className="hn-approval-timeline">
-                          {approvalHistory.map((ev, idx) => {
-                            const icons: Record<string, string> = {
-                              submitted: '📨', under_review: '🔍', info_requested: '❓',
-                              info_provided: '📝', approved: '✅', rejected: '❌',
-                              suspended: '⏸', reactivated: '🔄',
-                            }
-                            return (
-                              <div key={ev.id} className={`hn-approval-event ${idx === 0 ? 'hn-approval-event-latest' : ''}`}>
-                                <div className="hn-approval-event-icon">{icons[ev.eventType] ?? '📋'}</div>
-                                <div className="hn-approval-event-body">
-                                  <div className="hn-approval-event-type">{t(`networkApproval.${ev.eventType}` as any) || ev.eventType}</div>
-                                  <div className="hn-approval-event-meta">
-                                    {t('networkApproval.actedBy', { name: ev.actorName })} · {formatDate(ev.createdAt)}
-                                  </div>
-                                  {ev.notes && <div className="hn-approval-event-notes">"{ev.notes}"</div>}
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* P6-BRANDING: Settings Panel */}
-                {(userNetworkRole === 'corporate_admin' || user?.role === 'admin') && (
-                  <div className="module-card">
-                    <div className="hn-panel-header">
-                      <h3>⚙️ {t('networkSettings.title')}</h3>
-                      <button className="module-btn small" onClick={() => setShowBrandingPanel(p => !p)}>
-                        {showBrandingPanel ? '▲ Collapse' : '▼ Expand'}
-                      </button>
-                    </div>
-                    {showBrandingPanel && (
-                      <div className="card-body">
-                        {brandingSaved && <div className="module-alert success">✅ {t('networkSettings.settingsSaved')}</div>}
-                        <div className="hn-branding-section-title">{t('networkSettings.branding')}</div>
-                        <div className="module-form-group">
-                          <label className="module-label">{t('networkSettings.logoUpload')}</label>
-                          {brandingForm.logoUrl && (
-                            <div className="si-dab75309">
-                              <img src={brandingForm.logoUrl} alt="Network Logo" className="si-62661c53" />
-                            </div>
-                          )}
-                          <input type="file" accept="image/*" className="module-input"
-                            onChange={e => {
-                              const file = e.target.files?.[0]
-                              if (!file) return
-                              const reader = new FileReader()
-                              reader.onload = ev => setBrandingForm(f => ({ ...f, logoUrl: (ev.target?.result as string) ?? '' }))
-                              reader.readAsDataURL(file)
-                            }}
-                          />
-                        </div>
-                        <div className="hn-branding-section-title">{t('networkSettings.contactInfo')}</div>
-                        <div className="module-form-row">
-                          <div className="module-form-group">
-                            <label className="module-label">{t('networkSettings.contactEmail')}</label>
-                            <input className="module-input" type="email" value={brandingForm.contactEmail}
-                              onChange={e => setBrandingForm(f => ({ ...f, contactEmail: e.target.value }))} />
-                          </div>
-                          <div className="module-form-group">
-                            <label className="module-label">{t('networkSettings.contactPhone')}</label>
-                            <input className="module-input" value={brandingForm.contactPhone}
-                              onChange={e => setBrandingForm(f => ({ ...f, contactPhone: e.target.value }))} />
-                          </div>
-                        </div>
-                        <div className="module-form-group">
-                          <label className="module-label">{t('networkSettings.website')}</label>
-                          <input className="module-input" placeholder="https://" value={brandingForm.websiteUrl}
-                            onChange={e => setBrandingForm(f => ({ ...f, websiteUrl: e.target.value }))} />
-                        </div>
-                        <div className="hn-branding-section-title">{t('networkSettings.specializations')}</div>
-                        <div className="hn-spec-chips">
-                          {['Cardiology','Oncology','Orthopedics','Neurology','Dermatology','Ophthalmology','Dentistry','Surgery'].map(spec => (
-                            <button key={spec} type="button"
-                              className={`hn-spec-chip${brandingForm.specializations.includes(spec) ? ' active' : ''}`}
-                              onClick={() => setBrandingForm(f => ({
-                                ...f,
-                                specializations: f.specializations.includes(spec)
-                                  ? f.specializations.filter(s => s !== spec)
-                                  : [...f.specializations, spec]
-                              }))}>
-                              {spec}
-                            </button>
-                          ))}
-                        </div>
-                        <div className="module-form-group si-66faea9d">
-                          <label className="module-label si-98d3a741">
-                            <input type="checkbox" checked={brandingForm.emergencyServices}
-                              onChange={e => setBrandingForm(f => ({ ...f, emergencyServices: e.target.checked }))} />
-                            {t('networkSettings.emergencyServices')}
-                          </label>
-                        </div>
-                        <div className="hn-branding-section-title">{t('networkSettings.operatingHours')}</div>
-                        <div className="hn-hours-grid">
-                          {['mon','tue','wed','thu','fri','sat','sun'].map(day => {
-                            const h = brandingForm.operatingHours[day] ?? { open: '09:00', close: '18:00', closed: false }
-                            return (
-                              <div key={day} className="hn-hours-row">
-                                <span className="hn-hours-day">{day.charAt(0).toUpperCase() + day.slice(1)}</span>
-                                <label className="hn-hours-closed-label">
-                                  <input type="checkbox" checked={!!h.closed}
-                                    onChange={e => setBrandingForm(f => ({ ...f, operatingHours: { ...f.operatingHours, [day]: { ...h, closed: e.target.checked } } }))} />
-                                  {t('networkSettings.closed')}
-                                </label>
-                                {!h.closed && (
-                                  <>
-                                    <input type="time" className="hn-hours-input" value={h.open}
-                                      onChange={e => setBrandingForm(f => ({ ...f, operatingHours: { ...f.operatingHours, [day]: { ...h, open: e.target.value } } }))} />
-                                    <span>-</span>
-                                    <input type="time" className="hn-hours-input" value={h.close}
-                                      onChange={e => setBrandingForm(f => ({ ...f, operatingHours: { ...f.operatingHours, [day]: { ...h, close: e.target.value } } }))} />
-                                  </>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
-                        <div className="hn-modal-actions si-b0aee75b">
-                          <button className="module-btn primary" disabled={brandingSaving} onClick={handleBrandingSubmit}>
-                            {brandingSaving ? `⏳ ${t('common.saving')}` : t('networkSettings.saveSettings')}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="module-card">
-                  <div className="hn-panel-header">
-                    <h3>{t('hospitalNetworks.detail.staff')}</h3>
-                    {(userNetworkRole === 'corporate_admin' || userNetworkRole === 'hospital_director' || user?.role === 'admin') && (
-                      <div className="si-fe667bdf">
-                        <button className="module-btn small" onClick={() => { setShowInviteStaff(true); setInviteStaffError('') }}>
-                          ✉️ {t('hospitalNetworks.detail.inviteStaff')}
-                        </button>
-                        <button className="module-btn small primary" onClick={() => setShowAddMember(true)}>
-                          + {t('hospitalNetworks.detail.addMember')}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <div className="card-body">
-                    {networkMembers.length === 0 ? (
-                      <div className="hn-panel-empty">👥 {t('hospitalNetworks.detail.noMembers')}</div>
-                    ) : (
-                      <div className="hn-member-list">
-                        {networkMembers.map(m => (
-                          <div key={m.id} className="hn-member-item">
-                            <div className="hn-member-avatar">{(m.userName ?? 'U').charAt(0).toUpperCase()}</div>
-                            <div className="hn-member-info">
-                              <div className="hn-member-name">{m.userName ?? m.userEmail ?? 'Unknown'}</div>
-                              {m.hospitalName && <div className="hn-member-hospital">{m.hospitalName}</div>}
-                            </div>
-                            <RoleBadge role={m.networkRole} />
-                            <button
-                              className="hn-edit-btn"
-                              title="Edit member"
-                              onClick={() => handleEditMember(m)}
-                            >✏️</button>
-                            <button
-                              className="hn-remove-btn"
-                              title="Remove member"
-                              onClick={() => handleRemoveMember(m)}
-                            >✕</button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {/* Pending Invites Section */}
-                    {pendingInvites.length > 0 && (
-                      <div>
-                        <div className="hn-pending-invites-header">
-                          ⏳ {t('hospitalNetworks.detail.pendingInvitations', { count: pendingInvites.length })}
-                        </div>
-                        {pendingInvites.map((inv: any) => (
-                          <div key={inv.id} className="hn-pending-invite-item">
-                            <div className="hn-pending-invite-row1">
-                              <span className="hn-pending-invite-email">{inv.inviteeEmail ?? inv.invitee_email}</span>
-                              <span className="hn-pending-badge">PENDING</span>
-                            </div>
-                            <div className="hn-pending-invite-row2">
-                              <span className="hn-pending-invite-position">{inv.staffPosition ?? inv.staff_position}</span>
-                              <span className="hn-pending-invite-expiry">
-                                {t('hospitalNetworks.detail.expires')} {new Date(inv.expiresAt ?? inv.expires_at).toLocaleDateString()}
-                              </span>
-                              <div className="hn-pending-invite-actions">
-                                <button
-                                  className="hn-pending-invite-action copy"
-                                  title={t('hospitalNetworks.detail.copyInviteLink')}
-                                  onClick={() => {
-                                    const token = inv.inviteToken ?? inv.invite_token
-                                    const link = `${window.location.origin}/accept-staff-invite?token=${token}`
-                                    navigator.clipboard.writeText(link)
-                                    alert(t('hospitalNetworks.detail.inviteLinkCopied'))
-                                  }}
-                                >📋 {t('common.copyLink')}</button>
-                                <button
-                                  className="hn-pending-invite-action revoke"
-                                  title={t('hospitalNetworks.detail.revokeInvite')}
-                                  onClick={async () => {
-                                    if (!window.confirm(t('hospitalNetworks.detail.revokeConfirm'))) return
-                                    try {
-                                      await apiService.revokeStaffInvite(selectedNetwork.id, inv.id)
-                                      setPendingInvites(prev => prev.filter(i => i.id !== inv.id))
-                                    } catch {
-                                      alert(t('hospitalNetworks.detail.revokeFailed'))
-                                    }
-                                  }}
-                                >✕ {t('common.revoke')}</button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+        <NetworkDetailTab
+          selectedNetwork={selectedNetwork}
+          detailLoading={detailLoading}
+          dashboard={dashboard}
+          financialData={financialData}
+          networkHospitals={networkHospitals}
+          networkMembers={networkMembers}
+          pendingInvites={pendingInvites}
+          approvalLoading={approvalLoading}
+          approvalHistory={approvalHistory}
+          brandingForm={brandingForm}
+          setBrandingForm={setBrandingForm}
+          brandingSaving={brandingSaving}
+          brandingSaved={brandingSaved}
+          showBrandingPanel={showBrandingPanel}
+          setShowBrandingPanel={setShowBrandingPanel}
+          userNetworkRole={userNetworkRole}
+          userRole={user?.role}
+          formatDate={formatDate}
+          onEditNetwork={() => selectedNetwork && setEditingNetwork(selectedNetwork)}
+          onDeactivateNetwork={handleDeactivateNetwork}
+          onAddBranch={() => setShowCreateBranch(true)}
+          onEditBranch={setEditingBranch}
+          onDeleteBranch={setDeletingBranch}
+          onApprovalRequestInfo={() => setShowApprovalModal('info_requested')}
+          onApprovalApprove={() => setShowApprovalModal('approved')}
+          onApprovalReject={() => setShowApprovalModal('rejected')}
+          onApprovalSuspend={() => setShowApprovalModal('suspended')}
+          onBrandingSave={handleBrandingSubmit}
+          onInviteStaff={() => { setShowInviteStaff(true); setInviteStaffError('') }}
+          onAddMember={() => setShowAddMember(true)}
+          onEditMember={handleEditMember}
+          onRemoveMember={handleRemoveMember}
+          onCopyInviteLink={handleCopyInviteLink}
+          onRevokeInvite={handleRevokeInvite}
+          t={t}
+        />
       )}
 
-      {/* ════ TAB 3: AUDIT ════ */}
       {activeTab === 'audit' && (
-        <div className="hn-tab-content">
-          {!selectedNetwork ? (
-            <div className="hn-empty-state">
-              <div className="hn-empty-icon">🔐</div>
-              <div className="hn-empty-title">{t('hospitalNetworks.audit.selectNetwork')}</div>
-              <button className="module-btn primary" onClick={() => setActiveTab('networks')}>
-                {t('hospitalNetworks.audit.goToNetworks')}
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="hn-audit-header">
-                <h2 className="hn-audit-section-title">{t('hospitalNetworks.audit.title')}</h2>
-                <p className="hn-subtitle">{t('hospitalNetworks.audit.subtitle')}</p>
-              </div>
-
-              {/* Stats */}
-              <div className="hn-audit-stats">
-                <div className="hn-stat-card hn-stat-blue">
-                  <div className="hn-stat-value">{auditStats.total}</div>
-                  <div className="hn-stat-label">{t('hospitalNetworks.audit.stats.total')}</div>
-                </div>
-                <div className="hn-stat-card hn-stat-green">
-                  <div className="hn-stat-value">{auditStats.granted}</div>
-                  <div className="hn-stat-label">{t('hospitalNetworks.audit.stats.granted')}</div>
-                </div>
-                <div className="hn-stat-card hn-stat-orange">
-                  <div className="hn-stat-value">{auditStats.denied}</div>
-                  <div className="hn-stat-label">{t('hospitalNetworks.audit.stats.denied')}</div>
-                </div>
-                <div className="hn-stat-card hn-stat-teal">
-                  <div className="hn-stat-value">{auditStats.last7days}</div>
-                  <div className="hn-stat-label">{t('hospitalNetworks.audit.stats.last7days')}</div>
-                </div>
-              </div>
-
-              {/* Filter Bar */}
-              <div className="hn-audit-filter-bar">
-                <select
-                  className="module-input hn-audit-filter-select"
-                  value={auditRecordTypeFilter}
-                  onChange={e => { setAuditRecordTypeFilter(e.target.value); setAuditPage(1) }}
-                >
-                  <option value="">{t('hospitalNetworks.audit.filters.allTypes')}</option>
-                  <option value="animal_profile">Animal Profile</option>
-                  <option value="consultations">Consultations</option>
-                  <option value="prescriptions">Prescriptions</option>
-                  <option value="vaccinations">Vaccinations</option>
-                </select>
-                <div className="hn-filter-toggle">
-                  {(['all', 'granted', 'denied'] as const).map(v => (
-                    <button
-                      key={v}
-                      className={`module-btn${auditGrantedFilter === v ? ' primary' : ''} small`}
-                      onClick={() => { setAuditGrantedFilter(v); setAuditPage(1) }}
-                    >
-                      {t(`hospitalNetworks.audit.filters.${v === 'all' ? 'allResults' : v}`)}
-                    </button>
-                  ))}
-                </div>
-                <input
-                  className="module-input hn-search-input"
-                  placeholder={t('hospitalNetworks.audit.filters.search')}
-                  value={auditSearch}
-                  onChange={e => setAuditSearch(e.target.value)}
-                />
-                <button className="module-btn" onClick={exportAuditCsv}>
-                  {t('hospitalNetworks.audit.exportCsv')}
-                </button>
-                <button className="module-btn primary" onClick={() => setShowComplianceModal(true)}>
-                  📋 {t('complianceExport.exportReport')}
-                </button>
-              </div>
-
-              {/* Table */}
-              {auditLoading ? (
-                <div className="hn-loading">⏳ Loading audit logs…</div>
-              ) : filteredAuditLogs.length === 0 ? (
-                <div className="hn-empty-state">
-                  <div className="hn-empty-icon">🔐</div>
-                  <div className="hn-empty-title">{t('hospitalNetworks.audit.noLogs')}</div>
-                  <div className="hn-empty-desc">{t('hospitalNetworks.audit.noLogsDesc')}</div>
-                </div>
-              ) : (
-                <div className="module-card">
-                  <div className="hn-audit-table-wrapper data-table-container">
-                    <table className="module-table">
-                      <thead>
-                        <tr>
-                          <th>{t('hospitalNetworks.audit.table.accessor')}</th>
-                          <th>{t('hospitalNetworks.audit.table.role')}</th>
-                          <th>{t('hospitalNetworks.audit.table.animal')}</th>
-                          <th>{t('hospitalNetworks.audit.table.recordType')}</th>
-                          <th>{t('hospitalNetworks.audit.table.accessType')}</th>
-                          <th>{t('hospitalNetworks.audit.table.result')}</th>
-                          <th>{t('hospitalNetworks.audit.table.dateTime')}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredAuditLogs.map(entry => {
-                          const roleStyle = AUDIT_ROLE_STYLES[entry.accessorRole] ?? { bg: '#f3f4f6', color: '#6b7280' }
-                          return (
-                            <tr key={entry.id}>
-                              <td>
-                                <div className="hn-accessor-cell">
-                                  <div className="hn-avatar-circle">
-                                    {(entry.accessorName ?? '?')[0].toUpperCase()}
-                                  </div>
-                                  <div>
-                                    <div className="hn-accessor-name">{entry.accessorName}</div>
-                                    <div className="hn-accessor-email">{entry.accessorEmail}</div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td>
-                                <span
-                                  className="hn-role-badge"
-                                  style={{ background: roleStyle.bg, color: roleStyle.color }}
-                                >
-                                  {entry.accessorRole}
-                                </span>
-                              </td>
-                              <td>
-                                <div className="hn-animal-name">{entry.animalName || '-'}</div>
-                                {entry.animalUniqueId && (
-                                  <div className="hn-animal-uid">{entry.animalUniqueId}</div>
-                                )}
-                              </td>
-                              <td>
-                                <span className="hn-record-type-badge">
-                                  {AUDIT_RECORD_TYPE_LABELS[entry.recordType] ?? entry.recordType}
-                                </span>
-                              </td>
-                              <td>
-                                <code className="hn-access-type">{entry.accessType}</code>
-                              </td>
-                              <td>
-                                {entry.accessGranted ? (
-                                  <span className="hn-result-badge-granted">
-                                    ✓ {t('hospitalNetworks.audit.filters.granted')}
-                                  </span>
-                                ) : (
-                                  <span
-                                    className="hn-result-badge-denied hn-denied-tooltip"
-                                    title={entry.denialReason || ''}
-                                  >
-                                    ✗ {t('hospitalNetworks.audit.filters.denied')}
-                                  </span>
-                                )}
-                              </td>
-                              <td>
-                                <div className="hn-audit-date">{formatDate(entry.accessedAt)}</div>
-                                <div className="hn-audit-time">
-                                  {new Date(entry.accessedAt).toLocaleTimeString()}
-                                </div>
-                              </td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                  {auditTotal > 50 && (
-                    <div className="hn-audit-pagination">
-                      <button
-                        className="module-btn small"
-                        onClick={() => setAuditPage(p => Math.max(1, p - 1))}
-                        disabled={auditPage === 1}
-                      >
-                        ← Previous
-                      </button>
-                      <span className="hn-page-info">
-                        {t('hospitalNetworks.audit.pageOf', {
-                          page: auditPage,
-                          total: Math.ceil(auditTotal / 50),
-                        })}
-                      </span>
-                      <button
-                        className="module-btn small"
-                        onClick={() => setAuditPage(p => p + 1)}
-                        disabled={auditPage >= Math.ceil(auditTotal / 50)}
-                      >
-                        Next →
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── Configuration change trail ──────────────────────────
-                  The table above is the patient-record ACCESS trail (who read
-                  what). This is the CONFIGURATION trail (who changed roles,
-                  members and settings) - /hospital-networks/:id/security-audit,
-                  which had no caller at all despite being the only record of
-                  privilege changes in a network. */}
-              <div className="module-card si-af65fe13">
-                <div className="hn-panel-header">
-                  <h3>🛡️ {t('hospitalNetworks.securityAudit.title')}</h3>
-                </div>
-                <div className="card-body">
-                  <p className="module-form-helper si-676930d7">{t('hospitalNetworks.securityAudit.subtitle')}</p>
-                  {securityAuditLoading ? (
-                    <div className="loading-container"><div className="loading-spinner" /></div>
-                  ) : securityAuditError ? (
-                    <div className="module-alert error">⚠ {securityAuditError}</div>
-                  ) : securityAudit.length === 0 ? (
-                    <p className="empty-state">{t('hospitalNetworks.securityAudit.empty')}</p>
-                  ) : (
-                    <div className="data-table-container">
-                      <table className="data-table">
-                        <thead><tr>
-                          <th>{t('hospitalNetworks.securityAudit.when')}</th>
-                          <th>{t('hospitalNetworks.securityAudit.actor')}</th>
-                          <th>{t('hospitalNetworks.securityAudit.action')}</th>
-                          <th>{t('hospitalNetworks.securityAudit.target')}</th>
-                          <th>{t('hospitalNetworks.securityAudit.change')}</th>
-                          <th>{t('hospitalNetworks.securityAudit.ip')}</th>
-                        </tr></thead>
-                        <tbody>
-                          {securityAudit.map((a: any) => (
-                            <tr key={a.id}>
-                              <td>{a.createdAt ? new Date(a.createdAt).toLocaleString() : '-'}</td>
-                              <td>{a.actorName || '-'}</td>
-                              <td><span className="status-badge">{a.action}</span></td>
-                              <td>{a.targetType || '-'}</td>
-                              <td className="si-af971f42">
-                                {a.oldValue || a.newValue
-                                  ? `${a.oldValue ?? '-'} → ${a.newValue ?? '-'}`
-                                  : '-'}
-                              </td>
-                              <td>{a.ipAddress || '-'}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+        <AuditTab
+          hasSelectedNetwork={!!selectedNetwork}
+          onGoToNetworks={() => setActiveTab('networks')}
+          auditStats={auditStats}
+          auditRecordTypeFilter={auditRecordTypeFilter}
+          setAuditRecordTypeFilter={(v) => { setAuditRecordTypeFilter(v); setAuditPage(1) }}
+          auditGrantedFilter={auditGrantedFilter}
+          setAuditGrantedFilter={(v) => { setAuditGrantedFilter(v); setAuditPage(1) }}
+          auditSearch={auditSearch}
+          setAuditSearch={setAuditSearch}
+          onExportCsv={exportAuditCsv}
+          onOpenComplianceModal={() => setShowComplianceModal(true)}
+          auditLoading={auditLoading}
+          filteredAuditLogs={filteredAuditLogs}
+          formatDate={formatDate}
+          auditTotal={auditTotal}
+          auditPage={auditPage}
+          setAuditPage={setAuditPage}
+          securityAuditLoading={securityAuditLoading}
+          securityAuditError={securityAuditError}
+          securityAudit={securityAudit}
+          t={t}
+        />
       )}
 
-
-      {/* ════ TAB 4: PATIENTS ════ */}
       {activeTab === 'patients' && (
-        <div className="hn-tab-content">
-          {!selectedNetwork ? (
-            <div className="hn-empty-state">
-              <div className="hn-empty-icon">👥</div>
-              <div className="hn-empty-title">{t('hospitalNetworks.selectNetwork')}</div>
-            </div>
-          ) : (
-            <>
-              {/* Section A: Smart Patient Search */}
-              <div className="module-card si-af65fe13">
-                <div className="hn-panel-header">
-                  <h3>{t('hospitalNetworks.patients.searchTitle')}</h3>
-                  <div className="si-d223efb3">
-                    <button className="module-btn small primary" onClick={() => setShowWalkInRegModal(true)}>
-                      + {t('hospitalNetworks.patients.registerWalkIn', 'Register Walk-In')}
-                    </button>
-                    <button className="module-btn small" onClick={() => setShowInviteModal(true)}>
-                      ✉️ {t('hospitalNetworks.patients.inviteForOnlineAccess', 'Invite for Online Access')}
-                    </button>
-                  </div>
-                </div>
-                <div className="card-body">
-                  <p className="module-form-helper si-676930d7">
-                    {t('hospitalNetworks.patients.searchHelper')}
-                  </p>
-                  <div className="module-form-group">
-                    <input
-                      className="module-input"
-                      placeholder={t('hospitalNetworks.patients.searchPlaceholder')}
-                      value={patientSearch}
-                      onChange={e => setPatientSearch(e.target.value)}
-                    />
-                  </div>
-                  {patientSearch.length > 0 && patientSearch.length < 2 && (
-                    <p className="si-1617d817">{t('hospitalNetworks.patients.searchMinChars')}</p>
-                  )}
-                  {patientSearchLoading && <div className="hn-loading">⏳ {t('common.loading')}</div>}
-                  {!patientSearchLoading && patientSearch.length >= 2 && patientResults.length === 0 && (
-                    <p className="si-55855538">{t('hospitalNetworks.patients.noResults')}</p>
-                  )}
-                  {patientResults.map(patient => (
-                    <div key={patient.userId} className="hn-member-item si-a5c710fe">
-                      <div className="si-4eadb825">
-                        <div className="hn-member-avatar">{(patient.userName ?? 'P').charAt(0).toUpperCase()}</div>
-                        <div>
-                          <div className="hn-member-name">{patient.userName}</div>
-                          <div className="si-3e1bd646">{patient.userEmail}</div>
-                          {patient.userPhone && <div className="si-921b05f1">{patient.userPhone}</div>}
-                        </div>
-                      </div>
-                      <div className="si-37f17fee">
-                        {(patient.animals ?? []).length === 0 ? (
-                          <p className="si-921b05f1">No animals registered</p>
-                        ) : (
-                          <div className="si-b9eb5ec7">
-                            {(patient.animals ?? []).map(animal => (
-                              <div key={animal.id} className="si-e677ad2d">
-                                <span className="si-8756b2e7">{animal.name}</span>
-                                <span className="si-192b696d">{speciesLabel(animal.species, t)}</span>
-                                {animal.uniqueId && <span className="si-ee839ecf">{animal.uniqueId}</span>}
-                                {((animal as any).enrollmentStatus === 'active' || (animal as any).isEnrolled) && (
-                                  <span className="si-f781ec01">
-                                    ✓ Already Enrolled
-                                  </span>
-                                )}
-                                {enrollmentSuccessIds.has(animal.id) ? (
-                                  <span className="si-8812039f">✓ {t('hospitalNetworks.patients.enrollmentRequested')}</span>
-                                ) : (
-                                  <button
-                                    className="module-btn small primary si-d013fb7a"
-                                   
-                                    disabled={requestingEnrollment === animal.id}
-                                    onClick={() => handleRequestEnrollment(animal.id)}
-                                  >
-                                    {requestingEnrollment === animal.id ? '⏳' : t('hospitalNetworks.patients.requestEnrollment')}
-                                  </button>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Section C: All Enrollments */}
-              <div className="module-card">
-                <div className="hn-panel-header">
-                  <h3>{t('hospitalNetworks.patients.allEnrollments')}</h3>
-                  <div className="hn-filter-toggle">
-                    {(['all', 'pending_consent', 'active', 'declined'] as const).map(f => (
-                      <button
-                        key={f}
-                        className={`module-btn small${enrollmentFilter === f ? ' primary' : ''}`}
-                        onClick={() => setEnrollmentFilter(f)}
-                      >
-                        {f === 'all' ? t('hospitalNetworks.patients.filterAll')
-                          : f === 'pending_consent' ? t('hospitalNetworks.patients.filterPending')
-                          : f === 'active' ? t('hospitalNetworks.patients.filterActive')
-                          : t('hospitalNetworks.patients.filterDeclined')}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="card-body">
-                  {enrollmentsLoading ? (
-                    <div className="hn-loading">⏳ {t('common.loading')}</div>
-                  ) : (
-                    (() => {
-                      const filtered = allEnrollments.filter(e => enrollmentFilter === 'all' || e.enrollmentStatus === enrollmentFilter)
-                      if (filtered.length === 0) {
-                        return <div className="hn-panel-empty">{t('hospitalNetworks.patients.noEnrollments')}</div>
-                      }
-                      return (
-                        <div className="data-table-container">
-                          <table className="module-table">
-                            <thead>
-                              <tr>
-                                <th>{t('hospitalNetworks.patients.colAnimal')}</th>
-                                <th>{t('hospitalNetworks.patients.colOwner')}</th>
-                                <th>{t('hospitalNetworks.patients.colNetworkId')}</th>
-                                <th>{t('hospitalNetworks.patients.colStatus')}</th>
-                                <th>{t('hospitalNetworks.patients.colRequested')}</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {filtered.map(e => (
-                                <tr key={e.id}>
-                                  <td>
-                                    <div className="si-b2cfcbec">{e.animalName}</div>
-                                    <div className="si-3e1bd646">{speciesLabel(e.species, t)}</div>
-                                  </td>
-                                  <td>
-                                    <div>{e.ownerName}</div>
-                                    <div className="si-921b05f1">{e.ownerEmail}</div>
-                                  </td>
-                                  <td>
-                                    {e.networkPatientId
-                                      ? <span className="si-714eb092">{e.networkPatientId}</span>
-                                      : '-'}
-                                  </td>
-                                  <td>
-                                    <span className={`badge badge-${e.enrollmentStatus === 'active' ? 'success' : e.enrollmentStatus === 'pending_consent' ? 'pending' : 'error'}`}>
-                                      {e.enrollmentStatus === 'pending_consent' ? t('hospitalNetworks.patients.statusPending')
-                                        : e.enrollmentStatus === 'active' ? t('hospitalNetworks.patients.statusActive')
-                                        : e.enrollmentStatus === 'declined' ? t('hospitalNetworks.patients.statusDeclined')
-                                        : t('hospitalNetworks.patients.statusRevoked')}
-                                    </span>
-                                  </td>
-                                  <td className="si-3e1bd646">{formatDate(e.enrollmentRequestedAt)}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )
-                    })()
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+        <PatientsTab
+          hasSelectedNetwork={!!selectedNetwork}
+          patientSearch={patientSearch}
+          setPatientSearch={setPatientSearch}
+          patientSearchLoading={patientSearchLoading}
+          patientResults={patientResults}
+          enrollmentSuccessIds={enrollmentSuccessIds}
+          requestingEnrollment={requestingEnrollment}
+          onRequestEnrollment={handleRequestEnrollment}
+          onRegisterWalkIn={() => setShowWalkInRegModal(true)}
+          onInviteOnline={() => setShowInviteModal(true)}
+          allEnrollments={allEnrollments}
+          enrollmentsLoading={enrollmentsLoading}
+          enrollmentFilter={enrollmentFilter}
+          setEnrollmentFilter={setEnrollmentFilter}
+          formatDate={formatDate}
+          speciesLabel={speciesLabel}
+          t={t}
+        />
       )}
+
       {(showCreateModal || editingNetwork) && (
         <NetworkModal
           editing={editingNetwork}
@@ -2544,41 +1034,19 @@ const HospitalNetworks: React.FC = () => {
         />
       )}
 
-      {/* ═══ ONBOARDING CHECKLIST MODAL ═══ */}
       {showOnboarding && onboardingNetwork && (
-        <div className="hn-modal-overlay" onClick={() => setShowOnboarding(false)}>
-          <div className="hn-modal si-63396e81" onClick={e => e.stopPropagation()}>
-            <div className="hn-modal-header">
-              <h3>🚀 {t('hospitalNetworks.onboarding.title')}</h3>
-              <button type="button" className="hn-modal-close" onClick={() => setShowOnboarding(false)}>✕</button>
-            </div>
-            <div className="hn-modal-body">
-              <p className="si-57baef54">{t('hospitalNetworks.onboarding.subtitle')}</p>
-              {[
-                { id: 'details', label: t('hospitalNetworks.onboarding.networkDetails'), done: true },
-                { id: 'branch', label: t('hospitalNetworks.onboarding.addBranch'), done: false },
-                { id: 'director', label: t('hospitalNetworks.onboarding.assignDirector'), done: false },
-                { id: 'staff', label: t('hospitalNetworks.onboarding.inviteStaff'), done: false },
-                { id: 'compliance', label: t('hospitalNetworks.onboarding.complianceOfficer'), done: false },
-              ].map(item => (
-                <div key={item.id} className="si-2c2ebf39">
-                  <span className="si-7ff2b341">{item.done ? '✅' : '⬜'}</span>
-                  <span style={{ fontSize: 14, color: item.done ? '#059669' : '#374151', fontWeight: item.done ? 600 : 400 }}>{item.label}</span>
-                </div>
-              ))}
-              <div className="si-b32ecabd">
-                <button className="module-btn primary" onClick={() => {
-                  setShowOnboarding(false)
-                  handleView(onboardingNetwork)
-                  setActiveTab('detail')
-                }}>
-                  🏗️ {t('hospitalNetworks.onboarding.dismiss')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <OnboardingChecklistModal
+          onboardingNetwork={onboardingNetwork}
+          onClose={() => setShowOnboarding(false)}
+          onDismiss={(network) => {
+            setShowOnboarding(false)
+            handleView(network)
+            setActiveTab('detail')
+          }}
+          t={t}
+        />
       )}
+
       {showCreateBranch && selectedNetwork && (
         <CreateBranchHospitalModal
           networkId={selectedNetwork.id}
@@ -2606,86 +1074,26 @@ const HospitalNetworks: React.FC = () => {
       )}
 
       {deletingBranch && selectedNetwork && (
-        <div className="hn-modal-overlay" onClick={() => setDeletingBranch(null)}>
-          <div className="hn-modal hn-modal-sm si-0a161398" onClick={e => e.stopPropagation()}>
-            <div className="hn-modal-header">
-              <h3>🗑️ Remove Branch Hospital</h3>
-              <button type="button" className="hn-modal-close" onClick={() => setDeletingBranch(null)}>✕</button>
-            </div>
-            <div className="hn-modal-body">
-              <p>Are you sure you want to remove <strong>{deletingBranch.name}</strong> from this network?</p>
-              <p className="si-c3b93ebb">The hospital record will be deactivated and removed from the network. This cannot be undone.</p>
-            </div>
-            <div className="hn-modal-actions">
-              <button type="button" className="module-btn" onClick={() => setDeletingBranch(null)}>{t('common.cancel')}</button>
-              <button
-                type="button"
-                className="module-btn primary si-ada871e1"
-               
-                onClick={async () => {
-                  try {
-                    await apiService.deleteBranchHospital(selectedNetwork.id, deletingBranch.id)
-                    setSuccessMsg('Branch hospital removed.')
-                    setDeletingBranch(null)
-                    loadDetail(selectedNetwork)
-                  } catch (err: any) {
-                    setError(err?.response?.data?.message || 'Failed to remove hospital')
-                    setDeletingBranch(null)
-                  }
-                }}
-              >
-                🗑️ Remove
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteBranchConfirmModal
+          deletingBranch={deletingBranch}
+          onClose={() => setDeletingBranch(null)}
+          onConfirm={handleDeleteBranch}
+          t={t}
+        />
       )}
-      {/* Edit Member Modal */}
+
       {editingMember && selectedNetwork && (
-        <div className="hn-modal-overlay" onClick={() => setEditingMember(null)}>
-          <div className="hn-modal si-197ba518" onClick={e => e.stopPropagation()}>
-            <div className="hn-modal-header">
-              <h2>✏️ {t('hospitalNetworks.detail.editMember', 'Edit Member')}</h2>
-              <button type="button" className="hn-modal-close" onClick={() => setEditingMember(null)}>✕</button>
-            </div>
-            <div className="hn-modal-body">
-              <div className="module-form-group">
-                <label className="module-label">{t('hospitalNetworks.memberName', 'Member')}</label>
-                <input className="module-input" value={editingMember.userName || editingMember.userEmail || 'Unknown'} disabled />
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">{t('hospitalNetworks.detail.memberEmail', 'Email')}</label>
-                <input className="module-input" value={editingMember.userEmail || '-'} disabled />
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">{t('hospitalNetworks.detail.networkRole', 'Role')} <span className="si-4fb20e94">*</span></label>
-                <select className="module-input" value={editMemberForm.networkRole} onChange={e => setEditMemberForm(p => ({ ...p, networkRole: e.target.value }))}>
-                  {MEMBER_ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-                </select>
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">{t('hospitalNetworks.detail.hospital', 'Assigned Hospital')}</label>
-                <select className="module-input" value={editMemberForm.hospitalId} onChange={e => setEditMemberForm(p => ({ ...p, hospitalId: e.target.value }))}>
-                  <option value="">{t('common.none', '- None (Corporate Level) -')}</option>
-                  {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-                </select>
-              </div>
-              <div className="module-form-group">
-                <label className="module-label">{t('hospitalNetworks.department', 'Department')}</label>
-                <select className="module-input" value={editMemberForm.department} onChange={e => setEditMemberForm(p => ({ ...p, department: e.target.value }))}>
-                  <option value="">{t('hospitalNetworks.noDepartment', '- No Department -')}</option>
-                  {departments.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
-            </div>
-            <div className="hn-modal-footer">
-              <button type="button" className="module-btn" onClick={() => setEditingMember(null)}>{t('common.cancel', 'Cancel')}</button>
-              <button type="button" className="module-btn primary" disabled={editMemberLoading} onClick={handleUpdateMember}>
-                {editMemberLoading ? '⏳ ' + t('common.saving', 'Saving...') : t('common.save', 'Save Changes')}
-              </button>
-            </div>
-          </div>
-        </div>
+        <EditMemberModal
+          editingMember={editingMember}
+          editMemberForm={editMemberForm}
+          setEditMemberForm={setEditMemberForm}
+          editMemberLoading={editMemberLoading}
+          networkHospitals={networkHospitals}
+          departments={departments}
+          onClose={() => setEditingMember(null)}
+          onSave={handleUpdateMember}
+          t={t}
+        />
       )}
 
       {showAddMember && selectedNetwork && (
@@ -2707,704 +1115,92 @@ const HospitalNetworks: React.FC = () => {
         />
       )}
 
-      {/* Invite Hospital Staff Modal */}
       {showInviteStaff && selectedNetwork && (
-        <div className="hn-modal-overlay" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess(''); setInviteStaffError(''); setInviteLink('') }}>
-          <div className="hn-modal" onClick={e => e.stopPropagation()}>
-            <div className="hn-modal-header">
-              <h2>✉️ {t('hospitalNetworks.detail.inviteStaff')}</h2>
-              <button type="button" className="hn-modal-close" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess(''); setInviteStaffError(''); setInviteLink('') }}>✕</button>
-            </div>
-            {inviteStaffSuccess ? (
-              <div className="si-41acd90c">
-                <div className="si-d32e5e44">✅</div>
-                <p className="si-b2cfcbec">{inviteStaffSuccess}</p>
-                <p className="si-c367a229">{t('hospitalStaff.inviteSentHint')}</p>
-                {inviteLink && (
-                  <div className="si-58e4ada6">
-                    <p className="si-ddbe24a1">📋 Share this invite link if email is not configured:</p>
-                    <div className="si-bab2d193">
-                      <input readOnly value={inviteLink} className="si-444032bb" />
-                      <button type="button" className="si-69f59685"
-                        onClick={() => { navigator.clipboard.writeText(inviteLink) }}>Copy</button>
-                    </div>
-                  </div>
-                )}
-                <button className="module-btn primary si-70453e1a" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess(''); setInviteLink('') }}>
-                  {t('common.close')}
-                </button>
-              </div>
-            ) : (
-              <div className="hn-modal-body">
-                {inviteStaffError && <div className="module-alert error si-bab8e8bc">{inviteStaffError}</div>}
-                <p className="si-216e02a4">
-                  {t('hospitalNetworks.detail.inviteStaffDesc')}
-                </p>
-                <div className="module-form">
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalStaff.inviteeEmail')} *</label>
-                      <input type="email" className="module-input" value={inviteStaffForm.email}
-                        onChange={e => setInviteStaffForm(f => ({ ...f, email: e.target.value }))} />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalStaff.inviteeName')}</label>
-                      <input type="text" className="module-input" value={inviteStaffForm.name}
-                        onChange={e => setInviteStaffForm(f => ({ ...f, name: e.target.value }))} />
-                    </div>
-                  </div>
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalStaff.staffPosition')} *</label>
-                      <select className="module-input" value={inviteStaffForm.position}
-                        onChange={e => setInviteStaffForm(f => ({ ...f, position: e.target.value }))}>
-                        <option value="nurse">Nurse</option>
-                        <option value="technician">Technician</option>
-                        <option value="receptionist">Receptionist</option>
-                        <option value="lab_tech">Lab Technician</option>
-                        <option value="radiologist">Radiologist</option>
-                        <option value="anesthesiologist">Anesthesiologist</option>
-                        <option value="pharmacist">Pharmacist</option>
-                        <option value="intern">Intern</option>
-                        <option value="admin_staff">Admin Staff</option>
-                        {customNetworkRoles.length > 0 && (
-                          <optgroup label="── Custom Roles ──">
-                            {customNetworkRoles.map(r => (
-                              <option key={r.role_key} value={r.role_key}>{r.display_name}</option>
-                            ))}
-                          </optgroup>
-                        )}
-                      </select>
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalNetworks.detail.hospital')}</label>
-                      <select className="module-input" value={inviteStaffForm.hospitalId}
-                        onChange={e => setInviteStaffForm(f => ({ ...f, hospitalId: e.target.value }))}>
-                        <option value="">{t('common.select')}...</option>
-                        {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <button className="module-btn primary" disabled={inviteStaffLoading || !inviteStaffForm.email || !inviteStaffForm.position}
-                    onClick={async () => {
-                      setInviteStaffLoading(true)
-                      try {
-                        const res = await apiService.inviteHospitalStaff(selectedNetwork.id, {
-                          inviteeEmail: inviteStaffForm.email,
-                          inviteeName: inviteStaffForm.name,
-                          staffPosition: inviteStaffForm.position,
-                          hospitalId: inviteStaffForm.hospitalId || undefined,
-                        })
-                        if (res.success) {
-                          setInviteStaffSuccess(t('hospitalNetworks.staff.inviteSent'))
-                          const token = res.data?.inviteToken || res.data?.token
-                          setInviteLink(res.data?.inviteUrl || (token ? `${window.location.origin}/accept-staff-invite?token=${token}` : ''))
-                          setInviteStaffForm({ email: '', name: '', position: 'receptionist', hospitalId: '' })
-                          // Refresh pending invites list
-                          apiService.listStaffInvites(selectedNetwork.id).then((r: any) => setPendingInvites(r.data ?? r ?? [])).catch(() => {})
-                        } else {
-                          setInviteStaffError(res.message || res.error || 'Failed to send invite')
-                        }
-                      } catch (e: any) {
-                        const errMsg = e.response?.data?.error || e.response?.data?.message || e.message || 'Failed to send invite'
-                        setInviteStaffError(
-                          e.response?.status === 409
-                            ? (errMsg.includes('already a member') ? 'This email is already a member of this network.' : 'A pending invitation already exists for this email. Check the pending invites list below.')
-                            : errMsg
-                        )
-                      } finally {
-                        setInviteStaffLoading(false)
-                      }
-                    }}>
-                    {inviteStaffLoading ? t('common.saving') : t('hospitalStaff.sendInvite')}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <InviteStaffModal
+          networkHospitals={networkHospitals}
+          customNetworkRoles={customNetworkRoles}
+          inviteStaffForm={inviteStaffForm}
+          setInviteStaffForm={setInviteStaffForm}
+          inviteStaffLoading={inviteStaffLoading}
+          inviteStaffSuccess={inviteStaffSuccess}
+          inviteStaffError={inviteStaffError}
+          inviteLink={inviteLink}
+          onClose={handleCloseInviteStaffModal}
+          onSendInvite={handleSendStaffInvite}
+          t={t}
+        />
       )}
 
-      {/* Walk-in Patient Invite Modal */}
       {showInviteModal && selectedNetwork && (
-        <div className="hn-modal-overlay" onClick={() => setShowInviteModal(false)}>
-          <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
-            <div className="hn-modal-header">
-              <h2>{t('hospitalNetworks.patients.inviteTitle')}</h2>
-              <button type="button" className="hn-modal-close" onClick={() => setShowInviteModal(false)} aria-label="Close">✕</button>
-            </div>
-            <div className="hn-modal-body">
-              {inviteSuccess ? (
-                <div className="module-alert success">{t('hospitalNetworks.patients.inviteSuccess')}</div>
-              ) : (
-                <form onSubmit={handleInviteWalkIn}>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('hospitalNetworks.patients.invitePatientName')} <span className="hn-required">*</span></label>
-                    <input className="module-input" required value={inviteForm.patientName} onChange={e => setInviteForm(f => ({ ...f, patientName: e.target.value }))} />
-                  </div>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('hospitalNetworks.patients.inviteEmail')} <span className="hn-required">*</span></label>
-                    <input className="module-input" type="email" required value={inviteForm.patientEmail} onChange={e => setInviteForm(f => ({ ...f, patientEmail: e.target.value }))} />
-                  </div>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('hospitalNetworks.patients.invitePhone')}</label>
-                    <input className="module-input" value={inviteForm.patientPhone} onChange={e => setInviteForm(f => ({ ...f, patientPhone: e.target.value }))} />
-                  </div>
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalNetworks.patients.inviteAnimalName')}</label>
-                      <input className="module-input" value={inviteForm.animalName} onChange={e => setInviteForm(f => ({ ...f, animalName: e.target.value }))} />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalNetworks.patients.inviteSpecies')}</label>
-                      <select className="module-input" value={inviteForm.animalSpecies} onChange={e => setInviteForm(f => ({ ...f, animalSpecies: e.target.value }))}>
-                        <option value="">-</option>
-                        <option value="dog">Dog</option>
-                        <option value="cat">Cat</option>
-                        <option value="cattle">Cattle</option>
-                        <option value="horse">Horse</option>
-                        <option value="bird">Bird</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('hospitalNetworks.patients.inviteMessage')}</label>
-                    <textarea className="module-input si-3f7753b6" rows={3} value={inviteForm.message} onChange={e => setInviteForm(f => ({ ...f, message: e.target.value }))} />
-                  </div>
-                  <div className="hn-modal-actions">
-                    <button type="button" className="module-btn" onClick={() => setShowInviteModal(false)}>{t('common.cancel')}</button>
-                    <button type="submit" className="module-btn primary" disabled={inviteLoading}>
-                      {inviteLoading ? t('common.saving') : t('hospitalNetworks.patients.inviteSend')}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
+        <WalkInInviteModal
+          inviteForm={inviteForm}
+          setInviteForm={setInviteForm}
+          inviteLoading={inviteLoading}
+          inviteSuccess={inviteSuccess}
+          onClose={() => setShowInviteModal(false)}
+          onSubmit={handleInviteWalkIn}
+          t={t}
+        />
       )}
 
-      {/* Walk-In Direct Registration Modal */}
       {showWalkInRegModal && selectedNetwork && (
-        <div className="hn-modal-overlay" onClick={() => setShowWalkInRegModal(false)}>
-          <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
-            <div className="hn-modal-header">
-              <h2>🏥 {t('hospitalNetworks.patients.registerWalkInTitle', 'Register Walk-In Patient')}</h2>
-              <button type="button" className="hn-modal-close" onClick={() => setShowWalkInRegModal(false)} aria-label="Close">✕</button>
-            </div>
-            <div className="hn-modal-body">
-              {walkInSuccess ? (
-                <div className="module-alert success">✅ {t('hospitalNetworks.patients.walkInSuccess', 'Patient registered!')} ID: {walkInSuccess}</div>
-              ) : (
-                <form onSubmit={handleRegisterWalkIn}>
-                  <p className="module-form-helper si-676930d7">
-                    {t('hospitalNetworks.patients.walkInHelperText', 'Register a walk-in patient for immediate treatment. No invite or account needed. Patient can be given online access later.')}
-                  </p>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('hospitalNetworks.patients.invitePatientName', 'Patient Name')} <span className="hn-required">*</span></label>
-                    <input className="module-input" required value={walkInForm.patientName} onChange={e => setWalkInForm(f => ({ ...f, patientName: e.target.value }))} />
-                  </div>
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalNetworks.patients.invitePhone', 'Phone')}</label>
-                      <input className="module-input" value={walkInForm.patientPhone} onChange={e => setWalkInForm(f => ({ ...f, patientPhone: e.target.value }))} />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalNetworks.patients.inviteEmail', 'Email')} ({t('common.optional', 'optional')})</label>
-                      <input className="module-input" type="email" value={walkInForm.patientEmail} onChange={e => setWalkInForm(f => ({ ...f, patientEmail: e.target.value }))} />
-                    </div>
-                  </div>
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalNetworks.patients.inviteAnimalName', 'Animal Name')} <span className="hn-required">*</span></label>
-                      <input className="module-input" required value={walkInForm.animalName} onChange={e => setWalkInForm(f => ({ ...f, animalName: e.target.value }))} />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalNetworks.patients.inviteSpecies', 'Species')} <span className="hn-required">*</span></label>
-                      <select className="module-input" required value={walkInForm.animalSpecies} onChange={e => setWalkInForm(f => ({ ...f, animalSpecies: e.target.value }))}>
-                        <option value="">{t('common.select', '- Select -')}</option>
-                        <option value="dog">Dog</option><option value="cat">Cat</option>
-                        <option value="cattle">Cattle</option><option value="horse">Horse</option>
-                        <option value="bird">Bird</option><option value="other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalNetworks.patients.breed', 'Breed')} ({t('common.optional', 'optional')})</label>
-                      <input className="module-input" value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value }))} />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalNetworks.detail.hospital', 'Hospital')} <span className="hn-required">*</span></label>
-                      <select className="module-input" required value={walkInForm.hospitalId} onChange={e => setWalkInForm(f => ({ ...f, hospitalId: e.target.value }))}>
-                        <option value="">{t('common.select', '- Select -')}</option>
-                        {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('hospitalNetworks.patients.reasonForVisit', 'Reason for Visit')}</label>
-                    <textarea className="module-input si-3f7753b6" rows={2} value={walkInForm.reasonForVisit} onChange={e => setWalkInForm(f => ({ ...f, reasonForVisit: e.target.value }))} />
-                  </div>
-                  <div className="module-form-group si-66faea9d">
-                    <label className="si-901f8e47">
-                      <input
-                        type="checkbox"
-                        checked={walkInForm.consentCollected}
-                        onChange={e => setWalkInForm(f => ({ ...f, consentCollected: e.target.checked }))}
-                        className="si-f9badade"
-                      />
-                      <span className="si-0c1df75e">
-                        {t('hospitalNetworks.patients.consentCollected', 'Patient consent has been collected in person')}
-                        <span className="si-3fb91c19">
-                          ({t('hospitalNetworks.patients.consentCollectedHint', 'Check if owner signed consent form or gave verbal consent')})
-                        </span>
-                      </span>
-                    </label>
-                    {!walkInForm.consentCollected && (
-                      <p className="si-513c70eb">
-                        ⚠️ {t('hospitalNetworks.patients.consentPendingWarning', 'Without consent, the animal will be registered as "Pending Consent" and the owner must accept before full access is granted.')}
-                      </p>
-                    )}
-                  </div>
-                  <div className="hn-modal-actions">
-                    <button type="button" className="module-btn" onClick={() => setShowWalkInRegModal(false)}>{t('common.cancel', 'Cancel')}</button>
-                    <button type="submit" className="module-btn primary" disabled={walkInLoading}>
-                      {walkInLoading ? '⏳ ' + t('common.saving', 'Saving...') : t('hospitalNetworks.patients.registerNow', 'Register & Start Treatment')}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
+        <WalkInRegisterModal
+          walkInForm={walkInForm}
+          setWalkInForm={setWalkInForm}
+          walkInLoading={walkInLoading}
+          walkInSuccess={walkInSuccess}
+          networkHospitals={networkHospitals}
+          onClose={() => setShowWalkInRegModal(false)}
+          onSubmit={handleRegisterWalkIn}
+          t={t}
+        />
       )}
 
-      {/* ════ TAB 5: REFERRALS ════ */}
       {activeTab === 'referrals' && selectedNetwork && (
-        <div className="hn-tab-content">
-          {/* Header */}
-          <div className="module-header si-478be2e9">
-            <div>
-              <h2 className="si-44087c4b">{t('networkReferrals.title')}</h2>
-              <p className="si-d078dad1">{selectedNetwork.name}</p>
-            </div>
-            <button className="module-btn primary" onClick={() => setShowCreateReferralModal(true)}>
-              + {t('networkReferrals.create')}
-            </button>
-          </div>
-
-          {/* Alerts */}
-          {referralSuccess && <div className="module-alert success si-7e63ec4f">{referralSuccess}</div>}
-          {referralError && <div className="module-alert error si-7e63ec4f">{referralError}</div>}
-
-          {/* Direction sub-tabs */}
-          <div className="module-tabs si-478be2e9">
-            {(['incoming', 'outgoing', 'all'] as const).map(dir => (
-              <button
-                key={dir}
-                className={`module-tab${referralDirection === dir ? ' active' : ''}`}
-                onClick={() => { setReferralDirection(dir); loadReferrals(dir) }}
-              >
-                {dir === 'incoming' ? `📥 ${t('networkReferrals.incoming')}` :
-                 dir === 'outgoing' ? `📤 ${t('networkReferrals.outgoing')}` :
-                 `📋 ${t('networkReferrals.all')}`}
-              </button>
-            ))}
-          </div>
-
-          {/* Table or empty state */}
-          {referralsLoading ? (
-            <div className="si-78446846">⏳ {t('common.loading')}</div>
-          ) : referrals.length === 0 ? (
-            <div className="module-card si-86638a30">
-              <div className="si-353e617d">🔄</div>
-              <p className="si-651ede6d">
-                {referralDirection === 'incoming' ? t('networkReferrals.noIncoming') :
-                 referralDirection === 'outgoing' ? t('networkReferrals.noOutgoing') :
-                 t('networkReferrals.noReferrals')}
-              </p>
-            </div>
-          ) : (
-            <div className="data-table-container">
-              <table className="module-table">
-                <thead>
-                  <tr>
-                    <th>{t('networkReferrals.animal')}</th>
-                    <th>{t('networkReferrals.fromHospital')}</th>
-                    <th>{t('networkReferrals.toHospitalLabel')}</th>
-                    <th>{t('networkReferrals.reason')}</th>
-                    <th>{t('common.status')}</th>
-                    <th>{t('networkReferrals.date')}</th>
-                    <th>{t('networkReferrals.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {referrals.map(ref => (
-                    <tr key={ref.id}>
-                      <td>
-                        <strong>{ref.animalName}</strong><br />
-                        <span className="si-655cd763">{speciesLabel(ref.animalSpecies, t)}</span>
-                      </td>
-                      <td>
-                        {ref.fromHospitalName}<br />
-                        <span className="si-655cd763">{ref.fromVetName}</span>
-                      </td>
-                      <td>
-                        {ref.toHospitalName}<br />
-                        <span className="si-655cd763">{ref.toVetName || '-'}</span>
-                      </td>
-                      <td className="si-d83d7d70">{ref.reason}</td>
-                      <td>
-                        <span className={`module-badge ${
-                          ref.status === 'accepted' ? 'badge-success' :
-                          ref.status === 'rejected' ? 'badge-error' :
-                          ref.status === 'completed' ? 'badge-success' : 'badge-pending'
-                        }`}>
-                          {String(t(`networkReferrals.status.${ref.status}` as any, ref.status))}
-                        </span>
-                      </td>
-                      <td className="si-0a803082">{new Date(ref.created_at || ref.createdAt).toLocaleDateString()}</td>
-                      <td>
-                        {ref.status === 'pending' && referralDirection !== 'outgoing' && (
-                          <div className="si-9f20fe5e">
-                            <button
-                              className="module-btn small si-e44bed18"
-                             
-                              onClick={() => setResponseModal({ referral: ref, action: 'accepted' })}
-                            >
-                              ✓ {t('networkReferrals.accept')}
-                            </button>
-                            <button
-                              className="module-btn small si-b150e41a"
-                             
-                              onClick={() => setResponseModal({ referral: ref, action: 'rejected' })}
-                            >
-                              ✗ {t('networkReferrals.reject')}
-                            </button>
-                          </div>
-                        )}
-                        {ref.consultationId && (
-                          <button
-                            className="module-btn small si-f48bb60f"
-                           
-                            onClick={() => window.open(`/consultation/${ref.consultationId}`, '_blank')}
-                          >
-                            🔗 {t('networkReferrals.viewConsultation')}
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* ── Patient Transfers Section ── */}
-          <div className="module-card hn-transfers-card">
-            <div className="card-header">
-              <h3>🔄 {t('hospitalNetworks.transfers.title')}</h3>
-            </div>
-            <div className="card-body">
-              {transfers.length === 0 ? (
-                <p className="hn-panel-empty">{t('hospitalNetworks.transfers.noTransfers')}</p>
-              ) : (
-                <div className="data-table-container">
-                  <table className="module-table">
-                    <thead>
-                      <tr>
-                        <th>{t('hospitalNetworks.transfers.patient')}</th>
-                        <th>{t('hospitalNetworks.transfers.from')}</th>
-                        <th>{t('hospitalNetworks.transfers.to')}</th>
-                        <th>{t('hospitalNetworks.transfers.reason')}</th>
-                        <th>{t('hospitalNetworks.transfers.status')}</th>
-                        <th>{t('hospitalNetworks.transfers.actions')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {transfers.map((t_item: any) => (
-                        <tr key={t_item.id}>
-                          <td>{t_item.animalName} ({speciesLabel(t_item.animalSpecies, t)})</td>
-                          <td>{t_item.fromHospitalName}</td>
-                          <td>{t_item.toHospitalName}</td>
-                          <td>{t_item.reason}</td>
-                          <td>
-                            <span className={`module-badge ${t_item.status === 'completed' ? 'badge-success' : 'badge-pending'}`}>
-                              {t_item.status}
-                            </span>
-                          </td>
-                          <td>
-                            {t_item.status === 'accepted' && (
-                              <button className="module-btn small" onClick={async () => {
-                                try {
-                                  await apiService.completePatientTransfer(selectedNetwork!.id, t_item.id)
-                                  loadTransfers()
-                                } catch (err: any) { console.error(err) }
-                              }}>
-                                ✅ {t('hospitalNetworks.transfers.complete')}
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Create Referral Modal */}
-          {showCreateReferralModal && (
-            <div
-              className="si-2140be19"
-              onClick={() => setShowCreateReferralModal(false)}
-            >
-              <div
-                className="si-b212c540"
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="si-fe2d5bfb">
-                  <h3 className="si-44087c4b">{t('networkReferrals.createTitle')}</h3>
-                  <button type="button" onClick={() => setShowCreateReferralModal(false)} className="si-30be827b">✕</button>
-                </div>
-                {referralError && <div className="module-alert error si-bab8e8bc">{referralError}</div>}
-                <form onSubmit={handleCreateReferral}>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('networkReferrals.toHospital')}</label>
-                    <select
-                      className="module-input"
-                      required
-                      value={referralForm.toHospitalId}
-                      onChange={e => setReferralForm(f => ({ ...f, toHospitalId: e.target.value }))}
-                    >
-                      <option value="">{t('networkReferrals.selectHospital')}</option>
-                      {referralNetworkHospitals.map((h: any) => (
-                        <option key={h.id} value={h.id}>{h.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="module-form-group">
-                    <label className="module-label">
-                      {t('networkReferrals.reason')} <span className="si-f84f41a5">*</span>
-                    </label>
-                    <textarea
-                      className="module-input"
-                      required
-                      rows={3}
-                      placeholder={t('networkReferrals.reasonPlaceholder')}
-                      value={referralForm.reason}
-                      onChange={e => setReferralForm(f => ({ ...f, reason: e.target.value }))}
-                    />
-                  </div>
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('networkReferrals.priority')}</label>
-                      <select
-                        className="module-input"
-                        value={referralForm.priority}
-                        onChange={e => setReferralForm(f => ({ ...f, priority: e.target.value }))}
-                      >
-                        {(['low', 'normal', 'high', 'emergency'] as const).map(p => (
-                          <option key={p} value={p}>{t(`networkReferrals.priority_levels.${p}`, p)}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('networkReferrals.clinicalNotes')}</label>
-                    <textarea
-                      className="module-input"
-                      rows={4}
-                      placeholder={t('networkReferrals.clinicalNotesPlaceholder')}
-                      value={referralForm.clinicalNotes}
-                      onChange={e => setReferralForm(f => ({ ...f, clinicalNotes: e.target.value }))}
-                    />
-                  </div>
-                  <p className="si-b5cd343d">* {t('common.requiredField', 'Required field')}</p>
-                  <div className="si-961e4c67">
-                    <button type="button" className="module-btn" onClick={() => setShowCreateReferralModal(false)}>
-                      {t('common.cancel')}
-                    </button>
-                    <button type="submit" className="module-btn primary" disabled={referralSubmitting}>
-                      {referralSubmitting ? `⏳ ${t('networkReferrals.sending')}` : `🔄 ${t('networkReferrals.send')}`}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Accept / Reject Response Modal */}
-          {responseModal && (
-            <div
-              className="si-2140be19"
-              onClick={() => setResponseModal(null)}
-            >
-              <div
-                className="si-083e3903"
-                onClick={e => e.stopPropagation()}
-              >
-                <h3 className="si-3fd9d5d4">
-                  {responseModal.action === 'accepted' ? `✓ ${t('networkReferrals.accept')}` : `✗ ${t('networkReferrals.reject')}`}
-                </h3>
-                <p className="si-384c018a">
-                  {responseModal.action === 'accepted' ? t('networkReferrals.confirmAccept') : t('networkReferrals.confirmReject')}
-                </p>
-                <div className="module-form-group">
-                  <label className="module-label">{t('networkReferrals.responseNotes')}</label>
-                  <textarea
-                    className="module-input"
-                    rows={3}
-                    placeholder={t('networkReferrals.responseNotesPlaceholder')}
-                    value={responseNotes}
-                    onChange={e => setResponseNotes(e.target.value)}
-                  />
-                </div>
-                <div className="si-37b52067">
-                  <button className="module-btn" onClick={() => setResponseModal(null)}>{t('common.cancel')}</button>
-                  <button
-                    className="module-btn primary"
-                    disabled={respondingSubmitting}
-                    style={responseModal.action === 'rejected' ? { background: '#dc2626' } : {}}
-                    onClick={handleReferralResponse}
-                  >
-                    {respondingSubmitting ? `⏳ ${t('common.saving')}` :
-                     responseModal.action === 'accepted' ? `✓ ${t('networkReferrals.accept')}` : `✗ ${t('networkReferrals.reject')}`}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <ReferralsTab
+          selectedNetwork={selectedNetwork}
+          referralSuccess={referralSuccess}
+          referralError={referralError}
+          referralDirection={referralDirection}
+          onChangeDirection={(dir) => { setReferralDirection(dir); loadReferrals(dir) }}
+          referralsLoading={referralsLoading}
+          referrals={referrals}
+          speciesLabel={speciesLabel}
+          onAcceptReferral={(ref) => setResponseModal({ referral: ref, action: 'accepted' })}
+          onRejectReferral={(ref) => setResponseModal({ referral: ref, action: 'rejected' })}
+          transfers={transfers}
+          onCompleteTransfer={handleCompleteTransfer}
+          onOpenCreateReferral={() => setShowCreateReferralModal(true)}
+          showCreateReferralModal={showCreateReferralModal}
+          referralForm={referralForm}
+          setReferralForm={setReferralForm}
+          referralNetworkHospitals={referralNetworkHospitals}
+          referralSubmitting={referralSubmitting}
+          onCloseCreateReferral={() => setShowCreateReferralModal(false)}
+          onSubmitCreateReferral={handleCreateReferral}
+          responseModal={responseModal}
+          responseNotes={responseNotes}
+          setResponseNotes={setResponseNotes}
+          respondingSubmitting={respondingSubmitting}
+          onCloseResponseModal={() => setResponseModal(null)}
+          onConfirmResponse={handleReferralResponse}
+          t={t}
+        />
       )}
 
-      {/* ════ TAB 6: LEAVE MANAGEMENT ════ */}
       {activeTab === 'leave' && selectedNetwork && (
-        <div className="hn-tab-content">
-          <div className="hn-audit-header">
-            <div>
-              <h2 className="hn-audit-section-title">🏖️ {t('hospitalNetworks.leave.title')}</h2>
-            </div>
-            <button className="module-btn primary" onClick={() => setShowLeaveModal(true)}>
-              + {t('hospitalNetworks.leave.requestLeave')}
-            </button>
-          </div>
-          {leaveRequests.length === 0 ? (
-            <div className="hn-empty-state">
-              <div className="hn-empty-icon">🏖️</div>
-              <div className="hn-empty-title">{t('hospitalNetworks.leave.noRequests')}</div>
-            </div>
-          ) : (
-            <div className="data-table-container">
-              <table className="module-table">
-                <thead>
-                  <tr>
-                    <th>{t('hospitalNetworks.leave.staffName')}</th>
-                    <th>{t('hospitalNetworks.leave.type')}</th>
-                    <th>{t('hospitalNetworks.leave.dates')}</th>
-                    <th>{t('hospitalNetworks.leave.status')}</th>
-                    <th>{t('hospitalNetworks.leave.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaveRequests.map((lr: any) => (
-                    <tr key={lr.id}>
-                      <td>{lr.userName || '-'}</td>
-                      <td><span className="module-badge">{lr.leave_type}</span></td>
-                      <td>{new Date(lr.start_date).toLocaleDateString()} - {new Date(lr.end_date).toLocaleDateString()}</td>
-                      <td>
-                        <span className={`module-badge ${lr.status === 'approved' ? 'badge-success' : lr.status === 'rejected' ? 'badge-error' : 'badge-pending'}`}>
-                          {lr.status}
-                        </span>
-                      </td>
-                      <td>
-                        {lr.status === 'pending' && (
-                          <div className="hn-leave-actions">
-                            <button className="module-btn small" onClick={async () => {
-                              try {
-                                await apiService.updateLeaveRequest(selectedNetwork!.id, lr.id, { status: 'approved' })
-                                loadLeaveRequests()
-                              } catch (err: any) { console.error(err) }
-                            }}>✅</button>
-                            <button className="module-btn small" onClick={async () => {
-                              try {
-                                await apiService.updateLeaveRequest(selectedNetwork!.id, lr.id, { status: 'rejected', rejectionReason: 'Declined by admin' })
-                                loadLeaveRequests()
-                              } catch (err: any) { console.error(err) }
-                            }}>❌</button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Leave Request Modal */}
-          {showLeaveModal && (
-            <div
-              className="hn-modal-overlay"
-              onClick={() => setShowLeaveModal(false)}
-            >
-              <div className="hn-modal-content" onClick={e => e.stopPropagation()}>
-                <div className="hn-modal-header">
-                  <h3>🏖️ {t('hospitalNetworks.leave.requestLeave')}</h3>
-                  <button type="button" className="hn-modal-close" onClick={() => setShowLeaveModal(false)}>✕</button>
-                </div>
-                <form onSubmit={async (ev) => {
-                  ev.preventDefault()
-                  const fd = new FormData(ev.currentTarget)
-                  try {
-                    await apiService.createLeaveRequest(selectedNetwork!.id, {
-                      leave_type: fd.get('leave_type'),
-                      start_date: fd.get('start_date'),
-                      end_date: fd.get('end_date'),
-                      reason: fd.get('reason'),
-                    })
-                    setShowLeaveModal(false)
-                    loadLeaveRequests()
-                  } catch (err: any) { console.error(err) }
-                }}>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('hospitalNetworks.leave.type')} *</label>
-                    <select name="leave_type" className="module-input" required>
-                      <option value="annual">{t('hospitalNetworks.leave.annualLeave')}</option>
-                      <option value="sick">{t('hospitalNetworks.leave.sickLeave')}</option>
-                      <option value="personal">{t('hospitalNetworks.leave.personalLeave')}</option>
-                      <option value="emergency">{t('hospitalNetworks.leave.emergencyLeave')}</option>
-                    </select>
-                  </div>
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('hospitalNetworks.leave.dates')} *</label>
-                      <input type="date" name="start_date" className="module-input" required />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">&nbsp;</label>
-                      <input type="date" name="end_date" className="module-input" required />
-                    </div>
-                  </div>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('hospitalNetworks.transfers.reason')}</label>
-                    <textarea name="reason" className="module-input" rows={3} />
-                  </div>
-                  <div className="hn-modal-actions">
-                    <button type="button" className="module-btn" onClick={() => setShowLeaveModal(false)}>{t('common.cancel', 'Cancel')}</button>
-                    <button type="submit" className="module-btn primary">{t('hospitalNetworks.leave.requestLeave')}</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-        </div>
+        <LeaveManagementTab
+          leaveRequests={leaveRequests}
+          showLeaveModal={showLeaveModal}
+          onOpenLeaveModal={() => setShowLeaveModal(true)}
+          onCloseLeaveModal={() => setShowLeaveModal(false)}
+          onSubmitLeaveRequest={handleCreateLeaveRequest}
+          onApproveLeave={handleApproveLeave}
+          onRejectLeave={handleRejectLeave}
+          t={t}
+        />
       )}
 
-      {/* ════ TAB 7: ROLE MATRIX ════ */}
       {activeTab === 'roleMatrix' && selectedNetwork && (
         <div className="hn-tab-content">
           <NetworkRoleMatrix
@@ -3415,145 +1211,39 @@ const HospitalNetworks: React.FC = () => {
         </div>
       )}
 
-      {/* ════ TAB 8: ANALYTICS ════ */}
       {activeTab === 'analytics' && selectedNetwork && (
-        <div className="hn-tab-content">
-          <div className="hn-audit-header">
-            <h2 className="hn-audit-section-title">📊 {t('networkAnalytics.title')}</h2>
-          </div>
-          {analyticsLoading && <div className="hn-loading">⏳ {t('common.loading')}</div>}
-          {analyticsError && <div className="module-alert error">{analyticsError}</div>}
-          {!analyticsLoading && !analyticsError && analyticsData && (
-            <>
-              <div className="hn-analytics-grid">
-                <div className="hn-stat-card hn-stat-blue">
-                  <div className="hn-stat-value">{analyticsData.totalMembers ?? 0}</div>
-                  <div className="hn-stat-label">👤 {t('networkAnalytics.totalMembers')}</div>
-                </div>
-                <div className="hn-stat-card hn-stat-green">
-                  <div className="hn-stat-value">{analyticsData.totalHospitals ?? 0}</div>
-                  <div className="hn-stat-label">🏥 {t('networkAnalytics.totalHospitals')}</div>
-                </div>
-                <div className="hn-stat-card hn-stat-teal">
-                  <div className="hn-stat-value">{analyticsData.totalPatients ?? 0}</div>
-                  <div className="hn-stat-label">🐾 {t('networkAnalytics.activePatients')}</div>
-                </div>
-                <div className="hn-stat-card hn-stat-orange">
-                  <div className="hn-stat-value">{analyticsData.activeConsultations ?? 0}</div>
-                  <div className="hn-stat-label">🩺 {t('networkAnalytics.consultations30d')}</div>
-                </div>
-                <div className="hn-stat-card hn-stat-purple">
-                  <div className="hn-stat-value">{analyticsData.referrals30d ?? 0}</div>
-                  <div className="hn-stat-label">🔄 {t('networkAnalytics.referrals30d')}</div>
-                </div>
-                <div className="hn-stat-card hn-stat-red">
-                  <div className="hn-stat-value">{analyticsData.auditEvents7d ?? 0}</div>
-                  <div className="hn-stat-label">🛡️ {t('networkAnalytics.auditEvents7d')}</div>
-                </div>
-              </div>
-
-              {/* Enrollment Trend */}
-              {Array.isArray(analyticsData.enrollmentTrend) && analyticsData.enrollmentTrend.length > 0 && (
-                <div className="module-card si-b4c2d096">
-                  <div className="hn-panel-header">
-                    <h3>{t('networkAnalytics.enrollmentTrend')}</h3>
-                    <span className="si-48a0b045">{t('networkAnalytics.lastNMonths', { n: 6 })}</span>
-                  </div>
-                  <div className="card-body">
-                    {[...analyticsData.enrollmentTrend].reverse().map((item: any, i: number) => {
-                      const month = item.month ? new Date(item.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '-'
-                      const count = parseInt(item.count ?? 0)
-                      const max = Math.max(...analyticsData.enrollmentTrend.map((r: any) => parseInt(r.count ?? 0)), 1)
-                      return (
-                        <div key={i} className="hn-trend-row">
-                          <span className="hn-trend-month">{month}</span>
-                          <div className="hn-trend-bar-wrap">
-                            <div className="hn-trend-bar" style={{ width: `${(count / max) * 100}%` }} />
-                          </div>
-                          <span className="hn-trend-count">{count}</span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-          {!analyticsLoading && !analyticsError && !analyticsData && (
-            <div className="hn-empty-state">
-              <div className="hn-empty-icon">📊</div>
-              <div className="hn-empty-title">{t('networkAnalytics.noData')}</div>
-            </div>
-          )}
-        </div>
+        <AnalyticsTab
+          analyticsLoading={analyticsLoading}
+          analyticsError={analyticsError}
+          analyticsData={analyticsData}
+          t={t}
+        />
       )}
 
-      {/* Compliance Export Modal */}
       {showComplianceModal && selectedNetwork && (
-        <div className="hn-modal-overlay" onClick={() => setShowComplianceModal(false)}>
-          <div className="hn-modal si-197ba518" onClick={e => e.stopPropagation()}>
-            <div className="hn-modal-header">
-              <h2>📋 {t('complianceExport.exportDateRange')}</h2>
-              <button type="button" className="hn-modal-close" onClick={() => setShowComplianceModal(false)}>✕</button>
-            </div>
-            <div className="hn-modal-body">
-              {complianceError && <div className="module-alert error">{complianceError}</div>}
-              <div className="module-form-row">
-                <div className="module-form-group">
-                  <label className="module-label">{t('complianceExport.exportFrom')} <span className="hn-required">*</span></label>
-                  <input type="date" className="module-input" value={complianceFrom} onChange={e => setComplianceFrom(e.target.value)} />
-                </div>
-                <div className="module-form-group">
-                  <label className="module-label">{t('complianceExport.exportTo')} <span className="hn-required">*</span></label>
-                  <input type="date" className="module-input" value={complianceTo} onChange={e => setComplianceTo(e.target.value)} />
-                </div>
-              </div>
-            </div>
-            <div className="hn-modal-actions">
-              <button type="button" className="module-btn" onClick={() => setShowComplianceModal(false)}>{t('common.cancel')}</button>
-              <button
-                type="button"
-                className="module-btn primary"
-                disabled={!complianceFrom || !complianceTo || complianceGenerating}
-                onClick={handleExportCompliance}
-              >
-                {complianceGenerating ? `⏳ ${t('complianceExport.generating')}` : `⬇️ ${t('complianceExport.downloadReport')}`}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ComplianceExportModal
+          complianceFrom={complianceFrom}
+          setComplianceFrom={setComplianceFrom}
+          complianceTo={complianceTo}
+          setComplianceTo={setComplianceTo}
+          complianceGenerating={complianceGenerating}
+          complianceError={complianceError}
+          onClose={() => setShowComplianceModal(false)}
+          onExport={handleExportCompliance}
+          t={t}
+        />
       )}
 
-      {/* P6-APPROVAL: Approval Action Modal */}
       {showApprovalModal && (
-        <div className="hn-modal-overlay" onClick={() => { setShowApprovalModal(null); setApprovalNotes('') }}>
-          <div className="hn-modal si-197ba518" onClick={e => e.stopPropagation()}>
-            <div className="hn-modal-header">
-              <h3>
-                {showApprovalModal === 'info_requested' && ('❓ ' + t('networkApproval.requestInfo'))}
-                {showApprovalModal === 'approved' && ('✅ ' + t('networkApproval.approveNetwork'))}
-                {showApprovalModal === 'rejected' && ('❌ ' + t('networkApproval.rejectNetwork'))}
-                {showApprovalModal === 'suspended' && '⏸ Suspend Network'}
-                {showApprovalModal === 'reactivated' && '🔄 Reactivate Network'}
-              </h3>
-              <button type="button" className="hn-modal-close" onClick={() => { setShowApprovalModal(null); setApprovalNotes('') }}>✕</button>
-            </div>
-            <div className="hn-modal-body">
-              <div className="module-form-group">
-                <label className="module-label">{t('networkApproval.addNotes')}</label>
-                <textarea className="module-input" rows={4} value={approvalNotes}
-                  onChange={e => setApprovalNotes(e.target.value)}
-                  placeholder="Describe the reason or required changes..." />
-              </div>
-              <div className="hn-modal-actions">
-                <button type="button" className="module-btn" onClick={() => { setShowApprovalModal(null); setApprovalNotes('') }}>{t('common.cancel')}</button>
-                <button type="button" className="module-btn primary" disabled={approvalSaving} onClick={handleApprovalAction}>
-                  {approvalSaving ? ('⏳ ' + t('common.saving')) : t('common.confirm')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ApprovalActionModal
+          showApprovalModal={showApprovalModal}
+          approvalNotes={approvalNotes}
+          setApprovalNotes={setApprovalNotes}
+          approvalSaving={approvalSaving}
+          onClose={() => { setShowApprovalModal(null); setApprovalNotes('') }}
+          onConfirm={handleApprovalAction}
+          t={t}
+        />
       )}
     </div>
   )
