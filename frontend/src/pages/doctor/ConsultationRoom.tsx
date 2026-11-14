@@ -2,10 +2,17 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
-import { useMasterData } from '../../context/MasterDataContext'
 import apiService from '../../services/api'
 import { VideoSession, ChatMessage } from '../../types'
 import { useWebRTC } from '../../hooks/useWebRTC'
+import ConsultationVideoStage from '../../components/consultationRoom/ConsultationVideoStage'
+import EndedSessionView from '../../components/consultationRoom/EndedSessionView'
+import ChatPanel from '../../components/consultationRoom/ChatPanel'
+import MedicalHistoryPanel from '../../components/consultationRoom/MedicalHistoryPanel'
+import NotesPanel from '../../components/consultationRoom/NotesPanel'
+import PrescribePanel from '../../components/consultationRoom/PrescribePanel'
+import ReferralModal, { ReferralFormState } from '../../components/consultationRoom/ReferralModal'
+import { formatDuration } from '../../components/consultationRoom/consultationRoomShared'
 import '../../styles/modules.css'
 
 interface ConsultationRoomProps {
@@ -17,7 +24,6 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   const { t } = useTranslation()
   const { user } = useAuth()
   const { formatTime } = useSettings()
-  const { speciesLabel } = useMasterData()
 
   // Session & chat state
   const [session, setSession] = useState<VideoSession | null>(null)
@@ -56,7 +62,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
 
   // Referral state
   const [showReferralModal, setShowReferralModal] = useState(false)
-  const [referralForm, setReferralForm] = useState({ networkId: '', fromHospitalId: '', toHospitalId: '', reason: '', priority: 'normal', clinicalNotes: '' })
+  const [referralForm, setReferralForm] = useState<ReferralFormState>({ networkId: '', fromHospitalId: '', toHospitalId: '', reason: '', priority: 'normal', clinicalNotes: '' })
   const [networksList, setNetworksList] = useState<any[]>([])
   const [networkHospitals, setNetworkHospitals] = useState<any[]>([])
   const [referralSubmitting, setReferralSubmitting] = useState(false)
@@ -623,15 +629,6 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
     }
   }
 
-  const formatDuration = (s: number) => {
-    const h = Math.floor(s / 3600)
-    const m = Math.floor((s % 3600) / 60)
-    const sec = s % 60
-    return h > 0
-      ? `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`
-      : `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`
-  }
-
   // --- Loading State ----------------------------------------
   if (loading) {
     return (
@@ -645,93 +642,23 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
   if (session?.status === 'ended') {
     const isCompleted = consultationStatus === 'completed'
     return (
-      <div className="module-page">
-        <div className="si-9ae995d6">
-          <div className="si-7615cf7c">{isCompleted ? '✅' : '📹'}</div>
-          <h1 className="si-dab75309">{isCompleted ? t('consultationRoom.consultationCompleted') : t('consultationRoom.sessionEnded')}</h1>
-          <p className="si-712f4327">
-            {t('consultationRoom.duration')}: {formatDuration(session.duration || callDuration)}
-          </p>
-          {isCompleted && (
-            <p className="si-739c4b9c">
-              {t('consultationRoom.markedAsCompleted')}
-            </p>
-          )}
-
-          {/* Recording playback */}
-          {recordingUrl && (
-            <div className="si-ef14b2c1">
-              <p className="si-c338391d">🎬 {t('consultationRoom.recordingAvailable')}</p>
-              <video src={recordingUrl} controls className="si-a7540650" />
-              <br />
-              <a href={recordingUrl} download={`consultation-${conId}-${new Date().toISOString().slice(0,10)}.webm`}
-                className="btn btn-outline si-315b6ed5">
-                ⬇️ {t('consultationRoom.downloadRecording')}
-              </a>
-            </div>
-          )}
-
-          {/* Notes section */}
-          <div className="si-4734e5a8">
-            <h3>📝 {t('consultationRoom.consultationNotes')}</h3>
-            <div className="si-bab8e8bc">
-              <label className="si-e334d170">{t('consultationRoom.diagnosis')}</label>
-              <textarea className="form-input si-7d984748" rows={2} placeholder={t('consultationRoom.enterDiagnosis')}
-                value={diagnosis} onChange={e => setDiagnosis(e.target.value)}
-                readOnly={isCompleted} />
-            </div>
-            <div className="si-bab8e8bc">
-              <label className="si-e334d170">{t('consultationRoom.notes')}</label>
-              <textarea className="form-input si-7d984748" rows={4} placeholder={t('consultationRoom.notesPlaceholder')}
-                value={notes} onChange={e => setNotes(e.target.value)}
-                readOnly={isCompleted} />
-            </div>
-            <div className="si-d223efb3">
-              {!isCompleted && (
-                <>
-                  <button className="btn btn-outline" onClick={handleSaveNotes} disabled={savingNotes}>
-                    {savingNotes ? `⏳ ${t('consultationRoom.saving')}` : notesSaved ? `✅ ${t('consultationRoom.saved')}` : `💾 ${t('consultationRoom.saveNotes')}`}
-                  </button>
-                  <button className="btn btn-primary" onClick={handleCompleteConsultation}>
-                    ✅ {t('consultationRoom.completeConsultation')}
-                  </button>
-                  <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                    💊 {t('consultationRoom.writePrescription')}
-                  </button>
-                </>
-              )}
-              {isCompleted && (
-                <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                  💊 {t('consultationRoom.writePrescription')}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Chat transcript */}
-          {messages.length > 0 && (
-            <div className="si-4734e5a8">
-              <h3>💬 {t('consultationRoom.chatTranscript', { count: messages.length })}</h3>
-              <div className="si-cfed40cb">
-                {messages.map(msg => (
-                  <div key={msg.id} className="si-4815af7f">
-                    <strong>{msg.senderName}</strong>: {msg.message}
-                    <span className="si-a69da2c2">
-                      {formatTime(msg.timestamp)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="si-cf8b12ae">
-            <button className="btn btn-outline" onClick={() => onNavigate('/dashboard')}>
-              {t('consultationRoom.returnToDashboard')}
-            </button>
-          </div>
-        </div>
-      </div>
+      <EndedSessionView
+        isCompleted={isCompleted}
+        duration={session.duration || callDuration}
+        recordingUrl={recordingUrl}
+        conId={conId}
+        diagnosis={diagnosis}
+        onChangeDiagnosis={setDiagnosis}
+        notes={notes}
+        onChangeNotes={setNotes}
+        savingNotes={savingNotes}
+        notesSaved={notesSaved}
+        onSaveNotes={handleSaveNotes}
+        onCompleteConsultation={handleCompleteConsultation}
+        messages={messages}
+        formatTime={formatTime}
+        onNavigate={onNavigate}
+      />
     )
   }
 
@@ -754,7 +681,6 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
           </button>
           <button
             className="module-btn si-89f878b4"
-           
             onClick={() => setShowReferralModal(true)}
           >
             🔄 Refer to Network Hospital
@@ -776,102 +702,27 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
       )}
 
       <div className="video-container">
-        {/* Video Area */}
-        <div className="video-main">
-          {/* Main video: Show remote peer video when connected, placeholder otherwise */}
-          {session?.status === 'active' ? (
-            <>
-              <video ref={remoteVideoRef} autoPlay playsInline
-                style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000',
-                  display: remoteStream ? 'block' : 'none' }} />
-              {!remoteStream && (
-                <div className="video-placeholder">
-                  <div className="video-avatar">🧑</div>
-                  <p>{connectionState === 'connecting' ? t('consultationRoom.connectingToPatient') : t('consultationRoom.waitingForPatientVideo')}</p>
-                  {mediaMode === 'audio-only' && <p className="si-8e438b3b">🎤 {t('consultationRoom.audioOnlyMode')}</p>}
-                  {mediaMode === 'none' && <p className="si-ff8aeeff">💬 {t('consultationRoom.chatOnlyMode')}</p>}
-                </div>
-              )}
-              {isScreenSharing && (
-                <div className="si-1ded27be">
-                  🖥️ {t('consultationRoom.screenSharingActive')}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="video-placeholder">
-              <div className="video-avatar">👨‍⚕️</div>
-              <p>{t('consultationRoom.waitingForPatient')}</p>
-              <p className="si-7dcbd386">
-                {session ? `${t('consultationRoom.room')}: ${session.roomId}` : t('consultationRoom.creatingRoom')}
-              </p>
-            </div>
-          )}
-
-          {/* Camera error banner */}
-          {cameraError && session?.status === 'active' && (
-            <div style={{
-              position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)',
-              background: mediaMode === 'none' ? 'rgba(220,38,38,.85)' : 'rgba(217,119,6,.85)',
-              color: 'white', padding: '8px 16px', borderRadius: 8, fontSize: 13,
-              maxWidth: '80%', textAlign: 'center', zIndex: 10
-            }}>
-              {mediaMode === 'audio-only' ? '🎤' : '⚠️'} {cameraError}
-            </div>
-          )}
-
-          {/* Self-view (PIP) */}
-          <div className="video-self" style={isCameraOff || mediaMode !== 'video' ? {} : { padding: 0, overflow: 'hidden' }}>
-            {isCameraOff || mediaMode !== 'video' ? (
-              <span className="si-ecda976e">
-                {session?.status !== 'active' ? `Dr. ${user?.lastName?.charAt(0) || ''}` :
-                  mediaMode === 'audio-only' ? '🎤 Audio' : mediaMode === 'none' ? '💬 Chat' : '📷 Off'}
-              </span>
-            ) : (
-              <video ref={localVideoRef} autoPlay playsInline muted
-                className="si-cb5aeea0" />
-            )}
-          </div>
-
-          {/* Controls */}
-          <div className="video-controls">
-            {session?.status === 'waiting' && (
-              <button className="btn btn-success btn-lg" onClick={handleStartCall}>▶ {t('consultationRoom.startCall')}</button>
-            )}
-            {session?.status === 'active' && (
-              <>
-                <button className={`video-control-btn ${!isMuted ? 'active' : ''}`}
-                  onClick={toggleMute} title={isMuted ? t('consultationRoom.unmute') : t('consultationRoom.mute')}>
-                  {isMuted ? '🔇' : '🎤'}
-                </button>
-                <button className={`video-control-btn ${!isCameraOff ? 'active' : ''}`}
-                  onClick={toggleCamera} title={isCameraOff ? t('consultationRoom.turnOnCamera') : t('consultationRoom.turnOffCamera')}>
-                  {isCameraOff ? '📷' : '📹'}
-                </button>
-                <button className={`video-control-btn ${isScreenSharing ? 'active' : ''}`}
-                  onClick={toggleScreenShare} title={t('consultationRoom.shareScreen')}>
-                  🖥️
-                </button>
-                <button className={`video-control-btn ${isRecording ? 'recording' : ''}`}
-                  onClick={toggleRecording} title={isRecording ? t('consultationRoom.stopRecording') : t('consultationRoom.startRecording')}
-                  style={isRecording ? { background: '#dc2626', color: 'white', animation: 'pulse 1.5s infinite' } : {}}>
-                  {isRecording ? '⏹️' : '⏺️'}
-                </button>
-                <button className="video-control-btn end-call" onClick={handleEndCall} title={t('consultationRoom.endCallTitle')}>
-                  📞
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Recording indicator */}
-          {isRecording && (
-            <div className="si-fe782970">
-              <span className="si-00e70c6a" />
-              REC {formatDuration(callDuration)}
-            </div>
-          )}
-        </div>
+        <ConsultationVideoStage
+          session={session}
+          remoteVideoRef={remoteVideoRef}
+          localVideoRef={localVideoRef}
+          remoteStream={remoteStream}
+          connectionState={connectionState}
+          mediaMode={mediaMode}
+          isScreenSharing={isScreenSharing}
+          isCameraOff={isCameraOff}
+          cameraError={cameraError}
+          isRecording={isRecording}
+          callDuration={callDuration}
+          isMuted={isMuted}
+          doctorInitial={user?.lastName?.charAt(0) || ''}
+          onToggleMute={toggleMute}
+          onToggleCamera={toggleCamera}
+          onToggleScreenShare={toggleScreenShare}
+          onToggleRecording={toggleRecording}
+          onEndCall={handleEndCall}
+          onStartCall={handleStartCall}
+        />
 
         {/* Side Panel */}
         <div className="chat-panel si-78f95ca5">
@@ -880,237 +731,49 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
             {(['chat', 'history', 'notes', 'prescribe'] as const).map(tab => (
               <button key={tab}
                 className={`tab ${activePanel === tab ? 'active' : ''} si-1114bb34`}
-               
-                onClick={() => { setActivePanel(tab); if (tab === 'history' && !historyLoaded && !historyLoading) { /* auto-load on first click is handled in loadConsultationData */ } }}>
+                onClick={() => setActivePanel(tab)}>
                 {tab === 'chat' ? `💬 ${t('consultationRoom.chat')}${messages.length > 0 ? ` (${messages.length})` : ''}` : tab === 'history' ? `📋 ${t('consultationRoom.historyTab')}` : tab === 'notes' ? `📝 ${t('consultationRoom.notesTab')}` : `💊 ${t('consultationRoom.rx')}`}
               </button>
             ))}
           </div>
 
-          {/* Chat Tab */}
           {activePanel === 'chat' && (
-            <>
-              <div className="chat-messages">
-                {messages.length === 0 && (
-                  <div className="si-97639f58">
-                    <p>{t('consultationRoom.noMessagesYet')}</p>
-                    <p className="si-0a803082">{t('consultationRoom.startConversation')}</p>
-                  </div>
-                )}
-                {messages.map(msg => (
-                  <div key={msg.id} className={`chat-message ${msg.senderId === user?.id ? 'sent' : 'received'}`}>
-                    <div className="msg-sender">{msg.senderName}</div>
-                    <div>{msg.message}</div>
-                    <div className="msg-time">{formatTime(msg.timestamp)}</div>
-                  </div>
-                ))}
-                <div ref={chatEndRef} />
-              </div>
-              <div className="chat-input-area">
-                <input className="chat-input" placeholder={t('consultationRoom.typeMessage')}
-                  value={newMessage}
-                  onChange={e => setNewMessage(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSendMessage()} />
-                <button className="chat-send-btn" onClick={handleSendMessage}>➤</button>
-              </div>
-            </>
+            <ChatPanel
+              messages={messages}
+              currentUserId={user?.id}
+              formatTime={formatTime}
+              newMessage={newMessage}
+              onChangeMessage={setNewMessage}
+              onSendMessage={handleSendMessage}
+              chatEndRef={chatEndRef}
+            />
           )}
 
-          {/* Medical History Tab */}
           {activePanel === 'history' && (
-            <div className="si-3dc8ac19">
-              {historyLoading && (
-                <div className="si-ed5d7a12">
-                  <div className="loading-spinner si-8d6ac58b" />
-                  <p className="si-b416ac63">{t('consultationRoom.loadingMedicalHistory')}</p>
-                </div>
-              )}
-
-              {!historyLoading && !animalInfo && (
-                <div className="si-b1c6542e">
-                  <div className="si-75bae6a3">📋</div>
-                  <p className="si-c6905158">{t('consultationRoom.noAnimalLinked')}</p>
-                  <p className="si-0a803082">{t('consultationRoom.animalLinkMessage')}</p>
-                </div>
-              )}
-
-              {!historyLoading && animalInfo && (
-                <>
-                  {/* Animal Info Card */}
-                  <div className="si-843e21c5">
-                    <div className="si-2cd8f04c">
-                      🐾 {animalInfo.name || 'Unknown'}
-                    </div>
-                    <div className="si-9ac294d9">
-                      {speciesLabel(animalInfo.species, t)}{animalInfo.breed ? ` / ${animalInfo.breed}` : ''}
-                      {animalInfo.age ? ` - ${animalInfo.age}` : ''}
-                      {animalInfo.weight ? ` - ${animalInfo.weight}kg` : ''}
-                    </div>
-                    {animalInfo.uniqueId && <div className="si-b1a83cef">ID: {animalInfo.uniqueId}</div>}
-                    {(animalInfo.enterpriseName || animalInfo.enterprise_name) && (
-                      <div className="si-acad5bc1">
-                        🏢 Farm: {animalInfo.enterpriseName || animalInfo.enterprise_name}
-                        {(animalInfo.groupName || animalInfo.group_name) && ` › ${animalInfo.groupName || animalInfo.group_name}`}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Allergies */}
-                  <div className="si-bab8e8bc">
-                    <h4 className="si-d151fd1b">
-                      ⚠️ {t('consultationRoom.allergies')} ({allergies.length})
-                    </h4>
-                    {allergies.length === 0 ? (
-                      <p className="si-df056d61">{t('consultationRoom.noKnownAllergies')}</p>
-                    ) : (
-                      <div className="si-a78c2ab8">
-                        {allergies.map((a: any, i: number) => (
-                          <span key={i} style={{
-                            background: a.severity === 'severe' ? '#fef2f2' : '#fef3c7',
-                            color: a.severity === 'severe' ? '#991b1b' : '#92400e',
-                            padding: '3px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600
-                          }}>
-                            {a.allergen || a.name || 'Unknown'} ({a.severity || 'unknown'})
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Vaccinations */}
-                  <div className="si-bab8e8bc">
-                    <h4 className="si-72539157">
-                      💉 {t('consultationRoom.vaccinations')} ({vaccinations.length})
-                    </h4>
-                    {vaccinations.length === 0 ? (
-                      <p className="si-df056d61">{t('consultationRoom.noVaccinationRecords')}</p>
-                    ) : (
-                      <div className="si-859b1456">
-                        {vaccinations.slice(0, 10).map((v: any, i: number) => (
-                          <div key={i} className="si-4c23d640">
-                            <strong>{v.vaccineName || v.vaccine_name || v.name || 'Vaccine'}</strong>
-                            {v.dateAdministered || v.date_administered ? (
-                              <span className="si-ee2911f8">
-                                {new Date(v.dateAdministered || v.date_administered).toLocaleDateString()}
-                              </span>
-                            ) : null}
-                            {v.status && <span style={{ marginLeft: 6, color: v.status === 'completed' ? '#059669' : '#d97706' }}>({v.status})</span>}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Recent Medical Records */}
-                  <div className="si-bab8e8bc">
-                    <h4 className="si-1ea073bf">
-                      🩺 {t('consultationRoom.medicalRecords')} ({medicalRecords.length})
-                    </h4>
-                    {medicalRecords.length === 0 ? (
-                      <p className="si-df056d61">{t('consultationRoom.noMedicalRecords')}</p>
-                    ) : (
-                      <div className="si-a01c8940">
-                        {medicalRecords.slice(0, 10).map((r: any, i: number) => (
-                          <div key={i} className="si-55c66e92">
-                            <div className="si-b2cfcbec">{r.recordType || r.record_type || r.type || 'Record'}</div>
-                            {r.diagnosis && <div className="si-93b487ee">Dx: {r.diagnosis}</div>}
-                            {r.treatment && <div className="si-23033f05">Tx: {r.treatment}</div>}
-                            {(r.createdAt || r.created_at || r.date) && (
-                              <div className="si-a5de6cea">
-                                {new Date(r.createdAt || r.created_at || r.date).toLocaleDateString()}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Lab Results */}
-                  <div className="si-dab75309">
-                    <h4 className="si-7af7d0b5">
-                      🔬 {t('consultationRoom.labResults')} ({labResults.length})
-                    </h4>
-                    {labResults.length === 0 ? (
-                      <p className="si-df056d61">{t('consultationRoom.noLabResults')}</p>
-                    ) : (
-                      <div className="si-859b1456">
-                        {labResults.slice(0, 10).map((l: any, i: number) => (
-                          <div key={i} className="si-4c23d640">
-                            <strong>{l.testName || l.test_name || l.name || 'Test'}</strong>
-                            {l.result && <span className="si-c3560ab0">→ {l.result}</span>}
-                            {l.status && (
-                              <span style={{
-                                marginLeft: 6, fontSize: 11, padding: '1px 6px', borderRadius: 4,
-                                background: l.status === 'completed' ? '#d1fae5' : '#fef3c7',
-                                color: l.status === 'completed' ? '#065f46' : '#92400e'
-                              }}>{l.status}</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
+            <MedicalHistoryPanel
+              historyLoading={historyLoading}
+              animalInfo={animalInfo}
+              allergies={allergies}
+              vaccinations={vaccinations}
+              medicalRecords={medicalRecords}
+              labResults={labResults}
+            />
           )}
 
-          {/* Notes Tab */}
           {activePanel === 'notes' && (
-            <div className="si-daad42f2">
-              <div className="form-group">
-                <label className="form-label">{t('consultationRoom.diagnosis')}</label>
-                <textarea className="form-input" rows={3} placeholder={t('consultationRoom.enterDiagnosis')}
-                  value={diagnosis} onChange={e => setDiagnosis(e.target.value)} />
-              </div>
-              <div className="form-group si-6acd75e8">
-                <label className="form-label">{t('consultationRoom.consultationNotesLabel')}</label>
-                <textarea className="form-input si-3f7753b6" rows={8}
-                  placeholder={t('consultationRoom.notesDocumentPlaceholder')}
-                  value={notes} onChange={e => setNotes(e.target.value)} />
-              </div>
-              <button className="btn btn-primary" onClick={handleSaveNotes} disabled={savingNotes}>
-                {savingNotes ? `⏳ ${t('consultationRoom.saving')}` : notesSaved ? `✅ ${t('consultationRoom.saved')}` : `💾 ${t('consultationRoom.saveNotes')}`}
-              </button>
-            </div>
+            <NotesPanel
+              diagnosis={diagnosis}
+              onChangeDiagnosis={setDiagnosis}
+              notes={notes}
+              onChangeNotes={setNotes}
+              savingNotes={savingNotes}
+              notesSaved={notesSaved}
+              onSave={handleSaveNotes}
+            />
           )}
 
-          {/* Quick Prescribe Tab */}
           {activePanel === 'prescribe' && (
-            <div className="si-c710217c">
-              <p className="si-09dee8a9">
-                {t('consultationRoom.quickPrescribeAccess')}
-              </p>
-              <button className="btn btn-primary"
-                onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                💊 {t('consultationRoom.openPrescriptionWriter')}
-              </button>
-              <div className="si-66faea9d">
-                <h4>{t('consultationRoom.commonPrescriptions')}</h4>
-                {[
-                  { label: 'Antibiotics Course (7 days)', name: 'Amoxicillin', dosage: '250mg', frequency: 'Twice daily', duration: '7 days', instructions: 'Give with food' },
-                  { label: 'Pain Relief (5 days)', name: 'Meloxicam', dosage: '0.1mg/kg', frequency: 'Once daily', duration: '5 days', instructions: 'Give with food, monitor appetite' },
-                  { label: 'Anti-inflammatory (10 days)', name: 'Carprofen', dosage: '2mg/kg', frequency: 'Twice daily', duration: '10 days', instructions: 'Give with food, plenty of water' },
-                  { label: 'Vitamins & Supplements', name: 'Pet Multivitamin', dosage: '1 tablet', frequency: 'Once daily', duration: '30 days', instructions: 'Mix with food' },
-                ].map(tpl => (
-                  <div key={tpl.label} className="si-394b4e9f"
-                  onClick={() => {
-                    const med = encodeURIComponent(JSON.stringify([{
-                      name: tpl.name, dosage: tpl.dosage, frequency: tpl.frequency,
-                      duration: tpl.duration, instructions: tpl.instructions
-                    }]))
-                    onNavigate(`/doctor/prescriptions/new?consultationId=${conId}&meds=${med}`)
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                  onMouseLeave={e => (e.currentTarget.style.background = '#f3f4f6')}
-                  >
-                    <span>{tpl.label}</span>
-                    <span className="si-0134f7a1">+</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <PrescribePanel conId={conId} onNavigate={onNavigate} />
           )}
         </div>
       </div>
@@ -1118,72 +781,16 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
 
       {/* Referral Modal */}
       {showReferralModal && (
-        <div className="si-5044997e"
-          onClick={() => setShowReferralModal(false)}>
-          <div className="si-e6c98afe"
-            onClick={e => e.stopPropagation()}>
-            <div className="si-101fd1d0">
-              <h3 className="si-44087c4b">🔄 Refer Patient to Network Hospital</h3>
-              <button onClick={() => setShowReferralModal(false)} className="si-30be827b">✕</button>
-            </div>
-            {referralError && <div className="si-80ee1308">{referralError}</div>}
-            <form onSubmit={handleCreateReferral}>
-              <div className="si-bab8e8bc">
-                <label className="si-0402f865">Network <span className="si-f84f41a5">*</span></label>
-                <select className="si-c8d05a40" required
-                  value={referralForm.networkId} onChange={e => setReferralForm(f => ({ ...f, networkId: e.target.value, toHospitalId: '' }))}>
-                  <option value="">- Select Network -</option>
-                  {networksList.map((n: any) => <option key={n.id} value={n.id}>{n.name}</option>)}
-                </select>
-              </div>
-              <div className="si-bab8e8bc">
-                <label className="si-0402f865">
-                  Receiving Hospital <span className="si-f84f41a5">*</span>
-                  {!referralForm.networkId && <span className="si-18d8dcb2">⚠️ Select a network first</span>}
-                </label>
-                <select className="si-c8d05a40" required
-                  disabled={!referralForm.networkId}
-                  value={referralForm.toHospitalId} onChange={e => setReferralForm(f => ({ ...f, toHospitalId: e.target.value }))}>
-                  <option value="">- Select Hospital -</option>
-                  {networkHospitals.map((h: any) => <option key={h.id} value={h.id}>{h.name}</option>)}
-                </select>
-              </div>
-              <div className="si-bab8e8bc">
-                <label className="si-0402f865">Reason <span className="si-f84f41a5">*</span></label>
-                <textarea className="si-d41674e2"
-                  rows={3} required placeholder="Reason for referral..."
-                  value={referralForm.reason} onChange={e => setReferralForm(f => ({ ...f, reason: e.target.value }))} />
-              </div>
-              <div className="si-bab8e8bc">
-                <label className="si-0402f865">Priority</label>
-                <select className="si-c8d05a40"
-                  value={referralForm.priority} onChange={e => setReferralForm(f => ({ ...f, priority: e.target.value }))}>
-                  <option value="low">Low</option>
-                  <option value="normal">Normal</option>
-                  <option value="high">High</option>
-                  <option value="emergency">Emergency</option>
-                </select>
-              </div>
-              <div className="si-7e63ec4f">
-                <label className="si-0402f865">Clinical Notes (optional)</label>
-                <textarea className="si-d41674e2"
-                  rows={4} placeholder="Include relevant history, diagnosis, what you need from the receiving hospital..."
-                  value={referralForm.clinicalNotes} onChange={e => setReferralForm(f => ({ ...f, clinicalNotes: e.target.value }))} />
-              </div>
-              <p className="si-7dc8bae5">* Required field</p>
-              <div className="si-b1214800">
-                <button type="button" onClick={() => setShowReferralModal(false)} className="si-bf48a746">Cancel</button>
-                <button type="submit" disabled={referralSubmitting || !referralForm.networkId || !referralForm.toHospitalId}
-                  style={{ flex: 2, padding: '10px 20px', borderRadius: 8, border: 'none', background: (referralSubmitting || !referralForm.networkId || !referralForm.toHospitalId) ? '#94a3b8' : '#2563eb', color: '#fff', fontWeight: 600, cursor: (referralSubmitting || !referralForm.networkId || !referralForm.toHospitalId) ? 'not-allowed' : 'pointer' }}>
-                  {referralSubmitting ? '⏳ Sending...' : '🔄 Send Referral'}
-                </button>
-              </div>
-              {(!referralForm.networkId || !referralForm.toHospitalId) && (
-                <p className="si-d46111c1">⚠️ Select a network and hospital to enable submission</p>
-              )}
-            </form>
-          </div>
-        </div>
+        <ReferralModal
+          referralForm={referralForm}
+          onChangeForm={setReferralForm}
+          networksList={networksList}
+          networkHospitals={networkHospitals}
+          referralError={referralError}
+          referralSubmitting={referralSubmitting}
+          onClose={() => setShowReferralModal(false)}
+          onSubmit={handleCreateReferral}
+        />
       )}
       {referralSuccess && (
         <div className="si-6e46e0f9">

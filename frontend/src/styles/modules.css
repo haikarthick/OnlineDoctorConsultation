@@ -2887,3 +2887,18 @@ textarea.module-input {
 }
 .bc-mode-btn.variant-individual.is-selected { border: 2px solid var(--primary); background: var(--primary-light); color: var(--primary); }
 .bc-mode-btn.variant-enterprise.is-selected { border: 2px solid var(--success); background: #ecfdf5; color: var(--success); }
+
+/* ── ConsultationRoom (doctor) ───────────────────────────────── */
+.cr-allergy-badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; background: #fef3c7; color: #92400e; }
+.cr-allergy-badge.is-severe { background: #fef2f2; color: #991b1b; }
+
+.cr-vaccination-status { margin-left: 6px; color: var(--warning); }
+.cr-vaccination-status.is-completed { color: var(--success); }
+
+.cr-lab-status-badge { margin-left: 6px; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: #fef3c7; color: #92400e; }
+.cr-lab-status-badge.is-completed { background: #d1fae5; color: #065f46; }
+
+.cr-referral-submit-btn { flex: 2; padding: 10px 20px; border-radius: 8px; border: none; background: #2563eb; color: #fff; font-weight: 600; cursor: pointer; }
+.cr-referral-submit-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+
+.cr-rx-template-item:hover { background: #e5e7eb; }
