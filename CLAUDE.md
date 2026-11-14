@@ -136,6 +136,9 @@ Invoke these for the workflows they cover rather than improvising each time:
 
 ## Module docs
 - *(add a line here per module as `docs/modules/<name>.md` is written)*
+- **Active initiative:** `docs/FARM_MANAGEMENT_PLAN.md` — farm management realignment (all farm
+  types incl. aquaculture, phone-first, parent-drives-children field visibility). Plan approved
+  in principle 2026-11-14, nothing built; resume at its §11.
 
 ## Where the rest of the context lives
 This repo's full history of bugs, fixes, architectural decisions, and domain rules lives in
