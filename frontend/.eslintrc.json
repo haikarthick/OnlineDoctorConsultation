@@ -91,7 +91,6 @@
         "src/pages/GenomicLineage.tsx",
         "src/pages/GeospatialAnalytics.tsx",
         "src/pages/HealthAnalytics.tsx",
-        "src/pages/HerdMedicalManagement.tsx",
         "src/pages/HospitalWorkflow.tsx",
         "src/pages/IoTSensors.tsx",
         "src/pages/LocationManagement.tsx",

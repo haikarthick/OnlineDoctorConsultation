@@ -1261,3 +1261,115 @@
   line-height: 1.5;
   color: #64748b;
 }
+
+/* ─── Herd Medical: modal shell + form fields ─────────────────────────────
+   These reproduce the page's former inline style objects exactly (not the generic
+   .modal-overlay/.modal in modules.css, which center differently and would change layout). */
+:where(.module-page) .hm-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 60px;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+:where(.module-page) .hm-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  margin-bottom: 40px;
+}
+
+:where(.module-page) .hm-field {
+  margin-bottom: 14px;
+}
+
+:where(.module-page) .hm-field-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 0.9em;
+  color: #374151;
+}
+
+:where(.module-page) .hm-field-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+:where(.module-page) .hm-protocol-hint {
+  padding: 8px 12px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  border: 1px solid #bbf7d0;
+  margin-bottom: 8px;
+  font-size: 0.85em;
+  color: #166534;
+}
+
+/* ─── Herd Medical: severity / due-status / lab-status badges ────────────
+   Severity, vaccination due-status, and lab status are closed enums - colored via a
+   static modifier class instead of a per-element inline style. */
+:where(.module-page) .hm-severity-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  color: #fff;
+}
+
+:where(.module-page) .hm-severity-badge-lg {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #fff;
+}
+
+:where(.module-page) .hm-severity-badge.sev-low,
+:where(.module-page) .hm-severity-badge-lg.sev-low { background-color: #059669; }
+:where(.module-page) .hm-severity-badge.sev-normal,
+:where(.module-page) .hm-severity-badge-lg.sev-normal { background-color: #667eea; }
+:where(.module-page) .hm-severity-badge.sev-high,
+:where(.module-page) .hm-severity-badge-lg.sev-high { background-color: #d97706; }
+:where(.module-page) .hm-severity-badge.sev-critical,
+:where(.module-page) .hm-severity-badge-lg.sev-critical { background-color: #dc2626; }
+:where(.module-page) .hm-severity-badge.sev-unknown,
+:where(.module-page) .hm-severity-badge-lg.sev-unknown { background-color: #6b7280; }
+
+:where(.module-page) .hm-due-badge {
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+:where(.module-page) .hm-due-badge.due-overdue { background-color: #fef2f2; color: #dc2626; }
+:where(.module-page) .hm-due-badge.due-upcoming { background-color: #fffbeb; color: #d97706; }
+:where(.module-page) .hm-due-badge.due-current { background-color: #f0fdf4; color: #059669; }
+
+:where(.module-page) .hm-lab-status-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+:where(.module-page) .hm-lab-status-badge.status-completed { background-color: #f0fdf4; color: #059669; }
+:where(.module-page) .hm-lab-status-badge.status-pending { background-color: #fffbeb; color: #d97706; }
+:where(.module-page) .hm-lab-status-badge.status-inprogress { background-color: #f0f4ff; color: #667eea; }
+
+/* ─── Herd Medical: overview stat-card + table-cell state modifiers ──────── */
+:where(.module-page) .stat-card.hm-stat-overdue { border-color: #dc2626; }
+:where(.module-page) .stat-card.hm-stat-overdue .stat-value { color: #dc2626; }
+
+:where(.module-page) .hm-count-cell { font-weight: 600; }
+:where(.module-page) .hm-count-cell.bad { color: #dc2626; }
+:where(.module-page) .hm-count-cell.good { color: #059669; }
+
+:where(.module-page) .hm-lab-result.is-abnormal { color: #dc2626; font-weight: 600; }
