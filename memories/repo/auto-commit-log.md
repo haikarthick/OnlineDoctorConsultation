@@ -8579,3 +8579,45 @@
 </details>
 
 ---
+
+## 2026-11-14 01:17 · `2fdfc1e` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 01:27 · `f07bd43` · OTHER
+
+**Commit:** refactor(pages): split the 1,157-line Consultations.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/consultations/ActionLogModal.tsx
+  - frontend/src/components/consultations/BookingCard.tsx
+  - frontend/src/components/consultations/CancelBookingModal.tsx
+  - frontend/src/components/consultations/HistoryCard.tsx
+  - frontend/src/components/consultations/NoShowModal.tsx
+  - frontend/src/components/consultations/RescheduleModal.tsx
+  - frontend/src/components/consultations/TabsAndFilters.tsx
+  - frontend/src/components/consultations/consultationsShared.tsx
+  - frontend/src/pages/Consultations.tsx
+  - frontend/src/pages/ModulePage.css
+
+</details>
+
+---
