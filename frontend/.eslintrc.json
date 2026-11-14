@@ -92,7 +92,6 @@
         "src/pages/HealthAnalytics.tsx",
         "src/pages/IoTSensors.tsx",
         "src/pages/LocationManagement.tsx",
-        "src/pages/MedicalRecords.tsx",
         "src/pages/MovementLog.tsx",
         "src/pages/PaymentsHistory.tsx",
         "src/pages/ReportBuilder.tsx",

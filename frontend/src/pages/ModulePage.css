@@ -1461,3 +1461,132 @@
 :where(.module-page) .hm-count-cell.good { color: #059669; }
 
 :where(.module-page) .hm-lab-result.is-abnormal { color: #dc2626; font-weight: 600; }
+
+/* ═══ Medical Records (page) ═══ */
+:where(.module-page) .mr-field { width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid #d1d5db; font-size: 13px; }
+:where(.module-page) .mr-field--h60 { height: 60px; }
+:where(.module-page) .mr-field--h100 { height: 100px; }
+
+:where(.module-page) .mr-stat-card {
+  padding: 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+  border-left: 4px solid var(--accent, #6b7280); transition: box-shadow 0.15s;
+}
+:where(.module-page) .mr-stat-card.is-clickable { cursor: pointer; }
+:where(.module-page) .mr-stat-card.is-clickable:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+:where(.module-page) .mr-stat-value { font-size: 24px; font-weight: 700; color: var(--accent, #1a1a1a); }
+
+:where(.module-page) .mr-modal-save { padding: 8px 20px; font-size: 13px; }
+:where(.module-page) .mr-modal-save:disabled { opacity: .5; }
+
+:where(.module-page) .mr-allergy-card.sev-severe { border-left: 4px solid #dc2626; }
+:where(.module-page) .mr-allergy-card.sev-moderate { border-left: 4px solid #d97706; }
+:where(.module-page) .mr-allergy-card.sev-mild { border-left: 4px solid #059669; }
+:where(.module-page) .mr-allergy-sev-text.sev-severe { color: #dc2626; }
+:where(.module-page) .mr-allergy-sev-text.sev-moderate { color: #d97706; }
+:where(.module-page) .mr-allergy-sev-text.sev-mild { color: #059669; }
+
+:where(.module-page) .mr-consult-card.status-completed { border-left: 4px solid #059669; }
+:where(.module-page) .mr-consult-card.status-in_progress { border-left: 4px solid #667eea; }
+:where(.module-page) .mr-consult-card.status-scheduled { border-left: 4px solid #d97706; }
+:where(.module-page) .mr-consult-card.status-cancelled { border-left: 4px solid #dc2626; }
+:where(.module-page) .mr-consult-card.status-missed { border-left: 4px solid #9ca3af; }
+:where(.module-page) .mr-consult-card.status-default { border-left: 4px solid #6b7280; }
+
+:where(.module-page) .mr-lab-card { border-left: 4px solid #d97706; }
+:where(.module-page) .mr-lab-card.is-abnormal { border-left-color: #dc2626; }
+
+:where(.module-page) .mr-vax-card { border-left: 4px solid #7c3aed; }
+:where(.module-page) .mr-vax-card.is-overdue { border-left-color: #dc2626; }
+:where(.module-page) .mr-vax-due-text { color: #059669; }
+:where(.module-page) .mr-vax-due-text.is-overdue { color: #dc2626; }
+
+:where(.module-page) .mr-visit-card { background: #fff; border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+:where(.module-page) .mr-visit-card.q-waiting { border-left: 4px solid #f59e0b; }
+:where(.module-page) .mr-visit-card.q-in_triage { border-left: 4px solid #8b5cf6; }
+:where(.module-page) .mr-visit-card.q-in_examination { border-left: 4px solid #2563eb; }
+:where(.module-page) .mr-visit-card.q-in_treatment { border-left: 4px solid #059669; }
+:where(.module-page) .mr-visit-card.q-discharged { border-left: 4px solid #64748b; }
+:where(.module-page) .mr-visit-card.q-no_show { border-left: 4px solid #dc2626; }
+:where(.module-page) .mr-visit-card.q-default { border-left: 4px solid #64748b; }
+
+:where(.module-page) .mr-visit-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+:where(.module-page) .mr-visit-badge.q-waiting { background: #f59e0b20; color: #f59e0b; }
+:where(.module-page) .mr-visit-badge.q-in_triage { background: #8b5cf620; color: #8b5cf6; }
+:where(.module-page) .mr-visit-badge.q-in_examination { background: #2563eb20; color: #2563eb; }
+:where(.module-page) .mr-visit-badge.q-in_treatment { background: #05966920; color: #059669; }
+:where(.module-page) .mr-visit-badge.q-discharged { background: #64748b20; color: #64748b; }
+:where(.module-page) .mr-visit-badge.q-no_show { background: #dc262620; color: #dc2626; }
+:where(.module-page) .mr-visit-badge.q-default { background: #64748b20; color: #64748b; }
+
+:where(.module-page) .mr-visit-card.a-admitted { border-left: 4px solid #2563eb; }
+:where(.module-page) .mr-visit-card.a-in_treatment { border-left: 4px solid #b45309; }
+:where(.module-page) .mr-visit-card.a-recovering { border-left: 4px solid #059669; }
+:where(.module-page) .mr-visit-card.a-ready_to_discharge { border-left: 4px solid #0ea5e9; }
+:where(.module-page) .mr-visit-card.a-discharged { border-left: 4px solid #64748b; }
+:where(.module-page) .mr-visit-card.a-icu { border-left: 4px solid #991b1b; }
+:where(.module-page) .mr-visit-card.a-default { border-left: 4px solid #64748b; }
+
+:where(.module-page) .mr-visit-badge.a-admitted { background: #2563eb20; color: #2563eb; }
+:where(.module-page) .mr-visit-badge.a-in_treatment { background: #b4530920; color: #b45309; }
+:where(.module-page) .mr-visit-badge.a-recovering { background: #05966920; color: #059669; }
+:where(.module-page) .mr-visit-badge.a-ready_to_discharge { background: #0ea5e920; color: #0ea5e9; }
+:where(.module-page) .mr-visit-badge.a-discharged { background: #64748b20; color: #64748b; }
+:where(.module-page) .mr-visit-badge.a-icu { background: #991b1b20; color: #991b1b; }
+:where(.module-page) .mr-visit-badge.a-default { background: #64748b20; color: #64748b; }
+
+:where(.module-page) .mr-ref-type-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+:where(.module-page) .mr-ref-type-badge.type-network { background: #eff6ff; color: #1d4ed8; }
+:where(.module-page) .mr-ref-type-badge.type-platform { background: #f5f3ff; color: #7c3aed; }
+
+:where(.module-page) .mr-ref-priority-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+:where(.module-page) .mr-ref-priority-badge.priority-emergency { background: #fee2e2; color: #dc2626; }
+:where(.module-page) .mr-ref-priority-badge.priority-high { background: #fef3c7; color: #d97706; }
+:where(.module-page) .mr-ref-priority-badge.priority-normal { background: #f1f5f9; color: #64748b; }
+
+:where(.module-page) .mr-record-card { padding: 14px 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
+:where(.module-page) .mr-record-card.rt-diagnosis { border-left: 4px solid #667eea; }
+:where(.module-page) .mr-record-card.rt-prescription { border-left: 4px solid #059669; }
+:where(.module-page) .mr-record-card.rt-lab_report { border-left: 4px solid #d97706; }
+:where(.module-page) .mr-record-card.rt-vaccination { border-left: 4px solid #7c3aed; }
+:where(.module-page) .mr-record-card.rt-surgery { border-left: 4px solid #dc2626; }
+:where(.module-page) .mr-record-card.rt-imaging { border-left: 4px solid #0891b2; }
+:where(.module-page) .mr-record-card.rt-follow_up { border-left: 4px solid #ea580c; }
+:where(.module-page) .mr-record-card.rt-other { border-left: 4px solid #6b7280; }
+
+:where(.module-page) .mr-type-badge { font-size: 10px; color: #fff; }
+:where(.module-page) .mr-type-badge.rt-diagnosis { background: #667eea; }
+:where(.module-page) .mr-type-badge.rt-prescription { background: #059669; }
+:where(.module-page) .mr-type-badge.rt-lab_report { background: #d97706; }
+:where(.module-page) .mr-type-badge.rt-vaccination { background: #7c3aed; }
+:where(.module-page) .mr-type-badge.rt-surgery { background: #dc2626; }
+:where(.module-page) .mr-type-badge.rt-imaging { background: #0891b2; }
+:where(.module-page) .mr-type-badge.rt-follow_up { background: #ea580c; }
+:where(.module-page) .mr-type-badge.rt-other { background: #6b7280; }
+
+:where(.module-page) .mr-sev-badge { font-size: 10px; color: #fff; }
+:where(.module-page) .mr-sev-badge.sev-low { background: #059669; }
+:where(.module-page) .mr-sev-badge.sev-normal { background: #667eea; }
+:where(.module-page) .mr-sev-badge.sev-high { background: #d97706; }
+:where(.module-page) .mr-sev-badge.sev-critical { background: #dc2626; }
+
+:where(.module-page) .mr-timeline-dot {
+  position: absolute; left: -26px; top: 4px; width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 12px; z-index: 1;
+  background: #667eea;
+}
+:where(.module-page) .mr-timeline-dot.rt-diagnosis { background: #667eea; }
+:where(.module-page) .mr-timeline-dot.rt-prescription { background: #059669; }
+:where(.module-page) .mr-timeline-dot.rt-lab_report { background: #d97706; }
+:where(.module-page) .mr-timeline-dot.rt-vaccination { background: #7c3aed; }
+:where(.module-page) .mr-timeline-dot.rt-surgery { background: #dc2626; }
+:where(.module-page) .mr-timeline-dot.rt-imaging { background: #0891b2; }
+:where(.module-page) .mr-timeline-dot.rt-follow_up { background: #ea580c; }
+:where(.module-page) .mr-timeline-dot.rt-other { background: #6b7280; }
+
+:where(.module-page) .mr-weight-bar { flex: 1; height: var(--h, 20%); background: #667eea; border-radius: 4px 4px 0 0; min-width: 8px; max-width: 30px; }
+
+:where(.module-page) .mr-rt-filter-chip {
+  padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 500; border: 1px solid #e5e7eb;
+  background: #fff; color: #374151; cursor: pointer;
+}
+:where(.module-page) .mr-rt-filter-chip.is-active { border-color: #667eea; background: #667eea; color: #fff; }
