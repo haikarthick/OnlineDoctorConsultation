@@ -81,7 +81,7 @@ const AnimalTimeline: React.FC = () => {
       finally { setAnimalsLoading(false) }
     }
     load()
-  }, [isVet, isAdmin])
+  }, [isVet, isAdmin, isFarmer])
 
   // ── Load events ──
   const loadTimeline = useCallback(async () => {

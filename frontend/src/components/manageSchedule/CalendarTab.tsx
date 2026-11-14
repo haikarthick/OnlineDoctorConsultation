@@ -9,6 +9,7 @@ interface CalendarTabProps {
   overrides: DateOverride[]
   todayStr: string
   formatSlotTime: (t: string) => string
+  formatDate: (d: string | Date, opts?: Intl.DateTimeFormatOptions) => string
   onOpenVacation: () => void
   onOpenOverride: () => void
   onOpenOverrideForDate: (date: string) => void
@@ -24,7 +25,7 @@ const LEGEND_STATUSES: { status: CalendarDay['status']; labelKey: string }[] = [
 ]
 
 const CalendarTab: React.FC<CalendarTabProps> = ({
-  calMonth, setCalMonth, calendarDays, overrides, todayStr, formatSlotTime, onOpenVacation, onOpenOverride, onOpenOverrideForDate, onDeleteOverride
+  calMonth, setCalMonth, calendarDays, overrides, todayStr, formatSlotTime, formatDate, onOpenVacation, onOpenOverride, onOpenOverrideForDate, onDeleteOverride
 }) => {
   const { t } = useTranslation()
   const grid = buildCalendarGrid(calMonth, calendarDays)
@@ -90,7 +91,7 @@ const CalendarTab: React.FC<CalendarTabProps> = ({
           {upcomingOverrides.map(o => (
             <div key={o.id} className={`card ms-override-card ${o.overrideType === 'unavailable' ? 'type-unavailable' : 'type-custom'}`}>
               <div>
-                <strong>{new Date(o.overrideDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</strong>
+                <strong>{formatDate(o.overrideDate + 'T12:00:00', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</strong>
                 <span className="si-fddef076">
                   {o.overrideType === 'unavailable' ? `🚫 ${t('manageSchedule.dayOff')}` : `⚙️ ${t('manageSchedule.custom')}: ${formatSlotTime(o.startTime || '')}–${formatSlotTime(o.endTime || '')}`}
                 </span>

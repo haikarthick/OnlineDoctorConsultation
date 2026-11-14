@@ -22,11 +22,12 @@ interface VaccineProtocolHistoryModalProps {
   savingChange: boolean
   onClose: () => void
   t: any
+  formatDate: (d: string | Date, opts?: Intl.DateTimeFormatOptions) => string
 }
 
 const VaccineProtocolHistoryModal: React.FC<VaccineProtocolHistoryModalProps> = ({
   protocol, changes, loadingChanges, showAddChange, setShowAddChange, changeForm, setChangeForm,
-  onSaveChange, savingChange, onClose, t,
+  onSaveChange, savingChange, onClose, t, formatDate,
 }) => (
   <div className="vpa-modal-overlay" onClick={onClose}>
     <div className="vpa-modal vpa-wide-modal" onClick={e => e.stopPropagation()}>
@@ -87,7 +88,7 @@ const VaccineProtocolHistoryModal: React.FC<VaccineProtocolHistoryModalProps> = 
                 <div className="vpa-timeline-content module-card">
                   <div className="vpa-change-header">
                     <strong>{c.changedField}</strong>
-                    <span className="vpa-change-date">{new Date(c.effectiveDate).toLocaleDateString()}</span>
+                    <span className="vpa-change-date">{formatDate(c.effectiveDate)}</span>
                   </div>
                   <div className="vpa-change-values">
                     <span className="vpa-old-val">{c.oldValue || '-'}</span>

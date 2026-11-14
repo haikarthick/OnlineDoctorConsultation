@@ -5,11 +5,12 @@ import { BlockedSlot, DAY_LABELS } from './manageScheduleShared'
 interface TimeBlocksTabProps {
   blockedSlots: BlockedSlot[]
   formatSlotTime: (t: string) => string
+  formatDate: (d: string | Date, opts?: Intl.DateTimeFormatOptions) => string
   onAddNew: () => void
   onDelete: (id: string) => void
 }
 
-const TimeBlocksTab: React.FC<TimeBlocksTabProps> = ({ blockedSlots, formatSlotTime, onAddNew, onDelete }) => {
+const TimeBlocksTab: React.FC<TimeBlocksTabProps> = ({ blockedSlots, formatSlotTime, formatDate, onAddNew, onDelete }) => {
   const { t } = useTranslation()
   const recurring = blockedSlots.filter(b => b.isRecurring)
   const oneTime = blockedSlots.filter(b => !b.isRecurring)
@@ -55,7 +56,7 @@ const TimeBlocksTab: React.FC<TimeBlocksTabProps> = ({ blockedSlots, formatSlotT
           {oneTime.map(b => (
             <div key={b.id} className="card si-1ad6e65d">
               <div>
-                <strong>{b.blockDate ? new Date(b.blockDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '-'}</strong>
+                <strong>{b.blockDate ? formatDate(b.blockDate + 'T12:00:00', { weekday: 'short', month: 'short', day: 'numeric' }) : '-'}</strong>
                 <span className="si-fddef076">🕐 {formatSlotTime(b.startTime)} - {formatSlotTime(b.endTime)}</span>
                 {b.reason && <span className="si-824a7a1e">({b.reason})</span>}
               </div>

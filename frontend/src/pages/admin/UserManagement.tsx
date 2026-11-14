@@ -7,6 +7,7 @@ import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import type { User, PendingUser, VetProfileData } from '../../components/userManagement/userManagementShared'
 import { EMPTY_VET_FORM } from '../../components/userManagement/userManagementShared'
 import PendingApprovalsTab from '../../components/userManagement/PendingApprovalsTab'
+import RejectRegistrationModal from '../../components/userManagement/RejectRegistrationModal'
 import RoleChangeRequestsTab from '../../components/userManagement/RoleChangeRequestsTab'
 import UsersSearchAndTable from '../../components/userManagement/UsersSearchAndTable'
 import RoleChangeModal from '../../components/userManagement/RoleChangeModal'
@@ -448,13 +449,19 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
           pendingMsg={pendingMsg}
           processing={processing}
           onApprove={handleApproveRegistration}
-          showRejectRegistrationModal={showRejectRegistrationModal}
           setShowRejectRegistrationModal={setShowRejectRegistrationModal}
-          rejectRegistrationReason={rejectRegistrationReason}
           setRejectRegistrationReason={setRejectRegistrationReason}
-          onRejectConfirm={handleRejectRegistration}
         />
       )}
+
+      <RejectRegistrationModal
+        showRejectRegistrationModal={showRejectRegistrationModal}
+        setShowRejectRegistrationModal={setShowRejectRegistrationModal}
+        rejectRegistrationReason={rejectRegistrationReason}
+        setRejectRegistrationReason={setRejectRegistrationReason}
+        onRejectConfirm={handleRejectRegistration}
+        processing={processing}
+      />
 
       {/* ── Role Change Requests Tab ── */}
       {activeTab === 'requests' && (

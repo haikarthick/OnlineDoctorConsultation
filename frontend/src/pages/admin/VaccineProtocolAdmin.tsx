@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { useMasterData } from '../../context/MasterDataContext'
+import { useSettings } from '../../context/SettingsContext'
 import VaccineProtocolStatsPanel from '../../components/vaccineProtocol/VaccineProtocolStatsPanel'
 import VaccineProtocolFilterBar from '../../components/vaccineProtocol/VaccineProtocolFilterBar'
 import VaccineProtocolCard from '../../components/vaccineProtocol/VaccineProtocolCard'
@@ -18,6 +19,7 @@ interface VaccineProtocolAdminProps {
 const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate: _onNavigate }) => {
   const { t } = useTranslation()
   const { speciesLabel } = useMasterData()
+  const { formatDate } = useSettings()
   const [protocols, setProtocols] = useState<Protocol[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -248,6 +250,7 @@ const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate:
           changeForm={changeForm}
           setChangeForm={setChangeForm}
           onSaveChange={saveChange}
+          formatDate={formatDate}
           savingChange={savingChange}
           onClose={() => setHistoryProtocol(null)}
           t={t}

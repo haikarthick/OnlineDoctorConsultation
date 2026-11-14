@@ -8,11 +8,12 @@ interface HolidaysTabProps {
   setCalMonth: React.Dispatch<React.SetStateAction<{ year: number; month: number }>>
   todayStr: string
   formatSlotTime: (t: string) => string
+  formatDate: (d: string | Date, opts?: Intl.DateTimeFormatOptions) => string
   onAddNew: () => void
   onDelete: (id: string) => void
 }
 
-const HolidaysTab: React.FC<HolidaysTabProps> = ({ holidays, calMonth, setCalMonth, todayStr, formatSlotTime, onAddNew, onDelete }) => {
+const HolidaysTab: React.FC<HolidaysTabProps> = ({ holidays, calMonth, setCalMonth, todayStr, formatSlotTime, formatDate, onAddNew, onDelete }) => {
   const { t } = useTranslation()
 
   return (
@@ -48,7 +49,7 @@ const HolidaysTab: React.FC<HolidaysTabProps> = ({ holidays, calMonth, setCalMon
               <div>
                 <strong className="si-38c57a68">{h.name}</strong>
                 <span className="si-3d174d55">
-                  {new Date(h.holidayDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                  {formatDate(h.holidayDate + 'T12:00:00', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
                 <span className={`badge ${h.holidayType === 'general' ? 'badge-active' : h.holidayType === 'emergency_closure' ? 'badge-danger' : 'badge-warning'} si-7984dfbc`}>
                   {(h.holidayType || '').replace('_', ' ')}

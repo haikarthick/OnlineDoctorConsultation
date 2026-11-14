@@ -21,7 +21,7 @@ interface ManageScheduleProps {
 
 const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
   const { t } = useTranslation()
-  const { formatSlotTime } = useSettings()
+  const { formatSlotTime, formatDate } = useSettings()
   const [activeTab, setActiveTab] = useState<'weekly' | 'calendar' | 'blocks' | 'holidays'>('weekly')
   const [schedules, setSchedules] = useState<VetSchedule[]>([])
   const [overrides, setOverrides] = useState<DateOverride[]>([])
@@ -280,6 +280,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
           overrides={overrides}
           todayStr={todayStr}
           formatSlotTime={formatSlotTime}
+          formatDate={formatDate}
           onOpenVacation={() => { setVacationForm({ startDate: '', endDate: '', reason: '' }); setShowVacationForm(true) }}
           onOpenOverride={() => { setOverrideForm({ overrideDate: '', overrideType: 'unavailable', startTime: '09:00', endTime: '17:00', slotDuration: 30, reason: '' }); setShowOverrideForm(true) }}
           onOpenOverrideForDate={(date) => { setOverrideForm({ overrideDate: date, overrideType: 'unavailable', startTime: '09:00', endTime: '17:00', slotDuration: 30, reason: '' }); setShowOverrideForm(true) }}
@@ -291,6 +292,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
         <TimeBlocksTab
           blockedSlots={blockedSlots}
           formatSlotTime={formatSlotTime}
+          formatDate={formatDate}
           onAddNew={() => { setBlockForm({ blockDate: '', startTime: '12:00', endTime: '13:00', reason: '', isRecurring: false, recurringDay: 'monday' }); setShowBlockForm(true) }}
           onDelete={handleDeleteBlock}
         />
@@ -303,6 +305,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
           setCalMonth={setCalMonth}
           todayStr={todayStr}
           formatSlotTime={formatSlotTime}
+          formatDate={formatDate}
           onAddNew={() => { setHolidayForm({ holidayDate: '', name: '', holidayType: 'general', isFullDay: true, startTime: '09:00', endTime: '17:00' }); setShowHolidayForm(true) }}
           onDelete={handleDeleteHoliday}
         />
