@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
 import apiService from '../services/api'
 import './ModulePage.css'
 import './Marketplace.css'
@@ -9,43 +8,19 @@ import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData, MarketplaceThread, MarketplaceMessage, MarketplaceSavedSearch } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
-import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
 import { useMasterData } from '../context/MasterDataContext'
-
-const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
-
-// Media limits - mirror backend caps (uploadImage/uploadVideo in
-// backend/src/middleware/upload.ts, MAX_VIDEO_DURATION_SECONDS in
-// FileController.ts). Checked client-side first so a farmer on a slow
-// mobile connection gets instant feedback instead of uploading a file
-// that the backend will just reject.
-const MAX_LISTING_IMAGES = 4
-const MAX_IMAGE_SIZE_MB = 5
-const MAX_VIDEO_SIZE_MB = 100
-const MAX_VIDEO_DURATION_SECONDS = 60
-
-/** Reads a video file's duration client-side via an offscreen <video> element. */
-function readVideoDuration(file: File): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const video = document.createElement('video')
-    video.preload = 'metadata'
-    const objectUrl = URL.createObjectURL(file)
-    video.onloadedmetadata = () => {
-      URL.revokeObjectURL(objectUrl)
-      resolve(video.duration)
-    }
-    video.onerror = () => {
-      URL.revokeObjectURL(objectUrl)
-      reject(new Error('Could not read video metadata'))
-    }
-    video.src = objectUrl
-  })
-}
-
-type TabKey = 'dashboard' | 'browse' | 'sell' | 'auctions' | 'orders' | 'messages' | 'favorites' | 'saved' | 'prices' | 'admin'
-
-// ─── Helper to read snake_case or camelCase ───
-const g = (l: any, ...keys: string[]): any => { for (const k of keys) { if (l[k] !== undefined && l[k] !== null) return l[k]; } return undefined }
+import { g } from '../components/marketplace/publicListingShared'
+import { MAX_LISTING_IMAGES, MAX_IMAGE_SIZE_MB, MAX_VIDEO_SIZE_MB, MAX_VIDEO_DURATION_SECONDS, readVideoDuration, TabKey, AdminSubTab } from '../components/marketplace/marketplaceShared'
+import { ReportModal } from '../components/marketplace/ReportModal'
+import { DashboardTab } from '../components/marketplace/DashboardTab'
+import { BrowseTab } from '../components/marketplace/BrowseTab'
+import { SellWizard } from '../components/marketplace/SellWizard'
+import { OrdersTab } from '../components/marketplace/OrdersTab'
+import { MessagesTab } from '../components/marketplace/MessagesTab'
+import { FavoritesTab } from '../components/marketplace/FavoritesTab'
+import { SavedSearchesTab } from '../components/marketplace/SavedSearchesTab'
+import { PricesTab } from '../components/marketplace/PricesTab'
+import { AdminPanel } from '../components/marketplace/AdminPanel'
 
 const Marketplace: React.FC = () => {
   const { formatCurrency, settings } = useSettings()
@@ -141,7 +116,7 @@ const Marketplace: React.FC = () => {
   const [monetizationSettings, setMonetizationSettings] = useState<any[]>([])
   const [monetizationPlans, setMonetizationPlans] = useState<any[]>([])
   const [monetizationDashboard, setMonetizationDashboard] = useState<any>(null)
-  const [adminSubTab, setAdminSubTab] = useState<'listings' | 'reports' | 'settings' | 'plans' | 'revenue'>('listings')
+  const [adminSubTab, setAdminSubTab] = useState<AdminSubTab>('listings')
   const [editingPlan, setEditingPlan] = useState<any>(null)
   const [planForm, setPlanForm] = useState<Record<string, any>>({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
 
@@ -431,6 +406,9 @@ const Marketplace: React.FC = () => {
     } catch (e: any) { setError(e.message) }
   }
 
+  // Shared by the dashboard and favorites tabs: switch to Browse and open a listing's detail.
+  const viewListingFromTab = (listing: MarketplaceListing) => { setTab('browse'); viewListing(listing) }
+
   const createListing = async () => {
     if (!sellForm.title.trim()) { setError(t('marketplace.sell.titleRequired')); setFieldErrors({ title: t('marketplace.sell.titleRequired') }); return }
     try {
@@ -716,6 +694,61 @@ const Marketplace: React.FC = () => {
     } catch (e: any) { setError(e.message) }
   }
 
+  // ── Browse/Sell/Orders/Admin tab prop-wiring handlers ──
+  const handleClearAllFilters = () => { setFilters({}); setSortBy(''); setNearMeActive(false) }
+  const handleBuyNow = () => { if (selectedListing) reserveListing(selectedListing) }
+  const handleBack = () => setSelectedListing(null)
+  const handleRequestContact = async () => {
+    if (!selectedListing) return
+    try {
+      await apiService.createInquiry(selectedListing.id, '')
+      setSuccessMsg(t('marketplace.inquirySent', 'Inquiry sent! The seller will be notified.'))
+      viewListing(selectedListing)
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+  const handleMessageSellerClick = () => { if (selectedListing) messageSeller(selectedListing) }
+  const handleReportClick = () => { if (selectedListing) setReportModal({ listingId: selectedListing.id, title: selectedListing.title }) }
+  const handleBookVetCheckClick = () => { if (selectedListing) bookVetCheck(selectedListing) }
+
+  const handleClearFieldError = (key: string) => setFieldErrors(prev => { const n = { ...prev }; delete n[key]; return n })
+  const handleCopyId = (id: string) => {
+    navigator.clipboard?.writeText(id).then(() => {
+      setCopiedId(id)
+      setTimeout(() => setCopiedId(prev => (prev === id ? null : prev)), 1500)
+    }).catch(() => setError(t('common.copyFailed')))
+  }
+  const handleSellStep0Next = () => {
+    if (!sellForm.title.trim()) {
+      setError(t('marketplace.sell.titleRequired'))
+      setFieldErrors({ title: t('marketplace.sell.titleRequired') })
+      return
+    }
+    setFieldErrors({})
+    setSellStep(1)
+  }
+
+  const handleOrderRoleChange = (role: 'buyer' | 'seller') => { setOrderRole(role); fetchOrders(role); fetchInquiries(role) }
+  const handleDealPaymentMethodChange = (orderId: string, method: string) => setDealPaymentMethod(prev => ({ ...prev, [orderId]: method }))
+
+  const handleAdminSubTabChange = (st: AdminSubTab) => { setAdminSubTab(st); if (st === 'reports') fetchAdminReports() }
+  const handleAdminFilterChange = (v: string) => { setAdminFilter(v); fetchAdminData() }
+  const handleAdminTitleClick = (l: MarketplaceListing) => viewListingFromTab(l)
+  const handleAdminReportFilterChange = (v: string) => { setAdminReportFilter(v); fetchAdminReports(v) }
+  const handleAdminReportViewListing = (listingId: string, title: string) => { setTab('browse'); viewListing({ id: listingId, title } as MarketplaceListing) }
+  const handleAdminResolutionChange = (id: string, v: string) => setAdminReportResolution(prev => ({ ...prev, [id]: v }))
+  const handleEditPlan = (p: any) => {
+    setEditingPlan(p)
+    setPlanForm({
+      name: p.name, description: p.description || '', price: String(p.price),
+      durationDays: String(p.duration_days), maxListings: p.max_listings ? String(p.max_listings) : '',
+      maxBoostsPerMonth: String(p.max_boosts_per_month || 0), isActive: p.is_active, sortOrder: String(p.sort_order || 0),
+    })
+  }
+  const handleCancelEditPlan = () => {
+    setEditingPlan(null)
+    setPlanForm({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
+  }
+
   // ─── Tab definitions ───
   const tabs: Array<[TabKey, string]> = [
     ['dashboard', t('marketplace.tabs.dashboard')], ['browse', t('marketplace.tabs.browse')], ['sell', t('marketplace.tabs.sell')],
@@ -745,30 +778,12 @@ const Marketplace: React.FC = () => {
 
       {/* Report modal */}
       {reportModal && (
-        <div className="mp-modal-overlay" onClick={() => setReportModal(null)}>
-          <div className="mp-modal" onClick={e => e.stopPropagation()}>
-            <h3>🚩 {t('marketplace.report.reportListing')}</h3>
-            <p className="mp-sell-step-desc">{t('marketplace.report.reportingWhat', { title: reportModal.title })}</p>
-            <div className="module-form-group">
-              <label className="module-label">{t('marketplace.report.reason')}</label>
-              <select className="module-input" value={reportReason} onChange={e => setReportReason(e.target.value)}>
-                <option value="">{t('marketplace.report.selectReason')}</option>
-                {['scam', 'welfare_concern', 'prohibited', 'miscategorized', 'offensive', 'wrong_info', 'other'].map(r => (
-                  <option key={r} value={r}>{t(`marketplace.report.reasons.${r}`)}</option>
-                ))}
-              </select>
-            </div>
-            <div className="module-form-group">
-              <label className="module-label">{t('marketplace.report.details')}</label>
-              <textarea className="module-input" rows={3} value={reportDetails} onChange={e => setReportDetails(e.target.value)}
-                placeholder={t('marketplace.report.detailsPlaceholder')} maxLength={1000} />
-            </div>
-            <div className="mp-modal-actions">
-              <button className="module-btn" onClick={() => setReportModal(null)}>{t('marketplace.monetization.cancel')}</button>
-              <button className="module-btn primary" disabled={!reportReason} onClick={submitReport}>{t('marketplace.report.submit')}</button>
-            </div>
-          </div>
-        </div>
+        <ReportModal
+          reportModal={reportModal}
+          reportReason={reportReason} onReasonChange={setReportReason}
+          reportDetails={reportDetails} onDetailsChange={setReportDetails}
+          onClose={() => setReportModal(null)} onSubmit={submitReport} t={t}
+        />
       )}
 
       <div className="module-tabs">
@@ -788,1741 +803,153 @@ const Marketplace: React.FC = () => {
 
       {/* ════════ DASHBOARD ════════ */}
       {tab === 'dashboard' && dashboard && (
-        <div className="mp-dashboard">
-          <div className="module-stats">
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.activeListings || 0}</div><div className="stat-label">{t('marketplace.stats.activeListings')}</div></div>
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.soldListings || 0}</div><div className="stat-label">{t('marketplace.stats.itemsSold')}</div></div>
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.pendingApproval || 0}</div><div className="stat-label">{t('marketplace.stats.pendingReview')}</div></div>
-            <div className="stat-card"><div className="stat-value">{dashboard.bySpecies?.length || 0}</div><div className="stat-label">{t('marketplace.stats.speciesListed')}</div></div>
-          </div>
-
-          {/* Hot Deals Section */}
-          {dashboard.hotDeals?.length > 0 && (
-            <div className="mp-section">
-              <h3 className="mp-section-title">{t('marketplace.sections.hotDeals')}</h3>
-              <div className="mp-grid">
-                {dashboard.hotDeals.map((l: any) => <ListingCard key={l.id} listing={l} formatCurrency={formatCurrency} onView={() => { setTab('browse'); viewListing(l) }} t={t} />)}
-              </div>
-            </div>
-          )}
-
-          {/* Species Breakdown */}
-          {dashboard.bySpecies?.length > 0 && (
-            <div className="mp-section">
-              <h3 className="mp-section-title">{t('marketplace.sections.bySpecies')}</h3>
-              <div className="mp-species-grid">
-                {dashboard.bySpecies.map((s: any) => (
-                  <div key={s.species} className="mp-species-card" onClick={() => { setTab('browse'); updateFilter('species', s.species) }}>
-                    <div className="mp-species-name">{speciesLabel(s.species, t)}</div>
-                    <div className="mp-species-count">{s.count} {t('marketplace.units.listings')}</div>
-                    <div className="mp-species-price">{t('common.average')}: {formatCurrency(Math.round(s.avg_price || 0))}</div>
-                    {s.avg_milk_yield > 0 && <div className="mp-species-milk">🥛 {Number(s.avg_milk_yield).toFixed(1)}{t('marketplace.units.avgLPerDay')}</div>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Recent Listings */}
-          {dashboard.recentListings?.length > 0 && (
-            <div className="mp-section">
-              <h3 className="mp-section-title">{t('marketplace.sections.latestListings')}</h3>
-              <div className="mp-grid">
-                {dashboard.recentListings.map((l: any) => <ListingCard key={l.id} listing={l} formatCurrency={formatCurrency} onView={() => { setTab('browse'); viewListing(l) }} t={t} />)}
-              </div>
-            </div>
-          )}
-
-          {/* Top Sellers */}
-          {dashboard.topSellers?.length > 0 && (
-            <div className="mp-section">
-              <h3 className="mp-section-title">{t('marketplace.sections.topSellers')}</h3>
-              <div className="mp-sellers-list">
-                {dashboard.topSellers.map((s: any, i: number) => (
-                  <div key={i} className="mp-seller-row">
-                    <span className="mp-seller-rank">#{i + 1}</span>
-                    <span className="mp-seller-name">{s.name}</span>
-                    <span className="mp-seller-stat">{s.listings} {t('marketplace.units.listings')}</span>
-                    <span className="mp-seller-stat">{s.total_views} {t('marketplace.units.views')}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <DashboardTab
+          dashboard={dashboard} formatCurrency={formatCurrency} speciesLabel={speciesLabel}
+          onViewListing={viewListingFromTab}
+          onFilterBySpecies={(species) => { setTab('browse'); updateFilter('species', species) }}
+          t={t}
+        />
       )}
 
       {/* ════════ BROWSE ════════ */}
       {(tab === 'browse' || tab === 'auctions') && (
-        <div>
-          {selectedListing ? (
-            <ListingDetail
-              listing={selectedListing} bids={bids} formatCurrency={formatCurrency}
-              bidAmount={bidAmount} bidMessage={bidMessage} onBidAmountChange={setBidAmount} onBidMessageChange={setBidMessage}
-              onPlaceBid={placeBid} onBuyNow={() => reserveListing(selectedListing)} onBack={() => setSelectedListing(null)}
-              isAdmin={isAdmin} onToggleHotDeal={(id, v) => handleToggleHotDeal(id, v)} onToggleFeatured={(id, v) => handleToggleFeatured(id, v)}
-              userId={user?.id}
-              onRequestContact={async () => {
-                try {
-                  await apiService.createInquiry(selectedListing.id, '')
-                  setSuccessMsg(t('marketplace.inquirySent', 'Inquiry sent! The seller will be notified.'))
-                  viewListing(selectedListing)
-                } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
-              }}
-              isFavorite={favoriteIds.has(selectedListing.id)}
-              onToggleFavorite={user ? () => toggleFavorite(selectedListing.id) : undefined}
-              onMessageSeller={user ? () => messageSeller(selectedListing) : undefined}
-              onReport={user && selectedListing.seller_id !== user.id ? () => setReportModal({ listingId: selectedListing.id, title: selectedListing.title }) : undefined}
-              onBookVetCheck={() => bookVetCheck(selectedListing)}
-              transport={mpConfig?.transport?.enabled && mpConfig.transport.url ? mpConfig.transport : undefined}
-              t={t}
-            />
-          ) : (
-            <div>
-              {/* Advanced Filters */}
-              <div className="mp-filter-bar">
-                <input className="module-input si-0d5963cb" value={filters.search || ''} onChange={e => updateFilter('search', e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && fetchListings()} placeholder={t('marketplace.searchLivestock')} />
-                <select className="module-input si-549dd079" value={filters.category || ''} onChange={e => updateFilter('category', e.target.value)}>
-                  {CATEGORY_KEYS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-                </select>
-                <select className="module-input si-1403a954" value={filters.species || ''} onChange={e => updateFilter('species', e.target.value)}>
-                  <option value="">{t('marketplace.livestock.allSpecies')}</option>
-                  {SPECIES_LIST.map(s => <option key={s} value={s}>{speciesLabel(s, t)}</option>)}
-                </select>
-                <select className="module-input si-8ceadd67" value={filters.gender || ''} onChange={e => updateFilter('gender', e.target.value)}>
-                  <option value="">{t('marketplace.livestock.anyGender')}</option>
-                  <option value="male">{t('marketplace.genderLabel.male')}</option><option value="female">{t('marketplace.genderLabel.female')}</option>
-                </select>
-                {filters.species && classTermsForSpecies(filters.species).length > 0 && (
-                  <select className="module-input si-e28594a4" value={filters.animalClass || ''} onChange={e => updateFilter('animalClass', e.target.value)}>
-                    <option value="">{t('animalClass.anyClass')}</option>
-                    {classTermsForSpecies(filters.species).map(c => <option key={c.value} value={c.value}>{resolveLabel(c, t)}</option>)}
-                  </select>
-                )}
-                <select className="module-input si-e28594a4" value={sortBy} onChange={e => setSortBy(e.target.value)}>
-                  <option value="">{t('marketplace.sort.default')}</option>
-                  <option value="price_asc">{t('marketplace.sort.priceAsc')}</option>
-                  <option value="price_desc">{t('marketplace.sort.priceDesc')}</option>
-                  <option value="newest">{t('marketplace.sort.newest')}</option>
-                  <option value="milk_yield">{t('marketplace.sort.milkYield')}</option>
-                </select>
-                <button className="module-btn primary" onClick={fetchListings}>🔍</button>
-              </div>
-
-              {/* Proximity filter row */}
-              <div className="mp-proximity-bar">
-                <button
-                  className={`mp-chip ${nearMeActive ? 'active' : ''}`}
-                  onClick={handleNearMeToggle}
-                >
-                  📍 {nearMeActive ? t('marketplace.proximity.nearMeOn', 'Near Me ON') : t('marketplace.proximity.nearMe', 'Near Me')}
-                </button>
-                {nearMeActive && (
-                  <select className="module-input si-8ceadd67" value={radiusKm} onChange={e => setRadiusKm(e.target.value)}>
-                    <option value="5">5 km</option>
-                    <option value="10">10 km</option>
-                    <option value="25">25 km</option>
-                    <option value="50">50 km</option>
-                    <option value="100">100 km</option>
-                  </select>
-                )}
-                {nearMeActive && userLocation && (
-                  <span className="mp-location-hint si-48a0b045">
-                    {t('marketplace.proximity.searching', 'Searching within')} {radiusKm} km
-                  </span>
-                )}
-                {locationError && <span className="si-a41d01e2">{locationError}</span>}
-              </div>
-
-              {/* Quick filter chips */}
-              <div className="mp-chip-bar">
-                <button className={`mp-chip ${filters.isHotDeal === 'true' ? 'active' : ''}`} onClick={() => updateFilter('isHotDeal', filters.isHotDeal === 'true' ? '' : 'true')}>{t('marketplace.chips.hotDeals')}</button>
-                <button className={`mp-chip ${filters.healthCertificate === 'true' ? 'active' : ''}`} onClick={() => updateFilter('healthCertificate', filters.healthCertificate === 'true' ? '' : 'true')}>{t('marketplace.chips.healthCert')}</button>
-                <button className={`mp-chip ${filters.vaccinationStatus === 'fully_vaccinated' ? 'active' : ''}`} onClick={() => updateFilter('vaccinationStatus', filters.vaccinationStatus === 'fully_vaccinated' ? '' : 'fully_vaccinated')}>{t('marketplace.chips.vaccinated')}</button>
-                <button className={`mp-chip ${filters.pregnancyStatus === 'pregnant' ? 'active' : ''}`} onClick={() => updateFilter('pregnancyStatus', filters.pregnancyStatus === 'pregnant' ? '' : 'pregnant')}>{t('marketplace.chips.pregnant')}</button>
-                <button className={`mp-chip ${filters.listingTier === 'premium' ? 'active' : ''}`} onClick={() => updateFilter('listingTier', filters.listingTier === 'premium' ? '' : 'premium')}>{t('marketplace.chips.premium')}</button>
-                {Object.keys(filters).length > 0 && <button className="mp-chip clear" onClick={() => { setFilters({}); setSortBy(''); setNearMeActive(false) }}>{t('marketplace.chips.clearAll')}</button>}
-              </div>
-
-              {/* Treasure Mount interlink - surfaced when browsing non-animal product categories */}
-              {mpConfig?.treasureMount?.enabled && ['feed', 'equipment', 'medicine', 'other'].includes(filters.category || '') && (
-                <a className="mp-treasure-banner" href={mpConfig.treasureMount.url} target="_blank" rel="noopener noreferrer">
-                  🛒 {t('marketplace.interlink.treasureBanner')} <span className="mp-treasure-cta">{t('marketplace.interlink.visitTreasure')} →</span>
-                </a>
-              )}
-              {/* Save this search */}
-              <div className="mp-save-search-bar">
-                {showSaveSearch ? (
-                  <div className="mp-save-search-form">
-                    <input className="module-input" value={saveSearchName} onChange={e => setSaveSearchName(e.target.value)}
-                      placeholder={t('marketplace.engagement.searchNamePlaceholder')} maxLength={120} />
-                    <button className="module-btn primary small" onClick={saveCurrentSearch}>{t('marketplace.engagement.save')}</button>
-                    <button className="module-btn small" onClick={() => setShowSaveSearch(false)}>{t('marketplace.sell.back')}</button>
-                  </div>
-                ) : (
-                  <button className="mp-chip" onClick={() => setShowSaveSearch(true)}>🔔 {t('marketplace.engagement.saveThisSearch')}</button>
-                )}
-              </div>
-              {loading ? <div className="mp-loading">{t('marketplace.loadingListings')}</div> : (
-                <div className="mp-grid">
-                  {listings.map(l => <ListingCard key={l.id} listing={l} formatCurrency={formatCurrency} onView={() => viewListing(l)}
-                    isFavorite={favoriteIds.has(l.id)} onToggleFavorite={user ? () => toggleFavorite(l.id) : undefined} t={t} />)}
-                  {listings.length === 0 && <p className="mp-empty">{t('marketplace.emptyListings')}</p>}
-                </div>
-              )}
-              {/* Pagination */}
-              {totalListings > PAGE_SIZE && (
-                <div className="mp-pagination">
-                  <button className="module-btn small" disabled={page === 0} onClick={() => setPage(p => Math.max(0, p - 1))}>← {t('common.previous', 'Previous')}</button>
-                  <span className="mp-page-info">{t('marketplace.pageOf', { current: page + 1, total: Math.ceil(totalListings / PAGE_SIZE) })}</span>
-                  <button className="module-btn small" disabled={(page + 1) * PAGE_SIZE >= totalListings} onClick={() => setPage(p => p + 1)}>{t('common.next', 'Next')} →</button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        <BrowseTab
+          filters={filters} updateFilter={updateFilter}
+          sortBy={sortBy} onSortByChange={setSortBy}
+          categoryKeys={CATEGORY_KEYS} speciesList={SPECIES_LIST}
+          classTermsForSpecies={classTermsForSpecies} resolveLabel={resolveLabel} speciesLabel={speciesLabel}
+          onSearch={fetchListings} onClearAllFilters={handleClearAllFilters}
+          nearMeActive={nearMeActive} onNearMeToggle={handleNearMeToggle} radiusKm={radiusKm} onRadiusChange={setRadiusKm}
+          userLocation={userLocation} locationError={locationError}
+          treasureMount={mpConfig?.treasureMount}
+          showSaveSearch={showSaveSearch} onShowSaveSearchChange={setShowSaveSearch}
+          saveSearchName={saveSearchName} onSaveSearchNameChange={setSaveSearchName} onSaveCurrentSearch={saveCurrentSearch}
+          loading={loading} listings={listings} favoriteIds={favoriteIds} onToggleFavorite={toggleFavorite} isAuthenticated={!!user}
+          onViewListing={viewListing}
+          totalListings={totalListings} pageSize={PAGE_SIZE} page={page} onPageChange={setPage}
+          formatCurrency={formatCurrency}
+          selectedListing={selectedListing} bids={bids}
+          bidAmount={bidAmount} bidMessage={bidMessage} onBidAmountChange={setBidAmount} onBidMessageChange={setBidMessage}
+          onPlaceBid={placeBid} onBuyNow={handleBuyNow} onBack={handleBack}
+          isAdmin={isAdmin} onToggleHotDeal={handleToggleHotDeal} onToggleFeatured={handleToggleFeatured}
+          userId={user?.id} onRequestContact={handleRequestContact} onMessageSeller={handleMessageSellerClick} onReport={handleReportClick} onBookVetCheck={handleBookVetCheckClick}
+          transport={mpConfig?.transport?.enabled && mpConfig.transport.url ? mpConfig.transport : undefined}
+          t={t}
+        />
       )}
 
       {/* ════════ SELL (Multi-Step) ════════ */}
       {tab === 'sell' && (
-        <div className="mp-sell-container">
-          {/* Step Indicator */}
-          <div className="mp-steps">
-            {sellSteps.map((label, i) => (
-              <div key={i} className={`mp-step ${i === sellStep ? 'active' : i < sellStep ? 'done' : ''}`} onClick={() => i < sellStep && setSellStep(i)}>
-                <div className="mp-step-num">{i < sellStep ? '✓' : i + 1}</div>
-                <div className="mp-step-label">{label}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mp-sell-card">
-            {/* Step 0: Basic Info */}
-            {sellStep === 0 && (
-              <div className="mp-sell-step">
-                <h3>{t('marketplace.sell.basicInfoTitle')}</h3>
-                <p className="mp-sell-step-desc">{t('marketplace.sell.basicInfoDesc')}</p>
-                <div className="module-form">
-                  {/* Auto-populate from existing animal - top of form for visibility */}
-                  {userAnimals.length > 0 && (
-                    <div className="mp-auto-populate-section">
-                      <div className="mp-form-section-title">🐾 {t('marketplace.sell.autoPopulateTitle')}</div>
-                      <p className="mp-auto-populate-hint">{t('marketplace.sell.autoPopulateHint')}</p>
-                      <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.sell.selectAnimal')}</label>
-                        <select className="module-input mp-animal-select" value={selectedAnimalId} onChange={e => handleAnimalSelect(e.target.value)}>
-                          <option value="">{t('marketplace.sell.manualEntry')}</option>
-                          {userAnimals.map((a: any) => <option key={a.id} value={a.id}>{a.name} ({speciesLabel(a.species, t)}{a.breed ? ` - ${a.breed}` : ''})</option>)}
-                        </select>
-                      </div>
-                      {selectedAnimalId && <div className="mp-auto-populated-badge">✅ {t('marketplace.sell.autoPopulated')}</div>}
-                      {selectedAnimalId && (() => {
-                        const sel = userAnimals.find((a: any) => a.id === selectedAnimalId)
-                        const vcId = sel?.uniqueId || sel?.unique_id
-                        return vcId ? (
-                          <div className="si-a85540c4"
-                            title="waytovet Animal ID - click to copy"
-                            onClick={() => navigator.clipboard?.writeText(vcId).then(() => {
-                              setCopiedId(vcId)
-                              setTimeout(() => setCopiedId(prev => (prev === vcId ? null : prev)), 1500)
-                            }).catch(() => setError(t('common.copyFailed')))}
-                          >
-                            {copiedId === vcId ? `✅ ${t('common.copied')}` : `🏷️ ${vcId}`}
-                          </div>
-                        ) : null
-                      })()}
-                    </div>
-                  )}
-                  <div className="module-form-group">
-                    <label className="module-label">{t('marketplace.sell.title')}</label>
-                    <input className={`module-input${fieldErrors.title ? ' input-error' : ''}`} value={sellForm.title} onChange={e => { sf('title', e.target.value); if (fieldErrors.title) setFieldErrors(prev => { const n = { ...prev }; delete n.title; return n }) }} placeholder={t('marketplace.sell.titlePlaceholder')} />
-                    {fieldErrors.title && <div className="input-error-msg">{fieldErrors.title}</div>}
-                  </div>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('marketplace.sell.description')}</label>
-                    <textarea className="module-input" value={sellForm.description} onChange={e => sf('description', e.target.value)} rows={3} placeholder={t('marketplace.sell.descPlaceholder')} />
-                  </div>
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.sell.category')}</label>
-                      <select className="module-input" value={sellForm.category} onChange={e => sf('category', e.target.value)}>
-                        {CATEGORY_KEYS.filter(c => c.value).map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-                      </select>
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.sell.listingType')}</label>
-                      <select className="module-input" value={sellForm.listingType} onChange={e => sf('listingType', e.target.value)}>
-                        <option value="fixed_price">{t('marketplace.listingType.fixedPrice')}</option>
-                        {(auctionEnabled || isAdmin) && <option value="auction">{t('marketplace.listingType.auctionType')}{!auctionEnabled ? ' (Admin preview)' : ''}</option>}
-                        <option value="wanted">{t('marketplace.listingType.wanted')}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('marketplace.sell.tags')}</label>
-                    <input className="module-input" value={sellForm.tags} onChange={e => sf('tags', e.target.value)} placeholder={t('marketplace.sell.tagsPlaceholder')} />
-                  </div>
-                  {/* Seller Type (Compliance: PCA Rules 2017/2018) */}
-                  <div className="mp-form-section">
-                    <div className="mp-form-section-title">📋 {t('marketplace.compliance.sellerTypeTitle')}</div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.compliance.sellerType')}</label>
-                      <select className="module-input" value={sellForm.sellerType} onChange={e => sf('sellerType', e.target.value)}>
-                        <option value="individual">{t('marketplace.compliance.individualOwner')}</option>
-                        <option value="registered_breeder">{t('marketplace.compliance.registeredBreeder')}</option>
-                      </select>
-                    </div>
-                    {sellForm.sellerType === 'registered_breeder' && (
-                      <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.compliance.registrationNumber')}</label>
-                        <input className="module-input" value={sellForm.registrationNumber} onChange={e => sf('registrationNumber', e.target.value)} placeholder={t('marketplace.compliance.registrationPlaceholder')} />
-                        <div className="mp-compliance-hint">{t('marketplace.compliance.registrationHint')}</div>
-                      </div>
-                    )}
-                    {sellForm.sellerType === 'individual' && (
-                      <div className="mp-compliance-info">{t('marketplace.compliance.individualInfo')}</div>
-                    )}
-                  </div>
-                </div>
-                <div className="mp-step-actions">
-                  <button className="module-btn primary" onClick={() => {
-                    if (!sellForm.title.trim()) {
-                      setError(t('marketplace.sell.titleRequired'))
-                      setFieldErrors({ title: t('marketplace.sell.titleRequired') })
-                      return
-                    }
-                    setFieldErrors({})
-                    setSellStep(1)
-                  }}>{t('marketplace.sell.next')}</button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 1: Animal Details */}
-            {sellStep === 1 && (
-              <div className="mp-sell-step">
-                <h3>{t('marketplace.sell.animalDetailsTitle')}</h3>
-                <p className="mp-sell-step-desc">{t('marketplace.sell.animalDetailsDesc')}</p>
-                <div className="module-form">
-                  {selectedAnimalId && (
-                    <div className="mp-auto-populated-badge">✅ {t('marketplace.sell.fieldsAutoFilled')}</div>
-                  )}
-                  <div className="mp-form-section">
-                    <div className="mp-form-section-title">{t('marketplace.sell.identificationSection')}</div>
-                    <div className="module-form-row">
-                      <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.livestock.species')}</label>
-                        <select className="module-input" value={sellForm.species}
-                          onChange={e => setSellForm(f => ({ ...f, species: e.target.value, breed: '' }))}>
-                          <option value="">{t('marketplace.livestock.selectSpecies')}</option>
-                          {speciesCategories.map(cat => {
-                            // Only species flagged marketplace-eligible in Master Data - keeps this in
-                            // sync with the Browse filter's SPECIES_LIST (both read marketplaceEligibleSpecies).
-                            const eligible = cat.species.filter(s => marketplaceEligibleSpecies.includes(s))
-                            if (eligible.length === 0) return null
-                            return (
-                              <optgroup key={cat.label} label={cat.label}>
-                                {eligible.map(s => <option key={s} value={s}>{speciesLabel(s, t)}</option>)}
-                              </optgroup>
-                            )
-                          })}
-                        </select>
-                      </div>
-                      <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.livestock.breed')}</label>
-                        {(() => {
-                          const breeds = breedsForSpecies(sellForm.species)
-                          return breeds.length > 0 ? (
-                            <select className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} disabled={!sellForm.species}>
-                              <option value="">{sellForm.species ? t('marketplace.sell.selectBreed') : t('marketplace.sell.selectSpeciesFirst')}</option>
-                              {breeds.map(b => <option key={b} value={b}>{breedLabel(sellForm.species, b)}</option>)}
-                            </select>
-                          ) : (
-                            <input className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} placeholder={t('marketplace.sell.breedPlaceholder')} disabled={!sellForm.species} />
-                          )
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mp-form-section">
-                    <div className="mp-form-section-title">{t('marketplace.sell.physicalSection')}</div>
-                    <div className="module-form-row-3">
-                      <div className="module-form-group">
-                        {classTermsForSpecies(sellForm.species).length > 0 ? (
-                          <>
-                            <label className="module-label">{t('animalClass.fieldLabel')}</label>
-                            <select className="module-input" value={sellForm.animalClass} onChange={e => {
-                              const term = findClassTerm(sellForm.species, e.target.value)
-                              sf('animalClass', e.target.value)
-                              if (term?.impliedGender) sf('gender', term.impliedGender)
-                            }}>
-                              <option value="">{t('animalClass.selectClass')}</option>
-                              {classTermsForSpecies(sellForm.species).map(c => <option key={c.value} value={c.value}>{resolveLabel(c, t)}</option>)}
-                            </select>
-                          </>
-                        ) : (
-                          <>
-                            <label className="module-label">{t('marketplace.livestock.gender')}</label>
-                            <select className="module-input" value={sellForm.gender} onChange={e => sf('gender', e.target.value)}>
-                              <option value="">{t('marketplace.livestock.selectGender')}</option>
-                              <option value="female">{t('marketplace.genderLabel.female')}</option>
-                              <option value="male">{t('marketplace.genderLabel.male')}</option>
-                            </select>
-                          </>
-                        )}
-                      </div>
-                      <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.livestock.ageMonths')}</label>
-                        <input className="module-input" type="number" value={sellForm.animalAgeMonths} onChange={e => sf('animalAgeMonths', e.target.value)} placeholder={t('marketplace.sell.agePlaceholder')} />
-                      </div>
-                      <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.livestock.weightKg')}</label>
-                        <input className="module-input" type="number" value={sellForm.animalWeightKg} onChange={e => sf('animalWeightKg', e.target.value)} placeholder={t('marketplace.sell.weightPlaceholder')} />
-                      </div>
-                    </div>
-                  </div>
-                  {(() => {
-                    // Only show production/pregnancy fields when relevant to the
-                    // selected species+class - e.g. a Bullock or Dog listing never
-                    // needs a milk-yield field. Species without a class glossary keep
-                    // today's always-show behavior (no new judgment calls for them).
-                    const hasClassGlossary = classTermsForSpecies(sellForm.species).length > 0
-                    const selectedClassTerm = findClassTerm(sellForm.species, sellForm.animalClass)
-                    const showMilk = !hasClassGlossary || !sellForm.animalClass || selectedClassTerm?.canProduceMilk
-                    const showPregnancy = !hasClassGlossary || !sellForm.animalClass || selectedClassTerm?.canBePregnant
-                    if (!showMilk && !showPregnancy) return null
-                    return (
-                      <div className="mp-form-section">
-                        <div className="mp-form-section-title">{t('marketplace.sell.productionSection')}</div>
-                        {showMilk && (
-                          <div className="module-form-row">
-                            <div className="module-form-group">
-                              <label className="module-label">{t('marketplace.livestock.lactation')}</label>
-                              <input className="module-input" type="number" value={sellForm.lactationNumber} onChange={e => sf('lactationNumber', e.target.value)} placeholder={t('marketplace.sell.lactationPlaceholder')} />
-                            </div>
-                            <div className="module-form-group">
-                              <label className="module-label">{t('marketplace.livestock.milkYield')}</label>
-                              <input className="module-input" type="number" value={sellForm.dailyMilkYield} onChange={e => sf('dailyMilkYield', e.target.value)} placeholder={t('marketplace.sell.milkYieldPlaceholder')} />
-                            </div>
-                          </div>
-                        )}
-                        {showPregnancy && (
-                          <div className="module-form-row">
-                            <div className="module-form-group">
-                              <label className="module-label">{t('marketplace.livestock.pregnancy')}</label>
-                              <select className="module-input" value={sellForm.pregnancyStatus} onChange={e => sf('pregnancyStatus', e.target.value)}>
-                                <option value="">{t('marketplace.livestock.select')}</option>
-                                <option value="pregnant">{t('marketplace.pregnancyLabel.pregnant')}</option>
-                                <option value="not_pregnant">{t('marketplace.pregnancyLabel.notPregnant')}</option>
-                                <option value="unknown">{t('marketplace.genderLabel.unknown')}</option>
-                              </select>
-                            </div>
-                            {sellForm.pregnancyStatus === 'pregnant' && (
-                              <div className="module-form-group">
-                                <label className="module-label">{t('marketplace.livestock.pregnancyMonth')}</label>
-                                <input className="module-input" type="number" value={sellForm.pregnancyMonth} onChange={e => sf('pregnancyMonth', e.target.value)} min="1" max="12" />
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })()}
-                  <div className="module-form-group">
-                    <label className="module-label">{t('marketplace.livestock.quantity')}</label>
-                    <input className="module-input" type="number" value={sellForm.quantity} onChange={e => sf('quantity', e.target.value)} placeholder="1" />
-                  </div>
-                </div>
-                <div className="mp-step-actions">
-                  <button className="module-btn" onClick={() => setSellStep(0)}>{t('marketplace.sell.back')}</button>
-                  <button className="module-btn primary" onClick={() => setSellStep(2)}>{t('marketplace.sell.next')}</button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Health & Certs */}
-            {sellStep === 2 && (
-              <div className="mp-sell-step">
-                <h3>{t('marketplace.sell.healthCertsTitle')}</h3>
-                <p className="mp-sell-step-desc">{t('marketplace.sell.healthCertsDesc')}</p>
-                <div className="module-form">
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.livestock.vaccination')}</label>
-                      <select className="module-input" value={sellForm.vaccinationStatus} onChange={e => sf('vaccinationStatus', e.target.value)}>
-                        <option value="unknown">{t('marketplace.vaxLabel.unknown')}</option>
-                        <option value="fully_vaccinated">{t('marketplace.vaxLabel.fully')}</option>
-                        <option value="partially_vaccinated">{t('marketplace.vaxLabel.partial')}</option>
-                        <option value="not_vaccinated">{t('marketplace.vaxLabel.none')}</option>
-                      </select>
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.livestock.condition')}</label>
-                      <select className="module-input" value={sellForm.condition} onChange={e => sf('condition', e.target.value)}>
-                        {marketplaceConditions.map(c => <option key={c.code} value={c.code}>{resolveLabel(c, t)}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="module-form-group">
-                    <label className="mp-checkbox-label">
-                      <input type="checkbox" checked={sellForm.healthCertificate} onChange={e => sf('healthCertificate', e.target.checked)} />
-                      {t('marketplace.sell.hasHealthCert')}
-                    </label>
-                  </div>
-                  <div className="module-form-group">
-                    <label className="mp-checkbox-label">
-                      <input type="checkbox" checked={sellForm.welfareAttestation} onChange={e => sf('welfareAttestation', e.target.checked)} />
-                      {t('marketplace.compliance.welfareAttestation')}
-                    </label>
-                    <div className="mp-compliance-hint">{t('marketplace.compliance.welfareHint')}</div>
-                  </div>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('marketplace.livestock.contact')}</label>
-                    <input className="module-input" value={sellForm.contactPhone} onChange={e => sf('contactPhone', e.target.value)} placeholder={t('marketplace.sell.contactPlaceholder')} />
-                  </div>
-                  {/* Image Upload */}
-                  <div className="mp-form-section">
-                    <div className="mp-form-section-title">📸 {t('marketplace.sell.imagesTitle', 'Listing Images')}</div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.sell.imagesLabel', { count: MAX_LISTING_IMAGES, defaultValue: `Upload up to ${MAX_LISTING_IMAGES} images` })}</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        className="module-input"
-                        onChange={handleImageUpload}
-                        disabled={uploadingImages || (sellForm.images?.length || 0) >= MAX_LISTING_IMAGES}
-                      />
-                      {uploadingImages && <div className="input-error-msg si-8ad4a3c7">{t('marketplace.sell.uploading', 'Uploading...')}</div>}
-                    </div>
-                    {sellForm.images?.length > 0 && (
-                      <div className="mp-image-preview-row">
-                        {sellForm.images.map((url: string, i: number) => (
-                          <div key={i} className="mp-image-preview">
-                            <img src={url} alt={`Listing ${i + 1}`} />
-                            <button className="mp-image-remove" onClick={() => {
-                              setSellForm((prev: Record<string, any>) => ({ ...prev, images: prev.images.filter((_: string, idx: number) => idx !== i) }))
-                            }}>×</button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {/* Optional video */}
-                    <div className="module-form-group si-7930ee5e">
-                      <label className="module-label">🎥 {t('marketplace.sell.videoLabel')}</label>
-                      {sellForm.videoUrl ? (
-                        <div className="mp-video-set">
-                          <span>✅ {t('marketplace.sell.videoAdded')}</span>
-                          <button type="button" className="module-btn small" onClick={() => sf('videoUrl', '')}>{t('marketplace.sell.removeVideo')}</button>
-                        </div>
-                      ) : (
-                        <>
-                          <input type="file" accept="video/*" className="module-input" onChange={handleVideoUpload} disabled={uploadingVideo} />
-                          {uploadingVideo && <div className="input-error-msg si-8ad4a3c7">{t('marketplace.sell.uploadingVideo', 'Uploading video...')}</div>}
-                          <div className="mp-compliance-hint">{t('marketplace.sell.videoHint')}</div>
-                          <div className="mp-compliance-hint">{t('marketplace.sell.videoLimits', { maxSec: MAX_VIDEO_DURATION_SECONDS, maxMb: MAX_VIDEO_SIZE_MB, defaultValue: `Max ${MAX_VIDEO_DURATION_SECONDS} seconds, up to ${MAX_VIDEO_SIZE_MB}MB` })}</div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="mp-step-actions">
-                  <button className="module-btn" onClick={() => setSellStep(1)}>{t('marketplace.sell.back')}</button>
-                  <button className="module-btn primary" onClick={() => setSellStep(3)}>{t('marketplace.sell.next')}</button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Pricing & Location */}
-            {sellStep === 3 && (
-              <div className="mp-sell-step">
-                <h3>{t('marketplace.sell.pricingTitle')}</h3>
-                <p className="mp-sell-step-desc">{t('marketplace.sell.pricingDesc')}</p>
-                <div className="module-form">
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.reviewLabels.price')} ({settings.currency})</label>
-                      <input className="module-input" type="number" value={sellForm.price} onChange={e => sf('price', e.target.value)} placeholder={t('marketplace.sell.pricePlaceholder')} />
-                    </div>
-                    {sellForm.listingType === 'auction' && (
-                      <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.sell.reservePrice')}</label>
-                        <input className="module-input" type="number" value={sellForm.reservePrice} onChange={e => sf('reservePrice', e.target.value)} placeholder={t('marketplace.sell.reservePricePlaceholder')} />
-                      </div>
-                    )}
-                  </div>
-                  {/* Price suggestion from live market data */}
-                  {priceHint && (
-                    <div className="mp-price-hint">
-                      <div className="mp-price-hint-title">💡 {t('marketplace.sell.priceHintTitle')}</div>
-                      <div className="mp-price-hint-body">
-                        <span>{t('marketplace.sell.priceHintAvg')}: <strong>{formatCurrency(priceHint.avg)}</strong></span>
-                        <span>{t('marketplace.prices.min')}-{t('marketplace.prices.max')}: {formatCurrency(priceHint.min)} - {formatCurrency(priceHint.max)}</span>
-                        <span className="mp-price-hint-count">{t('marketplace.sell.priceHintBasis', { count: priceHint.count })}</span>
-                      </div>
-                      {sellForm.price && (() => {
-                        const p = +sellForm.price
-                        if (p > 0 && priceHint.avg > 0) {
-                          const pct = Math.round((p / priceHint.avg) * 100)
-                          if (pct < 85) return <div className="mp-price-hint-tag good">💚 {t('marketplace.card.fairDeal')} ({pct}%)</div>
-                          if (pct > 115) return <div className="mp-price-hint-tag high">⭐ {t('marketplace.card.premiumPriced')} ({pct}%)</div>
-                          return <div className="mp-price-hint-tag ok">✅ {t('marketplace.sell.priceHintFair')}</div>
-                        }
-                        return null
-                      })()}
-                    </div>
-                  )}
-                  {sellForm.listingType === 'auction' && (
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.sell.auctionEndTime')}</label>
-                      <input className="module-input" type="datetime-local" value={sellForm.auctionEndTime} onChange={e => sf('auctionEndTime', e.target.value)} />
-                    </div>
-                  )}
-                  <div className="module-form-group">
-                    <label className="module-label">{t('marketplace.sell.location')}</label>
-                    <input className="module-input" value={sellForm.location} onChange={e => sf('location', e.target.value)} placeholder={t('marketplace.sell.locationPlaceholder')} />
-                    <div className="mp-geo-row">
-                      <button type="button" className="module-btn small" onClick={useMyLocationForListing} disabled={geoLocating}>
-                        📍 {geoLocating ? t('marketplace.sell.locating') : t('marketplace.sell.useMyLocation')}
-                      </button>
-                      {sellForm.latitude && sellForm.longitude && (
-                        <span className="mp-geo-set">✅ {t('marketplace.sell.locationSet')}</span>
-                      )}
-                    </div>
-                    <div className="mp-compliance-hint">{t('marketplace.sell.locationGeoHint')}</div>
-                  </div>
-                </div>
-                <div className="mp-step-actions">
-                  <button className="module-btn" onClick={() => setSellStep(2)}>{t('marketplace.sell.back')}</button>
-                  <button className="module-btn primary" onClick={() => setSellStep(4)}>{t('marketplace.sell.review')}</button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 4: Review */}
-            {sellStep === 4 && (
-              <div className="mp-sell-step">
-                <h3>{t('marketplace.sell.reviewTitle')}</h3>
-                <p className="mp-sell-step-desc">{t('marketplace.sell.reviewDesc')}</p>
-                <div className="mp-review-grid">
-                  <ReviewItem label={t('marketplace.sell.title').replace(' *', '')} value={sellForm.title} />
-                  <ReviewItem label={t('marketplace.sell.category')} value={sellForm.category} />
-                  <ReviewItem label={t('marketplace.reviewLabels.type')} value={sellForm.listingType} />
-                  <ReviewItem label={t('marketplace.livestock.species')} value={speciesLabel(sellForm.species, t)} />
-                  <ReviewItem label={t('marketplace.livestock.breed')} value={breedLabel(sellForm.species, sellForm.breed)} />
-                  <ReviewItem label={t('marketplace.livestock.gender')} value={(() => {
-                    const term = findClassTerm(sellForm.species, sellForm.animalClass)
-                    if (term) return resolveLabel(term, t)
-                    return sellForm.gender ? GENDER_LABELS[sellForm.gender] : '-'
-                  })()} />
-                  <ReviewItem label={t('marketplace.livestock.age')} value={sellForm.animalAgeMonths ? `${sellForm.animalAgeMonths} ${t('marketplace.units.months')}` : '-'} />
-                  <ReviewItem label={t('marketplace.livestock.weightKg')} value={sellForm.animalWeightKg ? `${sellForm.animalWeightKg} ${t('marketplace.units.kg')}` : '-'} />
-                  <ReviewItem label={t('marketplace.reviewLabels.milkYield')} value={sellForm.dailyMilkYield ? `${sellForm.dailyMilkYield} ${t('marketplace.units.lPerDay')}` : '-'} />
-                  <ReviewItem label={t('marketplace.livestock.pregnancy')} value={sellForm.pregnancyStatus || '-'} />
-                  <ReviewItem label={t('marketplace.livestock.vaccination')} value={VAX_LABELS[sellForm.vaccinationStatus] || '-'} />
-                  <ReviewItem label={t('marketplace.reviewLabels.healthCert')} value={sellForm.healthCertificate ? t('marketplace.reviewLabels.yes') : t('marketplace.reviewLabels.no')} />
-                  <ReviewItem label={t('marketplace.reviewLabels.price')} value={sellForm.price ? `${settings.currency} ${sellForm.price}` : t('marketplace.reviewLabels.contactForPrice')} />
-                  <ReviewItem label={t('marketplace.sell.location')} value={sellForm.location || '-'} />
-                  <ReviewItem label={t('marketplace.livestock.contact')} value={sellForm.contactPhone || '-'} />
-                  <ReviewItem label={t('marketplace.compliance.sellerType')} value={sellForm.sellerType === 'registered_breeder' ? t('marketplace.compliance.registeredBreeder') : t('marketplace.compliance.individualOwner')} />
-                  {sellForm.sellerType === 'registered_breeder' && <ReviewItem label={t('marketplace.compliance.registrationNumber')} value={sellForm.registrationNumber || '-'} />}
-                </div>
-                {sellForm.description && (
-                  <div className="mp-review-desc">
-                    <strong>{t('marketplace.sell.description')}:</strong>
-                    <p>{sellForm.description}</p>
-                  </div>
-                )}
-                {/* Legal Compliance & T&C */}
-                <div className="mp-compliance-section">
-                  <h4 className="mp-compliance-title">⚖️ {t('marketplace.compliance.legalTitle')}</h4>
-                  <div className="mp-compliance-disclaimer">{t('marketplace.compliance.legalDisclaimer')}</div>
-                  <div className="mp-compliance-checkboxes">
-                    <label className="mp-checkbox-label">
-                      <input type="checkbox" checked={sellForm.welfareAttestation} onChange={e => sf('welfareAttestation', e.target.checked)} />
-                      {t('marketplace.compliance.welfareAttestation')}
-                    </label>
-                    <label className="mp-checkbox-label">
-                      <input type="checkbox" checked={sellForm.termsAccepted} onChange={e => sf('termsAccepted', e.target.checked)} />
-                      {t('marketplace.compliance.termsAccept')}
-                    </label>
-                  </div>
-                  {sellForm.sellerType === 'registered_breeder' && (
-                    <div className="mp-compliance-breeder-note">{t('marketplace.compliance.breederNote')}</div>
-                  )}
-                </div>
-                <div className="mp-step-actions">
-                  <button className="module-btn" onClick={() => setSellStep(3)}>{t('marketplace.sell.back')}</button>
-                  <button className="module-btn primary" disabled={!sellForm.termsAccepted || !sellForm.welfareAttestation} onClick={createListing}>{t('marketplace.sell.publish')}</button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <SellWizard
+          sellSteps={sellSteps} sellStep={sellStep} onStepClick={setSellStep}
+          step0Props={{
+            sellForm, sf, fieldErrors, onClearFieldError: handleClearFieldError,
+            userAnimals, selectedAnimalId, onAnimalSelect: handleAnimalSelect,
+            copiedId, onCopyId: handleCopyId,
+            speciesLabel, auctionEnabled, isAdmin, categoryKeys: CATEGORY_KEYS,
+            onNext: handleSellStep0Next, t,
+          }}
+          step1Props={{
+            sellForm, sf, setSellForm, selectedAnimalId,
+            speciesCategories, marketplaceEligibleSpecies, speciesLabel,
+            breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, resolveLabel,
+            onBack: () => setSellStep(0), onNext: () => setSellStep(2), t,
+          }}
+          step2Props={{
+            sellForm, sf, setSellForm, marketplaceConditions, resolveLabel,
+            maxListingImages: MAX_LISTING_IMAGES, uploadingImages, onImageUpload: handleImageUpload,
+            uploadingVideo, onVideoUpload: handleVideoUpload, maxVideoDurationSeconds: MAX_VIDEO_DURATION_SECONDS, maxVideoSizeMb: MAX_VIDEO_SIZE_MB,
+            onBack: () => setSellStep(1), onNext: () => setSellStep(3), t,
+          }}
+          step3Props={{
+            sellForm, sf, currency: settings.currency, priceHint, formatCurrency,
+            geoLocating, onUseMyLocation: useMyLocationForListing,
+            onBack: () => setSellStep(2), onReview: () => setSellStep(4), t,
+          }}
+          step4Props={{
+            sellForm, sf, currency: settings.currency, speciesLabel, breedLabel, findClassTerm, resolveLabel,
+            genderLabels: GENDER_LABELS, vaxLabels: VAX_LABELS,
+            onBack: () => setSellStep(3), onPublish: createListing, t,
+          }}
+          t={t}
+        />
       )}
 
       {/* ════════ ORDERS ════════ */}
       {tab === 'orders' && (
-        <div>
-          <div className="mp-order-toggle">
-            <button className={`module-btn ${orderRole === 'buyer' ? 'primary' : ''}`} onClick={() => { setOrderRole('buyer'); fetchOrders('buyer'); fetchInquiries('buyer') }}>{t('marketplace.orders.asBuyer')}</button>
-            <button className={`module-btn ${orderRole === 'seller' ? 'primary' : ''}`} onClick={() => { setOrderRole('seller'); fetchOrders('seller'); fetchInquiries('seller') }}>{t('marketplace.orders.asSeller')}</button>
-          </div>
-          {inquiries.length > 0 && (
-            <div className="mp-section">
-              <h3 className="mp-section-title">💌 {t('marketplace.orders.inquiriesTitle')}</h3>
-              <div className="data-table-container">
-                <table className="module-table">
-                  <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.orders.message')}</th><th>{t('marketplace.orders.date')}</th><th>{t('marketplace.orders.status')}</th></tr></thead>
-                  <tbody>
-                    {inquiries.map((inq: any) => (
-                      <tr key={inq.id}>
-                        <td>{inq.listingTitle || inq.listing_title || '-'}</td>
-                        <td>{inq.message || '-'}</td>
-                        <td>{inq.created_at ? new Date(inq.created_at).toLocaleDateString() : '-'}</td>
-                        <td><span className={`module-badge ${inq.status === 'responded' ? 'success' : ''}`}>{inq.status || 'pending'}</span></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-          {/* Free-classifieds note: settlement is between the parties, off-platform */}
-          <div className="mp-deal-free-note mp-deal-tab-note">💡 {t('marketplace.deal.tabNote')}</div>
-          <div className="data-table-container">
-            <table className="module-table">
-              <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.livestock.species')}</th><th>{orderRole === 'buyer' ? t('marketplace.detail.seller') : t('marketplace.orders.asBuyer').replace('🛒 ', '')}</th><th>{t('marketplace.orders.qty')}</th><th>{t('marketplace.orders.total')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.orders.date')}</th><th>{t('marketplace.deal.actionsCol')}</th></tr></thead>
-              <tbody>
-                {orders.map(o => {
-                  const myConfirm = orderRole === 'buyer' ? g(o, 'buyerConfirmedAt', 'buyer_confirmed_at') : g(o, 'sellerConfirmedAt', 'seller_confirmed_at')
-                  const otherConfirm = orderRole === 'buyer' ? g(o, 'sellerConfirmedAt', 'seller_confirmed_at') : g(o, 'buyerConfirmedAt', 'buyer_confirmed_at')
-                  const reservedUntil = g(o, 'reservedUntil', 'reserved_until')
-                  const statusKey = `marketplace.deal.status.${o.status}`
-                  const statusLabel = t(statusKey) === statusKey ? o.status : t(statusKey)
-                  return (
-                    <tr key={o.id}>
-                      <td>{g(o, 'listingTitle', 'listing_title') || '-'}</td>
-                      <td>{o.species ? speciesLabel(o.species, t) : '-'}</td>
-                      <td>{orderRole === 'buyer' ? g(o, 'sellerName', 'seller_name') : g(o, 'buyerName', 'buyer_name')}</td>
-                      <td>{o.quantity}</td>
-                      <td className="mp-price-highlight">{formatCurrency(g(o, 'totalPrice', 'total_price') || 0)}</td>
-                      <td>
-                        <span className={`module-badge ${o.status === 'completed' || o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'error' : ''}`}>{statusLabel}</span>
-                        {o.status === 'reserved' && reservedUntil && (
-                          <div className="mp-deal-until">{t('marketplace.deal.reservedUntil')}: {new Date(reservedUntil).toLocaleDateString()}</div>
-                        )}
-                      </td>
-                      <td>{(g(o, 'createdAt', 'created_at')) ? new Date(g(o, 'createdAt', 'created_at')).toLocaleDateString() : '-'}</td>
-                      <td>
-                        {o.status === 'reserved' ? (
-                          <div className="mp-deal-actions">
-                            {myConfirm ? (
-                              <span className="mp-deal-waiting">✓ {t('marketplace.deal.waitingOther')}</span>
-                            ) : (
-                              <>
-                                {orderRole === 'buyer' && (
-                                  <select className="module-input mp-deal-pm" value={dealPaymentMethod[o.id] || ''} onChange={e => setDealPaymentMethod(prev => ({ ...prev, [o.id]: e.target.value }))}>
-                                    <option value="">{t('marketplace.deal.paymentMethod')}</option>
-                                    <option value="cash">{t('marketplace.deal.pm.cash')}</option>
-                                    <option value="upi">{t('marketplace.deal.pm.upi')}</option>
-                                    <option value="bank_transfer">{t('marketplace.deal.pm.bankTransfer')}</option>
-                                    <option value="other">{t('marketplace.deal.pm.other')}</option>
-                                  </select>
-                                )}
-                                <button className="module-btn small primary" onClick={() => confirmDeal(o.id)}>
-                                  ✅ {orderRole === 'buyer' ? t('marketplace.deal.confirmReceipt') : t('marketplace.deal.confirmPayment')}
-                                </button>
-                              </>
-                            )}
-                            {otherConfirm && !myConfirm && <span className="mp-deal-other-done">👍 {t('marketplace.deal.otherConfirmed')}</span>}
-                            <button className="module-btn small" onClick={() => cancelDeal(o.id)}>✖ {t('marketplace.deal.cancelDeal')}</button>
-                          </div>
-                        ) : o.status === 'completed' ? (
-                          <span className="mp-deal-done">🎉 {t('marketplace.deal.dealDone')}</span>
-                        ) : '-'}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-          {orders.length === 0 && <p className="mp-empty">{t('marketplace.orders.noOrders')}</p>}
-        </div>
+        <OrdersTab
+          orderRole={orderRole} onOrderRoleChange={handleOrderRoleChange}
+          inquiries={inquiries} orders={orders}
+          speciesLabel={speciesLabel} formatCurrency={formatCurrency}
+          dealPaymentMethod={dealPaymentMethod} onDealPaymentMethodChange={handleDealPaymentMethodChange}
+          onConfirmDeal={confirmDeal} onCancelDeal={cancelDeal} t={t}
+        />
       )}
 
       {/* ════════ MESSAGES ════════ */}
       {tab === 'messages' && (
-        <div className="mp-messages-layout">
-          <div className={`mp-thread-list ${activeThread ? 'has-active' : ''}`}>
-            <h3 className="mp-section-title">💬 {t('marketplace.tabs.messages')}</h3>
-            {threads.length === 0 && <p className="mp-empty">{t('marketplace.engagement.noMessages')}</p>}
-            {threads.map(th => (
-              <div key={th.id} className={`mp-thread-item ${activeThread?.id === th.id ? 'active' : ''}`} onClick={() => openThread(th)}>
-                <div className="mp-thread-item-top">
-                  <span className="mp-thread-title">{th.listing_title || t('marketplace.engagement.listing')}</span>
-                  {(th.my_unread || 0) > 0 && <span className="mp-thread-unread">{th.my_unread}</span>}
-                </div>
-                <div className="mp-thread-sub">
-                  <span className="mp-thread-role">{th.my_role === 'buyer' ? `🛒 ${th.seller_name || ''}` : `🏠 ${th.buyer_name || ''}`}</span>
-                  {th.last_message_at && <span className="mp-thread-time">{new Date(th.last_message_at).toLocaleDateString()}</span>}
-                </div>
-                {th.last_message && <div className="mp-thread-preview">{th.last_message}</div>}
-              </div>
-            ))}
-          </div>
-          <div className={`mp-chat-panel ${activeThread ? 'open' : ''}`}>
-            {activeThread ? (
-              <>
-                <div className="mp-chat-header">
-                  <button className="mp-chat-back" onClick={() => setActiveThread(null)}>←</button>
-                  <div>
-                    <div className="mp-chat-title">{activeThread.listing_title || t('marketplace.engagement.listing')}</div>
-                    <div className="mp-chat-sub">{activeThread.my_role === 'buyer' ? activeThread.seller_name : activeThread.buyer_name}</div>
-                  </div>
-                </div>
-                <div className="mp-chat-safety">🔒 {t('marketplace.engagement.chatSafety')}</div>
-                <div className="mp-chat-messages">
-                  {threadMessages.length === 0 && <p className="mp-empty">{t('marketplace.engagement.startConversation')}</p>}
-                  {threadMessages.map(m => (
-                    <div key={m.id} className={`mp-chat-bubble ${m.sender_id === user?.id ? 'mine' : 'theirs'}`}>
-                      <div className="mp-chat-body">{m.body}</div>
-                      <div className="mp-chat-meta">{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mp-chat-input">
-                  <textarea className="module-input" value={messageDraft} onChange={e => setMessageDraft(e.target.value)}
-                    placeholder={t('marketplace.engagement.typeMessage')} rows={2}
-                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }} />
-                  <button className="module-btn primary" onClick={sendMessage} disabled={!messageDraft.trim()}>{t('marketplace.engagement.send')}</button>
-                </div>
-              </>
-            ) : (
-              <div className="mp-chat-empty">{t('marketplace.engagement.selectConversation')}</div>
-            )}
-          </div>
-        </div>
+        <MessagesTab
+          threads={threads} activeThread={activeThread} onOpenThread={openThread} onCloseThread={() => setActiveThread(null)}
+          threadMessages={threadMessages} currentUserId={user?.id}
+          messageDraft={messageDraft} onMessageDraftChange={setMessageDraft} onSendMessage={sendMessage} t={t}
+        />
       )}
 
       {/* ════════ FAVORITES ════════ */}
       {tab === 'favorites' && (
-        <div>
-          <h3 className="mp-section-title">❤️ {t('marketplace.tabs.favorites')}</h3>
-          {favorites.length === 0 ? (
-            <p className="mp-empty">{t('marketplace.engagement.noFavorites')}</p>
-          ) : (
-            <div className="mp-grid">
-              {favorites.map(l => <ListingCard key={l.id} listing={l} formatCurrency={formatCurrency}
-                onView={() => { setTab('browse'); viewListing(l) }}
-                isFavorite={favoriteIds.has(l.id)} onToggleFavorite={() => toggleFavorite(l.id)} t={t} />)}
-            </div>
-          )}
-        </div>
+        <FavoritesTab
+          favorites={favorites} formatCurrency={formatCurrency}
+          onViewListing={viewListingFromTab}
+          favoriteIds={favoriteIds} onToggleFavorite={toggleFavorite} t={t}
+        />
       )}
 
       {/* ════════ SAVED SEARCHES ════════ */}
       {tab === 'saved' && (
-        <div>
-          <h3 className="mp-section-title">🔔 {t('marketplace.tabs.saved')}</h3>
-          <p className="mp-sell-step-desc">{t('marketplace.engagement.savedSearchesDesc')}</p>
-          {savedSearches.length === 0 ? (
-            <p className="mp-empty">{t('marketplace.engagement.noSavedSearches')}</p>
-          ) : (
-            <div className="mp-saved-list">
-              {savedSearches.map(s => {
-                const chips = Object.entries(s.filters || {}).filter(([, v]) => v !== '' && v != null)
-                return (
-                  <div key={s.id} className="mp-saved-card">
-                    <div className="mp-saved-main">
-                      <div className="mp-saved-name">{s.name}</div>
-                      <div className="mp-saved-chips">
-                        {chips.length === 0 ? <span className="mp-saved-chip">{t('marketplace.engagement.allListings')}</span>
-                          : chips.map(([k, v]) => <span key={k} className="mp-saved-chip">{k}: {String(v)}</span>)}
-                      </div>
-                    </div>
-                    <div className="mp-saved-actions">
-                      <button className="module-btn small primary" onClick={() => applySavedSearch(s)}>{t('marketplace.engagement.applySearch')}</button>
-                      <button className={`module-btn small ${s.alertsEnabled ? '' : 'muted'}`} onClick={() => toggleSearchAlerts(s)}
-                        title={s.alertsEnabled ? t('marketplace.engagement.alertsOn') : t('marketplace.engagement.alertsOff')}>
-                        {s.alertsEnabled ? '🔔' : '🔕'}
-                      </button>
-                      <button className="module-btn small" onClick={() => deleteSavedSearch(s.id)}>🗑️</button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
+        <SavedSearchesTab
+          savedSearches={savedSearches} onApplySearch={applySavedSearch}
+          onToggleAlerts={toggleSearchAlerts} onDeleteSearch={deleteSavedSearch} t={t}
+        />
       )}
 
       {/* ════════ MARKET PRICES ════════ */}
       {tab === 'prices' && (
-        <div className="mp-section">
-          <h3 className="mp-section-title">{t('marketplace.sections.marketPriceIntelligence')}</h3>
-          <p className="mp-sell-step-desc">{t('marketplace.prices.subtitle')}</p>
-          {marketPrices.length > 0 ? (
-            <div className="data-table-container">
-              <table className="module-table">
-                <thead><tr><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.livestock.breed')}</th><th>{t('marketplace.prices.listings')}</th><th>{t('marketplace.prices.avgPrice')}</th><th>{t('marketplace.prices.min')}</th><th>{t('marketplace.prices.max')}</th><th>{t('marketplace.prices.avgMilkPerDay')}</th><th>{t('marketplace.prices.avgWeight')}</th></tr></thead>
-                <tbody>
-                  {marketPrices.map((mp, i) => (
-                    <tr key={i}>
-                      <td><strong>{speciesLabel(mp.species, t)}</strong></td>
-                      <td>{mp.breed || '-'}</td>
-                      <td>{mp.total_listings}</td>
-                      <td className="mp-price-highlight">{formatCurrency(Math.round(mp.avg_price || 0))}</td>
-                      <td>{formatCurrency(Math.round(mp.min_price || 0))}</td>
-                      <td>{formatCurrency(Math.round(mp.max_price || 0))}</td>
-                      <td>{mp.avg_milk_yield ? `${Number(mp.avg_milk_yield).toFixed(1)}L` : '-'}</td>
-                      <td>{mp.avg_weight ? `${Number(mp.avg_weight).toFixed(0)} ${t('marketplace.units.kg')}` : '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : <p className="mp-empty">{t('marketplace.prices.noData')}</p>}
-        </div>
+        <PricesTab marketPrices={marketPrices} speciesLabel={speciesLabel} formatCurrency={formatCurrency} t={t} />
       )}
 
       {/* ════════ ADMIN PANEL ════════ */}
       {tab === 'admin' && isAdmin && (
-        <div>
-          {/* Admin Sub-tabs */}
-          <div className="mp-admin-subtabs">
-            {(['listings', 'reports', 'settings', 'plans', 'revenue'] as const).map(st => (
-              <button key={st} className={`mp-admin-subtab ${adminSubTab === st ? 'active' : ''}`}
-                onClick={() => { setAdminSubTab(st); if (st === 'reports') fetchAdminReports() }}>
-                {st === 'listings' && '📋'} {st === 'reports' && '🚩'} {st === 'settings' && '⚙️'} {st === 'plans' && '💎'} {st === 'revenue' && '📊'}
-                {' '}{t(`marketplace.monetization.subtabs.${st}`)}
-              </button>
-            ))}
-          </div>
-
-          {/* ── Listings Sub-tab ── */}
-          {adminSubTab === 'listings' && (
-            <div>
-              {adminStats && (
-                <div className="module-stats">
-                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.total_listings || 0}</div><div className="stat-label">{t('marketplace.stats.totalListings')}</div></div>
-                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.active_listings || 0}</div><div className="stat-label">{t('marketplace.stats.active')}</div></div>
-                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.sold_listings || 0}</div><div className="stat-label">{t('marketplace.stats.sold')}</div></div>
-                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.pending_review || 0}</div><div className="stat-label">{t('marketplace.stats.pendingReview')}</div></div>
-                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.hot_deals || 0}</div><div className="stat-label">{t('marketplace.stats.hotDeals')}</div></div>
-                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.auctions || 0}</div><div className="stat-label">{t('marketplace.stats.auctions')}</div></div>
-                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.total_views || 0}</div><div className="stat-label">{t('marketplace.stats.totalViews')}</div></div>
-                </div>
-              )}
-              {adminStats?.bySpecies && adminStats.bySpecies.length > 0 && (
-                <div className="mp-section">
-                  <h3 className="mp-section-title">{t('marketplace.sections.speciesAnalytics')}</h3>
-                  <table className="module-table">
-                    <thead><tr><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.admin.count')}</th><th>{t('marketplace.prices.avgPrice')}</th><th>{t('marketplace.admin.avgMilkYield')}</th><th>{t('marketplace.prices.avgWeight')}</th></tr></thead>
-                    <tbody>{adminStats.bySpecies.map((s, i) => (
-                      <tr key={i}><td><strong>{speciesLabel(s.species, t)}</strong></td><td>{s.count}</td>
-                        <td>{formatCurrency(Math.round(s.avg_price || 0))}</td>
-                        <td>{s.avg_milk_yield ? `${Number(s.avg_milk_yield).toFixed(1)}L` : '-'}</td>
-                        <td>{s.avg_weight ? `${Number(s.avg_weight).toFixed(0)}${t('marketplace.units.kg')}` : '-'}</td></tr>
-                    ))}</tbody>
-                  </table>
-                </div>
-              )}
-              {adminStats?.priceDistribution && (
-                <div className="mp-section">
-                  <h3 className="mp-section-title">{t('marketplace.sections.priceDistribution')}</h3>
-                  <div className="module-stats">
-                    <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.under_10k}</div><div className="stat-label">{t('marketplace.admin.priceUnder10k')}</div></div>
-                    <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.range_10k_50k}</div><div className="stat-label">{t('marketplace.admin.price10k50k')}</div></div>
-                    <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.range_50k_100k}</div><div className="stat-label">{t('marketplace.admin.price50k1l')}</div></div>
-                    <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.above_100k}</div><div className="stat-label">{t('marketplace.admin.priceAbove1l')}</div></div>
-                  </div>
-                </div>
-              )}
-              <div className="mp-section">
-                <div className="mp-admin-header">
-                  <h3 className="mp-section-title">{t('marketplace.sections.listingManagement')}</h3>
-                  <select className="module-input" value={adminFilter} onChange={e => { setAdminFilter(e.target.value); fetchAdminData() }}>
-                    <option value="">{t('marketplace.admin.allListings')}</option>
-                    <option value="true">{t('marketplace.admin.approved')}</option>
-                    <option value="false">{t('marketplace.admin.rejectedPending')}</option>
-                  </select>
-                </div>
-                <div className="data-table-container">
-                  <table className="module-table">
-                    <thead><tr><th>{t('marketplace.admin.titleCol')}</th><th>{t('marketplace.admin.sellerCol')}</th><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.admin.priceCol')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.admin.approvedCol')}</th><th>{t('marketplace.admin.actionsCol')}</th></tr></thead>
-                    <tbody>
-                      {adminListings.map(l => (
-                        <tr key={l.id}>
-                          <td>
-                            <div className="mp-title-cell">
-                              {g(l, 'isHotDeal', 'is_hot_deal') && <span title="Hot Deal">🔥</span>}
-                              {l.featured && <span title="Featured">⭐</span>}
-                              <span className="mp-title-link" onClick={() => { setTab('browse'); viewListing(l) }}>{l.title}</span>
-                            </div>
-                          </td>
-                          <td>{g(l, 'sellerName', 'seller_name') || '-'}</td>
-                          <td>{l.species ? speciesLabel(l.species, t) : '-'}</td>
-                          <td>{l.price ? formatCurrency(l.price) : '-'}</td>
-                          <td><span className={`module-badge ${l.status === 'active' ? 'success' : l.status === 'rejected' ? 'error' : ''}`}>{l.status}</span></td>
-                          <td>{g(l, 'adminApproved', 'admin_approved') === true ? '✅' : g(l, 'adminApproved', 'admin_approved') === false ? '❌' : '⏳'}</td>
-                          <td>
-                            <div className="mp-action-cluster">
-                              {g(l, 'adminApproved', 'admin_approved') !== true && <button className="module-btn small" onClick={() => handleAdminApprove(l.id)} title="Approve">✅</button>}
-                              <button className="module-btn small" onClick={() => handleToggleHotDeal(l.id, g(l, 'isHotDeal', 'is_hot_deal') || false)} title="Toggle Hot Deal">{g(l, 'isHotDeal', 'is_hot_deal') ? '🔥' : '💤'}</button>
-                              <button className="module-btn small" onClick={() => handleToggleFeatured(l.id, l.featured || false)} title="Toggle Featured">{l.featured ? '⭐' : '☆'}</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                {adminListings.length === 0 && <p className="mp-empty">{t('marketplace.admin.noListings')}</p>}
-              </div>
-              <div className="mp-section">
-                <h3 className="mp-section-title">{t('marketplace.sections.rejectListing')}</h3>
-                <div className="mp-reject-row">
-                  <input className="module-input" value={adminRejectReason} onChange={e => setAdminRejectReason(e.target.value)} placeholder={t('marketplace.admin.rejectionReason')} />
-                  <select className="module-input" id="rejectListingSelect">
-                    <option value="">{t('marketplace.admin.selectToReject')}</option>
-                    {adminListings.filter(l => g(l, 'adminApproved', 'admin_approved') !== false).map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
-                  </select>
-                  <button className="module-btn primary" onClick={() => {
-                    const sel = (document.getElementById('rejectListingSelect') as HTMLSelectElement)?.value
-                    if (sel) handleAdminReject(sel)
-                  }}>{t('marketplace.admin.reject')}</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── Reports Sub-tab ── */}
-          {adminSubTab === 'reports' && (
-            <div className="mp-section">
-              <div className="mp-admin-header">
-                <h3 className="mp-section-title">🚩 {t('marketplace.report.adminTitle')}</h3>
-                <select className="module-input" value={adminReportFilter} onChange={e => { setAdminReportFilter(e.target.value); fetchAdminReports(e.target.value) }}>
-                  <option value="open">{t('marketplace.report.filterOpen')}</option>
-                  <option value="reviewing">{t('marketplace.report.status.reviewing')}</option>
-                  <option value="actioned">{t('marketplace.report.status.actioned')}</option>
-                  <option value="dismissed">{t('marketplace.report.status.dismissed')}</option>
-                  <option value="">{t('marketplace.admin.allListings')}</option>
-                </select>
-              </div>
-              {adminReports.length === 0 ? (
-                <p className="mp-empty">{t('marketplace.report.noReports')}</p>
-              ) : (
-                <div className="mp-reports-list">
-                  {adminReports.map(r => (
-                    <div key={r.id} className="mp-report-card">
-                      <div className="mp-report-head">
-                        <span className="mp-title-link" onClick={() => { setTab('browse'); viewListing({ id: r.listing_id, title: r.listing_title } as MarketplaceListing) }}>{r.listing_title || '-'}</span>
-                        <span className={`module-badge ${r.status === 'open' ? 'error' : r.status === 'actioned' ? 'success' : ''}`}>{t(`marketplace.report.status.${r.status}`)}</span>
-                      </div>
-                      <div className="mp-report-meta">
-                        <span className="mp-report-reason">{t(`marketplace.report.reasons.${r.reason}`)}</span>
-                        <span>· {t('marketplace.report.by')} {r.reporter_name}</span>
-                        <span>· {new Date(r.created_at).toLocaleDateString()}</span>
-                      </div>
-                      {r.details && <div className="mp-report-details">{r.details}</div>}
-                      {['open', 'reviewing'].includes(r.status) && (
-                        <div className="mp-report-actions">
-                          <input className="module-input" placeholder={t('marketplace.report.resolutionPlaceholder')}
-                            value={adminReportResolution[r.id] || ''} onChange={e => setAdminReportResolution(prev => ({ ...prev, [r.id]: e.target.value }))} />
-                          {r.status === 'open' && <button className="module-btn small" onClick={() => resolveReport(r.id, 'reviewing')}>{t('marketplace.report.markReviewing')}</button>}
-                          <button className="module-btn small primary" onClick={() => resolveReport(r.id, 'actioned')}>{t('marketplace.report.action')}</button>
-                          <button className="module-btn small" onClick={() => resolveReport(r.id, 'dismissed')}>{t('marketplace.report.dismiss')}</button>
-                        </div>
-                      )}
-                      {r.resolution && <div className="mp-report-resolution">💬 {r.resolution}</div>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── Monetization Settings Sub-tab ── */}
-          {adminSubTab === 'settings' && (
-            <div>
-              {/* Auction Feature Toggle - prominent card */}
-              <div className="mp-section">
-                <h3 className="mp-section-title">🔨 {t('marketplace.admin.auctionFeature', 'Auction Feature')}</h3>
-                <div className={`mp-setting-card ${auctionEnabled ? 'enabled' : ''} si-197ba518`}>
-                  <div className="mp-setting-header">
-                    <span className="mp-setting-icon">🔨</span>
-                    <div className="mp-setting-info">
-                      <h4>{t('marketplace.admin.auctionTitle', 'Live Auction Bidding')}</h4>
-                      <p className="si-48a0b045">
-                        {auctionEnabled
-                          ? t('marketplace.admin.auctionEnabledDesc', 'Auctions are LIVE. Users can create auction listings and place bids.')
-                          : t('marketplace.admin.auctionDisabledDesc', 'Auctions are DISABLED platform-wide. Legal review pending. Enable only after legal clearance.')}
-                      </p>
-                    </div>
-                    <label className="mp-toggle-switch">
-                      <input type="checkbox" checked={auctionEnabled} onChange={handleAdminAuctionToggle} />
-                      <span className="mp-toggle-slider"></span>
-                    </label>
-                  </div>
-                  <div className="mp-setting-status">
-                    <span className={`module-badge ${auctionEnabled ? 'success' : 'error'}`}>
-                      {auctionEnabled ? t('marketplace.monetization.active') : t('marketplace.monetization.inactive')}
-                    </span>
-                    <span className="mp-setting-category si-a213bf41">
-                      {t('marketplace.admin.auctionLegalNote', 'Consult legal before enabling in India')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="mp-section">
-                <h3 className="mp-section-title">{t('marketplace.monetization.featureToggles')}</h3>
-                <p className="mp-monetization-note">{t('marketplace.monetization.allFreeNote')}</p>
-                <div className="mp-settings-grid">
-                  {monetizationSettings.filter((s: any) => s.settingKey !== 'auction_enabled').map(s => {
-                    const SETTING_ICONS: Record<string, string> = {
-                      listing_fee: '📝', listing_boost: '🚀', subscription_plans: '💎',
-                      inquiry_fee: '📩', featured_seller: '⭐', transaction_fee: '💰',
-                      premium_analytics: '📊', priority_placement: '📌',
-                    }
-                    return (
-                      <div key={s.settingKey} className={`mp-setting-card ${s.isEnabled ? 'enabled' : ''}`}>
-                        <div className="mp-setting-header">
-                          <span className="mp-setting-icon">{SETTING_ICONS[s.settingKey] || '⚙️'}</span>
-                          <div className="mp-setting-info">
-                            <h4>{t(`marketplace.monetization.settings.${s.settingKey}.title`)}</h4>
-                            <p>{t(`marketplace.monetization.settings.${s.settingKey}.desc`)}</p>
-                          </div>
-                          <label className="mp-toggle-switch">
-                            <input type="checkbox" checked={s.isEnabled} onChange={() => handleToggleSetting(s.settingKey, s.isEnabled)} />
-                            <span className="mp-toggle-slider"></span>
-                          </label>
-                        </div>
-                        <div className="mp-setting-status">
-                          <span className={`module-badge ${s.isEnabled ? 'success' : ''}`}>
-                            {s.isEnabled ? t('marketplace.monetization.active') : t('marketplace.monetization.inactive')}
-                          </span>
-                          <span className="mp-setting-category">{s.category}</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── Plans Sub-tab ── */}
-          {adminSubTab === 'plans' && (
-            <div>
-              <div className="mp-section">
-                <h3 className="mp-section-title">{t('marketplace.monetization.managePlans')}</h3>
-                <div className="mp-plans-grid">
-                  {monetizationPlans.map(p => (
-                    <div key={p.id} className={`mp-plan-card ${p.is_active ? 'active' : 'inactive'}`}>
-                      <div className="mp-plan-header">
-                        <h4>{p.name}</h4>
-                        <span className={`module-badge ${p.is_active ? 'success' : ''}`}>
-                          {p.is_active ? t('marketplace.monetization.active') : t('marketplace.monetization.inactive')}
-                        </span>
-                      </div>
-                      <p className="mp-plan-desc">{p.description}</p>
-                      <div className="mp-plan-price">
-                        {p.price > 0 ? formatCurrency(p.price) : t('marketplace.monetization.free')}
-                        {p.duration_days > 0 && <span className="mp-plan-duration">/ {p.duration_days} {t('marketplace.monetization.days')}</span>}
-                      </div>
-                      <div className="mp-plan-features">
-                        <div className="mp-plan-feature">📋 {p.max_listings === -1 ? t('marketplace.monetization.unlimited') : p.max_listings || 0} {t('marketplace.monetization.listings')}</div>
-                        <div className="mp-plan-feature">🚀 {p.max_boosts_per_month || 0} {t('marketplace.monetization.boostsMonth')}</div>
-                        {p.priority_support && <div className="mp-plan-feature">🛡️ {t('marketplace.monetization.prioritySupport')}</div>}
-                        {p.analytics_access && <div className="mp-plan-feature">📊 {t('marketplace.monetization.analyticsAccess')}</div>}
-                      </div>
-                      <div className="mp-plan-actions">
-                        <button className="module-btn small" onClick={() => handleTogglePlanActive(p)}>
-                          {p.is_active ? '⏸️' : '▶️'}
-                        </button>
-                        <button className="module-btn small" onClick={() => {
-                          setEditingPlan(p)
-                          setPlanForm({
-                            name: p.name, description: p.description || '', price: String(p.price),
-                            durationDays: String(p.duration_days), maxListings: p.max_listings ? String(p.max_listings) : '',
-                            maxBoostsPerMonth: String(p.max_boosts_per_month || 0), isActive: p.is_active, sortOrder: String(p.sort_order || 0),
-                          })
-                        }}>✏️</button>
-                        <button className="module-btn small" onClick={() => handleDeletePlan(p.id)}>🗑️</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Plan Form */}
-              <div className="mp-section">
-                <h3 className="mp-section-title">{editingPlan ? t('marketplace.monetization.editPlan') : t('marketplace.monetization.createPlan')}</h3>
-                <div className="module-form">
-                  <div className="module-form-row">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.monetization.planName')}</label>
-                      <input className="module-input" value={planForm.name} onChange={e => setPlanForm(f => ({ ...f, name: e.target.value }))} />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.monetization.planPrice')}</label>
-                      <input className="module-input" type="number" value={planForm.price} onChange={e => setPlanForm(f => ({ ...f, price: e.target.value }))} />
-                    </div>
-                  </div>
-                  <div className="module-form-row-3">
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.monetization.durationDays')}</label>
-                      <input className="module-input" type="number" value={planForm.durationDays} onChange={e => setPlanForm(f => ({ ...f, durationDays: e.target.value }))} />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.monetization.maxListings')}</label>
-                      <input className="module-input" type="number" value={planForm.maxListings} onChange={e => setPlanForm(f => ({ ...f, maxListings: e.target.value }))} placeholder="-1 = unlimited" />
-                    </div>
-                    <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.monetization.boostsMonth')}</label>
-                      <input className="module-input" type="number" value={planForm.maxBoostsPerMonth} onChange={e => setPlanForm(f => ({ ...f, maxBoostsPerMonth: e.target.value }))} />
-                    </div>
-                  </div>
-                  <div className="module-form-group">
-                    <label className="module-label">{t('marketplace.monetization.planDescription')}</label>
-                    <textarea className="module-input" rows={2} value={planForm.description} onChange={e => setPlanForm(f => ({ ...f, description: e.target.value }))} />
-                  </div>
-                  <div className="mp-plan-form-actions">
-                    <button className="module-btn primary" onClick={handleSavePlan}>{editingPlan ? t('marketplace.monetization.updatePlan') : t('marketplace.monetization.createPlan')}</button>
-                    {editingPlan && <button className="module-btn" onClick={() => {
-                      setEditingPlan(null)
-                      setPlanForm({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
-                    }}>{t('marketplace.monetization.cancel')}</button>}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── Revenue Dashboard Sub-tab ── */}
-          {adminSubTab === 'revenue' && (
-            <div>
-              <div className="module-stats">
-                <div className="stat-card"><div className="stat-value">{formatCurrency(monetizationDashboard?.totalRevenue?.total || 0)}</div><div className="stat-label">{t('marketplace.monetization.totalRevenue')}</div></div>
-                <div className="stat-card"><div className="stat-value">{monetizationDashboard?.totalRevenue?.count || 0}</div><div className="stat-label">{t('marketplace.monetization.totalTransactions')}</div></div>
-                <div className="stat-card"><div className="stat-value">{monetizationDashboard?.inquiryStats?.total || 0}</div><div className="stat-label">{t('marketplace.monetization.totalInquiries')}</div></div>
-                <div className="stat-card"><div className="stat-value">{formatCurrency(monetizationDashboard?.inquiryStats?.revenue || 0)}</div><div className="stat-label">{t('marketplace.monetization.inquiryRevenue')}</div></div>
-              </div>
-              {/* Revenue by Type */}
-              {monetizationDashboard?.revenueByType?.length > 0 && (
-                <div className="mp-section">
-                  <h3 className="mp-section-title">{t('marketplace.monetization.revenueByType')}</h3>
-                  <div className="module-stats">
-                    {monetizationDashboard.revenueByType.map((r: any, i: number) => (
-                      <div className="stat-card" key={i}>
-                        <div className="stat-value">{formatCurrency(r.total || 0)}</div>
-                        <div className="stat-label">{r.type} ({r.count})</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {/* Subscription Stats */}
-              {monetizationDashboard?.subscriptionStats?.length > 0 && (
-                <div className="mp-section">
-                  <h3 className="mp-section-title">{t('marketplace.monetization.subscriptionStats')}</h3>
-                  <div className="module-stats">
-                    {monetizationDashboard.subscriptionStats.map((s: any, i: number) => (
-                      <div className="stat-card" key={i}>
-                        <div className="stat-value">{s.count}</div>
-                        <div className="stat-label">{s.status}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {/* Boost Stats */}
-              {monetizationDashboard?.boostStats?.length > 0 && (
-                <div className="mp-section">
-                  <h3 className="mp-section-title">{t('marketplace.monetization.boostStats')}</h3>
-                  <div className="module-stats">
-                    {monetizationDashboard.boostStats.map((b: any, i: number) => (
-                      <div className="stat-card" key={i}>
-                        <div className="stat-value">{b.count}</div>
-                        <div className="stat-label">{b.boost_type} ({formatCurrency(b.revenue || 0)})</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {/* Recent Transactions */}
-              {monetizationDashboard?.recentTransactions?.length > 0 && (
-                <div className="mp-section">
-                  <h3 className="mp-section-title">{t('marketplace.monetization.recentTransactions')}</h3>
-                  <div className="data-table-container">
-                    <table className="module-table">
-                      <thead><tr><th>{t('marketplace.monetization.user')}</th><th>{t('marketplace.monetization.type')}</th><th>{t('marketplace.monetization.amount')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.monetization.date')}</th></tr></thead>
-                      <tbody>
-                        {monetizationDashboard.recentTransactions.map((tx: any) => (
-                          <tr key={tx.id}>
-                            <td>{tx.userName || '-'}</td>
-                            <td><span className="module-badge">{tx.transaction_type}</span></td>
-                            <td>{formatCurrency(tx.amount)}</td>
-                            <td><span className={`module-badge ${tx.status === 'completed' ? 'success' : ''}`}>{tx.status}</span></td>
-                            <td>{new Date(tx.created_at).toLocaleDateString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-              {(!monetizationDashboard?.recentTransactions?.length && !monetizationDashboard?.revenueByType?.length) && (
-                <div className="mp-section">
-                  <p className="mp-empty">{t('marketplace.monetization.noRevenue')}</p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        <AdminPanel
+          adminSubTab={adminSubTab} onSubTabChange={handleAdminSubTabChange}
+          listingsProps={{
+            adminStats, adminFilter, onAdminFilterChange: handleAdminFilterChange,
+            adminListings, speciesLabel, formatCurrency,
+            onTitleClick: handleAdminTitleClick,
+            onApprove: handleAdminApprove, onToggleHotDeal: handleToggleHotDeal, onToggleFeatured: handleToggleFeatured,
+            adminRejectReason, onRejectReasonChange: setAdminRejectReason, onReject: handleAdminReject, t,
+          }}
+          reportsProps={{
+            adminReportFilter, onFilterChange: handleAdminReportFilterChange,
+            adminReports, onViewListing: handleAdminReportViewListing,
+            adminReportResolution, onResolutionChange: handleAdminResolutionChange,
+            onResolve: resolveReport, t,
+          }}
+          settingsProps={{
+            auctionEnabled, onAuctionToggle: handleAdminAuctionToggle,
+            monetizationSettings, onToggleSetting: handleToggleSetting, t,
+          }}
+          plansProps={{
+            monetizationPlans, formatCurrency,
+            onTogglePlanActive: handleTogglePlanActive, onEditPlan: handleEditPlan, onDeletePlan: handleDeletePlan,
+            editingPlan, planForm, onPlanFormChange: setPlanForm,
+            onSavePlan: handleSavePlan, onCancelEdit: handleCancelEditPlan, t,
+          }}
+          revenueProps={{ monetizationDashboard, formatCurrency, t }}
+          t={t}
+        />
       )}
     </div>
   )
 }
-
-// ─── Listing Card Component ───
-const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: TFunction; isFavorite?: boolean; onToggleFavorite?: () => void }> = ({ listing: l, formatCurrency, onView, t, isFavorite, onToggleFavorite }) => {
-  const { speciesLabel, breedLabel } = useMasterData()
-  const species = l.species
-  const breed = l.breed
-  const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
-  const isHot = g(l, 'isHotDeal', 'is_hot_deal')
-  const tier = g(l, 'listingTier', 'listing_tier')
-  const vax = g(l, 'vaccinationStatus', 'vaccination_status')
-  const hasCert = g(l, 'healthCertificate', 'health_certificate')
-  const pregnancy = g(l, 'pregnancyStatus', 'pregnancy_status')
-  const gender = l.gender
-  const listingType = g(l, 'listingType', 'listing_type')
-  const bidCount = g(l, 'bidCount', 'bid_count')
-  const sellerName = g(l, 'sellerName', 'seller_name')
-  const viewsCount = g(l, 'viewsCount', 'views_count')
-  const weight = g(l, 'animalWeightKg', 'animal_weight_kg')
-  const sellerType = g(l, 'sellerType', 'seller_type')
-  const breederVerified = g(l, 'breederVerified', 'breeder_verified')
-  const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
-  const images = typeof l.images === 'string' ? JSON.parse(l.images || '[]') : (l.images || [])
-  const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
-  const breedAvgPrice = g(l, 'breedAvgPrice', 'breed_avg_price')
-  const hasHealthPassport = g(l, 'hasHealthPassport', 'has_health_passport')
-  // Moderation state - only ever present on the seller's own listings (and for admins)
-  const adminApproved = g(l, 'adminApproved', 'admin_approved')
-  const isRejected = adminApproved === false && l.status === 'rejected'
-  const isPendingReview = adminApproved === false && !isRejected
-  const isReserved = l.status === 'reserved'
-  // Fair Deal badge: price is ≥15% below breed average → good deal; ≥15% above → premium priced
-  const fairDealPct = breedAvgPrice && l.price ? Math.round(100 * l.price / breedAvgPrice) : null
-  const isFairDeal = fairDealPct !== null && fairDealPct < 85
-  const isPremiumPriced = fairDealPct !== null && fairDealPct > 115
-
-  return (
-    <div className={`mp-listing-card ${tier === 'spotlight' ? 'spotlight' : tier === 'premium' ? 'premium' : ''}`} onClick={onView}>
-      {isHot && <div className="mp-hot-ribbon">{t('marketplace.card.hotDeal')}</div>}
-      {tier === 'spotlight' && !isHot && <div className="mp-hot-ribbon spotlight-ribbon">{t('marketplace.card.spotlightLabel')}</div>}
-
-      {/* Favorite heart */}
-      {onToggleFavorite && (
-        <button
-          className={`mp-fav-btn ${isFavorite ? 'active' : ''}`}
-          title={isFavorite ? t('marketplace.engagement.removeFavorite') : t('marketplace.engagement.addFavorite')}
-          aria-label={isFavorite ? t('marketplace.engagement.removeFavorite') : t('marketplace.engagement.addFavorite')}
-          onClick={e => { e.stopPropagation(); onToggleFavorite() }}
-        >{isFavorite ? '❤️' : '🤍'}</button>
-      )}
-
-      {/* Image placeholder */}
-      <div className="mp-card-img">
-        {images.length > 0 ? <img {...cldCardImageProps(images[0])} alt={l.title} loading="lazy" /> : <div className="mp-card-img-placeholder">{CATEGORY_ICONS[l.category] || '📦'}</div>}
-        {g(l, 'videoUrl', 'video_url') && <span className="mp-card-video-badge" title={t('marketplace.card.hasVideo')}>🎥</span>}
-      </div>
-
-      <div className="mp-card-body">
-        {/* Category + Type badges */}
-        <div className="mp-card-badges">
-          <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
-          <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
-          {tier === 'premium' && <span className="mp-badge premium">⭐</span>}
-          {isPendingReview && <span className="mp-badge pending-review">⏳ {t('marketplace.deal.pendingReview')}</span>}
-          {isRejected && <span className="mp-badge rejected">❌ {t('marketplace.deal.rejected')}</span>}
-          {isReserved && <span className="mp-badge reserved">🤝 {t('marketplace.deal.status.reserved')}</span>}
-        </div>
-
-        <h4 className="mp-card-title">{l.title}</h4>
-        {/* VC Animal ID badge */}
-        {(g(l, 'animalUniqueId', 'animal_unique_id')) && (
-          <div className="si-849b9ee0">
-            🏷️ {g(l, 'animalUniqueId', 'animal_unique_id')}
-          </div>
-        )}
-
-        {/* Livestock details row */}
-        {(species || breed) && (
-          <div className="mp-card-livestock">
-            {species && <span className="mp-tag species">{speciesLabel(species, t)}</span>}
-            {breed && <span className="mp-tag breed">{breedLabel(species, breed)}</span>}
-            {gender && <span className="mp-tag gender">{gender === 'female' ? '♀' : '♂'}</span>}
-          </div>
-        )}
-
-        {/* Key metrics */}
-        <div className="mp-card-metrics">
-          {milkYield && <span className="mp-metric">🥛 {milkYield}{t('marketplace.card.lPerDay')}</span>}
-          {weight && <span className="mp-metric">⚖️ {weight}{t('marketplace.card.kg')}</span>}
-          {pregnancy === 'pregnant' && <span className="mp-metric pregnant">🤰 {t('marketplace.card.pregnant')}</span>}
-          {vax === 'fully_vaccinated' && <span className="mp-metric vax">{t('marketplace.card.vaccinated')}</span>}
-          {hasCert && <span className="mp-metric cert">{t('marketplace.card.certified')}</span>}
-          {welfareAtt && <span className="mp-metric welfare">🛡️ {t('marketplace.card.welfareAttested')}</span>}
-          {sellerType === 'registered_breeder' && <span className={`mp-metric breeder ${breederVerified ? 'verified' : ''}`}>{breederVerified ? '✅' : '📋'} {t('marketplace.card.registeredBreeder')}</span>}
-          {hasHealthPassport && <span className="mp-metric cert" title="Vaccination records verified in waytovet system">🏥 {t('marketplace.card.healthPassport')}</span>}
-          {isFairDeal && <span className="mp-metric si-7cbce2ec">💚 {t('marketplace.card.fairDeal')} ({fairDealPct}%)</span>}
-          {isPremiumPriced && <span className="mp-metric si-aa4985c8">⭐ {t('marketplace.card.premiumPriced')}</span>}
-        </div>
-
-        {/* Price */}
-        <div className="mp-card-price">
-          {l.price ? formatCurrency(l.price) : t('marketplace.card.contact')}
-          {listingType === 'auction' && bidCount && <span className="mp-bid-count">{bidCount} {t('marketplace.units.listings').replace('listings', 'bids')}</span>}
-        </div>
-
-        {/* Footer */}
-        <div className="mp-card-footer">
-          <span>{sellerName || t('marketplace.genderLabel.unknown')}</span>
-          <span>{viewsCount || 0} {t('marketplace.units.views')}</span>
-        </div>
-
-        {/* Tags */}
-        {tags.length > 0 && (
-          <div className="mp-card-tags">
-            {tags.slice(0, 3).map((tag: string) => <span key={tag} className="mp-tag">{tag}</span>)}
-            {tags.length > 3 && <span className="mp-tag">+{tags.length - 3}</span>}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ─── Auction Countdown Timer ───
-const AuctionCountdown: React.FC<{ endTime: string; t: (key: string) => string }> = ({ endTime, t }) => {
-  const [remaining, setRemaining] = React.useState('')
-  React.useEffect(() => {
-    const update = () => {
-      const diff = new Date(endTime).getTime() - Date.now()
-      if (diff <= 0) { setRemaining(t('marketplace.detail.auctionEnded')); return }
-      const d = Math.floor(diff / 86400000)
-      const h = Math.floor((diff % 86400000) / 3600000)
-      const m = Math.floor((diff % 3600000) / 60000)
-      const s = Math.floor((diff % 60000) / 1000)
-      setRemaining(d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`)
-    }
-    update()
-    const id = setInterval(update, 1000)
-    return () => clearInterval(id)
-  }, [endTime])
-  const isUrgent = new Date(endTime).getTime() - Date.now() < 3600000
-  return <span className={`mp-countdown ${isUrgent ? 'urgent' : ''}`}>{remaining}</span>
-}
-
-// ─── Listing Detail Component ───
-const ListingDetail: React.FC<{
-  listing: MarketplaceListing; bids: MarketplaceBid[]; formatCurrency: (n: number) => string;
-  bidAmount: string; bidMessage: string; onBidAmountChange: (v: string) => void; onBidMessageChange: (v: string) => void;
-  onPlaceBid: () => void; onBuyNow: () => void; onBack: () => void;
-  isAdmin: boolean; onToggleHotDeal: (id: string, v: boolean) => void; onToggleFeatured: (id: string, v: boolean) => void;
-  userId?: string; onRequestContact?: () => void;
-  isFavorite?: boolean; onToggleFavorite?: () => void; onMessageSeller?: () => void;
-  onReport?: () => void; onBookVetCheck?: () => void; transport?: { url: string };
-  t: TFunction;
-}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
-  const { findClassTerm, speciesLabel, resolveLabel, breedLabel } = useMasterData()
-  const species = l.species
-  const breed = l.breed
-  const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
-  const weight = g(l, 'animalWeightKg', 'animal_weight_kg')
-  const age = g(l, 'animalAgeMonths', 'animal_age_months')
-  const gender = l.gender
-  const animalClass = g(l, 'animalClass', 'animal_class')
-  const lactation = g(l, 'lactationNumber', 'lactation_number')
-  const pregnancy = g(l, 'pregnancyStatus', 'pregnancy_status')
-  const pregMonth = g(l, 'pregnancyMonth', 'pregnancy_month')
-  const vax = g(l, 'vaccinationStatus', 'vaccination_status')
-  const hasCert = g(l, 'healthCertificate', 'health_certificate')
-  const tier = g(l, 'listingTier', 'listing_tier')
-  const isHot = g(l, 'isHotDeal', 'is_hot_deal')
-  const contact = g(l, 'contactPhone', 'contact_phone')
-  const listingType = g(l, 'listingType', 'listing_type')
-  const highestBid = g(l, 'highestBid', 'highest_bid')
-  const sellerName = g(l, 'sellerName', 'seller_name')
-  const viewsCount = g(l, 'viewsCount', 'views_count')
-  const auctionEnd = g(l, 'auctionEndTime', 'auction_end_time')
-  const sellerType = g(l, 'sellerType', 'seller_type')
-  const breederVerified = g(l, 'breederVerified', 'breeder_verified')
-  const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
-  const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
-  const images = typeof l.images === 'string' ? JSON.parse(l.images || '[]') : (l.images || [])
-  const [activeImageIdx, setActiveImageIdx] = useState(0)
-
-  return (
-    <div className="mp-detail">
-      <button className="module-btn small" onClick={onBack}>{t('marketplace.detail.backToListings')}</button>
-
-      <div className="mp-detail-layout">
-        <div className="mp-detail-main">
-          {/* Header badges */}
-          <div className="mp-card-badges">
-            <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
-            <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
-            {tier && <span className="mp-badge premium">{{ standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }[tier as 'standard' | 'premium' | 'spotlight'] || tier}</span>}
-            {isHot && <span className="mp-badge hot">{t('marketplace.card.hotDeal')}</span>}
-            {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
-          </div>
-
-          {images.length > 0 && (
-            <div className="mp-detail-gallery">
-              <div className="mp-detail-gallery-main">
-                <img {...cldDetailImageProps(images[activeImageIdx])} alt={l.title} />
-              </div>
-              {images.length > 1 && (
-                <div className="mp-detail-gallery-thumbs">
-                  {images.map((img: string, i: number) => (
-                    <button key={i} type="button" className={`mp-detail-thumb ${i === activeImageIdx ? 'active' : ''}`} onClick={() => setActiveImageIdx(i)}>
-                      <img {...cldCardImageProps(img)} alt={`${l.title} ${i + 1}`} loading="lazy" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="mp-detail-title-row">
-            <h2>{l.title}</h2>
-            <div className="mp-detail-title-actions">
-              {onToggleFavorite && (
-                <button className={`mp-fav-btn inline ${isFavorite ? 'active' : ''}`} onClick={onToggleFavorite}
-                  title={isFavorite ? t('marketplace.engagement.removeFavorite') : t('marketplace.engagement.addFavorite')}>
-                  {isFavorite ? '❤️' : '🤍'}
-                </button>
-              )}
-              {onMessageSeller && userId && l.seller_id !== userId && (
-                <button className="module-btn small" onClick={onMessageSeller}>💬 {t('marketplace.engagement.messageSeller')}</button>
-              )}
-            </div>
-          </div>
-          <p className="mp-sell-step-desc">{l.description || t('marketplace.detail.noDescription')}</p>
-
-          {/* Price */}
-          <div className="mp-detail-price">{l.price ? formatCurrency(l.price) : t('marketplace.contactForPrice')}</div>
-
-          {/* Video */}
-          {(() => {
-            const videoUrl = g(l, 'videoUrl', 'video_url')
-            if (!videoUrl) return null
-            const isUploaded = String(videoUrl).startsWith('/uploads/') || /\.(mp4|webm|ogg|mov)(\?|$)/i.test(videoUrl)
-            return (
-              <div className="mp-detail-video">
-                {isUploaded ? (
-                  <video controls preload="metadata" src={videoUrl} className="mp-detail-video-el" />
-                ) : (
-                  <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="module-btn small">▶ {t('marketplace.detail.watchVideo')}</a>
-                )}
-              </div>
-            )
-          })()}
-
-          {/* Animal Profile Section */}
-          {(species || breed || milkYield || weight || age) && (
-            <div className="mp-detail-section">
-              <h3>{t('marketplace.detail.animalProfile')}</h3>
-              <div className="mp-detail-grid">
-                {species && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.species')}</span><span className="mp-detail-value">{speciesLabel(species, t)}</span></div>}
-                {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breedLabel(species, breed)}</span></div>}
-                {(gender || animalClass) && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{(() => {
-                  const term = animalClass ? findClassTerm(species || '', animalClass) : undefined
-                  if (term) return resolveLabel(term, t)
-                  return (gender && ({ male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') } as Record<string, string>)[gender]) || gender
-                })()}</span></div>}
-                {age && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.age')}</span><span className="mp-detail-value">{age >= 12 ? `${Math.floor(age / 12)}y ${age % 12}m` : `${age} ${t('marketplace.units.months')}`}</span></div>}
-                {weight && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.weightKg')}</span><span className="mp-detail-value">{weight} {t('marketplace.units.kg')}</span></div>}
-                {lactation !== undefined && lactation !== null && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.lactation')}</span><span className="mp-detail-value">{lactation}</span></div>}
-                {milkYield && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.dailyMilk')}</span><span className="mp-detail-value highlight">🥛 {milkYield} {t('marketplace.units.lPerDay')}</span></div>}
-                {pregnancy && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.pregnancy')}</span><span className="mp-detail-value">{pregnancy === 'pregnant' ? `${t('marketplace.pregnancyLabel.pregnant')}${pregMonth ? ` (${pregMonth} ${t('marketplace.units.months')})` : ''}` : pregnancy}</span></div>}
-              </div>
-            </div>
-          )}
-
-          {/* Health Section */}
-          <div className="mp-detail-section">
-            <h3>{t('marketplace.detail.healthCert')}</h3>
-            <div className="mp-detail-grid">
-              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.vaccination')}</span><span className="mp-detail-value">{vax ? ({ fully_vaccinated: t('marketplace.vaxLabel.fully'), partially_vaccinated: t('marketplace.vaxLabel.partial'), not_vaccinated: t('marketplace.vaxLabel.none'), unknown: t('marketplace.vaxLabel.unknown') } as Record<string, string>)[vax] || vax : t('marketplace.genderLabel.unknown')}</span></div>
-              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.reviewLabels.healthCert')}</span><span className="mp-detail-value">{hasCert ? t('marketplace.reviewLabels.yes') : t('marketplace.reviewLabels.no')}</span></div>
-              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.condition')}</span><span className="mp-detail-value">{l.condition}</span></div>
-            </div>
-          </div>
-
-          {/* Seller & Location */}
-          <div className="mp-detail-section">
-            <h3>{t('marketplace.detail.sellerLocation')}</h3>
-            <div className="mp-detail-grid">
-              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.seller')}</span><span className="mp-detail-value">{sellerName || t('marketplace.genderLabel.unknown')}</span></div>
-              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.location')}</span><span className="mp-detail-value">{l.location || t('marketplace.detail.notSpecified')}</span></div>
-              <div className="mp-detail-item">
-                <span className="mp-detail-label">{t('marketplace.livestock.contact')}</span>
-                <span className="mp-detail-value">
-                  {contact ? (
-                    <div className="mp-contact-actions">
-                      <span>{contact}</span>
-                      <a href={`https://wa.me/${contact.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi, I'm interested in your listing: ${l.title}`)}`}
-                        target="_blank" rel="noopener noreferrer" className="mp-contact-btn whatsapp"
-                        onClick={e => e.stopPropagation()}>
-                        💬 WhatsApp
-                      </a>
-                      <a href={`tel:${contact}`} className="mp-contact-btn call" onClick={e => e.stopPropagation()}>
-                        📞 {t('marketplace.detail.call')}
-                      </a>
-                    </div>
-                  ) : userId && l.seller_id !== userId ? (
-                    <div>
-                      <span className="si-7b05444b">{t('marketplace.detail.contactHidden')}</span>
-                      {onRequestContact && (
-                        <button className="module-btn small si-5dc995a0" onClick={onRequestContact}>
-                          📩 {t('marketplace.detail.requestContact')}
-                        </button>
-                      )}
-                    </div>
-                  ) : <span className="si-e70e9abd">-</span>}
-                </span>
-              </div>
-              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.views')}</span><span className="mp-detail-value">{viewsCount || 0}</span></div>
-              {sellerType === 'registered_breeder' && (
-                <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.sellerType')}</span><span className="mp-detail-value">{breederVerified ? '✅ ' : '📋 '}{t('marketplace.compliance.registeredBreeder')}{breederVerified ? ` (${t('marketplace.compliance.verified')})` : ''}</span></div>
-              )}
-              {sellerType === 'individual' && (
-                <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.sellerType')}</span><span className="mp-detail-value">{t('marketplace.compliance.individualOwner')}</span></div>
-              )}
-            </div>
-          </div>
-
-          {/* Compliance & Welfare */}
-          <div className="mp-detail-section mp-compliance-detail">
-            <h3>⚖️ {t('marketplace.compliance.complianceTitle')}</h3>
-            <div className="mp-detail-grid">
-              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.welfareStatus')}</span><span className="mp-detail-value">{welfareAtt ? '✅ ' + t('marketplace.compliance.attested') : '-'}</span></div>
-              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.termsStatus')}</span><span className="mp-detail-value">✅ {t('marketplace.compliance.accepted')}</span></div>
-            </div>
-            <div className="mp-compliance-info">{t('marketplace.compliance.detailDisclaimer')}</div>
-          </div>
-
-          {tags.length > 0 && (
-            <div className="mp-card-tags">
-              {tags.map((tag: string) => <span key={tag} className="mp-tag">{tag}</span>)}
-            </div>
-          )}
-
-          {/* Admin controls */}
-          {isAdmin && (
-            <div className="mp-admin-bg">
-              <h3>{t('marketplace.detail.adminControls')}</h3>
-              <div className="mp-action-cluster">
-                <button className="module-btn small" onClick={() => onToggleHotDeal(l.id, isHot || false)}>{isHot ? t('marketplace.detail.removeHotDeal') : t('marketplace.detail.makeHotDeal')}</button>
-                <button className="module-btn small" onClick={() => onToggleFeatured(l.id, l.featured || false)}>{l.featured ? t('marketplace.detail.unfeature') : t('marketplace.detail.feature')}</button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right sidebar - Buy/Bid panel */}
-        <div className="mp-detail-sidebar">
-          {(l.seller_id && l.seller_id === userId) ? (
-            <div className="mp-buy-panel">
-              <h4>{t('marketplace.detail.yourListing')}</h4>
-              <p className="mp-sell-step-desc">{t('marketplace.detail.yourListingDesc')}</p>
-            </div>
-          ) : listingType !== 'auction' ? (
-            <div className="mp-buy-panel">
-              <h4>🤝 {t('marketplace.deal.reserveTitle')}</h4>
-              <div className="mp-buy-price">{l.price ? formatCurrency(l.price) : t('marketplace.detail.contactSeller')}</div>
-              <div className="mp-sell-step-desc">{t('marketplace.orders.qty')}: {l.quantity} {l.unit || t('marketplace.units.head')}</div>
-              {/* Free-classifieds deal: how it works */}
-              <div className="mp-deal-steps">
-                <div className="mp-deal-step"><span className="mp-deal-step-num">1</span>{t('marketplace.deal.howStep1')}</div>
-                <div className="mp-deal-step"><span className="mp-deal-step-num">2</span>{t('marketplace.deal.howStep2')}</div>
-                <div className="mp-deal-step"><span className="mp-deal-step-num">3</span>{t('marketplace.deal.howStep3')}</div>
-                <div className="mp-deal-step"><span className="mp-deal-step-num">4</span>{t('marketplace.deal.howStep4')}</div>
-              </div>
-              <div className="mp-deal-free-note">{t('marketplace.deal.freeNote')}</div>
-              {l.status === 'active' && <button className="module-btn primary" onClick={onBuyNow}>🤝 {t('marketplace.deal.reserveNow')}</button>}
-              {l.status === 'reserved' && <div className="mp-deal-reserved-badge">⏳ {t('marketplace.deal.currentlyReserved')}</div>}
-            </div>
-          ) : (
-            <div className="mp-bid-panel">
-              <h4>{t('marketplace.detail.placeBidTitle')}</h4>
-              <div className="mp-bid-current">
-                <span>{t('marketplace.detail.currentHighest')}</span>
-                <span className="mp-bid-amount">{formatCurrency(highestBid || l.price || 0)}</span>
-              </div>
-              {auctionEnd && (
-                <div className="mp-auction-end">
-                  <span>{t('marketplace.detail.ends')} </span>
-                  <AuctionCountdown endTime={auctionEnd} t={t} />
-                  <div className="si-b1a83cef">{new Date(auctionEnd).toLocaleString()}</div>
-                </div>
-              )}
-              <input className="module-input" type="number" placeholder={t('marketplace.detail.yourBidAmount')} value={bidAmount} onChange={e => onBidAmountChange(e.target.value)} />
-              <textarea className="module-input" placeholder={t('marketplace.detail.messageOptional')} value={bidMessage} onChange={e => onBidMessageChange(e.target.value)} />
-              <button className="module-btn primary" onClick={onPlaceBid}>{t('marketplace.detail.placeBidTitle')}</button>
-
-              {bids.length > 0 && (
-                <div className="mp-bid-history">
-                  <h5>{t('marketplace.detail.placeBidTitle').replace('🔨 ', '')} ({bids.length})</h5>
-                  {bids.slice(0, 8).map(b => (
-                    <div key={b.id} className="mp-bid-row">
-                      <span className="mp-bid-row-amount">{formatCurrency(b.amount)}</span>
-                      <span>{g(b, 'bidderName', 'bidder_name')}</span>
-                      {(g(b, 'isWinning', 'is_winning')) && <span className="mp-bid-winning">{t('marketplace.detail.leading')}</span>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Paid-services funnel: pre-purchase vet check (only for animal listings, non-owners) */}
-          {onBookVetCheck && l.category === 'animal' && userId && l.seller_id !== userId && (
-            <div className="mp-vetcheck-panel">
-              <div className="mp-vetcheck-title">🩺 {t('marketplace.services.vetCheckTitle')}</div>
-              <p className="mp-vetcheck-desc">{t('marketplace.services.vetCheckDesc')}</p>
-              <button className="module-btn primary" onClick={onBookVetCheck}>{t('marketplace.services.bookVetCheck')}</button>
-            </div>
-          )}
-
-          {/* Transport referral (config-driven) */}
-          {transport && userId && l.seller_id !== userId && (
-            <div className="mp-transport-panel">
-              <span>🚚 {t('marketplace.services.transportDesc')}</span>
-              <a className="module-btn small" href={transport.url} target="_blank" rel="noopener noreferrer">{t('marketplace.services.arrangeTransport')}</a>
-            </div>
-          )}
-
-          {/* Report */}
-          {onReport && (
-            <button className="mp-report-link" onClick={onReport}>🚩 {t('marketplace.report.reportListing')}</button>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Review Item ───
-const ReviewItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div className="mp-review-item"><span className="mp-review-label">{label}</span><span className="mp-review-value">{value || '-'}</span></div>
-)
 
 export default Marketplace
