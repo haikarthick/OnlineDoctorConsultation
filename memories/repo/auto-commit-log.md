@@ -8621,3 +8621,45 @@
 </details>
 
 ---
+
+## 2026-11-14 01:28 · `117168d` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 01:38 · `fcf42df` · OTHER
+
+**Commit:** refactor(pages): split the 1,197-line ConsultationRoom.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/consultationRoom/ChatPanel.tsx
+  - frontend/src/components/consultationRoom/ConsultationVideoStage.tsx
+  - frontend/src/components/consultationRoom/EndedSessionView.tsx
+  - frontend/src/components/consultationRoom/MedicalHistoryPanel.tsx
+  - frontend/src/components/consultationRoom/NotesPanel.tsx
+  - frontend/src/components/consultationRoom/PrescribePanel.tsx
+  - frontend/src/components/consultationRoom/ReferralModal.tsx
+  - frontend/src/components/consultationRoom/consultationRoomShared.ts
+  - frontend/src/pages/doctor/ConsultationRoom.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
