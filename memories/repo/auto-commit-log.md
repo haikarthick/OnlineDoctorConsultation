@@ -8946,3 +8946,79 @@
 </details>
 
 ---
+
+## 2026-11-14 14:12 · `3b2dea3` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 14:42 · `9e89922` · OTHER
+
+**Commit:** fix(frontend): locale date formatting, stale isFarmer dep, unreachable reject-registration modal  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/src/components/manageSchedule/CalendarTab.tsx
+  - frontend/src/components/manageSchedule/HolidaysTab.tsx
+  - frontend/src/components/manageSchedule/TimeBlocksTab.tsx
+  - frontend/src/components/userManagement/PendingApprovalsTab.tsx
+  - frontend/src/components/userManagement/RejectRegistrationModal.tsx
+  - frontend/src/components/vaccineProtocol/VaccineProtocolHistoryModal.tsx
+  - frontend/src/pages/AnimalTimeline.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/pages/admin/VaccineProtocolAdmin.tsx
+  - frontend/src/pages/doctor/ManageSchedule.tsx
+
+</details>
+
+---
+
+## 2026-11-14 15:00 · `4591d18` · OTHER
+
+**Commit:** fix(network,pharmacy): enforce membership expiry + fix stock-alert column bug  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (20)</summary>
+
+  - backend/src/controllers/HospitalNetworkController.ts
+  - backend/src/middleware/hospitalDataIsolation.ts
+  - backend/src/routes/hospital-network.routes.ts
+  - backend/src/routes/hospital-staff-invites.routes.ts
+  - backend/src/routes/network-subscriptions.routes.ts
+  - backend/src/routes/pharmacy.routes.ts
+  - backend/src/routes/pricing-visibility.routes.ts
+  - backend/src/services/AnimalService.ts
+  - backend/src/services/MedicalRecordService.ts
+  - backend/src/services/PrescriptionService.ts
+  - backend/src/services/VetHospitalService.ts
+  - backend/src/services/hospitalNetwork/dashboard.ts
+  - backend/src/services/hospitalNetwork/enrollment.ts
+  - backend/src/services/hospitalNetwork/financialSummary.ts
+  - backend/src/services/hospitalNetwork/leaveAndTransfer.ts
+  - backend/src/services/hospitalNetwork/members.ts
+  - backend/src/services/hospitalNetwork/networkCrud.ts
+  - backend/src/services/hospitalNetwork/referralsAndBranch.ts
+  - backend/src/services/hospitalNetwork/rowMappersAndDeactivate.ts
+  - backend/src/utils/scheduler.ts
+
+</details>
+
+---
