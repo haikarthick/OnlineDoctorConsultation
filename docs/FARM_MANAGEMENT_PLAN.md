@@ -42,6 +42,12 @@ Feedback from a real user (Tamil Nadu), relayed by the owner:
 | D7 | **Parent drives children.** For every farm type and animal, sub-fields and sections are shown/hidden by the parent selection so the farmer views/adds/updates only what is relevant. See §6. |
 | D8 | **Seamless across modules is a mandatory rule** (data, functionality, look and feel, usability, every role). Written into `CLAUDE.md`, the `feature-delivery` skill Phase 1, and memory `feedback-cross-module-seamless`. |
 | D9 | Plan first, owner approves the design, then build. |
+| D10 | **Aquaculture species come from government/official sources**, not general knowledge. Fish, shrimp and prawn are all in scope. Sourced list in §6.5. |
+| D11 | **Milk applies to every animal that produces milk.** No restriction from our side unless there is a functional or technical problem (there is none). Driven by the class flag `can_produce_milk`, never by a species list. |
+| D12 | **Every change is made consistently across all modules and roles** (restates D8). The bottom tab bar and the new building blocks therefore roll out to **every role in the same phase**, not farmers first. |
+| D13 | **Both the owner and farm workers record data.** |
+| D14 | Buffalo group types are the same as cattle, **including bullocks**. |
+| D15 | **Income/expense is out of this initiative.** The owner plans a complete farmer finance management module as the next phase. Do not build finance here; only keep the hooks in §9 "Finance hand-off". |
 
 Defaults proposed and **not objected to** (treat as accepted unless the owner says otherwise):
 "Cross Breed" replaces "Mixed Breed" for **livestock only** (dogs/cats/rabbits keep "Mixed
@@ -236,12 +242,12 @@ exist and when they apply:
 | Segment | Mode | Identity | Animal/group fields | Daily records | Events | Farmer watches |
 |---|---|---|---|---|---|---|
 | **Dairy** (cattle, buffalo) | individual | name, ear tag (Pashu Aadhaar), class | breed, DOB, birth weight, weight; females: pregnancy status, calvings, lactation no., avg daily milk, last calving, dry-off date | milk AM/PM (per animal or group total), feed | heat, insemination (natural/AI), pregnancy check, dry-off, calving → creates calf with dam/sire, treatment, sale, death | yield per cow and total, calving interval, due dates |
-| **Goat / sheep** | individual or flock | name/tag, class | breed, DOB, weight; females: pregnancy, kiddings/lambings; milk only if `produces_milk` and farmer enables it; sheep: wool | weight (periodic), feed; milk if dairy goats | mating, kidding/lambing (litter size), weaning, shearing (sheep), sale, death | growth, kids per doe, mortality |
+| **Goat / sheep** | individual or flock | name/tag, class | breed, DOB, weight; females: pregnancy, kiddings/lambings, avg daily milk (D11 — doe and ewe already have `can_produce_milk = true` in the seed); sheep: wool | milk AM/PM (same record as dairy, optional to use), weight (periodic), feed | mating, kidding/lambing (litter size), weaning, shearing (sheep), sale, death | growth, kids per doe, mortality |
 | **Pig** | sows/boars individual; fatteners batch | tag, class | breed, DOB, weight; sows: parity, pregnancy | feed; batch: mortality, sample weight | service, farrowing (born alive / stillborn), weaning (count), sale, death | litter size, growth, feed conversion |
 | **Poultry broiler** | batch + cycle | shed/flock name, cycle no. | breed/strain, placed count, placement date, source hatchery, age in days (computed) | mortality, culls, feed, water (optional), sample weight | placement, vaccination (campaign), partial sale, clear-out (closes cycle) | mortality %, feed conversion, average weight, days to market |
 | **Poultry layer** | batch + cycle | shed/flock name, cycle no. | breed/strain, placed count, age in weeks | eggs collected (good / broken), mortality, feed | placement, vaccination, cull, clear-out | lay %, eggs per bird, mortality % |
 | **Aquaculture** (fish, shrimp, prawn) | batch + cycle ("crop") | pond/tank name, crop no. | species, pond area + unit, water type (fresh/brackish), stocking count, stocking date, seed source, days of culture (computed) | feed given, mortality, water quality (temp, pH, dissolved oxygen, salinity, ammonia — optional each), sample weight | stocking, sampling, water exchange, treatment, partial harvest, harvest (kg, closes crop) | survival %, average body weight, biomass, feed conversion, days of culture |
-| **Equine / other livestock** | individual | name, tag/microchip, class | breed, DOB, weight; breeding fields by class flags | none by default | breeding, foaling, treatment, sale, death | health history |
+| **Equine / other livestock** (horse, donkey, camel, yak…) | individual | name, tag/microchip, class | breed, DOB, weight; breeding fields by class flags; milk fields for milk-producing female classes (camel, yak, donkey, mare — classes to be seeded with `can_produce_milk = true`, D11) | milk where the class produces it; otherwise none by default | breeding, foaling, treatment, sale, death | health history |
 | **Mixed** | per group | — | union, but each group/animal shows only its own row above | per group | per group | per-segment tiles |
 
 Never shown: milk for a non-milk class; pregnancy/parity for males and juveniles; ear tag for
@@ -249,16 +255,85 @@ poultry and aquatic; gender/class/name for batch subjects; water quality outside
 outside laying classes/groups; neutered / insurance / microchip sections for farm stock unless the
 farmer opens "More details".
 
-**Aquaculture specifics [unverified — domain content from general knowledge, confirm with
-ICAR-CIFA / MPEDA / state fisheries material or a fisheries expert before seeding]:** candidate
-species — Indian major carps (Rohu, Catla, Mrigal), Common Carp, Grass Carp, Tilapia, Pangasius,
-Murrel, Seabass; shrimp — Vannamei (Pacific white), Black Tiger; freshwater prawn (Scampi).
-Group types — nursery pond, rearing pond, grow-out pond, broodstock tank, hatchery tank,
-quarantine tank. Units — pond area in acres/hectares/cents, stocking density per m² or per acre,
-harvest in kg/tonnes. Withdrawal periods apply before harvest. Aquaculture reuses the batch
-engine (`group_cycles` = crop, `group_population_events` = stocking/mortality/harvest) rather
-than a new one; water quality is the one genuinely new record type. The existing `locations`
-table already has `pond` and `tank` types.
+Aquaculture reuses the batch engine (`group_cycles` = crop, `group_population_events` =
+stocking/mortality/harvest) rather than a new one; water quality is the one genuinely new record
+type. The existing `locations` table already has `pond` and `tank` types. Withdrawal periods
+apply before harvest. Species and parameters: §6.5.
+
+### 6.5 Aquaculture master data — from official sources (D10)
+
+Fetched 2026-11-14. **Sources that worked:** TNAU Agritech Portal (Tamil Nadu Agricultural
+University, `agritech.tnau.ac.in/fishery/`) and ICAR-CIBA (`ciba.res.in`, Finfish Culture
+Division page). **Sources that refused the automated fetch** (try again by hand or from another
+network before finalising the seed): NFDB handbook "Package of Practices for Breeding and Culture
+of Commercially Important Freshwater Fish Species" (Oct 2018, `nfdb.gov.in` — DNS failure);
+`fisheries.tn.gov.in/InlandFisheries` (404); Coastal Aquaculture Authority `caa.gov.in/faq.html`
+(TLS error); `dof.gov.in` (403); `cifa.nic.in` (TLS error). Two ICAR-CMFRI "Aquaculture Worker
+Training Manual" PDFs downloaded but could not be read in this environment (no PDF text tool) —
+`eprints.cmfri.org.in/16412/` and `/16413/`; these are the best single official list of
+*cultured* species and should be read before seeding.
+
+**Scientific names are as printed by the source. Common names in the table are the standard
+English/Indian trade names added by me — [unverified] against the source, which printed
+scientific names only. Per-locale labels (especially Tamil) need a native check.**
+
+| Seed as species | Scientific name (source) | Water | Group | Source |
+|---|---|---|---|---|
+| Catla | *Catla catla* | fresh | Indian major carp | TNAU |
+| Rohu | *Labeo rohita* | fresh | Indian major carp | TNAU |
+| Mrigal | *Cirrhinus mrigala* | fresh | Indian major carp | TNAU |
+| Bata | *Labeo bata* | fresh | Indian major carp (as grouped by source) | TNAU |
+| Calbasu | *Labeo calbasu* | fresh | Indian major carp (as grouped by source) | TNAU |
+| Silver Carp | *Hypophthalmichthys molitrix* | fresh | exotic carp | TNAU |
+| Grass Carp | *Ctenopharyngodon idella* | fresh | exotic carp | TNAU |
+| Common Carp (mirror / scale varieties as breeds) | *Cyprinus carpio* var. *specularis* / *communis* | fresh | exotic carp | TNAU |
+| Tilapia | *Tilapia mossambicus* (as printed) | fresh | tilapia | TNAU |
+| Magur | *Clarias batrachus* | fresh | air-breathing catfish | TNAU |
+| Singhi | *Heteropneustes fossilis* | fresh | air-breathing catfish | TNAU |
+| Murrel (Striped / Giant / Spotted as breeds) | *Channa striatus*, *C. marulius*, *C. punctatus* | fresh | murrel | TNAU |
+| Climbing Perch (Koi) | *Anabas testudineus* | fresh | air-breathing | TNAU |
+| Pangasius | *Pangasius pangasius* | fresh | catfish | TNAU (carp-culture page) |
+| Giant Gourami | *Osphronemus goramy* | fresh | other | TNAU (carp-culture page) |
+| Freshwater Prawn (Scampi) | *M. rosenbergii* | fresh | prawn | TNAU; CAA technical paper (search result) |
+| Asian Seabass | *Lates calcarifer* | brackish | finfish | ICAR-CIBA |
+| Milkfish | *Chanos chanos* | brackish | finfish | ICAR-CIBA |
+| Grey Mullet | *Mugil cephalus* | brackish | finfish | ICAR-CIBA |
+| Pearlspot | *Etroplus suratensis* | brackish (also named on TNAU carp page) | finfish | ICAR-CIBA; TNAU |
+| Long Whiskers Catfish | *Mystus gulio* | brackish | catfish | ICAR-CIBA |
+| Red Snapper | *Lutjanus argentimaculatus* | brackish / marine | finfish | ICAR-CIBA |
+| Pacific White Shrimp (Vannamei) | *L. vannamei* | brackish | shrimp | ICAR-CIBA (named); CAA paper + 2025 CAA empanelment order (search results, pages not opened) |
+| Black Tiger Shrimp | *P. monodon* | brackish | shrimp | CAA paper + 2025 CAA order (search results, pages not opened) |
+| Crab | not printed | brackish | crab | ICAR-CIBA (generic; "crab box culture") — **species name needed from CIBA manuals before seeding** |
+| Other | — | — | — | always present, like every species picker |
+
+Not seeded without a source: GIFT tilapia and Amur carp (named only in a news article about
+Coimbatore), mud crab species, seaweed/clams/mussels/oysters (CIBA names them generically).
+The TNAU page also lists ~30 minor/hill-stream species from a habitat survey; they are wild
+species, not culture species, and are deliberately left out.
+
+**Rule from the Coastal Aquaculture Authority (search result, page not opened — confirm):** a farm
+approved for *L. vannamei* may not farm another crustacean at the same time. If confirmed, the
+group form warns (does not block) when a second crustacean crop is opened on the same farm.
+
+**Culture stages / group types (as named by the sources):** nursery pond, rearing pond, stocking
+(grow-out) pond — TNAU describes carp culture as a three-tier system: spawn → fry in nursery ponds
+(2–3 weeks), fry → fingerling in rearing ponds (~3 months), fingerling → table size in stocking
+ponds; plus brood stock pond, breeding tank, cement tank (TNAU murrel page); cage, hapa,
+recirculatory system (ICAR-CIBA). Quarantine tank kept from our own health-hold pattern.
+
+**Water-quality readings and guide ranges** — the only official table found is TNAU's for
+freshwater prawn nursery and grow-out (cites FAO 2002 and ICAR-CIFA): temperature 28–31 °C; pH
+7.0–8.5; dissolved oxygen 3–7 ppm; salinity < 10 ppt; transparency 25–40 cm; alkalinity 25–60
+ppm; total hardness 30–150 ppm; ammonia < 0.3 ppm; nitrite < 2.0 ppm; nitrate < 10 ppm; hydrogen
+sulfide nil. **No official range table was found for carp ponds, shrimp or brackish finfish.**
+Design consequence: the reading fields are common to all aquatic species (temperature, pH,
+dissolved oxygen, salinity, transparency, ammonia — each optional), and guide ranges are stored
+per species in master data so they can be filled as sources are confirmed; a species with no
+range simply shows no "out of range" hint. Never hardcode a range.
+
+**Units (from sources):** stocking per hectare and per m²; pond/tank dimensions in metres; fish
+size in cm and g. Add acre and cent for pond area (local usage — **[unverified]**, confirm with
+the Tamil Nadu user). Typical periods printed: murrel grow-out 8 months to 800–900 g.
 
 ## 7. Cross-module trace (D8) — every consumer of the changes
 
@@ -290,10 +365,12 @@ list the new session re-verifies with grep before building (`animal_class`, `bre
 
 Rules live in the `mobile-farmer-ux` skill. Design summary:
 
-- **Bottom tab bar (farmer, phone widths):** Today · Animals · **＋ Add** · Health · More. The
-  existing sidebar stays for desktop and is what "More" opens. Built in the shared layout so
-  other roles can adopt the same bar with their own five items (D8) — design the component
-  role-agnostic, configure per role.
+- **Bottom tab bar (every role, phone widths — D12):** one shared component, five items per
+  role, the last always "More" (opens the existing sidebar, which stays as-is on desktop).
+  Farmer: Today · Animals · **＋ Add** · Health · More. Each other role (pet owner, vet, admin,
+  corporate admin, hospital staff, pharmacist, groomer) gets its own four most-used destinations
+  — chosen in Phase 0 from each role's existing `Navigation.tsx` items and signed off with the
+  mock-ups. All roles ship in the same phase; no role is left on the old phone navigation.
 - **Today:** adapts to what the farm holds (from `farm_segment` of its groups). Sections only
   when relevant: record now (milk / eggs / mortality / feed / water quality), due (vaccinations,
   pregnancy checks, expected births, dry-offs, harvest windows), alerts (active withdrawal, sick
@@ -342,9 +419,35 @@ approves before Phase 1. Confirm the open questions in §10.
 - Master Data admin screens for the new tables.
 - No visible farmer change yet except corrected breeds and ordering.
 
-### Phase 2 — Phone foundation
-Shared building blocks (§8), bottom tab bar, `inputMode` on numeric inputs across the app
-(all roles — D8), retry-with-form-kept save behaviour. Farm pages keep working unchanged.
+### Phase 2 — Phone foundation (all roles, D12)
+Shared building blocks (§8); bottom tab bar for **every role**; `inputMode` on all 142 numeric
+inputs across the app; retry-with-form-kept save behaviour as the shared default. Existing pages
+keep working unchanged. Review must open at least one screen per role at phone width.
+
+### Who records (D13) — applies to Phases 3 and 4
+Owner and workers both record. Verified gap to close: `ensureGroupAccess()`
+(`enterprise-farm.routes.ts:89-113`) grants access to **any** active enterprise member and does
+not look at the member's role, so a `viewer` can open a cycle or post a population event today.
+`EnterpriseService.ts:277` already has a role-checked membership query to reuse.
+- Write rule: owner, manager, supervisor, worker, farm_vet may record daily records and events;
+  viewer is read-only. Structural changes (create/delete group, close cycle, delete records)
+  stay with owner/manager/supervisor. Enforce in the backend, mirror in the UI (hide, don't
+  disable-and-confuse). Run `tenant-isolation-review` on every new route.
+- Every record stores who recorded it and shows it ("Morning milk — recorded by Kumar, 6:40").
+- Two people recording the same thing: the unique key (subject + type + date + session) means
+  the second person sees the existing entry and edits it rather than creating a duplicate; edits
+  keep an audit trail.
+- Today is per farm, shared by everyone on it, so a worker sees what the owner already recorded.
+- **[unverified]** how a worker with a non-farmer system role (e.g. `pet_owner`) reaches the farm
+  screens — `Navigation.tsx` shows Farm Management to `farmer`/`admin` only. Check the invite
+  flow (`/enterprises/:id/invite-member`) and fix so every active member sees their farm.
+
+### Finance hand-off (D15) — do not build finance here
+A full farmer finance module is the owner's next initiative. This initiative only makes sure the
+facts finance will need are captured once and cleanly: sale and purchase events carry an optional
+amount, quantity, unit and buyer/seller text; feed consumption keeps its existing cost; milk and
+egg records keep quantity so revenue can be derived later; every record has farm, group/animal,
+date and recorder. No ledgers, no profit screens, no invoices in this initiative.
 
 ### Phase 3 — Groups and animals rebuilt on the engine
 - Group create/edit as a step form: farm → species (picker) → mode (suggested, changeable) →
@@ -394,26 +497,24 @@ voice entry, WhatsApp reminders.
 
 ## 10. Open questions for the owner (ask at the start of the next session)
 
-1. **Aquaculture scope:** fish only, or fish + shrimp + freshwater prawn from day one? Brackish
-   and freshwater both? Who can validate the species and water-quality list (a fisheries
-   contact, or should I source it from ICAR-CIFA / MPEDA pages)?
-2. **Goat and sheep milk:** record it (dairy goats) or leave milk to cattle and buffalo only, as
-   the feedback said?
-3. **Other roles on phone:** should the bottom tab bar roll out to pet owners and vets in the
-   same phase as farmers (consistent look, more testing) or farmer first, others next?
-4. **Who records on a farm:** only the owner, or workers too (enterprise member roles exist)?
-   Decides whether Today is per farm or per person.
-5. **Buffalo "same classification"** as cattle confirmed for group types; confirm bullocks apply
-   to buffalo too.
-6. **Income/expense:** in scope for this initiative or later?
+The six questions first listed here were answered on 2026-11-14 and are recorded as D10–D15 in
+§2. What remains is verification work, not owner decisions:
+
+1. Read the official sources that refused the automated fetch (§6.5) and confirm or extend the
+   aquaculture species list, the crab species, shrimp names, and carp/shrimp water-quality ranges.
+2. Confirm buffalo gestation days and pig breeds on NBAGR.
+3. Confirm how a farm worker with a non-farmer system role reaches the farm screens (§9 "Who
+   records").
+4. Tamil labels for new group types, classes and aquatic species need a native-speaker check —
+   ask the owner who can review them.
+5. Phase 0 will ask the owner to sign off each role's four tab-bar destinations.
 
 ## 11. Resume here
 
 1. Read this file, `docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md` §10, `docs/DESIGN_SYSTEM.md`, and the
    three skills in §3.
-2. Ask the owner the §10 questions.
-3. Verify the **[unverified]** items (aquaculture species/units, buffalo gestation, pig breeds on
-   NBAGR).
+2. Do not re-ask the owner anything in §2 (D1–D15 are settled).
+3. Work through the §10 verification list and the **[unverified]** items.
 4. Do Phase 0: build the phone mock-ups and get sign-off.
 5. Then Phase 1 via the `feature-delivery` skill. First commit is migration 043 + `init.sql` for
    the farm profile engine and breed corrections.

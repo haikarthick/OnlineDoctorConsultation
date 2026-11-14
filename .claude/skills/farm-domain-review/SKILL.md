@@ -28,6 +28,7 @@ and say what the farmer records and sees:
 | Pig | individual sows, batch fatteners | feed | service, farrowing (litter size), weaning | litter size, growth |
 | Poultry broiler | batch + cycle | mortality, feed, sample weight | placement, sale/clear-out | mortality %, feed conversion, days to market |
 | Poultry layer | batch + cycle | eggs collected, mortality, feed | placement, cull | lay %, mortality % |
+| Aquaculture (fish, shrimp, prawn) | batch + cycle ("crop") per pond/tank | feed, mortality, water quality, sample weight | stocking, sampling, partial harvest, harvest | survival %, average weight, biomass, feed conversion |
 | Mixed smallholder | both | whichever applies | all of the above | simple totals |
 
 Batch-managed stock never gets one row per head (`docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md`). A daily
@@ -63,8 +64,9 @@ back for entering it.
 Gate on the class flags that already exist (`can_produce_milk`, `can_be_pregnant`,
 `implied_gender`) and on species — never hardcode species names in a component.
 
-- Milk yield, lactation number, dry-off: milk-producing classes of cattle and buffalo only (goat
-  and sheep milk only if the owner asks for it).
+- Milk yield, lactation number, dry-off: every class with `can_produce_milk`, whatever the
+  species (cow, buffalo, doe, ewe, camel, yak, mare, jenny). Owner rule 2026-11-14: never
+  restrict a capability from our side unless there is a real functional or technical problem.
 - Pregnancy status, calvings/parity, expected due date: classes that can be pregnant.
 - Ear tag: species with `has_ear_tag`.
 - A bull must never be asked about milk; a calf must never be asked about calvings.
@@ -79,6 +81,10 @@ Gate on the class flags that already exist (`can_produce_milk`, `can_be_pregnant
 - National animal ID is the 12-digit Pashu Aadhaar ear tag (Bharat Pashudhan). Treat it as the
   primary lookup key for tagged livestock.
 - Every label exists in all 6 locales; master rows carry per-locale labels.
+
+- Aquatic species, culture stages and water-quality guide ranges come from official sources only
+  (ICAR institutes, TNAU, NFDB, Coastal Aquaculture Authority); see
+  `docs/FARM_MANAGEMENT_PLAN.md` §6.5. Ranges live in master data per species, never in code.
 
 ## 5. The vet must see what the farmer recorded
 
