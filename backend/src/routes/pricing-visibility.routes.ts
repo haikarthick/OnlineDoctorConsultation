@@ -63,14 +63,14 @@ router.get('/my-network-subscription', authMiddleware, roleMiddleware(['corporat
   const authReq = req as any;
   const db = (await import('../utils/database')).default;
   const netResult = await db.query(
-    `SELECT id FROM hospital_networks WHERE id IN (SELECT network_id FROM hospital_network_members WHERE user_id=$1 AND network_role='corporate_admin' AND is_active=true) LIMIT 1`,
+    `SELECT id FROM hospital_networks WHERE id IN (SELECT network_id FROM hospital_network_members WHERE user_id=$1 AND network_role='corporate_admin' AND is_active=true AND (valid_until IS NULL OR valid_until > NOW())) LIMIT 1`,
     [authReq.userId]
   );
   if (netResult.rows.length === 0) return res.json({ success: true, data: null });
   const networkId = netResult.rows[0].id;
   const result = await db.query(
     `SELECT ns.*, nsp.name AS "planName", nsp.price_monthly AS "priceMonthly", nsp.price_annually AS "priceAnnually",
-      (SELECT COUNT(*) FROM hospital_network_members m WHERE m.network_id=ns.network_id AND m.is_active=true) AS "seatsUsed"
+      (SELECT COUNT(*) FROM hospital_network_members m WHERE m.network_id=ns.network_id AND m.is_active=true AND (m.valid_until IS NULL OR m.valid_until > NOW())) AS "seatsUsed"
      FROM network_subscriptions ns LEFT JOIN network_subscription_plans nsp ON nsp.id=ns.plan_id WHERE ns.network_id=$1`,
     [networkId]
   );

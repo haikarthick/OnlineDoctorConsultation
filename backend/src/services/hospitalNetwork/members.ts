@@ -195,7 +195,8 @@ import { getNetworkById } from './networkCrud';
               vh.is_network_branch AS "isNetworkBranch",
               vh.specializations,
               (SELECT COUNT(*) FROM hospital_network_members
-               WHERE network_id = $1 AND hospital_id = vh.id AND is_active = true) AS "staffCount"
+               WHERE network_id = $1 AND hospital_id = vh.id AND is_active = true
+                 AND (valid_until IS NULL OR valid_until > NOW())) AS "staffCount"
        FROM vet_hospitals vh
        WHERE vh.branch_network_id = $1 AND vh.is_network_branch = true
        ORDER BY vh.name ASC

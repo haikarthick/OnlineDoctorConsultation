@@ -5,12 +5,12 @@ import type { NetworkDashboard, AccessLogEntry } from './types';
   export async function getNetworkDashboard(networkId: string): Promise<NetworkDashboard> {
     const [members, hospitals, patients, consents, accessLogs, membersByRole] = await Promise.all([
       database.query(
-        `SELECT COUNT(*) AS count FROM hospital_network_members WHERE network_id = $1 AND is_active = true`,
+        `SELECT COUNT(*) AS count FROM hospital_network_members WHERE network_id = $1 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`,
         [networkId]
       ),
       database.query(
         `SELECT COUNT(DISTINCT hospital_id) AS count FROM hospital_network_members
-         WHERE network_id = $1 AND hospital_id IS NOT NULL AND is_active = true`,
+         WHERE network_id = $1 AND hospital_id IS NOT NULL AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`,
         [networkId]
       ),
       database.query(
@@ -30,6 +30,7 @@ import type { NetworkDashboard, AccessLogEntry } from './types';
       database.query(
         `SELECT network_role AS role, COUNT(*) AS count
          FROM hospital_network_members WHERE network_id = $1 AND is_active = true
+           AND (valid_until IS NULL OR valid_until > NOW())
          GROUP BY network_role`,
         [networkId]
       ),
@@ -57,7 +58,7 @@ import type { NetworkDashboard, AccessLogEntry } from './types';
        FROM hospital_network_members hnm
        LEFT JOIN hospital_networks hn ON hn.id = hnm.network_id
        LEFT JOIN vet_hospitals vh ON vh.id = hnm.hospital_id
-       WHERE hnm.user_id = $1 AND hnm.is_active = true LIMIT 1`,
+       WHERE hnm.user_id = $1 AND hnm.is_active = true AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW()) LIMIT 1`,
       [userId]
     );
     if (memberResult.rows.length === 0) {
@@ -96,12 +97,12 @@ import type { NetworkDashboard, AccessLogEntry } from './types';
       ),
       // Staff count at hospital
       hospital_id ? database.query(
-        `SELECT COUNT(*) as count FROM hospital_network_members 
-         WHERE network_id = $1 AND hospital_id = $2 AND is_active = true`,
+        `SELECT COUNT(*) as count FROM hospital_network_members
+         WHERE network_id = $1 AND hospital_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`,
         [network_id, hospital_id]
       ) : database.query(
-        `SELECT COUNT(*) as count FROM hospital_network_members 
-         WHERE network_id = $1 AND is_active = true`,
+        `SELECT COUNT(*) as count FROM hospital_network_members
+         WHERE network_id = $1 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`,
         [network_id]
       ),
     ]);

@@ -365,8 +365,8 @@ export class AnimalService {
     try {
       // Find user's network membership
       const memberResult = await database.query(
-        `SELECT network_id, hospital_id FROM hospital_network_members 
-         WHERE user_id = $1 AND is_active = true LIMIT 1`,
+        `SELECT network_id, hospital_id FROM hospital_network_members
+         WHERE user_id = $1 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW()) LIMIT 1`,
         [userId]
       );
       if (memberResult.rows.length === 0) {

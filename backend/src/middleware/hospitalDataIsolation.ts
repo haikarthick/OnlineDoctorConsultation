@@ -86,6 +86,7 @@ export async function checkAnimalAccess(
       const memberRes = await database.query(
         `SELECT id FROM hospital_network_members
          WHERE network_id = $1 AND user_id = $2 AND is_active = true
+           AND (valid_until IS NULL OR valid_until > NOW())
          LIMIT 1`,
         [ctx.network_id, userId]
       );
@@ -111,10 +112,12 @@ export async function checkAnimalAccess(
            OR pdc.granted_to_hospital_id IN (
              SELECT hospital_id FROM hospital_network_members
              WHERE user_id = $2 AND is_active = true AND hospital_id IS NOT NULL
+               AND (valid_until IS NULL OR valid_until > NOW())
            )
            OR pdc.granted_to_network_id IN (
              SELECT network_id FROM hospital_network_members
              WHERE user_id = $2 AND is_active = true
+               AND (valid_until IS NULL OR valid_until > NOW())
            )
          )
        LIMIT 1`,

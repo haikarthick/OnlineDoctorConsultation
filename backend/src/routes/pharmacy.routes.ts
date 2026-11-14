@@ -19,7 +19,7 @@ async function guardPharmacy(req: Request, res: Response, pharmacyId: string): P
   if (!p.rows[0]) { res.status(404).json({ success: false, message: 'Pharmacy not found' }); return null; }
   if (authReq.userRole === 'admin') return p.rows[0].network_id;
   const m = await database.query(
-    'SELECT 1 FROM hospital_network_members WHERE network_id=$1 AND user_id=$2 AND is_active=true',
+    'SELECT 1 FROM hospital_network_members WHERE network_id=$1 AND user_id=$2 AND is_active=true AND (valid_until IS NULL OR valid_until > NOW())',
     [p.rows[0].network_id, authReq.userId]
   );
   if (!m.rows[0]) { res.status(403).json({ success: false, message: 'You are not a member of this pharmacy\'s network' }); return null; }
@@ -31,7 +31,7 @@ async function guardNetworkPharmacy(req: Request, res: Response, networkId: stri
   const authReq = req as any;
   if (authReq.userRole === 'admin') return true;
   const m = await database.query(
-    'SELECT 1 FROM hospital_network_members WHERE network_id=$1 AND user_id=$2 AND is_active=true',
+    'SELECT 1 FROM hospital_network_members WHERE network_id=$1 AND user_id=$2 AND is_active=true AND (valid_until IS NULL OR valid_until > NOW())',
     [networkId, authReq.userId]
   );
   if (!m.rows[0]) { res.status(403).json({ success: false, message: 'You are not a member of this network' }); return false; }
@@ -825,9 +825,17 @@ router.get('/admin/pharmacy-overview', authMiddleware, roleMiddleware(['admin'])
       `SELECT COUNT(*) AS count FROM prescriptions WHERE review_status = 'pending_review' AND is_network_coordinated = true AND is_active = true`
     ),
     database.query(
-      `SELECT COUNT(DISTINCT hp.network_id) AS network_count, COUNT(*) AS item_count
-       FROM pharmacy_inventory pi JOIN hospital_pharmacies hp ON hp.id = pi.pharmacy_id
-       WHERE pi.quantity <= pi.min_stock_level AND hp.is_active = true`
+      `WITH stock_per_med AS (
+         SELECT pi.pharmacy_id, pi.med_id, SUM(pi.quantity) AS total_qty, pm.min_stock_level
+         FROM pharmacy_inventory pi
+         JOIN pharmacy_medications pm ON pm.id = pi.med_id
+         WHERE pi.is_active = true
+         GROUP BY pi.pharmacy_id, pi.med_id, pm.min_stock_level
+       )
+       SELECT COUNT(DISTINCT hp.network_id) AS network_count, COUNT(*) AS item_count
+       FROM stock_per_med spm
+       JOIN hospital_pharmacies hp ON hp.id = spm.pharmacy_id
+       WHERE spm.total_qty <= spm.min_stock_level AND hp.is_active = true`
     ),
     database.query(
       `SELECT COALESCE(SUM(total_cost), 0) AS revenue FROM dispensing_records WHERE created_at >= NOW() - INTERVAL '7 days'`

@@ -85,6 +85,7 @@ import { mapNetworkRow } from './rowMappersAndDeactivate';
       conditions.push(`(hn.created_by = $${idx} OR EXISTS (
         SELECT 1 FROM hospital_network_members hnm
         WHERE hnm.network_id = hn.id AND hnm.user_id = $${idx} AND hnm.is_active = true
+          AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())
       ))`);
       idx++;
     }
@@ -104,8 +105,8 @@ import { mapNetworkRow } from './rowMappersAndDeactivate';
     const result = await database.query(
       `SELECT hn.*,
               u.first_name || ' ' || u.last_name AS "approvedByName",
-              (SELECT COUNT(*) FROM hospital_network_members WHERE network_id = hn.id AND is_active = true) AS "memberCount",
-              (SELECT COUNT(DISTINCT hospital_id) FROM hospital_network_members WHERE network_id = hn.id AND hospital_id IS NOT NULL AND is_active = true) AS "hospitalCount"
+              (SELECT COUNT(*) FROM hospital_network_members WHERE network_id = hn.id AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())) AS "memberCount",
+              (SELECT COUNT(DISTINCT hospital_id) FROM hospital_network_members WHERE network_id = hn.id AND hospital_id IS NOT NULL AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())) AS "hospitalCount"
        FROM hospital_networks hn
        LEFT JOIN users u ON hn.approved_by = u.id
        ${where}
@@ -119,8 +120,8 @@ import { mapNetworkRow } from './rowMappersAndDeactivate';
     const result = await database.query(
       `SELECT hn.*,
               u.first_name || ' ' || u.last_name AS "approvedByName",
-              (SELECT COUNT(*) FROM hospital_network_members WHERE network_id = hn.id AND is_active = true) AS "memberCount",
-              (SELECT COUNT(DISTINCT hospital_id) FROM hospital_network_members WHERE network_id = hn.id AND hospital_id IS NOT NULL AND is_active = true) AS "hospitalCount"
+              (SELECT COUNT(*) FROM hospital_network_members WHERE network_id = hn.id AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())) AS "memberCount",
+              (SELECT COUNT(DISTINCT hospital_id) FROM hospital_network_members WHERE network_id = hn.id AND hospital_id IS NOT NULL AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())) AS "hospitalCount"
        FROM hospital_networks hn
        LEFT JOIN users u ON hn.approved_by = u.id
        WHERE hn.id = $1`,
@@ -135,7 +136,8 @@ import { mapNetworkRow } from './rowMappersAndDeactivate';
     if (userRole !== 'admin') {
       const authCheck = await database.query(
         `SELECT id FROM hospital_network_members
-         WHERE network_id = $1 AND user_id = $2 AND network_role = 'corporate_admin' AND is_active = true`,
+         WHERE network_id = $1 AND user_id = $2 AND network_role = 'corporate_admin' AND is_active = true
+           AND (valid_until IS NULL OR valid_until > NOW())`,
         [id, userId]
       );
       if (authCheck.rows.length === 0) {

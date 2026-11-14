@@ -111,7 +111,8 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
     const seat = await db.query(`
       SELECT (SELECT COUNT(*) FROM users u
               INNER JOIN hospital_network_members hnm ON u.id = hnm.user_id
-              WHERE hnm.network_id = $1 AND hnm.is_active = true) as used_seats,
+              WHERE hnm.network_id = $1 AND hnm.is_active = true
+                AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())) as used_seats,
              hn.seat_limit
       FROM network_subscriptions hn
       WHERE hn.network_id = $1
@@ -204,7 +205,8 @@ router.post('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewa
   const existingUser = await db.query(
     `SELECT u.id FROM users u
      JOIN hospital_network_members hnm ON hnm.user_id = u.id
-     WHERE LOWER(u.email) = LOWER($1) AND hnm.network_id = $2 AND hnm.is_active = true`,
+     WHERE LOWER(u.email) = LOWER($1) AND hnm.network_id = $2 AND hnm.is_active = true
+       AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())`,
     [inviteeEmail, req.params.id]
   );
   if (existingUser.rows.length > 0) {

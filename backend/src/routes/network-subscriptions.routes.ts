@@ -59,7 +59,7 @@ router.delete('/admin/network-subscription-plans/:id', authMiddleware, roleMiddl
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function countSeatsUsed(db: any, networkId: string): Promise<number> {
-  const r = await db.query(`SELECT COUNT(*) FROM hospital_network_members WHERE network_id = $1 AND is_active = true`, [networkId]);
+  const r = await db.query(`SELECT COUNT(*) FROM hospital_network_members WHERE network_id = $1 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`, [networkId]);
   return parseInt(r.rows[0].count);
 }
 export async function checkSeatLimit(networkId: string, db: any): Promise<{ allowed: boolean; used: number; limit: number; status: string }> {
@@ -79,7 +79,7 @@ router.get('/admin/network-subscriptions', authMiddleware, roleMiddleware(['admi
       ns.billing_cycle AS "billingCycle", ns.suspended_at AS "suspendedAt",
       ns.suspension_reason AS "suspensionReason", ns.admin_notes AS "adminNotes",
       nsp.name AS "planName", nsp.id AS "planId",
-      (SELECT COUNT(*) FROM hospital_network_members m WHERE m.network_id = hn.id AND m.is_active = true) AS "seatsUsed",
+      (SELECT COUNT(*) FROM hospital_network_members m WHERE m.network_id = hn.id AND m.is_active = true AND (m.valid_until IS NULL OR m.valid_until > NOW())) AS "seatsUsed",
       (SELECT COUNT(*) FROM hospital_network_hospitals hnh WHERE hnh.network_id = hn.id AND hnh.is_active = true) AS "hospitalsCount"
     FROM hospital_networks hn
     LEFT JOIN network_subscriptions ns ON ns.network_id = hn.id

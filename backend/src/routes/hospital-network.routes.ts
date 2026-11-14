@@ -50,7 +50,7 @@ router.post('/hospital-networks/:id/approval-events', authMiddleware, roleMiddle
   // Notify corporate_admin when info_requested
   if (eventType === 'info_requested') {
     const corpAdmins = await database.query(
-      `SELECT user_id FROM hospital_network_members WHERE network_id = $1 AND network_role = 'corporate_admin' AND is_active = true`,
+      `SELECT user_id FROM hospital_network_members WHERE network_id = $1 AND network_role = 'corporate_admin' AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`,
       [req.params.id]
     );
     const networkRes = await database.query(`SELECT name FROM hospital_networks WHERE id = $1`, [req.params.id]);
@@ -132,7 +132,7 @@ router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandle
   const userRole = (req as any).userRole;
   if (userRole !== 'admin') {
     const memberCheck = await database.query(
-      `SELECT network_role, hospital_id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      `SELECT network_role, hospital_id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`,
       [networkId, userId]
     );
     const callerNetworkRole = memberCheck.rows[0]?.network_role;
@@ -147,7 +147,7 @@ router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandle
     if (memberCheck.rows[0].network_role === 'hospital_director') {
       const directorHospitalId = memberCheck.rows[0]?.hospital_id as string | undefined;
       const hospitalIdCheck = directorHospitalId || (await database.query(
-        `SELECT hospital_id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+        `SELECT hospital_id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`,
         [networkId, userId]
       )).rows[0]?.hospital_id;
       if (hospitalIdCheck) {
@@ -243,6 +243,7 @@ router.get('/hospital-networks/:id/user-search', authMiddleware, requireNetworkA
           AND NOT EXISTS (
             SELECT 1 FROM hospital_network_members m
              WHERE m.network_id = $1 AND m.user_id = u.id AND m.is_active = true
+               AND (m.valid_until IS NULL OR m.valid_until > NOW())
           )
           ${searchClause}
         ORDER BY u.first_name, u.last_name
@@ -515,8 +516,8 @@ router.get('/hospital-networks/:id/search-patients', authMiddleware, asyncHandle
     let userHospitalId: string | null = null;
     if (!['admin', 'corporate_admin'].includes(userRole || '')) {
       const memberCheck = await database.query(
-        `SELECT hospital_id FROM hospital_network_members 
-         WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+        `SELECT hospital_id FROM hospital_network_members
+         WHERE network_id = $1 AND user_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`,
         [networkId, (req as AuthRequest).userId]
       );
       userHospitalId = memberCheck.rows[0]?.hospital_id || null;

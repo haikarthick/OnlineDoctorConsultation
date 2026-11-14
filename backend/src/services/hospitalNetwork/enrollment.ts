@@ -10,8 +10,8 @@ import { getNetworkMember } from './members';
       // Fix 4a: Verify hospital belongs to this network (only when hospitalId provided)
       if (data.hospitalId) {
         const hospitalInNetwork = await database.query(
-          `SELECT id FROM hospital_network_members 
-           WHERE network_id = $1 AND hospital_id = $2 AND is_active = true LIMIT 1`,
+          `SELECT id FROM hospital_network_members
+           WHERE network_id = $1 AND hospital_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW()) LIMIT 1`,
           [data.networkId, data.hospitalId]
         );
         if (hospitalInNetwork.rows.length === 0) {
@@ -21,9 +21,10 @@ import { getNetworkMember } from './members';
 
       // Fix 4b: Verify enrolledBy user has permission (network member or hospital staff)
       const userPermission = await database.query(
-        `SELECT hnm.network_role 
-         FROM hospital_network_members hnm 
+        `SELECT hnm.network_role
+         FROM hospital_network_members hnm
          WHERE hnm.network_id = $1 AND hnm.user_id = $2 AND hnm.is_active = true
+           AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())
          UNION
          SELECT 'hospital_staff' AS network_role
          FROM hospital_staff hs
@@ -56,7 +57,7 @@ import { getNetworkMember } from './members';
         [data.animalId, data.networkId]
       );
       const userRoleRes = await database.query(
-        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`,
         [data.networkId, data.enrolledBy]
       );
       const userNetworkRole = userRoleRes.rows[0]?.network_role;

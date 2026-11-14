@@ -91,7 +91,8 @@ class PrescriptionService {
           database.query(
             `SELECT hnm.user_id FROM hospital_network_members hnm
              JOIN users u ON u.id = hnm.user_id
-             WHERE hnm.network_id = $1 AND hnm.is_active = true AND u.role = 'pharmacist'`,
+             WHERE hnm.network_id = $1 AND hnm.is_active = true AND u.role = 'pharmacist'
+               AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())`,
             [networkId]
           ),
         ]);

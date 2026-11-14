@@ -5,8 +5,8 @@ import type { HospitalNetwork, NetworkMember, PatientConsent } from './types';
   export async function deactivateNetwork(networkId: string, userId: string, userRole: string): Promise<any> {
     if (userRole !== 'admin') {
       const membership = await database.query(
-        `SELECT network_role FROM hospital_network_members 
-         WHERE network_id = $1 AND user_id = $2 AND is_active = true LIMIT 1`,
+        `SELECT network_role FROM hospital_network_members
+         WHERE network_id = $1 AND user_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW()) LIMIT 1`,
         [networkId, userId]
       );
       if (membership.rows.length === 0 || membership.rows[0].network_role !== 'corporate_admin') {

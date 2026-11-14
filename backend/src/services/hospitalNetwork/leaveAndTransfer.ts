@@ -7,7 +7,7 @@ import { resolveNetworkAccess } from '../../middleware/networkAccess';
     leaveType: string; startDate: string; endDate: string; reason?: string;
   }): Promise<any> {
     const member = await database.query(
-      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`,
       [data.networkId, data.userId]
     );
     if (member.rows.length === 0) throw new ValidationError('Not a member of this network');

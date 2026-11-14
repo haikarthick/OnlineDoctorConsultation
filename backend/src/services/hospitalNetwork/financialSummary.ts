@@ -65,6 +65,7 @@ import { DatabaseError } from '../../utils/errors';
           `SELECT network_role, COUNT(*) as count
            FROM hospital_network_members
            WHERE network_id = $1 AND is_active = true
+             AND (valid_until IS NULL OR valid_until > NOW())
            GROUP BY network_role`,
           [networkId]
         ),

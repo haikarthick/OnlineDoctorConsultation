@@ -17,14 +17,14 @@ import logger from '../../utils/logger';
     createdBy: string;
   }): Promise<any> {
     const fromMember = await database.query(
-      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND hospital_id = $2 AND is_active = true LIMIT 1`,
+      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND hospital_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW()) LIMIT 1`,
       [data.networkId, data.fromHospitalId]
     );
     if (fromMember.rows.length === 0) {
       throw new ValidationError('Referring hospital is not a member of this network');
     }
     const toMember = await database.query(
-      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND hospital_id = $2 AND is_active = true LIMIT 1`,
+      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND hospital_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW()) LIMIT 1`,
       [data.networkId, data.toHospitalId]
     );
     if (toMember.rows.length === 0) {
@@ -33,8 +33,8 @@ import logger from '../../utils/logger';
 
     // Verify caller is a member of this network
     const callerMember = await database.query(
-      `SELECT id, network_role FROM hospital_network_members 
-       WHERE network_id = $1 AND user_id = $2 AND is_active = true LIMIT 1`,
+      `SELECT id, network_role FROM hospital_network_members
+       WHERE network_id = $1 AND user_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW()) LIMIT 1`,
       [data.networkId, data.createdBy]
     );
     if (callerMember.rows.length === 0) {
@@ -75,8 +75,8 @@ import logger from '../../utils/logger';
     const referral = referralCheck.rows[0];
     // Verify caller is a member of this network
     const callerMember = await database.query(
-      `SELECT id FROM hospital_network_members 
-       WHERE network_id = $1 AND user_id = $2 AND is_active = true LIMIT 1`,
+      `SELECT id FROM hospital_network_members
+       WHERE network_id = $1 AND user_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW()) LIMIT 1`,
       [referral.network_id, userId]
     );
     if (callerMember.rows.length === 0) {
@@ -241,6 +241,7 @@ import logger from '../../utils/logger';
         `SELECT id FROM hospital_networks WHERE id = $1 AND created_by = $2
          UNION
          SELECT network_id as id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true
+           AND (valid_until IS NULL OR valid_until > NOW())
          LIMIT 1`,
         [networkId, createdById]
       );
