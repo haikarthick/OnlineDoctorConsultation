@@ -8537,3 +8537,45 @@
 </details>
 
 ---
+
+## 2026-11-14 01:06 · `a1cfcfb` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 01:17 · `172dbc1` · OTHER
+
+**Commit:** refactor(pages): split the 1,143-line UserManagement.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - frontend/src/components/userManagement/FreezeAccountModal.tsx
+  - frontend/src/components/userManagement/PendingApprovalsTab.tsx
+  - frontend/src/components/userManagement/ResetPasswordModal.tsx
+  - frontend/src/components/userManagement/RoleChangeModal.tsx
+  - frontend/src/components/userManagement/RoleChangeRequestsTab.tsx
+  - frontend/src/components/userManagement/SecondaryRolesModal.tsx
+  - frontend/src/components/userManagement/SuspendAccountModal.tsx
+  - frontend/src/components/userManagement/UsersSearchAndTable.tsx
+  - frontend/src/components/userManagement/VetProfileModal.tsx
+  - frontend/src/components/userManagement/userManagementShared.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+
+</details>
+
+---
