@@ -15,6 +15,7 @@ import hospitalStaffInvitesRoutes from './hospital-staff-invites.routes';
 import networkFinancialSummaryRoutes from './network-financial-summary.routes';
 import pharmacyRoutes from './pharmacy.routes';
 import groomingRoutes from './grooming.routes';
+import farmRecordsRoutes from './farm-records.routes';
 
 const router = Router();
 
@@ -34,5 +35,6 @@ router.use(hospitalStaffInvitesRoutes);
 router.use(networkFinancialSummaryRoutes);
 router.use(pharmacyRoutes);
 router.use(groomingRoutes);
+router.use(farmRecordsRoutes);
 
 export default router;

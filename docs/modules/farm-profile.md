@@ -91,6 +91,26 @@ Platform reference data: no tenant id is taken, so there is no tenant scoping he
 - **Cards**: `pages/AnimalGroups.tsx`; the group colour is passed to CSS via `useCssVar` (no inline style).
 - Test fixture for master data in component tests: `frontend/src/test/farmMasterFixture.ts`.
 
+## Daily records (Phase 4a, migration 045, flag `farm.records.enabled`)
+
+- **One table**, `farm_daily_records`: subject = animal XOR group, one row per subject / record type /
+  date / session (unique index), always on a farm. Saving the same slot again corrects it (200,
+  `replaced: true`) and keeps the old values in `farm_daily_record_edits`; deletes are audited too.
+- **Master data decides everything**: whether a record applies is `FarmProfileService.assertRecordTypeAllowed`;
+  what it asks for is the record type's `fields` (`quantity` -> column, `session` -> column, the rest ->
+  `detail`). `FarmRecordService` has no species names in it - a new record type needs no code.
+- **Deaths are not stored here**: `mortality` is written through `BatchManagementService.recordPopulationEvent`
+  (the ledger owns head count). Other events (breeding, sale, harvest...) are Phase 4b and write through
+  their existing sources of truth.
+- **Who may do what**: any owner / active member / admin reads; `farm_vet` and `viewer` cannot write (403
+  with the reason); a worker deletes only what they entered, owner/manager any. A farm the caller has no
+  claim on is a 404. The demo seed makes Maria Garcia a worker and Dr. Carter a farm vet on Tom's farm -
+  use Emily (pet owner) as the outsider in tests.
+- **Dark launch**: every route except `GET /farm-records/enabled` answers 404 while the flag is off.
+  The flag is cached 60 s (`services/farmRecords/FarmRecordsConfig.ts`).
+- Dates are read as text (`record_date::text`): a DATE parsed into a JS Date shifts a day in timezones
+  ahead of UTC (India).
+
 ## Gotchas
 
 - A breed rename must move the text on `animals`, `animal_groups`, `group_cycles` and
