@@ -80,6 +80,10 @@
     margin-left: 0;
     margin-top: 56px;
     height: calc(100vh - 56px);
+    /* Room for the phone bottom tab bar (tokens in styles/modules.css), so the last row of any
+       page is never hidden behind it. */
+    padding-bottom: calc(var(--tabbar-height, 64px) + env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
   }
 
   .layout-sidebar-collapsed .layout-main {
@@ -96,10 +100,6 @@
     padding: 12px;
   }
 
-  .layout-main {
-    /* Account for iOS safe area */
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
 }
 
 @media (max-width: 360px) {

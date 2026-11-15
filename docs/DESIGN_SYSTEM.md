@@ -272,6 +272,15 @@ Regression guards live in `AuthContext.test.tsx` ("blocked account states") and
 
 ---
 
+## 5b. Phone-first building blocks — use these, don't reinvent
+
+Every role shares one set of phone components in `frontend/src/components/mobile/` (bottom tab bar,
+bottom sheet, chips, number stepper, quick date, step form, save state) and one tab-bar config
+(`frontend/src/navigation/bottomTabs.ts`). On a phone screen use them instead of a new modal, a
+`<select>` for a short list, or a bespoke save handler. Their sizes and colours are tokens
+(`--tap-min`, `--tabbar-height`, `--brand`, ...). Every numeric input declares `inputMode`
+(enforced by a test). Full guide and the "I want to change X" table: `docs/modules/mobile-ui.md`.
+
 ## 6. The ratchet — how the debt gets paid
 
 `react/forbid-dom-props` is an **error** everywhere. The 95 files that predate this rule are

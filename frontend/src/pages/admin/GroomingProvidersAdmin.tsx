@@ -280,7 +280,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
                 <div className="form-group">
                   <label className="form-label">{t('groomingAdmin.disputes.refundAmount')}</label>
                   <input
-                    className="form-input" type="number" min="0" step="0.01"
+                    className="form-input" type="number" inputMode="decimal" min="0" step="0.01"
                     value={disputeRefund} onChange={e => setDisputeRefund(e.target.value)}
                     placeholder="0.00"
                   />

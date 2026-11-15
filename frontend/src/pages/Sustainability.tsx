@@ -194,7 +194,7 @@ const Sustainability: React.FC = () => {
                   <div className="si-6acd75e8"><label className="module-label">{t('common.name')}</label><input className="module-input" value={metricForm.metricName} onChange={e => setMetricForm(f => ({ ...f, metricName: e.target.value }))} placeholder="e.g. Monthly CO2 from livestock" /></div>
                 </div>
                 <div className="si-c3866b40">
-                  <div className="si-6acd75e8"><label className="module-label">{t('sustainability.value')}</label><input className="module-input" type="number" value={metricForm.value} onChange={e => setMetricForm(f => ({ ...f, value: e.target.value }))} /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('sustainability.value')}</label><input className="module-input" type="number" inputMode="decimal" value={metricForm.value} onChange={e => setMetricForm(f => ({ ...f, value: e.target.value }))} /></div>
                   <div className="si-6acd75e8"><label className="module-label">{t('sustainability.unit')}</label><input className="module-input" value={metricForm.unit} onChange={e => setMetricForm(f => ({ ...f, unit: e.target.value }))} /></div>
                   <div className="si-6acd75e8"><label className="module-label">{t('sustainability.scope')}</label><select className="module-input" value={metricForm.scope} onChange={e => setMetricForm(f => ({ ...f, scope: e.target.value }))}>
                     {Object.entries(SCOPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -242,9 +242,9 @@ const Sustainability: React.FC = () => {
                   <div className="si-6acd75e8"><label className="module-label">{t('sustainability.targetDate')}</label><input className="module-input" type="date" value={goalForm.targetDate} onChange={e => setGoalForm(f => ({ ...f, targetDate: e.target.value }))} /></div>
                 </div>
                 <div className="si-c3866b40">
-                  <div className="si-6acd75e8"><label className="module-label">{t('sustainability.targetValue')}</label><input className="module-input" type="number" value={goalForm.targetValue} onChange={e => setGoalForm(f => ({ ...f, targetValue: e.target.value }))} /></div>
-                  <div className="si-6acd75e8"><label className="module-label">{t('sustainability.baselineValue')}</label><input className="module-input" type="number" value={goalForm.baselineValue} onChange={e => setGoalForm(f => ({ ...f, baselineValue: e.target.value }))} /></div>
-                  <div className="si-6acd75e8"><label className="module-label">{t('sustainability.currentValue')}</label><input className="module-input" type="number" value={goalForm.currentValue} onChange={e => setGoalForm(f => ({ ...f, currentValue: e.target.value }))} /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('sustainability.targetValue')}</label><input className="module-input" type="number" inputMode="decimal" value={goalForm.targetValue} onChange={e => setGoalForm(f => ({ ...f, targetValue: e.target.value }))} /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('sustainability.baselineValue')}</label><input className="module-input" type="number" inputMode="decimal" value={goalForm.baselineValue} onChange={e => setGoalForm(f => ({ ...f, baselineValue: e.target.value }))} /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('sustainability.currentValue')}</label><input className="module-input" type="number" inputMode="decimal" value={goalForm.currentValue} onChange={e => setGoalForm(f => ({ ...f, currentValue: e.target.value }))} /></div>
                 </div>
               </div>
               <div className="si-085d7dba">

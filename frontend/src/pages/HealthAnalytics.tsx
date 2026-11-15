@@ -165,19 +165,19 @@ const HealthAnalytics: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>Body Temperature</label>
-                  <input type="number" step="0.1" value={formData.bodyTemperature} onChange={e => setFormData({ ...formData, bodyTemperature: e.target.value })} />
+                  <input type="number" inputMode="decimal" step="0.1" value={formData.bodyTemperature} onChange={e => setFormData({ ...formData, bodyTemperature: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Heart Rate (bpm)</label>
-                  <input type="number" value={formData.heartRate} onChange={e => setFormData({ ...formData, heartRate: e.target.value })} />
+                  <input type="number" inputMode="decimal" value={formData.heartRate} onChange={e => setFormData({ ...formData, heartRate: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Respiratory Rate</label>
-                  <input type="number" value={formData.respiratoryRate} onChange={e => setFormData({ ...formData, respiratoryRate: e.target.value })} />
+                  <input type="number" inputMode="decimal" value={formData.respiratoryRate} onChange={e => setFormData({ ...formData, respiratoryRate: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Weight (kg)</label>
-                  <input type="number" step="0.1" value={formData.weightAtObservation} onChange={e => setFormData({ ...formData, weightAtObservation: e.target.value })} />
+                  <input type="number" inputMode="decimal" step="0.1" value={formData.weightAtObservation} onChange={e => setFormData({ ...formData, weightAtObservation: e.target.value })} />
                 </div>
               </div>
               <div className="form-group si-06af062a">

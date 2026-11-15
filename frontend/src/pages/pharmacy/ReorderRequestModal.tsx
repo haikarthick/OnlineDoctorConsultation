@@ -96,7 +96,7 @@ export default function ReorderRequestModal({ pharmacyId, networkId, item, onClo
           </div>
           <div className="pharm-form-group">
             <label>{t('pharmacy.reorder.quantity')} <span className="req-star">*</span></label>
-            <input type="number" min="1" value={form.requested_qty} onChange={e => setForm(f => ({ ...f, requested_qty: parseInt(e.target.value) || 1 }))} />
+            <input type="number" inputMode="decimal" min="1" value={form.requested_qty} onChange={e => setForm(f => ({ ...f, requested_qty: parseInt(e.target.value) || 1 }))} />
           </div>
           <div className="pharm-form-group">
             <label>{t('pharmacy.reorder.notes')}</label>

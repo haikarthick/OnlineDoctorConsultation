@@ -73,7 +73,7 @@ const CancellationPolicyCard: React.FC<Props> = ({
                 <button key={h} className={`btn btn-sm ${cancellationPolicy.patientFreeWindowHours === h ? 'btn-primary' : 'btn-outline'}`}
                   onClick={() => setCancellationPolicy({ ...cancellationPolicy, patientFreeWindowHours: h })}>{h}h</button>
               ))}
-              <input type="number" className="form-input ss-field ss-num-input"
+              <input type="number" inputMode="numeric" className="form-input ss-field ss-num-input"
                 value={cancellationPolicy.patientFreeWindowHours} min={1} max={168}
                 onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 1 && v <= 168) setCancellationPolicy({ ...cancellationPolicy, patientFreeWindowHours: v }) }} />
             </div>
@@ -108,7 +108,7 @@ const CancellationPolicyCard: React.FC<Props> = ({
                 <button key={n} className={`btn btn-sm ${cancellationPolicy.partialRefundPercent === n ? 'btn-primary' : 'btn-outline'}`}
                   onClick={() => setCancellationPolicy({ ...cancellationPolicy, partialRefundPercent: n })}>{n}%</button>
               ))}
-              <input type="number" className="form-input ss-field ss-num-input"
+              <input type="number" inputMode="numeric" className="form-input ss-field ss-num-input"
                 value={cancellationPolicy.partialRefundPercent} min={0} max={100}
                 onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 0 && v <= 100) setCancellationPolicy({ ...cancellationPolicy, partialRefundPercent: v }) }} />
             </div>

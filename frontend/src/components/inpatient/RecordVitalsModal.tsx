@@ -36,7 +36,7 @@ export const RecordVitalsModal: React.FC<{
               <span className="si-899e716c">({t('inpatientManagement.normalTempHint')})</span>
             </label>
             <input
-              type="number" step="0.1" min="0" placeholder="e.g. 101.5"
+              type="number" inputMode="decimal" step="0.1" min="0" placeholder="e.g. 101.5"
               value={vitalsForm.temperature}
               onChange={e => onFormChange(f => ({ ...f, temperature: e.target.value }))}
               className="si-d0e0df59"
@@ -48,7 +48,7 @@ export const RecordVitalsModal: React.FC<{
               <span className="si-899e716c">({t('inpatientManagement.normalHrHint')})</span>
             </label>
             <input
-              type="number" min="0" placeholder="e.g. 80"
+              type="number" inputMode="decimal" min="0" placeholder="e.g. 80"
               value={vitalsForm.heartRate}
               onChange={e => onFormChange(f => ({ ...f, heartRate: e.target.value }))}
               className="si-d0e0df59"
@@ -60,7 +60,7 @@ export const RecordVitalsModal: React.FC<{
               <span className="si-899e716c">({t('inpatientManagement.weightUnit')})</span>
             </label>
             <input
-              type="number" step="0.1" min="0" placeholder="e.g. 12.5"
+              type="number" inputMode="decimal" step="0.1" min="0" placeholder="e.g. 12.5"
               value={vitalsForm.weight}
               onChange={e => onFormChange(f => ({ ...f, weight: e.target.value }))}
               className="si-d0e0df59"

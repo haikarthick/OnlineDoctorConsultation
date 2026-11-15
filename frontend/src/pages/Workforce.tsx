@@ -252,7 +252,7 @@ const WorkforcePage: React.FC = () => {
                       </select>
                     </div>
                     <div className="form-group"><label>{t('workforce.form.dueDate')}</label><input type="datetime-local" value={formData.dueDate} onChange={e => setFormData({ ...formData, dueDate: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('workforce.form.estimatedHours')}</label><input type="number" step="0.5" value={formData.estimatedHours} onChange={e => setFormData({ ...formData, estimatedHours: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('workforce.form.estimatedHours')}</label><input type="number" inputMode="decimal" step="0.5" value={formData.estimatedHours} onChange={e => setFormData({ ...formData, estimatedHours: e.target.value })} /></div>
                     <div className="form-group full-width"><label>{t('common.description')}</label><textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} /></div>
                   </div>
                   <button type="submit" className="btn-primary">{t('workforce.createTask')}</button>

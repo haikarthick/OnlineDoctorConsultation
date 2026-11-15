@@ -34,7 +34,7 @@ const AddVaccinationModal: React.FC<AddVaccinationModalProps> = ({
           />
           {vaccForm.subjectType === 'group' && (
             <div className="hm-field"><label className="hm-field-label">{t('herdMedical.modal.headCountTreated')}</label>
-              <input type="number" min="0" className="search-input si-7d984748" value={vaccForm.headCountTreated}
+              <input type="number" inputMode="decimal" min="0" className="search-input si-7d984748" value={vaccForm.headCountTreated}
                 onChange={e => setVaccForm(f => ({ ...f, headCountTreated: e.target.value }))} /></div>
           )}
           {vaccineProtocols.length > 0 && (

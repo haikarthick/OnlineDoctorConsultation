@@ -186,7 +186,7 @@ export default function PharmacySuppliers({ networkId }: Props) {
                 </div>
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.suppliers.leadTimeDays')}</label>
-                  <input type="number" min="1" value={form.lead_time_days} onChange={e => setForm(f => ({ ...f, lead_time_days: parseInt(e.target.value) || 7 }))} />
+                  <input type="number" inputMode="decimal" min="1" value={form.lead_time_days} onChange={e => setForm(f => ({ ...f, lead_time_days: parseInt(e.target.value) || 7 }))} />
                 </div>
               </div>
               <div className="pharm-form-group">

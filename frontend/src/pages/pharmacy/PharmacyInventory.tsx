@@ -336,7 +336,7 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
                   </div>
                   <div className="pharm-form-group">
                     <label>{t('pharmacy.inventory.quantity')} <span className="req-star">*</span></label>
-                    <input type="number" min="1" value={addForm.quantity}
+                    <input type="number" inputMode="decimal" min="1" value={addForm.quantity}
                       onChange={e => setAddForm(f => ({ ...f, quantity: parseInt(e.target.value) || 1 }))} />
                   </div>
                 </div>

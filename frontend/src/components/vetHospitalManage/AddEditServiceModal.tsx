@@ -45,16 +45,16 @@ const AddEditServiceModal: React.FC<Props> = ({ t, show, editService, serviceFor
           <div className="form-row">
             <div className="form-group">
               <label>{t('vetHospitalManage.modal.minPrice', { currency })}</label>
-              <input type="number" value={serviceForm.priceMin} onChange={e => setServiceForm(f => ({ ...f, priceMin: e.target.value }))} min="0" />
+              <input type="number" inputMode="decimal" value={serviceForm.priceMin} onChange={e => setServiceForm(f => ({ ...f, priceMin: e.target.value }))} min="0" />
             </div>
             <div className="form-group">
               <label>{t('vetHospitalManage.modal.maxPrice', { currency })}</label>
-              <input type="number" value={serviceForm.priceMax} onChange={e => setServiceForm(f => ({ ...f, priceMax: e.target.value }))} min="0" />
+              <input type="number" inputMode="decimal" value={serviceForm.priceMax} onChange={e => setServiceForm(f => ({ ...f, priceMax: e.target.value }))} min="0" />
             </div>
           </div>
           <div className="form-group">
             <label>{t('vetHospitalManage.modal.duration')}</label>
-            <input type="number" value={serviceForm.durationMinutes} onChange={e => setServiceForm(f => ({ ...f, durationMinutes: e.target.value }))} min="5" step="5" />
+            <input type="number" inputMode="decimal" value={serviceForm.durationMinutes} onChange={e => setServiceForm(f => ({ ...f, durationMinutes: e.target.value }))} min="5" step="5" />
           </div>
           <label className="vh-toggle si-5afcd5fa">
             <input type="checkbox" checked={serviceForm.requiresAppointment} onChange={e => setServiceForm(f => ({ ...f, requiresAppointment: e.target.checked }))} />

@@ -251,7 +251,7 @@ export const ListingDetail: React.FC<{
                   <div className="si-b1a83cef">{new Date(auctionEnd).toLocaleString()}</div>
                 </div>
               )}
-              <input className="module-input" type="number" placeholder={t('marketplace.detail.yourBidAmount')} value={bidAmount} onChange={e => onBidAmountChange(e.target.value)} />
+              <input className="module-input" type="number" inputMode="decimal" placeholder={t('marketplace.detail.yourBidAmount')} value={bidAmount} onChange={e => onBidAmountChange(e.target.value)} />
               <textarea className="module-input" placeholder={t('marketplace.detail.messageOptional')} value={bidMessage} onChange={e => onBidMessageChange(e.target.value)} />
               <button className="module-btn primary" onClick={onPlaceBid}>{t('marketplace.detail.placeBidTitle')}</button>
 

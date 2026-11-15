@@ -192,7 +192,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
             <div className="modal-body">
               <div className="form-group">
                 <label className="form-label">{t('paymentManagement.refundAmountLabel')}</label>
-                <input className="form-input" type="number" value={refundAmount} onChange={e => setRefundAmount(e.target.value)} placeholder={t('paymentManagement.refundAmountPlaceholder')} />
+                <input className="form-input" type="number" inputMode="decimal" value={refundAmount} onChange={e => setRefundAmount(e.target.value)} placeholder={t('paymentManagement.refundAmountPlaceholder')} />
               </div>
               <div className="form-group">
                 <label className="form-label">{t('paymentManagement.reason')}</label>

@@ -184,7 +184,7 @@ const GroomingSchedule: React.FC<Props> = ({ onNavigate }) => {
                   </label>
                   <label>
                     <span className="field-caption">{t('groomingSchedule.capacity')}</span>
-                    <input className="module-input" type="number" min={1} max={100} value={row.capacity}
+                    <input className="module-input" type="number" inputMode="decimal" min={1} max={100} value={row.capacity}
                       onChange={e => patchDay(row.dayOfWeek, { capacity: Number(e.target.value) })} />
                   </label>
                 </div>

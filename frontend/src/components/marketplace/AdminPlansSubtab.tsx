@@ -52,21 +52,21 @@ export const AdminPlansSubtab: React.FC<{
           </div>
           <div className="module-form-group">
             <label className="module-label">{t('marketplace.monetization.planPrice')}</label>
-            <input className="module-input" type="number" value={planForm.price} onChange={e => onPlanFormChange(f => ({ ...f, price: e.target.value }))} />
+            <input className="module-input" type="number" inputMode="decimal" value={planForm.price} onChange={e => onPlanFormChange(f => ({ ...f, price: e.target.value }))} />
           </div>
         </div>
         <div className="module-form-row-3">
           <div className="module-form-group">
             <label className="module-label">{t('marketplace.monetization.durationDays')}</label>
-            <input className="module-input" type="number" value={planForm.durationDays} onChange={e => onPlanFormChange(f => ({ ...f, durationDays: e.target.value }))} />
+            <input className="module-input" type="number" inputMode="decimal" value={planForm.durationDays} onChange={e => onPlanFormChange(f => ({ ...f, durationDays: e.target.value }))} />
           </div>
           <div className="module-form-group">
             <label className="module-label">{t('marketplace.monetization.maxListings')}</label>
-            <input className="module-input" type="number" value={planForm.maxListings} onChange={e => onPlanFormChange(f => ({ ...f, maxListings: e.target.value }))} placeholder="-1 = unlimited" />
+            <input className="module-input" type="number" inputMode="decimal" value={planForm.maxListings} onChange={e => onPlanFormChange(f => ({ ...f, maxListings: e.target.value }))} placeholder="-1 = unlimited" />
           </div>
           <div className="module-form-group">
             <label className="module-label">{t('marketplace.monetization.boostsMonth')}</label>
-            <input className="module-input" type="number" value={planForm.maxBoostsPerMonth} onChange={e => onPlanFormChange(f => ({ ...f, maxBoostsPerMonth: e.target.value }))} />
+            <input className="module-input" type="number" inputMode="decimal" value={planForm.maxBoostsPerMonth} onChange={e => onPlanFormChange(f => ({ ...f, maxBoostsPerMonth: e.target.value }))} />
           </div>
         </div>
         <div className="module-form-group">

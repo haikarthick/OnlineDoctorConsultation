@@ -557,7 +557,7 @@ const AnimalGroups: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>{t('animalGroups.modal.targetCount')}</label>
-                  <input type="number" value={formData.targetCount} onChange={e => setFormData(f => ({ ...f, targetCount: e.target.value }))} />
+                  <input type="number" inputMode="decimal" value={formData.targetCount} onChange={e => setFormData(f => ({ ...f, targetCount: e.target.value }))} />
                 </div>
                 <div className="form-group">
                   <label>{t('animalGroups.modal.colorCode')}</label>

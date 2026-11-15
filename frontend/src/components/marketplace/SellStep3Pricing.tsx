@@ -16,12 +16,12 @@ export const SellStep3Pricing: React.FC<{
       <div className="module-form-row">
         <div className="module-form-group">
           <label className="module-label">{t('marketplace.reviewLabels.price')} ({currency})</label>
-          <input className="module-input" type="number" value={sellForm.price} onChange={e => sf('price', e.target.value)} placeholder={t('marketplace.sell.pricePlaceholder')} />
+          <input className="module-input" type="number" inputMode="decimal" value={sellForm.price} onChange={e => sf('price', e.target.value)} placeholder={t('marketplace.sell.pricePlaceholder')} />
         </div>
         {sellForm.listingType === 'auction' && (
           <div className="module-form-group">
             <label className="module-label">{t('marketplace.sell.reservePrice')}</label>
-            <input className="module-input" type="number" value={sellForm.reservePrice} onChange={e => sf('reservePrice', e.target.value)} placeholder={t('marketplace.sell.reservePricePlaceholder')} />
+            <input className="module-input" type="number" inputMode="decimal" value={sellForm.reservePrice} onChange={e => sf('reservePrice', e.target.value)} placeholder={t('marketplace.sell.reservePricePlaceholder')} />
           </div>
         )}
       </div>

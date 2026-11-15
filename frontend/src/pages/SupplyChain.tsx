@@ -234,7 +234,7 @@ const SupplyChainPage: React.FC = () => {
                         ))}
                       </select>
                     </div>
-                    <div className="form-group"><label>{t('supplyChain.quantity')}</label><input type="number" step="0.01" value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.quantity')}</label><input type="number" inputMode="decimal" step="0.01" value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} /></div>
                     <div className="form-group"><label>{t('sustainability.unit')}</label><input value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} /></div>
                     <div className="form-group"><label>{t('supplyChain.productionDate')}</label><input type="date" value={formData.productionDate} onChange={e => setFormData({ ...formData, productionDate: e.target.value })} /></div>
                     <div className="form-group"><label>{t('supplyChain.expiryDate')}</label><input type="date" value={formData.expiryDate} onChange={e => setFormData({ ...formData, expiryDate: e.target.value })} /></div>
@@ -292,8 +292,8 @@ const SupplyChainPage: React.FC = () => {
                     </div>
                     <div className="form-group"><label>{t('workforce.form.title')} *</label><input required value={eventForm.title} onChange={e => setEventForm({ ...eventForm, title: e.target.value })} /></div>
                     <div className="form-group"><label>{t('supplyChain.location')}</label><input value={eventForm.location} onChange={e => setEventForm({ ...eventForm, location: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('supplyChain.gpsLat')}</label><input type="number" step="0.000001" placeholder="Click map" value={eventForm.gpsLat} onChange={e => setEventForm({ ...eventForm, gpsLat: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('supplyChain.gpsLng')}</label><input type="number" step="0.000001" placeholder="Click map" value={eventForm.gpsLng} onChange={e => setEventForm({ ...eventForm, gpsLng: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.gpsLat')}</label><input type="number" inputMode="decimal" step="0.000001" placeholder="Click map" value={eventForm.gpsLat} onChange={e => setEventForm({ ...eventForm, gpsLat: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.gpsLng')}</label><input type="number" inputMode="decimal" step="0.000001" placeholder="Click map" value={eventForm.gpsLng} onChange={e => setEventForm({ ...eventForm, gpsLng: e.target.value })} /></div>
                     <div className="form-group full-width"><label>{t('common.description')}</label><textarea value={eventForm.description} onChange={e => setEventForm({ ...eventForm, description: e.target.value })} /></div>
                   </div>
                   <button type="submit" className="btn-primary">{t('supplyChain.logEvent')}</button>

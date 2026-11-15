@@ -344,7 +344,7 @@ export default function MedicationTransfers({ networkId }: Props) {
                       </select>
                     </div>
                     <div className="pharm-form-group si-7120288a">
-                      <input type="number" min="1" value={line.quantity}
+                      <input type="number" inputMode="decimal" min="1" value={line.quantity}
                         onChange={e => updateLine(idx, { quantity: parseInt(e.target.value) || 1 })} />
                     </div>
                     <div className="pharm-form-group si-7120288a">

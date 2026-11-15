@@ -82,11 +82,11 @@ export const SellStep1AnimalDetails: React.FC<{
           </div>
           <div className="module-form-group">
             <label className="module-label">{t('marketplace.livestock.ageMonths')}</label>
-            <input className="module-input" type="number" value={sellForm.animalAgeMonths} onChange={e => sf('animalAgeMonths', e.target.value)} placeholder={t('marketplace.sell.agePlaceholder')} />
+            <input className="module-input" type="number" inputMode="decimal" value={sellForm.animalAgeMonths} onChange={e => sf('animalAgeMonths', e.target.value)} placeholder={t('marketplace.sell.agePlaceholder')} />
           </div>
           <div className="module-form-group">
             <label className="module-label">{t('marketplace.livestock.weightKg')}</label>
-            <input className="module-input" type="number" value={sellForm.animalWeightKg} onChange={e => sf('animalWeightKg', e.target.value)} placeholder={t('marketplace.sell.weightPlaceholder')} />
+            <input className="module-input" type="number" inputMode="decimal" value={sellForm.animalWeightKg} onChange={e => sf('animalWeightKg', e.target.value)} placeholder={t('marketplace.sell.weightPlaceholder')} />
           </div>
         </div>
       </div>
@@ -107,11 +107,11 @@ export const SellStep1AnimalDetails: React.FC<{
               <div className="module-form-row">
                 <div className="module-form-group">
                   <label className="module-label">{t('marketplace.livestock.lactation')}</label>
-                  <input className="module-input" type="number" value={sellForm.lactationNumber} onChange={e => sf('lactationNumber', e.target.value)} placeholder={t('marketplace.sell.lactationPlaceholder')} />
+                  <input className="module-input" type="number" inputMode="decimal" value={sellForm.lactationNumber} onChange={e => sf('lactationNumber', e.target.value)} placeholder={t('marketplace.sell.lactationPlaceholder')} />
                 </div>
                 <div className="module-form-group">
                   <label className="module-label">{t('marketplace.livestock.milkYield')}</label>
-                  <input className="module-input" type="number" value={sellForm.dailyMilkYield} onChange={e => sf('dailyMilkYield', e.target.value)} placeholder={t('marketplace.sell.milkYieldPlaceholder')} />
+                  <input className="module-input" type="number" inputMode="decimal" value={sellForm.dailyMilkYield} onChange={e => sf('dailyMilkYield', e.target.value)} placeholder={t('marketplace.sell.milkYieldPlaceholder')} />
                 </div>
               </div>
             )}
@@ -129,7 +129,7 @@ export const SellStep1AnimalDetails: React.FC<{
                 {sellForm.pregnancyStatus === 'pregnant' && (
                   <div className="module-form-group">
                     <label className="module-label">{t('marketplace.livestock.pregnancyMonth')}</label>
-                    <input className="module-input" type="number" value={sellForm.pregnancyMonth} onChange={e => sf('pregnancyMonth', e.target.value)} min="1" max="12" />
+                    <input className="module-input" type="number" inputMode="decimal" value={sellForm.pregnancyMonth} onChange={e => sf('pregnancyMonth', e.target.value)} min="1" max="12" />
                   </div>
                 )}
               </div>
@@ -139,7 +139,7 @@ export const SellStep1AnimalDetails: React.FC<{
       })()}
       <div className="module-form-group">
         <label className="module-label">{t('marketplace.livestock.quantity')}</label>
-        <input className="module-input" type="number" value={sellForm.quantity} onChange={e => sf('quantity', e.target.value)} placeholder="1" />
+        <input className="module-input" type="number" inputMode="decimal" value={sellForm.quantity} onChange={e => sf('quantity', e.target.value)} placeholder="1" />
       </div>
     </div>
     <div className="mp-step-actions">

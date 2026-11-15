@@ -36,13 +36,13 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({ recordForm, setRecordFo
           {recordForm.subjectType === 'group' && (
             <div className="hm-field-row">
               <div className="si-6acd75e8"><label className="hm-field-label">{t('herdMedical.modal.headCountTreated')}</label>
-                <input type="number" min="0" className="search-input si-7d984748" value={recordForm.headCountTreated}
+                <input type="number" inputMode="decimal" min="0" className="search-input si-7d984748" value={recordForm.headCountTreated}
                   onChange={e => setRecordForm(f => ({ ...f, headCountTreated: e.target.value }))} /></div>
               <div className="si-6acd75e8"><label className="hm-field-label">{t('herdMedical.modal.affectedCount')}</label>
-                <input type="number" min="0" className="search-input si-7d984748" value={recordForm.affectedCount}
+                <input type="number" inputMode="decimal" min="0" className="search-input si-7d984748" value={recordForm.affectedCount}
                   onChange={e => setRecordForm(f => ({ ...f, affectedCount: e.target.value }))} /></div>
               <div className="si-6acd75e8"><label className="hm-field-label">{t('herdMedical.modal.mortalityCount')}</label>
-                <input type="number" min="0" className="search-input si-7d984748" value={recordForm.mortalityCount}
+                <input type="number" inputMode="decimal" min="0" className="search-input si-7d984748" value={recordForm.mortalityCount}
                   onChange={e => setRecordForm(f => ({ ...f, mortalityCount: e.target.value }))} /></div>
             </div>
           )}

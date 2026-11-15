@@ -103,7 +103,7 @@ export const AdmitPatientModal: React.FC<{
             </div>
             <div>
               <label className="si-2561596d">{t('inpatientManagement.dailyRateLabel')} <span className="si-17788c1c">(optional)</span></label>
-              <input type="number" min="0" placeholder="0.00" value={admitForm.dailyRate || ''} onChange={e => onFormChange(f => ({ ...f, dailyRate: parseFloat(e.target.value) || 0 }))} className="si-d0e0df59" />
+              <input type="number" inputMode="decimal" min="0" placeholder="0.00" value={admitForm.dailyRate || ''} onChange={e => onFormChange(f => ({ ...f, dailyRate: parseFloat(e.target.value) || 0 }))} className="si-d0e0df59" />
             </div>
           </div>
 

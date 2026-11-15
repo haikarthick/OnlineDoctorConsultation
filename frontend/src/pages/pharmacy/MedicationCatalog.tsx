@@ -322,12 +322,12 @@ export default function MedicationCatalog({ networkId }: Props) {
               <div className="pharm-form-row">
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.catalog.unitCost')}</label>
-                  <input type="number" min="0" step="0.01" value={form.unit_cost}
+                  <input type="number" inputMode="decimal" min="0" step="0.01" value={form.unit_cost}
                     onChange={e => setForm(f => ({ ...f, unit_cost: parseFloat(e.target.value) || 0 }))} />
                 </div>
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.catalog.sellingPrice')}</label>
-                  <input type="number" min="0" step="0.01" value={form.selling_price}
+                  <input type="number" inputMode="decimal" min="0" step="0.01" value={form.selling_price}
                     onChange={e => setForm(f => ({ ...f, selling_price: parseFloat(e.target.value) || 0 }))} />
                 </div>
               </div>
@@ -336,17 +336,17 @@ export default function MedicationCatalog({ networkId }: Props) {
               <div className="pharm-form-row">
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.catalog.minStockLevel')}</label>
-                  <input type="number" min="0" value={form.min_stock_level}
+                  <input type="number" inputMode="decimal" min="0" value={form.min_stock_level}
                     onChange={e => setForm(f => ({ ...f, min_stock_level: parseInt(e.target.value) || 0 }))} />
                 </div>
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.catalog.reorderPoint')}</label>
-                  <input type="number" min="0" value={form.reorder_point}
+                  <input type="number" inputMode="decimal" min="0" value={form.reorder_point}
                     onChange={e => setForm(f => ({ ...f, reorder_point: parseInt(e.target.value) || 0 }))} />
                 </div>
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.catalog.reorderQty')}</label>
-                  <input type="number" min="1" value={form.reorder_quantity}
+                  <input type="number" inputMode="decimal" min="1" value={form.reorder_quantity}
                     onChange={e => setForm(f => ({ ...f, reorder_quantity: parseInt(e.target.value) || 1 }))} />
                 </div>
               </div>
@@ -368,7 +368,7 @@ export default function MedicationCatalog({ networkId }: Props) {
               <div className="pharm-form-row">
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.catalog.withdrawalDays')}</label>
-                  <input type="number" min="0" value={form.withdrawal_period_days}
+                  <input type="number" inputMode="decimal" min="0" value={form.withdrawal_period_days}
                     onChange={e => setForm(f => ({ ...f, withdrawal_period_days: parseInt(e.target.value) || 0 }))} />
                   <small className="si-66fcce46">{t('pharmacy.catalog.withdrawalNote')}</small>
                 </div>

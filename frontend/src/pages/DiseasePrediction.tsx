@@ -220,8 +220,8 @@ const DiseasePredictionPage: React.FC = () => {
                 <form className="module-form" onSubmit={handleCreatePrediction}>
                   <div className="form-grid">
                     <div className="form-group"><label>{t('diseasePrediction.diseaseName')} *</label><input required value={formData.diseaseName} onChange={e => setFormData({ ...formData, diseaseName: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('diseasePrediction.riskScore')} (0-100)</label><input type="number" min="0" max="100" step="0.1" value={formData.riskScore} onChange={e => setFormData({ ...formData, riskScore: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('diseasePrediction.confidence')} (0-100)</label><input type="number" min="0" max="100" step="0.1" value={formData.confidence} onChange={e => setFormData({ ...formData, confidence: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.riskScore')} (0-100)</label><input type="number" inputMode="decimal" min="0" max="100" step="0.1" value={formData.riskScore} onChange={e => setFormData({ ...formData, riskScore: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.confidence')} (0-100)</label><input type="number" inputMode="decimal" min="0" max="100" step="0.1" value={formData.confidence} onChange={e => setFormData({ ...formData, confidence: e.target.value })} /></div>
                     <div className="form-group"><label>{t('diseasePrediction.predictedOnset')}</label><input type="date" value={formData.predictedOnset} onChange={e => setFormData({ ...formData, predictedOnset: e.target.value })} /></div>
                     <div className="form-group full-width"><label>{t('diseasePrediction.riskFactors')}</label><input value={formData.riskFactors} onChange={e => setFormData({ ...formData, riskFactors: e.target.value })} placeholder="e.g., Overcrowding, Poor ventilation" /></div>
                     <div className="form-group full-width"><label>{t('diseasePrediction.recommendedActions')}</label><input value={formData.recommendedActions} onChange={e => setFormData({ ...formData, recommendedActions: e.target.value })} placeholder="e.g., Isolate affected animals, Increase ventilation" /></div>
@@ -269,11 +269,11 @@ const DiseasePredictionPage: React.FC = () => {
                         <option value="high">High</option><option value="critical">Critical</option>
                       </select>
                     </div>
-                    <div className="form-group"><label>{t('diseasePrediction.affectedCount')}</label><input type="number" value={outbreakForm.affectedCount} onChange={e => setOutbreakForm({ ...outbreakForm, affectedCount: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('diseasePrediction.totalAtRisk')}</label><input type="number" value={outbreakForm.totalAtRisk} onChange={e => setOutbreakForm({ ...outbreakForm, totalAtRisk: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('diseasePrediction.radiusKm')}</label><input type="number" step="0.1" value={outbreakForm.radiusKm} onChange={e => setOutbreakForm({ ...outbreakForm, radiusKm: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('diseasePrediction.centerLat')}</label><input type="number" step="0.0001" value={outbreakForm.centerLat} onChange={e => setOutbreakForm({ ...outbreakForm, centerLat: e.target.value })} placeholder="Click map or type" /></div>
-                    <div className="form-group"><label>{t('diseasePrediction.centerLng')}</label><input type="number" step="0.0001" value={outbreakForm.centerLng} onChange={e => setOutbreakForm({ ...outbreakForm, centerLng: e.target.value })} placeholder="Click map or type" /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.affectedCount')}</label><input type="number" inputMode="decimal" value={outbreakForm.affectedCount} onChange={e => setOutbreakForm({ ...outbreakForm, affectedCount: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.totalAtRisk')}</label><input type="number" inputMode="decimal" value={outbreakForm.totalAtRisk} onChange={e => setOutbreakForm({ ...outbreakForm, totalAtRisk: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.radiusKm')}</label><input type="number" inputMode="decimal" step="0.1" value={outbreakForm.radiusKm} onChange={e => setOutbreakForm({ ...outbreakForm, radiusKm: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.centerLat')}</label><input type="number" inputMode="decimal" step="0.0001" value={outbreakForm.centerLat} onChange={e => setOutbreakForm({ ...outbreakForm, centerLat: e.target.value })} placeholder="Click map or type" /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.centerLng')}</label><input type="number" inputMode="decimal" step="0.0001" value={outbreakForm.centerLng} onChange={e => setOutbreakForm({ ...outbreakForm, centerLng: e.target.value })} placeholder="Click map or type" /></div>
                   </div>
                   <button type="submit" className="btn-primary">{t('diseasePrediction.createOutbreakZone')}</button>
                 </form>

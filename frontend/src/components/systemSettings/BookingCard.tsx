@@ -44,7 +44,7 @@ const BookingCard: React.FC<Props> = ({
                 {d}d
               </button>
             ))}
-            <input type="number" className="form-input ss-field ss-num-input"
+            <input type="number" inputMode="decimal" className="form-input ss-field ss-num-input"
               value={advanceBookingDays} min={1} max={365}
               disabled={savingInline === 'booking.advanceBookingDays'}
               onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 1 && v <= 365) setAdvanceBookingDays(v) }}
@@ -131,7 +131,7 @@ const BookingCard: React.FC<Props> = ({
                   {n === 0 ? '∞' : n}
                 </button>
               ))}
-              <input type="number" className="form-input ss-field ss-num-input"
+              <input type="number" inputMode="decimal" className="form-input ss-field ss-num-input"
                 value={patientNoShowLimit} min={0} max={10} disabled={savingPatientLimit}
                 onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 0 && v <= 10) setPatientNoShowLimit(v) }}
                 onBlur={() => onPatientNoShowLimitChange(patientNoShowLimit)}

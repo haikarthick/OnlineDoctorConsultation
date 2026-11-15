@@ -80,7 +80,7 @@ export default function StockAdjustmentModal({ pharmacyId, item, onClose, onDone
           <div className="pharm-form-row">
             <div className="pharm-form-group">
               <label>{t('pharmacy.stock.quantity')} <span className="req-star">*</span></label>
-              <input type="number" min="1" value={form.adjustment_qty} onChange={e => setForm(f => ({ ...f, adjustment_qty: parseInt(e.target.value) || 1 }))} />
+              <input type="number" inputMode="decimal" min="1" value={form.adjustment_qty} onChange={e => setForm(f => ({ ...f, adjustment_qty: parseInt(e.target.value) || 1 }))} />
             </div>
             <div className="pharm-form-group">
               <label>{t('pharmacy.table.batch')}</label>

@@ -189,7 +189,7 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
                     </td>
                     <td className="si-37f3ee27">
                       <input
-                        type="number" min={0} max={100} step={0.5}
+                        type="number" inputMode="decimal" min={0} max={100} step={0.5}
                         value={edits[d.id]?.pct ?? ''}
                         placeholder={`${globals.percent}%`}
                         onChange={(e) => setEdits((prev) => ({ ...prev, [d.id]: { ...prev[d.id], pct: e.target.value } }))}
@@ -198,7 +198,7 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
                     </td>
                     <td className="si-37f3ee27">
                       <input
-                        type="number" min={0} step={1}
+                        type="number" inputMode="numeric" min={0} step={1}
                         value={edits[d.id]?.flat ?? ''}
                         placeholder={globals.flat}
                         onChange={(e) => setEdits((prev) => ({ ...prev, [d.id]: { ...prev[d.id], flat: e.target.value } }))}
@@ -247,7 +247,7 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
                     <td className="si-674357ac">{tc.sacCode}</td>
                     <td className="si-37f3ee27">{tc.label}</td>
                     <td className="si-37f3ee27">
-                      <input type="number" min={0} max={100} step={0.5}
+                      <input type="number" inputMode="decimal" min={0} max={100} step={0.5}
                         value={taxEdits[tc.sacCode] ?? ''}
                         onChange={(e) => setTaxEdits((prev) => ({ ...prev, [tc.sacCode]: e.target.value }))}
                         className="si-4de231f8" />

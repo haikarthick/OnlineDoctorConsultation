@@ -16,7 +16,7 @@ const ConsultationFeeSection: React.FC<ConsultationFeeSectionProps> = ({ consult
         <div className="form-group">
           <label>{t('settings.consultation.fee')}</label>
           <div className="si-314cecae">
-            <input type="number" name="consultationFee" value={consultationFee} onChange={onVetChange}
+            <input type="number" inputMode="decimal" name="consultationFee" value={consultationFee} onChange={onVetChange}
               min="0" step="0.01" placeholder="500" className="si-054905ad" />
             <span className="si-147c1f2f">
               {formatCurrency(parseFloat(consultationFee) || 0).replace(/[\d,.\s]/g, '').trim() || '$'}

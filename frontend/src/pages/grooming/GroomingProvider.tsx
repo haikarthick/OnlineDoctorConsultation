@@ -230,13 +230,13 @@ const ServicesTab: React.FC<any> = ({ provider, canManage, formatCurrency, flash
             <div className="module-form-group"><label className="module-label">{t('grooming.serviceName')} *</label>
               <input className="module-input" value={n.name} onChange={e => setN({ ...n, name: e.target.value })} placeholder={t('grooming.serviceNamePlaceholder')} /></div>
             <div className="module-form-group"><label className="module-label">{t('grooming.price')} *</label>
-              <input className="module-input" type="number" min={0} value={n.basePrice} onChange={e => setN({ ...n, basePrice: e.target.value })} /></div>
+              <input className="module-input" type="number" inputMode="decimal" min={0} value={n.basePrice} onChange={e => setN({ ...n, basePrice: e.target.value })} /></div>
           </div>
           <div className="module-form-row">
             <div className="module-form-group"><label className="module-label">{t('grooming.durationMin')}</label>
-              <input className="module-input" type="number" min={0} value={n.durationMinutes} onChange={e => setN({ ...n, durationMinutes: Number(e.target.value) })} /></div>
+              <input className="module-input" type="number" inputMode="decimal" min={0} value={n.durationMinutes} onChange={e => setN({ ...n, durationMinutes: Number(e.target.value) })} /></div>
             <div className="module-form-group"><label className="module-label">{t('grooming.taxPercent')}</label>
-              <input className="module-input" type="number" min={0} value={n.taxPercent} onChange={e => setN({ ...n, taxPercent: Number(e.target.value) })} /></div>
+              <input className="module-input" type="number" inputMode="decimal" min={0} value={n.taxPercent} onChange={e => setN({ ...n, taxPercent: Number(e.target.value) })} /></div>
             <div className="module-form-group"><label className="module-label">{t('grooming.paymentRule')}</label>
               <select className="module-input" value={n.paymentRule} onChange={e => setN({ ...n, paymentRule: e.target.value })}>
                 <option value="full">{t('grooming.payFull')}</option>

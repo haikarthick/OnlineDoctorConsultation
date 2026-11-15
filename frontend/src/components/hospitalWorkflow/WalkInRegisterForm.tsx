@@ -174,7 +174,7 @@ export default function WalkInRegisterForm({
           <div className="si-347df862">
             <div>
               <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalWeight')} <span className="si-17788c1c">(optional)</span></label>
-              <input type="number" step="0.1" min="0" placeholder="e.g., 12.5" value={walkInForm.animalWeight} onChange={e => setWalkInForm(f => ({ ...f, animalWeight: e.target.value }))} className="si-d0e0df59" />
+              <input type="number" inputMode="decimal" step="0.1" min="0" placeholder="e.g., 12.5" value={walkInForm.animalWeight} onChange={e => setWalkInForm(f => ({ ...f, animalWeight: e.target.value }))} className="si-d0e0df59" />
             </div>
             <div>
               <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalColor')} <span className="si-17788c1c">(optional)</span></label>

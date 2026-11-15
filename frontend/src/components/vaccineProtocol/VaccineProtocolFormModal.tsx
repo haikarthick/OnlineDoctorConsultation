@@ -77,15 +77,15 @@ const VaccineProtocolFormModal: React.FC<VaccineProtocolFormModalProps> = ({
           <div className="module-form-row module-form-row-3">
             <div className="module-form-group">
               <label className="module-label">{t('vaccineProtocol.form.boosterInterval')}</label>
-              <input type="number" className="module-input" min={0} value={formData.boosterIntervalDays ?? 365} onChange={e => setFormData(p => ({ ...p, boosterIntervalDays: parseInt(e.target.value) || 365 }))} />
+              <input type="number" inputMode="decimal" className="module-input" min={0} value={formData.boosterIntervalDays ?? 365} onChange={e => setFormData(p => ({ ...p, boosterIntervalDays: parseInt(e.target.value) || 365 }))} />
             </div>
             <div className="module-form-group">
               <label className="module-label">{t('vaccineProtocol.form.seriesDoseCount')}</label>
-              <input type="number" className="module-input" min={1} max={10} value={formData.seriesDoseCount ?? 1} onChange={e => setFormData(p => ({ ...p, seriesDoseCount: parseInt(e.target.value) || 1 }))} />
+              <input type="number" inputMode="decimal" className="module-input" min={1} max={10} value={formData.seriesDoseCount ?? 1} onChange={e => setFormData(p => ({ ...p, seriesDoseCount: parseInt(e.target.value) || 1 }))} />
             </div>
             <div className="module-form-group">
               <label className="module-label">{t('vaccineProtocol.form.seriesInterval')}</label>
-              <input type="number" className="module-input" min={0} value={formData.seriesIntervalDays ?? 21} onChange={e => setFormData(p => ({ ...p, seriesIntervalDays: parseInt(e.target.value) || 21 }))} />
+              <input type="number" inputMode="decimal" className="module-input" min={0} value={formData.seriesIntervalDays ?? 21} onChange={e => setFormData(p => ({ ...p, seriesIntervalDays: parseInt(e.target.value) || 21 }))} />
             </div>
           </div>
 

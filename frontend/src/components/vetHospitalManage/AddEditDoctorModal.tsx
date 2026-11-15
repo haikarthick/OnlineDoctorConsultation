@@ -140,7 +140,7 @@ const AddEditDoctorModal: React.FC<Props> = ({
           </div>
           <div className="form-group">
             <label>{t('vetHospitalManage.modal.consultationFee', { currency })}</label>
-            <input type="number" value={doctorForm.consultationFee} onChange={e => setDoctorForm(f => ({ ...f, consultationFee: e.target.value }))} placeholder="e.g. 500" min="0" />
+            <input type="number" inputMode="decimal" value={doctorForm.consultationFee} onChange={e => setDoctorForm(f => ({ ...f, consultationFee: e.target.value }))} placeholder="e.g. 500" min="0" />
           </div>
           <label className="vh-toggle si-5afcd5fa">
             <input type="checkbox" checked={doctorForm.isPrimaryHospital} onChange={e => setDoctorForm(f => ({ ...f, isPrimaryHospital: e.target.checked }))} />

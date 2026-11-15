@@ -118,7 +118,7 @@ const AnimalFormModal: React.FC<Props> = ({
           </div>
           <div>
             <label className="an-field-label">{t('animals.registerModal.weight')}</label>
-            <input type="number" step="0.1" min="0" value={formData.weight} onChange={e => setFormData(p => ({ ...p, weight: e.target.value }))} className="an-field" placeholder={t('animals.form.placeholderWeight')} />
+            <input type="number" inputMode="decimal" step="0.1" min="0" value={formData.weight} onChange={e => setFormData(p => ({ ...p, weight: e.target.value }))} className="an-field" placeholder={t('animals.form.placeholderWeight')} />
           </div>
           <div className="si-6046e8a3">
             <input type="checkbox" id="isNeutered" checked={formData.isNeutered} onChange={e => setFormData(p => ({ ...p, isNeutered: e.target.checked }))} className="si-8f286607" />

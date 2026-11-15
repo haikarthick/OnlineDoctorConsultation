@@ -92,14 +92,14 @@ const RoleChangeRequestPanel: React.FC<RoleChangeRequestPanelProps> = ({
                 </div>
                 <div className="module-form-group">
                   <label className="module-label">{t('settings.roleChange.vetFee')}</label>
-                  <input className="module-input" type="number" min={0} value={rcVetFee}
+                  <input className="module-input" type="number" inputMode="decimal" min={0} value={rcVetFee}
                     onChange={e => setRcVetFee(e.target.value)} placeholder="500" />
                 </div>
               </div>
               <div className="module-form-row">
                 <div className="module-form-group">
                   <label className="module-label">{t('settings.roleChange.vetExperience')}</label>
-                  <input className="module-input" type="number" min={0} value={rcVetExperience}
+                  <input className="module-input" type="number" inputMode="decimal" min={0} value={rcVetExperience}
                     onChange={e => setRcVetExperience(e.target.value)} placeholder="5" />
                 </div>
                 <div className="module-form-group">

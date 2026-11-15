@@ -292,12 +292,12 @@ const LocationManagement: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>{t('locationManagement.form.capacity')}</label>
-                  <input type="number" value={formData.capacity} onChange={e => setFormData(f => ({ ...f, capacity: e.target.value }))} />
+                  <input type="number" inputMode="decimal" value={formData.capacity} onChange={e => setFormData(f => ({ ...f, capacity: e.target.value }))} />
                 </div>
                 <div className="form-group">
                   <label>{t('locationManagement.form.area')}</label>
                   <div className="si-6fdaaf49">
-                    <input type="number" step="0.01" value={formData.area} onChange={e => setFormData(f => ({ ...f, area: e.target.value }))} className="si-6acd75e8" />
+                    <input type="number" inputMode="decimal" step="0.01" value={formData.area} onChange={e => setFormData(f => ({ ...f, area: e.target.value }))} className="si-6acd75e8" />
                     <select value={formData.areaUnit} onChange={e => setFormData(f => ({ ...f, areaUnit: e.target.value }))} className="si-4706e1bb">
                       <option value="sqft">sqft</option><option value="sqm">sqm</option>
                       <option value="acres">acres</option><option value="hectares">ha</option>
@@ -312,11 +312,11 @@ const LocationManagement: React.FC = () => {
               <div className="si-ec24da01">
                 <div className="form-group">
                   <label>{t('locationManagement.form.gpsLatitude')}</label>
-                  <input type="number" step="0.000001" placeholder="Click map or type" value={formData.gpsLatitude} onChange={e => setFormData(f => ({ ...f, gpsLatitude: e.target.value }))} />
+                  <input type="number" inputMode="decimal" step="0.000001" placeholder="Click map or type" value={formData.gpsLatitude} onChange={e => setFormData(f => ({ ...f, gpsLatitude: e.target.value }))} />
                 </div>
                 <div className="form-group">
                   <label>{t('locationManagement.form.gpsLongitude')}</label>
-                  <input type="number" step="0.000001" placeholder="Click map or type" value={formData.gpsLongitude} onChange={e => setFormData(f => ({ ...f, gpsLongitude: e.target.value }))} />
+                  <input type="number" inputMode="decimal" step="0.000001" placeholder="Click map or type" value={formData.gpsLongitude} onChange={e => setFormData(f => ({ ...f, gpsLongitude: e.target.value }))} />
                 </div>
               </div>
               {showForm && (

@@ -198,7 +198,7 @@ const FeedInventory: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>{t('feedInventory.form.quantityInStock')}</label>
-                  <input type="number" step="0.01" required value={formData.quantityInStock} onChange={e => setFormData({ ...formData, quantityInStock: e.target.value })} />
+                  <input type="number" inputMode="decimal" step="0.01" required value={formData.quantityInStock} onChange={e => setFormData({ ...formData, quantityInStock: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>{t('feedInventory.form.unit')}</label>
@@ -208,11 +208,11 @@ const FeedInventory: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>{t('feedInventory.form.minimumStockLevel')}</label>
-                  <input type="number" step="0.01" value={formData.minimumStockLevel} onChange={e => setFormData({ ...formData, minimumStockLevel: e.target.value })} />
+                  <input type="number" inputMode="decimal" step="0.01" value={formData.minimumStockLevel} onChange={e => setFormData({ ...formData, minimumStockLevel: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>{t('feedInventory.form.costPerUnit')}</label>
-                  <input type="number" step="0.01" required value={formData.costPerUnit} onChange={e => setFormData({ ...formData, costPerUnit: e.target.value })} />
+                  <input type="number" inputMode="decimal" step="0.01" required value={formData.costPerUnit} onChange={e => setFormData({ ...formData, costPerUnit: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>{t('feedInventory.form.expiryDate')}</label>
@@ -248,7 +248,7 @@ const FeedInventory: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>{t('feedInventory.consumptionForm.quantityUsed')}</label>
-                  <input type="number" step="0.01" required value={consumptionData.quantityUsed} onChange={e => setConsumptionData({ ...consumptionData, quantityUsed: e.target.value })} />
+                  <input type="number" inputMode="decimal" step="0.01" required value={consumptionData.quantityUsed} onChange={e => setConsumptionData({ ...consumptionData, quantityUsed: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>{t('common.notes')}</label>
@@ -285,7 +285,7 @@ const FeedInventory: React.FC = () => {
                             <button className="btn btn-sm" onClick={() => startEdit(f)}>{t('common.edit')}</button>
                             {restockId === f.id ? (
                               <span className="inline-form">
-                                <input type="number" step="0.01" placeholder="Qty" value={restockQty} onChange={e => setRestockQty(e.target.value)} className="si-a30c62ec" />
+                                <input type="number" inputMode="decimal" step="0.01" placeholder="Qty" value={restockQty} onChange={e => setRestockQty(e.target.value)} className="si-a30c62ec" />
                                 <button className="btn btn-sm btn-success" onClick={handleRestock}>✓</button>
                                 <button className="btn btn-sm" onClick={() => setRestockId(null)}>✗</button>
                               </span>

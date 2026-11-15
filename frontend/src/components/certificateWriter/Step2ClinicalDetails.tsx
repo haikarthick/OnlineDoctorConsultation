@@ -196,7 +196,7 @@ const Step2ClinicalDetails: React.FC<Step2ClinicalDetailsProps> = ({
         <div className="module-form-row">
           <div className="module-form-group">
             <label className="module-label">{t('certificateWriter.valuationAmount')} *</label>
-            <input className="module-input" type="number" min="0" value={valuationAmount} onChange={e => setValuationAmount(e.target.value)} placeholder="e.g. 50000" />
+            <input className="module-input" type="number" inputMode="decimal" min="0" value={valuationAmount} onChange={e => setValuationAmount(e.target.value)} placeholder="e.g. 50000" />
           </div>
           <div className="module-form-group">
             <label className="module-label">{t('certificateWriter.valuationBasis')}</label>
@@ -261,7 +261,7 @@ const Step2ClinicalDetails: React.FC<Step2ClinicalDetailsProps> = ({
           </div>
           <div className="module-form-group">
             <label className="module-label">{t('certificateWriter.herdAnimalCount')} *</label>
-            <input className="module-input" type="number" min="1" value={herdAnimalCount} onChange={e => setHerdAnimalCount(e.target.value)} placeholder="Total number of animals" />
+            <input className="module-input" type="number" inputMode="decimal" min="1" value={herdAnimalCount} onChange={e => setHerdAnimalCount(e.target.value)} placeholder="Total number of animals" />
           </div>
         </div>
         <div className="module-form-row">

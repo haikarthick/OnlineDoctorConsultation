@@ -319,7 +319,7 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
                           <div className="pharm-form-group si-7120288a">
                             <label className="si-c384180a">{t('pharmacy.dispense.qty')}</label>
                             <input
-                              type="number" min="1"
+                              type="number" inputMode="decimal" min="1"
                               max={line.quantity_available || 9999}
                               value={line.quantity_dispensed}
                               onChange={e => updateLine(idx, 'quantity_dispensed', parseInt(e.target.value) || 1)}
@@ -329,7 +329,7 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
                           <div className="pharm-form-group si-7120288a">
                             <label className="si-c384180a">{t('pharmacy.dispense.unitPrice')}</label>
                             <input
-                              type="number" min="0" step="0.01"
+                              type="number" inputMode="decimal" min="0" step="0.01"
                               value={line.unit_price}
                               onChange={e => updateLine(idx, 'unit_price', parseFloat(e.target.value) || 0)}
                             />

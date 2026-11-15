@@ -53,7 +53,7 @@ const RoleChangeModal: React.FC<RoleChangeModalProps> = ({
               </div>
               <div className="form-group">
                 <label className="form-label">{t('settings.roleChange.vetFee')}</label>
-                <input className="form-input" type="number" min={0} value={roleVetFee}
+                <input className="form-input" type="number" inputMode="decimal" min={0} value={roleVetFee}
                   onChange={e => setRoleVetFee(e.target.value)} placeholder="500" />
               </div>
             </div>

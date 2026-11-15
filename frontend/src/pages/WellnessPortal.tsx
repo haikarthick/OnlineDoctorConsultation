@@ -213,7 +213,7 @@ const WellnessPortal: React.FC = () => {
                   {[[t('wellnessPortal.scoreLabels.nutrition'), 'nutritionScore'], [t('wellnessPortal.scoreLabels.activity'), 'activityScore'], [t('wellnessPortal.scoreLabels.vaccines'), 'vaccinationScore'], [t('wellnessPortal.scoreLabels.dental'), 'dentalScore']].map(([label, field]) => (
                     <div key={field} className="si-42eae7d1">
                       <label className="module-label">{label} {t('wellnessPortal.scoreInputSuffix')}</label>
-                      <input className="module-input" type="number" min="0" max="100"
+                      <input className="module-input" type="number" inputMode="decimal" min="0" max="100"
                         value={(scorecardForm as any)[field]}
                         onChange={e => setScorecardForm(f => ({ ...f, [field]: e.target.value }))} />
                     </div>

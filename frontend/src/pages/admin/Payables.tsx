@@ -229,7 +229,7 @@ const Payables: React.FC<Props> = () => {
                 </label>
                 <label>
                   <span className="field-caption">{t('payables.tdsOverride')}</span>
-                  <input className="module-input" type="number" min={0} step="0.01" value={payForm.tdsAmount}
+                  <input className="module-input" type="number" inputMode="decimal" min={0} step="0.01" value={payForm.tdsAmount}
                     placeholder={t('payables.tdsAuto')}
                     onChange={e => setPayForm({ ...payForm, tdsAmount: e.target.value })} />
                 </label>

@@ -282,7 +282,7 @@ const VetHospitals: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>{t('vetHospitals.form.establishedYear')}</label>
-                  <input type="number" value={formData.establishedYear} onChange={e => setFormData(f => ({ ...f, establishedYear: e.target.value }))} placeholder="2010" min="1900" max={new Date().getFullYear()} />
+                  <input type="number" inputMode="decimal" value={formData.establishedYear} onChange={e => setFormData(f => ({ ...f, establishedYear: e.target.value }))} placeholder="2010" min="1900" max={new Date().getFullYear()} />
                 </div>
               </div>
               <div className="form-actions">

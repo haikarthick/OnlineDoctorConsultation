@@ -482,7 +482,7 @@ const MasterDataManagement: React.FC = () => {
 
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>
-                  <input type="number" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
+                  <input type="number" inputMode="decimal" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
                 </div>
               </>
             )}
@@ -496,7 +496,7 @@ const MasterDataManagement: React.FC = () => {
                 {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>
-                  <input type="number" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
+                  <input type="number" inputMode="decimal" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
                 </div>
               </>
             )}
@@ -540,7 +540,7 @@ const MasterDataManagement: React.FC = () => {
                 </label>
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>
-                  <input type="number" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
+                  <input type="number" inputMode="decimal" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
                 </div>
               </>
             )}
@@ -564,7 +564,7 @@ const MasterDataManagement: React.FC = () => {
                 </div>
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>
-                  <input type="number" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
+                  <input type="number" inputMode="decimal" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
                 </div>
               </>
             )}
@@ -584,7 +584,7 @@ const MasterDataManagement: React.FC = () => {
                 {renderLocaleLabelInputs()}
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>
-                  <input type="number" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
+                  <input type="number" inputMode="decimal" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
                 </div>
               </>
             )}

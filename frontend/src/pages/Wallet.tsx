@@ -210,7 +210,7 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
             <div className="inline-form-row">
               <label>
                 <span className="field-caption">{t('walletWithdrawal.amount')}</span>
-                <input className="module-input" type="number" min={1} max={balance} step="0.01"
+                <input className="module-input" type="number" inputMode="decimal" min={1} max={balance} step="0.01"
                   value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
               </label>
               <label>

@@ -103,7 +103,7 @@ export default function SearchFiltersBar({
 
           <div>
             <label className="si-13e1b2f2">{t('findDoctor.maxFee')}</label>
-            <input type="number" min={0} step={10} placeholder="e.g. 100"
+            <input type="number" inputMode="decimal" min={0} step={10} placeholder="e.g. 100"
               value={maxFee} onChange={e => onMaxFeeChange(e.target.value ? Number(e.target.value) : '')}
               className="si-adaf9bd5"
             />

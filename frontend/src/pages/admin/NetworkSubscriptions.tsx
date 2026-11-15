@@ -342,7 +342,7 @@ export default function NetworkSubscriptions() {
               <div className="module-form-row">
                 <div className="module-form-group">
                   <label className="module-label">Seat Limit</label>
-                  <input type="number" className="module-input" value={subForm.seatLimit} onChange={e => setSubForm(f => ({ ...f, seatLimit: e.target.value }))} min={1} />
+                  <input type="number" inputMode="decimal" className="module-input" value={subForm.seatLimit} onChange={e => setSubForm(f => ({ ...f, seatLimit: e.target.value }))} min={1} />
                 </div>
                 <div className="module-form-group">
                   <label className="module-label">Status</label>
@@ -397,7 +397,7 @@ export default function NetworkSubscriptions() {
             <p>Current: {showOverrideModal.seatsUsed}/{showOverrideModal.seatLimit} seats used</p>
             <div className="module-form-group">
               <label className="module-label">New Seat Limit</label>
-              <input type="number" className="module-input" value={overrideSeatLimit} onChange={e => setOverrideSeatLimit(e.target.value)} min={1} />
+              <input type="number" inputMode="decimal" className="module-input" value={overrideSeatLimit} onChange={e => setOverrideSeatLimit(e.target.value)} min={1} />
             </div>
             <button className="module-btn primary" onClick={handleOverrideSeats}>Apply Override</button>
           </div>
@@ -418,7 +418,7 @@ export default function NetworkSubscriptions() {
                 </div>
                 <div className="module-form-group">
                   <label className="module-label">Sort Order</label>
-                  <input type="number" className="module-input" value={editingPlan.sortOrder ?? 0} onChange={e => setEditingPlan(p => ({ ...p, sortOrder: parseInt(e.target.value) }))} />
+                  <input type="number" inputMode="decimal" className="module-input" value={editingPlan.sortOrder ?? 0} onChange={e => setEditingPlan(p => ({ ...p, sortOrder: parseInt(e.target.value) }))} />
                 </div>
               </div>
               <div className="module-form-group">
@@ -428,21 +428,21 @@ export default function NetworkSubscriptions() {
               <div className="module-form-row">
                 <div className="module-form-group">
                   <label className="module-label">Max Seats (blank = unlimited)</label>
-                  <input type="number" className="module-input" value={editingPlan.maxSeats ?? ''} onChange={e => setEditingPlan(p => ({ ...p, maxSeats: e.target.value ? parseInt(e.target.value) : undefined }))} min={1} />
+                  <input type="number" inputMode="decimal" className="module-input" value={editingPlan.maxSeats ?? ''} onChange={e => setEditingPlan(p => ({ ...p, maxSeats: e.target.value ? parseInt(e.target.value) : undefined }))} min={1} />
                 </div>
                 <div className="module-form-group">
                   <label className="module-label">Max Hospitals (blank = unlimited)</label>
-                  <input type="number" className="module-input" value={editingPlan.maxHospitals ?? ''} onChange={e => setEditingPlan(p => ({ ...p, maxHospitals: e.target.value ? parseInt(e.target.value) : undefined }))} min={1} />
+                  <input type="number" inputMode="decimal" className="module-input" value={editingPlan.maxHospitals ?? ''} onChange={e => setEditingPlan(p => ({ ...p, maxHospitals: e.target.value ? parseInt(e.target.value) : undefined }))} min={1} />
                 </div>
               </div>
               <div className="module-form-row">
                 <div className="module-form-group">
                   <label className="module-label">Monthly Price (leave blank = not set)</label>
-                  <input type="number" className="module-input" value={editingPlan.priceMonthly ?? ''} onChange={e => setEditingPlan(p => ({ ...p, priceMonthly: e.target.value ? parseFloat(e.target.value) : undefined }))} min={0} />
+                  <input type="number" inputMode="decimal" className="module-input" value={editingPlan.priceMonthly ?? ''} onChange={e => setEditingPlan(p => ({ ...p, priceMonthly: e.target.value ? parseFloat(e.target.value) : undefined }))} min={0} />
                 </div>
                 <div className="module-form-group">
                   <label className="module-label">Annual Price (leave blank = not set)</label>
-                  <input type="number" className="module-input" value={editingPlan.priceAnnually ?? ''} onChange={e => setEditingPlan(p => ({ ...p, priceAnnually: e.target.value ? parseFloat(e.target.value) : undefined }))} min={0} />
+                  <input type="number" inputMode="decimal" className="module-input" value={editingPlan.priceAnnually ?? ''} onChange={e => setEditingPlan(p => ({ ...p, priceAnnually: e.target.value ? parseFloat(e.target.value) : undefined }))} min={0} />
                 </div>
               </div>
               <div className="module-form-group">

@@ -1,6 +1,7 @@
 # Farm Management Realignment — Analysis & Plan
 
-**Status: PHASE 1 SHIPPED 2026-11-15 (farm profile engine + master data). Phases 0 and 2-6 not
+**Status: PHASES 0, 1 AND 2 DONE (2026-11-15): design signed off, farm profile engine + master
+data, and the phone foundation (tab bar for every role + shared building blocks). Phases 3-6 not
 started.** Written 2026-11-14 so a new session can resume without redoing the analysis. Next
 action is in §11. How the engine works: `docs/modules/farm-profile.md`.
 
@@ -537,15 +538,20 @@ species, role-aware species ordering, breeding due date from master data. Phase 
 before Phase 0 because it has no farmer-facing design to sign off; nothing a farmer sees changed
 except the corrected breeds, the new species and the picker order.
 
+**Phase 0 done:** owner approved the mock-ups (canvas: claude.ai/artifact/JRBaPa3ykYCdnbqu9frrSX).
+**Phase 2 done:** `docs/modules/mobile-ui.md` - bottom tab bar for every role (data in
+`navigation/bottomTabs.ts`), shared blocks in `components/mobile/`, `inputMode` on all numeric
+inputs with a test that keeps it so, tokens for every size and colour.
+
 **Next:**
-1. Read this file, `docs/modules/farm-profile.md`, `docs/DESIGN_SYSTEM.md`, and the skills in §3.
+1. Read this file, `docs/modules/farm-profile.md`, `docs/modules/mobile-ui.md`,
+   `docs/DESIGN_SYSTEM.md`, and the skills in §3.
 2. Do not re-ask the owner anything in §2 (D1–D15 are settled).
-3. **Phase 0: phone mock-ups and owner sign-off** (D9) - this gates Phases 2 and 3. Include each
-   role's four tab-bar destinations.
-4. Then Phase 2 (phone foundation, all roles) and Phase 3 (groups and animals on the engine) via
-   the `feature-delivery` skill. Phase 3 is where `AnimalGroups.tsx` and `AnimalFormModal.tsx`
-   start reading `useFarmProfile` and the hardcoded group-type list in `types/enterprise.ts` goes.
-5. Ask the owner who can review the Tamil (and hi/kn/ml/te) words seeded in migration 043.
+3. **Phase 3** (groups and animals on the engine) via the `feature-delivery` skill: rebuild the
+   group and animal forms with `StepForm` / `ChipSelect` / `NumberStepper` reading `useFarmProfile`;
+   remove the hardcoded group-type list in `types/enterprise.ts`; new animal columns; `SubjectSummary`
+   in every consumer in §7 (consultation room, prescriptions, certificates...).
+4. Ask the owner who can review the local-language words in migration 043 and the short tab labels.
 
 Seen while testing, not caused by this work and not fixed: a hard page load of `/animals` as a
 farmer lands on the dashboard (navigating from the sidebar works); the Master Data page header

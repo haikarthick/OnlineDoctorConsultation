@@ -116,7 +116,7 @@ const RecordModals: React.FC<Props> = ({
         {showModal === 'weight' && (
           <>
             <h2 className="si-fdff7499">{t('medicalRecords.modals.recordWeight')}</h2>
-            <ModalField label={t('medicalRecords.modals.weightValue')}><input type="number" step="0.01" value={modalData.weight || ''} onChange={(e) => setModalData({ ...modalData, weight: e.target.value })} className="mr-field" placeholder={t('medicalRecords.modals.weightPlaceholder')} /></ModalField>
+            <ModalField label={t('medicalRecords.modals.weightValue')}><input type="number" inputMode="decimal" step="0.01" value={modalData.weight || ''} onChange={(e) => setModalData({ ...modalData, weight: e.target.value })} className="mr-field" placeholder={t('medicalRecords.modals.weightPlaceholder')} /></ModalField>
             <ModalField label={t('medicalRecords.modals.unit')}>
               <select value={modalData.unit || 'kg'} onChange={(e) => setModalData({ ...modalData, unit: e.target.value })} className="mr-field">
                 <option value="kg">kg</option><option value="lbs">lbs</option><option value="g">g</option>

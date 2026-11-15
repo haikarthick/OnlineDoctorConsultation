@@ -97,7 +97,7 @@ export const EnterpriseFormModal: React.FC<{
             <div className="form-group">
               <label>Total Area</label>
               <div className="si-6fdaaf49">
-                <input type="number" step="0.01" value={formData.totalArea} onChange={e => onChange(f => ({ ...f, totalArea: e.target.value }))} className="si-6acd75e8" />
+                <input type="number" inputMode="decimal" step="0.01" value={formData.totalArea} onChange={e => onChange(f => ({ ...f, totalArea: e.target.value }))} className="si-6acd75e8" />
                 <select value={formData.areaUnit} onChange={e => onChange(f => ({ ...f, areaUnit: e.target.value }))} className="si-fccc6ec7">
                   <option value="acres">Acres</option>
                   <option value="hectares">Hectares</option>
@@ -134,11 +134,11 @@ export const EnterpriseFormModal: React.FC<{
 
             <div className="form-group">
               <label>GPS Latitude</label>
-              <input type="number" step="0.000001" placeholder="Click map below" value={formData.gpsLatitude} onChange={e => onChange(f => ({ ...f, gpsLatitude: e.target.value }))} />
+              <input type="number" inputMode="decimal" step="0.000001" placeholder="Click map below" value={formData.gpsLatitude} onChange={e => onChange(f => ({ ...f, gpsLatitude: e.target.value }))} />
             </div>
             <div className="form-group">
               <label>GPS Longitude</label>
-              <input type="number" step="0.000001" placeholder="Click map below" value={formData.gpsLongitude} onChange={e => onChange(f => ({ ...f, gpsLongitude: e.target.value }))} />
+              <input type="number" inputMode="decimal" step="0.000001" placeholder="Click map below" value={formData.gpsLongitude} onChange={e => onChange(f => ({ ...f, gpsLongitude: e.target.value }))} />
             </div>
 
             <div className="form-group si-06af062a">

@@ -135,6 +135,8 @@ Invoke these for the workflows they cover rather than improvising each time:
 - `pre-ship` — what "done" actually requires, beyond a green `tsc`
 
 ## Module docs
+- `docs/modules/mobile-ui.md` — phone tab bar + shared building blocks for every role; the table
+  there says which single file to edit for any UI/UX change.
 - `docs/modules/farm-profile.md` — farm profile engine: one resolver decides which fields, records
   and events apply per species/class/group type; never branch on a species name in code.
 - **Active initiative:** `docs/FARM_MANAGEMENT_PLAN.md` — farm management realignment (all farm

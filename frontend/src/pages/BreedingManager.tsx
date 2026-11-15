@@ -166,15 +166,15 @@ const BreedingManager: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>{t('breedingManager.modal.offspringCount')}</label>
-                  <input type="number" value={formData.offspringCount} onChange={e => setFormData({ ...formData, offspringCount: e.target.value })} />
+                  <input type="number" inputMode="decimal" value={formData.offspringCount} onChange={e => setFormData({ ...formData, offspringCount: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>{t('breedingManager.modal.liveOffspring')}</label>
-                  <input type="number" value={formData.liveOffspring} onChange={e => setFormData({ ...formData, liveOffspring: e.target.value })} />
+                  <input type="number" inputMode="decimal" value={formData.liveOffspring} onChange={e => setFormData({ ...formData, liveOffspring: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>{t('breedingManager.modal.stillborn')}</label>
-                  <input type="number" value={formData.stillborn} onChange={e => setFormData({ ...formData, stillborn: e.target.value })} />
+                  <input type="number" inputMode="decimal" value={formData.stillborn} onChange={e => setFormData({ ...formData, stillborn: e.target.value })} />
                 </div>
               </div>
               <div className="form-group">

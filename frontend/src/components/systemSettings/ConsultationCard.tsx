@@ -37,7 +37,7 @@ const ConsultationCard: React.FC<Props> = ({
               <button key={mins} className={`btn btn-sm ${joinWindow === mins ? 'btn-primary' : 'btn-outline'}`}
                 disabled={savingJoinWindow} onClick={() => onJoinWindowChange(mins)}>{mins} min</button>
             ))}
-            <input type="number" className="form-input ss-field ss-num-input"
+            <input type="number" inputMode="decimal" className="form-input ss-field ss-num-input"
               value={joinWindow} min={0} max={120} disabled={savingJoinWindow}
               onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 0 && v <= 120) setJoinWindow(v) }}
               onBlur={() => onJoinWindowChange(joinWindow)}
@@ -68,7 +68,7 @@ const ConsultationCard: React.FC<Props> = ({
                   {mins} min
                 </button>
               ))}
-              <input type="number" className="form-input ss-field ss-num-input"
+              <input type="number" inputMode="decimal" className="form-input ss-field ss-num-input"
                 value={maxDurationMinutes} min={10} max={240}
                 disabled={savingInline === 'consultation.maxDurationMinutes'}
                 onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 10 && v <= 240) setMaxDurationMinutes(v) }}

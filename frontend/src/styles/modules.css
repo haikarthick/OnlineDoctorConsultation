@@ -3088,3 +3088,320 @@ textarea.module-input {
 .ss-test-email-result { margin-top: 8px; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
 .ss-test-email-result.is-success { background: var(--success-light); color: var(--success); }
 .ss-test-email-result.is-error { background: var(--danger-light); color: var(--danger); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHONE-FIRST BUILDING BLOCKS  (components/mobile/*)
+   Shared by every role. Everything below reads the tokens declared here, so a
+   restyle - sizes, brand colour, radii - is an edit to this block of tokens,
+   not to the components or the screens that use them.
+   Motion is transform/opacity only (no layout animation) and is switched off
+   for prefers-reduced-motion.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Brand accent used by navigation. --brand-strong is the text-safe shade
+     (4.5:1 on white); --brand is for fills and large icons only. */
+  --brand: #667eea;
+  --brand-strong: #4c51bf;
+  --brand-soft: #eef0fe;
+  /* Smallest comfortable touch target (Material 48dp; Apple HIG 44pt). */
+  --tap-min: 48px;
+  --tabbar-height: 64px;
+  --tabbar-add-size: 56px;
+  --sheet-radius: 20px;
+  --chip-radius: 24px;
+  --mobile-font: 16px; /* also stops iOS zooming on input focus */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Bottom tab bar (phones only; the sidebar is the navigation on wide screens) ── */
+.bottom-tabbar { display: none; }
+
+@media (max-width: 768px) {
+  .bottom-tabbar {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    align-items: center;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(var(--tabbar-height) + var(--safe-bottom));
+    padding: 0 4px var(--safe-bottom);
+    background: #fff;
+    border-top: 1px solid var(--gray-200);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.06);
+    z-index: 1002; /* above the slide-in menu (999) and its header (1001) */
+    box-sizing: border-box;
+  }
+}
+
+.bottom-tab {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  min-height: var(--tap-min);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 1px;
+  color: var(--gray-600);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  border-radius: var(--radius);
+}
+.bottom-tab.is-active { color: var(--brand-strong); font-weight: 700; }
+.bottom-tab:focus-visible, .bottom-tab-add:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.bottom-tab-icon { font-size: 22px; line-height: 1; }
+.bottom-tab-label {
+  max-width: 100%;
+  /* Up to two lines (long words in some languages), then an ellipsis - never overflow. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: break-word;
+}
+
+.bottom-tab-add {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  justify-self: center;
+  width: var(--tabbar-add-size);
+  height: var(--tabbar-add-size);
+  border-radius: 50%;
+  background: var(--brand-strong);
+  color: #fff;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(76, 81, 191, 0.35);
+}
+.bottom-tab-add:active { transform: scale(0.96); }
+
+/* ── Bottom sheet ── */
+.bottom-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.5);
+  /* Above everything, including the floating chat bubble (9999): a modal must never be
+     partly covered by another floating control. */
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: sheet-fade 0.18s ease-out;
+}
+.bottom-sheet {
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  background: #fff;
+  border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+  padding: 8px 16px calc(20px + var(--safe-bottom));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  outline: none;
+  animation: sheet-rise 0.22s ease-out;
+}
+.bottom-sheet-grip { align-self: center; width: 44px; height: 5px; border-radius: 3px; background: var(--gray-300); }
+.bottom-sheet-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.bottom-sheet-title { margin: 0; font-size: 20px; font-weight: 700; color: var(--gray-900); }
+.bottom-sheet-close {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border-radius: 50%;
+  background: var(--gray-100);
+  color: var(--gray-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex: none;
+}
+.bottom-sheet-close:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.bottom-sheet-body { overflow-y: auto; overscroll-behavior: contain; }
+
+/* On wide screens the same sheet is a centred dialog. */
+@media (min-width: 769px) {
+  .bottom-sheet-backdrop { align-items: center; }
+  .bottom-sheet { border-radius: var(--sheet-radius); padding-bottom: 20px; }
+  .bottom-sheet-grip { display: none; }
+}
+
+@keyframes sheet-rise { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Tile grid (quick actions; later, record types) ── */
+.action-tile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.action-tile {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  min-height: 88px;
+  padding: 10px 6px;
+  border-radius: var(--radius-xl);
+  background: var(--gray-100);
+  color: var(--gray-900);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.action-tile:active { background: var(--brand-soft); }
+.action-tile:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.action-tile-icon { font-size: 26px; line-height: 1; }
+.action-tile-label { overflow-wrap: anywhere; }
+
+/* ── Chips / segmented choice ── */
+.chip-select, .date-quick { border: 0; margin: 0; padding: 0; min-width: 0; }
+.chip-select-label { padding: 0; margin-bottom: 8px; font-size: 15px; font-weight: 700; color: var(--gray-900); }
+.chip-select-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-select-segmented { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; padding: 4px; background: var(--gray-200); border-radius: var(--radius-xl); }
+.choice-chip {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  min-height: var(--tap-min);
+  padding: 0 16px;
+  border-radius: var(--chip-radius);
+  border: 1px solid var(--gray-300);
+  background: #fff;
+  color: var(--gray-900);
+  font-size: var(--mobile-font);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+}
+.choice-chip.is-selected { background: var(--brand-strong); border-color: var(--brand-strong); color: #fff; font-weight: 700; }
+.choice-chip:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.choice-chip:disabled { opacity: 0.5; cursor: not-allowed; }
+.chip-select-segmented .choice-chip { border: 0; background: transparent; border-radius: var(--radius-lg); padding: 0 8px; min-height: 44px; font-size: 15px; }
+.chip-select-segmented .choice-chip.is-selected { background: #fff; color: var(--gray-900); box-shadow: var(--shadow-sm); }
+
+.date-quick-other { position: relative; }
+.date-quick-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+/* ── Number stepper ── */
+.num-stepper { display: flex; flex-direction: column; gap: 10px; }
+.num-stepper-label { font-size: 15px; font-weight: 700; color: var(--gray-900); }
+.num-stepper-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.num-stepper-btn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  flex: none;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-size: 32px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.num-stepper-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.num-stepper-btn:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.num-stepper-field { display: flex; align-items: baseline; justify-content: center; gap: 6px; min-width: 0; flex: 1; }
+.num-stepper-input {
+  width: 100%;
+  max-width: 160px;
+  min-height: 60px;
+  border: 0;
+  border-bottom: 2px solid var(--gray-300);
+  background: transparent;
+  text-align: center;
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--gray-900);
+  padding: 0;
+  box-sizing: border-box;
+}
+.num-stepper-input:focus { outline: none; border-bottom-color: var(--brand-strong); }
+.num-stepper-unit { font-size: 20px; font-weight: 600; color: var(--gray-600); }
+.num-stepper-hint { margin: 0; font-size: 14px; color: var(--gray-600); text-align: center; }
+.num-stepper-quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.num-stepper-quick .choice-chip { padding: 0 4px; border-radius: var(--radius-lg); }
+.num-stepper-quick .choice-chip.is-selected { background: var(--brand-soft); color: var(--brand-strong); border: 2px solid var(--brand-strong); }
+
+/* ── Save state ── */
+.save-state { margin: 0; padding: 10px 12px; border-radius: var(--radius-lg); font-size: 15px; line-height: 1.4; }
+.save-state.is-saving { background: var(--gray-100); color: var(--gray-700); }
+.save-state.is-saved { background: var(--success-light); color: #065f46; font-weight: 600; }
+.save-state.is-failed, .save-state.is-offline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.save-state.is-failed { background: var(--danger-light); color: #991b1b; }
+/* No connection is not the user's mistake: amber "waiting", never red. */
+.save-state.is-offline { background: var(--warning-light); color: #92400e; }
+.save-state-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.save-state-retry {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  flex: none;
+  min-height: var(--tap-min);
+  padding: 0 16px;
+  border-radius: var(--radius-lg);
+  background: #fff;
+  border: 1px solid currentColor;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+.save-state-retry:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+
+/* ── Step form ── */
+.step-form { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+.step-form-progress { display: flex; flex-direction: column; gap: 6px; }
+.step-form-count { font-size: 14px; font-weight: 600; color: var(--gray-600); }
+.step-form-bar { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
+.step-form-pip { height: 5px; border-radius: 3px; background: var(--gray-200); }
+.step-form-pip.is-done { background: var(--brand-strong); }
+.step-form-title { margin: 0; font-size: 20px; font-weight: 700; color: var(--gray-900); }
+.step-form-body { display: flex; flex-direction: column; gap: 18px; }
+.step-form-footer { display: flex; flex-direction: column; gap: 10px; position: sticky; bottom: 0; background: #fff; padding-top: 10px; }
+.step-form-blocked { margin: 0; font-size: 14px; color: var(--gray-700); }
+.step-form-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 10px; }
+.step-form-actions > :only-child { grid-column: 1 / -1; }
+.step-form-back, .step-form-next {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  min-height: 56px;
+  border-radius: var(--radius-xl);
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+}
+.step-form-back { background: var(--gray-100); color: var(--gray-800); }
+.step-form-next { background: var(--brand-strong); color: #fff; }
+.step-form-next:disabled, .step-form-back:disabled { opacity: 0.5; cursor: not-allowed; }
+.step-form-back:focus-visible, .step-form-next:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bottom-sheet, .bottom-sheet-backdrop { animation: none; }
+  .bottom-tab-add:active { transform: none; }
+}

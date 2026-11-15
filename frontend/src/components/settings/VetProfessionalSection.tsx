@@ -49,7 +49,7 @@ const VetProfessionalSection: React.FC<VetProfessionalSectionProps> = ({
           </div>
           <div className="form-group">
             <label>{t('settings.professional.yearsOfExperience')}</label>
-            <input type="number" name="yearsOfExperience" value={vetForm.yearsOfExperience} onChange={onVetChange} min="0" max="80" />
+            <input type="number" inputMode="decimal" name="yearsOfExperience" value={vetForm.yearsOfExperience} onChange={onVetChange} min="0" max="80" />
           </div>
         </div>
 

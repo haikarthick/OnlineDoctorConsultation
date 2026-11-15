@@ -217,9 +217,9 @@ const GeospatialAnalytics: React.FC = () => {
                       {ZONE_TYPES.map(zt => <option key={zt} value={zt}>{zt}</option>)}</select></div>
                 </div>
                 <div className="si-c3866b40">
-                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.centerLatitude')}</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLat} onChange={e => setZoneForm(f => ({ ...f, centerLat: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.centerLongitude')}</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLng} onChange={e => setZoneForm(f => ({ ...f, centerLng: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.radiusMeters')}</label><input className="module-input" type="number" value={zoneForm.radiusMeters} onChange={e => setZoneForm(f => ({ ...f, radiusMeters: e.target.value }))} /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.centerLatitude')}</label><input className="module-input" type="number" inputMode="decimal" step="0.0001" value={zoneForm.centerLat} onChange={e => setZoneForm(f => ({ ...f, centerLat: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.centerLongitude')}</label><input className="module-input" type="number" inputMode="decimal" step="0.0001" value={zoneForm.centerLng} onChange={e => setZoneForm(f => ({ ...f, centerLng: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.radiusMeters')}</label><input className="module-input" type="number" inputMode="decimal" value={zoneForm.radiusMeters} onChange={e => setZoneForm(f => ({ ...f, radiusMeters: e.target.value }))} /></div>
                 </div>
                 <div className="si-1d133837">
                   <div><label className="module-label">{t('geospatialAnalytics.color')}</label><input type="color" value={zoneForm.color} onChange={e => setZoneForm(f => ({ ...f, color: e.target.value }))} /></div>
@@ -335,8 +335,8 @@ const GeospatialAnalytics: React.FC = () => {
                       {EVENT_TYPES.map(et => <option key={et} value={et}>{et.replace(/_/g, ' ')}</option>)}</select></div>
                 </div>
                 <div className="si-c3866b40">
-                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.latitude')}</label><input className="module-input" type="number" step="0.0001" value={eventForm.latitude} onChange={e => setEventForm(f => ({ ...f, latitude: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.longitude')}</label><input className="module-input" type="number" step="0.0001" value={eventForm.longitude} onChange={e => setEventForm(f => ({ ...f, longitude: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.latitude')}</label><input className="module-input" type="number" inputMode="decimal" step="0.0001" value={eventForm.latitude} onChange={e => setEventForm(f => ({ ...f, latitude: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.longitude')}</label><input className="module-input" type="number" inputMode="decimal" step="0.0001" value={eventForm.longitude} onChange={e => setEventForm(f => ({ ...f, longitude: e.target.value }))} placeholder="Click map or type" /></div>
                 </div>
                 <div><label className="module-label">{t('geospatialAnalytics.metadata')}</label><input className="module-input" value={eventForm.metadata} onChange={e => setEventForm(f => ({ ...f, metadata: e.target.value }))} placeholder='{"speed": 5.2, "heading": 270}' /></div>
               </div>

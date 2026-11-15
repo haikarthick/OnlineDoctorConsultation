@@ -195,8 +195,8 @@ const ReportBuilderPage: React.FC = () => {
                       <option value="json">JSON</option><option value="csv">CSV</option><option value="pdf">PDF</option>
                     </select>
                   </div>
-                  <div className="form-group"><label>{t('reportBuilder.days')}</label><input type="number" value={genForm.days} onChange={e => setGenForm({ ...genForm, days: e.target.value })} /></div>
-                  <div className="form-group"><label>{t('reportBuilder.months')}</label><input type="number" value={genForm.months} onChange={e => setGenForm({ ...genForm, months: e.target.value })} /></div>
+                  <div className="form-group"><label>{t('reportBuilder.days')}</label><input type="number" inputMode="decimal" value={genForm.days} onChange={e => setGenForm({ ...genForm, days: e.target.value })} /></div>
+                  <div className="form-group"><label>{t('reportBuilder.months')}</label><input type="number" inputMode="decimal" value={genForm.months} onChange={e => setGenForm({ ...genForm, months: e.target.value })} /></div>
                 </div>
                 <button type="submit" className="btn-primary" disabled={generating}>
                   {generating ? `⏳ ${t('reportBuilder.generating')}` : `🚀 ${t('reportBuilder.tabs.generate')}`}

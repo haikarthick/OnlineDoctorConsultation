@@ -226,7 +226,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
             <h3>{t('groomingDispute.partialRefund')}</h3>
             <p className="slot-hint">{refundFor.orderNumber} · {refundFor.reason}</p>
             <label className="module-label">{t('groomingDispute.refundPrompt')}</label>
-            <input className="module-input" type="number" min="0" step="0.01" value={refundAmt}
+            <input className="module-input" type="number" inputMode="decimal" min="0" step="0.01" value={refundAmt}
               onChange={e => setRefundAmt(e.target.value)} />
             <div className="slot-hint">{t('groomingDispute.refundHint')}</div>
             <div className="modal-footer">

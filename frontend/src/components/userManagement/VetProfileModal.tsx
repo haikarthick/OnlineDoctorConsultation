@@ -38,7 +38,7 @@ const VetProfileModal: React.FC<VetProfileModalProps> = ({
                 </div>
                 <div className="form-group">
                   <label className="form-label">{t('userManagement.yearsExperience')}</label>
-                  <input className="form-input" type="number" name="yearsOfExperience" value={vetForm.yearsOfExperience} onChange={onFormChange} min="0" max="80" />
+                  <input className="form-input" type="number" inputMode="decimal" name="yearsOfExperience" value={vetForm.yearsOfExperience} onChange={onFormChange} min="0" max="80" />
                 </div>
               </div>
               <div className="form-group">
@@ -47,7 +47,7 @@ const VetProfileModal: React.FC<VetProfileModalProps> = ({
               </div>
               <div className="form-group">
                   <label className="form-label">{t('userManagement.consultationFee')}</label>
-                <input className="form-input" type="number" name="consultationFee" value={vetForm.consultationFee} onChange={onFormChange} min="0" step="0.01" />
+                <input className="form-input" type="number" inputMode="decimal" name="consultationFee" value={vetForm.consultationFee} onChange={onFormChange} min="0" step="0.01" />
                 {vetForm.consultationFee && <span className="si-48a0b045">Preview: {formatCurrency(parseFloat(vetForm.consultationFee) || 0)}</span>}
               </div>
               <div className="form-group">

@@ -465,3 +465,11 @@
     border-radius: 12px;
   }
 }
+
+/* Phones, signed-in app: sit above the bottom tab bar (tokens in styles/modules.css) instead of
+   covering its last tab. Public pages have no tab bar and keep the corner position. */
+@media (max-width: 768px) {
+  body:has(.bottom-tabbar) .chat-widget-bubble {
+    bottom: calc(var(--tabbar-height, 64px) + env(safe-area-inset-bottom, 0px) + 12px);
+  }
+}

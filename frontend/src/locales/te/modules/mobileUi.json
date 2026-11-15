@@ -1,0 +1,69 @@
+{
+  "mobileUi": {
+    "close": "మూసివేయి",
+    "tabBarLabel": "ప్రధాన నావిగేషన్",
+    "quickActionsTitle": "మీరు ఏమి చేయాలి?",
+    "tabs": {
+      "home": "హోమ్",
+      "add": "చేర్చు",
+      "more": "మరిన్ని"
+    },
+    "stepper": {
+      "less": "తగ్గించు",
+      "more": "పెంచు"
+    },
+    "date": {
+      "today": "ఈరోజు",
+      "yesterday": "నిన్న",
+      "other": "వేరే తేదీ"
+    },
+    "save": {
+      "saving": "భద్రపరుస్తోంది...",
+      "saved": "భద్రపరచబడింది",
+      "offlineTitle": "కనెక్షన్ లేదు",
+      "offlineHint": "మీ నమోదు ఈ స్క్రీన్‌పైనే ఉంది. సిగ్నల్ వచ్చాక \"మళ్లీ ప్రయత్నించు\" నొక్కండి.",
+      "failedTitle": "భద్రపరచలేకపోయింది",
+      "retry": "మళ్లీ ప్రయత్నించు"
+    },
+    "step": {
+      "stepOf": "దశ {{current}} / {{total}}",
+      "back": "వెనుకకు",
+      "next": "తర్వాత"
+    },
+    "tabLabels": {
+      "animals": "జంతువులు",
+      "herd-medical": "ఆరోగ్యం",
+      "animal-groups": "గుంపులు",
+      "medical": "రికార్డులు",
+      "consultations": "డాక్టర్",
+      "admin-consultations": "డాక్టర్",
+      "prescriptions": "మందులు",
+      "manage-schedule": "షెడ్యూల్",
+      "grooming-schedule": "షెడ్యూల్",
+      "hospital-workflow": "క్యూ",
+      "inpatient": "ఇన్‌పేషెంట్",
+      "hospital-networks": "నెట్‌వర్క్",
+      "vet-hospitals": "ఆసుపత్రి",
+      "settings": "సెట్టింగ్‌లు",
+      "pharmacy": "ఫార్మసీ",
+      "grooming-orders": "ఆర్డర్లు",
+      "grooming-earnings": "ఆదాయం",
+      "grooming-provider": "వ్యాపారం",
+      "admin-dashboard": "అడ్మిన్",
+      "admin-users": "యూజర్",
+      "admin-finance-reports": "ఆర్థికం",
+      "financial": "ఆర్థికం",
+      "health-analytics": "విశ్లేషణ",
+      "admin-disputes": "వివాదాలు",
+      "admin-cancellation-dashboard": "రద్దులు"
+    },
+    "tabLabelsByRole": {
+      "pet_owner": {
+        "animals": "పెంపుడు"
+      },
+      "veterinarian": {
+        "animals": "పెంపుడు"
+      }
+    }
+  }
+}

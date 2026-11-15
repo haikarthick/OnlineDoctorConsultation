@@ -144,7 +144,7 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
             : isProvider && <div className="eta-row">
                 <div className="module-form-group is-flush">
                   <label className="module-label">{t('groomingVar.etaLabel')}</label>
-                  <input className="module-input input-narrow" type="number" min={0} value={eta} onChange={e => setEta(e.target.value)} />
+                  <input className="module-input input-narrow" type="number" inputMode="decimal" min={0} value={eta} onChange={e => setEta(e.target.value)} />
                 </div>
                 <button className="module-btn primary" disabled={busy} onClick={setOnTheWay}>🚚 {t('groomingVar.markOnTheWay')}</button>
               </div>}
@@ -174,7 +174,7 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
               <div className="module-form-group"><label className="module-label">{t('groomingVar.workName')}</label>
                 <input className="module-input" value={varName} onChange={e => setVarName(e.target.value)} placeholder={t('groomingVar.workPlaceholder')} /></div>
               <div className="module-form-group"><label className="module-label">{t('groomingVar.price')}</label>
-                <input className="module-input" type="number" min={0} value={varPrice} onChange={e => setVarPrice(e.target.value)} /></div>
+                <input className="module-input" type="number" inputMode="decimal" min={0} value={varPrice} onChange={e => setVarPrice(e.target.value)} /></div>
               <div className="module-form-group"><label className="module-label">{t('groomingVar.reason')}</label>
                 <input className="module-input" value={varReason} onChange={e => setVarReason(e.target.value)} /></div>
               <button className="module-btn primary" disabled={busy} onClick={requestVariable}>{t('groomingVar.requestApproval')}</button>
