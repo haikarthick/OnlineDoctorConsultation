@@ -73,6 +73,16 @@ test.describe('Farmer - Animal Groups', () => {
   })
 })
 
+test.describe('Farmer - Daily Records', () => {
+  // The module is dark-launched (farm.records.enabled): the route loads either way - the records
+  // screen when an admin has switched it on, a plain 'not switched on' page when not.
+  test('should load the daily records page', async ({ farmerPage: page }) => {
+    await page.goto('/farm-records')
+    await page.waitForLoadState('networkidle')
+    await expect(page).toHaveURL(/\/farm-records/)
+  })
+})
+
 test.describe('Farmer - Location Management', () => {
   test('should load locations page', async ({ farmerPage: page }) => {
     await page.goto('/locations')
