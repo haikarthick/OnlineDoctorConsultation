@@ -307,16 +307,20 @@ class MasterDataService {
   }
 
   async createSpecies(input: { code: string; label: string; labelKey?: string; labelHi?: string; labelKn?: string; labelMl?: string; labelTa?: string; labelTe?: string; icon?: string; category?: string; hasEarTag?: boolean; sortOrder?: number; isMarketplaceEligible?: boolean } & SpeciesFarmInput): Promise<MasterSpecies> {
-    const columns = ['code', 'label', 'label_key', 'label_hi', 'label_kn', 'label_ml', 'label_ta', 'label_te', 'icon', 'category', 'has_ear_tag', 'sort_order', 'is_marketplace_eligible'];
-    const params: any[] = [input.code, input.label, input.labelKey ?? null, input.labelHi ?? null, input.labelKn ?? null, input.labelMl ?? null, input.labelTa ?? null, input.labelTe ?? null, input.icon ?? null, input.category ?? null, input.hasEarTag ?? false, input.sortOrder ?? 0, input.isMarketplaceEligible ?? false];
-    // Farm-profile fields are only written when supplied, so the column defaults (segment 'pet',
-    // every capability off) apply to a species an admin adds without touching them.
-    for (const [key, col] of Object.entries(SPECIES_FARM_COLUMNS)) {
-      if ((input as any)[key] !== undefined) { columns.push(col); params.push(bindValue(col, (input as any)[key])); }
-    }
+    // A fixed column list (not built dynamically) so the static schema check can read it. The
+    // farm-profile values fall back to the same defaults the columns have: segment 'pet' and
+    // every capability off, so a species added without them never grows farm sections.
     const result = await database.query(
-      `INSERT INTO master_species (${columns.join(', ')}) VALUES (${columns.map((_, i) => `$${i + 1}`).join(', ')}) RETURNING *`,
-      params
+      `INSERT INTO master_species (code, label, label_key, label_hi, label_kn, label_ml, label_ta, label_te, icon, category, has_ear_tag, sort_order, is_marketplace_eligible,
+         default_management_mode, farm_segment, produces_milk, produces_eggs, produces_wool, is_aquatic, litter_expected,
+         gestation_days, incubation_days, birth_event_term, scientific_name, water_type, water_quality_ranges)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26) RETURNING *`,
+      [input.code, input.label, input.labelKey ?? null, input.labelHi ?? null, input.labelKn ?? null, input.labelMl ?? null, input.labelTa ?? null, input.labelTe ?? null, input.icon ?? null, input.category ?? null, input.hasEarTag ?? false, input.sortOrder ?? 0, input.isMarketplaceEligible ?? false,
+       input.defaultManagementMode ?? 'individual', input.farmSegment ?? 'pet',
+       input.producesMilk ?? false, input.producesEggs ?? false, input.producesWool ?? false, input.isAquatic ?? false, input.litterExpected ?? false,
+       bindValue('gestation_days', input.gestationDays), bindValue('incubation_days', input.incubationDays),
+       input.birthEventTerm ?? 'birth', bindValue('scientific_name', input.scientificName), bindValue('water_type', input.waterType),
+       bindValue('water_quality_ranges', input.waterQualityRanges ?? null)]
     );
     return mapSpecies(result.rows[0]);
   }
