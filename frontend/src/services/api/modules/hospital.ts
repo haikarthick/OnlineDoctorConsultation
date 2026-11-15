@@ -64,6 +64,18 @@ export const hospitalApi = {
   async adminRestoreMasterAnimalClass(id: string) { return (await sharedClient.patch(`/admin/master-data/animal-classes/${id}/restore`, {})).data },
   async adminDeleteMasterAnimalClass(id: string) { return (await sharedClient.delete(`/admin/master-data/animal-classes/${id}`)).data },
 
+  // Farm profile: group types + record types (migration 043)
+  async adminListMasterGroupTypes(params: { speciesId?: string; farmSegment?: string } = {}) { return (await sharedClient.get('/admin/master-data/group-types', { params })).data },
+  async adminCreateMasterGroupType(data: any) { return (await sharedClient.post('/admin/master-data/group-types', data)).data },
+  async adminUpdateMasterGroupType(id: string, data: any) { return (await sharedClient.put(`/admin/master-data/group-types/${id}`, data)).data },
+  async adminArchiveMasterGroupType(id: string) { return (await sharedClient.patch(`/admin/master-data/group-types/${id}/archive`, {})).data },
+  async adminRestoreMasterGroupType(id: string) { return (await sharedClient.patch(`/admin/master-data/group-types/${id}/restore`, {})).data },
+  async adminDeleteMasterGroupType(id: string) { return (await sharedClient.delete(`/admin/master-data/group-types/${id}`)).data },
+  async adminListMasterRecordTypes() { return (await sharedClient.get('/admin/master-data/record-types')).data },
+  async adminUpdateMasterRecordType(id: string, data: any) { return (await sharedClient.put(`/admin/master-data/record-types/${id}`, data)).data },
+  async adminArchiveMasterRecordType(id: string) { return (await sharedClient.patch(`/admin/master-data/record-types/${id}/archive`, {})).data },
+  async adminRestoreMasterRecordType(id: string) { return (await sharedClient.patch(`/admin/master-data/record-types/${id}/restore`, {})).data },
+
   async adminListMasterMarketplaceCategories() { return (await sharedClient.get('/admin/master-data/marketplace/categories')).data },
   async adminCreateMasterMarketplaceCategory(data: any) { return (await sharedClient.post('/admin/master-data/marketplace/categories', data)).data },
   async adminUpdateMasterMarketplaceCategory(id: string, data: any) { return (await sharedClient.put(`/admin/master-data/marketplace/categories/${id}`, data)).data },

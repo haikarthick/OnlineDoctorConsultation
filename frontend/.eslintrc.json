@@ -111,7 +111,6 @@
         "src/pages/admin/ConsultationManagement.tsx",
         "src/pages/admin/FinanceReports.tsx",
         "src/pages/admin/HolidayManagement.tsx",
-        "src/pages/admin/MasterDataManagement.tsx",
         "src/pages/admin/MedicalRecordManagement.tsx",
         "src/pages/admin/NetworkSubscriptions.tsx",
         "src/pages/admin/PermissionManagement.tsx",

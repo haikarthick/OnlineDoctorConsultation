@@ -4,33 +4,28 @@ import apiService from '../../services/api'
 import { useMasterData } from '../../context/MasterDataContext'
 import '../../styles/modules.css'
 import './MasterDataManagement.css'
+import FarmMasterDataTabs from './masterData/FarmMasterDataTabs'
+import { BIRTH_EVENT_TERMS, FARM_SEGMENTS, LOCALE_LABEL_FIELDS, LocaleLabelCols, WATER_TYPES } from './masterData/farmMasterShared'
 
-type TabKey = 'species' | 'breeds' | 'classes' | 'categories' | 'conditions'
+type TabKey = 'species' | 'breeds' | 'classes' | 'groupTypes' | 'recordTypes' | 'categories' | 'conditions'
 
 interface SpeciesRow {
   id: string; code: string; label: string; labelKey: string | null;
   labelHi: string | null; labelKn: string | null; labelMl: string | null; labelTa: string | null; labelTe: string | null;
   icon: string | null; category: string | null;
   hasEarTag: boolean; sortOrder: number; isActive: boolean; isProtected: boolean; isMarketplaceEligible: boolean
+  // Farm profile flags (migration 043)
+  farmSegment: string; defaultManagementMode: 'individual' | 'batch'
+  producesMilk: boolean; producesEggs: boolean; producesWool: boolean; isAquatic: boolean; litterExpected: boolean
+  gestationDays: number | null; incubationDays: number | null; birthEventTerm: string
+  scientificName: string | null; waterType: string | null
 }
 
-/** Per-locale label fields shared by every master-data form, in display order. `col` is the
- *  i18n key for the field caption; `field` is the formData/DB column camelCase key. */
-const LOCALE_LABEL_FIELDS: Array<{ locale: string; field: 'labelHi' | 'labelKn' | 'labelMl' | 'labelTa' | 'labelTe'; col: string }> = [
-  { locale: 'hi', field: 'labelHi', col: 'masterData.col.labelHi' },
-  { locale: 'kn', field: 'labelKn', col: 'masterData.col.labelKn' },
-  { locale: 'ml', field: 'labelMl', col: 'masterData.col.labelMl' },
-  { locale: 'ta', field: 'labelTa', col: 'masterData.col.labelTa' },
-  { locale: 'te', field: 'labelTe', col: 'masterData.col.labelTe' },
-]
-/** Per-locale label overrides present on every master-data row (migrations 025/026). */
-interface LocaleLabelCols {
-  labelHi: string | null; labelKn: string | null; labelMl: string | null; labelTa: string | null; labelTe: string | null
-}
 interface BreedRow extends LocaleLabelCols { id: string; speciesId: string; speciesCode?: string; name: string; sortOrder: number; isActive: boolean }
 interface ClassRow extends LocaleLabelCols {
   id: string; speciesId: string; speciesCode?: string; value: string; labelKey: string | null; label: string | null;
-  impliedGender: 'male' | 'female' | 'unknown'; canBePregnant: boolean; canProduceMilk: boolean; sortOrder: number; isActive: boolean
+  impliedGender: 'male' | 'female' | 'unknown'; canBePregnant: boolean; canProduceMilk: boolean
+  canLayEggs: boolean; isJuvenile: boolean; sortOrder: number; isActive: boolean
 }
 interface CategoryRow extends LocaleLabelCols { id: string; code: string; labelKey: string | null; label: string | null; icon: string | null; sortOrder: number; isActive: boolean; isProtected: boolean }
 interface ConditionRow extends LocaleLabelCols { id: string; code: string; labelKey: string | null; label: string | null; sortOrder: number; isActive: boolean }
@@ -126,6 +121,7 @@ const MasterDataManagement: React.FC = () => {
         const res = await apiService.adminListMasterMarketplaceConditions()
         setConditionRows(res.data || [])
       }
+      // groupTypes / recordTypes load their own rows inside FarmMasterDataTabs.
       // Species list is needed by every tab (breeds/classes scoping, species dropdown) - keep it fresh.
       if (tab !== 'species') {
         const sres = await apiService.adminListMasterSpecies()
@@ -145,9 +141,13 @@ const MasterDataManagement: React.FC = () => {
   const openAdd = () => {
     clearMessages()
     setEditingId(null)
-    if (tab === 'species') setFormData({ code: '', label: '', labelHi: '', labelKn: '', labelMl: '', labelTa: '', labelTe: '', icon: '', category: '', hasEarTag: false, sortOrder: 0, isMarketplaceEligible: false })
+    if (tab === 'species') setFormData({
+      code: '', label: '', labelHi: '', labelKn: '', labelMl: '', labelTa: '', labelTe: '', icon: '', category: '', hasEarTag: false, sortOrder: 0, isMarketplaceEligible: false,
+      farmSegment: 'pet', defaultManagementMode: 'individual', producesMilk: false, producesEggs: false, producesWool: false,
+      isAquatic: false, litterExpected: false, gestationDays: '', incubationDays: '', birthEventTerm: 'birth', scientificName: '', waterType: '',
+    })
     else if (tab === 'breeds') setFormData({ speciesId: scopeSpeciesId, name: '', sortOrder: 0 })
-    else if (tab === 'classes') setFormData({ speciesId: scopeSpeciesId, value: '', label: '', impliedGender: 'unknown', canBePregnant: false, canProduceMilk: false, sortOrder: 0 })
+    else if (tab === 'classes') setFormData({ speciesId: scopeSpeciesId, value: '', label: '', impliedGender: 'unknown', canBePregnant: false, canProduceMilk: false, canLayEggs: false, isJuvenile: false, sortOrder: 0 })
     else if (tab === 'categories') setFormData({ code: '', label: '', icon: '', sortOrder: 0 })
     else setFormData({ code: '', label: '', sortOrder: 0 })
     setShowModal(true)
@@ -175,7 +175,8 @@ const MasterDataManagement: React.FC = () => {
         if (!formData.speciesId) { setError(t('masterData.errors.speciesRequired', 'Select a species first')); setSaving(false); return }
         if (editingId) await apiService.adminUpdateMasterAnimalClass(editingId, {
           label: formData.label, impliedGender: formData.impliedGender,
-          canBePregnant: formData.canBePregnant, canProduceMilk: formData.canProduceMilk, sortOrder: formData.sortOrder,
+          canBePregnant: formData.canBePregnant, canProduceMilk: formData.canProduceMilk,
+          canLayEggs: !!formData.canLayEggs, isJuvenile: !!formData.isJuvenile, sortOrder: formData.sortOrder,
           ...localeLabelsFromForm(),
         })
         else await apiService.adminCreateMasterAnimalClass(formData)
@@ -232,14 +233,17 @@ const MasterDataManagement: React.FC = () => {
     { key: 'species', label: t('masterData.tabs.species', 'Species'), icon: '🐾' },
     { key: 'breeds', label: t('masterData.tabs.breeds', 'Breeds'), icon: '🐕' },
     { key: 'classes', label: t('masterData.tabs.classes', 'Animal Classes'), icon: '🐄' },
+    { key: 'groupTypes', label: t('farmProfile.admin.tabs.groupTypes'), icon: '🏠' },
+    { key: 'recordTypes', label: t('farmProfile.admin.tabs.recordTypes'), icon: '📝' },
     { key: 'categories', label: t('masterData.tabs.categories', 'Marketplace Categories'), icon: '📦' },
     { key: 'conditions', label: t('masterData.tabs.conditions', 'Marketplace Conditions'), icon: '🏷️' },
   ]
 
   const needsSpeciesScope = tab === 'breeds' || tab === 'classes'
+  const isFarmTab = tab === 'groupTypes' || tab === 'recordTypes'
 
   return (
-    <div className="module-page">
+    <div className="module-page master-data-page">
       <div className="module-header">
         <h1>{t('masterData.title', 'Master Data')}</h1>
         <p>{t('masterData.subtitle', 'Manage species, breeds, animal classes, and marketplace dropdown values, no code deploy needed.')}</p>
@@ -257,7 +261,7 @@ const MasterDataManagement: React.FC = () => {
       </div>
 
       {needsSpeciesScope && (
-        <div className="module-form-group" style={{ maxWidth: 320, marginTop: 16 }}>
+        <div className="module-form-group md-scope-picker">
           <label className="module-label">{t('masterData.filterBySpecies', 'Species')}</label>
           <select className="module-input" value={scopeSpeciesId} onChange={e => setScopeSpeciesId(e.target.value)}>
             <option value="">{t('masterData.selectSpeciesPrompt', 'Select a species')}</option>
@@ -266,26 +270,32 @@ const MasterDataManagement: React.FC = () => {
         </div>
       )}
 
-      <div style={{ marginTop: 16, marginBottom: 12 }}>
+      {isFarmTab && (
+        <FarmMasterDataTabs tab={tab} speciesRows={speciesRows} onError={setError} onSuccess={setSuccess} clearMessages={clearMessages} />
+      )}
+
+      {!isFarmTab && (
+      <div className="md-toolbar md-toolbar-top">
         <button className="module-btn primary" onClick={openAdd} disabled={needsSpeciesScope && !scopeSpeciesId}>
           + {t('masterData.addNew', 'Add New')}
         </button>
       </div>
+      )}
 
-      {loading ? (
+      {isFarmTab ? null : loading ? (
         <div className="module-loading">{t('common.loading', 'Loading...')}</div>
       ) : (
         <div className="data-table-container">
           <table className="data-table">
             <thead>
               {tab === 'species' && (
-                <tr><th>{t('masterData.col.icon', 'Icon')}</th><th>{t('masterData.col.code', 'Code')}</th><th>{t('masterData.col.label', 'Label')}</th><th>{t('masterData.col.category', 'Category')}</th><th>{t('masterData.col.earTag', 'Ear Tag')}</th><th>{t('masterData.col.marketplaceEligible', 'Marketplace')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr>
+                <tr><th>{t('masterData.col.icon', 'Icon')}</th><th>{t('masterData.col.code', 'Code')}</th><th>{t('masterData.col.label', 'Label')}</th><th>{t('masterData.col.category', 'Category')}</th><th>{t('farmProfile.admin.col.farmSegment')}</th><th>{t('masterData.col.earTag', 'Ear Tag')}</th><th>{t('masterData.col.marketplaceEligible', 'Marketplace')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr>
               )}
               {tab === 'breeds' && (
                 <tr><th>{t('common.name')}</th><th>{t('masterData.col.sortOrder', 'Sort')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr>
               )}
               {tab === 'classes' && (
-                <tr><th>{t('masterData.col.value', 'Value')}</th><th>{t('masterData.col.label', 'Label')}</th><th>{t('masterData.col.impliedGender', 'Gender')}</th><th>{t('masterData.col.canBePregnant', 'Can Be Pregnant')}</th><th>{t('masterData.col.canProduceMilk', 'Can Produce Milk')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr>
+                <tr><th>{t('masterData.col.value', 'Value')}</th><th>{t('masterData.col.label', 'Label')}</th><th>{t('masterData.col.impliedGender', 'Gender')}</th><th>{t('masterData.col.canBePregnant', 'Can Be Pregnant')}</th><th>{t('masterData.col.canProduceMilk', 'Can Produce Milk')}</th><th>{t('farmProfile.admin.col.canLayEggs')}</th><th>{t('farmProfile.admin.col.isJuvenile')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr>
               )}
               {tab === 'categories' && (
                 <tr><th>{t('masterData.col.icon', 'Icon')}</th><th>{t('masterData.col.code', 'Code')}</th><th>{t('masterData.col.label', 'Label')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr>
@@ -301,6 +311,7 @@ const MasterDataManagement: React.FC = () => {
                   <td>{row.code}</td>
                   <td>{row.label}</td>
                   <td>{row.category || '-'}</td>
+                  <td>{t(`farmProfile.segments.${row.farmSegment || 'pet'}`)}</td>
                   <td>{row.hasEarTag ? '✓' : '-'}</td>
                   <td>{row.isMarketplaceEligible ? '✓' : '-'}</td>
                   <td><span className={`module-badge ${row.isActive ? 'badge-success' : 'badge-error'}`}>{row.isActive ? t('common.active') : t('common.inactive')}</span></td>
@@ -330,6 +341,8 @@ const MasterDataManagement: React.FC = () => {
                   <td>{row.impliedGender}</td>
                   <td>{row.canBePregnant ? '✓' : '-'}</td>
                   <td>{row.canProduceMilk ? '✓' : '-'}</td>
+                  <td>{row.canLayEggs ? '✓' : '-'}</td>
+                  <td>{row.isJuvenile ? '✓' : '-'}</td>
                   <td><span className={`module-badge ${row.isActive ? 'badge-success' : 'badge-error'}`}>{row.isActive ? t('common.active') : t('common.inactive')}</span></td>
                   <td>
                     <button className="module-btn small" onClick={() => openEdit(row)}>{t('common.edit')}</button>
@@ -411,6 +424,62 @@ const MasterDataManagement: React.FC = () => {
                   <input type="checkbox" checked={!!formData.isMarketplaceEligible} onChange={e => setFormData((f: any) => ({ ...f, isMarketplaceEligible: e.target.checked }))} />
                   {t('masterData.col.marketplaceEligible', 'Sellable on Marketplace')}
                 </label>
+
+                <h3 className="md-section-title">{t('farmProfile.admin.farmSectionTitle')}</h3>
+                <p className="module-hint md-hint">{t('farmProfile.admin.farmSectionHint')}</p>
+                <div className="module-form-group">
+                  <label className="module-label">{t('farmProfile.admin.col.farmSegment')}</label>
+                  <select className="module-input" value={formData.farmSegment || 'pet'} onChange={e => setFormData((f: any) => ({ ...f, farmSegment: e.target.value }))}>
+                    {FARM_SEGMENTS.map(seg => <option key={seg} value={seg}>{t(`farmProfile.segments.${seg}`)}</option>)}
+                  </select>
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('farmProfile.admin.col.defaultMode')}</label>
+                  <select className="module-input" value={formData.defaultManagementMode || 'individual'} onChange={e => setFormData((f: any) => ({ ...f, defaultManagementMode: e.target.value }))}>
+                    <option value="individual">{t('farmProfile.modes.individual')}</option>
+                    <option value="batch">{t('farmProfile.modes.batch')}</option>
+                  </select>
+                </div>
+                {(['producesMilk', 'producesEggs', 'producesWool', 'litterExpected', 'isAquatic'] as const).map(flag => (
+                  <label className="checkbox-label md-flag" key={flag}>
+                    <input type="checkbox" checked={!!formData[flag]} onChange={e => setFormData((f: any) => ({ ...f, [flag]: e.target.checked }))} />
+                    {t(`farmProfile.admin.col.${flag}`)}
+                  </label>
+                ))}
+                <div className="module-form-group">
+                  <label className="module-label">{t('farmProfile.admin.col.birthEventTerm')}</label>
+                  <select className="module-input" value={formData.birthEventTerm || 'birth'} onChange={e => setFormData((f: any) => ({ ...f, birthEventTerm: e.target.value }))}>
+                    {BIRTH_EVENT_TERMS.map(term => <option key={term} value={term}>{t(`farmProfile.birthTerms.${term}`)}</option>)}
+                  </select>
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('farmProfile.admin.col.gestationDays')}</label>
+                  <input type="number" inputMode="numeric" min={1} className="module-input" value={formData.gestationDays ?? ''}
+                    onChange={e => setFormData((f: any) => ({ ...f, gestationDays: e.target.value === '' ? '' : parseInt(e.target.value, 10) }))} />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('farmProfile.admin.col.incubationDays')}</label>
+                  <input type="number" inputMode="numeric" min={1} className="module-input" value={formData.incubationDays ?? ''}
+                    onChange={e => setFormData((f: any) => ({ ...f, incubationDays: e.target.value === '' ? '' : parseInt(e.target.value, 10) }))} />
+                  <p className="module-hint md-hint">{t('farmProfile.admin.daysBlankHint')}</p>
+                </div>
+                {formData.isAquatic && (
+                  <>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('farmProfile.admin.col.scientificName')}</label>
+                      <input className="module-input" value={formData.scientificName || ''} maxLength={150}
+                        onChange={e => setFormData((f: any) => ({ ...f, scientificName: e.target.value }))} />
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('farmProfile.admin.col.waterType')}</label>
+                      <select className="module-input" value={formData.waterType || ''} onChange={e => setFormData((f: any) => ({ ...f, waterType: e.target.value }))}>
+                        <option value="">{t('farmProfile.admin.none')}</option>
+                        {WATER_TYPES.map(w => <option key={w} value={w}>{t(`farmProfile.waterTypes.${w}`)}</option>)}
+                      </select>
+                    </div>
+                  </>
+                )}
+
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>
                   <input type="number" className="module-input" value={formData.sortOrder ?? 0} onChange={e => setFormData((f: any) => ({ ...f, sortOrder: parseInt(e.target.value, 10) || 0 }))} />
@@ -460,6 +529,14 @@ const MasterDataManagement: React.FC = () => {
                 <label className="checkbox-label">
                   <input type="checkbox" checked={!!formData.canProduceMilk} onChange={e => setFormData((f: any) => ({ ...f, canProduceMilk: e.target.checked }))} />
                   {t('masterData.col.canProduceMilk', 'Can produce milk')}
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" checked={!!formData.canLayEggs} onChange={e => setFormData((f: any) => ({ ...f, canLayEggs: e.target.checked }))} />
+                  {t('farmProfile.admin.col.canLayEggs')}
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" checked={!!formData.isJuvenile} onChange={e => setFormData((f: any) => ({ ...f, isJuvenile: e.target.checked }))} />
+                  {t('farmProfile.admin.col.isJuvenile')}
                 </label>
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>

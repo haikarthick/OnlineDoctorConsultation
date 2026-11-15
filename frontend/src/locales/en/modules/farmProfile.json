@@ -1,0 +1,105 @@
+{
+  "farmProfile": {
+    "segments": {
+      "dairy": "Dairy (cattle, buffalo)",
+      "small_ruminant": "Goat and sheep",
+      "pig": "Pig",
+      "poultry": "Poultry",
+      "aquaculture": "Aquaculture (fish, shrimp, prawn)",
+      "equine": "Horse and donkey",
+      "other_livestock": "Other livestock",
+      "pet": "Pet (not farm stock)"
+    },
+    "modes": {
+      "individual": "Each animal recorded",
+      "batch": "Recorded as a batch"
+    },
+    "birthTerms": {
+      "birth": "Birth",
+      "calving": "Calving",
+      "kidding": "Kidding",
+      "lambing": "Lambing",
+      "farrowing": "Farrowing",
+      "foaling": "Foaling",
+      "hatching": "Hatching",
+      "spawning": "Spawning"
+    },
+    "waterTypes": {
+      "fresh": "Freshwater",
+      "brackish": "Brackish water",
+      "marine": "Sea water"
+    },
+    "kinds": {
+      "daily": "Daily record",
+      "event": "Event"
+    },
+    "subjects": {
+      "animal": "One animal",
+      "group": "A whole group",
+      "either": "Animal or group"
+    },
+    "flags": {
+      "produces_milk": "Species gives milk",
+      "produces_eggs": "Species lays eggs",
+      "produces_wool": "Species gives wool",
+      "can_produce_milk": "can be milked",
+      "can_be_pregnant": "can be pregnant",
+      "can_lay_eggs": "lays eggs",
+      "yields_milk": "Group gives milk",
+      "yields_eggs": "Group lays eggs"
+    },
+    "admin": {
+      "tabs": {
+        "groupTypes": "Group Types",
+        "recordTypes": "Record Types"
+      },
+      "farmSectionTitle": "Farm profile",
+      "farmSectionHint": "These settings decide which fields, daily records and events a farmer sees for this species. Leave a pet species as it is.",
+      "appliesTo": "Show group types for",
+      "scopeSpecies": "One species",
+      "scopeSegment": "A whole farm type",
+      "scopeHint": "A species with its own list uses it. A species without one uses the list of its farm type.",
+      "selectScopePrompt": "Choose a species or a farm type",
+      "none": "None",
+      "modeNone": "No preference (species default)",
+      "groupTypeValueHint": "Lower-case letters, digits and underscores. It cannot be changed later because groups store it.",
+      "localeLabelsHint": "Add the label in each language. A language left blank shows the English label.",
+      "suggestedClassHint": "Pre-selected when an animal is added to a group of this type.",
+      "daysBlankHint": "Leave blank if not known. No due date is suggested for a blank value.",
+      "recordTypeFixed": "Record types are built into the app, so they cannot be added or deleted here. You can change the wording, icon, unit and order, or switch one off.",
+      "col": {
+        "farmSegment": "Farm type",
+        "defaultMode": "New groups default to",
+        "producesMilk": "Gives milk",
+        "producesEggs": "Lays eggs",
+        "producesWool": "Gives wool",
+        "isAquatic": "Lives in water (pond, tank)",
+        "litterExpected": "Usually has several young at a birth",
+        "gestationDays": "Pregnancy length (days)",
+        "incubationDays": "Egg incubation (days)",
+        "birthEventTerm": "Word for a birth",
+        "scientificName": "Scientific name",
+        "waterType": "Water type",
+        "canLayEggs": "Lays eggs",
+        "isJuvenile": "Young animal (no breeding or production fields)",
+        "managementMode": "Recorded as",
+        "suggestedClass": "Usual animal class",
+        "isHealthHold": "Sick or quarantine group",
+        "yieldsMilk": "A milk total can be recorded for this group",
+        "yieldsEggs": "An egg total can be recorded for this group",
+        "kind": "Kind",
+        "subject": "Recorded for",
+        "unit": "Unit",
+        "appliesWhen": "Offered when",
+        "flags": "Notes"
+      },
+      "rule": {
+        "anyFarmStock": "Any farm stock",
+        "aquaticOnly": "Aquatic species",
+        "landOnly": "Not aquatic",
+        "animal": "Animal",
+        "group": "Group"
+      }
+    }
+  }
+}

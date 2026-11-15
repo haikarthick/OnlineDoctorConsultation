@@ -1,10 +1,11 @@
 import database from '../utils/database';
 import logger from '../utils/logger';
+import FarmProfileService from './FarmProfileService';
 
 class BreedingService {
 
   async create(data: any): Promise<any> {
-    const gestationDays = data.gestationDays || this.estimateGestation(data.species);
+    const gestationDays = data.gestationDays || await this.estimateGestation(data.species, data.damId);
     const expectedDue = data.expectedDueDate || (gestationDays
       ? new Date(new Date(data.breedingDate).getTime() + gestationDays * 86400000).toISOString().split('T')[0]
       : null);
@@ -127,13 +128,25 @@ class BreedingService {
     return stats.rows[0];
   }
 
-  private estimateGestation(species?: string): number | null {
-    if (!species) return null;
-    const map: Record<string, number> = {
-      cattle: 283, cow: 283, horse: 340, pig: 114, sheep: 148,
-      goat: 150, dog: 63, cat: 65, rabbit: 31, chicken: 21,
-    };
-    return map[species.toLowerCase()] || null;
+  /**
+   * Days to the expected birth, from master data (master_species.gestation_days, admin-editable)
+   * instead of the hardcoded map that used to live here and had no buffalo. The breeding screen
+   * never sends a species, so when none is given it is read from the dam - before this, no
+   * expected due date was ever calculated unless the farmer typed the gestation days themselves.
+   * Best effort: a lookup problem must never stop the breeding record from being saved.
+   */
+  private async estimateGestation(species?: string | null, damId?: string | null): Promise<number | null> {
+    try {
+      let speciesCode = species || null;
+      if (!speciesCode && damId) {
+        const dam = await database.query('SELECT species FROM animals WHERE id = $1', [damId]);
+        speciesCode = dam.rows[0]?.species || null;
+      }
+      return await FarmProfileService.gestationDaysFor(speciesCode);
+    } catch (error: any) {
+      logger.warn('Could not estimate gestation days', { error: error.message });
+      return null;
+    }
   }
 
   private mapRow(row: any): any {

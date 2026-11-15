@@ -1,7 +1,8 @@
 # Farm Management Realignment — Analysis & Plan
 
-**Status: PLAN APPROVED IN PRINCIPLE, NOTHING BUILT.** Written 2026-11-14 so a new session can
-resume without redoing the analysis. Next action is in §11.
+**Status: PHASE 1 SHIPPED 2026-11-15 (farm profile engine + master data). Phases 0 and 2-6 not
+started.** Written 2026-11-14 so a new session can resume without redoing the analysis. Next
+action is in §11. How the engine works: `docs/modules/farm-profile.md`.
 
 Anything marked **[unverified]** was not checked against a source or the code and must be
 checked before it is built on. Everything else was read from the code or fetched from the cited
@@ -497,6 +498,24 @@ voice entry, WhatsApp reminders.
 
 ## 10. Open questions for the owner (ask at the start of the next session)
 
+**Verification pass done 2026-11-15** (results; details in the header of migration 043):
+- NBAGR pig list read from nbagr.res.in/pig (16 breeds, all seeded; "Ghungroo" corrected to
+  "Ghoongroo"). Tamil Nadu cattle/buffalo/goat/sheep breeds re-confirmed on the live pages.
+- Aquaculture: MPEDA pages opened and used - shrimp names (vannamei, monodon, indicus), mud crab
+  = *Scylla serrata*, GIFT/Nile tilapia, and a shrimp water-quality table (seeded as guide ranges
+  for the two shrimp species). **Still not found on any official page:** the CAA "one crustacean
+  per vannamei farm" rule (so no warning was built), carp / brackish-finfish / crab water-quality
+  ranges (those species carry no range), acre/cent as pond units (offered anyway, unconfirmed).
+  NFDB, CAA, CIFA and the TNAU fishery pages still refuse automated fetches.
+- Buffalo gestation seeded as 315 days (Vikaspedia table, read through a search summary, not the
+  page itself); donkey 365 (MSD Vet Manual); camel 390 (FAO). Yak, deer, llama, alpaca and the
+  duck/turkey/quail incubation periods have **no** sourced value and are left blank. All
+  editable in Master Data > Species.
+- Worker with a non-farmer system role reaching farm screens: **not yet checked** - belongs to
+  the "Who records" work in Phases 3-4.
+
+Original list:
+
 The six questions first listed here were answered on 2026-11-14 and are recorded as D10–D15 in
 §2. What remains is verification work, not owner decisions:
 
@@ -511,13 +530,23 @@ The six questions first listed here were answered on 2026-11-14 and are recorded
 
 ## 11. Resume here
 
-1. Read this file, `docs/BATCH_ANIMAL_MANAGEMENT_PLAN.md` §10, `docs/DESIGN_SYSTEM.md`, and the
-   three skills in §3.
-2. Do not re-ask the owner anything in §2 (D1–D15 are settled).
-3. Work through the §10 verification list and the **[unverified]** items.
-4. Do Phase 0: build the phone mock-ups and get sign-off.
-5. Then Phase 1 via the `feature-delivery` skill. First commit is migration 043 + `init.sql` for
-   the farm profile engine and breed corrections.
+**Done:** Phase 1 (2026-11-15) - migration 043 + `init.sql` §61, `FarmProfileService`, the shared
+resolver and `useFarmProfile` / `useSpeciesCategories` hooks, Master Data admin (species farm
+fields, class flags, Group Types and Record Types tabs), NBAGR breed corrections, 26 aquaculture
+species, role-aware species ordering, breeding due date from master data. Phase 1 was built
+before Phase 0 because it has no farmer-facing design to sign off; nothing a farmer sees changed
+except the corrected breeds, the new species and the picker order.
 
-Nothing in the application has been changed for this initiative yet. Commits so far are skills,
-rules and this document only (`ff362b2`, `b24535e`, and the commit that adds this file).
+**Next:**
+1. Read this file, `docs/modules/farm-profile.md`, `docs/DESIGN_SYSTEM.md`, and the skills in §3.
+2. Do not re-ask the owner anything in §2 (D1–D15 are settled).
+3. **Phase 0: phone mock-ups and owner sign-off** (D9) - this gates Phases 2 and 3. Include each
+   role's four tab-bar destinations.
+4. Then Phase 2 (phone foundation, all roles) and Phase 3 (groups and animals on the engine) via
+   the `feature-delivery` skill. Phase 3 is where `AnimalGroups.tsx` and `AnimalFormModal.tsx`
+   start reading `useFarmProfile` and the hardcoded group-type list in `types/enterprise.ts` goes.
+5. Ask the owner who can review the Tamil (and hi/kn/ml/te) words seeded in migration 043.
+
+Seen while testing, not caused by this work and not fixed: a hard page load of `/animals` as a
+farmer lands on the dashboard (navigating from the sidebar works); the Master Data page header
+puts the title and subtitle side by side at phone width.

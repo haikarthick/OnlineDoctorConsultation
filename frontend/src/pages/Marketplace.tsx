@@ -6,6 +6,7 @@ import './ModulePage.css'
 import './Marketplace.css'
 import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
+import { useSpeciesCategories } from '../hooks/useFarmProfile'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData, MarketplaceThread, MarketplaceMessage, MarketplaceSavedSearch } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useMasterData } from '../context/MasterDataContext'
@@ -27,7 +28,8 @@ const Marketplace: React.FC = () => {
   const { user } = useAuth()
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { speciesCategories, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, marketplaceCategories, marketplaceConditions, resolveLabel, marketplaceEligibleSpecies, speciesLabel } = useMasterData()
+  const { breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, marketplaceCategories, marketplaceConditions, resolveLabel, marketplaceEligibleSpecies, speciesLabel } = useMasterData()
+  const speciesCategories = useSpeciesCategories()
   const isAdmin = user?.role === 'admin'
   const SPECIES_LIST = marketplaceEligibleSpecies
   const CATEGORY_KEYS: Array<{ value: string; label: string }> = [

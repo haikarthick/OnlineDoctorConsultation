@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useSpeciesCategories } from '../hooks/useFarmProfile'
 import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
 import './ModulePage.css'
@@ -17,7 +18,8 @@ import { emptyAnimalFormData, type AnimalData, type EnterpriseOption, type Group
 
 const Animals: React.FC = () => {
   const { t } = useTranslation()
-  const { speciesCategories, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
+  const { breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
+  const speciesCategories = useSpeciesCategories()
 
   const { user } = useAuth()
   const { formatDate } = useSettings()

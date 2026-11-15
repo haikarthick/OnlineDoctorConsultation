@@ -5,6 +5,7 @@ import { vetHospitalApi } from '../services/api/vetHospitalApi'
 import apiService from '../services/api'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useMasterData } from '../context/MasterDataContext'
+import { useSpeciesCategories } from '../hooks/useFarmProfile'
 import { TRIAGE_LEVELS } from '../components/hospitalWorkflow/hospitalWorkflowShared'
 import QueueStatsTiles from '../components/hospitalWorkflow/QueueStatsTiles'
 import QueueList from '../components/hospitalWorkflow/QueueList'
@@ -22,7 +23,8 @@ import NewReferralModal from '../components/hospitalWorkflow/NewReferralModal'
 export default function HospitalWorkflow() {
   const { t } = useTranslation()
   const { formatDateTime } = useSettings()
-  const { speciesCategories, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
+  const { breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
+  const speciesCategories = useSpeciesCategories()
 
   const [tab, setTab] = useState<'queue' | 'workflow' | 'referrals'>('queue')
   const [hospitalId, setHospitalId] = useState('')
