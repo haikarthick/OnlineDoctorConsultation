@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { usePermission, NAV_PERMISSION_MAP } from '../context/PermissionContext'
 import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
+import { useFarmRecordsEnabled } from '../hooks/useFarmRecordsEnabled'
 import { MenuItem, UserRole } from '../types'
 import { buildMenuItems } from './menuItems'
 
@@ -15,6 +16,7 @@ export function useNavMenuItems(): MenuItem[] {
   const { user } = useAuth()
   const { hasPermission, networks } = usePermission()
   const { enabled: groomingEnabled } = useGroomingEnabled()
+  const { enabled: farmRecordsEnabled } = useFarmRecordsEnabled(!!user)
   const { t } = useTranslation()
 
   return useMemo(() => {
@@ -44,7 +46,11 @@ export function useNavMenuItems(): MenuItem[] {
       if (item.section === 'Grooming & Spa' && !groomingEnabled) {
         return false
       }
+      // Same for farm daily records (farm.records.enabled).
+      if (item.id === 'farm-records' && !farmRecordsEnabled) {
+        return false
+      }
       return true
     })
-  }, [t, user, hasPermission, networks, groomingEnabled])
+  }, [t, user, hasPermission, networks, groomingEnabled, farmRecordsEnabled])
 }

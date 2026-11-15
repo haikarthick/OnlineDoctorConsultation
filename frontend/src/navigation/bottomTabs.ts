@@ -24,7 +24,7 @@ export interface RoleTabConfig {
 export const BOTTOM_TABS: Record<string, RoleTabConfig> = {
   farmer: {
     tabs: ['dashboard', 'animals', 'herd-medical', 'animal-groups', 'medical', 'consultations'],
-    quickActions: ['animals', 'animal-groups', 'herd-medical', 'breeding', 'feed-inventory', 'movement-log', 'campaigns', 'book-consultation', 'find-doctor'],
+    quickActions: ['farm-records', 'animals', 'animal-groups', 'herd-medical', 'breeding', 'feed-inventory', 'movement-log', 'campaigns', 'book-consultation', 'find-doctor'],
   },
   pet_owner: {
     tabs: ['dashboard', 'animals', 'medical', 'consultations', 'prescriptions'],
@@ -66,7 +66,7 @@ const FALLBACK: RoleTabConfig = { tabs: ['dashboard'], quickActions: [] }
 /** Five cells in all: tabs + (the "+" when there are quick actions) + More. Keeps every label wide enough to read. */
 export const MAX_TABS = 4
 export const MAX_TABS_WITH_ADD = 3
-export const MAX_QUICK_ACTIONS = 9
+export const MAX_QUICK_ACTIONS = 10
 
 export interface ResolvedBottomTabs {
   tabs: MenuItem[]

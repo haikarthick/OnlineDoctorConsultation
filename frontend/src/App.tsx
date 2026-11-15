@@ -65,6 +65,7 @@ const PendingPolicyModal = lazy(() => import('./components/PendingPolicyModal'))
 // Enterprise Module
 const EnterpriseManagement = lazy(() => import('./pages/EnterpriseManagement'))
 const AnimalGroups = lazy(() => import('./pages/AnimalGroups'))
+const FarmRecords = lazy(() => import('./pages/FarmRecords'))
 const LocationManagement = lazy(() => import('./pages/LocationManagement'))
 const MovementLog = lazy(() => import('./pages/MovementLog'))
 const TreatmentCampaigns = lazy(() => import('./pages/TreatmentCampaigns'))
@@ -323,6 +324,7 @@ function AppRoutes() {
 
       {/* ── Enterprise Module ── */}
       <Route path="/enterprises" element={<RoleRoute path="/enterprises"><AppLayout><EnterpriseManagement /></AppLayout></RoleRoute>} />
+      <Route path="/farm-records" element={<RoleRoute path="/farm-records"><AppLayout><FarmRecords /></AppLayout></RoleRoute>} />
       <Route path="/animal-groups" element={<RoleRoute path="/animal-groups"><AppLayout><AnimalGroups /></AppLayout></RoleRoute>} />
       <Route path="/locations" element={<RoleRoute path="/locations"><AppLayout><LocationManagement /></AppLayout></RoleRoute>} />
       <Route path="/movement-log" element={<RoleRoute path="/movement-log"><AppLayout><MovementLog /></AppLayout></RoleRoute>} />

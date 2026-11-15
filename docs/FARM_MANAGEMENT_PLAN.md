@@ -553,7 +553,11 @@ them needs your decision); hospital-network patient views (change-protected, nee
 master-data group types; group types print in words everywhere via `groupTypeLabel`; cards on phone.
 Certificates/printed prescriptions and hospital-network views still untouched (see 3a note).
 
-**Next: Phase 4** (daily records and events behind `farm.records.enabled`, own route file).
+**Phase 4a done:** daily records (milk, eggs, feed, sample weight, water quality, deaths) - migration 045,
+`routes/farm-records.routes.ts`, `FarmRecordService`, the Daily records screen and entry sheet; see "Daily records"
+in `docs/modules/farm-profile.md`. Dark behind `farm.records.enabled` (an admin turns it on in system settings).
+**Next: Phase 4b** - events (breeding, sale, harvest, placement...) through their existing sources of truth,
+the batch/cycle UI (open cycle, place flock, close cycle), the due list, vet-side production in `SubjectSummary`.
 1. Read this file, `docs/modules/farm-profile.md`, `docs/modules/mobile-ui.md`,
    `docs/DESIGN_SYSTEM.md`, and the skills in §3.
 2. Do not re-ask the owner anything in §2 (D1–D15 are settled).

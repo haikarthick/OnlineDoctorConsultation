@@ -90,7 +90,12 @@ export interface GroupTypeEntry extends LocaleLabels {
 /** A daily record / event type as a tile shows it. Whether it applies comes from useFarmProfile. */
 export interface RecordTypeEntry extends LocaleLabels {
   code: string; kind: 'daily' | 'event'; labelKey: string | null; label: string | null; icon: string | null; unit: string | null
+  /** What the entry form asks for, as master data says it: [{key, type: number|choice|text|picker, required?, options?}]. */
+  fields: RecordFieldDef[]
 }
+
+/** One field of a record type's entry form. */
+export interface RecordFieldDef { key: string; type: string; required?: boolean; options?: string[] }
 
 const EMPTY_FARM_MASTER: FarmMaster = { species: [], classes: [], groupTypes: [], recordTypes: [] }
 
@@ -287,7 +292,7 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
       for (const r of recordTypes) {
         rtEntries[r.code] = {
           code: r.code, kind: r.kind, labelKey: r.labelKey ?? null, label: r.label ?? null,
-          icon: r.icon ?? null, unit: r.unit ?? null, ...pickLocaleFields(r),
+          icon: r.icon ?? null, unit: r.unit ?? null, fields: Array.isArray(r.fields) ? r.fields : [], ...pickLocaleFields(r),
         }
       }
       setRecordTypeEntries(rtEntries)

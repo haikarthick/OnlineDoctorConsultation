@@ -26,6 +26,7 @@ import { patientConsentRolesApi } from './api/modules/patientConsentRoles'
 import { groomingApi } from './api/modules/grooming'
 import { networkSubscriptionsApi } from './api/modules/networkSubscriptions'
 import { networkReferralsAdminApi } from './api/modules/networkReferralsAdmin'
+import { farmRecordsApi } from './api/modules/farmRecords'
 
 export { sharedClient, fetchCsrfToken }
 export { extractArrayFromResponse, extractTotalFromResponse } from './api/utils'
@@ -47,5 +48,6 @@ export const apiService = {
   ...groomingApi,
   ...networkSubscriptionsApi,
   ...networkReferralsAdminApi,
+  ...farmRecordsApi,
 }
 export default apiService

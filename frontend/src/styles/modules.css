@@ -3511,3 +3511,24 @@ textarea.module-input {
 .group-health-note { text-align: left; margin-top: 12px; }
 .an-color-input { width: 56px; height: var(--tap-min); padding: 2px; border: 1px solid var(--gray-300); border-radius: var(--radius); background: #fff; cursor: pointer; }
 .group-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 16px; }
+
+/* ── Daily records (pages/FarmRecords.tsx, components/farmRecords/) ── */
+.record-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 16px; }
+.record-card { display: flex; flex-direction: column; gap: 12px; padding: 1rem; min-width: 0; overflow-wrap: anywhere; }
+.record-card-head { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.record-card-icon { font-size: 28px; line-height: 1; flex: none; }
+.record-card-title { display: flex; flex-direction: column; min-width: 0; }
+.record-card-sub { color: var(--gray-600); font-size: 14px; }
+.record-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.record-chip { background: var(--success-light); color: #065f46; border-radius: var(--chip-radius); padding: 6px 12px; font-size: 14px; }
+.record-chip.is-empty { background: var(--gray-100); color: var(--gray-600); }
+.record-card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.record-quick { min-height: var(--tap-min); flex: 1 1 auto; }
+.record-totals { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0; padding: 12px 16px; background: var(--brand-soft); border-radius: var(--radius-lg); }
+.record-total { font-size: 15px; }
+.record-sheet { display: flex; flex-direction: column; gap: 16px; }
+.record-sheet-actions { display: flex; gap: 12px; }
+.record-sheet-actions .btn { flex: 1; min-height: var(--tap-min); }
+.record-note { margin: 0; padding: 10px 12px; border-radius: var(--radius-lg); background: var(--gray-100); color: var(--gray-700); font-size: 15px; }
+.record-note.is-update { background: var(--warning-light); color: #92400e; }
+.record-text-field { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }

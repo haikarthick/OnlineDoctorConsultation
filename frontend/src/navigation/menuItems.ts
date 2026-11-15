@@ -86,6 +86,10 @@ export function buildMenuItems(t: TFunction, user: User | null): MenuItem[] {
     // ── Farm / Enterprise Module ──
     { id: 'enterprises', label: t('nav.farmEnterprise'), icon: '🏢', path: '/enterprises',
       roles: ['farmer', 'admin'], section: 'Farm Management' },
+    // Daily records (milk, eggs, feed...). Hidden until an admin switches farm.records.enabled on - see
+    // useNavMenuItems. No permission key: the page only lists farms the caller belongs to.
+    { id: 'farm-records', label: t('nav.farmRecords'), icon: '📝', path: '/farm-records',
+      roles: ['farmer', 'admin'], section: 'Farm Management' },
     { id: 'animal-groups', label: t('nav.herdsGroups'), icon: '🐄', path: '/animal-groups',
       roles: ['farmer', 'admin'], section: 'Farm Management' },
     { id: 'herd-medical', label: t('nav.herdMedical'), icon: '💊', path: '/herd-medical',

@@ -108,6 +108,11 @@ Platform reference data: no tenant id is taken, so there is no tenant scoping he
   use Emily (pet owner) as the outsider in tests.
 - **Dark launch**: every route except `GET /farm-records/enabled` answers 404 while the flag is off.
   The flag is cached 60 s (`services/farmRecords/FarmRecordsConfig.ts`).
+- **Screen** (Phase 4a): `pages/FarmRecords.tsx` at `/farm-records` (first tile of the farmer's "+" sheet; menu item hidden
+  until the flag is on - `useFarmRecordsEnabled`, which never caches a failed probe). Herds/flocks first, then
+  single animals with the most to record. One entry sheet for everything: `components/farmRecords/RecordEntrySheet.tsx`
+  renders the record type's own `fields` (from `recordTypeEntry(code).fields`); pure logic in `recordShared.ts`.
+  Picker-type fields (feed item) are not shown yet - they need the feed inventory as a source list.
 - Dates are read as text (`record_date::text`): a DATE parsed into a JS Date shifts a day in timezones
   ahead of UTC (India).
 
