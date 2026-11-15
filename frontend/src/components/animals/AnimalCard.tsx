@@ -39,7 +39,7 @@ const AnimalCard: React.FC<Props> = ({
   return (
     <div className="si-9a7422fb">
       {/* Card Header */}
-      <div className="si-6ac50557">
+      <div className="si-6ac50557 animal-card-head">
         <div className="si-0b20392f">
           <span className="si-42fc55d5">{speciesIcon(animal.species)}</span>
           <div>
@@ -47,7 +47,7 @@ const AnimalCard: React.FC<Props> = ({
             <div className="si-122e0f6b">{speciesLabel(animal.species, t)}{animal.breed ? ` • ${breedLabel(animal.species, animal.breed)}` : ''}</div>
           </div>
         </div>
-        <div className="si-f4e64596">
+        <div className="si-f4e64596 animal-card-meta">
           <div
             className="si-ddf63368"
             onClick={() => {

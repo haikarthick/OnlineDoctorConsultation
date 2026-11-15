@@ -7,6 +7,7 @@ import './Marketplace.css'
 import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
 import { useSpeciesCategories } from '../hooks/useFarmProfile'
+import { listingPregnancyStatus } from '../constants/breedingStatus'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData, MarketplaceThread, MarketplaceMessage, MarketplaceSavedSearch } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useMasterData } from '../context/MasterDataContext'
@@ -465,13 +466,17 @@ const Marketplace: React.FC = () => {
       const months = Math.floor((Date.now() - dob.getTime()) / (1000 * 60 * 60 * 24 * 30.44))
       if (months > 0) updates.animalAgeMonths = String(months)
     }
-    // Breeding / pregnancy status
+    // Breeding / pregnancy status. Only a CONFIRMED pregnancy is advertised: an animal that has
+    // merely been served ("bred") used to be listed as pregnant, which tells a buyer something the
+    // farmer does not yet know. One vocabulary now (constants/breedingStatus.ts).
     const bs = animal.breedingStatus || animal.breeding_status
-    if (bs) {
-      // Map animal breeding_status -> Joi-valid pregnancyStatus ('pregnant'|'not_pregnant'|'unknown')
-      const statusMap: Record<string, string> = { pregnant: 'pregnant', bred: 'pregnant', lactating: 'not_pregnant', open: 'not_pregnant' }
-      if (statusMap[bs]) updates.pregnancyStatus = statusMap[bs]
-    }
+    if (bs) updates.pregnancyStatus = listingPregnancyStatus(bs)
+    // Milk facts the farmer already recorded on the animal - not retyped on the listing. The
+    // lactation number of a milking animal is its count of births (parity).
+    const milk = Number(animal.avgDailyMilkLitres ?? animal.avg_daily_milk_litres)
+    if (Number.isFinite(milk) && milk > 0) updates.dailyMilkYield = String(milk)
+    const births = Number(animal.parity)
+    if (Number.isFinite(births) && births > 0 && updates.dailyMilkYield) updates.lactationNumber = String(births)
     // Registration number for breeder compliance
     const regNum = animal.registrationNumber || animal.registration_number
     if (regNum) updates.registrationNumber = regNum

@@ -190,7 +190,7 @@
     "animalsFailed": "Failed",
     "importErrors": "Errors",
     "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId",
+    "csvHeaders": "Required: name, species. Optional: breed, gender, animalClass, dateOfBirth, weight, color, microchipId, earTagId, breedingStatus (not_bred, bred, pregnant, not_pregnant), parity, lastBirthDate, avgDailyMilkLitres",
     "healthPassport": "சுகாதார பாஸ்போர்ட்",
     "downloadPassport": "சுகாதார பாஸ்போர்ட் பதிவிறக்கு",
     "generatingPassport": "உருவாக்கப்படுகிறது..."
@@ -305,6 +305,7 @@
     "selectDam": "பெண் பெற்றோரைத் தேர்ந்தெடுக்கவும் (விருப்பம்)",
     "breedingStatus": "இனப்பெருக்க நிலை",
     "selectBreedingStatus": "நிலையைத் தேர்ந்தெடுக்கவும்",
+    "bred": "இனச்சேர்க்கை முடிந்தது",
     "notBred": "இனப்பெருக்கம் செய்யப்படவில்லை",
     "pregnant": "கர்ப்பமாக உள்ளது",
     "notPregnant": "கர்ப்பமாக இல்லை",

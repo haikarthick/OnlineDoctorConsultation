@@ -45,6 +45,36 @@ files; render them with `resolveLabel` from `useMasterData()`.
 
 Platform reference data: no tenant id is taken, so there is no tenant scoping here.
 
+## Animals (Phase 3, migration 044)
+
+- **Production fields** on `animals`: `avg_daily_milk_litres`, `parity` (number of births),
+  `last_birth_date`, `dry_off_date`; `birth_weight` now read and written. There is **no**
+  `lactation_number` column: for a milking animal it equals `parity`, and a stored copy would drift.
+- **One breeding-status vocabulary** on `animals.breeding_status`:
+  `not_bred | bred | pregnant | not_pregnant` (DB CHECK). Breeding-record statuses map onto it in
+  `backend/src/utils/breedingStatus.ts` (`confirmed_pregnant` -> `pregnant`; `delivered`, `aborted`,
+  `reabsorbed` -> `not_bred`). Frontend twin: `frontend/src/constants/breedingStatus.ts`. Anything
+  that writes the column must go through the mapping; seed SQL must use these four words or NULL
+  (the runtime gate fails otherwise - a seed row with `'active'` skipped 28 demo sections).
+- **A birth is counted once**: `BreedingService.update` reads the record's previous status, and only
+  the transition into `delivered` adds to `parity` (editing a delivered record's note does not).
+- **Write path**: `AnimalService.createAnimal/updateAnimal` is the only writer, including bulk import
+  (`POST /animals/bulk-import` now goes through it). It refuses a farm-only field the profile hides
+  for that species/class (`FARM_FIELD_RULES`) with a message naming the field and the animal.
+- **Form**: `components/animals/AnimalFormModal.tsx` is a `StepForm` (steps are an array: basics,
+  details, milk and breeding, farm and group). `buildAnimalPayload()` (in `animalsShared.tsx`) sends
+  only fields the profile shows; on edit an emptied visible field clears (null), a hidden field is
+  left untouched.
+- **One summary for every vet-facing screen**: `components/shared/SubjectSummary.tsx` (consultation
+  room, prescription writer, prescribe panel). It shows pregnancy / milk / births and, with
+  `emphasis`, a "check before choosing a medicine" note. Pure logic is in
+  `utils/farmProfile/animalFacts.ts` (`lactationState`, `doseWarnings`).
+- **Resolver rule**: with no class chosen, only an explicitly `female` animal is assumed able to be
+  pregnant or milked (otherwise every pet of unspecified gender showed breeding fields).
+- Tenant checks added in this phase: animal create/update checks the caller may use the farm and
+  group (`AnimalController.assertPlacementAllowed`); breeding create/update check the farm and that
+  dam and sire belong to it. `PUT /animals/:id` is now validated (it was not).
+
 ## Gotchas
 
 - A breed rename must move the text on `animals`, `animal_groups`, `group_cycles` and

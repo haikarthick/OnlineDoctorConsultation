@@ -23,6 +23,11 @@ interface StepFormProps {
   /** Anything to show just above the buttons - usually <SaveState>. */
   footer?: React.ReactNode
   onCancel?: () => void
+  /**
+   * Editing a record: the person usually wants to change ONE thing, not walk every step. When set,
+   * a "save now" button is offered on every step before the last (it runs the same submit).
+   */
+  saveNowLabel?: string
 }
 
 /**
@@ -31,7 +36,7 @@ interface StepFormProps {
  * reordering one is an edit to the array the caller passes, not a layout change. All field
  * state stays in the parent: going Back shows what was already entered.
  */
-export const StepForm: React.FC<StepFormProps> = ({ steps, current, onStepChange, onSubmit, submitLabel, busy, footer, onCancel }) => {
+export const StepForm: React.FC<StepFormProps> = ({ steps, current, onStepChange, onSubmit, submitLabel, busy, footer, onCancel, saveNowLabel }) => {
   const { t } = useTranslation()
   const index = Math.min(Math.max(current, 0), steps.length - 1)
   const step = steps[index]
@@ -53,6 +58,11 @@ export const StepForm: React.FC<StepFormProps> = ({ steps, current, onStepChange
       <div className="step-form-footer">
         {footer}
         {blocked && <p className="step-form-blocked" role="status">{step.blockedReason}</p>}
+        {saveNowLabel && !isLast && (
+          <button type="button" className="step-form-save-now" onClick={() => { if (!blocked && !busy) onSubmit() }} disabled={busy || steps.slice(0, index + 1).some(s => !!s.blockedReason)}>
+            {saveNowLabel}
+          </button>
+        )}
         <div className="step-form-actions">
           {index > 0
             ? <button type="button" className="step-form-back" onClick={() => onStepChange(index - 1)} disabled={busy}>{t('mobileUi.step.back')}</button>

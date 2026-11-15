@@ -1,8 +1,8 @@
 # Farm Management Realignment — Analysis & Plan
 
-**Status: PHASES 0, 1 AND 2 DONE (2026-11-15): design signed off, farm profile engine + master
-data, and the phone foundation (tab bar for every role + shared building blocks). Phases 3-6 not
-started.** Written 2026-11-14 so a new session can resume without redoing the analysis. Next
+**Status: PHASES 0, 1, 2 DONE; PHASE 3 IN PROGRESS (2026-11-15).** Phase 3a (animals: production
+fields, one breeding-status vocabulary, step form, shared vet summary, import) is shipped; 3b (group
+form on the engine, remaining consumers) is next. Phases 4-6 not started. Written 2026-11-14 so a new session can resume without redoing the analysis. Next
 action is in §11. How the engine works: `docs/modules/farm-profile.md`.
 
 Anything marked **[unverified]** was not checked against a source or the code and must be
@@ -542,6 +542,13 @@ except the corrected breeds, the new species and the picker order.
 **Phase 2 done:** `docs/modules/mobile-ui.md` - bottom tab bar for every role (data in
 `navigation/bottomTabs.ts`), shared blocks in `components/mobile/`, `inputMode` on all numeric
 inputs with a test that keeps it so, tokens for every size and colour.
+
+**Phase 3a done:** see "Animals" in `docs/modules/farm-profile.md`. Consumers updated: animal form,
+detail, cards (phone layout), CSV import + template, marketplace sell prefill (milk, births, honest
+pregnancy), consultation room, prescribe panel and prescription writer (via `SubjectSummary`), the
+breeding service, the prescription queries. **Not yet:** `types/enterprise.ts` group-type list and
+the group form (3b); certificates and the printed prescription (legal documents - adding rows to
+them needs your decision); hospital-network patient views (change-protected, needs approval).
 
 **Next:**
 1. Read this file, `docs/modules/farm-profile.md`, `docs/modules/mobile-ui.md`,

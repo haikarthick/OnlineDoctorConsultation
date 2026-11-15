@@ -4,6 +4,8 @@ import { resolveNetworkAccess } from '../middleware/networkAccess';
 import { asyncHandler } from '../utils/errorHandler';
 import database from '../utils/database';
 import HospitalNetworkService from '../services/HospitalNetworkService';
+import animalService from '../services/AnimalService';
+import enterpriseService from '../services/EnterpriseService';
 
 const router = Router();
 
@@ -159,6 +161,13 @@ router.get('/admin/revenue-trends', authMiddleware, roleMiddleware(['admin']), a
 }));
 
 // ─── Bulk Animal Import ──────────────────────────────────────
+// Every row goes through AnimalService.createAnimal - the same path as the registration form - so
+// an imported animal gets its unique ID, and the farm-profile rules apply (a bull cannot be given
+// a milk yield). This used to be a raw INSERT with none of that, and an unchecked farm id.
+const IMPORT_TEXT_FIELDS = ['name', 'species', 'breed', 'gender', 'animalClass', 'dateOfBirth', 'color',
+  'microchipId', 'earTagId', 'registrationNumber', 'breedingStatus', 'lastBirthDate'] as const;
+const IMPORT_NUMBER_FIELDS = ['weight', 'birthWeight', 'avgDailyMilkLitres', 'parity'] as const;
+
 router.post('/animals/bulk-import', authMiddleware, roleMiddleware(['admin', 'farmer']), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
   const { animals, enterpriseId } = req.body;
@@ -168,28 +177,44 @@ router.post('/animals/bulk-import', authMiddleware, roleMiddleware(['admin', 'fa
   if (animals.length > 500) {
     return res.status(400).json({ success: false, error: 'Maximum 500 animals per import' });
   }
+  // Importing into a farm needs access to that farm (admins excepted), like every other write.
+  if (enterpriseId && authReq.userRole !== 'admin' && !(await enterpriseService.hasAccess(enterpriseId, authReq.userId!))) {
+    return res.status(403).json({ success: false, error: 'You do not have access to that farm' });
+  }
   const results = { created: 0, failed: 0, errors: [] as string[] };
-  const { v4: uuidv4 } = require('uuid');
-  for (const animal of animals) {
+  for (const [index, row] of animals.entries()) {
+    const label = row?.name ? String(row.name) : `Row ${index + 2}`;
     try {
-      if (!animal.name || !animal.species) {
+      if (!row || !row.name || !row.species) {
         results.failed++;
-        results.errors.push(`Row skipped: name and species are required`);
+        results.errors.push(`${label}: name and species are required`);
         continue;
       }
-      const id = uuidv4();
-      await database.query(
-        `INSERT INTO animals (id, owner_id, enterprise_id, name, species, breed, gender, date_of_birth, weight, color, microchip_id, animal_class, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
-         ON CONFLICT DO NOTHING`,
-        [id, authReq.userId, enterpriseId || null, animal.name, animal.species,
-         animal.breed || null, animal.gender || null, animal.dateOfBirth || null,
-         animal.weight || null, animal.color || null, animal.microchipId || null, animal.animalClass || null]
-      );
+      const dto: Record<string, any> = {};
+      for (const key of IMPORT_TEXT_FIELDS) {
+        const value = row[key];
+        if (value !== undefined && value !== null && String(value).trim() !== '') dto[key] = String(value).trim();
+      }
+      let bad: string | null = null;
+      for (const key of IMPORT_NUMBER_FIELDS) {
+        const value = row[key];
+        if (value === undefined || value === null || String(value).trim() === '') continue;
+        const n = Number(String(value).replace(',', '.'));
+        if (!Number.isFinite(n) || n < 0) { bad = key; break; }
+        dto[key] = n;
+      }
+      if (bad) {
+        results.failed++;
+        results.errors.push(`${label}: "${bad}" must be a number`);
+        continue;
+      }
+      if (enterpriseId) dto.enterpriseId = enterpriseId;
+      await animalService.createAnimal(authReq.userId!, dto as any);
       results.created++;
     } catch (err: any) {
       results.failed++;
-      results.errors.push(`${animal.name || 'Unknown'}: ${err.message}`);
+      // The service's own message (for example which field cannot be set for this animal).
+      results.errors.push(`${label}: ${err.message}`);
     }
   }
   res.json({ success: true, data: results });

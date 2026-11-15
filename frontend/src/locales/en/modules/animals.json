@@ -190,7 +190,7 @@
     "animalsFailed": "Failed",
     "importErrors": "Errors",
     "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId",
+    "csvHeaders": "Required: name, species. Optional: breed, gender, animalClass, dateOfBirth, weight, color, microchipId, earTagId, breedingStatus (not_bred, bred, pregnant, not_pregnant), parity, lastBirthDate, avgDailyMilkLitres",
     "healthPassport": "Health Passport",
     "downloadPassport": "Download Health Passport",
     "generatingPassport": "Generating..."
@@ -305,6 +305,7 @@
     "selectDam": "Select dam (optional)",
     "breedingStatus": "Breeding Status",
     "selectBreedingStatus": "Select status",
+    "bred": "Bred (served)",
     "notBred": "Not Bred",
     "pregnant": "Pregnant",
     "notPregnant": "Not Pregnant",

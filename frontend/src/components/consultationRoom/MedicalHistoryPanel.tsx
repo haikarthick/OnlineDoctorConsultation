@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useMasterData } from '../../context/MasterDataContext'
+import { SubjectSummary } from '../shared/SubjectSummary'
 
 interface MedicalHistoryPanelProps {
   historyLoading: boolean
@@ -15,7 +15,6 @@ const MedicalHistoryPanel: React.FC<MedicalHistoryPanelProps> = ({
   historyLoading, animalInfo, allergies, vaccinations, medicalRecords, labResults
 }) => {
   const { t } = useTranslation()
-  const { speciesLabel } = useMasterData()
 
   return (
     <div className="si-3dc8ac19">
@@ -36,24 +35,8 @@ const MedicalHistoryPanel: React.FC<MedicalHistoryPanelProps> = ({
 
       {!historyLoading && animalInfo && (
         <>
-          {/* Animal Info Card */}
-          <div className="si-843e21c5">
-            <div className="si-2cd8f04c">
-              🐾 {animalInfo.name || 'Unknown'}
-            </div>
-            <div className="si-9ac294d9">
-              {speciesLabel(animalInfo.species, t)}{animalInfo.breed ? ` / ${animalInfo.breed}` : ''}
-              {animalInfo.age ? ` - ${animalInfo.age}` : ''}
-              {animalInfo.weight ? ` - ${animalInfo.weight}kg` : ''}
-            </div>
-            {animalInfo.uniqueId && <div className="si-b1a83cef">ID: {animalInfo.uniqueId}</div>}
-            {(animalInfo.enterpriseName || animalInfo.enterprise_name) && (
-              <div className="si-acad5bc1">
-                🏢 Farm: {animalInfo.enterpriseName || animalInfo.enterprise_name}
-                {(animalInfo.groupName || animalInfo.group_name) && ` › ${animalInfo.groupName || animalInfo.group_name}`}
-              </div>
-            )}
-          </div>
+          {/* Animal at a glance - one component for every screen that shows an animal */}
+          <SubjectSummary animal={animalInfo} emphasis showFarm />
 
           {/* Allergies */}
           <div className="si-bab8e8bc">

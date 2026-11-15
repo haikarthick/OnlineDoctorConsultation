@@ -3399,9 +3399,96 @@ textarea.module-input {
 .step-form-back { background: var(--gray-100); color: var(--gray-800); }
 .step-form-next { background: var(--brand-strong); color: #fff; }
 .step-form-next:disabled, .step-form-back:disabled { opacity: 0.5; cursor: not-allowed; }
+.step-form-save-now {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  min-height: var(--tap-min);
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--brand-strong);
+}
+.step-form-save-now:disabled { opacity: 0.5; cursor: not-allowed; }
+.step-form-save-now:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
 .step-form-back:focus-visible, .step-form-next:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   .bottom-sheet, .bottom-sheet-backdrop { animation: none; }
   .bottom-tab-add:active { transform: none; }
+}
+
+/* ── Subject summary (components/shared/SubjectSummary.tsx) ─────────────────
+   One look for "this animal at a glance" on every screen that shows one. */
+.subject-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--radius-lg);
+  background: var(--brand-soft);
+  border: 1px solid var(--gray-200);
+  min-width: 0;
+}
+.subject-summary-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; }
+.subject-summary-name { font-size: 17px; color: var(--gray-900); overflow-wrap: anywhere; }
+.subject-summary-id { font-size: 13px; color: var(--gray-600); }
+.subject-summary-line { font-size: 14px; color: var(--gray-700); overflow-wrap: anywhere; }
+.subject-summary-facts { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.subject-summary-fact {
+  padding: 4px 10px;
+  border-radius: var(--chip-radius);
+  background: #fff;
+  border: 1px solid var(--gray-300);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+/* Colour never carries meaning alone: the words say it, the tint only reinforces. */
+.subject-summary-fact.is-alert { background: var(--warning-light); border-color: var(--warning); color: #92400e; }
+.subject-summary-fact.is-quiet { font-weight: 500; color: var(--gray-600); }
+.subject-summary-farm { font-size: 13px; color: var(--gray-600); overflow-wrap: anywhere; }
+.subject-summary-warning {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--warning-light);
+  border: 1px solid var(--warning);
+  color: #92400e;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* ── Animal form additions (components/animals/AnimalFormModal.tsx) ── */
+.an-field--follow { margin-top: 8px; }
+.an-field-hint { display: block; margin-top: 4px; font-size: 13px; color: var(--gray-600); }
+.an-field-warn { display: block; margin-top: 4px; font-size: 13px; color: var(--danger); font-weight: 600; }
+.an-more-species { margin-top: 8px; }
+.an-link-button {
+  all: unset;
+  cursor: pointer;
+  color: var(--brand-strong);
+  font-weight: 700;
+  text-decoration: underline;
+}
+.an-link-button:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+/* Phones: 16px stops iOS zooming on focus, and the field is a proper touch target. */
+@media (max-width: 768px) {
+  .an-field { font-size: var(--mobile-font); min-height: var(--tap-min); }
+  .an-field-label { font-size: 14px; }
+}
+
+/* ── Animal cards on a phone (pages/Animals.tsx, components/animals/AnimalCard.tsx) ── */
+.animal-card-grid {
+  display: grid;
+  /* min(): a column is never wider than the space it is in, so no card is cut off at 360px. */
+  grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+  gap: 16px;
+}
+@media (max-width: 768px) {
+  .animal-card-head { flex-wrap: wrap; gap: 8px 12px; padding: 14px 16px; }
+  .animal-card-head > * { min-width: 0; }
+  .animal-card-meta { text-align: left; }
 }

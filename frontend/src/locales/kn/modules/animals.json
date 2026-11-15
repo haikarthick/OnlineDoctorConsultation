@@ -190,7 +190,7 @@
     "animalsFailed": "Failed",
     "importErrors": "Errors",
     "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId",
+    "csvHeaders": "Required: name, species. Optional: breed, gender, animalClass, dateOfBirth, weight, color, microchipId, earTagId, breedingStatus (not_bred, bred, pregnant, not_pregnant), parity, lastBirthDate, avgDailyMilkLitres",
     "healthPassport": "ಆರೋಗ್ಯ ಪಾಸ್‌ಪೋರ್ಟ್",
     "downloadPassport": "ಆರೋಗ್ಯ ಪಾಸ್‌ಪೋರ್ಟ್ ಡೌನ್‌ಲೋಡ್",
     "generatingPassport": "ರಚಿಸಲಾಗುತ್ತಿದೆ..."
@@ -305,6 +305,7 @@
     "selectDam": "ತಾಯಿ ಪ್ರಾಣಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ (ಐಚ್ಛಿಕ)",
     "breedingStatus": "ಸಂತಾನೋತ್ಪತ್ತಿ ಸ್ಥಿತಿ",
     "selectBreedingStatus": "ಸ್ಥಿತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "bred": "ಗರ್ಭಧಾರಣೆ ಮಾಡಲಾಗಿದೆ",
     "notBred": "ಸಂತಾನೋತ್ಪತ್ತಿ ಆಗಿಲ್ಲ",
     "pregnant": "ಗರ್ಭಿಣಿ",
     "notPregnant": "ಗರ್ಭಿಣಿ ಅಲ್ಲ",

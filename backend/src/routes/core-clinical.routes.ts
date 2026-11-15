@@ -24,7 +24,7 @@ import {
   createVideoSessionSchema, endVideoSessionSchema, sendVideoMessageSchema,
   createScheduleSchema, updateScheduleSchema,
   createPrescriptionSchema,
-  createAnimalSchema,
+  createAnimalSchema, updateAnimalSchema,
   createVetProfileSchema, updateVetProfileSchema,
   forgotPasswordSchema, resetPasswordSchema,
 } from '../middleware/validation';
@@ -409,7 +409,7 @@ router.get('/animals/:id/access-check', authMiddleware, asyncHandler(async (req:
   res.json({ success: true, data: { allowed: decision.allowed, isPrivate: decision.isPrivate, accessType: decision.accessType, reason: decision.reason } });
 }));
 router.get('/animals/:id', authMiddleware, requireAnimalAccess('params:id', 'animal_profile'), asyncHandler((req: Request, res: Response) => AnimalController.getAnimal(req, res)));
-router.put('/animals/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.put('/animals/:id', authMiddleware, validateBody(updateAnimalSchema), asyncHandler(async (req: Request, res: Response) => {
   res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'animals') } })
   await AnimalController.updateAnimal(req, res)
 }));

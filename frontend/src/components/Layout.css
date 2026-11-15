@@ -76,6 +76,13 @@
     flex-direction: column;
   }
 
+  /* On a phone .layout-main must not trap its modals in its own stacking context (z-index: 1):
+     that put every modal BELOW the top header and the bottom tab bar, hiding a form's Save button
+     behind the bar. Without it a modal overlay (9998) covers both, as it should. */
+  .layout-main {
+    z-index: auto;
+  }
+
   .layout-main {
     margin-left: 0;
     margin-top: 56px;

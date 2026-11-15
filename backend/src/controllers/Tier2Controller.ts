@@ -71,6 +71,11 @@ class Tier2Controller {
 
   async createBreedingRecord(req: Request, res: Response) {
     try {
+      // A breeding record changes the dam's status and births, so the caller must belong to the
+      // farm and the animals must be that farm's (or the caller's own) - not someone else's.
+      if (!await ensureAccess(req, res, req.body.enterpriseId)) return;
+      const allowed = await breedingService.animalsAllowed(req.body.enterpriseId, [req.body.damId, req.body.sireId], (req as any).userId, (req as any).userRole);
+      if (!allowed) { res.status(403).json({ error: { message: 'The dam and sire must be animals of this farm' } }); return; }
       const data = await breedingService.create(req.body);
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -78,6 +83,10 @@ class Tier2Controller {
 
   async updateBreedingRecord(req: Request, res: Response) {
     try {
+      // Same rule as create: the record's own farm decides, never the id alone.
+      const record = await breedingService.getById(req.params.id);
+      if (!record) { res.status(404).json({ error: { message: 'Breeding record not found' } }); return; }
+      if (!await ensureAccess(req, res, record.enterpriseId)) return;
       const data = await breedingService.update(req.params.id, req.body);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }

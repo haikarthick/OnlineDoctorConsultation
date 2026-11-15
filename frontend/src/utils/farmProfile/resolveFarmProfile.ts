@@ -218,7 +218,10 @@ export function resolveFarmProfile(master: FarmMaster, input: FarmProfileInput):
   const gender = animalClass && animalClass.impliedGender !== 'unknown'
     ? animalClass.impliedGender
     : (input.gender ? input.gender.trim().toLowerCase() : 'unknown');
-  const notMale = gender !== 'male';
+  // With no class to say so, only an animal that is EXPLICITLY female is assumed able to breed or
+  // be milked. Treating "unknown" as possibly female made every pet of unspecified gender show
+  // breeding fields, and asked for births on animals nobody had said were female.
+  const isFemale = gender === 'female';
   const bearsLiveYoung = !!species && species.birthEventTerm !== 'hatching' && species.birthEventTerm !== 'spawning';
 
   // Capabilities of the ANIMAL in front of the farmer. With a class chosen the class decides;
@@ -234,9 +237,9 @@ export function resolveFarmProfile(master: FarmMaster, input: FarmProfileInput):
       canProduceMilk = animalClass.canProduceMilk && !isJuvenile;
       canLayEggs = animalClass.canLayEggs && !isJuvenile;
     } else {
-      canBePregnant = notMale && bearsLiveYoung && !isAquatic;
-      canProduceMilk = notMale && species.producesMilk;
-      canLayEggs = notMale && species.producesEggs;
+      canBePregnant = isFemale && bearsLiveYoung && !isAquatic;
+      canProduceMilk = isFemale && species.producesMilk;
+      canLayEggs = isFemale && species.producesEggs;
     }
   }
 

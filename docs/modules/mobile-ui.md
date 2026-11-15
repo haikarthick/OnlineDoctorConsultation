@@ -52,6 +52,13 @@ bar, no label in any of the six languages needs a mid-word break, bar hidden on 
 login page. Roles not logged in during that run (hospital staff, pharmacist, groomer, corporate
 admin, support) have unit-test coverage only - no seeded demo account exists for them.
 
+## Stacking order (phone)
+
+Tab bar 1002 · chat bubble 1003 · edit-form overlays 9998 · bottom sheet 10000. On a phone
+`.layout-main` has `z-index: auto` (it used to be 1, which trapped every modal in its own stacking
+context UNDER the header and the tab bar and hid a form's Save button). Keep a floating control
+below 9998 or it will cover a form's primary button.
+
 ## Known limits
 
 - Tab labels are 11.5px; some Indic words are shortened to fit (e.g. the consult tab reads "Doctor"

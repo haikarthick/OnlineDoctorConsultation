@@ -2,6 +2,9 @@ import React from 'react'
 import type { TFunction } from 'i18next'
 import type { AnimalClassTerm } from '../../constants/speciesBreeds'
 import { SectionTitle, classOrGenderLabel, calculateAge, type AnimalData } from './animalsShared'
+import { useFarmProfile } from '../../hooks/useFarmProfile'
+import { breedingStatusLabelKey } from '../../constants/breedingStatus'
+import { asNumber } from '../../utils/farmProfile/animalFacts'
 
 interface Props {
   detailAnimal: AnimalData
@@ -16,6 +19,35 @@ interface Props {
   resolveLabel: (item: AnimalClassTerm, t: (key: string) => string) => string
   formatDate: (date: string) => string
   navigate: (path: string) => void
+}
+
+/**
+ * The breeding and production rows of the detail view. Which rows appear comes from the farm
+ * profile for this species and class - the same rule the form uses - so a bull never shows an empty
+ * milk row. Replaces two lines that mapped every status that was not "pregnant" or "not bred" to
+ * "Not pregnant", which is how a served-but-unconfirmed animal came to read as not pregnant.
+ */
+const ProductionRows: React.FC<{ animal: AnimalData; t: TFunction; formatDate: (date: string) => string }> = ({ animal, t, formatDate }) => {
+  const { profile } = useFarmProfile({ speciesCode: animal.species, animalClass: animal.animalClass, gender: animal.gender })
+  const shown = (f: keyof typeof profile.fields) => profile.fields[f] !== 'hidden'
+  const statusKey = shown('pregnancyStatus') ? breedingStatusLabelKey(animal.breedingStatus) : null
+  const milk = asNumber(animal.avgDailyMilkLitres)
+  const births = asNumber(animal.parity)
+  const birthWeight = asNumber(animal.birthWeight)
+  const row = (key: string, label: string, value: string) => (
+    <div key={key}><span className="si-23033f05">{label}</span> <strong>{value}</strong></div>
+  )
+  return (
+    <>
+      {statusKey && row('status', t('animalClass.breedingStatus'), t(statusKey))}
+      {statusKey && (animal.breedingStatus === 'pregnant' || animal.breedingStatus === 'bred') && animal.expectedDueDate && row('due', t('animalClass.expectedDueDate'), formatDate(animal.expectedDueDate))}
+      {shown('avgDailyMilk') && milk !== null && row('milk', t('farmProfile.fieldLabels.avgDailyMilk'), `${milk} L`)}
+      {shown('parity') && births !== null && row('parity', t('farmProfile.fieldLabels.parity'), String(births))}
+      {shown('lastBirthDate') && animal.lastBirthDate && row('lastBirth', t('farmProfile.fieldLabels.lastBirthDate'), formatDate(animal.lastBirthDate))}
+      {shown('dryOffDate') && animal.dryOffDate && row('dryOff', t('farmProfile.fieldLabels.dryOffDate'), formatDate(animal.dryOffDate))}
+      {birthWeight !== null && row('birthWeight', t('farmProfile.fieldLabels.birthWeight'), `${birthWeight} kg`)}
+    </>
+  )
 }
 
 const AnimalDetailModal: React.FC<Props> = ({
@@ -48,8 +80,7 @@ const AnimalDetailModal: React.FC<Props> = ({
           {detailAnimal.dateOfBirth && <div><span className="si-23033f05">{t('animals.detailModal.dob')}</span> <strong>{formatDate(detailAnimal.dateOfBirth)}</strong></div>}
           {detailAnimal.sireName && <div><span className="si-23033f05">{t('animalClass.sire')}</span> <strong>{detailAnimal.sireName}</strong></div>}
           {detailAnimal.damName && <div><span className="si-23033f05">{t('animalClass.dam')}</span> <strong>{detailAnimal.damName}</strong></div>}
-          {detailAnimal.breedingStatus && <div><span className="si-23033f05">{t('animalClass.breedingStatus')}</span> <strong>{t(`animalClass.${detailAnimal.breedingStatus === 'not_bred' ? 'notBred' : detailAnimal.breedingStatus === 'pregnant' ? 'pregnant' : 'notPregnant'}`)}</strong></div>}
-          {detailAnimal.breedingStatus === 'pregnant' && detailAnimal.expectedDueDate && <div><span className="si-23033f05">{t('animalClass.expectedDueDate')}</span> <strong>{formatDate(detailAnimal.expectedDueDate)}</strong></div>}
+          <ProductionRows animal={detailAnimal} t={t} formatDate={formatDate} />
           {detailAnimal.dateOfBirth && <div><span className="si-23033f05">{t('animals.detailModal.age')}</span> <strong>{calculateAge(t, detailAnimal.dateOfBirth)}</strong></div>}
           {detailAnimal.weight && <div><span className="si-23033f05">{t('animals.detailModal.weight')}</span> <strong>{detailAnimal.weight} kg</strong></div>}
           {detailAnimal.color && <div><span className="si-23033f05">{t('animals.detailModal.color')}</span> <strong>{detailAnimal.color}</strong></div>}

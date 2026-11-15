@@ -1,7 +1,8 @@
 ﻿import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useSpeciesCategories } from '../hooks/useFarmProfile'
+import { useSpeciesCategories, useFarmProfile } from '../hooks/useFarmProfile'
+import { useSaveAction } from '../hooks/useSaveAction'
 import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
 import './ModulePage.css'
@@ -14,7 +15,7 @@ import AnimalFormModal from '../components/animals/AnimalFormModal'
 import AnimalCard from '../components/animals/AnimalCard'
 import AnimalDetailModal from '../components/animals/AnimalDetailModal'
 import BulkImportModal from '../components/animals/BulkImportModal'
-import { emptyAnimalFormData, type AnimalData, type EnterpriseOption, type GroupOption } from '../components/animals/animalsShared'
+import { emptyAnimalFormData, animalToFormData, buildAnimalPayload, type AnimalData, type EnterpriseOption, type GroupOption } from '../components/animals/animalsShared'
 
 const Animals: React.FC = () => {
   const { t } = useTranslation()
@@ -33,7 +34,6 @@ const Animals: React.FC = () => {
   const [formData, setFormData] = useState(emptyAnimalFormData)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [speciesFilter, setSpeciesFilter] = useState('')
@@ -61,6 +61,16 @@ const Animals: React.FC = () => {
   const canManageAnimals = isPetOwner || isFarmer || (isVet && vetView === 'my-pets')
 
   const breeds = useMemo(() => breedsForSpecies(formData.species), [formData.species, breedsForSpecies])
+  // What the form shows (and therefore what it may send) follows the species and class chosen.
+  const { profile: formProfile } = useFarmProfile({ speciesCode: formData.species, animalClass: formData.animalClass, gender: formData.gender })
+  const placementVisible = (isFarmer || isAdmin) && enterpriseOptions.length > 0
+  const saveAnimal = useSaveAction(
+    async (payload: Record<string, unknown>, editingId: string | null) => {
+      if (editingId) await apiService.updateAnimal(editingId, payload)
+      else await apiService.createAnimal(payload)
+    },
+    t('animals.toasts.failedSave'),
+  )
   const showEarTag = earTagSpecies.includes(formData.species)
 
   // Load enterprises for farmer
@@ -136,9 +146,11 @@ const Animals: React.FC = () => {
     // animalClass is optional - species-correct terms like cattle_cow, cattle_bull,
     // sheep_ewe, etc. (see ANIMAL_CLASS_TERMS in constants/speciesBreeds.ts); leave
     // blank for species without class terms, or to just use gender.
-    const csv = 'name,species,breed,gender,animalClass,dateOfBirth,weight,color,microchipId\n' +
-      'Bessie,Cattle,Gir,female,cattle_cow,2020-01-15,450,Black & White,900118001234567\n' +
-      'Raja,Horse,Marwari,male,,2019-06-01,520,Brown,\n'
+    // Production columns (milk, births, status) are accepted only for an animal that can have them:
+    // a bull row with a milk yield is rejected with a message naming the row and the field.
+    const csv = 'name,species,breed,gender,animalClass,dateOfBirth,weight,color,microchipId,earTagId,breedingStatus,parity,lastBirthDate,avgDailyMilkLitres\n' +
+      'Bessie,Cattle,Gir,female,cattle_cow,2020-01-15,450,Black & White,900118001234567,,pregnant,2,2026-03-01,9.5\n' +
+      'Raja,Horse,Marwari,male,,2019-06-01,520,Brown,,,,,,\n'
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -165,75 +177,30 @@ const Animals: React.FC = () => {
   const resetForm = () => {
     setFormData(emptyAnimalFormData)
     setEditingAnimal(null)
+    saveAnimal.reset()
   }
 
   const openEditForm = (a: AnimalData) => {
-    const breedList = breedsForSpecies(a.species)
-    const isCustomBreed = a.breed && !breedList.includes(a.breed)
-    setFormData({
-      name: a.name, species: a.species, breed: isCustomBreed ? 'Other' : (a.breed || ''),
-      customBreed: isCustomBreed ? (a.breed || '') : '',
-      gender: a.gender || '', weight: a.weight?.toString() || '', color: a.color || '',
-      dateOfBirth: a.dateOfBirth ? a.dateOfBirth.split('T')[0] : '',
-      microchipId: a.microchipId || '', earTagId: a.earTagId || '',
-      registrationNumber: a.registrationNumber || '',
-      isNeutered: a.isNeutered || false,
-      insuranceProvider: a.insuranceProvider || '', insurancePolicyNumber: a.insurancePolicyNumber || '',
-      insuranceExpiry: a.insuranceExpiry ? a.insuranceExpiry.split('T')[0] : '',
-      medicalNotes: a.medicalNotes || '',
-      enterpriseId: (a as any).enterpriseId || (a as any).enterprise_id || '',
-      groupId: (a as any).groupId || (a as any).group_id || '',
-      animalClass: a.animalClass || '', sireId: a.sireId || '', damId: a.damId || '',
-      breedingStatus: a.breedingStatus || '',
-      lastBreedingDate: a.lastBreedingDate ? a.lastBreedingDate.split('T')[0] : '',
-      expectedDueDate: a.expectedDueDate ? a.expectedDueDate.split('T')[0] : ''
-    })
+    saveAnimal.reset()
+    setFormData(animalToFormData(a, breedsForSpecies(a.species)))
     setEditingAnimal(a)
     setShowForm(true)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isSubmitting) return
-    setIsSubmitting(true)
-    setError('')
-    const finalBreed = formData.breed === 'Other' ? formData.customBreed : formData.breed
-    const payload: any = {
-      name: formData.name, species: formData.species, breed: finalBreed || undefined,
-      gender: formData.gender || undefined, weight: formData.weight ? parseFloat(formData.weight) : undefined,
-      color: formData.color || undefined, dateOfBirth: formData.dateOfBirth || undefined,
-      microchipId: formData.microchipId || undefined, earTagId: formData.earTagId || undefined,
-      registrationNumber: formData.registrationNumber || undefined, isNeutered: formData.isNeutered,
-      insuranceProvider: formData.insuranceProvider || undefined,
-      insurancePolicyNumber: formData.insurancePolicyNumber || undefined,
-      insuranceExpiry: formData.insuranceExpiry || undefined,
-      medicalNotes: formData.medicalNotes || undefined,
-      enterpriseId: formData.enterpriseId || undefined,
-      groupId: formData.groupId || undefined,
-      animalClass: formData.animalClass || undefined,
-      sireId: formData.sireId || undefined,
-      damId: formData.damId || undefined,
-      breedingStatus: formData.breedingStatus || undefined,
-      lastBreedingDate: formData.lastBreedingDate || undefined,
-      expectedDueDate: formData.expectedDueDate || undefined,
-    }
-    try {
-      if (editingAnimal) {
-        await apiService.updateAnimal(editingAnimal.id, payload)
-        setSuccessMsg(t('animals.toasts.updated'))
-      } else {
-        await apiService.createAnimal(payload)
-        setSuccessMsg(t('animals.toasts.registered'))
-      }
-      setShowForm(false)
-      resetForm()
-      fetchAnimals()
-      setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err.message || t('animals.toasts.failedSave'))
-    } finally {
-      setIsSubmitting(false)
-    }
+    // Only the fields this species and class shows are sent, and a cleared field clears on edit.
+    const payload = buildAnimalPayload(formData, formProfile, { editing: !!editingAnimal, placementVisible })
+    const wasEditing = !!editingAnimal
+    // On failure the form stays open and filled (nothing typed is lost); the footer shows the
+    // server's own message, or "waiting for connection", with Retry.
+    const saved = await saveAnimal.run(payload, editingAnimal?.id ?? null)
+    if (!saved) return
+    setSuccessMsg(wasEditing ? t('animals.toasts.updated') : t('animals.toasts.registered'))
+    setShowForm(false)
+    resetForm()
+    fetchAnimals()
+    setTimeout(() => setSuccessMsg(''), 3000)
   }
 
   const handleDelete = async (id: string) => {
@@ -443,7 +410,11 @@ const Animals: React.FC = () => {
           editingAnimal={editingAnimal}
           onClose={() => { setShowForm(false); resetForm() }}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
+          isSubmitting={saveAnimal.status === 'saving'}
+          saveStatus={saveAnimal.status}
+          saveError={saveAnimal.error}
+          saveOffline={saveAnimal.offline}
+          onRetry={() => handleSubmit({ preventDefault: () => undefined } as React.FormEvent)}
           breeds={breeds}
           showEarTag={showEarTag}
           speciesCategories={speciesCategories}
@@ -480,7 +451,7 @@ const Animals: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="si-af8b7d7f">
+          <div className="animal-card-grid">
             {filteredAnimals.map(animal => (
               <AnimalCard
                 key={animal.id}

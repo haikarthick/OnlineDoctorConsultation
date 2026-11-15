@@ -3,29 +3,60 @@ import { AuthRequest } from '../middleware/auth';
 import AnimalService from '../services/AnimalService';
 import { ValidationError, ForbiddenError } from '../utils/errors';
 import database from '../utils/database';
+import AnimalGroupService from '../services/AnimalGroupService';
+import logger from '../utils/logger';
 
 export class AnimalController {
+  /**
+   * A farm and a group are tenant data. The caller must own the farm or be an active member of it
+   * (or be a platform admin), and a group must belong to the farm it is paired with. Before this
+   * check anyone could file an animal under any farm or group id they knew.
+   */
+  private async assertPlacementAllowed(req: AuthRequest, enterpriseId?: string | null, groupId?: string | null): Promise<void> {
+    if (!enterpriseId && !groupId) return;
+    if (req.userRole === 'admin') return;
+    const access = `(e.owner_id = $2 OR EXISTS (SELECT 1 FROM enterprise_members em
+                       WHERE em.enterprise_id = e.id AND em.user_id = $2 AND em.is_active = true))`;
+    if (enterpriseId) {
+      const ent = await database.query(`SELECT 1 FROM enterprises e WHERE e.id = $1 AND ${access} LIMIT 1`, [enterpriseId, req.userId]);
+      if (ent.rows.length === 0) throw new ForbiddenError('You do not have access to that farm');
+    }
+    if (groupId) {
+      const grp = await database.query(
+        `SELECT ag.enterprise_id FROM animal_groups ag JOIN enterprises e ON e.id = ag.enterprise_id
+          WHERE ag.id = $1 AND ${access} LIMIT 1`,
+        [groupId, req.userId]
+      );
+      if (grp.rows.length === 0) throw new ForbiddenError('You do not have access to that group');
+      if (enterpriseId && grp.rows[0].enterprise_id !== enterpriseId) {
+        throw new ValidationError('That group belongs to a different farm. Choose a group from the selected farm.');
+      }
+    }
+  }
+
   async createAnimal(req: AuthRequest, res: Response): Promise<void> {
-    const { name, species, breed, dateOfBirth, gender, weight, color, microchipId,
-            earTagId, registrationNumber, isNeutered, insuranceProvider, insurancePolicyNumber,
-            insuranceExpiry, medicalNotes, enterpriseId, groupId } = req.body;
-    if (!name || !species) throw new ValidationError('Name and species are required');
+    // The body has been through createAnimalSchema (unknown keys stripped), so the whole of it is
+    // passed on. This used to copy a fixed subset, which silently dropped the animal's class,
+    // sire, dam and breeding status - and would have dropped every production field too.
+    const body = req.body;
+    if (!body.name || !body.species) throw new ValidationError('Name and species are required');
+    await this.assertPlacementAllowed(req, body.enterpriseId, body.groupId);
 
     const animal = await AnimalService.createAnimal(req.userId!, {
-      name, species, breed, dateOfBirth, gender, weight, color, microchipId,
-      earTagId, registrationNumber, isNeutered, insuranceProvider, insurancePolicyNumber,
-      insuranceExpiry, medicalNotes, enterpriseId: enterpriseId || undefined,
-      groupId: groupId || undefined,
+      ...body,
+      enterpriseId: body.enterpriseId || undefined,
+      groupId: body.groupId || undefined,
     });
 
-    // If assigned to a group, update the group's count
-    if (groupId) {
+    // Placing the animal in a group also opens its batch-membership window (batch groups) and
+    // refreshes the head count the right way for the group's mode. The previous inline SQL
+    // recounted animal rows, which resets a batch flock's headcount to zero.
+    if (body.groupId) {
       try {
-        await database.query(
-          `UPDATE animal_groups SET current_count = (SELECT COUNT(*) FROM animals WHERE group_id = $1 AND is_active = true), updated_at = NOW() WHERE id = $1`,
-          [groupId]
-        );
-      } catch { /* non-critical */ }
+        await AnimalGroupService.assignAnimal(body.groupId, animal.id);
+      } catch (err: any) {
+        logger.warn('Animal created but group assignment follow-up failed', { animalId: animal.id, groupId: body.groupId, error: err.message });
+      }
     }
 
     res.status(201).json({ success: true, data: animal });
@@ -96,7 +127,24 @@ export class AnimalController {
       throw new ForbiddenError('You do not have permission to update this animal');
     }
     // Veterinarians can only update their own animals (ownerId check above covers this)
+    const placementTouched = req.body.groupId !== undefined || req.body.enterpriseId !== undefined;
+    let previousGroupId: string | null = null;
+    if (placementTouched) {
+      await this.assertPlacementAllowed(req, req.body.enterpriseId || undefined, req.body.groupId || undefined);
+      const prev = await database.query('SELECT group_id FROM animals WHERE id = $1', [req.params.id]);
+      previousGroupId = prev.rows[0]?.group_id ?? null;
+    }
     const updated = await AnimalService.updateAnimal(req.params.id, req.body);
+    if (placementTouched) {
+      const newGroupId: string | null = req.body.groupId || null;
+      try {
+        if (newGroupId) await AnimalGroupService.assignAnimal(newGroupId, req.params.id);
+        // The group it left must recount too.
+        if (previousGroupId && previousGroupId !== newGroupId) await AnimalGroupService.removeAnimal(previousGroupId, req.params.id);
+      } catch (err: any) {
+        logger.warn('Animal updated but group follow-up failed', { animalId: req.params.id, error: err.message });
+      }
+    }
     res.json({ success: true, data: updated });
   }
 

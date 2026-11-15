@@ -150,13 +150,17 @@ describe('resolveFarmProfile', () => {
       expect(isRecordTypeAllowed(p, 'milk', 'animal')).toBe(true);
     });
 
-    it('with no class chosen, a female still gets milk and breeding; a male does not', () => {
+    it('with no class chosen, only an explicitly female animal gets milk and breeding', () => {
       const female = resolveFarmProfile(master, { speciesCode: 'Cattle', gender: 'female' });
       expect(female.fields.avgDailyMilk).toBe('optional');
       expect(isRecordTypeAllowed(female, 'milk', 'animal')).toBe(true);
       const male = resolveFarmProfile(master, { speciesCode: 'Cattle', gender: 'Male' });
       expect(male.fields.avgDailyMilk).toBe('hidden');
       expect(male.fields.pregnancyStatus).toBe('hidden');
+      // gender not given: nothing is assumed (a farm animal registered without a class or gender)
+      const unknown = resolveFarmProfile(master, { speciesCode: 'Cattle' });
+      expect(unknown.fields.avgDailyMilk).toBe('hidden');
+      expect(unknown.fields.pregnancyStatus).toBe('hidden');
     });
 
     it('a group milk total is offered for the lactating group, not for the bulls group', () => {
@@ -241,7 +245,7 @@ describe('resolveFarmProfile', () => {
       expect(isRecordTypeAllowed(p, 'eggs', 'animal')).toBe(true);
       expect(p.fields.pregnancyStatus).toBe('hidden');
       expect(codes(p)).not.toContain('heat');
-      const noClass = resolveFarmProfile(master, { speciesCode: 'Chicken', managementMode: 'individual' });
+      const noClass = resolveFarmProfile(master, { speciesCode: 'Chicken', managementMode: 'individual', gender: 'female' });
       expect(noClass.fields.pregnancyStatus).toBe('hidden');
     });
   });

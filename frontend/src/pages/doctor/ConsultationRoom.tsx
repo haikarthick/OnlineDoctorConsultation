@@ -773,7 +773,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
           )}
 
           {activePanel === 'prescribe' && (
-            <PrescribePanel conId={conId} onNavigate={onNavigate} />
+            <PrescribePanel conId={conId} animalInfo={animalInfo} onNavigate={onNavigate} />
           )}
         </div>
       </div>

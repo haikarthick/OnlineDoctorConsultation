@@ -190,7 +190,7 @@
     "animalsFailed": "Failed",
     "importErrors": "Errors",
     "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId",
+    "csvHeaders": "Required: name, species. Optional: breed, gender, animalClass, dateOfBirth, weight, color, microchipId, earTagId, breedingStatus (not_bred, bred, pregnant, not_pregnant), parity, lastBirthDate, avgDailyMilkLitres",
     "healthPassport": "ఆరోగ్య పాస్‌పోర్ట్",
     "downloadPassport": "ఆరోగ్య పాస్‌పోర్ట్ డౌన్‌లోడ్",
     "generatingPassport": "రూపొందిస్తోంది..."
@@ -305,6 +305,7 @@
     "selectDam": "తల్లి జంతువును ఎంచుకోండి (ఐచ్ఛికం)",
     "breedingStatus": "సంతానోత్పత్తి స్థితి",
     "selectBreedingStatus": "స్థితిని ఎంచుకోండి",
+    "bred": "గర్భధారణ చేయబడింది",
     "notBred": "సంతానోత్పత్తి చేయలేదు",
     "pregnant": "గర్భవతి",
     "notPregnant": "గర్భవతి కాదు",

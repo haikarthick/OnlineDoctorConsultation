@@ -1,8 +1,11 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { SubjectSummary } from '../shared/SubjectSummary'
 
 interface PrescribePanelProps {
   conId: string
+  /** The consultation's animal, as returned by GET /animals/:id. */
+  animalInfo?: any
   onNavigate: (path: string) => void
 }
 
@@ -13,11 +16,12 @@ const COMMON_PRESCRIPTIONS = [
   { label: 'Vitamins & Supplements', name: 'Pet Multivitamin', dosage: '1 tablet', frequency: 'Once daily', duration: '30 days', instructions: 'Mix with food' },
 ]
 
-const PrescribePanel: React.FC<PrescribePanelProps> = ({ conId, onNavigate }) => {
+const PrescribePanel: React.FC<PrescribePanelProps> = ({ conId, animalInfo, onNavigate }) => {
   const { t } = useTranslation()
 
   return (
     <div className="si-c710217c">
+      {animalInfo && <SubjectSummary animal={animalInfo} emphasis />}
       <p className="si-09dee8a9">
         {t('consultationRoom.quickPrescribeAccess')}
       </p>

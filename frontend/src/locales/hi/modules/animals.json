@@ -190,7 +190,7 @@
     "animalsFailed": "Failed",
     "importErrors": "Errors",
     "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId",
+    "csvHeaders": "Required: name, species. Optional: breed, gender, animalClass, dateOfBirth, weight, color, microchipId, earTagId, breedingStatus (not_bred, bred, pregnant, not_pregnant), parity, lastBirthDate, avgDailyMilkLitres",
     "healthPassport": "स्वास्थ्य पासपोर्ट",
     "downloadPassport": "स्वास्थ्य पासपोर्ट डाउनलोड करें",
     "generatingPassport": "उत्पन्न हो रहा है..."
@@ -305,6 +305,7 @@
     "selectDam": "मादा जनक चुनें (वैकल्पिक)",
     "breedingStatus": "प्रजनन स्थिति",
     "selectBreedingStatus": "स्थिति चुनें",
+    "bred": "गर्भाधान हुआ",
     "notBred": "गर्भित नहीं हुई",
     "pregnant": "गर्भवती",
     "notPregnant": "गर्भवती नहीं",

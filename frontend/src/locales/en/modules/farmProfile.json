@@ -100,6 +100,45 @@
         "animal": "Animal",
         "group": "Group"
       }
+    },
+    "summary": {
+      "weightKg": "{{kg}} kg",
+      "due": "due {{date}}",
+      "inMilk": "In milk",
+      "milkPerDay": "{{litres}} L a day",
+      "dry": "Dry (not in milk)",
+      "births": "Births: {{count}}",
+      "lastBirth": "Last birth {{date}}",
+      "dryOff": "Dry-off {{date}}",
+      "farm": "Farm",
+      "warnTitle": "Check before choosing a medicine",
+      "warnPregnant": "Pregnant: some medicines are unsafe in pregnancy.",
+      "warnDueSoon": "Due in {{days}} days.",
+      "warnLactating": "In milk: a milk withdrawal period applies, and the milk may be used by people."
+    },
+    "form": {
+      "stepWho": "The basics",
+      "stepDetails": "About the animal",
+      "stepProduction": "Milk and breeding",
+      "stepFarm": "Farm and group",
+      "which": "Which animal?",
+      "kind": "What kind?",
+      "moreSpecies": "More animals",
+      "moreDetails": "More details",
+      "lessDetails": "Fewer details",
+      "chooseAnimalFirst": "Choose the animal first",
+      "enterName": "Enter a name",
+      "saveNow": "Save now",
+      "dueAuto": "Worked out from the breeding date. You can change it.",
+      "parityHint": "How many times she has had young ({{term}}).",
+      "milkHint": "Litres a day, on average. Leave empty if not known."
+    },
+    "fieldLabels": {
+      "avgDailyMilk": "Average daily milk (litres)",
+      "parity": "Number of births",
+      "lastBirthDate": "Last birth date",
+      "dryOffDate": "Dry-off date",
+      "birthWeight": "Birth weight (kg)"
     }
   }
 }

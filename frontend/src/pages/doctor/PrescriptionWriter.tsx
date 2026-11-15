@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useMasterData } from '../../context/MasterDataContext'
 import apiService from '../../services/api'
 import client from '../../services/api/client'
+import { SubjectSummary } from '../../components/shared/SubjectSummary'
 import { Medication } from '../../types'
 import '../../styles/modules.css'
 
@@ -51,6 +52,28 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
   const isVet = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
   const isStandalone = !conId
+
+  // The animal being prescribed for, so the vet sees pregnancy and milk BEFORE choosing a medicine.
+  // Chosen in the selector, passed in the link, or - from a consultation - the consultation's own.
+  const [consultationAnimalId, setConsultationAnimalId] = useState('')
+  const [summaryAnimal, setSummaryAnimal] = useState<any>(null)
+  useEffect(() => {
+    if (!conId) return
+    let cancelled = false
+    apiService.getConsultation(conId)
+      .then((res: any) => { if (!cancelled) setConsultationAnimalId(res?.data?.animalId || res?.data?.animal_id || '') })
+      .catch(() => { /* the summary is a courtesy; the prescription does not depend on it */ })
+    return () => { cancelled = true }
+  }, [conId])
+  const summaryAnimalId = selectedAnimalId || urlAnimalId || consultationAnimalId
+  useEffect(() => {
+    if (!summaryAnimalId) { setSummaryAnimal(null); return }
+    let cancelled = false
+    apiService.getAnimal(summaryAnimalId)
+      .then((res: any) => { if (!cancelled) setSummaryAnimal(res?.data || null) })
+      .catch(() => { if (!cancelled) setSummaryAnimal(null) })
+    return () => { cancelled = true }
+  }, [summaryAnimalId])
 
   // Load all animals directly when animalId is pre-selected
   useEffect(() => {
@@ -227,6 +250,12 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
       {error && (
         <div className="si-2d8d745c">
           {error}
+        </div>
+      )}
+
+      {summaryAnimal && (
+        <div className="si-af65fe13">
+          <SubjectSummary animal={summaryAnimal} emphasis showFarm />
         </div>
       )}
 

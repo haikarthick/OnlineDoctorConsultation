@@ -23,9 +23,16 @@ export const createAnimalSchema = Joi.object({
   animalClass: shortText(30).optional().allow('', null),
   sireId: uuid.optional().allow(null, ''),
   damId: uuid.optional().allow(null, ''),
-  breedingStatus: Joi.string().valid('not_bred', 'pregnant', 'not_pregnant').optional().allow('', null),
+  // One vocabulary (migration 044, utils/breedingStatus.ts).
+  breedingStatus: Joi.string().valid('not_bred', 'bred', 'pregnant', 'not_pregnant').optional().allow('', null),
   lastBreedingDate: Joi.string().optional().allow('', null),
   expectedDueDate: Joi.string().optional().allow('', null),
+  // Production facts (migration 044). Only accepted for animals the farm profile says can have them.
+  avgDailyMilkLitres: Joi.number().min(0).max(200).optional().allow(null, ''),
+  parity: Joi.number().integer().min(0).max(40).optional().allow(null, ''),
+  lastBirthDate: Joi.string().optional().allow('', null),
+  dryOffDate: Joi.string().optional().allow('', null),
+  birthWeight: Joi.number().min(0).max(2000).optional().allow(null, ''),
 });
 
 export const updateAnimalSchema = createAnimalSchema.fork(

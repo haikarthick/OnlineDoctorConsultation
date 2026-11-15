@@ -5555,3 +5555,59 @@ UPDATE master_species SET water_quality_ranges =
 UPDATE master_species SET water_quality_ranges =
   '{"temperatureC":{"min":28,"max":31},"ph":{"min":7.0,"max":8.5},"dissolvedOxygenPpm":{"min":3,"max":7},"salinityPpt":{"max":10},"transparencyCm":{"min":25,"max":40},"ammoniaPpm":{"max":0.3},"source":"TNAU Agritech Portal, freshwater prawn culture (cites FAO 2002, ICAR-CIFA)"}'::jsonb
  WHERE code = 'Freshwater Prawn' AND water_quality_ranges IS NULL;
+
+-- ============================================================
+-- 62. ANIMAL PRODUCTION FIELDS + ONE BREEDING-STATUS VOCABULARY
+-- ============================================================
+-- Kept identical to backend/migrations/044_animal_production_fields.sql (everything below its
+-- header) so a fresh install and an upgraded database end up the same. See that file for why.
+
+-- 1. production fields
+ALTER TABLE animals ADD COLUMN IF NOT EXISTS avg_daily_milk_litres DECIMAL(5,2);
+ALTER TABLE animals ADD COLUMN IF NOT EXISTS parity INTEGER;
+ALTER TABLE animals ADD COLUMN IF NOT EXISTS last_birth_date DATE;
+ALTER TABLE animals ADD COLUMN IF NOT EXISTS dry_off_date DATE;
+
+DO $$ BEGIN
+  ALTER TABLE animals ADD CONSTRAINT animals_avg_milk_ck
+    CHECK (avg_daily_milk_litres IS NULL OR (avg_daily_milk_litres >= 0 AND avg_daily_milk_litres <= 200));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER TABLE animals ADD CONSTRAINT animals_parity_ck
+    CHECK (parity IS NULL OR (parity >= 0 AND parity <= 40));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- 2. one breeding-status vocabulary
+UPDATE animals SET breeding_status = CASE breeding_status
+    WHEN 'confirmed_pregnant' THEN 'pregnant'
+    WHEN 'confirmed'          THEN 'pregnant'
+    WHEN 'open'               THEN 'not_bred'
+    WHEN 'delivered'          THEN 'not_bred'
+    WHEN 'aborted'            THEN 'not_bred'
+    WHEN 'reabsorbed'         THEN 'not_bred'
+    WHEN 'lactating'          THEN 'not_bred'
+    ELSE breeding_status END
+ WHERE breeding_status IN ('confirmed_pregnant', 'confirmed', 'open', 'delivered', 'aborted', 'reabsorbed', 'lactating');
+
+-- Anything still outside the vocabulary (free text from an old client) carries no usable meaning.
+UPDATE animals SET breeding_status = NULL
+ WHERE breeding_status IS NOT NULL
+   AND breeding_status NOT IN ('not_bred', 'bred', 'pregnant', 'not_pregnant');
+
+DO $$ BEGIN
+  ALTER TABLE animals ADD CONSTRAINT animals_breeding_status_ck
+    CHECK (breeding_status IS NULL OR breeding_status IN ('not_bred', 'bred', 'pregnant', 'not_pregnant'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- 3. backfill births from the breeding records that already say a delivery happened, so animals
+--    that have calved before this migration do not show "0 births". Only fills a blank.
+UPDATE animals a SET parity = b.births
+  FROM (SELECT dam_id, COUNT(*) AS births FROM breeding_records
+         WHERE status = 'delivered' AND dam_id IS NOT NULL GROUP BY dam_id) b
+ WHERE a.id = b.dam_id AND a.parity IS NULL;
+
+UPDATE animals a SET last_birth_date = b.last_birth
+  FROM (SELECT dam_id, MAX(actual_birth_date) AS last_birth FROM breeding_records
+         WHERE status = 'delivered' AND dam_id IS NOT NULL AND actual_birth_date IS NOT NULL GROUP BY dam_id) b
+ WHERE a.id = b.dam_id AND a.last_birth_date IS NULL;

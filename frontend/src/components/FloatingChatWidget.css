@@ -4,7 +4,9 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 9999;
+  /* Above the phone tab bar (1002) but BELOW every modal overlay (9998+): a floating helper must
+     never cover a form's Save button. */
+  z-index: 1003;
   width: 60px;
   height: 60px;
   border-radius: 50%;
