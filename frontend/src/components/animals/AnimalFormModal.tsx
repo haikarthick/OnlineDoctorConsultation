@@ -1,13 +1,13 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import type { TFunction } from 'i18next'
 import type { AnimalClassTerm } from '../../constants/speciesBreeds'
 import { type AnimalData, type AnimalFormData, type EnterpriseOption, type GroupOption } from './animalsShared'
-import { useMasterData } from '../../context/MasterDataContext'
 import { useFarmProfile } from '../../hooks/useFarmProfile'
 import type { SaveStatus } from '../../hooks/useSaveAction'
 import { BREEDING_STATUSES, breedingStatusLabelKey } from '../../constants/breedingStatus'
 import { ChipSelect } from '../mobile/ChipSelect'
 import { NumberStepper } from '../mobile/NumberStepper'
+import { SpeciesPicker } from '../mobile/SpeciesPicker'
 import { SaveState } from '../mobile/SaveState'
 import { StepForm, type FormStep } from '../mobile/StepForm'
 
@@ -33,8 +33,6 @@ interface Props {
   findClassTerm: (species: string, value: string) => AnimalClassTerm | undefined
   breedLabel: (species: string | undefined, breed: string) => string
   resolveLabel: (item: AnimalClassTerm, t: (key: string) => string) => string
-  speciesIcon: (species?: string) => string
-  speciesLabel: (species: string | undefined, t: TFunction) => string
   isFarmer: boolean
   isAdmin: boolean
   enterpriseOptions: EnterpriseOption[]
@@ -43,10 +41,6 @@ interface Props {
   navigate: (path: string) => void
   t: TFunction
 }
-
-const FEATURED_SPECIES = 6
-/** The segments whose animals a farmer keeps most often - offered as one-tap species. */
-const COMMON_FARM_SEGMENTS = ['dairy', 'small_ruminant', 'pig', 'poultry']
 
 const today = () => new Date().toISOString().split('T')[0]
 
@@ -62,29 +56,16 @@ const AnimalFormModal: React.FC<Props> = ({
   formRef, formData, setFormData, editingAnimal, onClose, onSubmit, isSubmitting,
   saveStatus, saveError, saveOffline, onRetry,
   breeds, showEarTag, speciesCategories, classTermsForSpecies, findClassTerm, breedLabel,
-  resolveLabel, speciesIcon, speciesLabel, isFarmer, isAdmin, enterpriseOptions, groupOptions,
+  resolveLabel, isFarmer, isAdmin, enterpriseOptions, groupOptions,
   animals, navigate, t
 }) => {
-  const { farmMaster } = useMasterData()
   const { profile } = useFarmProfile({ speciesCode: formData.species, animalClass: formData.animalClass, gender: formData.gender })
   const [step, setStep] = useState(0)
   const [showMore, setShowMore] = useState(false)
-  const [showAllSpecies, setShowAllSpecies] = useState(false)
 
   const set = <K extends keyof AnimalFormData>(key: K, value: AnimalFormData[K]) => setFormData(p => ({ ...p, [key]: value }))
   const classTerms = classTermsForSpecies(formData.species)
   const fieldShown = (f: keyof typeof profile.fields) => profile.fields[f] !== 'hidden'
-
-  // One-tap species: farm animals first for a farmer (read from master data, not a species list in
-  // code), the first few of the picker order for everyone else. The chosen species always shows.
-  const featured = useMemo(() => {
-    const all = speciesCategories.flatMap(c => c.species)
-    const segmentOf = new Map(farmMaster.species.map(s => [s.code, s.farmSegment as string]))
-    const pool = isFarmer ? all.filter(code => COMMON_FARM_SEGMENTS.includes(segmentOf.get(code) || '')) : all
-    const picked = pool.slice(0, FEATURED_SPECIES)
-    if (formData.species && !picked.includes(formData.species)) picked.push(formData.species)
-    return picked
-  }, [speciesCategories, farmMaster.species, isFarmer, formData.species])
 
   const today_ = today()
   const dueFromBreeding = (breedingDate: string): string => {
@@ -96,37 +77,19 @@ const AnimalFormModal: React.FC<Props> = ({
   const showPlacement = (isFarmer || isAdmin) && enterpriseOptions.length > 0
   const statusOptions = BREEDING_STATUSES.map(s => ({ value: s, label: t(breedingStatusLabelKey(s) as string) }))
 
-  const speciesSelect = (
-    <select value={formData.species} onChange={e => setFormData(p => ({ ...p, species: e.target.value, breed: '', customBreed: '', animalClass: '' }))} className="an-field" aria-label={t('animals.registerModal.species')}>
-      <option value="">{t('animals.form.selectSpecies')}</option>
-      {speciesCategories.map(cat => (
-        <optgroup key={cat.label} label={cat.label}>
-          {cat.species.map(s => <option key={s} value={s}>{speciesIcon(s)} {speciesLabel(s, t)}</option>)}
-        </optgroup>
-      ))}
-    </select>
-  )
-
   const whoStep: FormStep = {
     id: 'who',
     title: t('farmProfile.form.stepWho'),
     blockedReason: !formData.species ? t('farmProfile.form.chooseAnimalFirst') : !formData.name.trim() ? t('farmProfile.form.enterName') : '',
     content: (
       <>
-        <ChipSelect
+        <SpeciesPicker
           label={t('farmProfile.form.which')}
-          options={[
-            ...featured.map(code => ({ value: code, label: speciesLabel(code, t), icon: speciesIcon(code) })),
-          ]}
+          categories={speciesCategories}
           value={formData.species}
           onChange={code => setFormData(p => ({ ...p, species: code, breed: '', customBreed: '', animalClass: '' }))}
+          preferFarm={isFarmer}
         />
-        <div>
-          <button type="button" className="choice-chip" aria-expanded={showAllSpecies} onClick={() => setShowAllSpecies(v => !v)}>
-            {t('farmProfile.form.moreSpecies')}
-          </button>
-          {showAllSpecies && <div className="an-more-species">{speciesSelect}</div>}
-        </div>
 
         {formData.species && (classTerms.length > 0 ? (
           <ChipSelect

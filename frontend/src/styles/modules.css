@@ -3492,3 +3492,22 @@ textarea.module-input {
   .animal-card-head > * { min-width: 0; }
   .animal-card-meta { text-align: left; }
 }
+
+/* ── Animal groups (pages/AnimalGroups.tsx, components/animalGroups/*) ── */
+.group-card {
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  /* --group-color is set from the farmer's pick by useCssVar (no inline style). */
+  border-left: 4px solid var(--group-color, var(--primary));
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.group-health-badges { margin-bottom: 12px; }
+.group-health-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 12px; }
+.group-health-metric { padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--gray-200); }
+.group-health-metric-icon { font-size: 20px; }
+.group-health-metric-value { font-size: 1.35rem; font-weight: 700; color: var(--primary); }
+.group-health-metric-label { font-size: 12px; color: var(--gray-600); }
+.group-health-note { text-align: left; margin-top: 12px; }
+.an-color-input { width: 56px; height: var(--tap-min); padding: 2px; border: 1px solid var(--gray-300); border-radius: var(--radius); background: #fff; cursor: pointer; }
+.group-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 16px; }

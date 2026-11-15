@@ -422,8 +422,6 @@ const Animals: React.FC = () => {
           findClassTerm={findClassTerm}
           breedLabel={breedLabel}
           resolveLabel={resolveLabel}
-          speciesIcon={speciesIcon}
-          speciesLabel={speciesLabel}
           isFarmer={isFarmer}
           isAdmin={isAdmin}
           enterpriseOptions={enterpriseOptions}

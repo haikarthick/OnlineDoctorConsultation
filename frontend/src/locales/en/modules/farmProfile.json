@@ -139,6 +139,43 @@
       "lastBirthDate": "Last birth date",
       "dryOffDate": "Dry-off date",
       "birthWeight": "Birth weight (kg)"
+    },
+    "groupForm": {
+      "stepWhat": "What are you grouping?",
+      "stepDetails": "Group details",
+      "animals": "Which animals?",
+      "chooseSpeciesFirst": "Choose the animals first",
+      "chooseType": "Choose what this group is for",
+      "enterName": "Enter a name for the group",
+      "whatFor": "What is this group for?",
+      "kindOfGroup": "Kind of group",
+      "modeLabel": "How will you keep records?",
+      "modeIndividual": "Each animal",
+      "modeBatch": "Whole group together",
+      "modeHintIndividual": "Each animal has its own record. Good for a few animals you know by name.",
+      "modeHintBatch": "One record for the whole group: counts, deaths, eggs, feed. Good for poultry, fish and large flocks.",
+      "modeLocked": "Record-keeping style cannot be changed after the group is created.",
+      "plannedCount": "Planned count (optional)",
+      "plannedHint": "How many animals this group is meant to hold. It is shown next to the real count, for example 12 of 20.",
+      "plannedOf": "{{count}} of {{planned}} planned",
+      "purpose": "Purpose (optional)",
+      "noPurpose": "No particular purpose"
+    },
+    "purposes": {
+      "dairy": "Dairy",
+      "meat": "Meat",
+      "breeding": "Breeding",
+      "layer": "Egg laying",
+      "broiler": "Broiler (meat birds)",
+      "companion": "Companion",
+      "exhibition": "Show / exhibition",
+      "conservation": "Conservation",
+      "racing": "Racing",
+      "working": "Working",
+      "research": "Research",
+      "rehabilitation": "Rehabilitation",
+      "sale": "For sale",
+      "other": "Other"
     }
   }
 }

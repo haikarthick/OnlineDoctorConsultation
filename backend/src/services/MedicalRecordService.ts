@@ -1437,7 +1437,7 @@ export class MedicalRecordService {
           [enterpriseId]
         ),
         database.query(
-          `SELECT ag.id, ag.name, ag.group_type as "groupType", ag.management_mode as "managementMode",
+          `SELECT ag.id, ag.name, ag.group_type as "groupType", ag.species, ag.management_mode as "managementMode",
                   -- A batch group has no animals rows; its population is the stored headcount.
                   CASE WHEN ag.management_mode = 'batch' THEN ag.current_count
                        ELSE COUNT(DISTINCT a.id) END as "animalCount",
@@ -1449,7 +1449,7 @@ export class MedicalRecordService {
            LEFT JOIN medical_records mr ON mr.animal_id = a.id OR mr.group_id = ag.id
            LEFT JOIN vaccination_records vr ON vr.animal_id = a.id OR vr.group_id = ag.id
            WHERE ag.enterprise_id = $1 AND ag.is_active = true
-           GROUP BY ag.id, ag.name, ag.group_type, ag.management_mode, ag.current_count
+           GROUP BY ag.id, ag.name, ag.group_type, ag.species, ag.management_mode, ag.current_count
            ORDER BY ag.name`,
           [enterpriseId]
         ),

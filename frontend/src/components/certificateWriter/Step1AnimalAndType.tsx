@@ -1,6 +1,6 @@
 import React from 'react'
 import { TFunction } from 'i18next'
-import { GROUP_TYPE_LABELS, AnimalGroupType } from '../../types'
+import { useMasterData } from '../../context/MasterDataContext'
 import { CERT_TYPES_PET, CERT_TYPES_FARM, certTypeLabel } from './certificateWriterShared'
 
 interface Owner { id: string; name: string; email: string }
@@ -51,7 +51,9 @@ const Step1AnimalAndType: React.FC<Step1AnimalAndTypeProps> = ({
   isHerd, isGroupCapable, selectedAnimalId, setSelectedAnimalId, loadingAnimals, animals,
   loadingGroups, groups, selectedGroupId, selectGroup, selectedGroup, consultations,
   selectedConsultationId, setSelectedConsultationId, examinationDate, setExaminationDate, setStep,
-}) => (
+}) => {
+  const { groupTypeLabel } = useMasterData()
+  return (
   <div className="module-card cw-card">
     <h3 className="cw-step-title">1. {t('certificateWriter.step1')}</h3>
 
@@ -164,7 +166,7 @@ const Step1AnimalAndType: React.FC<Step1AnimalAndTypeProps> = ({
             <option value="">- {t('certificateWriter.selectGroup')} -</option>
             {groups.map(g => (
               <option key={g.id} value={g.id}>
-                {g.name}{g.groupType ? ` (${GROUP_TYPE_LABELS[g.groupType as AnimalGroupType] || g.groupType})` : ''}
+                {g.name}{g.groupType ? ` (${groupTypeLabel(g.species, g.groupType, t)})` : ''}
                 {g.animalCount != null ? ` · ${g.animalCount} head` : ''}
               </option>
             ))}
@@ -219,6 +221,7 @@ const Step1AnimalAndType: React.FC<Step1AnimalAndTypeProps> = ({
       </button>
     </div>
   </div>
-)
+  )
+}
 
 export default Step1AnimalAndType

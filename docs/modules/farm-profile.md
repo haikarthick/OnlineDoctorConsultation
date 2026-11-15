@@ -75,6 +75,22 @@ Platform reference data: no tenant id is taken, so there is no tenant scoping he
   group (`AnimalController.assertPlacementAllowed`); breeding create/update check the farm and that
   dam and sire belong to it. `PUT /animals/:id` is now validated (it was not).
 
+## Groups (Phase 3b)
+
+- **Group types come from master data** (`master_group_types`, per species), not `types/enterprise.ts`.
+  Use `useMasterData().groupTypesForSpecies`, and print with `groupTypeLabel(species, value, t)` /
+  `groupTypeIcon` (falls back to the legacy `GROUP_TYPE_LABELS` for old stored values). Never print the
+  raw stored value.
+- **Record-keeping style** (`management_mode`: individual or batch) is decided when the group is
+  created: the master group type's mode first, then the species default (`AnimalGroupService.createGroup`).
+  The form suggests it, the farmer may override it, and it is **locked on edit** (the form only sends
+  `managementMode` when creating).
+- **Form**: `components/animalGroups/GroupFormModal.tsx` (`StepForm`: what / details) with
+  `buildGroupPayload` in `groupShared.ts`. Species uses the shared `components/mobile/SpeciesPicker.tsx`
+  (also used by the animal form). Planned count steps by 100 for a batch.
+- **Cards**: `pages/AnimalGroups.tsx`; the group colour is passed to CSS via `useCssVar` (no inline style).
+- Test fixture for master data in component tests: `frontend/src/test/farmMasterFixture.ts`.
+
 ## Gotchas
 
 - A breed rename must move the text on `animals`, `animal_groups`, `group_cycles` and

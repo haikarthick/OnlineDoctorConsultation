@@ -2,6 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { RECORD_TYPE_ICONS, severityClass } from './herdMedicalShared'
+import { useMasterData } from '../../context/MasterDataContext'
 
 interface OverviewTabProps {
   stats: any
@@ -18,6 +19,7 @@ interface OverviewTabProps {
 
 const OverviewTab: React.FC<OverviewTabProps> = ({ stats, canCreate, fmtDate, speciesLabel, onAddRecord, onAddVaccination, onAddAllergy, onAddLab, onFilterByType, onViewRecord }) => {
   const { t } = useTranslation()
+  const { groupTypeLabel } = useMasterData()
   if (!stats) return <div className="empty-state">{t('herdMedical.overview.noStats')}</div>
   return (
     <div>
@@ -72,7 +74,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ stats, canCreate, fmtDate, sp
               <tbody>
                 {stats.groupHealth.map((g: any) => (
                   <tr key={g.id}>
-                    <td><strong>{g.name}</strong></td><td>{g.groupType || '-'}</td><td>{g.animalCount}</td><td>{g.recordCount}</td>
+                    <td><strong>{g.name}</strong></td><td>{groupTypeLabel(g.species, g.groupType, t) || '-'}</td><td>{g.animalCount}</td><td>{g.recordCount}</td>
                     <td className={`hm-count-cell ${g.overdueVaccinations > 0 ? 'bad' : 'good'}`}>{g.overdueVaccinations}</td>
                   </tr>
                 ))}

@@ -136,7 +136,7 @@ describe('AnimalFormModal', () => {
         breeds={['Kangayam']} showEarTag speciesCategories={[{ label: 'Livestock', species: ['Cattle', 'Dog'] }]}
         classTermsForSpecies={(s: string) => (s === 'Cattle' ? [{ value: 'cattle_cow', labelKey: 'c.cow', impliedGender: 'female', canBePregnant: true, canProduceMilk: true }, { value: 'cattle_bull', labelKey: 'c.bull', impliedGender: 'male', canBePregnant: false, canProduceMilk: false }] : [])}
         findClassTerm={(s: string, v: string) => (s === 'Cattle' ? ({ cattle_cow: { value: 'cattle_cow', impliedGender: 'female' }, cattle_bull: { value: 'cattle_bull', impliedGender: 'male' } } as any)[v] : undefined)}
-        breedLabel={(_s: any, b: string) => b} resolveLabel={(item: any) => item.labelKey} speciesIcon={() => '*'} speciesLabel={(s: any) => s}
+        breedLabel={(_s: any, b: string) => b} resolveLabel={(item: any) => item.labelKey}
         isFarmer={farmer} isAdmin={false} enterpriseOptions={[]} groupOptions={[]} animals={[]} navigate={() => {}} t={t}
       />
     )

@@ -16,6 +16,7 @@ import type {
   FarmMaster, FarmSpecies, FarmAnimalClass, FarmGroupType, FarmRecordType, FarmSegment, ManagementMode,
 } from '../utils/farmProfile/resolveFarmProfile'
 import { groupTypesForSpecies as resolveGroupTypesForSpecies } from '../utils/farmProfile/resolveFarmProfile'
+import { GROUP_TYPE_LABELS } from '../types'
 
 // Fallback marketplace-eligible species list - union of the old hardcoded farmer/pet-owner
 // arrays, used only until the live master-data fetch resolves (see loadMasterData below).
@@ -106,6 +107,15 @@ interface MasterDataContextType {
   groupTypesForSpecies: (species?: string | null) => GroupTypeEntry[]
   /** Label/icon row for a record type code (milk, eggs, heat ...), or undefined. */
   recordTypeEntry: (code: string) => RecordTypeEntry | undefined
+  /**
+   * The words for a group's type, whatever screen shows it: the master-data label for the group's
+   * species (translated per locale), else the legacy generic label ("Herd", "Pen / Corral") for a
+   * group created before group types were master data, else the stored value. Use this instead of
+   * printing `group.groupType` or reading a hardcoded label list.
+   */
+  groupTypeLabel: (species: string | null | undefined, value: string | null | undefined, t: TFunction) => string
+  /** The master-data icon for a group type, or null when it has none (legacy values). */
+  groupTypeIcon: (species: string | null | undefined, value: string | null | undefined) => string | null
   speciesIcon: (species?: string) => string
   breedsForSpecies: (species?: string) => string[]
   /** Localized display name for a breed (canonical `name` stays the stored value).
@@ -372,12 +382,26 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const recordTypeEntry = useCallback((code: string): RecordTypeEntry | undefined => recordTypeEntries[code], [recordTypeEntries])
 
+  const groupTypeLabel = useCallback((species: string | null | undefined, value: string | null | undefined, t: TFunction): string => {
+    if (!value) return ''
+    const entry = groupTypesForSpecies(species).find(g => g.value === value)
+    if (entry) return resolveLabel(entry, t) || value
+    return (GROUP_TYPE_LABELS as Record<string, string>)[value] || value
+  }, [groupTypesForSpecies, resolveLabel])
+
+  const groupTypeIcon = useCallback((species: string | null | undefined, value: string | null | undefined): string | null => {
+    if (!value) return null
+    return groupTypesForSpecies(species).find(g => g.value === value)?.icon || null
+  }, [groupTypesForSpecies])
+
   const value = useMemo(() => ({
     speciesCategories, speciesCategoriesFor, farmMaster, farmMasterLoaded, groupTypesForSpecies, recordTypeEntry,
+    groupTypeLabel, groupTypeIcon,
     speciesIcon, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm,
     earTagSpecies, marketplaceEligibleSpecies, speciesLabel, marketplaceCategories, marketplaceConditions, resolveLabel,
   }), [
     speciesCategories, speciesCategoriesFor, farmMaster, farmMasterLoaded, groupTypesForSpecies, recordTypeEntry,
+    groupTypeLabel, groupTypeIcon,
     speciesIcon, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm,
     earTagSpecies, marketplaceEligibleSpecies, speciesLabel, marketplaceCategories, marketplaceConditions, resolveLabel,
   ])

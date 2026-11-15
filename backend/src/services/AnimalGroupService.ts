@@ -49,6 +49,23 @@ export class AnimalGroupService {
       // Species only ever SUGGESTS - the same species is managed individually by a smallholder
       // and as a batch by an enterprise, so the group is what actually decides.
       let mode: string = (data as any).managementMode;
+      if (!mode && data.groupType) {
+        // The group TYPE can say how it is kept ("Fatteners" are a batch, "Sows" are individual),
+        // which is more specific than the species default. A type of the species' own wins over one
+        // shared by its farm segment. Clients that do not send a mode (the API, an import) get the
+        // same answer the group form shows.
+        const gt = await database.query(
+          `SELECT g.management_mode
+             FROM master_group_types g
+             LEFT JOIN master_species s ON s.id = g.species_id
+            WHERE g.value = $1 AND g.is_active = true AND g.management_mode IS NOT NULL
+              AND (s.code = $2 OR g.farm_segment = (SELECT farm_segment FROM master_species WHERE code = $2))
+            ORDER BY (s.code = $2) DESC NULLS LAST
+            LIMIT 1`,
+          [data.groupType, data.species || null]
+        );
+        mode = gt.rows[0]?.management_mode;
+      }
       if (!mode) {
         const sp = await database.query(
           `SELECT default_management_mode FROM master_species WHERE code = $1 LIMIT 1`,

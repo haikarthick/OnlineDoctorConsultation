@@ -1,8 +1,7 @@
 # Farm Management Realignment — Analysis & Plan
 
-**Status: PHASES 0, 1, 2 DONE; PHASE 3 IN PROGRESS (2026-11-15).** Phase 3a (animals: production
-fields, one breeding-status vocabulary, step form, shared vet summary, import) is shipped; 3b (group
-form on the engine, remaining consumers) is next. Phases 4-6 not started. Written 2026-11-14 so a new session can resume without redoing the analysis. Next
+**Status: PHASES 0, 1, 2, 3 DONE (2026-11-15).** Phase 3a (animals) and 3b (groups on the engine)
+are shipped. Phases 4-6 not started. Written 2026-11-14 so a new session can resume without redoing the analysis. Next
 action is in §11. How the engine works: `docs/modules/farm-profile.md`.
 
 Anything marked **[unverified]** was not checked against a source or the code and must be
@@ -550,7 +549,11 @@ breeding service, the prescription queries. **Not yet:** `types/enterprise.ts` g
 the group form (3b); certificates and the printed prescription (legal documents - adding rows to
 them needs your decision); hospital-network patient views (change-protected, needs approval).
 
-**Next:**
+**Phase 3b done:** see "Groups" in `docs/modules/farm-profile.md`. Group form is a `StepForm` on
+master-data group types; group types print in words everywhere via `groupTypeLabel`; cards on phone.
+Certificates/printed prescriptions and hospital-network views still untouched (see 3a note).
+
+**Next: Phase 4** (daily records and events behind `farm.records.enabled`, own route file).
 1. Read this file, `docs/modules/farm-profile.md`, `docs/modules/mobile-ui.md`,
    `docs/DESIGN_SYSTEM.md`, and the skills in §3.
 2. Do not re-ask the owner anything in §2 (D1–D15 are settled).
