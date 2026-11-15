@@ -556,8 +556,10 @@ Certificates/printed prescriptions and hospital-network views still untouched (s
 **Phase 4a done:** daily records (milk, eggs, feed, sample weight, water quality, deaths) - migration 045,
 `routes/farm-records.routes.ts`, `FarmRecordService`, the Daily records screen and entry sheet; see "Daily records"
 in `docs/modules/farm-profile.md`. Dark behind `farm.records.enabled` (an admin turns it on in system settings).
-**Next: Phase 4b** - events (breeding, sale, harvest, placement...) through their existing sources of truth,
-the batch/cycle UI (open cycle, place flock, close cycle), the due list, vet-side production in `SubjectSummary`.
+**Phase 4b-1 done:** batch-group events (place flock / stock pond, cull, partial sale / harvest, clear-out) and the
+batch/cycle UI, through the population ledger (`FarmEventService`).
+**Next: 4b-2** - individual-animal events (heat, mating, pregnancy check, birth, dry-off, sale, death) through
+`breeding_records` / `movement_records` / the animal row, the due list, and vet-side production in `SubjectSummary`.
 1. Read this file, `docs/modules/farm-profile.md`, `docs/modules/mobile-ui.md`,
    `docs/DESIGN_SYSTEM.md`, and the skills in §3.
 2. Do not re-ask the owner anything in §2 (D1–D15 are settled).

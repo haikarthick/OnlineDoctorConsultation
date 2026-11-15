@@ -23,6 +23,11 @@ export const farmRecordsApi = {
     const response = await sharedClient.post('/farm-records', data)
     return response.data
   },
+  /** An event on a batch group (place flock, stock pond, cull, partial sale / harvest, clear-out). */
+  async saveGroupEvent(data: { groupId: string; eventType: string; eventDate?: string; quantity?: number | null; detail?: Record<string, unknown>; notes?: string }) {
+    const response = await sharedClient.post('/farm-records/events', data)
+    return response.data
+  },
   async deleteFarmRecord(id: string) {
     const response = await sharedClient.delete(`/farm-records/${id}`)
     return response.data

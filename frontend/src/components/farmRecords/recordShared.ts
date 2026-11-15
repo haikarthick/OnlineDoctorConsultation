@@ -22,6 +22,8 @@ export interface RecordSubject {
   gender: string | null
   managementMode: string | null
   groupType: string | null
+  /** For a group: how many animals it holds now (a group with none is offered starting a batch first). */
+  headCount?: number | null
 }
 
 export type FieldValues = Record<string, string>
@@ -45,24 +47,48 @@ const WHOLE_NUMBER_UNITS = ['head', 'eggs']
 /** Step of the +/- buttons for a measured amount, by unit. Anything else steps by 1. */
 const STEP_BY_UNIT: Record<string, number> = { L: 0.5, kg: 0.5, g: 10 }
 
+/**
+ * Events on a batch group that change its head count - they go through the population ledger on the
+ * server (backend FarmEventService.GROUP_EVENT_ACTIONS - keep the two lists in step). Other events
+ * (breeding, treatment...) have their own screens.
+ */
+export const GROUP_EVENT_CODES = ['placement', 'stocking', 'cull', 'partial_sale', 'clear_out', 'partial_harvest', 'harvest']
+/** The events that start a batch - offered first on a group that has no animals yet. */
+export const BATCH_START_CODES = ['placement', 'stocking']
+
 /** Daily (not event) record types that apply to this kind of subject in this profile. */
 export function dailyTypesFor(profile: FarmProfile, kind: RecordSubjectKind): ResolvedRecordType[] {
   return profile.recordTypes.filter(r => r.kind === 'daily' && r.subjects.includes(kind))
 }
 
 /** The fields the form shows: pickers need a source list we do not have yet, so they are left out. */
+/**
+ * Everything the entry sheet can record for this subject: the daily records, plus - for a batch
+ * group - the head-count events. A group with no animals yet is offered starting a batch first.
+ */
+export function recordableTypesFor(profile: FarmProfile, kind: RecordSubjectKind, opts: { emptyGroup?: boolean } = {}): ResolvedRecordType[] {
+  const daily = dailyTypesFor(profile, kind)
+  if (kind !== 'group') return daily
+  const events = profile.recordTypes.filter(r => r.kind === 'event' && r.subjects.includes('group') && GROUP_EVENT_CODES.includes(r.code))
+  const all = [...daily, ...events]
+  if (!opts.emptyGroup) return all
+  const start = all.filter(r => BATCH_START_CODES.includes(r.code))
+  return [...start, ...all.filter(r => !BATCH_START_CODES.includes(r.code))]
+}
+
 export function visibleFields(fields: RecordFieldDef[]): RecordFieldDef[] {
   return fields.filter(f => f.type !== 'picker')
 }
 
 export function isWholeNumberField(field: RecordFieldDef, unit: string | null): boolean {
   if (field.key === 'quantity') return !!unit && WHOLE_NUMBER_UNITS.includes(unit)
-  return /Count$/.test(field.key) || field.key === 'broken'
+  return /[cC]ount$/.test(field.key) || field.key === 'broken'
 }
 
 export function stepFor(field: RecordFieldDef, unit: string | null): number {
   if (isWholeNumberField(field, unit)) return 1
   if (field.key === 'quantity') return (unit && STEP_BY_UNIT[unit]) || 1
+  if (field.key === 'amount') return 100
   return 0.1
 }
 
@@ -116,6 +142,14 @@ export function buildRecordPayload(
   }
   if (Object.keys(detail).length) payload.detail = detail
   return payload
+}
+
+/** The body for POST /farm-records/events (a batch-group event). */
+export function buildEventPayload(
+  subject: RecordSubject, eventType: string, fields: RecordFieldDef[], values: FieldValues, date: string,
+): Record<string, unknown> {
+  const { recordType, recordDate, enterpriseId: _e, animalId: _a, groupId: _g, ...rest } = buildRecordPayload(subject, eventType, fields, values, date) as Record<string, unknown>
+  return { groupId: subject.id, eventType: recordType, eventDate: recordDate, ...rest }
 }
 
 /** The record already saved for this subject, type, day and session - saving again corrects it. */

@@ -102,6 +102,13 @@ Platform reference data: no tenant id is taken, so there is no tenant scoping he
 - **Deaths are not stored here**: `mortality` is written through `BatchManagementService.recordPopulationEvent`
   (the ledger owns head count). Other events (breeding, sale, harvest...) are Phase 4b and write through
   their existing sources of truth.
+- **Batch-group events** (Phase 4b-1): `POST /farm-records/events` -> `FarmEventService.recordGroupEvent`. Place flock /
+  stock pond (opens the cycle, or adds to the open one), cull, partial sale, partial harvest, clear-out and final
+  harvest (sell, then close the cycle). It only ever writes through `BatchManagementService` (the ledger owns head
+  count) and `GROUP_EVENT_ACTIONS` is the one table saying what each event does - mirrored by `GROUP_EVENT_CODES` in
+  `recordShared.ts`. Applicability is still the profile engine's. Harvest needs the **number of animals taken** (the
+  head count); weight, amount and buyer go into the ledger reason text. Not done yet: individual-animal events
+  (heat, mating, birth, sale, death), weaning, water exchange, the due list.
 - **Who may do what**: any owner / active member / admin reads; `farm_vet` and `viewer` cannot write (403
   with the reason); a worker deletes only what they entered, owner/manager any. A farm the caller has no
   claim on is a 404. The demo seed makes Maria Garcia a worker and Dr. Carter a farm vet on Tom's farm -

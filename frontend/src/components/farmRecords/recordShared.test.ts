@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import {
   buildRecordPayload, firstMissingField, findExisting, formatRange, totalsByType, stepFor, isWholeNumberField,
-  initialValues, defaultSession, visibleFields, dailyTypesFor, type RecordSubject, type FarmRecord,
+  initialValues, defaultSession, visibleFields, dailyTypesFor, recordableTypesFor, buildEventPayload, GROUP_EVENT_CODES,
+  type RecordSubject, type FarmRecord,
 } from './recordShared'
 import type { FarmProfile } from '../../utils/farmProfile/resolveFarmProfile'
 
@@ -86,6 +87,41 @@ describe('findExisting', () => {
     expect(findExisting(records, cow, 'milk', '2026-11-10', 'am')?.id).toBe('y')
     expect(findExisting(records, cow, 'milk', '2026-11-11', 'am')).toBeUndefined()
     expect(findExisting(records, flock, 'milk', '2026-11-10', 'am')).toBeUndefined()
+  })
+})
+
+describe('events on a batch group', () => {
+  const profile = { recordTypes: [
+    { code: 'feed', kind: 'daily', unit: 'kg', subjects: ['animal', 'group'] },
+    { code: 'mortality', kind: 'daily', unit: 'head', subjects: ['group'] },
+    { code: 'cull', kind: 'event', unit: 'head', subjects: ['group'] },
+    { code: 'placement', kind: 'event', unit: 'head', subjects: ['group'] },
+    { code: 'heat', kind: 'event', unit: null, subjects: ['animal'] },
+    { code: 'weaning', kind: 'event', unit: null, subjects: ['group'] },
+  ] } as unknown as FarmProfile
+
+  it('a batch group can record its head-count events as well as daily records', () => {
+    expect(recordableTypesFor(profile, 'group').map(r => r.code)).toEqual(['feed', 'mortality', 'cull', 'placement'])
+  })
+
+  it('events that are not about the head count are left to their own screens', () => {
+    expect(recordableTypesFor(profile, 'group').map(r => r.code)).not.toContain('weaning')
+    expect(recordableTypesFor(profile, 'animal').map(r => r.code)).toEqual(['feed'])
+  })
+
+  it('a group with no animals is offered starting a batch first', () => {
+    expect(recordableTypesFor(profile, 'group', { emptyGroup: true })[0].code).toBe('placement')
+  })
+
+  it('the event body names the group, the event and the day', () => {
+    const fields = [{ key: 'quantity', type: 'number', required: true }, { key: 'buyer', type: 'text' }]
+    expect(buildEventPayload(flock, 'partial_sale', fields, { quantity: '200', buyer: 'Ravi' }, '2026-11-10')).toEqual({
+      groupId: 'g1', eventType: 'partial_sale', eventDate: '2026-11-10', quantity: 200, detail: { buyer: 'Ravi' },
+    })
+  })
+
+  it('the list matches what the server accepts', () => {
+    expect([...GROUP_EVENT_CODES].sort()).toEqual(['clear_out', 'cull', 'harvest', 'partial_harvest', 'partial_sale', 'placement', 'stocking'])
   })
 })
 

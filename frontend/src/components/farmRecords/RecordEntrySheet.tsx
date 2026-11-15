@@ -9,7 +9,7 @@ import { ChipSelect } from '../mobile/ChipSelect'
 import { NumberStepper } from '../mobile/NumberStepper'
 import { SaveState } from '../mobile/SaveState'
 import {
-  buildRecordPayload, dailyTypesFor, defaultSession, findExisting, firstMissingField, formatQuantity, formatRange,
+  buildEventPayload, buildRecordPayload, recordableTypesFor, defaultSession, findExisting, firstMissingField, formatQuantity, formatRange,
   initialValues, isWholeNumberField, stepFor, visibleFields,
   type FarmRecord, type FieldValues, type RecordSubject,
 } from './recordShared'
@@ -41,11 +41,14 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
     managementMode: subject.managementMode, groupType: subject.groupType,
   })
 
-  const types = useMemo(() => dailyTypesFor(profile, subject.kind), [profile, subject.kind])
+  const emptyGroup = subject.kind === 'group' && subject.headCount === 0
+  const types = useMemo(() => recordableTypesFor(profile, subject.kind, { emptyGroup }), [profile, subject.kind, emptyGroup])
   const [typeCode, setTypeCode] = useState<string>(initialType && types.some(x => x.code === initialType) ? initialType : (types[0]?.code || ''))
   const entry = typeCode ? recordTypeEntry(typeCode) : undefined
   const fields = useMemo(() => visibleFields(entry?.fields || []), [entry])
   const unit = entry?.unit || null
+  // A head-count event (place flock, cull, sale, harvest) is written through the population ledger.
+  const isEvent = entry?.kind === 'event'
 
   const [values, setValues] = useState<FieldValues>(() => initialValues(entry?.fields || [], defaultSession()))
   // A different record type asks for different fields: start that form fresh.
@@ -54,13 +57,13 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
 
   const [last, setLast] = useState<{ quantity: number; date: string } | null>(null)
   const session = values.session
-  const existing = typeCode ? findExisting(records, subject, typeCode, date, session) : undefined
+  const existing = typeCode && !isEvent ? findExisting(records, subject, typeCode, date, session) : undefined
 
   // "Last time" - the figure from the most recent earlier day, one tap away.
   useEffect(() => {
     let active = true
     setLast(null)
-    if (!typeCode) return
+    if (!typeCode || isEvent) return
     apiService.listFarmRecords({
       ...(subject.kind === 'animal' ? { animalId: subject.id } : { groupId: subject.id }), recordType: typeCode, limit: 30,
     }).then((res: any) => {
@@ -70,14 +73,14 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
       setLast(prev && prev.quantity !== null ? { quantity: prev.quantity, date: prev.recordDate } : null)
     }).catch(() => { /* the hint is optional */ })
     return () => { active = false }
-  }, [subject.kind, subject.id, typeCode, date, session])
+  }, [subject.kind, subject.id, typeCode, date, session, isEvent])
 
   // useSaveAction reports only success or failure; the screen also needs what the server answered
   // (a death entry says how many are left), so the response is kept here.
   const answer = useRef<any>(null)
   const save = useSaveAction(
     async (payload: Record<string, unknown>) => {
-      const res = await apiService.saveFarmRecord(payload as any)
+      const res = 'eventType' in payload ? await apiService.saveGroupEvent(payload as any) : await apiService.saveFarmRecord(payload as any)
       answer.current = res?.data ?? null
       return res
     },
@@ -92,7 +95,7 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
 
   const submit = async () => {
     if (!typeCode || missing) return
-    const ok = await save.run(buildRecordPayload(subject, typeCode, fields, values, date))
+    const ok = await save.run((isEvent ? buildEventPayload : buildRecordPayload)(subject, typeCode, fields, values, date))
     if (ok) onSaved({ ...(answer.current || {}), recordType: typeCode })
   }
 

@@ -33,8 +33,18 @@
       "salinityPpt": "खारापन (ppt)",
       "transparencyCm": "पानी की साफ़ाई (सेमी)",
       "ammoniaPpm": "अमोनिया (ppm)",
-      "percent": "प्रतिशत"
+      "percent": "प्रतिशत",
+      "count": "पशुओं की संख्या",
+      "amount": "मिली रकम",
+      "buyer": "खरीदार (वैकल्पिक)",
+      "source": "कहाँ से लिया (वैकल्पिक)",
+      "seedSource": "बीज कहाँ से (वैकल्पिक)",
+      "reason": "कारण (वैकल्पिक)"
     },
+    "eventSaved_one": "सहेज लिया। समूह में अब {{count}} पशु हैं।",
+    "eventSaved_other": "सहेज लिया। समूह में अब {{count}} पशु हैं।",
+    "batchStarted": "नया बैच शुरू हो गया।",
+    "batchClosed": "बैच बंद हो गया।",
     "options": {
       "am": "सुबह",
       "pm": "शाम",

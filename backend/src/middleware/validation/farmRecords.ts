@@ -14,3 +14,13 @@ export const saveFarmRecordSchema = Joi.object({
   detail: Joi.object().unknown(true).allow(null).optional(),
   notes: Joi.string().max(1000).allow('', null).optional(),
 });
+
+// A batch-group event (placement, cull, sale, harvest, clear-out) - see FarmEventService.
+export const groupEventSchema = Joi.object({
+  groupId: Joi.string().uuid().required(),
+  eventType: Joi.string().max(40).required(),
+  eventDate: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  quantity: Joi.alternatives(Joi.number(), Joi.string().allow('')).allow(null).optional(),
+  detail: Joi.object().unknown(true).allow(null).optional(),
+  notes: Joi.string().max(1000).allow('', null).optional(),
+});

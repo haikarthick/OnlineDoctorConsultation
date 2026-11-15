@@ -79,7 +79,7 @@ class FarmRecordService {
   }
 
   /** Loads the animal or group a record is about, checking the caller may use its farm. */
-  private async loadSubject(input: { animalId?: string | null; groupId?: string | null }, caller: Caller, write = false): Promise<Subject> {
+  async loadSubject(input: { animalId?: string | null; groupId?: string | null }, caller: Caller, write = false): Promise<Subject> {
     if (!!input.animalId === !!input.groupId) {
       throw new ValidationError('A record is about one animal or one group - choose which.');
     }
@@ -118,14 +118,16 @@ class FarmRecordService {
     };
   }
 
-  private async loadRecordType(code: string): Promise<{ code: string; kind: string; unit: string | null; fields: FieldDef[] }> {
+  async loadRecordType(code: string, kind: 'daily' | 'event' = 'daily'): Promise<{ code: string; kind: string; unit: string | null; fields: FieldDef[] }> {
     const r = await database.query(
       `SELECT code, kind, unit, fields FROM master_record_types WHERE code = $1 AND is_active = true`, [code]
     );
     const rt = r.rows[0];
     if (!rt) throw new ValidationError(`'${code}' is not a record type you can use.`);
-    if (rt.kind !== 'daily') {
-      throw new ValidationError(`'${code}' is an event, not a daily record. Record it as an event.`);
+    if (rt.kind !== kind) {
+      throw new ValidationError(kind === 'daily'
+        ? `'${code}' is an event, not a daily record. Record it as an event.`
+        : `'${code}' is a daily record, not an event. Record it as a daily record.`);
     }
     return { code: rt.code, kind: rt.kind, unit: rt.unit || null, fields: Array.isArray(rt.fields) ? rt.fields : [] };
   }
@@ -134,7 +136,7 @@ class FarmRecordService {
    * Checks the entry against the record type's own field list and splits it into the headline
    * quantity, the session and the rest (detail). Driven entirely by master data.
    */
-  private shape(fields: FieldDef[], input: SaveRecordInput): { quantity: number | null; session: Session; detail: Record<string, unknown> } {
+  shape(fields: FieldDef[], input: SaveRecordInput): { quantity: number | null; session: Session; detail: Record<string, unknown> } {
     const raw: Record<string, unknown> = { ...(input.detail || {}) };
     if (input.quantity !== undefined && input.quantity !== null && input.quantity !== '') raw.quantity = input.quantity;
     if (input.session) raw.session = input.session;
@@ -181,7 +183,7 @@ class FarmRecordService {
     return key.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase());
   }
 
-  private checkDate(date?: string): string {
+  checkDate(date?: string): string {
     const d = date || todayIso();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || Number.isNaN(Date.parse(d))) throw new ValidationError('That date is not valid.');
     // A day of slack covers a farmer in a timezone ahead of the server.

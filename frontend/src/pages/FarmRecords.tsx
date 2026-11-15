@@ -11,7 +11,7 @@ import { resolveFarmProfile } from '../utils/farmProfile/resolveFarmProfile'
 import { DateQuick, localIsoDate } from '../components/mobile/DateQuick'
 import RecordEntrySheet from '../components/farmRecords/RecordEntrySheet'
 import {
-  dailyTypesFor, formatQuantity, totalsByType, type FarmRecord, type RecordSubject,
+  recordableTypesFor, formatQuantity, totalsByType, type FarmRecord, type RecordSubject,
 } from '../components/farmRecords/recordShared'
 
 /**
@@ -63,6 +63,7 @@ const FarmRecords: React.FC = () => {
         ...groups.map((g): RecordSubject => ({
           kind: 'group', id: g.id, name: g.name, enterpriseId: farmId, speciesCode: g.species || null, animalClass: null,
           gender: null, managementMode: g.managementMode || null, groupType: g.groupType || null,
+          headCount: typeof g.currentCount === 'number' ? g.currentCount : null,
         })),
         ...animals.map((a): RecordSubject => ({
           kind: 'animal', id: a.id, name: a.name, enterpriseId: farmId, speciesCode: a.species || null,
@@ -88,7 +89,7 @@ const FarmRecords: React.FC = () => {
         speciesCode: subject.speciesCode, animalClass: subject.animalClass, gender: subject.gender,
         managementMode: subject.managementMode, groupType: subject.groupType,
       })
-      return { subject, types: dailyTypesFor(profile, subject.kind) }
+      return { subject, types: recordableTypesFor(profile, subject.kind, { emptyGroup: subject.headCount === 0 }) }
     })
     .filter(c => c.types.length > 0)
     // Herds and flocks first (one entry covers many animals), then single animals with the most to
@@ -109,6 +110,10 @@ const FarmRecords: React.FC = () => {
     setOpen(null)
     if (result?.ledger) {
       setMessage(t('farmRecords.deathsSaved', { count: Math.abs(result.quantity) }))
+    } else if (typeof result?.currentCount === 'number') {
+      // A head-count event: say what happened to the batch, then how many animals the group has now.
+      const batch = result.cycleOpened ? `${t('farmRecords.batchStarted')} ` : result.cycleClosed ? `${t('farmRecords.batchClosed')} ` : ''
+      setMessage(`${batch}${t('farmRecords.eventSaved', { count: result.currentCount })}`)
     } else {
       setMessage(result?.replaced ? t('farmRecords.updated') : t('farmRecords.saved'))
     }

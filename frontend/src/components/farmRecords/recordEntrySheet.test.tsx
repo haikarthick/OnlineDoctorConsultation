@@ -7,14 +7,16 @@ const t = ((key: string) => key) as any
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t }) }))
 
 const save = vi.fn()
+const saveEvent = vi.fn()
 const list = vi.fn()
 vi.mock('../../services/api', () => ({
-  default: { saveFarmRecord: (...a: unknown[]) => save(...a), listFarmRecords: (...a: unknown[]) => list(...a) },
+  default: { saveFarmRecord: (...a: unknown[]) => save(...a), saveGroupEvent: (...a: unknown[]) => saveEvent(...a), listFarmRecords: (...a: unknown[]) => list(...a) },
 }))
 
 const ENTRIES: Record<string, any> = {
   milk: { code: 'milk', kind: 'daily', label: 'Milk', labelKey: null, icon: 'M', unit: 'L', fields: [{ key: 'session', type: 'choice', options: ['am', 'pm'], required: true }, { key: 'quantity', type: 'number', required: true }] },
   eggs: { code: 'eggs', kind: 'daily', label: 'Eggs', labelKey: null, icon: 'E', unit: 'eggs', fields: [{ key: 'quantity', type: 'number', required: true }, { key: 'broken', type: 'number' }] },
+  placement: { code: 'placement', kind: 'event', label: 'Place new batch', labelKey: null, icon: 'P', unit: 'head', fields: [{ key: 'quantity', type: 'number', required: true }, { key: 'source', type: 'text' }] },
   water_quality: { code: 'water_quality', kind: 'daily', label: 'Water quality', labelKey: null, icon: 'W', unit: null, fields: [{ key: 'ph', type: 'number' }] },
 }
 
@@ -96,6 +98,19 @@ describe('RecordEntrySheet', () => {
     applicable = [{ code: 'eggs', kind: 'daily', unit: 'eggs', subjects: ['group'] }, { code: 'water_quality', kind: 'daily', unit: null, subjects: ['group'] }]
     render(<RecordEntrySheet subject={pond} date="2026-11-10" initialType="water_quality" records={[]} onClose={() => {}} onSaved={() => {}} />)
     expect(screen.getByText('farmRecords.fields.ph')).toBeInTheDocument()
+  })
+
+  it('a head-count event goes to the events endpoint, not the daily one, and opens first on an empty group', async () => {
+    applicable = [{ code: 'eggs', kind: 'daily', unit: 'eggs', subjects: ['group'] }, { code: 'placement', kind: 'event', unit: 'head', subjects: ['group'] }]
+    saveEvent.mockResolvedValue({ data: { currentCount: 500, cycleOpened: true } })
+    const onSaved = vi.fn()
+    render(<RecordEntrySheet subject={{ ...pond, headCount: 0 }} date="2026-11-10" records={[]} onClose={() => {}} onSaved={onSaved} />)
+    fireEvent.change(screen.getByLabelText(/Place new batch/), { target: { value: '500' } })
+    fireEvent.click(screen.getByText('farmRecords.save'))
+    await waitFor(() => expect(saveEvent).toHaveBeenCalledTimes(1))
+    expect(save).not.toHaveBeenCalled()
+    expect(saveEvent.mock.calls[0][0]).toMatchObject({ groupId: 'g1', eventType: 'placement', eventDate: '2026-11-10', quantity: 500 })
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(expect.objectContaining({ currentCount: 500, cycleOpened: true })))
   })
 
   it('says so when nothing can be recorded for the subject', () => {

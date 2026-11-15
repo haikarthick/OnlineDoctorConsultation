@@ -33,8 +33,18 @@
       "salinityPpt": "Salinity (ppt)",
       "transparencyCm": "Water clarity (cm)",
       "ammoniaPpm": "Ammonia (ppm)",
-      "percent": "Percent"
+      "percent": "Percent",
+      "count": "Number of animals",
+      "amount": "Amount received",
+      "buyer": "Buyer (optional)",
+      "source": "Bought from (optional)",
+      "seedSource": "Seed from (optional)",
+      "reason": "Reason (optional)"
     },
+    "eventSaved_one": "Saved. The group now has {{count}} animal.",
+    "eventSaved_other": "Saved. The group now has {{count}} animals.",
+    "batchStarted": "A new batch has started.",
+    "batchClosed": "The batch is closed.",
     "options": {
       "am": "Morning",
       "pm": "Evening",

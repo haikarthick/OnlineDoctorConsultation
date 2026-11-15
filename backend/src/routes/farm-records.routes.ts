@@ -1,8 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { authMiddleware, validateBody } from '../middleware/auth';
-import { saveFarmRecordSchema } from '../middleware/validation';
+import { saveFarmRecordSchema, groupEventSchema } from '../middleware/validation';
 import { asyncHandler } from '../utils/errorHandler';
 import FarmRecordService from '../services/FarmRecordService';
+import FarmEventService from '../services/FarmEventService';
 import { isFarmRecordsEnabled } from '../services/farmRecords/FarmRecordsConfig';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -45,6 +46,12 @@ router.get('/farm-records/summary', authMiddleware, farmRecordsEnabled, asyncHan
 router.post('/farm-records', authMiddleware, farmRecordsEnabled, validateBody(saveFarmRecordSchema), asyncHandler(async (req: Request, res: Response) => {
   const saved = await FarmRecordService.save(req.body, caller(req));
   res.status(saved.replaced ? 200 : 201).json({ success: true, data: saved });
+}));
+
+// Events on a batch group (place flock, stock pond, cull, partial sale / harvest, clear-out): they
+// change the group's head count, so they are written through the population ledger.
+router.post('/farm-records/events', authMiddleware, farmRecordsEnabled, validateBody(groupEventSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await FarmEventService.recordGroupEvent(req.body, caller(req)) });
 }));
 
 router.delete('/farm-records/:id', authMiddleware, farmRecordsEnabled, asyncHandler(async (req: Request, res: Response) => {
