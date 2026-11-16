@@ -217,3 +217,14 @@ that the table's CHECK (`view, search, export, print, api_call, audit`) rejects,
 farm (`EnterpriseService.transferOwnership`, one transaction): `enterprises.owner_id` and the manager's seat become owner,
 the previous owner becomes a manager; both are notified. The team screen offers "Make owner" on managers, with a
 confirmation. Verified by a 13-check real-server run.
+
+## Saving with no signal: the outbox (2026-11-16)
+When a save fails because the phone cannot reach the server, the entry sheet offers "Save on this phone, send later"
+(`RecordEntrySheet` -> `useFarmOutbox().add`). Entries live in `utils/farmOutbox.ts` (localStorage, per signed-in
+person) and `hooks/useFarmOutbox.ts` sends them oldest-first when the screen opens, when the phone comes back online and
+every 30 s; `FarmOutboxBanner` on the Farm records screen lists what is waiting. Rules: only "could not reach the
+server" keeps an entry waiting; if the server answered and refused (animal sold, number not allowed) the entry stays
+with the server's reason and waits for the farmer (Send again / Discard). Each entry's id is its `Idempotency-Key`:
+`POST /farm-records/events` stores the answer in `farm_event_receipts` (migration 049) and replays it, so an entry whose
+first attempt did arrive is never counted twice (daily records are already one-per-day-per-subject upserts). Refused
+events store no receipt. Verified by an 8-check real-server run plus 8 unit tests.

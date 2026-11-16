@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useMasterData } from '../../context/MasterDataContext'
 import { useFarmProfile } from '../../hooks/useFarmProfile'
 import { useSaveAction } from '../../hooks/useSaveAction'
+import { useFarmOutbox } from '../../hooks/useFarmOutbox'
 import { BottomSheet } from '../mobile/BottomSheet'
 import { ChipSelect } from '../mobile/ChipSelect'
 import { NumberStepper } from '../mobile/NumberStepper'
@@ -25,6 +26,8 @@ interface RecordEntrySheetProps {
   onClose: () => void
   /** Called after a successful save with the API result; the screen refreshes and closes the sheet. */
   onSaved: (result: any) => void
+  /** Called when the entry was kept on the phone to be sent later (no signal). */
+  onQueued?: () => void
 }
 
 /**
@@ -33,7 +36,7 @@ interface RecordEntrySheetProps {
  * says which record types apply, the record type says which fields), so there is no per-species or
  * per-record code here. Saving the same entry again corrects it - a double tap cannot duplicate.
  */
-export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, date, records, initialType, onClose, onSaved }) => {
+export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, date, records, initialType, onClose, onSaved, onQueued }) => {
   const { t } = useTranslation()
   const { recordTypeEntry, resolveLabel } = useMasterData()
   const { profile } = useFarmProfile({
@@ -107,6 +110,17 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
     if (typeCode === 'birth' && addNewborns && liveBirths > 0) payload.offspring = calfRows.map(c => ({ name: c.name.trim(), gender: c.gender }))
     const ok = await save.run(payload)
     if (ok) onSaved({ ...(answer.current || {}), recordType: typeCode })
+  }
+
+  // No signal: keep the entry on this phone and send it when the connection is back.
+  const outbox = useFarmOutbox()
+  const saveForLater = () => {
+    if (!typeCode) return
+    const payload = (isEvent ? buildEventPayload : buildRecordPayload)(subject, typeCode, fields, values, date)
+    if (typeCode === 'birth' && addNewborns && liveBirths > 0) payload.offspring = calfRows.map(c => ({ name: c.name.trim(), gender: c.gender }))
+    const entry = recordTypeEntry(typeCode)
+    outbox.add({ kind: isEvent ? 'event' : 'record', payload, label: `${subject.name} - ${entry ? (resolveLabel(entry, t) || typeCode) : typeCode}` })
+    onQueued?.()
   }
 
   const typeOptions = types.map(r => {
@@ -198,6 +212,9 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
         )}
 
         <SaveState status={save.status} error={save.error} offline={save.offline} onRetry={save.retry} />
+        {save.status === 'failed' && save.offline && onQueued && (
+          <button type="button" className="btn btn-secondary" onClick={saveForLater}>📤 {t('farmRecords.outbox.saveLater')}</button>
+        )}
 
         <div className="record-sheet-actions">
           <button type="button" className="btn btn-secondary" onClick={onClose}>{t('common.cancel', { defaultValue: 'Cancel' })}</button>

@@ -5814,3 +5814,18 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_farm_invitations_pending_email
 CREATE INDEX IF NOT EXISTS idx_farm_invitations_farm ON farm_invitations(enterprise_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_farm_invitations_phone ON farm_invitations(invitee_phone) WHERE status = 'pending';
 CREATE INDEX IF NOT EXISTS idx_farm_invitations_email ON farm_invitations(invitee_email) WHERE status = 'pending';
+
+-- ============================================================
+-- 67. FARM EVENT RECEIPTS
+-- ============================================================
+-- Kept identical to backend/migrations/049_farm_event_receipts.sql (everything below its
+-- header) so a fresh install and an upgraded database end up the same. See that file for why.
+
+CREATE TABLE IF NOT EXISTS farm_event_receipts (
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  idempotency_key VARCHAR(80) NOT NULL,
+  response JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (user_id, idempotency_key)
+);
+CREATE INDEX IF NOT EXISTS idx_farm_event_receipts_created ON farm_event_receipts(created_at);

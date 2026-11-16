@@ -3614,3 +3614,14 @@ button.record-due-row { cursor: pointer; }
 .newborn-section { display: flex; flex-direction: column; gap: 10px; padding: 10px 12px; border-radius: var(--radius-lg); background: var(--gray-100); }
 .newborn-toggle { display: flex; align-items: center; gap: 10px; font-weight: 600; }
 .newborn-row { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Farm outbox: entries waiting for a signal (components/farmRecords/FarmOutboxBanner.tsx) ── */
+.farm-outbox { margin: 12px 0; padding: 10px 14px; border-radius: var(--radius-lg); background: var(--warning-light); color: #92400e; }
+.farm-outbox-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 600; }
+.farm-outbox-hint { margin: 4px 0 0; font-size: 13px; }
+.farm-outbox-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.farm-outbox-item { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 14px; }
+.farm-outbox-item.is-refused { color: var(--danger); }
+.farm-outbox-label { flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; }
+.farm-outbox-error { flex-basis: 100%; }
+.farm-outbox-actions { display: flex; gap: 8px; }

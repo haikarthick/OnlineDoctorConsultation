@@ -21,6 +21,7 @@ const ENTRIES: Record<string, any> = {
 }
 
 let applicable: Array<{ code: string; kind: 'daily' | 'event'; unit: string | null; subjects: Array<'animal' | 'group'> }> = []
+vi.mock('../../hooks/useFarmOutbox', () => ({ useFarmOutbox: () => ({ items: [], waiting: 0, refused: 0, flush: vi.fn(), add: vi.fn(), discard: vi.fn(), retry: vi.fn() }) }))
 vi.mock('../../hooks/useFarmProfile', () => ({
   useFarmProfile: () => ({ profile: { recordTypes: applicable, waterQualityRanges: { ph: { min: 7.5, max: 8.3 } } }, ready: true }),
 }))

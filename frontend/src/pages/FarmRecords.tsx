@@ -10,6 +10,8 @@ import { useFarmRecordsEnabled } from '../hooks/useFarmRecordsEnabled'
 import { resolveFarmProfile } from '../utils/farmProfile/resolveFarmProfile'
 import { DateQuick, localIsoDate } from '../components/mobile/DateQuick'
 import RecordEntrySheet from '../components/farmRecords/RecordEntrySheet'
+import { FarmOutboxBanner } from '../components/farmRecords/FarmOutboxBanner'
+import { useFarmOutbox } from '../hooks/useFarmOutbox'
 import {
   recordableTypesFor, formatQuantity, totalsByType, dueTiming, type DueItem, type FarmRecord, type RecordSubject,
 } from '../components/farmRecords/recordShared'
@@ -88,6 +90,9 @@ const FarmRecords: React.FC = () => {
 
   useEffect(() => { void load() }, [load])
 
+  // Entries saved with no signal wait on the phone; when some are sent the screen reloads.
+  const outbox = useFarmOutbox(() => { setMessage(t('farmRecords.outbox.sent')); void load() })
+
   // Only subjects with something to record today get a card: a bull or a pet has no daily records.
   const cards = useMemo(() => subjects
     .map(subject => {
@@ -152,6 +157,7 @@ const FarmRecords: React.FC = () => {
         </div>
       </div>
 
+      <FarmOutboxBanner items={outbox.items} waiting={outbox.waiting} onSendNow={() => { void outbox.flush() }} onDiscard={outbox.discard} onRetry={outbox.retry} />
       {message && <div className="alert alert-success" role="status">{message}</div>}
       {error && <div className="alert alert-error" role="alert">{error}</div>}
 
@@ -277,6 +283,7 @@ const FarmRecords: React.FC = () => {
           initialType={open.type}
           onClose={() => setOpen(null)}
           onSaved={onSaved}
+          onQueued={() => { setOpen(null); setMessage(t('farmRecords.outbox.queued')) }}
         />
       )}
     </div>

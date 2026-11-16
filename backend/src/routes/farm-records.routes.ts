@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { authMiddleware, validateBody } from '../middleware/auth';
 import { saveFarmRecordSchema, groupEventSchema } from '../middleware/validation';
 import { asyncHandler } from '../utils/errorHandler';
+import database from '../utils/database';
 import FarmRecordService from '../services/FarmRecordService';
 import FarmEventService from '../services/FarmEventService';
 import FarmDueService from '../services/FarmDueService';
@@ -59,7 +60,21 @@ router.post('/farm-records', authMiddleware, farmRecordsEnabled, validateBody(sa
 // Events on a batch group (place flock, stock pond, cull, partial sale / harvest, clear-out): they
 // change the group's head count, so they are written through the population ledger.
 router.post('/farm-records/events', authMiddleware, farmRecordsEnabled, validateBody(groupEventSchema), asyncHandler(async (req: Request, res: Response) => {
-  res.status(201).json({ success: true, data: await FarmEventService.recordEvent(req.body, caller(req)) });
+  // A phone that was offline sends the entry again later with the same Idempotency-Key: the answer given the first
+  // time is returned, and nothing is counted twice (migration 049).
+  const key = String(req.headers['idempotency-key'] || '').trim().slice(0, 80);
+  const who = caller(req);
+  if (key) {
+    const seen = await database.query(`SELECT response FROM farm_event_receipts WHERE user_id = $1 AND idempotency_key = $2`, [who.userId, key]);
+    if (seen.rows.length) return res.status(200).json({ success: true, data: seen.rows[0].response, replayed: true });
+  }
+  const data = await FarmEventService.recordEvent(req.body, who);
+  if (key) {
+    await database.query(
+      `INSERT INTO farm_event_receipts (user_id, idempotency_key, response) VALUES ($1, $2, $3::jsonb) ON CONFLICT DO NOTHING`,
+      [who.userId, key, JSON.stringify(data)]).catch(() => { /* the entry is saved; a missing receipt only loses the replay protection */ });
+  }
+  res.status(201).json({ success: true, data });
 }));
 
 router.delete('/farm-records/:id', authMiddleware, farmRecordsEnabled, asyncHandler(async (req: Request, res: Response) => {

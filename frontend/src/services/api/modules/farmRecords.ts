@@ -29,8 +29,9 @@ export const farmRecordsApi = {
     return response.data
   },
   /** An event on a batch group (place flock, cull, sale, harvest, clear-out) or on one animal (heat, mating, pregnancy check, birth, dry-off, weight, sale, death). */
-  async saveGroupEvent(data: { groupId?: string; animalId?: string; eventType: string; eventDate?: string; quantity?: number | null; detail?: Record<string, unknown>; notes?: string }) {
-    const response = await sharedClient.post('/farm-records/events', data)
+  async saveGroupEvent(data: { groupId?: string; animalId?: string; eventType: string; eventDate?: string; quantity?: number | null; detail?: Record<string, unknown>; notes?: string; offspring?: Array<{ name?: string; gender?: string }> }, idempotencyKey?: string) {
+    // The key makes a retry (an entry sent again after the phone was offline) safe: the server answers it once.
+    const response = await sharedClient.post('/farm-records/events', data, idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined)
     return response.data
   },
   async deleteFarmRecord(id: string) {
