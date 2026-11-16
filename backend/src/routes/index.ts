@@ -18,6 +18,7 @@ import groomingRoutes from './grooming.routes';
 import farmRecordsRoutes from './farm-records.routes';
 import smsSettingsRoutes from './sms-settings.routes';
 import farmInvitationsRoutes from './farm-invitations.routes';
+import groupNetworkSharingRoutes from './group-network-sharing.routes';
 
 const router = Router();
 
@@ -40,5 +41,6 @@ router.use(groomingRoutes);
 router.use(farmRecordsRoutes);
 router.use(smsSettingsRoutes);
 router.use(farmInvitationsRoutes);
+router.use(groupNetworkSharingRoutes);
 
 export default router;

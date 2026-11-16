@@ -9,6 +9,8 @@ import { useFarmProfile, useSpeciesCategories } from '../hooks/useFarmProfile'
 import { useSaveAction } from '../hooks/useSaveAction'
 import { useCssVar } from '../hooks/useCssVar'
 import GroupFormModal from '../components/animalGroups/GroupFormModal'
+import { ShareGroupSheet } from '../components/animalGroups/ShareGroupSheet'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
 import { emptyGroupForm, groupToFormData, buildGroupPayload, type GroupFormData } from '../components/animalGroups/groupShared'
 
 import { userMessage } from '../utils/userMessage'
@@ -28,6 +30,9 @@ const AnimalGroups: React.FC = () => {
   const navigate = useNavigate()
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
+  // Only the farm's owner decides to share a group's records with a hospital network.
+  const [shareGroup, setShareGroup] = useState<{ id: string; name: string } | null>(null)
+  const myFarmRole = useMyFarmRole(enterprises.find(e => e.id === selectedEnterpriseId))
   const [groups, setGroups] = useState<AnimalGroup[]>([])
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
@@ -307,6 +312,9 @@ const AnimalGroups: React.FC = () => {
                   title={t('animalGroups.bookConsultation')}>
                   {t('animalGroups.bookConsultation')}
                 </button>
+                {myFarmRole === 'owner' && (
+                  <button className="btn btn-sm btn-secondary" onClick={() => setShareGroup({ id: g.id, name: g.name })}>{t('groupSharing.shareButton')}</button>
+                )}
                 <button className="btn btn-sm btn-secondary" onClick={() => openEdit(g)}>{t('common.edit')}</button>
                 <button className="btn btn-sm btn-danger" onClick={() => handleDelete(g.id)}>{t('common.delete')}</button>
               </div>
@@ -534,6 +542,7 @@ const AnimalGroups: React.FC = () => {
           speciesCategories={speciesCategories}
         />
       )}
+      <ShareGroupSheet group={shareGroup} onClose={() => setShareGroup(null)} />
     </div>
   )
 }

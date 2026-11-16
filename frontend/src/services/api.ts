@@ -29,6 +29,7 @@ import { networkReferralsAdminApi } from './api/modules/networkReferralsAdmin'
 import { farmRecordsApi } from './api/modules/farmRecords'
 import { smsSettingsApi } from './api/modules/smsSettings'
 import { farmInvitationsApi } from './api/modules/farmInvitations'
+import { groupSharingApi } from './api/modules/groupSharing'
 
 export { sharedClient, fetchCsrfToken }
 export { extractArrayFromResponse, extractTotalFromResponse } from './api/utils'
@@ -53,5 +54,6 @@ export const apiService = {
   ...farmRecordsApi,
   ...smsSettingsApi,
   ...farmInvitationsApi,
+  ...groupSharingApi,
 }
 export default apiService

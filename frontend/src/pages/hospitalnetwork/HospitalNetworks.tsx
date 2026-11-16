@@ -29,6 +29,7 @@ import NetworksListTab from '../../components/hospitalNetwork/NetworksListTab'
 import NetworkDetailTab from '../../components/hospitalNetwork/NetworkDetailTab'
 import AuditTab from '../../components/hospitalNetwork/AuditTab'
 import PatientsTab from '../../components/hospitalNetwork/PatientsTab'
+import { SharedGroupsPanel } from '../../components/hospitalNetwork/SharedGroupsPanel'
 import ReferralsTab from '../../components/hospitalNetwork/ReferralsTab'
 import LeaveManagementTab from '../../components/hospitalNetwork/LeaveManagementTab'
 import AnalyticsTab from '../../components/hospitalNetwork/AnalyticsTab'
@@ -1025,6 +1026,7 @@ const HospitalNetworks: React.FC = () => {
           t={t}
         />
       )}
+      {activeTab === 'patients' && selectedNetwork && <SharedGroupsPanel networkId={selectedNetwork.id} />}
 
       {(showCreateModal || editingNetwork) && (
         <NetworkModal

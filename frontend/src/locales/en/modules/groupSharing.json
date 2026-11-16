@@ -1,0 +1,47 @@
+{
+  "groupSharing": {
+    "shareButton": "Share with a hospital",
+    "title": "Share \"{{name}}\" with a hospital network",
+    "explain": "You decide who sees this group's records. Create a one-time code for the current production cycle and give it to the hospital. They can only read, and only the records of this cycle.",
+    "loadFailed": "We could not load the sharing details. Check your connection and try again.",
+    "createFailed": "The code could not be created. Check your connection and try again.",
+    "stopFailed": "Sharing could not be stopped. Try again.",
+    "cancelFailed": "The code could not be cancelled. Try again.",
+    "sharedNow": "Shared now",
+    "since": "since {{date}}",
+    "stop": "Stop sharing",
+    "endsWithCycle": "Sharing ends by itself when this cycle is closed. For the next cycle you create a new code.",
+    "codeReady": "Give this code to the hospital",
+    "codeNote": "It works once and expires on {{date}}. We cannot show it again - copy it now.",
+    "copy": "Copy code",
+    "copied": "Copied",
+    "whatToShare": "What the hospital may read",
+    "scope": {
+      "medicalRecords": "Medical records",
+      "vaccinationRecords": "Vaccinations",
+      "prescriptions": "Prescriptions"
+    },
+    "createCode": "Create code",
+    "openCodes": "Codes not used yet",
+    "validTo": "valid until {{date}}",
+    "cancelCode": "Cancel code",
+    "earlier": "Earlier sharing",
+    "endedCycle": "ended when the cycle closed",
+    "endedOwner": "stopped by you",
+    "network": {
+      "title": "Groups shared by farms",
+      "explain": "A farm owner can share a herd or flock with you for one production cycle. Enter the code they give you. You can read, not change, its records.",
+      "codeLabel": "Code from the farm",
+      "add": "Add group",
+      "added": "The group is now shared with you.",
+      "none": "No group is shared with your branch yet.",
+      "heads_one": "{{count}} animal",
+      "heads_other": "{{count}} animals",
+      "view": "View records",
+      "cycleOnly": "Only the records of the shared cycle are shown.",
+      "loadFailed": "We could not load the shared groups. Check your connection and try again.",
+      "redeemFailed": "The code could not be used. Check it and try again.",
+      "recordsFailed": "We could not load the records. Try again."
+    }
+  }
+}

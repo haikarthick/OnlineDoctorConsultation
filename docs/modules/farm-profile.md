@@ -288,3 +288,25 @@ only a group they are booked or in consultation for); and a vet's open consultat
 **different** animal or group booked later (the dedupe ignored the subject) - it now matches the same subject only.
 Verified by an 11-check real-server run. Group enrolment in a hospital network (cycle-bound consent) is the one Phase 5 item
 left; it is change-protected hospital-network code and needs the owner's sign-off on the specific isolation changes first.
+
+## Sharing a group with a hospital network (2026-11-16, owner approved)
+A farm shares a GROUP (herd / flock) with a hospital network for **one production cycle**. Own tables (migration 052, `init.sql`
+§69) and own route file (`routes/group-network-sharing.routes.ts`, `services/GroupNetworkSharingService.ts`): the animal
+enrolment code and tables (`animal_care_contexts`, `patient_data_consent`) are change-protected and were not touched. The
+only edits near protected code are one line mounting the new routes, one hook in `BatchManagementService.closeCycle`, and one
+panel rendered in the network's Patients tab.
+- **Why a code, not a request from the network:** a network cannot browse farms (directory is scoped, memory
+  network-hospital audit I-3) and a group id must never be enough to ask for one (the animal flow guards that with a "footprint"
+  check; a group has no visit history). So consent comes first: the **owner** creates a one-time code for the group's current
+  cycle (choose: medical records, vaccinations, prescriptions) and gives it to the hospital. Only the SHA-256 of the code is
+  stored; it is shown once; valid 14 days; cancellable.
+- **Network side:** staff with the existing `enrollPatient` permission redeem it (branch-scoped roles enrol into their own branch);
+  `viewEnrolledPatients` lists shared groups and reads their records, read-only, **only that cycle's records**, only what the owner
+  allowed, never `is_confidential` ones, each read written to `clinical_data_access_log` (`record_type='group_records'`,
+  `record_id` = the group). Non-members get 404, an unshared group 403 with a plain next step.
+- **Cycle-bound:** `group_care_contexts.cycle_id`; closing the cycle ends the sharing (`ended_reason='cycle_closed'`) and cancels
+  unused codes; the next cycle needs a new code. A group with no cycle is shared for 90 days.
+- **Owner controls:** only the farm owner (or a platform admin) can create / cancel codes or stop a sharing; the owner is notified
+  when a network redeems a code; "Share with a hospital" on the group card (`ShareGroupSheet`).
+Verified by a 29-check real-server run (owner-only, wrong / used / cancelled code, non-member 404, branch scoping, scope
+respected, audit row, cycle close ends it, new cycle needs a new code, owner stops it, earlier cycle's records not shown).

@@ -3820,3 +3820,18 @@ button.record-due-row { cursor: pointer; }
 .group-history h4 { margin: 0 0 6px; font-size: 15px; }
 .group-history-empty { margin: 0; font-size: 13px; color: var(--gray-600); }
 .group-history-list { margin: 0; padding-left: 18px; font-size: 14px; }
+
+/* ── Sharing a group with a hospital network (components/animalGroups/ShareGroupSheet.tsx, hospitalNetwork/SharedGroupsPanel.tsx) ── */
+.share-hint { margin: 4px 0 10px; font-size: 13px; color: var(--gray-600); }
+.share-section { margin: 14px 0; }
+.share-section h4 { margin: 0 0 6px; font-size: 15px; }
+.share-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.share-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 8px 10px; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); }
+.share-row-name { flex: 1 1 160px; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.share-row-meta { font-size: 13px; color: var(--gray-600); }
+.share-check { display: flex; align-items: center; gap: 10px; min-height: var(--tap-min); }
+.share-action { width: 100%; min-height: var(--tap-min); margin-top: 10px; }
+.share-code-box { padding: 12px 14px; border-radius: var(--radius-lg); background: var(--brand-soft); }
+.share-code { margin: 6px 0; font-size: 30px; font-weight: 700; letter-spacing: 3px; text-align: center; overflow-wrap: anywhere; }
+.shared-groups { margin: 18px 0; padding: 14px; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); background: #fff; }
+.shared-groups-add { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
