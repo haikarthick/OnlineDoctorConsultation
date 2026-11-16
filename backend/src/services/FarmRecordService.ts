@@ -198,13 +198,13 @@ class FarmRecordService {
    * Saves one daily record. Saving the same subject / type / date / session again corrects it
    * (the earlier values are kept in the audit table) - it never adds a second row.
    */
-  async save(input: SaveRecordInput, caller: Caller): Promise<any> {
+  async save(input: SaveRecordInput, caller: Caller, kind: 'daily' | 'event' = 'daily'): Promise<any> {
     const subject = await this.loadSubject(input, caller, true);
     if (input.enterpriseId && input.enterpriseId !== subject.enterpriseId) {
       throw new ValidationError('That animal or group is not on the selected farm.');
     }
     const recordDate = this.checkDate(input.recordDate);
-    const rt = await this.loadRecordType(input.recordType);
+    const rt = await this.loadRecordType(input.recordType, kind);
 
     await FarmProfileService.assertRecordTypeAllowed({
       speciesCode: subject.speciesCode, animalClass: subject.animalClass, gender: subject.gender,

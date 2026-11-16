@@ -34,6 +34,11 @@
       "transparencyCm": "ನೀರಿನ ಸ್ಪಷ್ಟತೆ (ಸೆಂ.ಮೀ)",
       "ammoniaPpm": "ಅಮೋನಿಯಾ (ppm)",
       "percent": "ಶೇಕಡಾ",
+      "result": "ಫಲಿತಾಂಶ",
+      "method": "ವಿಧಾನ",
+      "liveBirths": "ಜೀವಂತ ಹುಟ್ಟಿದ್ದು",
+      "stillbirths": "ಸತ್ತು ಹುಟ್ಟಿದ್ದು",
+      "weight": "ತೂಕ (ಕೆ.ಜಿ)",
       "count": "ಪ್ರಾಣಿಗಳ ಸಂಖ್ಯೆ",
       "amount": "ಬಂದ ಮೊತ್ತ",
       "buyer": "ಖರೀದಿದಾರ (ಐಚ್ಛಿಕ)",
@@ -48,8 +53,13 @@
     "options": {
       "am": "ಬೆಳಿಗ್ಗೆ",
       "pm": "ಸಂಜೆ",
-      "day": "ಇಡೀ ದಿನ"
+      "day": "ಇಡೀ ದಿನ",
+      "pregnant": "ಗರ್ಭಧರಿಸಿದೆ",
+      "not_pregnant": "ಗರ್ಭಧರಿಸಿಲ್ಲ",
+      "natural": "ಸಹಜ ಸಂಯೋಗ",
+      "artificial_insemination": "ಕೃತಕ ಗರ್ಭಧಾರಣೆ (AI)"
     },
+    "dueAbout": "ಉಳಿಸಲಾಗಿದೆ. ಸುಮಾರು {{date}} ರಂದು ಈಯುವ ನಿರೀಕ್ಷೆ.",
     "lastTime": "ಕಳೆದ ಬಾರಿ: {{value}}",
     "usualRange": "ಸಾಮಾನ್ಯ ವ್ಯಾಪ್ತಿ: {{range}}",
     "alreadyRecorded": "ಈಗಾಗಲೇ ದಾಖಲಾಗಿದೆ: {{value}}. ಉಳಿಸಿದರೆ ಇದು ಬದಲಾಗುತ್ತದೆ.",

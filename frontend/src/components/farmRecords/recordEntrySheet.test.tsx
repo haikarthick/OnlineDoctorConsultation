@@ -35,11 +35,11 @@ beforeEach(() => {
   vi.clearAllMocks()
   list.mockResolvedValue({ data: { items: [] } })
   save.mockResolvedValue({ data: { id: 'r1', replaced: false } })
-  applicable = [{ code: 'milk', kind: 'daily', unit: 'L', subjects: ['animal', 'group'] }, { code: 'heat', kind: 'event', unit: null, subjects: ['animal'] }]
+  applicable = [{ code: 'milk', kind: 'daily', unit: 'L', subjects: ['animal', 'group'] }, { code: 'weaning', kind: 'event', unit: null, subjects: ['animal'] }]
 })
 
 describe('RecordEntrySheet', () => {
-  it('offers only daily records that apply, and asks for what the record type asks for', () => {
+  it('offers only records and events the screen can write, that apply, and asks for what the record type asks for', () => {
     render(<RecordEntrySheet subject={cow} date="2026-11-10" records={[]} onClose={() => {}} onSaved={() => {}} />)
     expect(screen.getByText('farmRecords.sheetTitle')).toBeInTheDocument()
     expect(screen.getByText('farmRecords.fields.session')).toBeInTheDocument() // milk asks which milking

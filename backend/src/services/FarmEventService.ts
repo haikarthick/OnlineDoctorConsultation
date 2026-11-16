@@ -3,6 +3,10 @@ import { ValidationError } from '../utils/errors';
 import FarmProfileService from './FarmProfileService';
 import FarmRecordService from './FarmRecordService';
 import BatchManagementService, { PopulationEventType } from './BatchManagementService';
+import BreedingService from './BreedingService';
+import AnimalService from './AnimalService';
+import AnimalGroupService from './AnimalGroupService';
+import MedicalRecordService from './MedicalRecordService';
 
 /**
  * Farm EVENTS on a batch group - placing a flock, stocking a pond, culling, a partial sale or
@@ -41,8 +45,18 @@ export const GROUP_EVENT_ACTIONS: Record<string, EventAction> = {
 
 interface Caller { userId: string; role?: string }
 
+/**
+ * What each event on ONE animal does, and which source of truth it writes through. Breeding events
+ * go through BreedingService (which maps record status onto the animal's own vocabulary and counts
+ * a birth once); a weight through the weight history; status changes touch the animal row only.
+ * A record type not listed here is not recordable as an animal event yet (treatments and
+ * vaccinations have their own screens; weaning, shearing and purchases come later).
+ */
+export const ANIMAL_EVENT_CODES = ['heat', 'insemination', 'pregnancy_check', 'birth', 'dry_off', 'weight', 'sale', 'death'];
+
 export interface GroupEventInput {
-  groupId: string;
+  groupId?: string;
+  animalId?: string;
   eventType: string;
   eventDate?: string;
   quantity?: number | string | null;
@@ -51,6 +65,113 @@ export interface GroupEventInput {
 }
 
 class FarmEventService {
+
+  /** One entry point: the body names a group (head-count events) or an animal (individual events). */
+  async recordEvent(input: GroupEventInput, caller: Caller): Promise<any> {
+    if (!!input.groupId === !!input.animalId) throw new ValidationError('An event is about one animal or one group - choose which.');
+    return input.groupId ? this.recordGroupEvent(input, caller) : this.recordAnimalEvent(input, caller);
+  }
+
+  async recordAnimalEvent(input: GroupEventInput, caller: Caller): Promise<any> {
+    if (!ANIMAL_EVENT_CODES.includes(input.eventType)) {
+      throw new ValidationError(`'${input.eventType}' cannot be recorded here. Choose one of: ${ANIMAL_EVENT_CODES.join(', ')}.`);
+    }
+    const subject = await FarmRecordService.loadSubject({ animalId: input.animalId }, caller, true);
+    const eventDate = FarmRecordService.checkDate(input.eventDate);
+    const rt = await FarmRecordService.loadRecordType(input.eventType, 'event');
+    await FarmProfileService.assertRecordTypeAllowed({
+      speciesCode: subject.speciesCode, animalClass: subject.animalClass, gender: subject.gender,
+      managementMode: 'individual', groupType: subject.groupType,
+    }, rt.code, 'animal');
+    const { quantity, detail } = FarmRecordService.shape(rt.fields, { recordType: rt.code, quantity: input.quantity, detail: input.detail });
+
+    const st = await database.query(`SELECT status, group_id FROM animals WHERE id = $1`, [subject.id]);
+    const status: string = st.rows[0]?.status || 'active';
+    const groupId: string | null = st.rows[0]?.group_id || null;
+    if (status === 'sold' || status === 'deceased') {
+      throw new ValidationError(`This animal is already marked as ${status}, so nothing more can be recorded for it.`);
+    }
+
+    const base = { recordType: rt.code, animalId: subject.id, eventDate };
+    switch (rt.code) {
+      case 'heat':
+        // An observation, not a change to anything else: one a day.
+        await FarmRecordService.save({ animalId: subject.id, recordType: 'heat', recordDate: eventDate, notes: input.notes }, caller, 'event');
+        return base;
+
+      case 'insemination': {
+        const rec = await BreedingService.create({
+          enterpriseId: subject.enterpriseId, damId: subject.id, species: subject.speciesCode,
+          breedingMethod: (detail.method as string) || 'natural', breedingDate: eventDate, status: 'bred', notes: input.notes || null,
+        });
+        return { ...base, breedingRecordId: rec.id, expectedDueDate: rec.expectedDueDate ?? null };
+      }
+
+      case 'pregnancy_check': {
+        const open = await this.openBreedingRecord(subject.id, ['bred']);
+        if (!open) throw new ValidationError('No mating is recorded for this animal. Record the mating first, then the pregnancy check.');
+        const pregnant = detail.result === 'pregnant';
+        const rec = await BreedingService.update(open.id, {
+          status: pregnant ? 'confirmed_pregnant' : 'not_pregnant', pregnancyConfirmed: pregnant, pregnancyCheckDate: eventDate,
+        });
+        return { ...base, breedingRecordId: open.id, result: detail.result, expectedDueDate: rec.expectedDueDate ?? null };
+      }
+
+      case 'birth': {
+        let open = await this.openBreedingRecord(subject.id, ['bred', 'confirmed_pregnant']);
+        if (!open) {
+          // A birth without a recorded mating (bought in pregnant, mating not written down): the
+          // date of the mating is unknown, so the birth date stands in for it.
+          const created = await BreedingService.create({
+            enterpriseId: subject.enterpriseId, damId: subject.id, species: subject.speciesCode,
+            breedingMethod: 'natural', breedingDate: eventDate, status: 'bred', notes: 'Created from a birth entry (no mating recorded)',
+          });
+          open = { id: created.id };
+        }
+        const live = Math.round(Number(detail.liveBirths ?? 0));
+        const still = Math.round(Number(detail.stillbirths ?? 0));
+        await BreedingService.update(open.id, {
+          status: 'delivered', actualBirthDate: eventDate, liveBirths: live, stillbirths: still, offspringCount: live + still, notes: input.notes,
+        });
+        return { ...base, breedingRecordId: open.id, liveBirths: live, stillbirths: still };
+      }
+
+      case 'dry_off':
+        await AnimalService.updateAnimal(subject.id, { dryOffDate: eventDate });
+        return base;
+
+      case 'weight': {
+        const w = Number(detail.weight ?? quantity);
+        if (!Number.isFinite(w) || w <= 0) throw new ValidationError('Enter the weight, above zero.');
+        await MedicalRecordService.addWeight(subject.id, w, 'kg', caller.userId, input.notes || undefined);
+        return { ...base, weight: w };
+      }
+
+      case 'sale':
+      case 'death': {
+        const newStatus = rt.code === 'sale' ? 'sold' : 'deceased';
+        const note = [rt.code === 'sale' ? 'Sold' : 'Died', eventDate, detail.amount ? `amount ${detail.amount}` : '', detail.buyer ? `to ${detail.buyer}` : '',
+          detail.cause ? `cause: ${detail.cause}` : '', input.notes || ''].filter(Boolean).join(' - ');
+        await database.query(
+          `UPDATE animals SET status = $1, medical_notes = CASE WHEN COALESCE(medical_notes, '') = '' THEN $2 ELSE medical_notes || chr(10) || $2 END, updated_at = NOW() WHERE id = $3`,
+          [newStatus, note, subject.id]
+        );
+        // It leaves its group, which keeps the group's head count honest.
+        if (groupId) await AnimalGroupService.removeAnimal(groupId, subject.id);
+        return { ...base, status: newStatus };
+      }
+    }
+    throw new ValidationError(`'${rt.code}' cannot be recorded here.`);
+  }
+
+  /** The animal's most recent breeding record that is still in one of these states. */
+  private async openBreedingRecord(damId: string, statuses: string[]): Promise<{ id: string } | null> {
+    const r = await database.query(
+      `SELECT id FROM breeding_records WHERE dam_id = $1 AND status = ANY($2::text[]) ORDER BY breeding_date DESC, created_at DESC LIMIT 1`,
+      [damId, statuses]
+    );
+    return r.rows[0] ? { id: r.rows[0].id } : null;
+  }
 
   async recordGroupEvent(input: GroupEventInput, caller: Caller): Promise<any> {
     const action = GROUP_EVENT_ACTIONS[input.eventType];

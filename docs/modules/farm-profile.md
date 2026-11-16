@@ -107,8 +107,13 @@ Platform reference data: no tenant id is taken, so there is no tenant scoping he
   harvest (sell, then close the cycle). It only ever writes through `BatchManagementService` (the ledger owns head
   count) and `GROUP_EVENT_ACTIONS` is the one table saying what each event does - mirrored by `GROUP_EVENT_CODES` in
   `recordShared.ts`. Applicability is still the profile engine's. Harvest needs the **number of animals taken** (the
-  head count); weight, amount and buyer go into the ledger reason text. Not done yet: individual-animal events
-  (heat, mating, birth, sale, death), weaning, water exchange, the due list.
+  head count); weight, amount and buyer go into the ledger reason text. 
+- **Events on one animal** (Phase 4b-2): same endpoint with `animalId`. Mating -> `BreedingService.create` (expected
+  birth date from master gestation days); pregnancy check -> the open breeding record; birth -> completes it
+  (`BreedingService.update` counts the birth once; with no mating on record a record is made from the birth entry);
+  dry-off -> the animal's date; weight -> weight history; heat -> one observation row a day; sale / death -> animal
+  status, a note, and out of its group. A sold or dead animal accepts nothing more. Not done yet: creating the calf
+  as an animal on birth, weaning, shearing, water exchange, the due list.
 - **Who may do what**: any owner / active member / admin reads; `farm_vet` and `viewer` cannot write (403
   with the reason); a worker deletes only what they entered, owner/manager any. A farm the caller has no
   claim on is a 404. The demo seed makes Maria Garcia a worker and Dr. Carter a farm vet on Tom's farm -

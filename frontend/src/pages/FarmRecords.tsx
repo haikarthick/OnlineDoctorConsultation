@@ -65,7 +65,8 @@ const FarmRecords: React.FC = () => {
           gender: null, managementMode: g.managementMode || null, groupType: g.groupType || null,
           headCount: typeof g.currentCount === 'number' ? g.currentCount : null,
         })),
-        ...animals.map((a): RecordSubject => ({
+        // A sold or dead animal has nothing more to record.
+        ...animals.filter(a => a.status !== 'sold' && a.status !== 'deceased').map((a): RecordSubject => ({
           kind: 'animal', id: a.id, name: a.name, enterpriseId: farmId, speciesCode: a.species || null,
           animalClass: a.animalClass || null, gender: a.gender || null, managementMode: 'individual', groupType: null,
         })),
@@ -114,6 +115,8 @@ const FarmRecords: React.FC = () => {
       // A head-count event: say what happened to the batch, then how many animals the group has now.
       const batch = result.cycleOpened ? `${t('farmRecords.batchStarted')} ` : result.cycleClosed ? `${t('farmRecords.batchClosed')} ` : ''
       setMessage(`${batch}${t('farmRecords.eventSaved', { count: result.currentCount })}`)
+    } else if (result?.expectedDueDate) {
+      setMessage(t('farmRecords.dueAbout', { date: new Date(result.expectedDueDate).toLocaleDateString() }))
     } else {
       setMessage(result?.replaced ? t('farmRecords.updated') : t('farmRecords.saved'))
     }

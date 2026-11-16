@@ -53,6 +53,8 @@ const STEP_BY_UNIT: Record<string, number> = { L: 0.5, kg: 0.5, g: 10 }
  * (breeding, treatment...) have their own screens.
  */
 export const GROUP_EVENT_CODES = ['placement', 'stocking', 'cull', 'partial_sale', 'clear_out', 'partial_harvest', 'harvest']
+/** Events on ONE animal (backend FarmEventService.ANIMAL_EVENT_CODES - keep the two lists in step). */
+export const ANIMAL_EVENT_CODES = ['heat', 'insemination', 'pregnancy_check', 'birth', 'dry_off', 'weight', 'sale', 'death']
 /** The events that start a batch - offered first on a group that has no animals yet. */
 export const BATCH_START_CODES = ['placement', 'stocking']
 
@@ -68,10 +70,10 @@ export function dailyTypesFor(profile: FarmProfile, kind: RecordSubjectKind): Re
  */
 export function recordableTypesFor(profile: FarmProfile, kind: RecordSubjectKind, opts: { emptyGroup?: boolean } = {}): ResolvedRecordType[] {
   const daily = dailyTypesFor(profile, kind)
-  if (kind !== 'group') return daily
-  const events = profile.recordTypes.filter(r => r.kind === 'event' && r.subjects.includes('group') && GROUP_EVENT_CODES.includes(r.code))
+  const codes = kind === 'group' ? GROUP_EVENT_CODES : ANIMAL_EVENT_CODES
+  const events = profile.recordTypes.filter(r => r.kind === 'event' && r.subjects.includes(kind) && codes.includes(r.code))
   const all = [...daily, ...events]
-  if (!opts.emptyGroup) return all
+  if (kind !== 'group' || !opts.emptyGroup) return all
   const start = all.filter(r => BATCH_START_CODES.includes(r.code))
   return [...start, ...all.filter(r => !BATCH_START_CODES.includes(r.code))]
 }
@@ -82,7 +84,7 @@ export function visibleFields(fields: RecordFieldDef[]): RecordFieldDef[] {
 
 export function isWholeNumberField(field: RecordFieldDef, unit: string | null): boolean {
   if (field.key === 'quantity') return !!unit && WHOLE_NUMBER_UNITS.includes(unit)
-  return /[cC]ount$/.test(field.key) || field.key === 'broken'
+  return /[cC]ount$/.test(field.key) || ['broken', 'liveBirths', 'stillbirths'].includes(field.key)
 }
 
 export function stepFor(field: RecordFieldDef, unit: string | null): number {
@@ -144,12 +146,12 @@ export function buildRecordPayload(
   return payload
 }
 
-/** The body for POST /farm-records/events (a batch-group event). */
+/** The body for POST /farm-records/events (an event on a batch group or on one animal). */
 export function buildEventPayload(
   subject: RecordSubject, eventType: string, fields: RecordFieldDef[], values: FieldValues, date: string,
 ): Record<string, unknown> {
   const { recordType, recordDate, enterpriseId: _e, animalId: _a, groupId: _g, ...rest } = buildRecordPayload(subject, eventType, fields, values, date) as Record<string, unknown>
-  return { groupId: subject.id, eventType: recordType, eventDate: recordDate, ...rest }
+  return { [subject.kind === 'animal' ? 'animalId' : 'groupId']: subject.id, eventType: recordType, eventDate: recordDate, ...rest }
 }
 
 /** The record already saved for this subject, type, day and session - saving again corrects it. */

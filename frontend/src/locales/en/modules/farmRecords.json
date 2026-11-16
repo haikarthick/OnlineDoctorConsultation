@@ -34,6 +34,11 @@
       "transparencyCm": "Water clarity (cm)",
       "ammoniaPpm": "Ammonia (ppm)",
       "percent": "Percent",
+      "result": "Result",
+      "method": "How",
+      "liveBirths": "Born alive",
+      "stillbirths": "Stillborn",
+      "weight": "Weight (kg)",
       "count": "Number of animals",
       "amount": "Amount received",
       "buyer": "Buyer (optional)",
@@ -48,8 +53,13 @@
     "options": {
       "am": "Morning",
       "pm": "Evening",
-      "day": "Whole day"
+      "day": "Whole day",
+      "pregnant": "Pregnant",
+      "not_pregnant": "Not pregnant",
+      "natural": "Natural mating",
+      "artificial_insemination": "Artificial insemination (AI)"
     },
+    "dueAbout": "Saved. Birth expected about {{date}}.",
     "lastTime": "Last time: {{value}}",
     "usualRange": "Usual range: {{range}}",
     "alreadyRecorded": "Already recorded: {{value}}. Saving will update it.",

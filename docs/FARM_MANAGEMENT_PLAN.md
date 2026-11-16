@@ -558,8 +558,9 @@ Certificates/printed prescriptions and hospital-network views still untouched (s
 in `docs/modules/farm-profile.md`. Dark behind `farm.records.enabled` (an admin turns it on in system settings).
 **Phase 4b-1 done:** batch-group events (place flock / stock pond, cull, partial sale / harvest, clear-out) and the
 batch/cycle UI, through the population ledger (`FarmEventService`).
-**Next: 4b-2** - individual-animal events (heat, mating, pregnancy check, birth, dry-off, sale, death) through
-`breeding_records` / `movement_records` / the animal row, the due list, and vet-side production in `SubjectSummary`.
+**Phase 4b-2 (events) done:** heat, mating, pregnancy check, birth, dry-off, weight, sale, death for one animal.
+**Next: 4b-3** - the due list (expected births, pregnancy checks, dry-off, vaccinations, withdrawal ending) on the
+Daily records screen, and vet-side production + events in `SubjectSummary`.
 1. Read this file, `docs/modules/farm-profile.md`, `docs/modules/mobile-ui.md`,
    `docs/DESIGN_SYSTEM.md`, and the skills in §3.
 2. Do not re-ask the owner anything in §2 (D1–D15 are settled).

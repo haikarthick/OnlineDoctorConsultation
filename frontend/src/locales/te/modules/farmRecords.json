@@ -34,6 +34,11 @@
       "transparencyCm": "నీటి స్పష్టత (సెం.మీ)",
       "ammoniaPpm": "అమ్మోనియా (ppm)",
       "percent": "శాతం",
+      "result": "ఫలితం",
+      "method": "పద్ధతి",
+      "liveBirths": "సజీవంగా పుట్టినవి",
+      "stillbirths": "చనిపోయి పుట్టినవి",
+      "weight": "బరువు (కిలో)",
       "count": "జంతువుల సంఖ్య",
       "amount": "వచ్చిన మొత్తం",
       "buyer": "కొనుగోలుదారు (ఐచ్ఛికం)",
@@ -48,8 +53,13 @@
     "options": {
       "am": "ఉదయం",
       "pm": "సాయంత్రం",
-      "day": "రోజంతా"
+      "day": "రోజంతా",
+      "pregnant": "చూడి",
+      "not_pregnant": "చూడి కాదు",
+      "natural": "సహజ సంపర్కం",
+      "artificial_insemination": "కృత్రిమ గర్భధారణ (AI)"
     },
+    "dueAbout": "సేవ్ అయింది. సుమారు {{date}} న ఈనే అవకాశం.",
     "lastTime": "గత సారి: {{value}}",
     "usualRange": "సాధారణ పరిధి: {{range}}",
     "alreadyRecorded": "ఇప్పటికే నమోదు: {{value}}. సేవ్ చేస్తే ఇది మారుతుంది.",

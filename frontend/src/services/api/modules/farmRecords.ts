@@ -23,8 +23,8 @@ export const farmRecordsApi = {
     const response = await sharedClient.post('/farm-records', data)
     return response.data
   },
-  /** An event on a batch group (place flock, stock pond, cull, partial sale / harvest, clear-out). */
-  async saveGroupEvent(data: { groupId: string; eventType: string; eventDate?: string; quantity?: number | null; detail?: Record<string, unknown>; notes?: string }) {
+  /** An event on a batch group (place flock, cull, sale, harvest, clear-out) or on one animal (heat, mating, pregnancy check, birth, dry-off, weight, sale, death). */
+  async saveGroupEvent(data: { groupId?: string; animalId?: string; eventType: string; eventDate?: string; quantity?: number | null; detail?: Record<string, unknown>; notes?: string }) {
     const response = await sharedClient.post('/farm-records/events', data)
     return response.data
   },

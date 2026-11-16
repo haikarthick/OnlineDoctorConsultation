@@ -34,6 +34,11 @@
       "transparencyCm": "पानी की साफ़ाई (सेमी)",
       "ammoniaPpm": "अमोनिया (ppm)",
       "percent": "प्रतिशत",
+      "result": "नतीजा",
+      "method": "तरीका",
+      "liveBirths": "जीवित जन्मे",
+      "stillbirths": "मृत जन्मे",
+      "weight": "वज़न (किग्रा)",
       "count": "पशुओं की संख्या",
       "amount": "मिली रकम",
       "buyer": "खरीदार (वैकल्पिक)",
@@ -48,8 +53,13 @@
     "options": {
       "am": "सुबह",
       "pm": "शाम",
-      "day": "पूरा दिन"
+      "day": "पूरा दिन",
+      "pregnant": "गाभिन",
+      "not_pregnant": "गाभिन नहीं",
+      "natural": "प्राकृतिक",
+      "artificial_insemination": "कृत्रिम गर्भाधान (AI)"
     },
+    "dueAbout": "सहेज लिया। बच्चा लगभग {{date}} को होने की उम्मीद है।",
     "lastTime": "पिछली बार: {{value}}",
     "usualRange": "सामान्य सीमा: {{range}}",
     "alreadyRecorded": "पहले से दर्ज: {{value}}। सहेजने पर यह बदल जाएगा।",

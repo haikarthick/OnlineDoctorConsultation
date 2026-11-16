@@ -104,9 +104,20 @@ describe('events on a batch group', () => {
     expect(recordableTypesFor(profile, 'group').map(r => r.code)).toEqual(['feed', 'mortality', 'cull', 'placement'])
   })
 
-  it('events that are not about the head count are left to their own screens', () => {
+  it('events the screen cannot write yet are left to their own screens', () => {
     expect(recordableTypesFor(profile, 'group').map(r => r.code)).not.toContain('weaning')
-    expect(recordableTypesFor(profile, 'animal').map(r => r.code)).toEqual(['feed'])
+  })
+
+  it('a single animal can record its own events (heat) but not the head-count events of a group', () => {
+    expect(recordableTypesFor(profile, 'animal').map(r => r.code)).toEqual(['feed', 'heat'])
+  })
+
+  it('the animal event body names the animal', () => {
+    expect(buildEventPayload(cow, 'dry_off', [], {}, '2026-11-10')).toEqual({ animalId: 'a1', eventType: 'dry_off', eventDate: '2026-11-10' })
+  })
+
+  it('births are whole numbers', () => {
+    expect(isWholeNumberField({ key: 'liveBirths', type: 'number' }, null)).toBe(true)
   })
 
   it('a group with no animals is offered starting a batch first', () => {

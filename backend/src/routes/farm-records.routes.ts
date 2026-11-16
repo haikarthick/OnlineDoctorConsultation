@@ -51,7 +51,7 @@ router.post('/farm-records', authMiddleware, farmRecordsEnabled, validateBody(sa
 // Events on a batch group (place flock, stock pond, cull, partial sale / harvest, clear-out): they
 // change the group's head count, so they are written through the population ledger.
 router.post('/farm-records/events', authMiddleware, farmRecordsEnabled, validateBody(groupEventSchema), asyncHandler(async (req: Request, res: Response) => {
-  res.status(201).json({ success: true, data: await FarmEventService.recordGroupEvent(req.body, caller(req)) });
+  res.status(201).json({ success: true, data: await FarmEventService.recordEvent(req.body, caller(req)) });
 }));
 
 router.delete('/farm-records/:id', authMiddleware, farmRecordsEnabled, asyncHandler(async (req: Request, res: Response) => {
