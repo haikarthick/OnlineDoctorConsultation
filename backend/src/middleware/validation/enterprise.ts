@@ -97,7 +97,9 @@ export const createMovementSchema = Joi.object({
 export const createCampaignSchema = Joi.object({
   enterpriseId: requiredUuid,
   groupId: uuid.optional(),
-  campaignType: shortText(50).required(),
+  // The kinds the table accepts (docker/init.sql treatment_campaigns): anything else was refused by the database as a bare error.
+  campaignType: shortText(50).valid('vaccination', 'deworming', 'testing', 'treatment', 'health_check', 'tagging', 'weighing', 'hoof_trimming', 'shearing', 'dipping', 'other').required()
+    .messages({ 'any.only': 'Choose one of the campaign types in the list.' }),
   name: shortText().required(),
   description: longText(2000).optional().allow('', null),
   productUsed: shortText().optional().allow('', null),

@@ -668,7 +668,13 @@
       "testing": "Testing",
       "treatment": "Treatment",
       "supplement": "Supplement",
-      "other": "Other"
+      "other": "Other",
+      "health_check": "Health check",
+      "tagging": "Tagging",
+      "weighing": "Weighing",
+      "hoof_trimming": "Hoof trimming",
+      "shearing": "Shearing",
+      "dipping": "Dipping"
     },
     "cardLabels": {
       "species": "Species:",
@@ -698,7 +704,14 @@
         "cancelled": "Cancelled"
       },
       "updateBtn": "Update Campaign",
-      "createBtn": "Create Campaign"
+      "createBtn": "Create Campaign",
+      "group": "Group",
+      "groupNone": "Not for one group (enter the number below)",
+      "groupCount": "{{count}} animals are in this group.",
+      "targetCount": "How many animals to treat",
+      "targetHint": "Filled in from the group; change it if only some are being treated.",
+      "completedCount": "How many have been treated so far",
+      "completedHint": "This goes into the health record, so enter the number really treated."
     },
     "toasts": {
       "updated": "Campaign updated",
@@ -706,8 +719,27 @@
       "deleted": "Campaign deleted",
       "nameRequired": "Name and type required",
       "deleteConfirm": "Delete this campaign?",
-      "failed": "Failed"
-    }
+      "failed": "The campaign could not be saved. Check your connection and try again.",
+      "started": "Campaign started.",
+      "deleteFailed": "The campaign could not be deleted. Try again."
+    },
+    "status": {
+      "planned": "Planned",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "loadFailed": "We could not load the campaigns. Check your connection and try again.",
+    "steps": {
+      "what": "What is the campaign?",
+      "who": "Who gets it, and with what?",
+      "progress": "How is it going?"
+    },
+    "blocked": {
+      "name": "Type the campaign name first."
+    },
+    "start": "Start",
+    "markDone": "Mark done"
   },
   "alertCenter": {
     "pageTitle": "🔔 Smart Alert Center",

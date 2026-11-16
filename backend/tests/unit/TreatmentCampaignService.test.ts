@@ -20,10 +20,29 @@ describe('TreatmentCampaignService', () => {
   describe('createCampaign', () => {
     it('should create a treatment campaign', async () => {
       const campaign = { id: 'mock-uuid', enterprise_id: 'e1', name: 'Annual Deworming', campaign_type: 'deworming', group_id: 'g1', scheduled_date: '2024-07-01', status: 'planned' };
-      (database.query as jest.Mock).mockResolvedValueOnce({ rows: [campaign] });
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ current_count: 12 }] }) // the group is on this farm
+        .mockResolvedValueOnce({ rows: [campaign] });
       const result = await treatmentCampaignService.createCampaign({ enterpriseId: 'e1', name: 'Annual Deworming', campaignType: 'deworming', groupId: 'g1', scheduledDate: '2024-07-01' });
       expect(result).toEqual(expect.objectContaining({ id: 'mock-uuid', name: 'Annual Deworming' }));
       expect(database.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO treatment_campaigns'), expect.any(Array));
+    });
+  });
+
+  describe('farm boundary', () => {
+    it('refuses a group that is not on the farm, in words, and writes nothing', async () => {
+      (database.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      await expect(treatmentCampaignService.createCampaign({ enterpriseId: 'e1', name: 'X', campaignType: 'deworming', groupId: 'foreign' })).rejects.toThrow(/not on this farm/);
+      expect((database.query as jest.Mock).mock.calls.some(c => String(c[0]).includes('INSERT INTO treatment_campaigns'))).toBe(false);
+    });
+
+    it('defaults how many to treat to the group head count', async () => {
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ current_count: 12 }] })
+        .mockResolvedValueOnce({ rows: [{ id: 'c', enterprise_id: 'e1', target_count: 12 }] });
+      await treatmentCampaignService.createCampaign({ enterpriseId: 'e1', name: 'X', campaignType: 'deworming', groupId: 'g1' });
+      const insert = (database.query as jest.Mock).mock.calls.find(c => String(c[0]).includes('INSERT INTO treatment_campaigns'));
+      expect(insert[1]).toContain(12);
     });
   });
 

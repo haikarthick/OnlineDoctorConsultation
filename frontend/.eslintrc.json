@@ -95,7 +95,6 @@
         "src/pages/ResetPassword.tsx",
         "src/pages/SupplyChain.tsx",
         "src/pages/Sustainability.tsx",
-        "src/pages/TreatmentCampaigns.tsx",
         "src/pages/VetCertificates.tsx",
         "src/pages/VetHospitalProfile.tsx",
         "src/pages/Wallet.tsx",

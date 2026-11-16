@@ -3,7 +3,6 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, MovementRecord } from '../types'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '../context/AuthContext'
 import { useMasterData } from '../context/MasterDataContext'
 import { useSettings } from '../context/SettingsContext'
 import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
@@ -11,7 +10,7 @@ import { ChipSelect } from '../components/mobile/ChipSelect'
 import { SaveState } from '../components/mobile/SaveState'
 import { StepForm, type FormStep } from '../components/mobile/StepForm'
 import { useSaveAction } from '../hooks/useSaveAction'
-import { myFarmRole } from '../utils/farmRoles'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
 import { userMessage } from '../utils/userMessage'
 
 const MOVEMENT_TYPES = ['transfer', 'intake', 'discharge', 'quarantine', 'sale', 'death', 'birth', 'import', 'export']
@@ -25,13 +24,11 @@ const emptyForm = (): MovementForm => ({ movementType: 'transfer', kind: 'animal
 
 const MovementLog: React.FC = () => {
   const { t } = useTranslation()
-  const { user } = useAuth()
   const { speciesLabel } = useMasterData()
   const { formatDateTime } = useSettings()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
-  const [members, setMembers] = useState<Array<{ userId: string; role: string }>>([])
   const [movements, setMovements] = useState<MovementRecord[]>([])
   const [locations, setLocations] = useState<{ id: string; name: string }[]>([])
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([])
@@ -58,17 +55,14 @@ const MovementLog: React.FC = () => {
     if (!selectedEnterpriseId) return
     try {
       setLoading(true); setError('')
-      const [movRes, locRes, grpRes, memRes] = await Promise.all([
+      const [movRes, locRes, grpRes] = await Promise.all([
         apiService.listMovements(selectedEnterpriseId),
         apiService.listLocations(selectedEnterpriseId),
         apiService.listAnimalGroups(selectedEnterpriseId),
-        // Only to know whether to offer Approve / Reject; if it cannot load, the buttons are simply not offered.
-        apiService.listEnterpriseMembers(selectedEnterpriseId).catch(() => ({ data: [] })),
       ])
       setMovements(movRes.data?.items || [])
       setLocations((locRes.data?.items || []).map((l: any) => ({ id: l.id, name: l.name })))
       setGroups((grpRes.data?.items || []).map((g: any) => ({ id: g.id, name: g.name })))
-      setMembers(memRes.data || [])
     } catch (err: any) {
       setMovements([])
       setError(userMessage(err, 'movementLog.loadFailed'))
@@ -79,7 +73,7 @@ const MovementLog: React.FC = () => {
 
   // The server decides; this only decides whether to show the buttons (owner and manager approve).
   const farm = enterprises.find(e => e.id === selectedEnterpriseId)
-  const role = myFarmRole(farm as any, members, user?.id, user?.role === 'admin')
+  const role = useMyFarmRole(farm)
   const canApprove = role === 'owner' || role === 'manager'
 
   const handleApprove = async (movId: string, action: 'approve' | 'reject') => {

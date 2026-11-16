@@ -249,3 +249,14 @@ cards instead of tables; classes `breeding-*`, `feed-*`, `movement-*` in `module
   (the farm was looked up through an animal), approval was owner-only (now owner or manager, `FarmAccessService
   'manage_farm'`), and **a movement could name another farm's animal, group or place** (it rewrote that animal's location) -
   `MovementService.assertBelongsToFarm` now refuses it in words. Verified by a 15-check real-server run.
+
+## Treatment campaigns (Phase 5, 2026-11-16)
+Cards + step form on the shared blocks. Bugs found and fixed on the way: the page sent `targetGroupId` / `medication` /
+`targetSpecies` while the server knows `groupId` / `productUsed` (unknown fields are stripped, so a chosen group and the
+medication were **silently never saved**), it showed `treatedCount/totalAnimals` which the server never returns (it is
+`completedCount/targetCount`), it offered a "Supplement" type the table rejects (the type list now matches
+`treatment_campaigns.campaign_type`, and the server says in words to choose one from the list), a campaign could name
+another farm's group (`groupCountOnFarm` now refuses it), and "how many to treat" is filled from the group's head count.
+"Start" is one tap; "Mark done" opens the progress step so the real number treated is entered (it goes into the group's
+health record). Create / edit buttons are shown only to owner, manager, supervisor and farm vet (`hooks/useMyFarmRole.ts`,
+shared with the Movement screen; the server still decides). Verified by a 10-check real-server run.

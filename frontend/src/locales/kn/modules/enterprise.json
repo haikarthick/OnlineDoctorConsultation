@@ -668,7 +668,13 @@
       "testing": "ಪರೀಕ್ಷೆ",
       "treatment": "ಚಿಕಿತ್ಸೆ",
       "supplement": "ಪೂರಕ",
-      "other": "ಇತರ"
+      "other": "ಇತರ",
+      "health_check": "ಆರೋಗ್ಯ ತಪಾಸಣೆ",
+      "tagging": "ಟ್ಯಾಗಿಂಗ್",
+      "weighing": "ತೂಕ ಹಾಕುವುದು",
+      "hoof_trimming": "ಗೊರಸು ಕತ್ತರಿಸುವುದು",
+      "shearing": "ಉಣ್ಣೆ ಕತ್ತರಿಸುವುದು",
+      "dipping": "ಔಷಧಿ ಸ್ನಾನ"
     },
     "cardLabels": {
       "species": "Species:",
@@ -698,7 +704,14 @@
         "cancelled": "ರದ್ದಾಗಿದೆ"
       },
       "updateBtn": "Update Campaign",
-      "createBtn": "Create Campaign"
+      "createBtn": "Create Campaign",
+      "group": "ಗುಂಪು",
+      "groupNone": "ಒಂದು ಗುಂಪಿಗೆ ಅಲ್ಲ (ಕೆಳಗೆ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ)",
+      "groupCount": "ಈ ಗುಂಪಿನಲ್ಲಿ {{count}} ಪ್ರಾಣಿಗಳಿವೆ.",
+      "targetCount": "ಎಷ್ಟು ಪ್ರಾಣಿಗಳಿಗೆ ಚಿಕಿತ್ಸೆ",
+      "targetHint": "ಗುಂಪಿನಿಂದ ತುಂಬಲಾಗಿದೆ; ಕೆಲವಕ್ಕೆ ಮಾತ್ರ ಆದರೆ ಬದಲಿಸಿ.",
+      "completedCount": "ಇಲ್ಲಿಯವರೆಗೆ ಎಷ್ಟಕ್ಕೆ ಚಿಕಿತ್ಸೆ ನೀಡಲಾಗಿದೆ",
+      "completedHint": "ಇದು ಆರೋಗ್ಯ ದಾಖಲೆಗೆ ಹೋಗುತ್ತದೆ, ಆದ್ದರಿಂದ ನಿಜವಾಗಿ ಚಿಕಿತ್ಸೆ ನೀಡಿದ ಸಂಖ್ಯೆಯನ್ನೇ ನಮೂದಿಸಿ."
     },
     "toasts": {
       "updated": "Campaign updated",
@@ -706,8 +719,27 @@
       "deleted": "Campaign deleted",
       "nameRequired": "Name and type required",
       "deleteConfirm": "Delete this campaign?",
-      "failed": "ವಿಫಲ"
-    }
+      "failed": "ಅಭಿಯಾನವನ್ನು ಉಳಿಸಲಾಗಲಿಲ್ಲ. ನಿಮ್ಮ ಸಂಪರ್ಕ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+      "started": "ಅಭಿಯಾನ ಪ್ರಾರಂಭವಾಯಿತು.",
+      "deleteFailed": "ಅಭಿಯಾನವನ್ನು ಅಳಿಸಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
+    },
+    "status": {
+      "planned": "ಯೋಜಿತ",
+      "in_progress": "ಪ್ರಗತಿಯಲ್ಲಿದೆ",
+      "completed": "ಪೂರ್ಣಗೊಂಡಿದೆ",
+      "cancelled": "ರದ್ದಾಗಿದೆ"
+    },
+    "loadFailed": "ಅಭಿಯಾನಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ. ನಿಮ್ಮ ಸಂಪರ್ಕ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "steps": {
+      "what": "ಅಭಿಯಾನ ಏನು?",
+      "who": "ಯಾರಿಗೆ, ಯಾವುದರಿಂದ?",
+      "progress": "ಹೇಗೆ ನಡೆಯುತ್ತಿದೆ?"
+    },
+    "blocked": {
+      "name": "ಮೊದಲು ಅಭಿಯಾನದ ಹೆಸರು ಬರೆಯಿರಿ."
+    },
+    "start": "ಪ್ರಾರಂಭಿಸಿ",
+    "markDone": "ಮುಗಿಯಿತು"
   },
   "alertCenter": {
     "pageTitle": "🔔 Smart Alert Center",

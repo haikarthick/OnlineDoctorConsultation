@@ -3,135 +3,213 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, TreatmentCampaign } from '../types'
 import { useTranslation } from 'react-i18next'
-import { useScrollToForm } from '../hooks/useScrollToForm'
-
+import { useSettings } from '../context/SettingsContext'
+import { BottomSheet } from '../components/mobile/BottomSheet'
+import { ChipSelect } from '../components/mobile/ChipSelect'
+import { NumberStepper } from '../components/mobile/NumberStepper'
+import { SaveState } from '../components/mobile/SaveState'
+import { StepForm, type FormStep } from '../components/mobile/StepForm'
+import { useSaveAction } from '../hooks/useSaveAction'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
 import { userMessage } from '../utils/userMessage'
-const CAMPAIGN_TYPE_LABELS: Record<string, string> = {
-  vaccination: 'Vaccination', deworming: 'Deworming', testing: 'Testing',
-  treatment: 'Treatment', supplement: 'Supplement', other: 'Other'
-}
 
+/** The kinds the database accepts (treatment_campaigns.campaign_type). */
+const CAMPAIGN_TYPES = ['vaccination', 'deworming', 'testing', 'treatment', 'health_check', 'tagging', 'weighing', 'hoof_trimming', 'shearing', 'dipping', 'other']
 const CAMPAIGN_TYPE_ICONS: Record<string, string> = {
-  vaccination: '💉', deworming: '💊', testing: '🔬',
-  treatment: '🏥', supplement: '🧪', other: '📋'
+  vaccination: '💉', deworming: '💊', testing: '🔬', treatment: '🏥', health_check: '🩺', tagging: '🏷️',
+  weighing: '⚖️', hoof_trimming: '✂️', shearing: '🐑', dipping: '🛁', other: '📋',
 }
+const STATUSES = ['planned', 'in_progress', 'completed', 'cancelled']
+/** Who may create or change a campaign (server: EnterpriseController.createCampaign). */
+const CAMPAIGN_ROLES = ['owner', 'manager', 'supervisor', 'farm_vet']
 
-const STATUS_COLORS: Record<string, string> = {
-  planned: '#6c757d', in_progress: '#0d6efd', completed: '#198754',
-  cancelled: '#dc3545'
+interface CampaignForm {
+  name: string; campaignType: string; groupId: string; scheduledDate: string; productUsed: string; dosage: string
+  targetCount: string; status: string; completedCount: string; description: string; notes: string
 }
+const emptyForm = (): CampaignForm => ({
+  name: '', campaignType: 'vaccination', groupId: '', scheduledDate: '', productUsed: '', dosage: '',
+  targetCount: '', status: 'planned', completedCount: '', description: '', notes: '',
+})
+const barStep = (done: number, total: number) => Math.min(20, Math.max(0, Math.round((done / Math.max(1, total)) * 20)))
 
 const TreatmentCampaigns: React.FC = () => {
   const { t } = useTranslation()
+  const { formatDate } = useSettings()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [campaigns, setCampaigns] = useState<TreatmentCampaign[]>([])
-  const [groups, setGroups] = useState<{ id: string; name: string; animalCount?: number }[]>([])
-  const [groupsLoading, setGroupsLoading] = useState(false)
-  const [groupsError, setGroupsError] = useState(false)
+  const [groups, setGroups] = useState<{ id: string; name: string; currentCount?: number }[]>([])
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
-  const formRef = useScrollToForm(showForm)
-  const [editingCampaign, setEditingCampaign] = useState<TreatmentCampaign | null>(null)
-  const [formData, setFormData] = useState({
-    name: '', campaignType: 'vaccination', description: '',
-    targetSpecies: '', targetGroupId: '', status: 'planned',
-    scheduledDate: '', medication: '', dosage: '', notes: ''
-  })
+  const [editing, setEditing] = useState<TreatmentCampaign | null>(null)
+  const [step, setStep] = useState(0)
+  const [form, setForm] = useState<CampaignForm>(emptyForm)
+  const [deleting, setDeleting] = useState<TreatmentCampaign | null>(null)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
 
+  const farm = enterprises.find(e => e.id === selectedEnterpriseId)
+  const role = useMyFarmRole(farm)
+  const canEdit = !!role && CAMPAIGN_ROLES.includes(role)
+
   useEffect(() => {
-    const fetchEnterprises = async () => {
-      try {
-        const res = await apiService.listEnterprises({ limit: 100 })
+    apiService.listEnterprises({ limit: 100 })
+      .then((res: any) => {
         const items = res.data?.items || []
         setEnterprises(items)
         if (items.length === 1) setSelectedEnterpriseId(items[0].id)
-      } catch { setEnterprises([]) }
-    }
-    fetchEnterprises()
+      })
+      .catch(() => setEnterprises([]))
   }, [])
 
-  const fetchCampaigns = async () => {
+  const fetchAll = async () => {
     if (!selectedEnterpriseId) return
     try {
-      setLoading(true)
-      const res = await apiService.listCampaigns(selectedEnterpriseId)
-      setCampaigns(res.data?.items || [])
-    } catch { setCampaigns([]) }
-    finally { setLoading(false) }
+      setLoading(true); setError('')
+      const [campRes, groupRes] = await Promise.all([
+        apiService.listCampaigns(selectedEnterpriseId),
+        apiService.listAnimalGroups(selectedEnterpriseId, { limit: 200 }),
+      ])
+      setCampaigns(campRes.data?.items || [])
+      setGroups((groupRes.data?.items || []).map((g: any) => ({ id: g.id, name: g.name, currentCount: g.currentCount })))
+    } catch (err: any) {
+      setCampaigns([])
+      setError(userMessage(err, 'treatmentCampaigns.loadFailed'))
+    } finally { setLoading(false) }
   }
+  useEffect(() => { if (selectedEnterpriseId) fetchAll() }, [selectedEnterpriseId])
 
-  const fetchGroups = async (enterpriseId: string) => {
-    setGroupsLoading(true)
-    setGroupsError(false)
-    try {
-      const res = await apiService.listAnimalGroups(enterpriseId)
-      setGroups((res.data?.items || []).map((g: any) => ({ id: g.id, name: g.name, animalCount: g.animalCount })))
-    } catch {
-      setGroupsError(true)
-      setGroups([])
-    } finally {
-      setGroupsLoading(false)
+  const typeLabel = (c: string) => t('treatmentCampaigns.types.' + c, { defaultValue: c })
+  const statusLabel = (s: string) => t('treatmentCampaigns.status.' + s, { defaultValue: s })
+  const set = <K extends keyof CampaignForm>(key: K, value: CampaignForm[K]) => setForm(f => ({ ...f, [key]: value }))
+
+  const save = useSaveAction(async () => {
+    const num = (v: string) => (v !== '' && !Number.isNaN(parseInt(v, 10)) ? parseInt(v, 10) : undefined)
+    const payload: Record<string, unknown> = {
+      enterpriseId: selectedEnterpriseId, name: form.name.trim(), campaignType: form.campaignType,
+      groupId: form.groupId || undefined, scheduledDate: form.scheduledDate || undefined,
+      productUsed: form.productUsed || undefined, dosage: form.dosage || undefined,
+      targetCount: num(form.targetCount), description: form.description || undefined, notes: form.notes || undefined,
     }
-  }
+    if (editing) {
+      await apiService.updateCampaign(editing.id, { ...payload, status: form.status, completedCount: num(form.completedCount) })
+    } else {
+      await apiService.createCampaign(payload as any)
+    }
+  }, t('treatmentCampaigns.toasts.failed'))
 
-  useEffect(() => { if (selectedEnterpriseId) { fetchCampaigns(); fetchGroups(selectedEnterpriseId) } }, [selectedEnterpriseId])
-
-  const resetForm = () => {
-    setFormData({ name: '', campaignType: 'vaccination', description: '', targetSpecies: '', targetGroupId: '', status: 'planned', scheduledDate: '', medication: '', dosage: '', notes: '' })
-    setEditingCampaign(null); setError('')
-  }
-
-  const openEdit = (c: TreatmentCampaign) => {
-    setEditingCampaign(c)
-    setFormData({
-      name: c.name, campaignType: c.campaignType, description: c.description || '',
-      targetSpecies: c.targetSpecies || '', targetGroupId: c.targetGroupId || '',
-      status: c.status, scheduledDate: c.scheduledDate ? c.scheduledDate.split('T')[0] : '',
-      medication: c.medication || '', dosage: c.dosage || '', notes: c.notes || ''
+  const close = () => { setShowForm(false); setEditing(null); setStep(0); save.reset() }
+  const openNew = () => { setForm(emptyForm()); setEditing(null); setStep(0); save.reset(); setShowForm(true) }
+  const openEdit = (c: TreatmentCampaign, status?: string, firstStep = 0) => {
+    setEditing(c); setStep(firstStep); save.reset()
+    setForm({
+      name: c.name, campaignType: c.campaignType, groupId: c.groupId || '', scheduledDate: c.scheduledDate ? c.scheduledDate.split('T')[0] : '',
+      productUsed: c.productUsed || '', dosage: c.dosage || '', targetCount: c.targetCount ? String(c.targetCount) : '',
+      status: status || c.status, completedCount: c.completedCount ? String(c.completedCount) : '', description: c.description || '', notes: c.notes || '',
     })
     setShowForm(true)
   }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setError('')
-    if (!formData.name || !formData.campaignType) { setError('Name and type required'); return }
-    try {
-      const payload: any = {
-        ...formData, enterpriseId: selectedEnterpriseId,
-        targetGroupId: formData.targetGroupId || undefined,
-        scheduledDate: formData.scheduledDate || undefined,
-      }
-      if (editingCampaign) {
-        await apiService.updateCampaign(editingCampaign.id, payload)
-        setSuccessMsg('Campaign updated')
-      } else {
-        await apiService.createCampaign(payload)
-        setSuccessMsg('Campaign created')
-      }
-      resetForm(); setShowForm(false); fetchCampaigns()
-      setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(userMessage(err)) }
+  const submit = async () => {
+    setSuccessMsg('')
+    const wasEditing = !!editing
+    if (await save.run()) {
+      close()
+      setSuccessMsg(t(wasEditing ? 'treatmentCampaigns.toasts.updated' : 'treatmentCampaigns.toasts.created'))
+      void fetchAll()
+    }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this campaign?')) return
-    try {
-      await apiService.deleteCampaign(id)
-      setSuccessMsg('Campaign deleted')
-      fetchCampaigns()
-      setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(userMessage(err)) }
+  // "Start" is one tap; finishing asks how many were actually treated, so the health record is true.
+  const start = useSaveAction(async (c: TreatmentCampaign) => { await apiService.updateCampaign(c.id, { status: 'in_progress' }) }, t('treatmentCampaigns.toasts.failed'))
+  const startCampaign = async (c: TreatmentCampaign) => {
+    setSuccessMsg(''); setError('')
+    if (await start.run(c)) { setSuccessMsg(t('treatmentCampaigns.toasts.started')); void fetchAll() }
+    else setError(start.error || t('treatmentCampaigns.toasts.failed'))
   }
 
-  const formatDate = (d: string | null | undefined) => d ? new Date(d).toLocaleDateString() : '-'
-
-  const getStatusLabel = (s: string) => {
-    return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+  const removal = useSaveAction(async () => { if (deleting) await apiService.deleteCampaign(deleting.id) }, t('treatmentCampaigns.toasts.deleteFailed'))
+  const submitDelete = async () => {
+    if (await removal.run()) { setDeleting(null); setSuccessMsg(t('treatmentCampaigns.toasts.deleted')); void fetchAll() }
   }
+
+  const chosenGroup = groups.find(g => g.id === form.groupId)
+  const steps: FormStep[] = [
+    {
+      id: 'what', title: t('treatmentCampaigns.steps.what'),
+      blockedReason: form.name.trim() ? undefined : t('treatmentCampaigns.blocked.name'),
+      content: (
+        <>
+          <div className="camp-field">
+            <label htmlFor="camp-name">{t('treatmentCampaigns.modal.name')}</label>
+            <input id="camp-name" type="text" className="an-field" value={form.name} onChange={e => set('name', e.target.value)} />
+          </div>
+          <div className="camp-field">
+            <label htmlFor="camp-type">{t('treatmentCampaigns.modal.type')}</label>
+            <select id="camp-type" className="an-field" value={form.campaignType} onChange={e => set('campaignType', e.target.value)}>
+              {CAMPAIGN_TYPES.map(c => <option key={c} value={c}>{CAMPAIGN_TYPE_ICONS[c]} {typeLabel(c)}</option>)}
+            </select>
+          </div>
+          <div className="camp-field">
+            <label htmlFor="camp-date">{t('treatmentCampaigns.modal.scheduledDate')}</label>
+            <input id="camp-date" type="date" className="an-field" value={form.scheduledDate} onChange={e => set('scheduledDate', e.target.value)} />
+          </div>
+        </>
+      ),
+    },
+    {
+      id: 'who', title: t('treatmentCampaigns.steps.who'),
+      content: (
+        <>
+          <div className="camp-field">
+            <label htmlFor="camp-group">{t('treatmentCampaigns.modal.group')}</label>
+            <select id="camp-group" className="an-field" value={form.groupId} onChange={e => {
+              const g = groups.find(x => x.id === e.target.value)
+              setForm(f => ({ ...f, groupId: e.target.value, targetCount: g && typeof g.currentCount === 'number' && !f.targetCount ? String(g.currentCount) : f.targetCount }))
+            }}>
+              <option value="">{t('treatmentCampaigns.modal.groupNone')}</option>
+              {groups.map(g => <option key={g.id} value={g.id}>{g.name}{typeof g.currentCount === 'number' ? ` (${g.currentCount})` : ''}</option>)}
+            </select>
+            {chosenGroup && typeof chosenGroup.currentCount === 'number' && (
+              <p className="camp-hint" role="status">{t('treatmentCampaigns.modal.groupCount', { count: chosenGroup.currentCount })}</p>
+            )}
+          </div>
+          <NumberStepper label={t('treatmentCampaigns.modal.targetCount')} value={form.targetCount} onChange={v => set('targetCount', v)} integer min={0} hint={t('treatmentCampaigns.modal.targetHint')} />
+          <div className="camp-field">
+            <label htmlFor="camp-product">{t('treatmentCampaigns.modal.medication')}</label>
+            <input id="camp-product" type="text" className="an-field" value={form.productUsed} onChange={e => set('productUsed', e.target.value)} />
+          </div>
+          <div className="camp-field">
+            <label htmlFor="camp-dosage">{t('treatmentCampaigns.modal.dosage')}</label>
+            <input id="camp-dosage" type="text" className="an-field" value={form.dosage} onChange={e => set('dosage', e.target.value)} />
+          </div>
+        </>
+      ),
+    },
+    {
+      id: 'progress', title: t('treatmentCampaigns.steps.progress'),
+      content: (
+        <>
+          {editing && (
+            <>
+              <ChipSelect label={t('treatmentCampaigns.modal.status')} options={STATUSES.map(s => ({ value: s, label: statusLabel(s) }))} value={form.status} onChange={v => set('status', v)} />
+              <NumberStepper label={t('treatmentCampaigns.modal.completedCount')} value={form.completedCount} onChange={v => set('completedCount', v)} integer min={0}
+                hint={form.status === 'completed' ? t('treatmentCampaigns.modal.completedHint') : undefined} />
+            </>
+          )}
+          <div className="camp-field">
+            <label htmlFor="camp-desc">{t('treatmentCampaigns.modal.description')}</label>
+            <textarea id="camp-desc" rows={2} className="an-field an-field--textarea" value={form.description} onChange={e => set('description', e.target.value)} />
+          </div>
+          <div className="camp-field">
+            <label htmlFor="camp-notes">{t('treatmentCampaigns.modal.notes')}</label>
+            <textarea id="camp-notes" rows={2} className="an-field an-field--textarea" value={form.notes} onChange={e => set('notes', e.target.value)} />
+          </div>
+        </>
+      ),
+    },
+  ]
 
   return (
     <div className="module-page">
@@ -141,27 +219,47 @@ const TreatmentCampaigns: React.FC = () => {
           <p className="subtitle">{t('treatmentCampaigns.subtitle')}</p>
         </div>
         <div className="header-actions">
-          {selectedEnterpriseId && (
-            <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>+ New Campaign</button>
-          )}
+          {selectedEnterpriseId && canEdit && <button className="btn btn-primary" onClick={openNew}>{t('treatmentCampaigns.newCampaign')}</button>}
         </div>
       </div>
 
-      {successMsg && <div className="alert alert-success">{successMsg}</div>}
-      {error && !showForm && <div className="alert alert-error">{error}</div>}
+      {successMsg && <div className="alert alert-success" role="status">{successMsg}</div>}
+      {error && <div className="alert alert-error" role="alert">{error}</div>}
 
       <div className="filters-bar">
-        <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input si-58fb376a">
-          <option value="">Select Enterprise...</option>
+        <select aria-label={t('treatmentCampaigns.selectEnterprise')} value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input">
+          <option value="">{t('treatmentCampaigns.selectEnterprise')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
 
+      {showForm && (
+        <div className="edit-form-overlay" onClick={close}>
+          <div className="edit-form-panel edit-form-modal" onClick={e => e.stopPropagation()}>
+            <button className="edit-form-close" onClick={close} aria-label={t('mobileUi.close')}>✕</button>
+            <h2>{editing ? t('treatmentCampaigns.modal.editTitle') : t('treatmentCampaigns.modal.createTitle')}</h2>
+            <StepForm
+              steps={steps} current={step} onStepChange={setStep} onSubmit={submit}
+              submitLabel={editing ? t('treatmentCampaigns.modal.updateBtn') : t('treatmentCampaigns.modal.createBtn')}
+              busy={save.status === 'saving'} onCancel={close}
+              saveNowLabel={editing ? t('farmProfile.form.saveNow') : undefined}
+              footer={<SaveState status={save.status} error={save.error} offline={save.offline} onRetry={save.retry} />}
+            />
+          </div>
+        </div>
+      )}
+
+      <BottomSheet open={!!deleting} title={t('treatmentCampaigns.toasts.deleteConfirm')} onClose={() => { setDeleting(null); removal.reset() }}>
+        <p>{deleting?.name}</p>
+        <SaveState status={removal.status} error={removal.error} offline={removal.offline} onRetry={removal.retry} />
+        <button type="button" className="btn btn-danger camp-sheet-action" disabled={removal.status === 'saving'} onClick={submitDelete}>{t('common.delete')}</button>
+      </BottomSheet>
+
       {!selectedEnterpriseId ? (
         <div className="empty-state">
           <div className="empty-icon">💉</div>
-          <h3>Select an Enterprise</h3>
-          <p>Choose an enterprise to manage treatment campaigns.</p>
+          <h3>{t('treatmentCampaigns.emptyEnterprise')}</h3>
+          <p>{t('treatmentCampaigns.emptyEnterpriseSubtitle')}</p>
         </div>
       ) : loading ? (
         <div className="loading-spinner">{t('common.loading')}</div>
@@ -170,122 +268,42 @@ const TreatmentCampaigns: React.FC = () => {
           <div className="empty-icon">💉</div>
           <h3>{t('treatmentCampaigns.emptyTitle')}</h3>
           <p>{t('treatmentCampaigns.emptySubtitle')}</p>
-          <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>+ Create Campaign</button>
+          {canEdit && <button className="btn btn-primary" onClick={openNew}>{t('treatmentCampaigns.createBtn')}</button>}
         </div>
       ) : (
-        <div className="si-22cdfbdb">
+        <ul className="camp-list">
           {campaigns.map(camp => (
-            <div key={camp.id} className="card" style={{ borderRadius: '12px', padding: '1.25rem', borderLeft: `4px solid ${STATUS_COLORS[camp.status] || '#6c757d'}` }}>
-              <div className="si-d2493201">
-                <span className="si-25a9f042">{CAMPAIGN_TYPE_ICONS[camp.campaignType] || '📋'}</span>
-                <div className="si-6acd75e8">
-                  <h3 className="si-44087c4b">{camp.name}</h3>
-                  <span className="badge si-8c23064b">{CAMPAIGN_TYPE_LABELS[camp.campaignType] || camp.campaignType}</span>
-                </div>
-                <span className="badge" style={{ background: STATUS_COLORS[camp.status] || '#6c757d', color: '#fff', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '12px' }}>
-                  {getStatusLabel(camp.status)}
-                </span>
+            <li key={camp.id} className={`camp-card camp-card--${camp.status}`}>
+              <div className="camp-card-head">
+                <strong className="camp-card-name">{CAMPAIGN_TYPE_ICONS[camp.campaignType] || '📋'} {camp.name}</strong>
+                <span className={`camp-status camp-status--${camp.status}`}>{statusLabel(camp.status)}</span>
               </div>
-              {camp.description && <p className="si-cf622af4">{camp.description}</p>}
-              <div className="si-442101a9">
-                {camp.targetSpecies && <div><strong>Species:</strong> {camp.targetSpecies}</div>}
-                {camp.medication && <div><strong>Medication:</strong> {camp.medication}</div>}
-                {camp.dosage && <div><strong>Dosage:</strong> {camp.dosage}</div>}
-                <div><strong>Scheduled:</strong> {formatDate(camp.scheduledDate)}</div>
-                {camp.startedAt && <div><strong>Started:</strong> {formatDate(camp.startedAt)}</div>}
-                {camp.completedAt && <div><strong>Completed:</strong> {formatDate(camp.completedAt)}</div>}
-                <div><strong>Treated:</strong> {camp.treatedCount}/{camp.totalAnimals}</div>
-              </div>
-              {camp.totalAnimals > 0 && (
-                <div className="si-e243e932">
-                  <div style={{ height: '100%', width: `${Math.min(100, (camp.treatedCount / camp.totalAnimals) * 100)}%`, background: STATUS_COLORS[camp.status] || '#6c757d', borderRadius: '3px' }} />
+              <p className="camp-card-type">{typeLabel(camp.campaignType)}{camp.groupName ? ` · ${camp.groupName}` : ''}</p>
+              {camp.description && <p className="camp-card-desc">{camp.description}</p>}
+              <dl className="camp-facts">
+                {camp.productUsed && <div><dt>{t('treatmentCampaigns.cardLabels.medication')}</dt><dd>{camp.productUsed}</dd></div>}
+                {camp.dosage && <div><dt>{t('treatmentCampaigns.cardLabels.dosage')}</dt><dd>{camp.dosage}</dd></div>}
+                <div><dt>{t('treatmentCampaigns.cardLabels.scheduled')}</dt><dd>{camp.scheduledDate ? formatDate(camp.scheduledDate) : '-'}</dd></div>
+                {camp.startedAt && <div><dt>{t('treatmentCampaigns.cardLabels.started')}</dt><dd>{formatDate(camp.startedAt)}</dd></div>}
+                {camp.completedAt && <div><dt>{t('treatmentCampaigns.cardLabels.completed')}</dt><dd>{formatDate(camp.completedAt)}</dd></div>}
+                <div><dt>{t('treatmentCampaigns.cardLabels.treated')}</dt><dd>{camp.completedCount}/{camp.targetCount}</dd></div>
+              </dl>
+              {camp.targetCount > 0 && (
+                <div className="camp-progress" role="progressbar" aria-valuemin={0} aria-valuemax={camp.targetCount} aria-valuenow={camp.completedCount}>
+                  <div className={`camp-progress-fill camp-progress-${barStep(camp.completedCount, camp.targetCount)}`} />
                 </div>
               )}
-              <div className="si-3429dc13">
-                <button className="btn btn-sm btn-secondary" onClick={() => openEdit(camp)}>{t('common.edit')}</button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(camp.id)}>{t('common.delete')}</button>
-              </div>
-            </div>
+              {canEdit && (
+                <div className="camp-card-actions">
+                  {camp.status === 'planned' && <button className="btn btn-sm btn-primary" disabled={start.status === 'saving'} onClick={() => startCampaign(camp)}>{t('treatmentCampaigns.start')}</button>}
+                  {(camp.status === 'planned' || camp.status === 'in_progress') && <button className="btn btn-sm btn-primary" onClick={() => openEdit(camp, 'completed', 2)}>{t('treatmentCampaigns.markDone')}</button>}
+                  <button className="btn btn-sm btn-secondary" onClick={() => openEdit(camp)}>{t('common.edit')}</button>
+                  <button className="btn btn-sm btn-danger" onClick={() => { removal.reset(); setDeleting(camp) }}>{t('common.delete')}</button>
+                </div>
+              )}
+            </li>
           ))}
-        </div>
-      )}
-
-      {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
-      {showForm && (
-        <div ref={formRef} className="edit-form-panel">
-            <h2>{editingCampaign ? t('treatmentCampaigns.modal.editTitle') : t('treatmentCampaigns.modal.createTitle')}</h2>
-            <form onSubmit={handleSubmit}>
-              {error && <div className="alert alert-error">{error}</div>}
-              <div className="form-group">
-                <label>Campaign Name *</label>
-                <input type="text" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} required />
-              </div>
-              <div className="si-ec24da01">
-                <div className="form-group">
-                  <label>Campaign Type *</label>
-                  <select value={formData.campaignType} onChange={e => setFormData(f => ({ ...f, campaignType: e.target.value }))} required>
-                    {Object.entries(CAMPAIGN_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>{t('treatmentCampaigns.modal.status')}</label>
-                  <select value={formData.status} onChange={e => setFormData(f => ({ ...f, status: e.target.value }))}>
-                    <option value="planned">{t('treatmentCampaigns.modal.statusOptions.planned')}</option>
-                    <option value="in_progress">{t('treatmentCampaigns.modal.statusOptions.inProgress')}</option>
-                    <option value="completed">{t('common.completed')}</option>
-                    <option value="cancelled">{t('common.cancelled')}</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Target Species</label>
-                  <input type="text" value={formData.targetSpecies} onChange={e => setFormData(f => ({ ...f, targetSpecies: e.target.value }))} placeholder="e.g. Cattle" />
-                </div>
-                <div className="form-group">
-                  <label>Target Group (optional)</label>
-                  {groupsError ? (
-                    <input type="text" value={formData.targetGroupId} onChange={e => setFormData(f => ({ ...f, targetGroupId: e.target.value }))} placeholder="Group ID" />
-                  ) : (
-                    <select value={formData.targetGroupId} onChange={e => setFormData(f => ({ ...f, targetGroupId: e.target.value }))}>
-                      <option value="">{groupsLoading ? 'Loading groups...' : 'All animals (no group filter)'}</option>
-                      {groups.map(g => <option key={g.id} value={g.id}>{g.name}{g.animalCount != null ? ` (${g.animalCount} animals)` : ''}</option>)}
-                    </select>
-                  )}
-                  {formData.targetGroupId && groups.length > 0 && (() => {
-                    const sel = groups.find(g => g.id === formData.targetGroupId)
-                    return sel && sel.animalCount != null ? (
-                      <small className="si-d6f17824">
-                        📊 {sel.animalCount} animals in this group will be included
-                      </small>
-                    ) : null
-                  })()}
-                </div>
-                <div className="form-group">
-                  <label>Scheduled Date</label>
-                  <input type="date" value={formData.scheduledDate} onChange={e => setFormData(f => ({ ...f, scheduledDate: e.target.value }))} />
-                </div>
-                <div className="form-group">
-                  <label>Medication</label>
-                  <input type="text" value={formData.medication} onChange={e => setFormData(f => ({ ...f, medication: e.target.value }))} />
-                </div>
-                <div className="form-group">
-                  <label>Dosage</label>
-                  <input type="text" value={formData.dosage} onChange={e => setFormData(f => ({ ...f, dosage: e.target.value }))} placeholder="e.g. 5ml" />
-                </div>
-              </div>
-              <div className="form-group">
-                <label>{t('common.description')}</label>
-                <textarea rows={2} value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} />
-              </div>
-              <div className="form-group">
-                <label>{t('common.notes')}</label>
-                <textarea rows={2} value={formData.notes} onChange={e => setFormData(f => ({ ...f, notes: e.target.value }))} />
-              </div>
-              <div className="si-5af10afb">
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
-                <button type="submit" className="btn btn-primary">{editingCampaign ? 'Update' : 'Create'} Campaign</button>
-              </div>
-            </form>
-        </div>
+        </ul>
       )}
     </div>
   )
