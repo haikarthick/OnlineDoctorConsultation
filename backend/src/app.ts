@@ -165,7 +165,7 @@ app.get(`/api/${config.app.apiVersion}/csrf-token`, csrfTokenRoute);
 // there is no authenticated session to hijack before login, and
 // they already use rate-limiting + password validation for protection.
 app.use(`/api/${config.app.apiVersion}`, (req, res, next) => {
-  const authExemptPaths = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout', '/vet-hospitals/invites/accept'];
+  const authExemptPaths = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout', '/vet-hospitals/invites/accept', '/farm-invitations/register'];
   if (authExemptPaths.some(p => req.path === p || req.path.endsWith(p))) {
     return next();
   }

@@ -6,6 +6,7 @@ import database from '../utils/database';
 import EnterpriseController from '../controllers/EnterpriseController';
 import BatchManagementService from '../services/BatchManagementService';
 import FarmAccessService from '../services/FarmAccessService';
+import FarmInvitationService from '../services/FarmInvitationService';
 import { ForbiddenError } from '../utils/errors';
 import {
   createEnterpriseSchema, updateEnterpriseSchema, addMemberSchema, updateMemberSchema,
@@ -43,23 +44,10 @@ router.post('/enterprises/:id/invite-member', authMiddleware, asyncHandler(async
     return res.status(400).json({ success: false, message: 'email and role are required' });
   }
 
-  // Owner or manager (services/FarmAccessService.ts); a manager may add supervisors, workers, viewers and farm vets only.
-  const actorRole = await FarmAccessService.assert(req.params.id, { userId, role: userRole }, 'manage_team');
-  FarmAccessService.assertTeamChange(actorRole, { kind: 'add', newRole: role });
-
-  // Look up user by email
-  const userResult = await database.query(
-    `SELECT id FROM users WHERE email = $1 AND is_active = true`,
-    [email.toLowerCase().trim()]
-  );
-  if (userResult.rows.length === 0) {
-    return res.status(404).json({ success: false, message: 'No active user found with that email address' });
-  }
-
-  const targetUserId = userResult.rows[0].id;
-  const EnterpriseService = (await import('../services/EnterpriseService')).default;
-  const member = await EnterpriseService.addMember(req.params.id, targetUserId, role);
-  res.status(201).json({ success: true, data: member });
+  // Kept for older clients; it now starts an INVITATION (the person accepts or declines) instead of adding
+  // them straight away. Who may invite whom, and the messages, are FarmInvitationService's.
+  const data = await FarmInvitationService.create(req.params.id, { userId, role: userRole }, { email, role });
+  res.status(201).json({ success: true, data });
 }));
 
 // Animal Groups

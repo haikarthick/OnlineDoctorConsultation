@@ -17,6 +17,7 @@ import pharmacyRoutes from './pharmacy.routes';
 import groomingRoutes from './grooming.routes';
 import farmRecordsRoutes from './farm-records.routes';
 import smsSettingsRoutes from './sms-settings.routes';
+import farmInvitationsRoutes from './farm-invitations.routes';
 
 const router = Router();
 
@@ -38,5 +39,6 @@ router.use(pharmacyRoutes);
 router.use(groomingRoutes);
 router.use(farmRecordsRoutes);
 router.use(smsSettingsRoutes);
+router.use(farmInvitationsRoutes);
 
 export default router;

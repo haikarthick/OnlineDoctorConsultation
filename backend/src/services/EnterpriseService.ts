@@ -70,6 +70,7 @@ export interface EnterpriseMember {
   // joined
   userName?: string;
   userEmail?: string;
+  userPhone?: string;
   userRole?: string;
 }
 
@@ -217,7 +218,22 @@ export class EnterpriseService {
        ON CONFLICT (enterprise_id, user_id) DO UPDATE SET role = $4, title = $5, is_active = true, updated_at = NOW()`,
       [id, enterpriseId, userId, role, title]
     );
+    // Whoever is put on a farm - by an invitation or directly - gets the farm workspace.
+    await this.grantFarmWorkspace(userId);
     return this.getMember(enterpriseId, userId);
+  }
+
+  /**
+   * A farm member whose platform role is not farmer (a pet owner, a vet...) still needs the farm screens.
+   * The additive 'farmer' role (user_roles) gives them the farm workspace through the same permission
+   * machinery as any role; what they may DO on a given farm is their farm role (FarmAccessService).
+   */
+  async grantFarmWorkspace(userId: string): Promise<void> {
+    const u = await database.query(`SELECT role FROM users WHERE id = $1`, [userId]);
+    if (!u.rows.length || u.rows[0].role === 'farmer' || u.rows[0].role === 'admin') return;
+    await database.query(
+      `INSERT INTO user_roles (user_id, role, is_primary, notes) VALUES ($1, 'farmer', false, 'Added when they joined a farm')
+       ON CONFLICT (user_id, role) DO NOTHING`, [userId]);
   }
 
   async removeMember(enterpriseId: string, userId: string): Promise<void> {
@@ -250,7 +266,7 @@ export class EnterpriseService {
 
   async listMembers(enterpriseId: string): Promise<EnterpriseMember[]> {
     const result = await database.query(
-      `SELECT em.*, u.first_name || ' ' || u.last_name as user_name, u.email as user_email, u.role as user_role
+      `SELECT em.*, u.first_name || ' ' || u.last_name as user_name, u.email as user_email, u.phone as user_phone, u.role as user_role
        FROM enterprise_members em
        JOIN users u ON em.user_id = u.id
        WHERE em.enterprise_id = $1 AND em.is_active = true
@@ -411,7 +427,9 @@ export class EnterpriseService {
       joinedAt: row.joined_at,
       updatedAt: row.updated_at,
       userName: row.user_name,
-      userEmail: row.user_email,
+      // A person invited by mobile number only has a placeholder address: show their number instead.
+      userEmail: typeof row.user_email === 'string' && row.user_email.toLowerCase().endsWith('@phone.waytovet.invalid') ? undefined : row.user_email,
+      userPhone: row.user_phone || undefined,
       userRole: row.user_role,
     };
   }
