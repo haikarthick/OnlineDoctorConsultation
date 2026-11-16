@@ -228,3 +228,11 @@ with the server's reason and waits for the farmer (Send again / Discard). Each e
 `POST /farm-records/events` stores the answer in `farm_event_receipts` (migration 049) and replays it, so an entry whose
 first attempt did arrive is never counted twice (daily records are already one-per-day-per-subject upserts). Refused
 events store no receipt. Verified by an 8-check real-server run plus 8 unit tests.
+
+## Vets opening an animal, and the access audit (2026-11-16, owner decisions)
+`GET /animals/:id` no longer lets any vet open any animal: a vet needs a (not cancelled) booking or consultation with them
+for it, to be the farm vet of its farm, or a hospital-network access path already granted. Otherwise they are told in words
+to ask the owner to book them. The clinical access audit (`clinical_data_access_log`) was silently failing for every
+private-animal read: the middleware wrote `get_animal_profile` into `access_type`, which the table restricts to a closed
+list. It now writes `view` (reads) / `api_call` (changes) and the screen name goes in `record_type`. Verified by a 6-check
+real-server run (unbooked 403, booked 200, cancelled 403, audit row written as `view/animal_profile`).

@@ -60,10 +60,30 @@ export class AnimalController {
 
   async getAnimal(req: AuthRequest, res: Response): Promise<void> {
     const animal = await AnimalService.getAnimal(req.params.id);
-    if (animal.ownerId !== req.userId && req.userRole !== 'admin' && req.userRole !== 'veterinarian') {
-      throw new ForbiddenError('You do not have permission to view this animal');
+    if (animal.ownerId !== req.userId && req.userRole !== 'admin') {
+      // A vet sees an animal only when there is a reason: an appointment (or consultation) with them for it, being
+      // the vet of the farm it lives on, or an access path the hospital-network check already granted.
+      const decision = (req as any).animalAccessDecision;
+      const networkGranted = !!(decision && decision.isPrivate && decision.allowed);
+      if (req.userRole !== 'veterinarian' || !(networkGranted || await this.vetHasReasonToSee(req.userId as string, animal))) {
+        throw new ForbiddenError('You can open this animal only if it is yours or you are booked for an appointment about it. Ask the owner to book you, or check that you opened the right animal.');
+      }
     }
     res.json({ success: true, data: animal });
+  }
+
+  /** A booking or consultation (not cancelled) with this vet for the animal, or the vet is the farm vet of its farm. */
+  private async vetHasReasonToSee(vetId: string, animal: { id: string; enterpriseId?: string | null }): Promise<boolean> {
+    const r = await database.query(
+      `SELECT 1 WHERE
+         EXISTS (SELECT 1 FROM bookings b WHERE b.veterinarian_id = $1 AND b.animal_id = $2
+                  AND b.status NOT IN ('cancelled', 'missed'))
+         OR EXISTS (SELECT 1 FROM consultations c WHERE c.veterinarian_id = $1 AND c.animal_id = $2 AND c.status <> 'cancelled')`,
+      [vetId, animal.id]
+    );
+    if (r.rows.length > 0) return true;
+    if (animal.enterpriseId) return (await FarmAccessService.roleOf(animal.enterpriseId, vetId)) === 'farm_vet';
+    return false;
   }
 
   async listAnimals(req: AuthRequest, res: Response): Promise<void> {

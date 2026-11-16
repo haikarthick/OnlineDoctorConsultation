@@ -247,7 +247,8 @@ export function requireAnimalAccess(
         accessedBy: userId,
         accessorRole: userRole,
         animalId,
-        accessType: `${req.method.toLowerCase()}_${recordType}`,
+        // access_type is a closed list in the table (init.sql); the screen being read goes in record_type.
+        accessType: req.method === 'GET' || req.method === 'HEAD' ? 'view' : 'api_call',
         recordType,
         consentId: decision.consentId,
         networkId: decision.networkId,
