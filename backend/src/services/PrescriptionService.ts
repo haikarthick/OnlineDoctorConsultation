@@ -37,6 +37,23 @@ class PrescriptionService {
     if (animalId && groupId) throw new ValidationError('A prescription is for one animal or for one group, not both.');
     if (!animalId && !groupId) throw new ValidationError('Choose the animal or the group this prescription is for. This appointment has none linked to it.');
 
+    // A vet writes for the patient's own animal, or one they already have an appointment / network relationship with - never
+    // for a stranger's animal (a prescription lands in that animal's record and is shown to its owner).
+    if (animalId && vetRole !== 'admin') {
+      const ok = await database.query(
+        `SELECT 1 FROM animals a WHERE a.id = $1 AND (
+             a.owner_id = $2
+          OR EXISTS (SELECT 1 FROM enterprises e WHERE e.id = a.enterprise_id AND e.owner_id = $2)
+          OR EXISTS (SELECT 1 FROM bookings b WHERE b.animal_id = a.id AND b.veterinarian_id = $3)
+          OR EXISTS (SELECT 1 FROM consultations c WHERE c.animal_id = a.id AND c.veterinarian_id = $3)
+          OR EXISTS (SELECT 1 FROM animal_care_contexts acc JOIN hospital_network_members hnm ON hnm.network_id = acc.network_id
+                      WHERE acc.animal_id = a.id AND acc.is_active = true AND hnm.user_id = $3 AND hnm.is_active = true)
+        )`,
+        [animalId, petOwnerId, veterinarianId]
+      );
+      if (ok.rows.length === 0) throw new ForbiddenError('You can prescribe only for an animal that belongs to this patient, or one you already have an appointment for. Choose one of the owner\'s animals.');
+    }
+
     // A vet writes only for a group they are booked or in consultation for (a prescription lands in that farm's group
     // record); a platform admin may write for any.
     if (groupId && vetRole !== 'admin') {

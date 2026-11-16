@@ -690,7 +690,11 @@
     "selectAnimal": "Select Animal (Optional)",
     "loadingAnimals": "Loading animals...",
     "chooseAnimal": "-- Choose an animal --",
-    "errorPatientRequired": "Please select a patient before creating a standalone prescription"
+    "errorPatientRequired": "Please select a patient before creating a standalone prescription",
+    "chooseSubjectTitle": "ఈ ప్రిస్క్రిప్షన్ ఏ జంతువుకు?",
+    "chooseSubjectHint": "ఈ అపాయింట్‌మెంట్ జంతువు లేకుండా బుక్ చేయబడింది. యజమాని జంతువులలో ఒకదాన్ని ఎంచుకోండి.",
+    "errorAnimalRequired": "ముందు ఈ ప్రిస్క్రిప్షన్ ఏ జంతువుకో ఎంచుకోండి.",
+    "ownerHasNoAnimals": "ఈ యజమానికి ఇంకా ప్లాట్‌ఫామ్‌లో జంతువు లేదు. ముందు జంతువును జోడించమని చెప్పండి, తర్వాత ప్రిస్క్రిప్షన్ రాయండి."
   },
   "prescriptionPrint": {
     "previewTitle": "Prescription Preview",

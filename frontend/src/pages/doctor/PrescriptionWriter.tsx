@@ -61,15 +61,35 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
   const [summaryAnimal, setSummaryAnimal] = useState<any>(null)
   // An appointment for a whole group: one prescription for the group, not one per head.
   const [consultationGroup, setConsultationGroup] = useState<ConsultationGroup | null>(null)
+  // An appointment booked with no animal and no group (e.g. a general question): the vet chooses which of the owner's animals
+  // the prescription is for - a prescription always has a subject.
+  const [needsSubject, setNeedsSubject] = useState(false)
+  const [consultationOwnerId, setConsultationOwnerId] = useState('')
+  const [ownerAnimals, setOwnerAnimals] = useState<{ id: string; name: string; species: string }[]>([])
+  const [ownerAnimalsLoaded, setOwnerAnimalsLoaded] = useState(false)
   useEffect(() => {
     if (!conId) return
     let cancelled = false
     apiService.getConsultation(conId)
-      .then((res: any) => { if (!cancelled) { setConsultationAnimalId(res?.data?.animalId || res?.data?.animal_id || ''); setConsultationGroup(groupFromConsultation(res?.data)) } })
+      .then((res: any) => { if (!cancelled) { setConsultationAnimalId(res?.data?.animalId || res?.data?.animal_id || ''); setConsultationGroup(groupFromConsultation(res?.data)); setConsultationOwnerId(res?.data?.userId || ''); setNeedsSubject(!res?.data?.animalId && !res?.data?.animal_id && !res?.data?.groupId) } })
       .catch(() => { /* the summary is a courtesy; the prescription does not depend on it */ })
     return () => { cancelled = true }
   }, [conId])
   const summaryAnimalId = selectedAnimalId || urlAnimalId || consultationAnimalId
+  useEffect(() => {
+    if (!needsSubject || !consultationOwnerId) return
+    let cancelled = false
+    apiService.listAnimals({ limit: 100, ownerId: consultationOwnerId })
+      .then((res: any) => {
+        if (cancelled) return
+        const list = res.data?.animals || res.data?.items || (Array.isArray(res.data) ? res.data : [])
+        setOwnerAnimals(list.map((a: any) => ({ id: a.id, name: a.name, species: a.species })))
+        if (list.length === 1) setSelectedAnimalId(list[0].id)
+      })
+      .catch(() => { if (!cancelled) setOwnerAnimals([]) })
+      .finally(() => { if (!cancelled) setOwnerAnimalsLoaded(true) })
+    return () => { cancelled = true }
+  }, [needsSubject, consultationOwnerId])
   useEffect(() => {
     if (!summaryAnimalId) { setSummaryAnimal(null); return }
     let cancelled = false
@@ -161,6 +181,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
       setError(t('prescriptionWriter.errorPatientRequired'))
       return
     }
+    if (needsSubject && !selectedAnimalId) { setError(t('prescriptionWriter.errorAnimalRequired')); return }
     if (!diagnosis.trim()) { setError(t('prescriptionWriter.errorDiagnosisRequired')); return }
     if (medications.length === 0) { setError(t('prescriptionWriter.errorMedicationRequired')); return }
 
@@ -265,6 +286,22 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
       )}
 
       <form onSubmit={handleSubmit}>
+        {needsSubject && (
+          <div className="card si-af65fe13">
+            <div className="card-header"><h2>🐾 {t('prescriptionWriter.chooseSubjectTitle')}</h2></div>
+            <div className="card-body">
+              <p className="rx-subject-hint">{t('prescriptionWriter.chooseSubjectHint')}</p>
+              {ownerAnimalsLoaded && ownerAnimals.length === 0 ? (
+                <p className="rx-subject-hint" role="status">{t('prescriptionWriter.ownerHasNoAnimals')}</p>
+              ) : (
+                <select className="module-input" aria-label={t('prescriptionWriter.selectAnimal')} value={selectedAnimalId} onChange={e => setSelectedAnimalId(e.target.value)}>
+                  <option value="">{t('prescriptionWriter.chooseAnimal')}</option>
+                  {ownerAnimals.map(a => <option key={a.id} value={a.id}>{a.name} ({speciesLabel(a.species, t)})</option>)}
+                </select>
+              )}
+            </div>
+          </div>
+        )}
         {/* Standalone patient/animal selector */}
         {isStandalone && (isVet || isAdmin) && (
           <div className="card si-af65fe13">

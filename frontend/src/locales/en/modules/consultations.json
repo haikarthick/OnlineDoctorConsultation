@@ -272,7 +272,8 @@
       "noRecords": "You have not written any record for this group yet.",
       "treated_one": "{{count}} treated",
       "treated_other": "{{count}} treated"
-    }
+    },
+    "referralNeedsAnimal": "A referral is for one animal, but this appointment was booked without an animal. Ask the owner to add the animal and book again, then refer from that appointment."
   },
   "consultationManagement": {
     "title": "Consultation Management",

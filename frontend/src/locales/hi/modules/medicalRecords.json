@@ -690,7 +690,11 @@
     "selectAnimal": "जानवर चुनें (वैकल्पिक)",
     "loadingAnimals": "जानवर लोड हो रहे हैं...",
     "chooseAnimal": "-- जानवर चुनें --",
-    "errorPatientRequired": "स्वतंत्र नुस्खा बनाने से पहले कृपया एक मरीज़ चुनें"
+    "errorPatientRequired": "स्वतंत्र नुस्खा बनाने से पहले कृपया एक मरीज़ चुनें",
+    "chooseSubjectTitle": "यह पर्चा किस पशु के लिए है?",
+    "chooseSubjectHint": "यह नियुक्ति बिना किसी पशु के बुक की गई थी। मालिक के पशुओं में से एक चुनें।",
+    "errorAnimalRequired": "पहले वह पशु चुनें जिसके लिए यह पर्चा है।",
+    "ownerHasNoAnimals": "इस मालिक का अभी प्लेटफ़ॉर्म पर कोई पशु नहीं है। उनसे पहले पशु जोड़ने को कहें, फिर पर्चा लिखें।"
   },
   "prescriptionPrint": {
     "previewTitle": "Prescription Preview",

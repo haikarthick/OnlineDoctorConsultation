@@ -234,6 +234,8 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       setReferralError('Please fill all required fields')
       return
     }
+    // A referral is about one animal (the patient the other hospital will receive).
+    if (!animalInfo?.id) { setReferralError(t('consultationRoom.referralNeedsAnimal')); return }
     setReferralSubmitting(true)
     setReferralError('')
     try {

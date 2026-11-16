@@ -690,7 +690,11 @@
     "selectAnimal": "Select Animal (Optional)",
     "loadingAnimals": "Loading animals...",
     "chooseAnimal": "-- Choose an animal --",
-    "errorPatientRequired": "Please select a patient before creating a standalone prescription"
+    "errorPatientRequired": "Please select a patient before creating a standalone prescription",
+    "chooseSubjectTitle": "ഈ കുറിപ്പടി ഏത് മൃഗത്തിനാണ്?",
+    "chooseSubjectHint": "ഈ അപ്പോയിന്റ്മെന്റ് മൃഗമില്ലാതെയാണ് ബുക്ക് ചെയ്തത്. ഉടമയുടെ മൃഗങ്ങളിൽ ഒന്ന് തിരഞ്ഞെടുക്കുക.",
+    "errorAnimalRequired": "ആദ്യം ഈ കുറിപ്പടി ഏത് മൃഗത്തിനാണെന്ന് തിരഞ്ഞെടുക്കുക.",
+    "ownerHasNoAnimals": "ഈ ഉടമയ്ക്ക് ഇതുവരെ പ്ലാറ്റ്ഫോമിൽ മൃഗമില്ല. ആദ്യം മൃഗത്തെ ചേർക്കാൻ പറയുക, എന്നിട്ട് കുറിപ്പടി എഴുതുക."
   },
   "prescriptionPrint": {
     "previewTitle": "Prescription Preview",

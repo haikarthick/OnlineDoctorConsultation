@@ -310,3 +310,14 @@ panel rendered in the network's Patients tab.
   when a network redeems a code; "Share with a hospital" on the group card (`ShareGroupSheet`).
 Verified by a 29-check real-server run (owner-only, wrong / used / cancelled code, non-member 404, branch scoping, scope
 respected, audit row, cycle close ends it, new cycle needs a new code, owner stops it, earlier cycle's records not shown).
+
+## Appointments with no animal or group (2026-11-16, owner decision: stays optional)
+The booking form keeps the animal "optional" (a general question, e.g. about feeding, has no single animal). Verified end to
+end on a real server (23 checks): book -> confirm -> both booking lists -> consultation -> room -> video call and chat ->
+notes -> prescription -> complete -> booking completed. What an animal-less appointment cannot do yet has a plain next step:
+- **Prescription**: the writer shows "Which animal is this prescription for?" with the owner's animals (nothing to choose if the
+  owner has none - it says to add one first). Server: the animal must be the patient's own (or on their farm), or one the vet
+  already has an appointment / network relationship with - a vet could previously prescribe for ANY animal id.
+- **Referral**: a referral is about one animal (protected network code requires it); the room now says in words to ask the owner
+  to add the animal and book again, instead of a raw validation error.
+- **Medical history panel**: shows "No animal linked" with what that means.

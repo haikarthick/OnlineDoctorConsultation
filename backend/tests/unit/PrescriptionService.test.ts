@@ -28,6 +28,13 @@ describe('PrescriptionService', () => {
   });
 
   describe('createPrescription', () => {
+    it('refuses an animal that is not the patient animal and has no relationship with the vet, in words, and writes nothing', async () => {
+      (database.query as jest.Mock).mockResolvedValue({ rows: [] }); // ownership / relationship check finds nothing
+      await expect(PrescriptionService.createPrescription('vet-1', { petOwnerId: 'owner-1', animalId: 'strangers-animal', medications: [{ name: 'A', dosage: '1', frequency: 'd' }] } as any, 'veterinarian'))
+        .rejects.toThrow(/belongs to this patient/);
+      expect((database.query as jest.Mock).mock.calls.some(c => String(c[0]).includes('INSERT INTO prescriptions'))).toBe(false);
+    });
+
     it('says in words when there is neither an animal nor a group, and writes nothing', async () => {
       (database.query as jest.Mock).mockResolvedValue({ rows: [{ user_id: 'owner-1', animal_id: null, group_id: null }] });
       await expect(PrescriptionService.createPrescription('vet-1', { consultationId: 'cons-1', medications: [{ name: 'A', dosage: '1', frequency: 'd' }] } as any))

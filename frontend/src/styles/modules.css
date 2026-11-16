@@ -3835,3 +3835,5 @@ button.record-due-row { cursor: pointer; }
 .share-code { margin: 6px 0; font-size: 30px; font-weight: 700; letter-spacing: 3px; text-align: center; overflow-wrap: anywhere; }
 .shared-groups { margin: 18px 0; padding: 14px; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); background: #fff; }
 .shared-groups-add { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+
+.rx-subject-hint { margin: 0 0 8px; font-size: 13px; color: var(--gray-600); }
