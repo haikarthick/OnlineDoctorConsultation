@@ -6,6 +6,7 @@ import AnimalGroupService from '../services/AnimalGroupService';
 import LocationService from '../services/LocationService';
 import MovementService from '../services/MovementService';
 import TreatmentCampaignService from '../services/TreatmentCampaignService';
+import logger from '../utils/logger';
 import { ValidationError, ForbiddenError } from '../utils/errors';
 
 class EnterpriseController {
@@ -80,6 +81,21 @@ class EnterpriseController {
     FarmAccessService.assertTeamChange(actorRole, { kind: 'change_role', targetRole: target.role as FarmRole, newRole: role });
     const member = await EnterpriseService.updateMemberRole(req.params.enterpriseId, req.params.userId, role, title);
     res.json({ success: true, data: member });
+  }
+
+  async transferOwnership(req: AuthRequest, res: Response): Promise<void> {
+    await FarmAccessService.assert(req.params.id, { userId: req.userId!, role: req.userRole }, 'change_roles'); // owner / admin only
+    const { userId } = req.body;
+    if (!userId) throw new ValidationError('Choose which manager the farm goes to.');
+    const r = await EnterpriseService.transferOwnership(req.params.id, userId);
+    logger.info('Farm ownership transferred', { enterpriseId: req.params.id, by: req.userId, ...r });
+    try {
+      const farm = await EnterpriseService.getEnterprise(req.params.id);
+      const NotificationService = (await import('../services/NotificationService')).default;
+      await NotificationService.createNotification(r.newOwnerId, 'system', `You are now the owner of ${farm.name}`, `${farm.name} was handed to you. You can add and remove managers and change roles.`, 'in_app', { type: 'farm_ownership', enterpriseId: req.params.id });
+      await NotificationService.createNotification(r.previousOwnerId, 'system', `${farm.name} was handed over`, `You are now a manager of ${farm.name}.`, 'in_app', { type: 'farm_ownership', enterpriseId: req.params.id });
+    } catch { /* a notification failure never undoes the hand-over */ }
+    res.json({ success: true, data: r });
   }
 
   async removeMember(req: AuthRequest, res: Response): Promise<void> {

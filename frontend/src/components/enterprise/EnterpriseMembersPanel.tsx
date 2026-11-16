@@ -14,7 +14,9 @@ export const EnterpriseMembersPanel: React.FC<{
   onInviteClick: () => void
   onUpdateRole: (userId: string, newRole: string) => void
   onRemoveMember: (userId: string) => void
-}> = ({ members, membersLoading, actorRole, updatingMemberId, membersLabel, onInviteClick, onUpdateRole, onRemoveMember }) => {
+  /** Owner only: hand the farm to this manager. */
+  onTransfer?: (userId: string) => void
+}> = ({ members, membersLoading, actorRole, updatingMemberId, membersLabel, onInviteClick, onUpdateRole, onRemoveMember, onTransfer }) => {
   const { t } = useTranslation()
   const roleLabel = (r: string) => t(`farmTeam.roles.${r}`, { defaultValue: r })
   return (
@@ -48,6 +50,9 @@ export const EnterpriseMembersPanel: React.FC<{
                 </select>
               ) : (
                 <span className="badge si-a517fcb0">{roleLabel(m.role)}</span>
+              )}
+              {actorRole === 'owner' && m.role === 'manager' && onTransfer && (
+                <button className="btn btn-sm btn-secondary si-a517fcb0" onClick={() => onTransfer(m.userId)}>{t('farmTeam.makeOwner')}</button>
               )}
               {canRemoveMember(actorRole, m.role) && (
                 <button className="btn btn-sm btn-danger si-a517fcb0" onClick={() => onRemoveMember(m.userId)} aria-label={t('farmTeam.remove')}>✗</button>

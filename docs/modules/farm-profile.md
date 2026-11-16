@@ -211,3 +211,9 @@ that the table's CHECK (`view, search, export, print, api_call, audit`) rejects,
 - **Birth -> newborn animals**: the birth entry offers "Add the newborn(s) to the farm" (on by default, editable name and sex,
   at most as many as were born alive, max 10). They are created through `AnimalService.createAnimal` with dam, the mating's sire,
   the farm and the birth date; class is left for the farmer. A birth entered twice on the same day is refused (no double parity).
+
+## Handing a farm over (2026-11-16)
+`POST /enterprises/:id/transfer-ownership {userId}` - owner (or platform admin) only, and only to an ACTIVE MANAGER of the
+farm (`EnterpriseService.transferOwnership`, one transaction): `enterprises.owner_id` and the manager's seat become owner,
+the previous owner becomes a manager; both are notified. The team screen offers "Make owner" on managers, with a
+confirmation. Verified by a 13-check real-server run.

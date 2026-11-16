@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
-import { DatabaseError, NotFoundError, ForbiddenError } from '../utils/errors';
+import { DatabaseError, NotFoundError, ForbiddenError, ValidationError } from '../utils/errors';
 import logger from '../utils/logger';
 
 // ─── Interfaces ──────────────────────────────────────────────
@@ -234,6 +234,32 @@ export class EnterpriseService {
     await database.query(
       `INSERT INTO user_roles (user_id, role, is_primary, notes) VALUES ($1, 'farmer', false, 'Added when they joined a farm')
        ON CONFLICT (user_id, role) DO NOTHING`, [userId]);
+  }
+
+  /**
+   * Hands the farm to an existing MANAGER of it, in one transaction: the manager becomes the owner (the
+   * enterprise's owner_id and their seat both say so) and the previous owner becomes a manager - still on
+   * the team, able to be changed by the new owner. Only the owner (or a platform admin) may do this, and only
+   * to an active manager: a person who has never run the farm day to day is not handed it.
+   */
+  async transferOwnership(enterpriseId: string, newOwnerId: string): Promise<{ previousOwnerId: string; newOwnerId: string }> {
+    return database.transaction(async (client: any) => {
+      const e = await client.query(`SELECT owner_id FROM enterprises WHERE id = $1 FOR UPDATE`, [enterpriseId]);
+      if (!e.rows.length) throw new NotFoundError('Farm not found');
+      const previousOwnerId: string = e.rows[0].owner_id;
+      if (previousOwnerId === newOwnerId) throw new ValidationError('That person already owns this farm.');
+      const m = await client.query(
+        `SELECT role FROM enterprise_members WHERE enterprise_id = $1 AND user_id = $2 AND is_active = true`, [enterpriseId, newOwnerId]);
+      if (!m.rows.length || m.rows[0].role !== 'manager') {
+        throw new ValidationError('A farm can only be handed to one of its managers. Make the person a manager first.');
+      }
+      await client.query(`UPDATE enterprises SET owner_id = $2, updated_at = NOW() WHERE id = $1`, [enterpriseId, newOwnerId]);
+      await client.query(`UPDATE enterprise_members SET role = 'owner', updated_at = NOW() WHERE enterprise_id = $1 AND user_id = $2`, [enterpriseId, newOwnerId]);
+      await client.query(
+        `INSERT INTO enterprise_members (enterprise_id, user_id, role) VALUES ($1, $2, 'manager')
+         ON CONFLICT (enterprise_id, user_id) DO UPDATE SET role = 'manager', is_active = true, updated_at = NOW()`, [enterpriseId, previousOwnerId]);
+      return { previousOwnerId, newOwnerId };
+    });
   }
 
   async removeMember(enterpriseId: string, userId: string): Promise<void> {

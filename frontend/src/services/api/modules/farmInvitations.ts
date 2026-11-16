@@ -44,6 +44,11 @@ export const farmInvitationsApi = {
     const response = await sharedClient.post(`/farm-invitations/${id}/decline`)
     return response.data
   },
+  /** Owner only: hand the farm to one of its managers (they become owner, you become a manager). */
+  async transferFarmOwnership(enterpriseId: string, userId: string) {
+    const response = await sharedClient.post(`/enterprises/${enterpriseId}/transfer-ownership`, { userId })
+    return response.data
+  },
   async registerFromFarmInvitation(data: { token: string; firstName: string; lastName: string; password: string; email?: string }) {
     const response = await sharedClient.post('/farm-invitations/register', data)
     return response.data

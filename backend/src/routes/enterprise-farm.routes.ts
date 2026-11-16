@@ -32,6 +32,7 @@ router.get('/enterprises/:enterpriseId/animals', authMiddleware, asyncHandler((r
 router.get('/enterprises/:id/members', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listMembers(req, res)));
 router.post('/enterprises/:id/members', authMiddleware, validateBody(addMemberSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.addMember(req, res)));
 router.put('/enterprises/:enterpriseId/members/:userId', authMiddleware, validateBody(updateMemberSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.updateMember(req, res)));
+router.post('/enterprises/:id/transfer-ownership', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.transferOwnership(req, res)));
 router.delete('/enterprises/:enterpriseId/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.removeMember(req, res)));
 
 // Enterprise member invite by email (finds user by email then adds as member)

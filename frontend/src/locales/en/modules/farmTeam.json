@@ -86,6 +86,9 @@
       "decline": "Decline",
       "joined": "You joined {{farm}}.",
       "declined": "Invitation declined."
-    }
+    },
+    "makeOwner": "Make owner",
+    "makeOwnerConfirm": "Hand {{farm}} to {{name}}? They become the owner and you become a manager. Only they can undo this.",
+    "handedOver": "{{farm}} now belongs to {{name}}."
   }
 }

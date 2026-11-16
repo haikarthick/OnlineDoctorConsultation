@@ -92,6 +92,22 @@ const EnterpriseManagement: React.FC = () => {
     }
   }
 
+  const handleTransfer = async (userId: string) => {
+    if (!selectedEnterprise) return
+    const who = members.find(m => m.userId === userId)
+    const name = who?.userName || who?.userPhone || who?.userEmail || ''
+    if (!window.confirm(t('farmTeam.makeOwnerConfirm', { farm: selectedEnterprise.name, name }))) return
+    try {
+      await apiService.transferFarmOwnership(selectedEnterprise.id, userId)
+      setSuccessMsg(t('farmTeam.handedOver', { farm: selectedEnterprise.name, name }))
+      await fetchEnterprises()
+      setSelectedEnterprise(null)
+      setTimeout(() => setSuccessMsg(''), 4000)
+    } catch (err: any) {
+      setError(userMessage(err))
+    }
+  }
+
   const handleRemoveMember = async (userId: string) => {
     if (!selectedEnterprise) return
     const who = members.find(m => m.userId === userId)
@@ -261,6 +277,7 @@ const EnterpriseManagement: React.FC = () => {
             onInviteClick={() => setShowInviteModal(true)}
             onUpdateRole={handleUpdateMemberRole}
             onRemoveMember={handleRemoveMember}
+            onTransfer={handleTransfer}
           />
         )}
         {selectedEnterprise && (
