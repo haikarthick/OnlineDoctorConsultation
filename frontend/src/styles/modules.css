@@ -3645,3 +3645,42 @@ button.record-due-row { cursor: pointer; }
 .breeding-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 .breeding-field label { font-weight: 600; }
 .breeding-hint { margin: 0; font-size: 13px; color: var(--gray-600); }
+
+/* ── Feed stock: phone cards instead of a nine-column table (pages/FeedInventory.tsx) ── */
+.feed-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.feed-card { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); background: #fff; }
+.feed-card.is-low { border-color: var(--danger); background: var(--danger-light); }
+.feed-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.feed-card-name { min-width: 0; overflow-wrap: anywhere; }
+.feed-card-stock { margin: 0; font-size: 22px; font-weight: 700; }
+.feed-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px 14px; margin: 0; }
+.feed-facts dt { font-size: 12px; color: var(--gray-600); }
+.feed-facts dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.feed-card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.feed-card-actions .btn { min-height: var(--tap-min); }
+.feed-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.feed-field label { font-weight: 600; }
+.feed-sheet-action { width: 100%; min-height: var(--tap-min); margin-top: 12px; }
+.feed-usage-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding: 6px 0; border-bottom: 1px solid var(--gray-200); font-size: 14px; }
+/* Trend bar heights, 5% steps (feed-bar-0 .. feed-bar-20) */
+.feed-bar-0 { height: 0%; }
+.feed-bar-1 { height: 5%; }
+.feed-bar-2 { height: 10%; }
+.feed-bar-3 { height: 15%; }
+.feed-bar-4 { height: 20%; }
+.feed-bar-5 { height: 25%; }
+.feed-bar-6 { height: 30%; }
+.feed-bar-7 { height: 35%; }
+.feed-bar-8 { height: 40%; }
+.feed-bar-9 { height: 45%; }
+.feed-bar-10 { height: 50%; }
+.feed-bar-11 { height: 55%; }
+.feed-bar-12 { height: 60%; }
+.feed-bar-13 { height: 65%; }
+.feed-bar-14 { height: 70%; }
+.feed-bar-15 { height: 75%; }
+.feed-bar-16 { height: 80%; }
+.feed-bar-17 { height: 85%; }
+.feed-bar-18 { height: 90%; }
+.feed-bar-19 { height: 95%; }
+.feed-bar-20 { height: 100%; }

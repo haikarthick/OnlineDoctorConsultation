@@ -84,7 +84,6 @@
         "src/pages/ComplianceDocs.tsx",
         "src/pages/DigitalTwin.tsx",
         "src/pages/DiseasePrediction.tsx",
-        "src/pages/FeedInventory.tsx",
         "src/pages/FinancialAnalytics.tsx",
         "src/pages/GenomicLineage.tsx",
         "src/pages/GeospatialAnalytics.tsx",

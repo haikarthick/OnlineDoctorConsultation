@@ -374,6 +374,41 @@
       "deleteConfirm": "Delete this feed item?",
       "feedDeleted": "Feed deleted!",
       "deleteFailed": "Failed to delete"
+    },
+    "loadFailed": "We could not load the feed stock. Check your connection and try again.",
+    "steps": {
+      "what": "What feed is it?",
+      "stock": "How much, and what did it cost?",
+      "more": "More details (optional)"
+    },
+    "blocked": {
+      "name": "Type the name of the feed first.",
+      "quantity": "Enter how much is in stock first.",
+      "cost": "Enter the cost per unit first."
+    },
+    "minHint": "You are warned when the stock falls to this level.",
+    "restockTitle": "Restock {{name}}",
+    "restockQty": "Quantity added",
+    "types": {
+      "hay": "Hay",
+      "grain": "Grain",
+      "pellet": "Pellet",
+      "silage": "Silage",
+      "mineral": "Mineral",
+      "supplement": "Supplement",
+      "concentrate": "Concentrate",
+      "forage": "Green fodder",
+      "medicated": "Medicated feed",
+      "other": "Other"
+    },
+    "units": {
+      "kg": "kg",
+      "lb": "lb",
+      "ton": "tonne",
+      "bag": "bag",
+      "bale": "bale",
+      "liter": "litre",
+      "gallon": "gallon"
     }
   },
   "supplyChain": {
