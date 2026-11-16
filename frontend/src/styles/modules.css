@@ -3684,3 +3684,23 @@ button.record-due-row { cursor: pointer; }
 .feed-bar-18 { height: 90%; }
 .feed-bar-19 { height: 95%; }
 .feed-bar-20 { height: 100%; }
+
+/* ── Movement log: phone cards instead of a seven-column table (pages/MovementLog.tsx) ── */
+.movement-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.movement-card { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); background: #fff; }
+.movement-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.movement-card-name { min-width: 0; overflow-wrap: anywhere; }
+.movement-card-subject { margin: 0; font-size: 18px; font-weight: 600; overflow-wrap: anywhere; }
+.movement-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px 14px; margin: 0; }
+.movement-facts dt { font-size: 12px; color: var(--gray-600); }
+.movement-facts dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.movement-card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.movement-card-actions .btn { min-height: var(--tap-min); }
+.movement-status { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; background: #94a3b8; }
+.movement-status--pending { background: #d97706; }
+.movement-status--approved { background: #16a34a; }
+.movement-status--rejected { background: #dc2626; }
+.movement-status--completed { background: #2563eb; }
+.movement-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.movement-field label { font-weight: 600; }
+.movement-hint { margin: 0; font-size: 13px; color: var(--gray-600); }

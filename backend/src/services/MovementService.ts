@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
-import { DatabaseError, NotFoundError } from '../utils/errors';
+import { DatabaseError, NotFoundError, ValidationError } from '../utils/errors';
 import logger from '../utils/logger';
 import BatchManagementService from './BatchManagementService';
 
@@ -19,6 +19,8 @@ export interface MovementRecord {
   transportDate: Date;
   regulatoryPermit?: string;
   approvedBy?: string;
+  /** pending (waiting for the owner or a manager), approved, rejected or completed. */
+  status: string;
   recordedBy: string;
   notes?: string;
   metadata?: any;
@@ -48,6 +50,41 @@ export interface MovementCreateDTO {
 
 export class MovementService {
 
+  /**
+   * Everything a movement names must belong to the farm it is recorded on. Before this, anyone with a role on ONE farm
+   * could name another farm's animal and move it (the animal's current location is rewritten), or file a movement
+   * against another farm's group or location.
+   */
+  private async assertBelongsToFarm(data: MovementCreateDTO): Promise<void> {
+    const check = async (table: 'animals' | 'animal_groups' | 'locations', id: string | undefined, message: string) => {
+      if (!id) return;
+      const r = await database.query(`SELECT 1 FROM ${table} WHERE id = $1 AND enterprise_id = $2`, [id, data.enterpriseId]);
+      if (r.rows.length === 0) throw new ValidationError(message);
+    };
+    await check('animals', data.animalId, 'That animal is not on this farm. Add it to the farm first, or choose another animal.');
+    await check('animal_groups', data.groupId, 'That group is not on this farm. Choose a group from this farm.');
+    await check('locations', data.fromLocationId, 'The place it is moving from is not on this farm. Choose a place from this farm.');
+    await check('locations', data.toLocationId, 'The place it is moving to is not on this farm. Choose a place from this farm.');
+  }
+
+  /** The farm a movement belongs to (so the caller can check the person's role on it). */
+  async farmOf(id: string): Promise<string> {
+    const found = await database.query(`SELECT enterprise_id FROM movement_records WHERE id = $1`, [id]);
+    if (found.rows.length === 0) throw new NotFoundError('We could not find that movement. It may have been removed.');
+    return found.rows[0].enterprise_id;
+  }
+
+  /** The owner's or a manager's decision. Only a pending movement can be decided. */
+  async setDecision(id: string, action: 'approve' | 'reject', decidedBy: string): Promise<string> {
+    const status = action === 'approve' ? 'approved' : 'rejected';
+    const r = await database.query(
+      `UPDATE movement_records SET status = $1, approved_by = $2 WHERE id = $3 AND status = 'pending' RETURNING id`,
+      [status, decidedBy, id]
+    );
+    if (r.rows.length === 0) throw new ValidationError('This movement has already been decided. Refresh the list to see what was decided.');
+    return status;
+  }
+
   async createMovement(recordedBy: string, data: MovementCreateDTO): Promise<MovementRecord> {
     // Food-safety interlock. A movement that sends animals to slaughter or off the holding must
     // not happen while a withdrawal period is running - Phase 1 records the date, this refuses
@@ -59,6 +96,7 @@ export class MovementService {
         { animalId: data.animalId, groupId: data.groupId }, kind as any
       );
     }
+    await this.assertBelongsToFarm(data);
     try {
       const id = uuidv4();
       const result = await database.query(
@@ -151,6 +189,7 @@ export class MovementService {
       transportDate: row.transport_date,
       regulatoryPermit: row.regulatory_permit,
       approvedBy: row.approved_by,
+      status: row.status || 'pending',
       recordedBy: row.recorded_by,
       notes: row.notes,
       metadata: row.metadata,

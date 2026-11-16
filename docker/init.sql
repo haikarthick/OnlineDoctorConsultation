@@ -319,7 +319,9 @@ CREATE TABLE IF NOT EXISTS movement_records (
   recorded_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   notes TEXT,
   metadata JSONB DEFAULT '{}',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status VARCHAR(20) DEFAULT 'pending'
+    CHECK (status IN ('pending', 'approved', 'rejected', 'completed'))
 );
 
 -- ============================================================

@@ -409,7 +409,8 @@
     "completed": "Completed",
     "approve": "Approve",
     "reject": "Reject",
-    "approvalRequired": "This movement requires manager approval"
+    "approvalRequired": "This movement requires manager approval",
+    "pending": "Waiting for approval"
   },
   "movementLog": {
     "pageTitle": "🔄 Movement Log",
@@ -442,23 +443,35 @@
     "form": {
       "title": "Record Movement",
       "type": "Movement Type *",
-      "animalId": "Animal ID",
-      "group": "Or Group",
+      "animalId": "Animal",
+      "group": "Group",
       "fromLocation": "From Location",
       "toLocation": "To Location",
       "reason": "Reason",
       "notes": "Notes",
       "groupDefault": "None",
       "locationDefault": "-",
-      "recordBtn": "Record Movement"
+      "recordBtn": "Record Movement",
+      "kind": "What is moving?",
+      "kindAnimal": "One animal",
+      "kindGroup": "A group",
+      "searchAnimal": "Search the animal by name...",
+      "groupChoose": "Choose a group",
+      "noGroups": "This farm has no group yet. Add one on the Groups screen first."
     },
     "validation": {
       "typeRequired": "Movement type required",
-      "selectAnimal": "Select animal or group"
+      "selectAnimal": "Choose the animal or group first."
     },
     "toasts": {
       "recorded": "Movement recorded",
       "failed": "Failed"
+    },
+    "loadFailed": "We could not load the movements. Check your connection and try again.",
+    "steps": {
+      "what": "What kind of movement?",
+      "who": "Which animal or group?",
+      "where": "Where, and why?"
     }
   }
 }

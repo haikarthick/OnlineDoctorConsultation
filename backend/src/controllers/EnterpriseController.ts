@@ -223,6 +223,16 @@ class EnterpriseController {
     res.json({ success: true, data: result });
   }
 
+  /** Approve or reject a pending movement: the farm's owner or a manager (or an admin) - nobody else changes the record of what moved. */
+  async decideMovement(req: AuthRequest, res: Response): Promise<void> {
+    const action = req.body?.action;
+    if (action !== 'approve' && action !== 'reject') throw new ValidationError('Choose approve or reject.');
+    const enterpriseId = await MovementService.farmOf(req.params.id);
+    await FarmAccessService.assert(enterpriseId, { userId: req.userId!, role: req.userRole }, 'manage_farm');
+    const status = await MovementService.setDecision(req.params.id, action, req.userId!);
+    res.json({ success: true, data: { status, message: `Movement ${status}` } });
+  }
+
   async getMovement(req: AuthRequest, res: Response): Promise<void> {
     const movement = await MovementService.getMovement(req.params.id);
     await this.ensureEnterpriseAccess(movement.enterpriseId, req.userId!, req.userRole!);

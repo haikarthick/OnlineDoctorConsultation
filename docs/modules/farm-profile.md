@@ -236,3 +236,16 @@ to ask the owner to book them. The clinical access audit (`clinical_data_access_
 private-animal read: the middleware wrote `get_animal_profile` into `access_type`, which the table restricts to a closed
 list. It now writes `view` (reads) / `api_call` (changes) and the screen name goes in `record_type`. Verified by a 6-check
 real-server run (unbooked 403, booked 200, cancelled 403, audit row written as `view/animal_profile`).
+
+## Breeding, Feed and Movement screens (Phase 5, 2026-11-16)
+All three now use the shared phone blocks (`StepForm`, `ChipSelect`, `NumberStepper`, `BottomSheet`, `useSaveAction`) and
+cards instead of tables; classes `breeding-*`, `feed-*`, `movement-*` in `modules.css`.
+- **Breeding**: the mother and father are picked from the farm's own live animals (female / male, the father of the mother's
+  species) - it used to take a typed UUID. Birth figures appear only for outcomes that have them.
+- **Feed**: money uses the platform currency (`useSettings().formatCurrency`; it was a hardcoded `$`), feed types and units
+  are translated, restock / log use / delete are sheets with the shared save behaviour, trend bars use `feed-bar-N` classes.
+- **Movement**: backend fixes found on the way - `movement_records.status` existed only if a seed script ran (migration 050 +
+  `init.sql`; existing rows become `completed`), the list never returned `status`, group movements could never be approved
+  (the farm was looked up through an animal), approval was owner-only (now owner or manager, `FarmAccessService
+  'manage_farm'`), and **a movement could name another farm's animal, group or place** (it rewrote that animal's location) -
+  `MovementService.assertBelongsToFarm` now refuses it in words. Verified by a 15-check real-server run.

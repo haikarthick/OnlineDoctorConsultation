@@ -409,7 +409,8 @@
     "completed": "Completed",
     "approve": "Approve",
     "reject": "Reject",
-    "approvalRequired": "This movement requires manager approval"
+    "approvalRequired": "This movement requires manager approval",
+    "pending": "അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു"
   },
   "movementLog": {
     "pageTitle": "🔄 ചലന രേഖ",
@@ -442,23 +443,35 @@
     "form": {
       "title": "ചലനം രേഖപ്പെടുത്തുക",
       "type": "ചലന തരം *",
-      "animalId": "മൃഗ ഐഡി",
-      "group": "അല്ലെങ്കിൽ ഗ്രൂപ്പ്",
+      "animalId": "മൃഗം",
+      "group": "ഗ്രൂപ്പ്",
       "fromLocation": "ഇവിടെ നിന്ന്",
       "toLocation": "ഇവിടേക്ക്",
       "reason": "കാരണം",
       "notes": "കുറിപ്പുകൾ",
       "groupDefault": "ഒന്നുമില്ല",
       "locationDefault": "-",
-      "recordBtn": "ചലനം രേഖപ്പെടുത്തുക"
+      "recordBtn": "ചലനം രേഖപ്പെടുത്തുക",
+      "kind": "എന്താണ് മാറ്റുന്നത്?",
+      "kindAnimal": "ഒരു മൃഗം",
+      "kindGroup": "ഒരു ഗ്രൂപ്പ്",
+      "searchAnimal": "മൃഗത്തിന്റെ പേരിൽ തിരയുക...",
+      "groupChoose": "ഗ്രൂപ്പ് തിരഞ്ഞെടുക്കുക",
+      "noGroups": "ഈ ഫാമിൽ ഇതുവരെ ഗ്രൂപ്പ് ഇല്ല. ആദ്യം ഗ്രൂപ്പുകളുടെ സ്ക്രീനിൽ ഒന്ന് ചേർക്കുക."
     },
     "validation": {
       "typeRequired": "ചലന തരം ആവശ്യമാണ്",
-      "selectAnimal": "മൃഗം അല്ലെങ്കിൽ ഗ്രൂപ്പ് തിരഞ്ഞെടുക്കുക"
+      "selectAnimal": "ആദ്യം മൃഗമോ ഗ്രൂപ്പോ തിരഞ്ഞെടുക്കുക."
     },
     "toasts": {
       "recorded": "ചലനം രേഖപ്പെടുത്തി",
       "failed": "പരാജയപ്പെട്ടു"
+    },
+    "loadFailed": "മാറ്റ രേഖകൾ ലോഡ് ചെയ്യാനായില്ല. കണക്ഷൻ പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കുക.",
+    "steps": {
+      "what": "ഏതുതരം മാറ്റം?",
+      "who": "ഏത് മൃഗം അല്ലെങ്കിൽ ഗ്രൂപ്പ്?",
+      "where": "എവിടേക്ക്, എന്തിന്?"
     }
   }
 }

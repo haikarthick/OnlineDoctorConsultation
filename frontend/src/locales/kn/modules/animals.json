@@ -409,7 +409,8 @@
     "completed": "ಪೂರ್ಣಗೊಂಡಿದೆ",
     "approve": "ಅನುಮೋದಿಸಿ",
     "reject": "ತಿರಸ್ಕರಿಸಿ",
-    "approvalRequired": "ಈ ಚಲನೆಗೆ ವ್ಯವಸ್ಥಾಪಕರ ಅನುಮೋದನೆ ಅಗತ್ಯ"
+    "approvalRequired": "ಈ ಚಲನೆಗೆ ವ್ಯವಸ್ಥಾಪಕರ ಅನುಮೋದನೆ ಅಗತ್ಯ",
+    "pending": "ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ"
   },
   "movementLog": {
     "pageTitle": "🔄 ಚಲನೆ ದಾಖಲೆ",
@@ -442,23 +443,35 @@
     "form": {
       "title": "Record Movement",
       "type": "Movement Type *",
-      "animalId": "Animal ID",
-      "group": "Or Group",
+      "animalId": "ಪ್ರಾಣಿ",
+      "group": "ಗುಂಪು",
       "fromLocation": "From Location",
       "toLocation": "To Location",
       "reason": "ಕಾರಣ",
       "notes": "ಟಿಪ್ಪಣಿಗಳು",
       "groupDefault": "None",
       "locationDefault": "-",
-      "recordBtn": "Record Movement"
+      "recordBtn": "Record Movement",
+      "kind": "ಯಾವುದು ಸ್ಥಳಾಂತರವಾಗುತ್ತಿದೆ?",
+      "kindAnimal": "ಒಂದು ಪ್ರಾಣಿ",
+      "kindGroup": "ಒಂದು ಗುಂಪು",
+      "searchAnimal": "ಪ್ರಾಣಿಯ ಹೆಸರಿನಿಂದ ಹುಡುಕಿ...",
+      "groupChoose": "ಗುಂಪನ್ನು ಆರಿಸಿ",
+      "noGroups": "ಈ ಫಾರ್ಮ್‌ನಲ್ಲಿ ಇನ್ನೂ ಗುಂಪು ಇಲ್ಲ. ಮೊದಲು ಗುಂಪುಗಳ ಪರದೆಯಲ್ಲಿ ಒಂದನ್ನು ಸೇರಿಸಿ."
     },
     "validation": {
       "typeRequired": "Movement type required",
-      "selectAnimal": "Select animal or group"
+      "selectAnimal": "ಮೊದಲು ಪ್ರಾಣಿ ಅಥವಾ ಗುಂಪನ್ನು ಆರಿಸಿ."
     },
     "toasts": {
       "recorded": "Movement recorded",
       "failed": "ವಿಫಲ"
+    },
+    "loadFailed": "ಸ್ಥಳಾಂತರ ದಾಖಲೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ. ನಿಮ್ಮ ಸಂಪರ್ಕ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "steps": {
+      "what": "ಯಾವ ರೀತಿಯ ಸ್ಥಳಾಂತರ?",
+      "who": "ಯಾವ ಪ್ರಾಣಿ ಅಥವಾ ಗುಂಪು?",
+      "where": "ಎಲ್ಲಿಂದ ಎಲ್ಲಿಗೆ, ಏಕೆ?"
     }
   }
 }

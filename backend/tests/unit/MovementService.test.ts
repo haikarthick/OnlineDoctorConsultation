@@ -24,11 +24,35 @@ describe('MovementService', () => {
       const movement = { id: 'mock-uuid', enterprise_id: 'e1', animal_id: 'a1', from_location_id: 'l1', to_location_id: 'l2', movement_type: 'transfer', reason: 'Rotation', recorded_by: 'u1' };
       (database.query as jest.Mock)
         .mockResolvedValueOnce({ rows: [{ milk: null, meat: null }] }) // withdrawal status check
+        .mockResolvedValueOnce({ rows: [{}] })          // animal is on the farm
+        .mockResolvedValueOnce({ rows: [{}] })          // from-place is on the farm
+        .mockResolvedValueOnce({ rows: [{}] })          // to-place is on the farm
         .mockResolvedValueOnce({ rows: [movement] })   // INSERT
         .mockResolvedValueOnce({ rows: [] });           // UPDATE animal location
       const result = await movementService.createMovement('u1', { enterpriseId: 'e1', animalId: 'a1', fromLocationId: 'l1', toLocationId: 'l2', movementType: 'transfer', reason: 'Rotation' });
       expect(result).toEqual(expect.objectContaining({ id: 'mock-uuid' }));
       expect(database.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO movement_records'), expect.any(Array));
+    });
+  });
+
+  describe('farm boundaries and decisions', () => {
+    it('refuses an animal that is not on the farm, in words, and writes nothing', async () => {
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ milk: null, meat: null }] }) // withdrawal status check
+        .mockResolvedValueOnce({ rows: [] });                           // animal is NOT on the farm
+      await expect(movementService.createMovement('u1', { enterpriseId: 'e1', animalId: 'other', toLocationId: 'l2', movementType: 'transfer' }))
+        .rejects.toThrow(/not on this farm/);
+      expect((database.query as jest.Mock).mock.calls.some(c => String(c[0]).includes('INSERT INTO movement_records'))).toBe(false);
+    });
+
+    it('only a pending movement can be decided', async () => {
+      (database.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      await expect(movementService.setDecision('m1', 'approve', 'u1')).rejects.toThrow(/already been decided/);
+    });
+
+    it('records who decided and returns the new status', async () => {
+      (database.query as jest.Mock).mockResolvedValueOnce({ rows: [{ id: 'm1' }] });
+      await expect(movementService.setDecision('m1', 'reject', 'u1')).resolves.toBe('rejected');
     });
   });
 
