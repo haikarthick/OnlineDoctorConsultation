@@ -260,3 +260,14 @@ another farm's group (`groupCountOnFarm` now refuses it), and "how many to treat
 "Start" is one tap; "Mark done" opens the progress step so the real number treated is entered (it goes into the group's
 health record). Create / edit buttons are shown only to owner, manager, supervisor and farm vet (`hooks/useMyFarmRole.ts`,
 shared with the Movement screen; the server still decides). Verified by a 10-check real-server run.
+
+## Locations (Phase 5, 2026-11-16)
+Cards, tree (indent by `loc-depth-N` class) and map views; add / edit is a three-step form (what, size, where) with a
+"use my current location" button for the coordinates; delete is a sheet that says what happens to what is inside. Backend:
+a place's parent must be a place of the same farm and not the place itself or one of its own parts (it used to accept any
+id - another farm's place name then showed on this farm's screen, and a loop broke the tree); the place type is validated
+against `locations.location_type`; deleting a place moves the places inside it up one level. The screen asks for up to 200
+places (it silently stopped at 50 before). Only owner and manager see the change buttons (`useMyFarmRole`). Verified by an
+11-check real-server run. Phase 5's five farm screens (Breeding, Feed, Movement, Campaigns, Locations) are now all on the
+shared phone blocks; the batch-plan leftovers (group passport, group certificates, group consultations, batch prescriptions)
+remain - the hospital-network parts of those need the owner's sign-off.

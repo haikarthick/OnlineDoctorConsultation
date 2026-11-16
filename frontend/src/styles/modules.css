@@ -3751,3 +3751,58 @@ button.record-due-row { cursor: pointer; }
 .camp-progress-18 { width: 90%; }
 .camp-progress-19 { width: 95%; }
 .camp-progress-20 { width: 100%; }
+
+/* ── Locations: phone cards, tree depth and occupancy bars as classes (pages/LocationManagement.tsx) ── */
+.loc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.loc-card { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); background: #fff; }
+.loc-card-head { display: flex; align-items: center; gap: 10px; }
+.loc-card-icon { font-size: 28px; }
+.loc-card-title { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.loc-card-name { overflow-wrap: anywhere; }
+.loc-card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.loc-card-actions .btn { min-height: var(--tap-min); }
+.loc-occupancy { display: flex; justify-content: space-between; font-size: 14px; }
+.loc-full { color: var(--danger); }
+.loc-bar { height: 8px; border-radius: 4px; background: var(--gray-200); overflow: hidden; }
+.loc-bar-fill { height: 100%; border-radius: 4px; background: var(--primary); }
+.loc-bar-fill.is-full { background: var(--danger); }
+.loc-desc { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.loc-hint { margin: 0; font-size: 13px; color: var(--gray-600); }
+.loc-warning { margin: 8px 0 0; padding: 10px 12px; border-radius: var(--radius-lg); background: var(--warning-light); font-size: 14px; }
+.loc-tree { display: flex; flex-direction: column; gap: 2px; }
+.loc-node { padding: 4px 0 4px 10px; border-left: 2px solid var(--gray-200); }
+.loc-node-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-height: var(--tap-min); }
+.loc-node-name { min-width: 0; overflow-wrap: anywhere; }
+.loc-node-occ { font-size: 13px; color: var(--gray-600); }
+.loc-depth-0 { margin-left: 0; }
+.loc-depth-1 { margin-left: 14px; }
+.loc-depth-2 { margin-left: 28px; }
+.loc-depth-3 { margin-left: 42px; }
+.loc-depth-4 { margin-left: 56px; }
+.loc-depth-5 { margin-left: 70px; }
+.loc-depth-6 { margin-left: 84px; }
+.loc-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.loc-field label { font-weight: 600; }
+.loc-gps-button { width: 100%; min-height: var(--tap-min); margin-bottom: 10px; }
+.loc-sheet-action { width: 100%; min-height: var(--tap-min); margin-top: 12px; }
+.loc-bar-0 { width: 0%; }
+.loc-bar-1 { width: 5%; }
+.loc-bar-2 { width: 10%; }
+.loc-bar-3 { width: 15%; }
+.loc-bar-4 { width: 20%; }
+.loc-bar-5 { width: 25%; }
+.loc-bar-6 { width: 30%; }
+.loc-bar-7 { width: 35%; }
+.loc-bar-8 { width: 40%; }
+.loc-bar-9 { width: 45%; }
+.loc-bar-10 { width: 50%; }
+.loc-bar-11 { width: 55%; }
+.loc-bar-12 { width: 60%; }
+.loc-bar-13 { width: 65%; }
+.loc-bar-14 { width: 70%; }
+.loc-bar-15 { width: 75%; }
+.loc-bar-16 { width: 80%; }
+.loc-bar-17 { width: 85%; }
+.loc-bar-18 { width: 90%; }
+.loc-bar-19 { width: 95%; }
+.loc-bar-20 { width: 100%; }

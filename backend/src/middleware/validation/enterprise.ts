@@ -65,7 +65,9 @@ export const assignAnimalToGroupSchema = Joi.object({
 export const createLocationSchema = Joi.object({
   enterpriseId: requiredUuid,
   name: shortText().required(),
-  locationType: shortText(50).required(),
+  // The kinds the table accepts (docker/init.sql locations.location_type).
+  locationType: shortText(50).valid('barn', 'stable', 'pen', 'paddock', 'field', 'pasture', 'quarantine', 'isolation', 'aviary', 'tank', 'pond', 'enclosure', 'kennel', 'cattery', 'warehouse', 'office', 'treatment_area', 'milking_parlor', 'feed_storage', 'other').required()
+    .messages({ 'any.only': 'Choose one of the place types in the list.' }),
   parentLocationId: uuid.optional().allow(null),
   capacity: positiveInt.optional().allow(null),
   area: positiveNumber.optional().allow(null),

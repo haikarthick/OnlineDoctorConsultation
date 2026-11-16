@@ -907,14 +907,66 @@
       "capacity": "Capacity",
       "area": "Area",
       "gpsLatitude": "GPS Latitude",
-      "gpsLongitude": "GPS Longitude"
+      "gpsLongitude": "GPS Longitude",
+      "typeChoose": "Choose the kind of place",
+      "capacityHint": "How many animals it can hold. Leave 0 if it has no limit.",
+      "areaUnit": "Area unit"
     },
     "toasts": {
       "updated": "Location updated",
       "created": "Location created",
       "deleted": "Location deleted",
-      "deleteConfirm": "Delete this location?"
-    }
+      "deleteConfirm": "Delete this location?",
+      "failed": "The place could not be saved. Check your connection and try again.",
+      "deleteFailed": "The place could not be deleted. Try again."
+    },
+    "types": {
+      "barn": "Barn",
+      "stable": "Stable",
+      "pen": "Pen",
+      "paddock": "Paddock",
+      "field": "Field",
+      "pasture": "Pasture",
+      "quarantine": "Quarantine",
+      "isolation": "Isolation",
+      "aviary": "Aviary",
+      "tank": "Tank",
+      "pond": "Pond",
+      "enclosure": "Enclosure",
+      "kennel": "Kennel",
+      "cattery": "Cattery",
+      "warehouse": "Warehouse",
+      "office": "Office",
+      "treatment_area": "Treatment area",
+      "milking_parlor": "Milking parlour",
+      "feed_storage": "Feed store",
+      "other": "Other"
+    },
+    "areaUnits": {
+      "sqft": "sq ft",
+      "sqm": "sq m",
+      "acres": "acres",
+      "hectares": "hectares"
+    },
+    "loadFailed": "We could not load the places. Check your connection and try again.",
+    "viewAs": "Show as",
+    "steps": {
+      "what": "What is this place?",
+      "size": "How big is it?",
+      "where": "Where is it?"
+    },
+    "blocked": {
+      "name": "Type the name of the place first.",
+      "type": "Choose what kind of place it is first."
+    },
+    "useMyLocation": "Use my current location",
+    "locating": "Finding your location...",
+    "gpsUnavailable": "This phone cannot give its location. Tap the map or type the numbers instead.",
+    "gpsDenied": "We could not get your location. Allow location for this site in the phone settings, or tap the map instead.",
+    "clickMapHint": "Tap the map to set the coordinates.",
+    "gpsCount": "{{have}} of {{total}} places have GPS coordinates.",
+    "gpsMissing": "These places have no GPS yet: {{names}}. Edit them to add it.",
+    "deleteExplain": "Animals in it will show as having no place, and places inside it move up one level. Nothing else is deleted."
   },
   "enterpriseManagement": {
     "pageTitle": "🏢 Enterprise Management",
