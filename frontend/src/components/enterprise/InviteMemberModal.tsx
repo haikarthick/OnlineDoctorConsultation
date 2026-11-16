@@ -10,7 +10,9 @@ export const InviteMemberModal: React.FC<{
   onRoleChange: (v: string) => void
   onSubmit: (e: React.FormEvent) => void
   onClose: () => void
-}> = ({ inviteEmail, inviteRole, inviteError, inviteLoading, onEmailChange, onRoleChange, onSubmit, onClose }) => {
+  /** Roles the signed-in person may give (a manager cannot make another manager). */
+  roles: Array<{ value: string; label: string }>
+}> = ({ inviteEmail, inviteRole, inviteError, inviteLoading, onEmailChange, onRoleChange, onSubmit, onClose, roles }) => {
   return (
     <>
       <div className="edit-form-overlay" onClick={onClose} />
@@ -34,11 +36,7 @@ export const InviteMemberModal: React.FC<{
           <div className="form-group">
             <label>Role <span className="si-4fb20e94">*</span></label>
             <select value={inviteRole} onChange={e => onRoleChange(e.target.value)} className="module-input">
-              <option value="manager">Manager</option>
-              <option value="supervisor">Supervisor</option>
-              <option value="farm_vet">Farm Vet</option>
-              <option value="worker">Worker</option>
-              <option value="viewer">Viewer</option>
+              {roles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
           </div>
           {!inviteEmail && <p className="si-6ea836c5">⚠️ Enter a registered user&apos;s email to proceed</p>}

@@ -10,6 +10,7 @@ import { EnterpriseMapOverview } from '../components/enterprise/EnterpriseMapOve
 import { EnterpriseCard } from '../components/enterprise/EnterpriseCard'
 import { EnterpriseStatsPanel } from '../components/enterprise/EnterpriseStatsPanel'
 import { EnterpriseMembersPanel } from '../components/enterprise/EnterpriseMembersPanel'
+import { myFarmRole, rolesIMayAssign } from '../utils/farmRoles'
 import { InviteMemberModal } from '../components/enterprise/InviteMemberModal'
 import { EnterpriseFormModal, EnterpriseFormData } from '../components/enterprise/EnterpriseFormModal'
 
@@ -49,7 +50,7 @@ const EnterpriseManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
 
   const isAdmin = user?.role === 'admin'
-  const canManageSelected = !!selectedEnterprise && (isAdmin || selectedEnterprise.ownerId === user?.id)
+  const actorRole = myFarmRole(selectedEnterprise, members, user?.id, isAdmin)
 
   const fetchEnterprises = async () => {
     try {
@@ -278,7 +279,7 @@ const EnterpriseManagement: React.FC = () => {
           <EnterpriseMembersPanel
             members={members}
             membersLoading={membersLoading}
-            canManage={canManageSelected}
+            actorRole={actorRole}
             updatingMemberId={updatingMemberId}
             membersLabel={t('enterpriseManagement.tabs.members')}
             onInviteClick={() => { setShowInviteModal(true); setInviteError('') }}
@@ -298,6 +299,7 @@ const EnterpriseManagement: React.FC = () => {
           onRoleChange={setInviteRole}
           onSubmit={handleInviteMember}
           onClose={() => setShowInviteModal(false)}
+          roles={rolesIMayAssign(actorRole).map(r => ({ value: r, label: r === 'farm_vet' ? 'Farm Vet' : r.charAt(0).toUpperCase() + r.slice(1) }))}
         />
       )}
 

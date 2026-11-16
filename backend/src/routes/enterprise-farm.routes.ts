@@ -5,6 +5,8 @@ import { asyncHandler } from '../utils/errorHandler';
 import database from '../utils/database';
 import EnterpriseController from '../controllers/EnterpriseController';
 import BatchManagementService from '../services/BatchManagementService';
+import FarmAccessService from '../services/FarmAccessService';
+import { ForbiddenError } from '../utils/errors';
 import {
   createEnterpriseSchema, updateEnterpriseSchema, addMemberSchema, updateMemberSchema,
   createAnimalGroupSchema, updateAnimalGroupSchema, assignAnimalToGroupSchema,
@@ -41,18 +43,9 @@ router.post('/enterprises/:id/invite-member', authMiddleware, asyncHandler(async
     return res.status(400).json({ success: false, message: 'email and role are required' });
   }
 
-  // Verify requester is enterprise owner or manager
-  const entResult = await database.query(
-    `SELECT id FROM enterprises WHERE id = $1 AND owner_id = $2`,
-    [req.params.id, userId]
-  );
-  const memberResult = await database.query(
-    `SELECT id FROM enterprise_members WHERE enterprise_id = $1 AND user_id = $2 AND role IN ('owner','manager') AND is_active = true`,
-    [req.params.id, userId]
-  );
-  if (userRole !== 'admin' && entResult.rows.length === 0 && memberResult.rows.length === 0) {
-    return res.status(403).json({ success: false, message: 'Not authorized to manage enterprise members' });
-  }
+  // Owner or manager (services/FarmAccessService.ts); a manager may add supervisors, workers, viewers and farm vets only.
+  const actorRole = await FarmAccessService.assert(req.params.id, { userId, role: userRole }, 'manage_team');
+  FarmAccessService.assertTeamChange(actorRole, { kind: 'add', newRole: role });
 
   // Look up user by email
   const userResult = await database.query(
@@ -91,23 +84,22 @@ export async function ensureGroupAccess(req: Request, res: Response): Promise<st
   const groupId = req.params.groupId || req.params.id;
   if (!groupId) { res.status(400).json({ success: false, message: 'Group id is required' }); return null; }
 
-  if (authReq.userRole === 'admin') return groupId;
-
-  const owned = await database.query(
-    `SELECT 1
-       FROM animal_groups ag
-       JOIN enterprises e ON e.id = ag.enterprise_id
-      WHERE ag.id = $1
-        AND (e.owner_id = $2
-             OR EXISTS (SELECT 1 FROM enterprise_members em
-                         WHERE em.enterprise_id = e.id AND em.user_id = $2 AND em.is_active = true))
-      LIMIT 1`,
-    [groupId, authReq.userId]
-  );
-  if (!owned.rows.length) {
-    // 404 not 403 - do not confirm that a group exists to someone with no claim on it.
-    res.status(404).json({ success: false, message: 'Animal group not found' });
+  // The group's farm decides: any member may look; changing the head count, cycles or records needs a role
+  // that records (a viewer or farm vet only looks). services/FarmAccessService.ts is the one rule.
+  const g = await database.query(`SELECT enterprise_id FROM animal_groups WHERE id = $1`, [groupId]);
+  if (!g.rows.length) {
+    res.status(404).json({ success: false, message: 'That group was not found. It may have been removed.' });
     return null;
+  }
+  try {
+    const action = authReq.method === 'GET' || authReq.method === 'HEAD' ? 'read' : 'record';
+    await FarmAccessService.assert(g.rows[0].enterprise_id, { userId: authReq.userId, role: authReq.userRole }, action);
+  } catch (err: any) {
+    if (err instanceof ForbiddenError) {
+      res.status(403).json({ success: false, message: err.message, error: { message: err.message } });
+      return null;
+    }
+    throw err;
   }
   return groupId;
 }

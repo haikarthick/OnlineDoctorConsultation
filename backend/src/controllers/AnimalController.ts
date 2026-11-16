@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import FarmAccessService from '../services/FarmAccessService';
 import { AuthRequest } from '../middleware/auth';
 import AnimalService from '../services/AnimalService';
 import { ValidationError, ForbiddenError } from '../utils/errors';
@@ -15,19 +16,14 @@ export class AnimalController {
   private async assertPlacementAllowed(req: AuthRequest, enterpriseId?: string | null, groupId?: string | null): Promise<void> {
     if (!enterpriseId && !groupId) return;
     if (req.userRole === 'admin') return;
-    const access = `(e.owner_id = $2 OR EXISTS (SELECT 1 FROM enterprise_members em
-                       WHERE em.enterprise_id = e.id AND em.user_id = $2 AND em.is_active = true))`;
-    if (enterpriseId) {
-      const ent = await database.query(`SELECT 1 FROM enterprises e WHERE e.id = $1 AND ${access} LIMIT 1`, [enterpriseId, req.userId]);
-      if (ent.rows.length === 0) throw new ForbiddenError('You do not have access to that farm');
-    }
+    // Putting an animal on a farm or in a group changes that farm: it needs a role that records
+    // (services/FarmAccessService.ts) - a viewer or farm vet cannot.
+    const actor = { userId: req.userId!, role: req.userRole };
+    if (enterpriseId) await FarmAccessService.assert(enterpriseId, actor, 'record');
     if (groupId) {
-      const grp = await database.query(
-        `SELECT ag.enterprise_id FROM animal_groups ag JOIN enterprises e ON e.id = ag.enterprise_id
-          WHERE ag.id = $1 AND ${access} LIMIT 1`,
-        [groupId, req.userId]
-      );
-      if (grp.rows.length === 0) throw new ForbiddenError('You do not have access to that group');
+      const grp = await database.query(`SELECT enterprise_id FROM animal_groups WHERE id = $1`, [groupId]);
+      if (grp.rows.length === 0) throw new ValidationError('That group was not found. Choose a group from the list.');
+      await FarmAccessService.assert(grp.rows[0].enterprise_id, actor, 'record');
       if (enterpriseId && grp.rows[0].enterprise_id !== enterpriseId) {
         throw new ValidationError('That group belongs to a different farm. Choose a group from the selected farm.');
       }

@@ -142,3 +142,26 @@ Platform reference data: no tenant id is taken, so there is no tenant scoping he
   breeding screen never sends a species, so before migration 043 no due date was ever calculated.
 - Seeded values with weak sourcing are listed in the header of
   `backend/migrations/043_farm_profile_engine.sql`; all are admin-editable.
+
+## Farm roles (one rule everywhere, 2026-11-16)
+`backend/src/services/FarmAccessService.ts` is the only place that decides what a farm role may do (the screen's
+copy for button visibility is `frontend/src/utils/farmRoles.ts`).
+
+| action | owner | manager | supervisor | worker | farm vet | viewer |
+|---|---|---|---|---|---|---|
+| read | x | x | x | x | x | x |
+| record (daily records, events, head count, putting animals on the farm) | x | x | x | x | | |
+| clinical (health / analytics screens that change data) | x | x | x | x | x | |
+| manage farm | x | x | | | | |
+| manage team (add / remove supervisors, workers, viewers, farm vets) | x | x | | | | |
+| change roles, make / remove a manager | x | | | | | |
+
+A platform admin may do everything. The owner's own place cannot be removed or changed; a farm has one owner.
+Applied in: `EnterpriseController` (per-action role lists kept, now through `roleOf`), Tier 2/3/4 controllers (read =
+GET, anything else = clinical), `ensureGroupAccess` (batch routes), `AnimalController` placement, medical-record
+group writes (a viewer is refused), `requireEnterpriseAccess` middleware, the daily-records module, and the member
+endpoints (`assertTeamChange`: a manager cannot promote, cannot touch managers or the owner). A person with no
+role is told: "You don't have access to this farm. Only the farm owner can add people. Please ask them to
+invite you." (403, never "not found"). Verified by `backend/tests/unit/FarmAccessService.test.ts` and a real-server
+run (28 checks). Still to build: invitations for people without an account, SMS, and a farm workspace for people whose
+platform role is not farmer (see the plan in the conversation / `docs/FARM_MANAGEMENT_PLAN.md`).

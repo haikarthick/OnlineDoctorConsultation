@@ -2,6 +2,7 @@ import database from '../utils/database';
 import logger from '../utils/logger';
 import { ValidationError, NotFoundError, ForbiddenError } from '../utils/errors';
 import FarmProfileService from './FarmProfileService';
+import FarmAccessService from './FarmAccessService';
 import BatchManagementService from './BatchManagementService';
 
 /**
@@ -19,7 +20,7 @@ import BatchManagementService from './BatchManagementService';
  */
 
 const LEDGER_RECORD_TYPE = 'mortality';
-const READ_ONLY_FARM_ROLES = ['farm_vet', 'viewer'];
+const canDeleteAnyRecord = (role: string | null): boolean => role === 'owner' || role === 'manager';
 const SESSIONS = ['am', 'pm', 'day'] as const;
 type Session = typeof SESSIONS[number];
 
@@ -51,31 +52,17 @@ interface Subject {
 
 interface FieldDef { key: string; type: string; required?: boolean; options?: string[] }
 
-const FARM_ACCESS = `(e.owner_id = $2 OR EXISTS (SELECT 1 FROM enterprise_members em
-                       WHERE em.enterprise_id = e.id AND em.user_id = $2 AND em.is_active = true))`;
-
 const todayIso = (): string => new Date().toISOString().slice(0, 10);
 
 class FarmRecordService {
 
   /**
-   * Throws unless the caller works on this farm (owner, active member) or is an admin. Reading is
-   * open to every member; WRITING is not - a farm vet or a viewer can look at the records but not
-   * add or change them (the farm's own people record; the vet reads).
+   * Throws a readable refusal unless the caller may use this farm. Reading is open to every member;
+   * WRITING needs a role that records (owner, manager, supervisor, worker). The rule itself lives in
+   * FarmAccessService so every farm screen and endpoint answers the same way.
    */
   async assertFarmAccess(enterpriseId: string, caller: Caller, write = false): Promise<void> {
-    if (caller.role === 'admin') return;
-    const r = await database.query(
-      `SELECT (e.owner_id = $2) AS is_owner,
-              (SELECT em.role FROM enterprise_members em
-                WHERE em.enterprise_id = e.id AND em.user_id = $2 AND em.is_active = true LIMIT 1) AS member_role
-         FROM enterprises e WHERE e.id = $1 AND ${FARM_ACCESS} LIMIT 1`, [enterpriseId, caller.userId]
-    );
-    // 404, not 403: do not confirm that a farm exists to someone with no claim on it.
-    if (!r.rows.length) throw new NotFoundError('Farm not found');
-    if (write && !r.rows[0].is_owner && READ_ONLY_FARM_ROLES.includes(r.rows[0].member_role)) {
-      throw new ForbiddenError('Your role on this farm lets you see its records but not add or change them. Ask the farm owner or manager.');
-    }
+    await FarmAccessService.assert(enterpriseId, caller, write ? 'record' : 'read');
   }
 
   /** Loads the animal or group a record is about, checking the caller may use its farm. */
@@ -320,14 +307,10 @@ class FarmRecordService {
     const rec = r.rows[0];
     if (!rec) throw new NotFoundError('Record not found');
     await this.assertFarmAccess(rec.enterprise_id, caller, true);
-    // The farm's owner and managers may delete anything; a worker may only delete what they entered.
+    // The farm's owner and managers may delete anything; anyone else only what they entered themselves.
     if (caller.role !== 'admin' && rec.recorded_by !== caller.userId) {
-      const own = await database.query(
-        `SELECT 1 FROM enterprises e WHERE e.id = $1 AND e.owner_id = $2
-         UNION SELECT 1 FROM enterprise_members em WHERE em.enterprise_id = $1 AND em.user_id = $2 AND em.is_active = true AND em.role IN ('owner','manager')`,
-        [rec.enterprise_id, caller.userId]
-      );
-      if (!own.rows.length) throw new ForbiddenError('Only the person who entered this record, or the farm owner or manager, can delete it.');
+      const role = await FarmAccessService.roleOf(rec.enterprise_id, caller.userId);
+      if (!canDeleteAnyRecord(role)) throw new ForbiddenError('Only the person who entered this record, or the farm owner or manager, can delete it.');
     }
     await database.transaction(async (client: any) => {
       await client.query(

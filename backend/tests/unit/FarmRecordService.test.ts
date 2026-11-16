@@ -2,7 +2,7 @@ import database from '../../src/utils/database';
 import FarmRecordService from '../../src/services/FarmRecordService';
 import FarmProfileService from '../../src/services/FarmProfileService';
 import BatchManagementService from '../../src/services/BatchManagementService';
-import { ValidationError, NotFoundError } from '../../src/utils/errors';
+import { ValidationError, NotFoundError, ForbiddenError } from '../../src/utils/errors';
 
 jest.mock('../../src/utils/database');
 jest.mock('../../src/services/FarmProfileService');
@@ -23,11 +23,11 @@ const cow = { id: 'a1', enterprise_id: 'e1', species: 'Cattle', animal_class: 'l
 const flock = { id: 'g1', enterprise_id: 'e1', species: 'Chicken', management_mode: 'batch', group_type: 'layers', cycle_id: 'c1' };
 
 /** Answers the service's queries by the SQL text. */
-function stubDb(opts: { animal?: any; group?: any; type?: any; access?: boolean }) {
+function stubDb(opts: { animal?: any; group?: any; type?: any; access?: boolean; role?: string }) {
   query.mockImplementation(async (sql: string) => {
     if (/FROM animals a/.test(sql)) return { rows: opts.animal ? [opts.animal] : [] };
     if (/FROM animal_groups g/.test(sql)) return { rows: opts.group ? [opts.group] : [] };
-    if (/FROM enterprises e WHERE/.test(sql)) return { rows: opts.access === false ? [] : [{ x: 1 }] };
+    if (/FROM enterprises e WHERE/.test(sql)) return { rows: opts.access === false ? [] : [{ role: opts.role || 'worker' }] };
     if (/FROM master_record_types/.test(sql)) return { rows: opts.type ? [opts.type] : [] };
     return { rows: [] };
   });
@@ -109,11 +109,11 @@ describe('FarmRecordService.save', () => {
     await expect(FarmRecordService.save({ animalId: 'a1', recordType: 'milk', session: 'am', quantity: 1, recordDate: '2026-13-45' }, caller)).rejects.toThrow(/not valid/);
   });
 
-  it('tenant: a farm the caller has no claim on looks like it does not exist, and nothing is written', async () => {
+  it('tenant: a farm the caller has no claim on is refused in words (ask the owner to invite you), and nothing is written', async () => {
     stubDb({ animal: cow, type: MILK, access: false });
-    await expect(FarmRecordService.save({ animalId: 'a1', recordType: 'milk', session: 'am', quantity: 1 }, caller)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(FarmRecordService.save({ animalId: 'a1', recordType: 'milk', session: 'am', quantity: 1 }, caller)).rejects.toThrow(/ask them to invite you/);
     stubDb({ group: flock, type: MILK, access: false });
-    await expect(FarmRecordService.save({ groupId: 'g1', recordType: 'milk', session: 'am', quantity: 1 }, caller)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(FarmRecordService.save({ groupId: 'g1', recordType: 'milk', session: 'am', quantity: 1 }, caller)).rejects.toBeInstanceOf(ForbiddenError);
     expect(transaction).not.toHaveBeenCalled();
   });
 
@@ -151,8 +151,8 @@ describe('FarmRecordService.list / summary / remove', () => {
 
   it('list and summary check farm access first', async () => {
     stubDb({ access: false });
-    await expect(FarmRecordService.list({ enterpriseId: 'e1' }, caller)).rejects.toBeInstanceOf(NotFoundError);
-    await expect(FarmRecordService.summary('e1', 7, caller)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(FarmRecordService.list({ enterpriseId: 'e1' }, caller)).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(FarmRecordService.summary('e1', 7, caller)).rejects.toBeInstanceOf(ForbiddenError);
   });
 
   it('admin skips the membership check', async () => {
@@ -160,17 +160,24 @@ describe('FarmRecordService.list / summary / remove', () => {
     await expect(FarmRecordService.list({ enterpriseId: 'e1' }, { userId: 'adm', role: 'admin' })).resolves.toEqual([]);
   });
 
-  it('a worker cannot delete a record somebody else entered; the farm owner can', async () => {
-    const answer = (isManager: boolean) => async (sql: string) => {
-      if (/SELECT \* FROM farm_daily_records WHERE id/.test(sql)) return { rows: [{ id: 'r1', enterprise_id: 'e1', recorded_by: 'someone-else' }] };
-      if (/UNION SELECT/.test(sql)) return { rows: isManager ? [{ x: 1 }] : [] };
-      if (/FROM enterprises e WHERE/.test(sql)) return { rows: [{ x: 1 }] };
+  it('a worker cannot delete a record somebody else entered; a manager can', async () => {
+    const answer = (role: string) => async (sql: string) => {
+      if (/FROM farm_daily_records WHERE id/.test(sql)) return { rows: [{ id: 'r1', enterprise_id: 'e1', recorded_by: 'someone-else' }] };
+      if (/FROM enterprises e WHERE/.test(sql)) return { rows: [{ role }] };
       return { rows: [] };
     };
-    query.mockImplementation(answer(false));
+    query.mockImplementation(answer('worker'));
     await expect(FarmRecordService.remove('r1', caller)).rejects.toThrow(/person who entered/);
-    query.mockImplementation(answer(true));
+    query.mockImplementation(answer('manager'));
     stubTx();
     await expect(FarmRecordService.remove('r1', caller)).resolves.toBeUndefined();
+  });
+
+  it('a farm vet or viewer cannot add or change records, and is told why', async () => {
+    for (const role of ['farm_vet', 'viewer']) {
+      stubDb({ animal: cow, type: MILK, role });
+      await expect(FarmRecordService.save({ animalId: 'a1', recordType: 'milk', session: 'am', quantity: 1 }, caller)).rejects.toThrow(/lets you see it but not add or change/);
+    }
+    expect(transaction).not.toHaveBeenCalled();
   });
 });

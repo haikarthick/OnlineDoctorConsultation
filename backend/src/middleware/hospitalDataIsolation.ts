@@ -14,6 +14,8 @@
  */
 
 import { Response, NextFunction } from 'express';
+import FarmAccessService from '../services/FarmAccessService';
+import { ForbiddenError } from '../utils/errors';
 import { AuthRequest } from './auth';
 import database from '../utils/database';
 import logger from '../utils/logger';
@@ -288,23 +290,15 @@ export function requireEnterpriseAccess() {
       return next(); // Admins can access all enterprises
     }
 
-    // Check if user is a member of this enterprise
-    const membershipRes = await database.query(
-      `SELECT id FROM enterprise_members WHERE enterprise_id = $1 AND user_id = $2 AND is_active = true`,
-      [enterpriseId, req.userId]
-    );
-
-    if (membershipRes.rows.length === 0) {
-      logger.warn('Enterprise access denied', {
-        userId: req.userId,
-        enterpriseId,
-        path: req.path,
-      });
-      return res.status(403).json({
-        success: false,
-        error: 'You do not have access to this enterprise',
-        code: 'ENTERPRISE_ACCESS_DENIED',
-      });
+    // One rule for every farm screen (services/FarmAccessService.ts): members only; a viewer only looks.
+    try {
+      await FarmAccessService.assert(enterpriseId, { userId: req.userId!, role: req.userRole }, FarmAccessService.actionForMethod(req.method));
+    } catch (err: any) {
+      if (err instanceof ForbiddenError) {
+        logger.warn('Enterprise access denied', { userId: req.userId, enterpriseId, path: req.path });
+        return res.status(403).json({ success: false, message: err.message, error: { message: err.message, code: 'ENTERPRISE_ACCESS_DENIED' } });
+      }
+      throw err;
     }
 
     next();

@@ -24,7 +24,7 @@ export class MedicalRecordController {
             AND ($2 = 'admin'
                  OR e.owner_id = $3
                  OR EXISTS (SELECT 1 FROM enterprise_members em
-                             WHERE em.enterprise_id = e.id AND em.user_id = $3 AND em.is_active = true))
+                             WHERE em.enterprise_id = e.id AND em.user_id = $3 AND em.is_active = true AND em.role <> 'viewer'))
           LIMIT 1`,
         [req.body.groupId, req.userRole, req.userId]
       );
@@ -167,7 +167,7 @@ export class MedicalRecordController {
             AND ($2 = 'admin'
                  OR e.owner_id = $3
                  OR EXISTS (SELECT 1 FROM enterprise_members em
-                             WHERE em.enterprise_id = e.id AND em.user_id = $3 AND em.is_active = true))
+                             WHERE em.enterprise_id = e.id AND em.user_id = $3 AND em.is_active = true AND em.role <> 'viewer'))
           LIMIT 1`,
         [groupId, req.userRole, req.userId]
       );
