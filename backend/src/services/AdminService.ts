@@ -1,7 +1,8 @@
 import database from '../utils/database';
 import { AdminDashboardStats, AuditLog, SystemSetting, PaginatedResponse } from '../models/types';
 import { v4 as uuidv4 } from 'uuid';
-import { NotFoundError } from '../utils/errors';
+import { NotFoundError, ValidationError } from '../utils/errors';
+import { SECRET_KEYS as SECRET_SETTING_KEYS } from './sms/SmsConfig';
 import logger from '../utils/logger';
 
 class AdminService {
@@ -423,10 +424,14 @@ class AdminService {
        updated_at as "updatedAt" FROM system_settings ORDER BY category, key`,
       []
     );
-    return result.rows;
+    // Provider secrets never leave the server (Admin -> SMS Settings is the only place they are written).
+    return result.rows.map((r: any) => (SECRET_SETTING_KEYS.includes(r.key) ? { ...r, value: '' } : r));
   }
 
   async updateSystemSetting(key: string, value: string, updatedBy: string): Promise<SystemSetting> {
+    if (SECRET_SETTING_KEYS.includes(key)) {
+      throw new ValidationError('This value is a secret. Change it in Admin > SMS Settings.');
+    }
     const now = new Date();
     // Try update first
     let result = await database.query(

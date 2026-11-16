@@ -56,7 +56,7 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   admin_consultations: ['/admin/consultations'],
   admin_payments: ['/admin/payments'],
   admin_reviews: ['/admin/reviews'],
-  admin_settings: ['/admin/settings', '/admin/prescription-settings'],
+  admin_settings: ['/admin/settings', '/admin/prescription-settings', '/admin/sms-settings'],
   admin_audit: ['/admin/audit-logs'],
   admin_permissions: ['/admin/permissions'],
   // Enterprise
@@ -168,6 +168,7 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'admin-payments': 'admin_payments',
   'admin-reviews': 'admin_reviews',
   'admin-settings': 'admin_settings',
+  'admin-sms-settings': 'admin_settings',
   'admin-prescription-settings': 'admin_settings',
   'admin-audit': 'admin_audit',
   'admin-permissions': 'admin_permissions',

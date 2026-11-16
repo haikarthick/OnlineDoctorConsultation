@@ -200,6 +200,8 @@ export function buildMenuItems(t: TFunction, user: User | null): MenuItem[] {
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-settings', label: t('nav.systemSettings'), icon: '⚙️', path: '/admin/settings',
       roles: ['admin'], section: 'Administration' },
+    { id: 'admin-sms-settings', label: t('nav.smsSettings'), icon: '💬', path: '/admin/sms-settings',
+      roles: ['admin'], section: 'Administration' },
     { id: 'admin-prescription-settings', label: t('nav.prescriptionSettings'), icon: '📄', path: '/admin/prescription-settings',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-permissions', label: t('nav.permissions'), icon: '🔐', path: '/admin/permissions',

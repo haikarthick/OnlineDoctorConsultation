@@ -27,6 +27,7 @@ import { groomingApi } from './api/modules/grooming'
 import { networkSubscriptionsApi } from './api/modules/networkSubscriptions'
 import { networkReferralsAdminApi } from './api/modules/networkReferralsAdmin'
 import { farmRecordsApi } from './api/modules/farmRecords'
+import { smsSettingsApi } from './api/modules/smsSettings'
 
 export { sharedClient, fetchCsrfToken }
 export { extractArrayFromResponse, extractTotalFromResponse } from './api/utils'
@@ -49,5 +50,6 @@ export const apiService = {
   ...networkSubscriptionsApi,
   ...networkReferralsAdminApi,
   ...farmRecordsApi,
+  ...smsSettingsApi,
 }
 export default apiService

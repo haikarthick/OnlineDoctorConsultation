@@ -3547,3 +3547,19 @@ button.record-due-row { cursor: pointer; }
 @keyframes route-spin { to { transform: rotate(360deg); } }
 .route-problem { max-width: 520px; margin: 48px auto; padding: 0 16px; }
 .session-ended { margin: 0 0 12px; padding: 10px 12px; border-radius: var(--radius-lg); background: var(--warning-light); color: #92400e; font-size: 15px; }
+
+/* ── Admin SMS settings (pages/admin/SmsSettings.tsx) ── */
+.sms-status { padding: 12px 16px; border-radius: var(--radius-lg); font-weight: 600; margin: 0 0 8px; }
+.sms-status.is-on { background: var(--success-light); color: #065f46; }
+.sms-status.is-off { background: var(--warning-light); color: #92400e; }
+.sms-card { padding: 1rem 1.25rem; margin: 12px 0; max-width: 720px; }
+.sms-section-title { font-size: 17px; margin: 0 0 8px; }
+.sms-switch { display: flex; align-items: center; gap: 10px; font-weight: 600; margin-bottom: 12px; }
+.sms-actions { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
+.sms-test-result { margin: 10px 0 0; padding: 10px 12px; border-radius: var(--radius-lg); background: var(--gray-100); }
+.sms-log { display: flex; flex-direction: column; gap: 6px; }
+.sms-log-row { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; padding: 6px 0; border-bottom: 1px solid var(--gray-100); }
+.sms-log-when { color: var(--gray-600); }
+.sms-log-status.is-failed { color: var(--danger); font-weight: 600; }
+.sms-log-status.is-sent { color: var(--success); font-weight: 600; }
+.sms-log-error { flex-basis: 100%; color: var(--gray-600); overflow-wrap: anywhere; }

@@ -67,6 +67,7 @@ const PendingPolicyModal = lazy(() => import('./components/PendingPolicyModal'))
 const EnterpriseManagement = lazy(() => import('./pages/EnterpriseManagement'))
 const AnimalGroups = lazy(() => import('./pages/AnimalGroups'))
 const FarmRecords = lazy(() => import('./pages/FarmRecords'))
+const SmsSettings = lazy(() => import('./pages/admin/SmsSettings'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 /** An address the app has no page for: say so (inside the app shell when signed in), never redirect silently. */
@@ -345,6 +346,7 @@ function AppRoutes() {
       <Route path="/admin/consultations" element={<RoleRoute path="/admin/consultations"><AppLayout><RoutedPage Component={ConsultationManagement} /></AppLayout></RoleRoute>} />
       <Route path="/admin/payments" element={<RoleRoute path="/admin/payments"><AppLayout><RoutedPage Component={PaymentManagement} /></AppLayout></RoleRoute>} />
       <Route path="/admin/reviews" element={<RoleRoute path="/admin/reviews"><AppLayout><RoutedPage Component={ReviewModeration} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/sms-settings" element={<RoleRoute path="/admin/sms-settings"><AppLayout><SmsSettings /></AppLayout></RoleRoute>} />
       <Route path="/admin/settings" element={<RoleRoute path="/admin/settings"><AppLayout><RoutedPage Component={SystemSettings} /></AppLayout></RoleRoute>} />
       <Route path="/admin/prescription-settings" element={<RoleRoute path="/admin/prescription-settings"><AppLayout><RoutedPage Component={PrescriptionSettings} /></AppLayout></RoleRoute>} />
       <Route path="/admin/audit-logs" element={<RoleRoute path="/admin/audit-logs"><AppLayout><RoutedPage Component={AuditLogs} /></AppLayout></RoleRoute>} />
