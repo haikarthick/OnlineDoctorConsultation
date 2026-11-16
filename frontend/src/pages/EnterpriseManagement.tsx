@@ -12,6 +12,7 @@ import { EnterpriseStatsPanel } from '../components/enterprise/EnterpriseStatsPa
 import { EnterpriseMembersPanel } from '../components/enterprise/EnterpriseMembersPanel'
 import { myFarmRole, rolesIMayAssign } from '../utils/farmRoles'
 import { InviteMemberModal } from '../components/enterprise/InviteMemberModal'
+import { FarmInvitationsPanel } from '../components/enterprise/FarmInvitationsPanel'
 import { EnterpriseFormModal, EnterpriseFormData } from '../components/enterprise/EnterpriseFormModal'
 
 import { userMessage } from '../utils/userMessage'
@@ -38,10 +39,7 @@ const EnterpriseManagement: React.FC = () => {
   const [members, setMembers] = useState<EnterpriseMember[]>([])
   const [membersLoading, setMembersLoading] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
-  const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState('viewer')
-  const [inviteLoading, setInviteLoading] = useState(false)
-  const [inviteError, setInviteError] = useState('')
+  const [invitationsKey, setInvitationsKey] = useState(0) // bumped when an invitation is created or answered
   const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null)
   const [formData, setFormData] = useState<EnterpriseFormData>(EMPTY_FORM)
   const [showMapOverview, setShowMapOverview] = useState(false)
@@ -79,36 +77,13 @@ const EnterpriseManagement: React.FC = () => {
     finally { setMembersLoading(false) }
   }
 
-  const handleInviteMember = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setInviteError('')
-    if (!inviteEmail || !inviteRole) {
-      setInviteError('Email and role are required')
-      return
-    }
-    if (!selectedEnterprise) return
-    setInviteLoading(true)
-    try {
-      await apiService.inviteEnterpriseMember(selectedEnterprise.id, { email: inviteEmail, role: inviteRole })
-      setSuccessMsg('Member invited successfully')
-      setInviteEmail(''); setInviteRole('viewer')
-      setShowInviteModal(false)
-      fetchMembers(selectedEnterprise.id)
-      setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) {
-      setInviteError(userMessage(err))
-    } finally {
-      setInviteLoading(false)
-    }
-  }
-
   const handleUpdateMemberRole = async (userId: string, newRole: string) => {
     if (!selectedEnterprise) return
     setUpdatingMemberId(userId)
     try {
       await apiService.updateEnterpriseMember(selectedEnterprise.id, userId, { role: newRole })
       setMembers(prev => prev.map(m => m.userId === userId ? { ...m, role: newRole as EnterpriseMember['role'] } : m))
-      setSuccessMsg('Member role updated')
+      setSuccessMsg(t('farmTeam.roleChanged'))
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
       setError(userMessage(err))
@@ -119,11 +94,12 @@ const EnterpriseManagement: React.FC = () => {
 
   const handleRemoveMember = async (userId: string) => {
     if (!selectedEnterprise) return
-    if (!window.confirm('Remove this member from the enterprise?')) return
+    const who = members.find(m => m.userId === userId)
+    if (!window.confirm(t('farmTeam.removeConfirm', { name: who?.userName || who?.userPhone || who?.userEmail || '' }))) return
     try {
       await apiService.removeEnterpriseMember(selectedEnterprise.id, userId)
       setMembers(prev => prev.filter(m => m.userId !== userId))
-      setSuccessMsg('Member removed')
+      setSuccessMsg(t('farmTeam.removed'))
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
       setError(userMessage(err))
@@ -282,24 +258,27 @@ const EnterpriseManagement: React.FC = () => {
             actorRole={actorRole}
             updatingMemberId={updatingMemberId}
             membersLabel={t('enterpriseManagement.tabs.members')}
-            onInviteClick={() => { setShowInviteModal(true); setInviteError('') }}
+            onInviteClick={() => setShowInviteModal(true)}
             onUpdateRole={handleUpdateMemberRole}
             onRemoveMember={handleRemoveMember}
           />
         )}
+        {selectedEnterprise && (
+          <FarmInvitationsPanel
+            enterpriseId={selectedEnterprise.id}
+            actorRole={actorRole}
+            refreshKey={invitationsKey}
+            onChanged={() => fetchMembers(selectedEnterprise.id)}
+          />
+        )}
       </div>
 
-      {showInviteModal && (
+      {showInviteModal && selectedEnterprise && (
         <InviteMemberModal
-          inviteEmail={inviteEmail}
-          inviteRole={inviteRole}
-          inviteError={inviteError}
-          inviteLoading={inviteLoading}
-          onEmailChange={setInviteEmail}
-          onRoleChange={setInviteRole}
-          onSubmit={handleInviteMember}
+          enterpriseId={selectedEnterprise.id}
+          roles={rolesIMayAssign(actorRole)}
           onClose={() => setShowInviteModal(false)}
-          roles={rolesIMayAssign(actorRole).map(r => ({ value: r, label: r === 'farm_vet' ? 'Farm Vet' : r.charAt(0).toUpperCase() + r.slice(1) }))}
+          onInvited={() => setInvitationsKey(k => k + 1)}
         />
       )}
 

@@ -6,6 +6,7 @@ import { SettingsProvider } from './context/SettingsContext'
 import { MasterDataProvider } from './context/MasterDataContext'
 import { PermissionProvider } from './context/PermissionContext'
 import { PageLoader, ProtectedRoute, RoleRoute, PublicOnlyRoute } from './components/routing/RouteGuards'
+import { PendingFarmInvitations } from './components/enterprise/PendingFarmInvitations'
 import { SocketProvider } from './context/SocketContext'
 import { Layout } from './components/Layout'
 import FloatingChatWidget from './components/FloatingChatWidget'
@@ -67,6 +68,7 @@ const PendingPolicyModal = lazy(() => import('./components/PendingPolicyModal'))
 const EnterpriseManagement = lazy(() => import('./pages/EnterpriseManagement'))
 const AnimalGroups = lazy(() => import('./pages/AnimalGroups'))
 const FarmRecords = lazy(() => import('./pages/FarmRecords'))
+const JoinFarm = lazy(() => import('./pages/JoinFarm'))
 const SmsSettings = lazy(() => import('./pages/admin/SmsSettings'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
@@ -161,6 +163,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
         <PendingPolicyModal />
       </Suspense>
       <div className="layout-content">
+        <PendingFarmInvitations />
         {children}
       </div>
     </Layout>
@@ -262,6 +265,7 @@ function AppRoutes() {
         <ResetPassword onGoToLogin={() => navigate('/login')} />
       } />
       <Route path="/accept-invite" element={<AcceptInvite />} />
+      <Route path="/join-farm" element={<JoinFarm />} />
       <Route path="/browse-marketplace" element={<PublicMarketplace />} />
       <Route path="/policies/:docType" element={<PolicyPage />} />
 

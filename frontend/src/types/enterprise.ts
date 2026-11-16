@@ -67,6 +67,8 @@ export interface EnterpriseMember {
   updatedAt: string
   userName?: string
   userEmail?: string
+  /** Shown when the person has no email (invited by mobile number only). */
+  userPhone?: string
   userRole?: string
 }
 

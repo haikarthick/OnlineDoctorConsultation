@@ -3563,3 +3563,41 @@ button.record-due-row { cursor: pointer; }
 .sms-log-status.is-failed { color: var(--danger); font-weight: 600; }
 .sms-log-status.is-sent { color: var(--success); font-weight: 600; }
 .sms-log-error { flex-basis: 100%; color: var(--gray-600); overflow-wrap: anywhere; }
+
+/* ── Farm team: invitations (components/enterprise/*, pages/JoinFarm.tsx) ── */
+.team-invite-sheet { display: flex; flex-direction: column; gap: 14px; }
+.team-invite-hint { margin: 0; color: var(--gray-600); font-size: 15px; }
+.team-invite-role-help { margin: 0; color: var(--gray-700); font-size: 14px; background: var(--gray-100); padding: 8px 12px; border-radius: var(--radius-lg); }
+.team-invite-actions { display: flex; gap: 12px; }
+.team-invite-actions .btn { flex: 1; min-height: var(--tap-min); }
+.team-invite-result { display: flex; flex-direction: column; gap: 8px; }
+.team-invite-result-title { margin: 0; font-weight: 700; color: #065f46; }
+.team-invite-result p { margin: 0; }
+.team-invite-result-label { color: var(--gray-600); font-size: 14px; }
+.team-invite-link { font-size: 13px; }
+.team-invite-copied { color: #065f46; font-size: 14px; }
+.farm-invitations { padding: 1rem 1.25rem; margin: 16px 0; }
+.farm-invitations-title { margin: 0 0 8px; font-size: 17px; }
+.farm-invitations-empty { margin: 0; color: var(--gray-600); }
+.farm-invitations-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.farm-invitation { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
+.farm-invitation-who { display: flex; flex-direction: column; min-width: 0; flex: 1 1 200px; overflow-wrap: anywhere; }
+.farm-invitation-detail, .farm-invitation-expires { color: var(--gray-600); font-size: 13px; }
+.farm-invitation-status { font-weight: 600; font-size: 14px; }
+.farm-invitation-status.is-accepted { color: var(--success); }
+.farm-invitation-status.is-declined, .farm-invitation-status.is-expired, .farm-invitation-status.is-revoked { color: var(--gray-600); }
+.farm-invitation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex-basis: 100%; }
+.pending-invitations { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+.pending-invitation { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; border-radius: var(--radius-lg); background: var(--brand-soft); }
+.pending-invitation-text { flex: 1 1 220px; min-width: 0; overflow-wrap: anywhere; }
+.pending-invitation-actions { display: flex; gap: 8px; }
+.join-farm { display: flex; justify-content: center; }
+.join-farm-card { width: 100%; max-width: 520px; padding: 1.5rem; margin: 24px 0; display: flex; flex-direction: column; gap: 12px; }
+.join-farm-title { margin: 0; font-size: 22px; }
+.join-farm-sentence { margin: 0; font-size: 17px; }
+.join-farm-sent { margin: 0; color: var(--gray-600); font-size: 14px; }
+.join-farm-ok { margin: 0; font-weight: 700; color: #065f46; }
+.join-farm-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.join-farm-actions .btn { min-height: var(--tap-min); flex: 1 1 140px; }
+.join-farm-subtitle { margin: 4px 0 0; font-size: 18px; }
+.join-farm-form { display: flex; flex-direction: column; gap: 10px; }

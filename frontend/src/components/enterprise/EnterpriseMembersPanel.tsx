@@ -1,8 +1,7 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { EnterpriseMember } from '../../types'
 import { FarmRole, canChangeRoles, canInvite, canRemoveMember, rolesIMayAssign } from '../../utils/farmRoles'
-
-const ROLE_LABEL: Record<FarmRole, string> = { owner: 'Owner', manager: 'Manager', supervisor: 'Supervisor', worker: 'Worker', farm_vet: 'Farm Vet', viewer: 'Viewer' }
 
 // ─── Selected-enterprise members list, with inline role management ───
 export const EnterpriseMembersPanel: React.FC<{
@@ -16,25 +15,27 @@ export const EnterpriseMembersPanel: React.FC<{
   onUpdateRole: (userId: string, newRole: string) => void
   onRemoveMember: (userId: string) => void
 }> = ({ members, membersLoading, actorRole, updatingMemberId, membersLabel, onInviteClick, onUpdateRole, onRemoveMember }) => {
+  const { t } = useTranslation()
+  const roleLabel = (r: string) => t(`farmTeam.roles.${r}`, { defaultValue: r })
   return (
     <div className="si-78b34307">
       <div className="si-c66b816b">
         <h3 className="si-1b87764a">👥 {membersLabel}</h3>
         {canInvite(actorRole) && (
-          <button className="btn btn-sm btn-primary" onClick={onInviteClick}>+ Invite</button>
+          <button className="btn btn-sm btn-primary" onClick={onInviteClick}>{t('farmTeam.invite')}</button>
         )}
       </div>
       {membersLoading ? (
-        <p className="si-62bd76f7">Loading...</p>
+        <p className="si-62bd76f7">{t('farmRecords.loading')}</p>
       ) : members.length === 0 ? (
-        <p className="si-62bd76f7">No members yet</p>
+        <p className="si-62bd76f7">{t('farmTeam.noMembers')}</p>
       ) : (
         <div className="si-bbd60ea4">
           {members.map(m => (
             <div key={m.userId} className="si-e162b4a6">
               <div className="si-26d7edc3">
-                <div className="si-2d596e02">{m.userName || m.userEmail || m.userId.slice(0, 8)}</div>
-                <div className="si-93f5e4c5">{m.userEmail}</div>
+                <div className="si-2d596e02">{m.userName || m.userPhone || m.userEmail || m.userId.slice(0, 8)}</div>
+                <div className="si-93f5e4c5">{m.userPhone || m.userEmail}</div>
               </div>
               {m.role !== 'owner' && canChangeRoles(actorRole) ? (
                 <select
@@ -43,13 +44,13 @@ export const EnterpriseMembersPanel: React.FC<{
                   className="si-9c640ad7"
                   onChange={e => onUpdateRole(m.userId, e.target.value)}
                 >
-                  {rolesIMayAssign(actorRole).map(r => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
+                  {rolesIMayAssign(actorRole).map(r => <option key={r} value={r}>{roleLabel(r)}</option>)}
                 </select>
               ) : (
-                <span className="badge si-a517fcb0">{ROLE_LABEL[m.role as FarmRole] || m.role}</span>
+                <span className="badge si-a517fcb0">{roleLabel(m.role)}</span>
               )}
               {canRemoveMember(actorRole, m.role) && (
-                <button className="btn btn-sm btn-danger si-a517fcb0" onClick={() => onRemoveMember(m.userId)} aria-label="Remove">✗</button>
+                <button className="btn btn-sm btn-danger si-a517fcb0" onClick={() => onRemoveMember(m.userId)} aria-label={t('farmTeam.remove')}>✗</button>
               )}
             </div>
           ))}

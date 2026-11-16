@@ -257,8 +257,30 @@ class FarmInvitationService {
     }
   }
 
+  /** The same invitation, found by its id - for the person's own list after sign-in (no link needed). */
+  private async byIdForMe(invitationId: string): Promise<any> {
+    await this.expireOld();
+    const r = await database.query(
+      `SELECT i.*, e.name AS farm_name, u.first_name || ' ' || u.last_name AS inviter_name
+         FROM farm_invitations i JOIN enterprises e ON e.id = i.enterprise_id LEFT JOIN users u ON u.id = i.invited_by
+        WHERE i.id = $1`, [invitationId]);
+    if (!r.rows.length) throw new NotFoundError('That invitation was not found. It may have been cancelled.');
+    return r.rows[0];
+  }
+
+  async acceptById(invitationId: string, userId: string) {
+    return this.acceptInvitation(await this.byIdForMe(invitationId), userId);
+  }
+
+  async declineById(invitationId: string, userId: string) {
+    return this.declineInvitation(await this.byIdForMe(invitationId), userId);
+  }
+
   async accept(token: string, userId: string) {
-    const inv = await this.byToken(token);
+    return this.acceptInvitation(await this.byToken(token), userId);
+  }
+
+  private async acceptInvitation(inv: any, userId: string) {
     const problem = this.statusProblem(inv);
     if (problem) throw new ValidationError(problem);
     await this.assertForMe(inv, userId);
@@ -269,7 +291,10 @@ class FarmInvitationService {
   }
 
   async decline(token: string, userId: string) {
-    const inv = await this.byToken(token);
+    return this.declineInvitation(await this.byToken(token), userId);
+  }
+
+  private async declineInvitation(inv: any, userId: string) {
     const problem = this.statusProblem(inv);
     if (problem) throw new ValidationError(problem);
     await this.assertForMe(inv, userId);

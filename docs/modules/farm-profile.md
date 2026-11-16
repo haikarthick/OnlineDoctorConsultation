@@ -165,3 +165,24 @@ role is told: "You don't have access to this farm. Only the farm owner can add p
 invite you." (403, never "not found"). Verified by `backend/tests/unit/FarmAccessService.test.ts` and a real-server
 run (28 checks). Still to build: invitations for people without an account, SMS, and a farm workspace for people whose
 platform role is not farmer (see the plan in the conversation / `docs/FARM_MANAGEMENT_PLAN.md`).
+
+## Farm team: invitations, SMS, workspace (2026-11-16)
+**Owner-driven only.** Nobody requests access; there is no farm directory. The owner (and managers, for the roles
+below a manager) invite by mobile number and/or email with a role (`FarmInvitationService`, migration 048,
+`routes/farm-invitations.routes.ts`).
+- Lifecycle: `pending -> accepted | declined | expired | revoked`, valid 7 days; resend gives a new link (only the
+  token's SHA-256 is stored) after a 60 s cooldown; one pending invitation per farm and number / email.
+- The link (`/join-farm?token=...`, public) shows the farm, role and inviter only. Signed in: Accept / Decline.
+  Has an account, signed out: sign in, then straight back. No account: create one from the link (platform role
+  `farmer`, number marked verified, a placeholder `...@phone.waytovet.invalid` email when invited by number only -
+  never mailed, never shown). Accept / decline also work from the banner at the top of every screen (by the person's
+  own number / email, no link needed).
+- **Farm workspace for any platform role**: `EnterpriseService.addMember` (the choke point) adds the additive
+  `farmer` role (`user_roles`) to a member whose platform role is not farmer, so a pet owner or vet who joins a farm
+  gets the farm screens; what they may do on a farm is their farm role (`FarmAccessService`).
+- Delivery: SMS (`SmsService`, Admin -> SMS Settings, migration 046: MSG91 / Twilio / log provider, DLT template ids,
+  write-only secrets, test send, send log), email (`farm_invite` template), in-app notification for an existing
+  account. SMS off or failing never blocks: the invitation is created and the link is shown to share by hand.
+- The older `POST /enterprises/:id/invite-member` now creates an invitation (no instant add).
+- Screens: `components/enterprise/{InviteMemberModal,InviteResultNotice,FarmInvitationsPanel,PendingFarmInvitations}.tsx`,
+  `pages/JoinFarm.tsx`, `pages/admin/SmsSettings.tsx`. Verified: 41 server checks, 19 browser checks.

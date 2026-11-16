@@ -64,6 +64,13 @@ router.post('/farm-invitations/decline', authMiddleware, validateBody(tokenSchem
   await FarmInvitationService.decline(req.body.token, actor(req).userId);
   res.json({ success: true });
 }));
+router.post('/farm-invitations/:id/accept', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await FarmInvitationService.acceptById(req.params.id, actor(req).userId) });
+}));
+router.post('/farm-invitations/:id/decline', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  await FarmInvitationService.declineById(req.params.id, actor(req).userId);
+  res.json({ success: true });
+}));
 router.post('/farm-invitations/register', validateBody(registerSchema), asyncHandler(async (req: Request, res: Response) => {
   const { token, ...rest } = req.body;
   res.status(201).json({ success: true, data: await FarmInvitationService.registerFromInvite(token, rest) });
