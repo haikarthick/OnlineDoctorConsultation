@@ -60,6 +60,19 @@
       "artificial_insemination": "செயற்கை கருவூட்டல் (AI)"
     },
     "dueAbout": "சேமிக்கப்பட்டது. சுமார் {{date}} அன்று ஈனும் எதிர்பார்ப்பு.",
+    "due": {
+      "title": "வரவிருப்பவை",
+      "birth_expected": "{{name}}: ஈனும் எதிர்பார்ப்பு",
+      "vaccination_due": "{{name}}: {{detail}} போட வேண்டும்",
+      "withdrawal_ending": "{{name}}: {{detail}} தடைக்காலம் முடிகிறது",
+      "overdue_one": "{{count}} நாள் தாமதம்",
+      "overdue_other": "{{count}} நாள் தாமதம்",
+      "today": "இன்று",
+      "in_one": "{{count}} நாளில்",
+      "in_other": "{{count}} நாளில்",
+      "milk": "பால்",
+      "meat": "இறைச்சி"
+    },
     "lastTime": "கடந்த முறை: {{value}}",
     "usualRange": "வழக்கமான வரம்பு: {{range}}",
     "alreadyRecorded": "ஏற்கனவே பதிவு: {{value}}. சேமித்தால் இது மாறும்.",

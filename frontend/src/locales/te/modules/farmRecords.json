@@ -60,6 +60,19 @@
       "artificial_insemination": "కృత్రిమ గర్భధారణ (AI)"
     },
     "dueAbout": "సేవ్ అయింది. సుమారు {{date}} న ఈనే అవకాశం.",
+    "due": {
+      "title": "రాబోయేవి",
+      "birth_expected": "{{name}}: ఈనే అవకాశం",
+      "vaccination_due": "{{name}}: {{detail}} వేయాలి",
+      "withdrawal_ending": "{{name}}: {{detail}} నిషేధ కాలం ముగుస్తుంది",
+      "overdue_one": "{{count}} రోజులు ఆలస్యం",
+      "overdue_other": "{{count}} రోజులు ఆలస్యం",
+      "today": "ఈ రోజు",
+      "in_one": "{{count}} రోజుల్లో",
+      "in_other": "{{count}} రోజుల్లో",
+      "milk": "పాలు",
+      "meat": "మాంసం"
+    },
     "lastTime": "గత సారి: {{value}}",
     "usualRange": "సాధారణ పరిధి: {{range}}",
     "alreadyRecorded": "ఇప్పటికే నమోదు: {{value}}. సేవ్ చేస్తే ఇది మారుతుంది.",

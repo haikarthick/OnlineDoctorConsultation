@@ -186,6 +186,24 @@ export function totalsByType(records: FarmRecord[]): Array<{ recordType: string;
   return [...map.entries()].map(([recordType, v]) => ({ recordType, ...v }))
 }
 
+/** One thing coming up on the farm (GET /farm-records/due). */
+export interface DueItem {
+  kind: 'birth_expected' | 'vaccination_due' | 'withdrawal_ending'
+  date: string
+  inDays: number
+  animalId: string | null
+  groupId: string | null
+  name: string
+  detail: string | null
+}
+
+/** The translation key and count for "overdue by 3 days" / "today" / "in 5 days". */
+export function dueTiming(inDays: number): { key: 'overdue' | 'today' | 'in'; count: number } {
+  if (inDays < 0) return { key: 'overdue', count: -inDays }
+  if (inDays === 0) return { key: 'today', count: 0 }
+  return { key: 'in', count: inDays }
+}
+
 /** A number for display without trailing noise: 6.5, 12, 4200. */
 export function formatQuantity(n: number): string {
   return String(Math.round(n * 100) / 100)

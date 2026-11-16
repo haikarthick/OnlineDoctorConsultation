@@ -60,6 +60,19 @@
       "artificial_insemination": "Artificial insemination (AI)"
     },
     "dueAbout": "Saved. Birth expected about {{date}}.",
+    "due": {
+      "title": "Coming up",
+      "birth_expected": "{{name}}: birth expected",
+      "vaccination_due": "{{name}}: {{detail}} due",
+      "withdrawal_ending": "{{name}}: {{detail}} withdrawal ends",
+      "overdue_one": "{{count}} day overdue",
+      "overdue_other": "{{count}} days overdue",
+      "today": "Today",
+      "in_one": "In {{count}} day",
+      "in_other": "In {{count}} days",
+      "milk": "milk",
+      "meat": "meat"
+    },
     "lastTime": "Last time: {{value}}",
     "usualRange": "Usual range: {{range}}",
     "alreadyRecorded": "Already recorded: {{value}}. Saving will update it.",

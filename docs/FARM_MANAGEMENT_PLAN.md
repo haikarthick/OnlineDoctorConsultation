@@ -559,8 +559,10 @@ in `docs/modules/farm-profile.md`. Dark behind `farm.records.enabled` (an admin 
 **Phase 4b-1 done:** batch-group events (place flock / stock pond, cull, partial sale / harvest, clear-out) and the
 batch/cycle UI, through the population ledger (`FarmEventService`).
 **Phase 4b-2 (events) done:** heat, mating, pregnancy check, birth, dry-off, weight, sale, death for one animal.
-**Next: 4b-3** - the due list (expected births, pregnancy checks, dry-off, vaccinations, withdrawal ending) on the
-Daily records screen, and vet-side production + events in `SubjectSummary`.
+**Phase 4b-3 done:** the due list (expected births, vaccinations due, withdrawals ending) on the Daily records screen.
+**Still open in Phase 4:** vet-side production in `SubjectSummary` (needs an owner decision on which vets may read a
+farm's records - a consulting vet is not a farm member), due items through the notification system, creating the
+calf on birth, pregnancy-check / dry-off reminders (need sourced master-data values).
 1. Read this file, `docs/modules/farm-profile.md`, `docs/modules/mobile-ui.md`,
    `docs/DESIGN_SYSTEM.md`, and the skills in §3.
 2. Do not re-ask the owner anything in §2 (D1–D15 are settled).

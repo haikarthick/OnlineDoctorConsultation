@@ -4,6 +4,7 @@ import { saveFarmRecordSchema, groupEventSchema } from '../middleware/validation
 import { asyncHandler } from '../utils/errorHandler';
 import FarmRecordService from '../services/FarmRecordService';
 import FarmEventService from '../services/FarmEventService';
+import FarmDueService from '../services/FarmDueService';
 import { isFarmRecordsEnabled } from '../services/farmRecords/FarmRecordsConfig';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -41,6 +42,13 @@ router.get('/farm-records/summary', authMiddleware, farmRecordsEnabled, asyncHan
   const enterpriseId = String(req.query.enterpriseId || '');
   if (!enterpriseId) return res.status(400).json({ success: false, message: 'enterpriseId is required' });
   res.json({ success: true, data: { items: await FarmRecordService.summary(enterpriseId, Number(req.query.days) || 7, caller(req)) } });
+}));
+
+// What is coming up: expected births, vaccinations due, withdrawals ending (recorded dates only).
+router.get('/farm-records/due', authMiddleware, farmRecordsEnabled, asyncHandler(async (req: Request, res: Response) => {
+  const enterpriseId = String(req.query.enterpriseId || '');
+  if (!enterpriseId) return res.status(400).json({ success: false, message: 'enterpriseId is required' });
+  res.json({ success: true, data: { items: await FarmDueService.list(enterpriseId, caller(req)) } });
 }));
 
 router.post('/farm-records', authMiddleware, farmRecordsEnabled, validateBody(saveFarmRecordSchema), asyncHandler(async (req: Request, res: Response) => {

@@ -60,6 +60,19 @@
       "artificial_insemination": "കൃത്രിമ ബീജാധാനം (AI)"
     },
     "dueAbout": "സേവ് ചെയ്തു. ഏകദേശം {{date}} ന് പ്രസവം പ്രതീക്ഷിക്കുന്നു.",
+    "due": {
+      "title": "വരാനിരിക്കുന്നവ",
+      "birth_expected": "{{name}}: പ്രസവം പ്രതീക്ഷിക്കുന്നു",
+      "vaccination_due": "{{name}}: {{detail}} നൽകേണ്ടതുണ്ട്",
+      "withdrawal_ending": "{{name}}: {{detail}} വിലക്ക് അവസാനിക്കുന്നു",
+      "overdue_one": "{{count}} ദിവസം വൈകി",
+      "overdue_other": "{{count}} ദിവസം വൈകി",
+      "today": "ഇന്ന്",
+      "in_one": "{{count}} ദിവസത്തിൽ",
+      "in_other": "{{count}} ദിവസത്തിൽ",
+      "milk": "പാൽ",
+      "meat": "ഇറച്ചി"
+    },
     "lastTime": "കഴിഞ്ഞ തവണ: {{value}}",
     "usualRange": "സാധാരണ പരിധി: {{range}}",
     "alreadyRecorded": "ഇതിനകം രേഖപ്പെടുത്തി: {{value}}. സേവ് ചെയ്താൽ ഇത് മാറും.",

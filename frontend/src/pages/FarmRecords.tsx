@@ -11,7 +11,7 @@ import { resolveFarmProfile } from '../utils/farmProfile/resolveFarmProfile'
 import { DateQuick, localIsoDate } from '../components/mobile/DateQuick'
 import RecordEntrySheet from '../components/farmRecords/RecordEntrySheet'
 import {
-  recordableTypesFor, formatQuantity, totalsByType, type FarmRecord, type RecordSubject,
+  recordableTypesFor, formatQuantity, totalsByType, dueTiming, type DueItem, type FarmRecord, type RecordSubject,
 } from '../components/farmRecords/recordShared'
 
 /**
@@ -33,6 +33,7 @@ const FarmRecords: React.FC = () => {
   const [subjects, setSubjects] = useState<RecordSubject[]>([])
   const [counts, setCounts] = useState<Record<string, number | null>>({})
   const [records, setRecords] = useState<FarmRecord[]>([])
+  const [due, setDue] = useState<DueItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
@@ -52,10 +53,12 @@ const FarmRecords: React.FC = () => {
     if (!farmId) return
     setLoading(true); setError('')
     try {
-      const [groupsRes, animalsRes, recordsRes] = await Promise.all([
+      const [groupsRes, animalsRes, recordsRes, dueRes] = await Promise.all([
         apiService.listAnimalGroups(farmId, { limit: 200 }),
         apiService.listEnterpriseAnimals(farmId, { limit: 200 }),
         apiService.listFarmRecords({ enterpriseId: farmId, from: date, to: date, limit: 500 }),
+        // The due list is a nicety: if it cannot load, the screen still works.
+        apiService.farmRecordsDue(farmId).catch(() => ({ data: { items: [] } })),
       ])
       const groups: any[] = groupsRes.data?.items || []
       const animals: any[] = animalsRes.data?.items || []
@@ -74,6 +77,7 @@ const FarmRecords: React.FC = () => {
       setSubjects(list)
       setCounts(Object.fromEntries(groups.map(g => [g.id, typeof g.currentCount === 'number' ? g.currentCount : null])))
       setRecords(recordsRes.data?.items || [])
+      setDue(dueRes.data?.items || [])
     } catch (err: any) {
       setError(err?.response?.data?.error?.message || err?.response?.data?.message || t('farmRecords.loadFailed'))
     } finally {
@@ -164,6 +168,35 @@ const FarmRecords: React.FC = () => {
       ) : (
         <>
           <DateQuick label={t('farmRecords.day')} value={date} onChange={d => { setDate(d); setMessage('') }} />
+
+          {due.length > 0 && (
+            <section className="record-due" aria-label={t('farmRecords.due.title')}>
+              <h2 className="record-due-title">{t('farmRecords.due.title')}</h2>
+              <ul className="record-due-list">
+                {due.slice(0, 8).map(item => {
+                  const when = dueTiming(item.inDays)
+                  const text = t(`farmRecords.due.${item.kind}`, {
+                    name: item.name,
+                    detail: item.kind === 'withdrawal_ending' ? t(`farmRecords.due.${item.detail}`) : item.detail,
+                  })
+                  const subject = item.kind === 'birth_expected' ? subjects.find(x => x.kind === 'animal' && x.id === item.animalId) : undefined
+                  const row = (
+                    <>
+                      <span className={`record-due-when ${item.inDays < 0 ? 'is-overdue' : ''}`}>{when.key === 'today' ? t('farmRecords.due.today') : t(`farmRecords.due.${when.key}`, { count: when.count })}</span>
+                      <span className="record-due-text">{text}</span>
+                    </>
+                  )
+                  return (
+                    <li key={`${item.kind}:${item.animalId || item.groupId}:${item.detail}`}>
+                      {subject
+                        ? <button type="button" className="record-due-row" onClick={() => setOpen({ subject, type: 'birth' })}>{row}</button>
+                        : <div className="record-due-row">{row}</div>}
+                    </li>
+                  )
+                })}
+              </ul>
+            </section>
+          )}
 
           {totals.length > 0 && (
             <div className="record-totals" aria-label={t('farmRecords.totalsLabel')}>

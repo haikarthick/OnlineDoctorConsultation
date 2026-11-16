@@ -11,6 +11,11 @@ export const farmRecordsApi = {
     const response = await sharedClient.get('/farm-records', { params })
     return response.data
   },
+  /** What is coming up on the farm: expected births, vaccinations due, withdrawals ending. */
+  async farmRecordsDue(enterpriseId: string) {
+    const response = await sharedClient.get('/farm-records/due', { params: { enterpriseId } })
+    return response.data
+  },
   async farmRecordsSummary(enterpriseId: string, days = 7) {
     const response = await sharedClient.get('/farm-records/summary', { params: { enterpriseId, days } })
     return response.data

@@ -60,6 +60,19 @@
       "artificial_insemination": "ಕೃತಕ ಗರ್ಭಧಾರಣೆ (AI)"
     },
     "dueAbout": "ಉಳಿಸಲಾಗಿದೆ. ಸುಮಾರು {{date}} ರಂದು ಈಯುವ ನಿರೀಕ್ಷೆ.",
+    "due": {
+      "title": "ಮುಂದಿನವು",
+      "birth_expected": "{{name}}: ಈಯುವ ನಿರೀಕ್ಷೆ",
+      "vaccination_due": "{{name}}: {{detail}} ಹಾಕಬೇಕು",
+      "withdrawal_ending": "{{name}}: {{detail}} ನಿರ್ಬಂಧ ಮುಗಿಯುತ್ತದೆ",
+      "overdue_one": "{{count}} ದಿನ ತಡ",
+      "overdue_other": "{{count}} ದಿನ ತಡ",
+      "today": "ಇಂದು",
+      "in_one": "{{count}} ದಿನದಲ್ಲಿ",
+      "in_other": "{{count}} ದಿನದಲ್ಲಿ",
+      "milk": "ಹಾಲು",
+      "meat": "ಮಾಂಸ"
+    },
     "lastTime": "ಕಳೆದ ಬಾರಿ: {{value}}",
     "usualRange": "ಸಾಮಾನ್ಯ ವ್ಯಾಪ್ತಿ: {{range}}",
     "alreadyRecorded": "ಈಗಾಗಲೇ ದಾಖಲಾಗಿದೆ: {{value}}. ಉಳಿಸಿದರೆ ಇದು ಬದಲಾಗುತ್ತದೆ.",

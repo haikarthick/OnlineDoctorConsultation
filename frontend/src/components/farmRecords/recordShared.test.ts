@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   buildRecordPayload, firstMissingField, findExisting, formatRange, totalsByType, stepFor, isWholeNumberField,
-  initialValues, defaultSession, visibleFields, dailyTypesFor, recordableTypesFor, buildEventPayload, GROUP_EVENT_CODES,
+  initialValues, defaultSession, dueTiming, visibleFields, dailyTypesFor, recordableTypesFor, buildEventPayload, GROUP_EVENT_CODES,
   type RecordSubject, type FarmRecord,
 } from './recordShared'
 import type { FarmProfile } from '../../utils/farmProfile/resolveFarmProfile'
@@ -133,6 +133,14 @@ describe('events on a batch group', () => {
 
   it('the list matches what the server accepts', () => {
     expect([...GROUP_EVENT_CODES].sort()).toEqual(['clear_out', 'cull', 'harvest', 'partial_harvest', 'partial_sale', 'placement', 'stocking'])
+  })
+})
+
+describe('due list timing', () => {
+  it('overdue, today and upcoming read differently', () => {
+    expect(dueTiming(-3)).toEqual({ key: 'overdue', count: 3 })
+    expect(dueTiming(0)).toEqual({ key: 'today', count: 0 })
+    expect(dueTiming(5)).toEqual({ key: 'in', count: 5 })
   })
 })
 

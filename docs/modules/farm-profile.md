@@ -114,6 +114,11 @@ Platform reference data: no tenant id is taken, so there is no tenant scoping he
   dry-off -> the animal's date; weight -> weight history; heat -> one observation row a day; sale / death -> animal
   status, a note, and out of its group. A sold or dead animal accepts nothing more. Not done yet: creating the calf
   as an animal on birth, weaning, shearing, water exchange, the due list.
+- **Due list** (Phase 4b-3): `GET /farm-records/due` (`FarmDueService`) - expected births (the date stored when the
+  mating was recorded), each animal's latest vaccination whose next-due date is within 14 days or past, and withdrawals
+  ending within 7 days. Only recorded dates - nothing is guessed from a species (no 'check pregnancy at day 45': that
+  needs a sourced value in master data first). Shown at the top of the Daily records screen; a birth row opens the birth entry.
+  Not done: sending due items through the notification system, a pregnancy-check or dry-off reminder.
 - **Who may do what**: any owner / active member / admin reads; `farm_vet` and `viewer` cannot write (403
   with the reason); a worker deletes only what they entered, owner/manager any. A farm the caller has no
   claim on is a 404. The demo seed makes Maria Garcia a worker and Dr. Carter a farm vet on Tom's farm -

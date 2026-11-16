@@ -60,6 +60,19 @@
       "artificial_insemination": "कृत्रिम गर्भाधान (AI)"
     },
     "dueAbout": "सहेज लिया। बच्चा लगभग {{date}} को होने की उम्मीद है।",
+    "due": {
+      "title": "आने वाला",
+      "birth_expected": "{{name}}: ब्याने की उम्मीद",
+      "vaccination_due": "{{name}}: {{detail}} देय",
+      "withdrawal_ending": "{{name}}: {{detail}} की रोक खत्म",
+      "overdue_one": "{{count}} दिन देर",
+      "overdue_other": "{{count}} दिन देर",
+      "today": "आज",
+      "in_one": "{{count}} दिन में",
+      "in_other": "{{count}} दिन में",
+      "milk": "दूध",
+      "meat": "मांस"
+    },
     "lastTime": "पिछली बार: {{value}}",
     "usualRange": "सामान्य सीमा: {{range}}",
     "alreadyRecorded": "पहले से दर्ज: {{value}}। सहेजने पर यह बदल जाएगा।",
