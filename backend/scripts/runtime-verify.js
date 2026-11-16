@@ -582,13 +582,16 @@ async function http(method, url, body, token) {
       const problems = [];
       const base = `http://127.0.0.1:${port}/api/v1`;
 
+      // A mobile number is a login identifier now: unique per account, and a real Indian mobile (starts 6-9).
+      let mobileSeq = Math.floor(Date.now() / 1000) % 100000000;
+      const uniqueMobile = () => `9${String(mobileSeq++).padStart(9, '0')}`;
       for (const role of roles) {
         // Fixtures must satisfy the real Joi rules: a resolvable-looking TLD, and names
         // restricted to /^[a-zA-Z\s'-]+$/ (so no underscores from the role slug).
         const safeName = role.replace(/_/g, ' ');
         const email = `verify.${role.replace(/_/g, '.')}.${Date.now()}@example.com`;
         const body = {
-          firstName: 'Verify', lastName: safeName, email, phone: '5550000000',
+          firstName: 'Verify', lastName: safeName, email, phone: uniqueMobile(),
           password: 'Password1', confirmPassword: 'Password1', role, acceptTerms: true,
         };
         if (role === 'veterinarian') body.licenseNumber = 'VERIFY-LIC-1';

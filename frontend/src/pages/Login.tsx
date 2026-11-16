@@ -187,12 +187,15 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
                 <label htmlFor="login-email">{t('login.email')}</label>
                 <input
                   id="login-email"
-                  type="email"
-                  placeholder="you@email.com"
+                  type="text"
+                  inputMode="email"
+                  placeholder={t('login.identifierPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  autoComplete="email"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
                   aria-required="true"
                 />
               </div>

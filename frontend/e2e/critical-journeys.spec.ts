@@ -141,7 +141,8 @@ async function fillRegistration(page: Page, email: string, lastName: string) {
   await page.fill('#reg-firstName', 'Journey')
   await page.fill('#reg-lastName', lastName)
   await page.fill('#reg-email', email)
-  await page.fill('#reg-phone', '5550000000')
+  // The mobile number is a login identifier: unique per account and a real Indian mobile (starts 6-9).
+  await page.fill('#reg-phone', `9${String(Date.now() % 1e9).padStart(9, '0')}`)
   await page.fill('#reg-password', 'Password1')
   await page.fill('#reg-confirmPassword', 'Password1')
   if (await page.locator('#reg-license').count()) {

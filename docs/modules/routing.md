@@ -32,3 +32,11 @@ never `[object Object]`. Only `UserFacingError` (sign-in / registration replies)
 `response.data.error` by hand (`// guard-ok: reason` marks a justified exception). The crash screen
 (`ErrorBoundary`) shows technical text in development only. Texts: `locales/<lang>/modules/errors.json`.
 Known remaining gap: server-side messages are English only; making them translatable is a separate piece of work.
+
+## Signing in with a mobile number (2026-11-16)
+Phone is the primary identifier, email the second; sign-in accepts either (`identifier`, `email` still works).
+`users.phone_e164` (migration 047) holds the normalised number, unique; a trigger fills it for any writer, and
+`UserService.phoneForStorage` validates and refuses a number already on another account. Normalisation is
+`backend/src/services/sms/phone.ts` (India-first: 10 digits starting 6-9; `+` numbers kept). Test fixtures that
+register accounts must use a unique valid mobile (`runtime-verify.js` and `critical-journeys.spec.ts` do).
+SMS sending and its admin settings: `backend/src/services/SmsService.ts`, Admin -> SMS Settings (migration 046).

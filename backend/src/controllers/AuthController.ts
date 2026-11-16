@@ -141,10 +141,12 @@ export class AuthController {
 
   async login(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const { email, password } = req.body;
+      // The person may sign in with their email or their mobile number (sent as `identifier`; `email` still works).
+      const identifier: string = String(req.body.identifier ?? req.body.email ?? '').trim();
+      const { password } = req.body;
 
-      if (!email || !password) {
-        throw new ValidationError('Email and password are required');
+      if (!identifier || !password) {
+        throw new ValidationError('Enter your email or mobile number, and your password.');
       }
 
       // Retry login query up to 6 times with escalating delays.
@@ -155,12 +157,12 @@ export class AuthController {
       let loginAttemptError: any;
       for (let attempt = 1; attempt <= 6; attempt++) {
         try {
-          user = await UserService.getUserByEmail(email);
+          user = await UserService.getUserByIdentifier(identifier);
           loginAttemptError = null;
           break;
         } catch (dbErr: any) {
           loginAttemptError = dbErr;
-          logger.warn(`Login: getUserByEmail attempt ${attempt}/6 failed`, { error: dbErr.message });
+          logger.warn(`Login: getUserByIdentifier attempt ${attempt}/6 failed`, { error: dbErr.message });
           if (attempt < 6) {
             if (attempt === 1) {
               try {
@@ -180,12 +182,12 @@ export class AuthController {
       }
 
       if (!user || !user.passwordHash) {
-        throw new UnauthorizedError('Invalid email or password');
+        throw new UnauthorizedError('Invalid email, mobile number or password');
       }
 
       const isPasswordValid = await SecurityUtils.comparePassword(password, user.passwordHash);
       if (!isPasswordValid) {
-        throw new UnauthorizedError('Invalid email or password');
+        throw new UnauthorizedError('Invalid email, mobile number or password');
       }
 
       // Account status gate - checked AFTER password so we don't reveal account existence

@@ -52,7 +52,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         method: 'POST',
         headers: headersWithCsrf(),
         credentials: 'include',
-        body: JSON.stringify({ email, password })
+        // `email` may be an email address or a mobile number: the server accepts either as the identifier.
+        body: JSON.stringify({ identifier: email, password })
       })
 
       const data = await response.json()

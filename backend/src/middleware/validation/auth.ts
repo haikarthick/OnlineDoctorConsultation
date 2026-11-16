@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { normalizePhone } from '../../services/sms/phone';
 
 // ─── Auth ────────────────────────────────────────────────────
 export const registerSchema = Joi.object({
@@ -15,9 +16,10 @@ export const registerSchema = Joi.object({
     'string.min': 'Last name must be at least 2 characters',
     'any.required': 'Last name is required',
   }),
-  phone: Joi.string().required().pattern(/^\+?[\d\s()-]{7,20}$/).messages({
-    'string.pattern.base': 'Please provide a valid phone number',
-    'any.required': 'Phone number is required',
+  phone: Joi.string().required().pattern(/^\+?[\d\s()-]{7,20}$/).custom((value: string, helpers: any) => (normalizePhone(value) ? value : helpers.error('any.invalid'))).messages({
+    'string.pattern.base': 'Please provide a valid mobile number',
+    'any.invalid': 'Please enter a valid mobile number, for example 98765 43210.',
+    'any.required': 'Mobile number is required',
   }),
   password: Joi.string().min(8).max(128).required().pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).messages({
     'string.min': 'Password must be at least 8 characters',
@@ -69,13 +71,22 @@ export const registerSchema = Joi.object({
   }),
 });
 
+// Sign in with an email OR a mobile number. `identifier` is the new name; `email` is still accepted so older
+// clients keep working. Either one must be present.
+const emailOrPhone = Joi.string().trim().max(255).custom((value: string, helpers: any) => {
+  if (value.includes('@')) {
+    const { error } = Joi.string().email({ tlds: { allow: false } }).validate(value);
+    if (error) return helpers.error('any.invalid');
+    return value;
+  }
+  return normalizePhone(value) ? value : helpers.error('any.invalid');
+}).messages({ 'any.invalid': 'Enter a valid email address or a 10-digit mobile number.' });
+
 export const loginSchema = Joi.object({
-  email: Joi.string().email().required().messages({
-    'string.email': 'Please provide a valid email address',
-    'any.required': 'Email is required',
-  }),
+  identifier: emailOrPhone,
+  email: emailOrPhone,
   password: Joi.string().required().messages({ 'any.required': 'Password is required' }),
-});
+}).or('identifier', 'email').messages({ 'object.missing': 'Enter your email or mobile number.' });
 
 export const refreshTokenSchema = Joi.object({
   refreshToken: Joi.string().required().messages({ 'any.required': 'Refresh token is required' }),

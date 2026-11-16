@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import UserServiceForPhone from '../services/UserService';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
 import { resolveNetworkAccess } from '../middleware/networkAccess';
 import { asyncHandler } from '../utils/errorHandler';
@@ -134,8 +135,8 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
     // network_role must satisfy the DB check constraint - always 'hospital_staff' for position-based invites
     const networkRole = 'hospital_staff';
     const userResult = await db.query(
-      `INSERT INTO users (email, first_name, last_name, phone, role, password_hash) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, email, first_name, last_name, role`,
-      [invite.invitee_email, first_name, last_name, phone || '', assignedRole, password_hash]
+      `INSERT INTO users (email, first_name, last_name, phone, role, password_hash, phone_e164) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, email, first_name, last_name, role`,
+      [invite.invitee_email, first_name, last_name, phone || '', assignedRole, password_hash, await UserServiceForPhone.phoneForStorage(phone).catch(() => null)]
     );
     const newUser = userResult.rows[0];
     await db.query(`INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (network_id, user_id) DO NOTHING`,
