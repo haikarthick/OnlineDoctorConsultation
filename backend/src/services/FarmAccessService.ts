@@ -129,7 +129,8 @@ class FarmAccessService {
                     AND (b.status IN ('confirmed', 'rescheduled')
                          OR (b.status = 'completed' AND b.updated_at >= NOW() - ($4::int * INTERVAL '1 day'))))
          OR EXISTS (SELECT 1 FROM consultations c
-                     WHERE c.veterinarian_id = $1 AND $2::uuid IS NOT NULL AND c.animal_id = $2::uuid
+                     WHERE c.veterinarian_id = $1
+                       AND (($2::uuid IS NOT NULL AND c.animal_id = $2::uuid) OR ($3::uuid IS NOT NULL AND c.group_id = $3::uuid))
                        AND (c.status IN ('confirmed', 'scheduled', 'in_progress')
                             OR (c.status = 'completed' AND c.completed_at >= NOW() - ($4::int * INTERVAL '1 day'))))`,
       [vetUserId, subject.animalId || null, subject.groupId || null, VET_ACCESS_DAYS]

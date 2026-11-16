@@ -11,6 +11,7 @@ import ChatPanel from '../../components/consultationRoom/ChatPanel'
 import MedicalHistoryPanel from '../../components/consultationRoom/MedicalHistoryPanel'
 import NotesPanel from '../../components/consultationRoom/NotesPanel'
 import PrescribePanel from '../../components/consultationRoom/PrescribePanel'
+import { groupFromConsultation, type ConsultationGroup } from '../../components/shared/GroupSummary'
 import ReferralModal, { ReferralFormState } from '../../components/consultationRoom/ReferralModal'
 import { formatDuration } from '../../components/consultationRoom/consultationRoomShared'
 import '../../styles/modules.css'
@@ -54,6 +55,8 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
 
   // Medical history state (for doctors)
   const [animalInfo, setAnimalInfo] = useState<any>(null)
+  // When the appointment is about a whole group (a herd or flock), the group instead of one animal.
+  const [groupInfo, setGroupInfo] = useState<ConsultationGroup | null>(null)
   const [medicalRecords, setMedicalRecords] = useState<any[]>([])
   const [vaccinations, setVaccinations] = useState<any[]>([])
   const [allergies, setAllergies] = useState<any[]>([])
@@ -335,9 +338,23 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         const animalId = res.data.animalId || res.data.animal_id
         if (animalId && !historyLoaded) {
           loadMedicalHistory(animalId)
+        } else if (!animalId && res.data.groupId && !historyLoaded) {
+          setGroupInfo(groupFromConsultation(res.data))
+          loadGroupHistory(res.data.groupId)
         }
       }
     } catch { /* ignore */ }
+  }
+
+  // A group's history is its own records (one row for the whole flock), written by this vet.
+  const loadGroupHistory = async (groupId: string) => {
+    if (historyLoaded || historyLoading) return
+    try {
+      setHistoryLoading(true)
+      const recordsRes = await apiService.listMedicalRecords({ groupId, limit: 20 }).catch(() => ({ data: { items: [] } }))
+      setMedicalRecords(recordsRes?.data?.items || recordsRes?.data?.records || (Array.isArray(recordsRes?.data) ? recordsRes.data : []))
+      setHistoryLoaded(true)
+    } finally { setHistoryLoading(false) }
   }
 
   const loadMedicalHistory = async (animalId: string) => {
@@ -754,6 +771,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (userMessage(err)))
             <MedicalHistoryPanel
               historyLoading={historyLoading}
               animalInfo={animalInfo}
+              groupInfo={groupInfo}
               allergies={allergies}
               vaccinations={vaccinations}
               medicalRecords={medicalRecords}
@@ -774,7 +792,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (userMessage(err)))
           )}
 
           {activePanel === 'prescribe' && (
-            <PrescribePanel conId={conId} animalInfo={animalInfo} onNavigate={onNavigate} />
+            <PrescribePanel conId={conId} animalInfo={animalInfo} groupInfo={groupInfo} onNavigate={onNavigate} />
           )}
         </div>
       </div>

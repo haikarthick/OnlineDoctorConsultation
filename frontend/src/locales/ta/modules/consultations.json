@@ -261,7 +261,18 @@
     "shareScreen": "Share screen",
     "startRecording": "Start recording",
     "stopRecording": "Stop recording",
-    "endCallTitle": "End call"
+    "endCallTitle": "End call",
+    "group": {
+      "title": "குழு சந்திப்பு",
+      "unnamed": "இந்தக் குழு",
+      "headCount_one": "குழுவில் {{count}} விலங்கு",
+      "headCount_other": "குழுவில் {{count}} விலங்குகள்",
+      "oneRecord": "இந்த சந்திப்பு முழு குழுவுக்கானது. நீங்கள் எழுதும் பதிவு அல்லது மருந்துச்சீட்டு குழுவுக்கான ஒரே பதிவு, ஒவ்வொரு விலங்குக்கும் தனியாக அல்ல.",
+      "yourRecords": "இந்தக் குழுவுக்கான உங்கள் பதிவுகள்",
+      "noRecords": "இந்தக் குழுவுக்கு நீங்கள் இன்னும் எந்தப் பதிவும் எழுதவில்லை.",
+      "treated_one": "{{count}} சிகிச்சை",
+      "treated_other": "{{count}} சிகிச்சை"
+    }
   },
   "consultationManagement": {
     "title": "ஆலோசனை மேலாண்மை",

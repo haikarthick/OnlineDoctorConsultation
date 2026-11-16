@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
 import { Prescription, CreatePrescriptionDTO, Medication } from '../models/types';
-import { NotFoundError } from '../utils/errors';
+import { NotFoundError, ValidationError, ForbiddenError } from '../utils/errors';
 import logger from '../utils/logger';
 
 class PrescriptionService {
-  async createPrescription(veterinarianId: string, data: CreatePrescriptionDTO): Promise<Prescription> {
+  async createPrescription(veterinarianId: string, data: CreatePrescriptionDTO, vetRole?: string): Promise<Prescription> {
     const id = uuidv4();
     const now = new Date();
 
@@ -30,6 +30,19 @@ class PrescriptionService {
         }
       } catch (err) {
         logger.warn('Could not lookup consultation for prescription', { consultationId: data.consultationId, error: err });
+      }
+    }
+
+    // One subject, said in words: an animal OR a group. (The database also enforces it; this is what the person reads.)
+    if (animalId && groupId) throw new ValidationError('A prescription is for one animal or for one group, not both.');
+    if (!animalId && !groupId) throw new ValidationError('Choose the animal or the group this prescription is for. This appointment has none linked to it.');
+
+    // A vet writes only for a group they are booked or in consultation for (a prescription lands in that farm's group
+    // record); a platform admin may write for any.
+    if (groupId && vetRole !== 'admin') {
+      const FarmAccessService = (await import('./FarmAccessService')).default;
+      if (!(await FarmAccessService.consultingVetMayRead(veterinarianId, { groupId }))) {
+        throw new ForbiddenError('You can prescribe for a group only when you are booked or in consultation for it. Ask the farm owner to book you for it.');
       }
     }
 
@@ -60,8 +73,20 @@ class PrescriptionService {
       }
     }
 
-    const cycleId = data.cycleId || null;
-    const headCountTreated = data.headCountTreated ?? null;
+    // A group prescription belongs to the group's open production cycle, and records how many were treated (the group's head
+    // count unless the vet says fewer) so the obligation survives later changes to the group.
+    let cycleId = data.cycleId || null;
+    let headCountTreated = data.headCountTreated ?? null;
+    if (groupId) {
+      if (!cycleId) {
+        const cyc = await database.query(`SELECT id FROM group_cycles WHERE group_id = $1 AND status = 'active' LIMIT 1`, [groupId]);
+        cycleId = cyc.rows[0]?.id || null;
+      }
+      if (headCountTreated === null) {
+        const g = await database.query(`SELECT current_count FROM animal_groups WHERE id = $1`, [groupId]);
+        headCountTreated = g.rows[0] ? Number(g.rows[0].current_count) : null;
+      }
+    }
 
     const result = await database.query(
       `INSERT INTO prescriptions (id, consultation_id, veterinarian_id, pet_owner_id, animal_id,

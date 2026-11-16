@@ -261,7 +261,18 @@
     "shareScreen": "Share screen",
     "startRecording": "Start recording",
     "stopRecording": "Stop recording",
-    "endCallTitle": "End call"
+    "endCallTitle": "End call",
+    "group": {
+      "title": "ಗುಂಪಿನ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್",
+      "unnamed": "ಈ ಗುಂಪು",
+      "headCount_one": "ಗುಂಪಿನಲ್ಲಿ {{count}} ಪ್ರಾಣಿ",
+      "headCount_other": "ಗುಂಪಿನಲ್ಲಿ {{count}} ಪ್ರಾಣಿಗಳು",
+      "oneRecord": "ಈ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ಇಡೀ ಗುಂಪಿಗೆ. ನೀವು ಬರೆಯುವ ದಾಖಲೆ ಅಥವಾ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಗುಂಪಿಗೆ ಒಂದೇ ನಮೂದು, ಪ್ರತಿ ಪ್ರಾಣಿಗೆ ಬೇರೆ ಅಲ್ಲ.",
+      "yourRecords": "ಈ ಗುಂಪಿಗೆ ನಿಮ್ಮ ದಾಖಲೆಗಳು",
+      "noRecords": "ಈ ಗುಂಪಿಗೆ ನೀವು ಇನ್ನೂ ಯಾವ ದಾಖಲೆಯನ್ನೂ ಬರೆದಿಲ್ಲ.",
+      "treated_one": "{{count}} ಚಿಕಿತ್ಸೆ",
+      "treated_other": "{{count}} ಚಿಕಿತ್ಸೆ"
+    }
   },
   "consultationManagement": {
     "title": "ಸಮಾಲೋಚನೆ ನಿರ್ವಹಣೆ",

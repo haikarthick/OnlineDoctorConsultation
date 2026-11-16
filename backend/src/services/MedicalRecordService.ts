@@ -292,7 +292,7 @@ export class MedicalRecordService {
   }
 
   async listRecords(filters: {
-    userId?: string; animalId?: string; recordType?: string;
+    userId?: string; animalId?: string; groupId?: string; recordType?: string;
     status?: string; severity?: string; veterinarianId?: string;
     search?: string; limit?: number; offset?: number; isAdmin?: boolean;
   }): Promise<{ records: MedicalRecord[]; total: number }> {
@@ -306,6 +306,7 @@ export class MedicalRecordService {
         params.push(filters.userId);
       }
       if (filters.animalId) { idx++; conditions.push(`mr.animal_id = $${idx}`); params.push(filters.animalId); }
+      if (filters.groupId) { idx++; conditions.push(`mr.group_id = $${idx}`); params.push(filters.groupId); }
       if (filters.recordType) { idx++; conditions.push(`mr.record_type = $${idx}`); params.push(filters.recordType); }
       if (filters.status) { idx++; conditions.push(`mr.status = $${idx}`); params.push(filters.status); }
       if (filters.severity) { idx++; conditions.push(`mr.severity = $${idx}`); params.push(filters.severity); }

@@ -5831,3 +5831,10 @@ CREATE TABLE IF NOT EXISTS farm_event_receipts (
   PRIMARY KEY (user_id, idempotency_key)
 );
 CREATE INDEX IF NOT EXISTS idx_farm_event_receipts_created ON farm_event_receipts(created_at);
+
+-- ============================================================
+-- 68. GROUP CONSULTATIONS (migration 051)
+-- ============================================================
+ALTER TABLE consultations
+  ADD COLUMN IF NOT EXISTS group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_consultations_group ON consultations(group_id) WHERE group_id IS NOT NULL;

@@ -261,7 +261,18 @@
     "shareScreen": "Share screen",
     "startRecording": "Start recording",
     "stopRecording": "Stop recording",
-    "endCallTitle": "End call"
+    "endCallTitle": "End call",
+    "group": {
+      "title": "ഗ്രൂപ്പ് അപ്പോയിന്റ്മെന്റ്",
+      "unnamed": "ഈ ഗ്രൂപ്പ്",
+      "headCount_one": "ഗ്രൂപ്പിൽ {{count}} മൃഗം",
+      "headCount_other": "ഗ്രൂപ്പിൽ {{count}} മൃഗങ്ങൾ",
+      "oneRecord": "ഈ അപ്പോയിന്റ്മെന്റ് മുഴുവൻ ഗ്രൂപ്പിനുമുള്ളതാണ്. നിങ്ങൾ എഴുതുന്ന രേഖയോ കുറിപ്പടിയോ ഗ്രൂപ്പിന് ഒരൊറ്റ എൻട്രിയാണ്, ഓരോ മൃഗത്തിനും വെവ്വേറെയല്ല.",
+      "yourRecords": "ഈ ഗ്രൂപ്പിനായുള്ള നിങ്ങളുടെ രേഖകൾ",
+      "noRecords": "ഈ ഗ്രൂപ്പിന് നിങ്ങൾ ഇതുവരെ രേഖയൊന്നും എഴുതിയിട്ടില്ല.",
+      "treated_one": "{{count}} ചികിത്സിച്ചു",
+      "treated_other": "{{count}} ചികിത്സിച്ചു"
+    }
   },
   "consultationManagement": {
     "title": "കൺസൾട്ടേഷൻ മാനേജ്‌മെന്റ്",

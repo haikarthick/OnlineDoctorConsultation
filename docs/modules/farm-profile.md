@@ -271,3 +271,20 @@ places (it silently stopped at 50 before). Only owner and manager see the change
 11-check real-server run. Phase 5's five farm screens (Breeding, Feed, Movement, Campaigns, Locations) are now all on the
 shared phone blocks; the batch-plan leftovers (group passport, group certificates, group consultations, batch prescriptions)
 remain - the hospital-network parts of those need the owner's sign-off.
+
+## Group appointments and prescriptions (2026-11-16)
+A consultation can now be about a whole group: `consultations.group_id` (migration 051, `init.sql` §68). The group comes from
+the **booking** (never from a typed id); without a booking it is accepted only for a group the person has a role on.
+`GET /consultations/:id` returns the group's name, type, species and head count; the vet's room shows it with
+`components/shared/GroupSummary.tsx` (the group counterpart of `SubjectSummary`), the farm team's last-7-days records
+(`RecentFarmRecords groupId`) and the vet's own records for the group (`GET /medical-records?groupId=`). A prescription from
+that room is ONE prescription for the group; its cycle is the group's open cycle and `head_count_treated` defaults to the
+group's head count.
+Bugs found and fixed on the way (all reproduced on a real server first): prescribing from a consultation room was **refused**
+with a raw validation message (`xor('animalId','groupId')` required a subject in the request, and the service's lookup of the
+consultation's subject queried the missing `consultations.group_id`, failed and was swallowed) - the schema now allows
+"neither" and the service says in words when there is still none; a vet could write a prescription into any group id (now
+only a group they are booked or in consultation for); and a vet's open consultation with an owner was handed back for a
+**different** animal or group booked later (the dedupe ignored the subject) - it now matches the same subject only.
+Verified by an 11-check real-server run. Group enrolment in a hospital network (cycle-bound consent) is the one Phase 5 item
+left; it is change-protected hospital-network code and needs the owner's sign-off on the specific isolation changes first.

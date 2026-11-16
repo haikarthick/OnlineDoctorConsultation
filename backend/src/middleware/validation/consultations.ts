@@ -13,6 +13,7 @@ export const createConsultationSchema = Joi.object({
   animalId: uuid.optional().allow(null),
   bookingId: uuid.optional().allow(null),
   petOwnerId: uuid.optional().allow(null),
+  groupId: uuid.optional().allow(null),
 });
 
 export const updateConsultationSchema = Joi.object({
@@ -120,5 +121,7 @@ export const createPrescriptionSchema = Joi.object({
   validUntil: Joi.string().optional().allow('', null),
   diagnosis: longText().optional().allow('', null),
   followUpDate: Joi.string().optional().allow('', null),
-}).xor('animalId', 'groupId');
+  // At most one: a prescription written from a consultation names neither - the server takes the subject from the
+  // consultation - and the service says in words when there is still none.
+}).oxor('animalId', 'groupId').messages({ 'object.oxor': 'A prescription is for one animal or for one group, not both.' });
 

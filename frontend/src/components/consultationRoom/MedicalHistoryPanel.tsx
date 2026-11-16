@@ -2,10 +2,13 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { SubjectSummary } from '../shared/SubjectSummary'
 import { RecentFarmRecords } from '../farmRecords/RecentFarmRecords'
+import { GroupSummary, type ConsultationGroup } from '../shared/GroupSummary'
 
 interface MedicalHistoryPanelProps {
   historyLoading: boolean
   animalInfo: any
+  /** Set instead of animalInfo when the appointment is about a whole group. */
+  groupInfo?: ConsultationGroup | null
   allergies: any[]
   vaccinations: any[]
   medicalRecords: any[]
@@ -13,7 +16,7 @@ interface MedicalHistoryPanelProps {
 }
 
 const MedicalHistoryPanel: React.FC<MedicalHistoryPanelProps> = ({
-  historyLoading, animalInfo, allergies, vaccinations, medicalRecords, labResults
+  historyLoading, animalInfo, groupInfo, allergies, vaccinations, medicalRecords, labResults
 }) => {
   const { t } = useTranslation()
 
@@ -26,7 +29,27 @@ const MedicalHistoryPanel: React.FC<MedicalHistoryPanelProps> = ({
         </div>
       )}
 
-      {!historyLoading && !animalInfo && (
+      {!historyLoading && !animalInfo && groupInfo && (
+        <>
+          <GroupSummary group={groupInfo} />
+          {/* What the farm team recorded for the group in the last 7 days - only for the vet booked for it */}
+          <RecentFarmRecords groupId={groupInfo.groupId} />
+          <div className="group-history">
+            <h4>{t('consultationRoom.group.yourRecords')} ({medicalRecords.length})</h4>
+            {medicalRecords.length === 0 ? (
+              <p className="group-history-empty">{t('consultationRoom.group.noRecords')}</p>
+            ) : (
+              <ul className="group-history-list">
+                {medicalRecords.map((r: any) => (
+                  <li key={r.id}><strong>{r.title}</strong>{r.headCountTreated != null && <span> · {t('consultationRoom.group.treated', { count: r.headCountTreated })}</span>}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
+      )}
+
+      {!historyLoading && !animalInfo && !groupInfo && (
         <div className="si-b1c6542e">
           <div className="si-75bae6a3">📋</div>
           <p className="si-c6905158">{t('consultationRoom.noAnimalLinked')}</p>

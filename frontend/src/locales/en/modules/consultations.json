@@ -261,7 +261,18 @@
     "shareScreen": "Share screen",
     "startRecording": "Start recording",
     "stopRecording": "Stop recording",
-    "endCallTitle": "End call"
+    "endCallTitle": "End call",
+    "group": {
+      "title": "Group appointment",
+      "unnamed": "This group",
+      "headCount_one": "{{count}} animal in the group",
+      "headCount_other": "{{count}} animals in the group",
+      "oneRecord": "This appointment is for the whole group. A record or prescription you write is one entry for the group, not one per animal.",
+      "yourRecords": "Your records for this group",
+      "noRecords": "You have not written any record for this group yet.",
+      "treated_one": "{{count}} treated",
+      "treated_other": "{{count}} treated"
+    }
   },
   "consultationManagement": {
     "title": "Consultation Management",

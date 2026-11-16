@@ -180,7 +180,7 @@ export const medicalRecordsApi = {
     return response.data
   },
 
-  async listMedicalRecords(params?: { limit?: number; offset?: number; animalId?: string; recordType?: string; status?: string; severity?: string; search?: string }) {
+  async listMedicalRecords(params?: { limit?: number; offset?: number; animalId?: string; groupId?: string; recordType?: string; status?: string; severity?: string; search?: string }) {
     const response = await sharedClient.get('/medical-records', { params })
     return response.data
   },

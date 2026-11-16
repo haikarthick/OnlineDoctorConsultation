@@ -261,7 +261,18 @@
     "shareScreen": "Share screen",
     "startRecording": "Start recording",
     "stopRecording": "Stop recording",
-    "endCallTitle": "End call"
+    "endCallTitle": "End call",
+    "group": {
+      "title": "సమూహ అపాయింట్‌మెంట్",
+      "unnamed": "ఈ సమూహం",
+      "headCount_one": "సమూహంలో {{count}} జంతువు",
+      "headCount_other": "సమూహంలో {{count}} జంతువులు",
+      "oneRecord": "ఈ అపాయింట్‌మెంట్ మొత్తం సమూహానికి. మీరు రాసే రికార్డు లేదా ప్రిస్క్రిప్షన్ సమూహానికి ఒకే ఎంట్రీ, ప్రతి జంతువుకు వేరుగా కాదు.",
+      "yourRecords": "ఈ సమూహానికి మీ రికార్డులు",
+      "noRecords": "ఈ సమూహానికి మీరు ఇంకా ఏ రికార్డూ రాయలేదు.",
+      "treated_one": "{{count}} చికిత్స",
+      "treated_other": "{{count}} చికిత్స"
+    }
   },
   "consultationManagement": {
     "title": "సంప్రదింపు నిర్వహణ",

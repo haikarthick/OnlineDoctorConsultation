@@ -261,7 +261,18 @@
     "shareScreen": "स्क्रीन शेयर करें",
     "startRecording": "रिकॉर्डिंग शुरू करें",
     "stopRecording": "रिकॉर्डिंग बंद करें",
-    "endCallTitle": "कॉल समाप्त करें"
+    "endCallTitle": "कॉल समाप्त करें",
+    "group": {
+      "title": "समूह की नियुक्ति",
+      "unnamed": "यह समूह",
+      "headCount_one": "समूह में {{count}} पशु",
+      "headCount_other": "समूह में {{count}} पशु",
+      "oneRecord": "यह नियुक्ति पूरे समूह के लिए है। आप जो रिकॉर्ड या पर्चा लिखेंगे वह पूरे समूह की एक प्रविष्टि होगी, हर पशु की अलग नहीं।",
+      "yourRecords": "इस समूह के लिए आपके रिकॉर्ड",
+      "noRecords": "आपने अभी इस समूह के लिए कोई रिकॉर्ड नहीं लिखा है।",
+      "treated_one": "{{count}} का उपचार",
+      "treated_other": "{{count}} का उपचार"
+    }
   },
   "consultationManagement": {
     "title": "परामर्श प्रबंधन",

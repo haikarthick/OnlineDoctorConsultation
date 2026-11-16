@@ -28,6 +28,24 @@ describe('PrescriptionService', () => {
   });
 
   describe('createPrescription', () => {
+    it('says in words when there is neither an animal nor a group, and writes nothing', async () => {
+      (database.query as jest.Mock).mockResolvedValue({ rows: [{ user_id: 'owner-1', animal_id: null, group_id: null }] });
+      await expect(PrescriptionService.createPrescription('vet-1', { consultationId: 'cons-1', medications: [{ name: 'A', dosage: '1', frequency: 'd' }] } as any))
+        .rejects.toThrow(/Choose the animal or the group/);
+      expect((database.query as jest.Mock).mock.calls.some(c => String(c[0]).includes('INSERT INTO prescriptions'))).toBe(false);
+    });
+
+    it('refuses a prescription naming both an animal and a group', async () => {
+      await expect(PrescriptionService.createPrescription('vet-1', { petOwnerId: 'owner-1', animalId: 'a1', groupId: 'g1', medications: [{ name: 'A', dosage: '1', frequency: 'd' }] } as any))
+        .rejects.toThrow(/one animal or for one group, not both/);
+    });
+
+    it('a vet not booked for the group is refused, in words', async () => {
+      (database.query as jest.Mock).mockResolvedValue({ rows: [] }); // no booking, no consultation
+      await expect(PrescriptionService.createPrescription('vet-1', { petOwnerId: 'owner-1', groupId: 'g1', medications: [{ name: 'A', dosage: '1', frequency: 'd' }] } as any, 'veterinarian'))
+        .rejects.toThrow(/booked or in consultation/);
+    });
+
     it('should create a prescription', async () => {
       (database.query as jest.Mock).mockResolvedValue({ rows: [mockPrescription] });
 

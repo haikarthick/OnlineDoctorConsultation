@@ -2,7 +2,7 @@ import { sharedClient } from '../core'
 
 export const consultationsApi = {
   // ─── Consultations ────────────────────────────────────────
-  async createConsultation(data: { veterinarianId: string; animalType: string; symptomDescription: string; scheduledAt?: string; animalId?: string; bookingId?: string; petOwnerId?: string }) {
+  async createConsultation(data: { veterinarianId: string; animalType: string; symptomDescription: string; scheduledAt?: string; animalId?: string; groupId?: string; bookingId?: string; petOwnerId?: string }) {
     const response = await sharedClient.post('/consultations', data)
     return response.data
   },

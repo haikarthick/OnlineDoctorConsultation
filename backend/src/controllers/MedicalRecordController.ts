@@ -87,6 +87,7 @@ export class MedicalRecordController {
     const filters: any = { limit, offset };
 
     if (req.query.animalId) filters.animalId = req.query.animalId;
+    if (req.query.groupId) filters.groupId = req.query.groupId; // a group's own records (still limited to the person's own by the scope below)
     if (req.query.recordType) filters.recordType = req.query.recordType;
     if (req.query.status) filters.status = req.query.status;
     if (req.query.severity) filters.severity = req.query.severity;

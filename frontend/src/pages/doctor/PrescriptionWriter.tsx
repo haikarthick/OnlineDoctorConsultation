@@ -5,6 +5,7 @@ import { useMasterData } from '../../context/MasterDataContext'
 import apiService from '../../services/api'
 import client from '../../services/api/client'
 import { SubjectSummary } from '../../components/shared/SubjectSummary'
+import { GroupSummary, groupFromConsultation, type ConsultationGroup } from '../../components/shared/GroupSummary'
 import { Medication } from '../../types'
 import '../../styles/modules.css'
 
@@ -58,11 +59,13 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
   // Chosen in the selector, passed in the link, or - from a consultation - the consultation's own.
   const [consultationAnimalId, setConsultationAnimalId] = useState('')
   const [summaryAnimal, setSummaryAnimal] = useState<any>(null)
+  // An appointment for a whole group: one prescription for the group, not one per head.
+  const [consultationGroup, setConsultationGroup] = useState<ConsultationGroup | null>(null)
   useEffect(() => {
     if (!conId) return
     let cancelled = false
     apiService.getConsultation(conId)
-      .then((res: any) => { if (!cancelled) setConsultationAnimalId(res?.data?.animalId || res?.data?.animal_id || '') })
+      .then((res: any) => { if (!cancelled) { setConsultationAnimalId(res?.data?.animalId || res?.data?.animal_id || ''); setConsultationGroup(groupFromConsultation(res?.data)) } })
       .catch(() => { /* the summary is a courtesy; the prescription does not depend on it */ })
     return () => { cancelled = true }
   }, [conId])
@@ -254,6 +257,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
         </div>
       )}
 
+      {!summaryAnimal && consultationGroup && <GroupSummary group={consultationGroup} />}
       {summaryAnimal && (
         <div className="si-af65fe13">
           <SubjectSummary animal={summaryAnimal} emphasis showFarm />

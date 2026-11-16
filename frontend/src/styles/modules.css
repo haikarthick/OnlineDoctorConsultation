@@ -3806,3 +3806,17 @@ button.record-due-row { cursor: pointer; }
 .loc-bar-18 { width: 90%; }
 .loc-bar-19 { width: 95%; }
 .loc-bar-20 { width: 100%; }
+
+/* ── Group at a glance for the vet (components/shared/GroupSummary.tsx) ── */
+.group-summary { margin: 12px 0; padding: 12px 14px; border-radius: var(--radius-lg); background: var(--brand-soft); }
+.group-summary-head { display: flex; align-items: center; gap: 10px; }
+.group-summary-icon { font-size: 28px; }
+.group-summary-title { display: flex; flex-direction: column; min-width: 0; }
+.group-summary-name { overflow-wrap: anywhere; }
+.group-summary-sub { font-size: 13px; color: var(--gray-600); }
+.group-summary-count { margin: 8px 0 0; font-size: 20px; font-weight: 700; }
+.group-summary-note { margin: 6px 0 0; font-size: 13px; color: var(--gray-600); }
+.group-history { margin: 12px 0; }
+.group-history h4 { margin: 0 0 6px; font-size: 15px; }
+.group-history-empty { margin: 0; font-size: 13px; color: var(--gray-600); }
+.group-history-list { margin: 0; padding-left: 18px; font-size: 14px; }
