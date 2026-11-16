@@ -1,0 +1,64 @@
+name: Full E2E Suite (nightly, informational)
+
+# The full legacy Playwright suite (~460 tests) is not reliably green yet (docs/VERIFICATION.md) and takes
+# ~25 minutes. It used to run on every push inside ci-cd.yml, where each newer push cancelled it - and a
+# cancelled check kept the commit's CI from ever passing, so Render never auto-deployed. It now runs on a
+# schedule and by hand, so it is visible without being able to block or cancel a deploy.
+on:
+  schedule:
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  e2e-full-suite:
+    name: Full E2E Suite (informational - known not fully green)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install PostgreSQL server
+        run: sudo apt-get update && sudo apt-get install -y postgresql
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build backend
+        working-directory: backend
+        run: NODE_ENV=production npm run build
+
+      - name: Build frontend
+        working-directory: frontend
+        run: NODE_ENV=production npm run build
+
+      - name: Install Playwright chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run full legacy E2E suite
+        working-directory: backend
+        run: npm run verify:runtime:full
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-full-suite-playwright
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7

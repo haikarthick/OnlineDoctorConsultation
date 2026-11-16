@@ -194,3 +194,11 @@ delete the block.
    precisely how it falls behind
 4. the app-level validator (`validation.ts`, `PermissionService.ts`, …)
 5. run `npm run verify:runtime` and watch phases 5 and 6
+
+## Why deploys stopped (2026-11-16) and the rule that prevents it
+Render auto-deploys `vetcare-dev` only for a commit whose CI checks PASS. The full legacy E2E suite used to be a job in
+`ci-cd.yml` (25 minutes, `continue-on-error`). With frequent pushes each newer push cancelled it (`cancel-in-progress`),
+so almost every run ended **cancelled** and no commit ever had passing checks - Render's last deploy was 2026-11-14.
+It now lives in `.github/workflows/e2e-full.yml` (nightly + manual), outside any commit's checks. **Do not put a slow or
+cancellable job back into the push pipeline.** Also: the deploy job needs the GitHub secret `RENDER_DEPLOY_HOOK_DEV`
+(`..._DEMO` for demo); if it is missing the job now raises a visible warning instead of a silent green.

@@ -212,72 +212,10 @@ jobs:
         working-directory: frontend
         run: node e2e/generate-tests.cjs
 
-  # ═════════════════════════════════════════════
-  #  2c. Full legacy E2E suite (informational, not a gate)
-  # ═════════════════════════════════════════════
-  # This used to hand-roll its own Postgres service container + `npm start` + `npx playwright
-  # test` with no schema ever applied to that container - it had been failing on infrastructure
-  # grounds alone, unrelated to any actual test content, since at least 2026-08-05. `runtime-verify`
-  # above already does this correctly (its own throwaway cluster, real init.sql + migrations,
-  # real server boot) and already runs the @critical-tagged suite as part of PHASE 7. Duplicating
-  # that by hand here added nothing but a second place to get the setup wrong.
-  #
-  # What's actually missing a home is the FULL 462-test legacy suite - docs/VERIFICATION.md
-  # documents it as not reliably green yet (a block of admin.spec.ts times out) and deliberately
-  # excludes it from the push gate. `npm run verify:runtime:full` is the existing, tested way to
-  # run it. This job runs that, informationally, so the legacy suite's real pass/fail state is
-  # visible somewhere instead of nowhere - it must NOT block anything until that suite is
-  # triaged (continue-on-error: true is intentional, not a placeholder to remove casually).
-  e2e-full-suite:
-    name: Full E2E Suite (informational - known not fully green)
-    runs-on: ubuntu-24.04
-    needs: [frontend-test]
-    if: github.event_name == 'push'
-    continue-on-error: true
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install PostgreSQL server
-        run: sudo apt-get update && sudo apt-get install -y postgresql
-
-      - name: Install backend dependencies
-        working-directory: backend
-        run: npm ci
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci
-
-      - name: Build backend
-        working-directory: backend
-        run: NODE_ENV=production npm run build
-
-      - name: Build frontend
-        working-directory: frontend
-        run: NODE_ENV=production npm run build
-
-      - name: Install Playwright chromium
-        working-directory: frontend
-        run: npx playwright install --with-deps chromium
-
-      - name: Run full legacy E2E suite
-        working-directory: backend
-        run: npm run verify:runtime:full
-
-      - name: Upload Playwright artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-full-suite-playwright
-          path: |
-            frontend/test-results/
-            frontend/playwright-report/
-          if-no-files-found: ignore
-          retention-days: 7
+  # (The full legacy E2E suite is NOT part of this pipeline any more: it lives in e2e-full.yml, nightly.
+  #  It is informational and takes ~25 minutes; as a job here, every newer push cancelled it, which made
+  #  the whole run "cancelled" and kept the commit from ever having passing CI checks - and Render only
+  #  auto-deploys a commit whose checks pass. See docs/VERIFICATION.md.)
 
   # ═════════════════════════════════════════════
   #  3. Security Scan (Trivy)
@@ -363,6 +301,7 @@ jobs:
           esac
 
           if [ -z "$HOOK_URL" ]; then
+            echo "::warning title=No Render deploy hook::Set the RENDER_DEPLOY_HOOK_$(echo $ENV | tr a-z A-Z) secret. Nothing was deployed by this job; Render's own auto-deploy (if enabled) is the only trigger."
             echo "⚠️  No deploy hook configured for $ENV - skipping deployment."
             echo "    Set the RENDER_DEPLOY_HOOK_$(echo $ENV | tr a-z A-Z) secret in GitHub."
             exit 0
