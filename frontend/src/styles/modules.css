@@ -3625,3 +3625,23 @@ button.record-due-row { cursor: pointer; }
 .farm-outbox-label { flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; }
 .farm-outbox-error { flex-basis: 100%; }
 .farm-outbox-actions { display: flex; gap: 8px; }
+
+/* ── Breeding screen: phone cards instead of a wide table (pages/BreedingManager.tsx) ── */
+.breeding-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.breeding-card { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); background: #fff; }
+.breeding-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.breeding-card-name { min-width: 0; overflow-wrap: anywhere; }
+.breeding-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px 14px; margin: 0; }
+.breeding-facts dt { font-size: 12px; color: var(--gray-600); }
+.breeding-facts dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.breeding-card > .btn { align-self: flex-start; min-height: var(--tap-min); }
+.breeding-status { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; background: #888; }
+.breeding-status--bred { background: #3b82f6; }
+.breeding-status--confirmed_pregnant { background: #16a34a; }
+.breeding-status--not_pregnant { background: #64748b; }
+.breeding-status--delivered { background: #7c3aed; }
+.breeding-status--aborted { background: #dc2626; }
+.breeding-status--reabsorbed { background: #ea580c; }
+.breeding-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.breeding-field label { font-weight: 600; }
+.breeding-hint { margin: 0; font-size: 13px; color: var(--gray-600); }

@@ -228,8 +228,8 @@
     "modal": {
       "editTitle": "Edit Breeding Record",
       "createTitle": "New Breeding Record",
-      "dam": "Dam (Mother) ID *",
-      "sire": "Sire (Father) ID",
+      "dam": "Mother (dam) *",
+      "sire": "Father (sire) - optional",
       "breedingDate": "Breeding Date *",
       "method": "Method",
       "status": "Status",
@@ -239,8 +239,8 @@
       "notes": "Notes",
       "updateBtn": "Update",
       "createBtn": "Create",
-      "damPlaceholder": "UUID of dam",
-      "sirePlaceholder": "UUID of sire",
+      "damPlaceholder": "Choose the mother",
+      "sirePlaceholder": "Choose the father",
       "cancel": "Cancel"
     },
     "recordsTable": {
@@ -296,7 +296,18 @@
       "delivered": "Delivered",
       "aborted": "Aborted",
       "reabsorbed": "Reabsorbed"
-    }
+    },
+    "steps": {
+      "who": "Who is being bred?",
+      "when": "When and how?",
+      "result": "How did it go?"
+    },
+    "blocked": {
+      "dam": "Choose the mother first.",
+      "date": "Choose the date first."
+    },
+    "noFemales": "This farm has no female animal to breed yet. Add her on the Animals screen first.",
+    "loadFailed": "We could not load the breeding records. Check your connection and try again."
   },
   "feedInventory": {
     "pageTitle": "🌾 Feed & Inventory Management",

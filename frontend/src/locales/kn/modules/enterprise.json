@@ -228,8 +228,8 @@
     "modal": {
       "editTitle": "Edit Breeding Record",
       "createTitle": "New Breeding Record",
-      "dam": "Dam (Mother) ID *",
-      "sire": "Sire (Father) ID",
+      "dam": "ತಾಯಿ (ಹೆಣ್ಣು) *",
+      "sire": "ತಂದೆ (ಗಂಡು) - ಐಚ್ಛಿಕ",
       "breedingDate": "Breeding Date *",
       "method": "Method",
       "status": "ಸ್ಥಿತಿ",
@@ -239,8 +239,8 @@
       "notes": "ಟಿಪ್ಪಣಿಗಳು",
       "updateBtn": "ನವೀಕರಿಸಿ",
       "createBtn": "ರಚಿಸಿ",
-      "damPlaceholder": "ಡ್ಯಾಮ್ UUID",
-      "sirePlaceholder": "ಸೈರ್ UUID",
+      "damPlaceholder": "ತಾಯಿಯನ್ನು ಆರಿಸಿ",
+      "sirePlaceholder": "ತಂದೆಯನ್ನು ಆರಿಸಿ",
       "cancel": "ರದ್ದುಮಾಡಿ"
     },
     "recordsTable": {
@@ -296,7 +296,18 @@
       "delivered": "ಹೆರಿಗೆ ಆಗಿದೆ",
       "aborted": "ಗರ್ಭಪಾತ",
       "reabsorbed": "ಮರುಹೀರಿಕೆ"
-    }
+    },
+    "steps": {
+      "who": "ಯಾರ ತಳಿ ಅಭಿವೃದ್ಧಿ?",
+      "when": "ಯಾವಾಗ, ಹೇಗೆ?",
+      "result": "ಫಲಿತಾಂಶ ಏನು?"
+    },
+    "blocked": {
+      "dam": "ಮೊದಲು ತಾಯಿಯನ್ನು ಆರಿಸಿ.",
+      "date": "ಮೊದಲು ದಿನಾಂಕವನ್ನು ಆರಿಸಿ."
+    },
+    "noFemales": "ಈ ಫಾರ್ಮ್‌ನಲ್ಲಿ ತಳಿ ಅಭಿವೃದ್ಧಿಗೆ ಹೆಣ್ಣು ಪ್ರಾಣಿ ಇನ್ನೂ ಇಲ್ಲ. ಮೊದಲು ಪ್ರಾಣಿಗಳ ಪರದೆಯಲ್ಲಿ ಸೇರಿಸಿ.",
+    "loadFailed": "ತಳಿ ಅಭಿವೃದ್ಧಿ ದಾಖಲೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ. ನಿಮ್ಮ ಸಂಪರ್ಕ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
   },
   "feedInventory": {
     "pageTitle": "🌾 Feed & Inventory Management",
