@@ -203,3 +203,11 @@ profile (`AnimalController.getAnimal`), which conflicts with the rule above for 
 could affect certificates and hospital flows. Also `logClinicalAccess` writes access types such as `get_medical_records`
 that the table's CHECK (`view, search, export, print, api_call, audit`) rejects, so those audit rows silently fail
 (hospital-network code - change-protected).
+
+## Reminders and newborns (2026-11-16)
+- **Due reminders**: `FarmDueNotifier` (scheduler, every 6 h, off while `farm.records.enabled` is off) sends the owner, managers
+  and supervisors ONE in-app note per farm per day (deduped by `metadata.dedupeKey`) when something recorded is due within 3 days
+  or overdue (births, vaccinations, withdrawals). Same dates as the due list; nothing guessed.
+- **Birth -> newborn animals**: the birth entry offers "Add the newborn(s) to the farm" (on by default, editable name and sex,
+  at most as many as were born alive, max 10). They are created through `AnimalService.createAnimal` with dam, the mating's sire,
+  the farm and the birth date; class is left for the farmer. A birth entered twice on the same day is refused (no double parity).

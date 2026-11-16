@@ -34,6 +34,11 @@ class FarmDueService {
 
   async list(enterpriseId: string, caller: { userId: string; role?: string }): Promise<DueItem[]> {
     await FarmRecordService.assertFarmAccess(enterpriseId, caller);
+    return this.listForFarm(enterpriseId);
+  }
+
+  /** The due items of a farm with no caller check - for the daily reminder job, which has no caller. */
+  async listForFarm(enterpriseId: string): Promise<DueItem[]> {
 
     const births = await database.query(
       `SELECT a.id, a.name, a.expected_due_date::text AS due, (a.expected_due_date - CURRENT_DATE) AS in_days

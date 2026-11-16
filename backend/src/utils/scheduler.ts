@@ -15,6 +15,7 @@ import BookingService from '../services/BookingService';
 import NotificationService from '../services/NotificationService';
 import MarketplaceService from '../services/MarketplaceService';
 import MarketplaceEngagementService from '../services/MarketplaceEngagementService';
+import FarmDueNotifier from '../services/FarmDueNotifier';
 import database from './database';
 import logger from './logger';
 
@@ -35,6 +36,11 @@ export function startScheduler(): void {
   // Then every 24 hours
   setInterval(runExpiryCheck, TWENTY_FOUR_HOURS);
   setInterval(runPharmacyStockAlerts, TWENTY_FOUR_HOURS);
+
+  // Farm daily records: tell the owner and managers what is coming up (births, vaccinations, withdrawals).
+  // A no-op while farm.records.enabled is off; one note per person per farm per day.
+  runFarmDueReminders();
+  setInterval(runFarmDueReminders, SIX_HOURS);
 
   // Check for missed bookings every 15 minutes
   setInterval(runMissedBookingsCheck, FIFTEEN_MINUTES);
@@ -230,6 +236,15 @@ async function runMarketplaceSavedSearchAlerts(): Promise<void> {
 }
 
 /** Daily digest to each network's pharmacists: low-stock items + batches expiring within 30 days. */
+async function runFarmDueReminders(): Promise<void> {
+  try {
+    const n = await FarmDueNotifier.run();
+    if (n > 0) logger.info('Farm due reminders sent', { notified: n });
+  } catch (err: any) {
+    logger.warn('Farm due reminders failed', { error: err.message });
+  }
+}
+
 async function runPharmacyStockAlerts(): Promise<void> {
   try {
     const pharmaciesRes = await database.query(

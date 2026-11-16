@@ -120,6 +120,8 @@ const FarmRecords: React.FC = () => {
       // A head-count event: say what happened to the batch, then how many animals the group has now.
       const batch = result.cycleOpened ? `${t('farmRecords.batchStarted')} ` : result.cycleClosed ? `${t('farmRecords.batchClosed')} ` : ''
       setMessage(`${batch}${t('farmRecords.eventSaved', { count: result.currentCount })}`)
+    } else if (Array.isArray(result?.newborns) && result.newborns.length > 0) {
+      setMessage(t('farmRecords.newbornsAdded', { count: result.newborns.length }))
     } else if (result?.expectedDueDate) {
       setMessage(t('farmRecords.dueAbout', { date: new Date(result.expectedDueDate).toLocaleDateString() }))
     } else {

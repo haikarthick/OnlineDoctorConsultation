@@ -24,4 +24,9 @@ export const groupEventSchema = Joi.object({
   quantity: Joi.alternatives(Joi.number(), Joi.string().allow('')).allow(null).optional(),
   detail: Joi.object().unknown(true).allow(null).optional(),
   notes: Joi.string().max(1000).allow('', null).optional(),
+  // Birth only: newborns to add to the herd as animals.
+  offspring: Joi.array().items(Joi.object({
+    name: Joi.string().trim().max(100).allow('', null),
+    gender: Joi.string().valid('male', 'female', 'unknown').allow('', null),
+  })).max(10).allow(null).optional(),
 });

@@ -3609,3 +3609,8 @@ button.record-due-row { cursor: pointer; }
 .recent-farm-record { overflow-wrap: anywhere; font-size: 14px; }
 .recent-farm-record-latest { color: var(--gray-600); }
 .recent-farm-records-hint { margin: 6px 0 0; color: var(--gray-600); font-size: 12px; }
+
+/* ── Birth entry: add the newborn(s) as animals (RecordEntrySheet) ── */
+.newborn-section { display: flex; flex-direction: column; gap: 10px; padding: 10px 12px; border-radius: var(--radius-lg); background: var(--gray-100); }
+.newborn-toggle { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+.newborn-row { display: flex; flex-direction: column; gap: 8px; }

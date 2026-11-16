@@ -33,13 +33,15 @@ const addWeight = MedicalRecordService.addWeight as jest.Mock;
 const caller = { userId: 'u1', role: 'farmer' };
 const cow = { enterpriseId: 'e1', kind: 'animal', id: 'a1', speciesCode: 'Cattle', animalClass: 'cattle_cow', gender: 'female', managementMode: 'individual', groupType: null, cycleId: null };
 
-let animalRow: { status: string; group_id: string | null } = { status: 'active', group_id: null };
+let animalRow: Record<string, unknown> = { status: 'active', group_id: null, owner_id: 'owner1', name: 'Lakshmi', breed: 'HF' };
 let openRecord: { id: string } | null = null;
+let deliveredToday = false;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  animalRow = { status: 'active', group_id: null };
+  animalRow = { status: 'active', group_id: null, owner_id: 'owner1', name: 'Lakshmi', breed: 'HF' };
   openRecord = null;
+  deliveredToday = false;
   loadSubject.mockResolvedValue(cow);
   checkDate.mockImplementation((d?: string) => d || '2026-11-10');
   assertAllowed.mockResolvedValue({});
@@ -47,6 +49,9 @@ beforeEach(() => {
   shape.mockImplementation((_f: unknown, i: any) => ({ quantity: i.quantity ?? null, session: 'day', detail: { ...(i.detail || {}) } }));
   query.mockImplementation(async (sql: string) => {
     if (/FROM animals WHERE id/.test(sql)) return { rows: [animalRow] };
+    if (/status = 'delivered'/.test(sql)) return { rows: deliveredToday ? [{ x: 1 }] : [] };
+    if (/SELECT sire_id FROM breeding_records/.test(sql)) return { rows: [{ sire_id: 'bull1' }] };
+    if (/SELECT owner_id, name, breed FROM animals/.test(sql)) return { rows: [{ owner_id: 'owner1', name: 'Lakshmi', breed: 'HF' }] };
     if (/FROM breeding_records/.test(sql)) return { rows: openRecord ? [openRecord] : [] };
     return { rows: [] };
   });
@@ -98,6 +103,31 @@ describe('individual animal events', () => {
     expect(update).toHaveBeenCalledWith('b1', expect.objectContaining({ status: 'delivered', liveBirths: 2, offspringCount: 2 }));
   });
 
+  it('adds the newborns the farmer chose as animals: dam, sire, farm, birth date; named, or named after the dam', async () => {
+    openRecord = { id: 'b1' };
+    (AnimalService.createAnimal as jest.Mock).mockImplementation(async (_o: string, d: any) => ({ id: 'n-' + d.name, name: d.name }));
+    const r = await run('birth', { detail: { liveBirths: 2 }, offspring: [{ name: 'Gauri', gender: 'female' }, { name: '', gender: 'weird' }, { name: 'Third' }] });
+    const calls = (AnimalService.createAnimal as jest.Mock).mock.calls;
+    expect(calls).toHaveLength(2); // never more than were born alive
+    expect(calls[0][0]).toBe('owner1'); // the dam's owner
+    expect(calls[0][1]).toMatchObject({ name: 'Gauri', gender: 'female', species: 'Cattle', breed: 'HF', dateOfBirth: '2026-11-10', enterpriseId: 'e1', damId: 'a1', sireId: 'bull1' });
+    expect(calls[1][1]).toMatchObject({ name: 'Lakshmi calf 2', gender: 'unknown' });
+    expect(r.newborns.map((n: any) => n.name)).toEqual(['Gauri', 'Lakshmi calf 2']);
+  });
+
+  it('adds no animals unless the farmer asks', async () => {
+    openRecord = { id: 'b1' };
+    await run('birth', { detail: { liveBirths: 1 } });
+    expect(AnimalService.createAnimal).not.toHaveBeenCalled();
+  });
+
+  it('a birth already recorded for that day is refused instead of counted twice', async () => {
+    openRecord = { id: 'b1' };
+    deliveredToday = true;
+    await expect(run('birth', { detail: { liveBirths: 1 } })).rejects.toThrow(/already recorded/);
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it('dry-off sets the date on the animal; a weight goes to the weight history', async () => {
     await run('dry_off');
     expect(updateAnimal).toHaveBeenCalledWith('a1', { dryOffDate: '2026-11-10' });
@@ -127,7 +157,7 @@ describe('individual animal events', () => {
 
   it('nothing more can be recorded for an animal that is already sold or dead', async () => {
     for (const status of ['sold', 'deceased']) {
-      animalRow = { status, group_id: null };
+      animalRow = { status, group_id: null, owner_id: 'owner1' };
       await expect(run('heat')).rejects.toThrow(new RegExp(`already marked as ${status}`));
     }
     expect(save).not.toHaveBeenCalled();

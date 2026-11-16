@@ -62,6 +62,8 @@ export interface GroupEventInput {
   quantity?: number | string | null;
   detail?: Record<string, unknown> | null;
   notes?: string | null;
+  /** Birth only: the newborns to add to the herd as animals (the farmer chose to). */
+  offspring?: Array<{ name?: string; gender?: string }> | null;
 }
 
 class FarmEventService {
@@ -118,6 +120,11 @@ class FarmEventService {
       }
 
       case 'birth': {
+        // A birth entered twice (a retry after a slow connection) must not count twice.
+        const dup = await database.query(
+          `SELECT 1 FROM breeding_records WHERE dam_id = $1 AND status = 'delivered' AND actual_birth_date = $2::date
+              AND updated_at > NOW() - INTERVAL '1 day' LIMIT 1`, [subject.id, eventDate]);
+        if (dup.rows.length) throw new ValidationError('A birth for this animal on that day is already recorded.');
         let open = await this.openBreedingRecord(subject.id, ['bred', 'confirmed_pregnant']);
         if (!open) {
           // A birth without a recorded mating (bought in pregnant, mating not written down): the
@@ -133,7 +140,8 @@ class FarmEventService {
         await BreedingService.update(open.id, {
           status: 'delivered', actualBirthDate: eventDate, liveBirths: live, stillbirths: still, offspringCount: live + still, notes: input.notes,
         });
-        return { ...base, breedingRecordId: open.id, liveBirths: live, stillbirths: still };
+        const calves = await this.addNewborns(subject, open.id, eventDate, live, input.offspring || [], caller);
+        return { ...base, breedingRecordId: open.id, liveBirths: live, stillbirths: still, newborns: calves };
       }
 
       case 'dry_off':
@@ -162,6 +170,30 @@ class FarmEventService {
       }
     }
     throw new ValidationError(`'${rt.code}' cannot be recorded here.`);
+  }
+
+  /**
+   * The newborns the farmer chose to add: each becomes an animal on the same farm, with the dam (and the
+   * mating's sire) recorded, born on the birth date. Never more than were born alive. The farmer names them
+   * and may leave it blank - then it is "<dam> calf 1" style; the class is left for the farmer to set.
+   */
+  private async addNewborns(subject: { id: string; enterpriseId: string; speciesCode: string | null }, breedingRecordId: string,
+    eventDate: string, liveBirths: number, wanted: Array<{ name?: string; gender?: string }>, caller: Caller): Promise<Array<{ id: string; name: string }>> {
+    const list = wanted.slice(0, Math.min(liveBirths, 10));
+    if (list.length === 0) return [];
+    const dam = await database.query(`SELECT owner_id, name, breed FROM animals WHERE id = $1`, [subject.id]);
+    const sire = await database.query(`SELECT sire_id FROM breeding_records WHERE id = $1`, [breedingRecordId]);
+    const created: Array<{ id: string; name: string }> = [];
+    for (let i = 0; i < list.length; i++) {
+      const name = (list[i].name || '').trim().slice(0, 100) || `${dam.rows[0]?.name || 'Newborn'} calf ${i + 1}`;
+      const gender = ['male', 'female'].includes(String(list[i].gender)) ? String(list[i].gender) : 'unknown';
+      const a = await AnimalService.createAnimal(dam.rows[0]?.owner_id || caller.userId, {
+        name, species: subject.speciesCode || '', breed: dam.rows[0]?.breed || undefined, gender, dateOfBirth: eventDate,
+        enterpriseId: subject.enterpriseId, damId: subject.id, sireId: sire.rows[0]?.sire_id || undefined,
+      } as any);
+      created.push({ id: a.id, name: a.name });
+    }
+    return created;
   }
 
   /** The animal's most recent breeding record that is still in one of these states. */

@@ -55,6 +55,14 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
   useEffect(() => { setValues(initialValues(fields, defaultSession())) }, [typeCode]) // eslint-disable-line react-hooks/exhaustive-deps
   const set = (key: string, v: string) => setValues(prev => ({ ...prev, [key]: v }))
 
+  // A birth can also add the newborn(s) to the farm as animals (the farmer's choice, on by default).
+  const [addNewborns, setAddNewborns] = useState(true)
+  const [calves, setCalves] = useState<Array<{ name: string; gender: string }>>([])
+  const liveBirths = typeCode === 'birth' ? Math.min(Math.max(Math.round(Number((values.liveBirths || '0').replace(',', '.')) || 0), 0), 10) : 0
+  const calfRows = Array.from({ length: liveBirths }, (_, i) => calves[i] || { name: '', gender: 'unknown' })
+  const setCalf = (i: number, patch: Partial<{ name: string; gender: string }>) =>
+    setCalves(prev => Array.from({ length: Math.max(prev.length, i + 1) }, (_, k) => (k === i ? { ...(prev[k] || { name: '', gender: 'unknown' }), ...patch } : (prev[k] || { name: '', gender: 'unknown' }))))
+
   const [last, setLast] = useState<{ quantity: number; date: string } | null>(null)
   const session = values.session
   const existing = typeCode && !isEvent ? findExisting(records, subject, typeCode, date, session) : undefined
@@ -95,7 +103,9 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
 
   const submit = async () => {
     if (!typeCode || missing) return
-    const ok = await save.run((isEvent ? buildEventPayload : buildRecordPayload)(subject, typeCode, fields, values, date))
+    const payload = (isEvent ? buildEventPayload : buildRecordPayload)(subject, typeCode, fields, values, date)
+    if (typeCode === 'birth' && addNewborns && liveBirths > 0) payload.offspring = calfRows.map(c => ({ name: c.name.trim(), gender: c.gender }))
+    const ok = await save.run(payload)
     if (ok) onSaved({ ...(answer.current || {}), recordType: typeCode })
   }
 
@@ -155,6 +165,28 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
                 </label>
               )
             })}
+
+            {typeCode === 'birth' && liveBirths > 0 && (
+              <div className="newborn-section">
+                <label className="newborn-toggle">
+                  <input type="checkbox" checked={addNewborns} onChange={e => setAddNewborns(e.target.checked)} />
+                  <span>{t('farmRecords.newborn.add', { count: liveBirths })}</span>
+                </label>
+                {addNewborns && calfRows.map((c, i) => (
+                  <div key={i} className="newborn-row">
+                    <input
+                      className="form-input" type="text" maxLength={100} value={c.name} onChange={e => setCalf(i, { name: e.target.value })}
+                      placeholder={t('farmRecords.newborn.name', { n: i + 1 })} aria-label={t('farmRecords.newborn.name', { n: i + 1 })}
+                    />
+                    <ChipSelect
+                      label={t('farmRecords.newborn.sex')} variant="segmented" value={c.gender}
+                      options={[{ value: 'female', label: t('farmRecords.newborn.female') }, { value: 'male', label: t('farmRecords.newborn.male') }, { value: 'unknown', label: t('farmRecords.newborn.unknown') }]}
+                      onChange={v => setCalf(i, { gender: v })}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
 
             {existing && existing.quantity !== null && (
               <p className="record-note is-update" role="status">

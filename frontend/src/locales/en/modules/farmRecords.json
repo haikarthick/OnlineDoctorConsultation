@@ -91,6 +91,17 @@
       "total": "{{total}} in {{days}} days",
       "latest": "latest: {{value}} on {{date}}",
       "hint": "What the farm team wrote down. Shown to you because you are booked for this animal."
-    }
+    },
+    "newborn": {
+      "add_one": "Add the newborn to the farm as an animal",
+      "add_other": "Add the {{count}} newborns to the farm as animals",
+      "name": "Name of newborn {{n}} (optional)",
+      "sex": "Sex",
+      "female": "Female",
+      "male": "Male",
+      "unknown": "Not sure"
+    },
+    "newbornsAdded_one": "Saved. {{count}} animal was added to the farm.",
+    "newbornsAdded_other": "Saved. {{count}} animals were added to the farm."
   }
 }
