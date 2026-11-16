@@ -563,6 +563,9 @@ batch/cycle UI, through the population ledger (`FarmEventService`).
 **Still open in Phase 4:** vet-side production in `SubjectSummary` (needs an owner decision on which vets may read a
 farm's records - a consulting vet is not a farm member), due items through the notification system, creating the
 calf on birth, pregnancy-check / dry-off reminders (need sourced master-data values).
+**Phase 6 done (2026-11-16):** offline outbox + idempotency keys (migration 049).
+**Phase 5 (screens) done (2026-11-16):** Breeding, Feed, Movement, Campaigns, Locations on the shared phone blocks, with the backend bugs found on the way fixed (see "Breeding, Feed and Movement", "Treatment campaigns", "Locations" in `docs/modules/farm-profile.md`; migration 050). **Still open:** the batch-plan leftovers - group passport, group certificates, group consultations, batch prescriptions (hospital-network parts need owner sign-off); also vet-side production summaries in the timeline. Deferred by the owner: see memory `future-todos-2026-11-16`.
+
 1. Read this file, `docs/modules/farm-profile.md`, `docs/modules/mobile-ui.md`,
    `docs/DESIGN_SYSTEM.md`, and the skills in §3.
 2. Do not re-ask the owner anything in §2 (D1–D15 are settled).
