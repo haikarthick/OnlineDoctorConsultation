@@ -96,7 +96,7 @@ describe('AuthContext', () => {
       expect(JSON.parse(localStorage.getItem('authUser') || '{}')).toEqual(serverUser)
       expect(result.current.isAuthenticated).toBe(true)
       expect(result.current.user).toEqual(serverUser)
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard')
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true })
     })
 
     it('throws and leaves storage/state untouched when the server responds with an error', async () => {
@@ -116,7 +116,7 @@ describe('AuthContext', () => {
 
       expect(localStorage.getItem('authToken')).toBeNull()
       expect(result.current.isAuthenticated).toBe(false)
-      expect(mockNavigate).not.toHaveBeenCalledWith('/dashboard')
+      expect(mockNavigate).not.toHaveBeenCalledWith('/dashboard', expect.anything())
     })
 
     /**

@@ -125,7 +125,7 @@ describe('api.ts - auth refresh + CSRF retry interceptors', () => {
 
       expect(axios.post).not.toHaveBeenCalled()
       expect(localStorage.getItem('authToken')).toBeNull()
-      expect(locationHrefSetter).toHaveBeenCalledWith('/')
+      expect(locationHrefSetter).toHaveBeenCalledWith('/login')
     })
 
     it('logs out when the refresh call itself fails', async () => {
@@ -140,7 +140,7 @@ describe('api.ts - auth refresh + CSRF retry interceptors', () => {
 
       expect(localStorage.getItem('authToken')).toBeNull()
       expect(localStorage.getItem('refreshToken')).toBeNull()
-      expect(locationHrefSetter).toHaveBeenCalledWith('/')
+      expect(locationHrefSetter).toHaveBeenCalledWith('/login')
     })
   })
 

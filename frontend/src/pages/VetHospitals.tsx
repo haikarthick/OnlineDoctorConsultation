@@ -131,12 +131,12 @@ const VetHospitals: React.FC = () => {
     if (!formData.name || !formData.hospitalType) { setCreateError(t('vetHospitals.errors.nameTypeRequired')); return }
     setCreateLoading(true); setCreateError('')
     try {
-      const hospital = await vetHospitalApi.createHospital({
+      await vetHospitalApi.createHospital({
         ...formData,
         establishedYear: formData.establishedYear ? parseInt(formData.establishedYear) : undefined,
       } as any)
       setShowCreateModal(false)
-      navigate(`/vet-hospitals/${hospital.id}/manage`)
+      navigate('/vet-hospitals/manage')
     } catch (err: any) {
       setCreateError(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitals.errors.createFailed'))
     } finally { setCreateLoading(false) }

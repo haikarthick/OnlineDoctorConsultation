@@ -14,6 +14,16 @@ and persona that reads or writes the data it touches and say what changes for ea
 `feature-delivery` skill's Phase 1 cross-module trace). Shared UI patterns go in the shared
 layer, never as a one-role special.
 
+## Mandatory: users never see error codes
+No user, in any role or scenario, may see an HTTP code (404, 403, 500), "Request failed with status
+code ...", a stack trace, a raw `err.message`, or a blank/redirected screen with no explanation. Every
+refusal or failure says in plain words, in the user's language, **what happened, why, and what they
+can do next** (the `feedback-usability-standards` §0 rule, `docs/DESIGN_SYSTEM.md` §5a). The server
+sends a user-readable `message`; the client shows it, else a translated, specific fallback - never
+`err.message`. Status codes are for APIs and logs only. A case where the right wording or behaviour
+needs the owner's decision (e.g. whether to reveal that a farm exists to someone with no access) must be
+raised to the owner explicitly, not decided silently.
+
 ## Tech stack
 Backend: Node 18 + Express + TypeScript, PostgreSQL (`gen_random_uuid()`), Redis, Socket.IO, JWT.
 Frontend: React 18 + TypeScript + Vite, CSS modules are **global** (no scoping — see
@@ -137,6 +147,7 @@ Invoke these for the workflows they cover rather than improvising each time:
 ## Module docs
 - `docs/modules/mobile-ui.md` — phone tab bar + shared building blocks for every role; the table
   there says which single file to edit for any UI/UX change.
+- `docs/modules/routing.md` - route guards, deep links, session expiry, unknown addresses; one place decides access.
 - `docs/modules/farm-profile.md` — farm profile engine: one resolver decides which fields, records
   and events apply per species/class/group type; never branch on a species name in code.
 - **Active initiative:** `docs/FARM_MANAGEMENT_PLAN.md` — farm management realignment (all farm

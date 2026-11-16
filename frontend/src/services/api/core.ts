@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
+import { rememberSessionEnded } from '../../utils/returnPath'
 
 export const API_BASE_URL = '/api/v1'
 
@@ -73,7 +74,10 @@ sharedClient.interceptors.response.use(
       localStorage.removeItem('authToken')
       localStorage.removeItem('authUser')
       localStorage.removeItem('refreshToken')
-      window.location.href = '/'
+      // The session ended while the person was working. Say so on the sign-in page and bring them
+      // back to where they were - never drop them on the home page with no explanation.
+      rememberSessionEnded(window.location.pathname + window.location.search)
+      window.location.href = '/login'
     }
 
     // If CSRF token expired/missing, fetch a new one and retry once

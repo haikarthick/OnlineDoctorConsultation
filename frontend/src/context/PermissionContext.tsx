@@ -18,7 +18,10 @@ export interface NetworkAccess {
 
 interface PermissionContextType {
   permissions: string[]
+  /** True from sign-in until the permission list for THIS user has been answered (success or failure). */
   loading: boolean
+  /** The list could not be fetched (after retries). Not the same as having no permissions. */
+  loadFailed: boolean
   hasPermission: (permission: string) => boolean
   hasAnyPermission: (permissions: string[]) => boolean
   hasAllPermissions: (permissions: string[]) => boolean
@@ -248,28 +251,42 @@ export const PermissionProvider: React.FC<{ children: ReactNode }> = ({ children
   const { isAuthenticated, user } = useAuth()
   const [permissions, setPermissions] = useState<string[]>([])
   const [networks, setNetworks] = useState<NetworkAccess[]>([])
-  const [loading, setLoading] = useState(true)
+  // Which user the permission list was last answered for. 'loading' is DERIVED from this, so there is
+  // no moment when a signed-in user has an empty list and loading=false (the old race that sent people
+  // to the dashboard from a pasted link or a refresh).
+  const [loadedFor, setLoadedFor] = useState<string | null>(null)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const signedInId = isAuthenticated && user ? user.id : null
+  const loading = signedInId !== null && loadedFor !== signedInId
 
   const loadPermissions = useCallback(async () => {
     if (!isAuthenticated || !user) {
       setPermissions([])
       setNetworks([])
-      setLoading(false)
+      setLoadedFor(null)
+      setLoadFailed(false)
       return
     }
 
-    try {
-      setLoading(true)
-      const result = await apiService.getMyPermissions()
-      const perms = result.data?.permissions || []
-      setPermissions(perms)
-      setNetworks(Array.isArray(result.data?.networks) ? result.data.networks : [])
-    } catch (err) {
-      setPermissions([])
-      setNetworks([])
-    } finally {
-      setLoading(false)
+    // A dropped connection is common on a phone in a shed: try a few times before saying it failed.
+    let lastError: unknown = null
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const result = await apiService.getMyPermissions()
+        setPermissions(result.data?.permissions || [])
+        setNetworks(Array.isArray(result.data?.networks) ? result.data.networks : [])
+        setLoadFailed(false)
+        setLoadedFor(user.id)
+        return
+      } catch (err) {
+        lastError = err
+        if (attempt < 2) await new Promise(r => setTimeout(r, 600 * (attempt + 1)))
+      }
     }
+    void lastError
+    // Could not find out. Keep what we had (never turn a failed check into 'no permissions') and say so.
+    setLoadFailed(true)
+    setLoadedFor(user.id)
   }, [isAuthenticated, user?.id])
 
   useEffect(() => {
@@ -312,6 +329,7 @@ export const PermissionProvider: React.FC<{ children: ReactNode }> = ({ children
     <PermissionContext.Provider value={{
       permissions,
       loading,
+      loadFailed,
       hasPermission,
       hasAnyPermission,
       hasAllPermissions,

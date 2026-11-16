@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { takeSessionEnded } from '../utils/returnPath'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
@@ -19,6 +20,8 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
+  // Signed out because the session ended while working: explain, instead of silently showing sign-in.
+  const [sessionEnded] = useState(takeSessionEnded)
   // Set when the credentials were CORRECT but the account is blocked (pending_approval /
   // frozen / suspended). That is not a mistake the user can fix by retrying, so it must not
   // be rendered as a red failure alongside "wrong password".
@@ -162,6 +165,10 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
                   )}
                 </div>
               </div>
+            )}
+
+            {sessionEnded && !message && (
+              <div className="session-ended" role="status">{t('routeErrors.sessionExpired')}</div>
             )}
 
             {message && !accountStatus && (
