@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../../services/api'
 import { MEMBER_ROLES, NetworkHospital } from './hospitalNetworksShared'
 
+import { userMessage } from '../../utils/userMessage'
 export interface AddMemberModalProps {
   networkId: string
   networkHospitals: NetworkHospital[]
@@ -51,7 +52,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
       })
       onAdded()
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Failed to add member')
+      setError(userMessage(err))
     } finally { setSaving(false) }
   }
 

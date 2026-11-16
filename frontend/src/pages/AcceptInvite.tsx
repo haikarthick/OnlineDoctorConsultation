@@ -6,6 +6,7 @@ import './ModulePage.css'
 import './VetHospitals.css'
 import { useTranslation } from 'react-i18next'
 
+import { userMessage } from '../utils/userMessage'
 const AcceptInvite: React.FC = () => {
   const { t } = useTranslation()
 
@@ -28,7 +29,7 @@ const AcceptInvite: React.FC = () => {
         const data = await vetHospitalApi.getInviteByToken(token)
         setInvite(data)
       } catch (err: any) {
-        setError(err?.response?.data?.message || err?.response?.data?.error?.message || t('acceptInvite.invalidInvite'))
+        setError(userMessage(err, 'acceptInvite.invalidInvite'))
       } finally { setLoading(false) }
     }
     load()
@@ -43,7 +44,7 @@ const AcceptInvite: React.FC = () => {
       await vetHospitalApi.acceptInvite(token, password)
       setSuccess(true)
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error?.message || t('acceptInvite.failedToAccept'))
+      setError(userMessage(err, 'acceptInvite.failedToAccept'))
     } finally { setSubmitting(false) }
   }
 

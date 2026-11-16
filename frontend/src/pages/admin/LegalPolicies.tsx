@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 const DOC_TYPES = ['terms', 'privacy', 'refund_policy', 'wallet_terms', 'doctor_agreement', 'grievance_policy', 'disclaimer']
 
 interface LegalPoliciesProps {
@@ -69,7 +70,7 @@ const LegalPolicies: React.FC<LegalPoliciesProps> = () => {
       setEditing(null)
       await load()
     } catch (err: any) {
-      setMessage(err.response?.data?.error?.message || err.response?.data?.error || t('legalAdmin.publishFailed'))
+      setMessage(userMessage(err, 'legalAdmin.publishFailed'))
     } finally {
       setSaving(false)
     }

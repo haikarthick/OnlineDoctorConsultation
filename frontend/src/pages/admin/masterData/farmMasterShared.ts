@@ -1,3 +1,4 @@
+import { userMessage } from '../../../utils/userMessage'
 /** Shared by MasterDataManagement.tsx and its farm-profile parts (kept here so neither imports the other). */
 
 /** Per-locale label fields shared by every master-data form, in display order. `col` is the
@@ -28,5 +29,5 @@ export interface MasterSpeciesOption { id: string; code: string; label: string; 
 
 /** The server's own message when it sent one (usability rule: never a generic fallback over it). */
 export function serverMessage(e: any, fallback: string): string {
-  return e?.response?.data?.error?.message || e?.response?.data?.message || fallback
+  return userMessage(e, undefined, fallback)
 }

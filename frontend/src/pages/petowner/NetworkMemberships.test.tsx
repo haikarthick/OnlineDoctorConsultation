@@ -37,24 +37,24 @@ describe('NetworkMemberships error state', () => {
   })
 
   it('renders the error banner with the failure message when the API call fails', async () => {
-    mockedApi.getMyNetworkEnrollments.mockRejectedValue({ message: 'Network request failed' })
+    mockedApi.getMyNetworkEnrollments.mockRejectedValue({ message: 'errors.offline' })
 
     render(<NetworkMemberships />)
 
-    expect(await screen.findByText('Network request failed')).toBeInTheDocument()
+    expect(await screen.findByText('errors.offline')).toBeInTheDocument()
   })
 
   it('clears the error banner when the dismiss button is clicked', async () => {
-    mockedApi.getMyNetworkEnrollments.mockRejectedValue({ message: 'Network request failed' })
+    mockedApi.getMyNetworkEnrollments.mockRejectedValue({ message: 'errors.offline' })
 
     render(<NetworkMemberships />)
 
-    const errorText = await screen.findByText('Network request failed')
+    const errorText = await screen.findByText('errors.offline')
     expect(errorText).toBeInTheDocument()
 
     const dismissBtn = screen.getByRole('button', { name: '✕' })
     fireEvent.click(dismissBtn)
 
-    await waitFor(() => expect(screen.queryByText('Network request failed')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('errors.offline')).not.toBeInTheDocument())
   })
 })

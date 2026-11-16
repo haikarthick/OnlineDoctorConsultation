@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import NetworkRoleMatrix from '../hospitalnetwork/NetworkRoleMatrix'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface PermissionManagementProps {
   onNavigate: (path: string) => void
 }
@@ -39,7 +40,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       setMatrix(result.data?.matrix || {})
       setMetadata(result.data?.metadata || null)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.message || t('permissionManagement.failedToLoad'))
+      setError(userMessage(err, 'permissionManagement.failedToLoad'))
     } finally {
       setLoading(false)
     }
@@ -66,7 +67,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
         ...prev,
         [role]: { ...prev[role], [permission]: currentValue }
       }))
-      setError(err?.response?.data?.error?.message || t('permissionManagement.failedToUpdate'))
+      setError(userMessage(err, 'permissionManagement.failedToUpdate'))
     } finally {
       setSaving(null)
     }
@@ -82,7 +83,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       setSuccess(`Permissions reset to defaults for ${metadata?.roleLabels[selectedRole] || selectedRole}`)
       setTimeout(() => setSuccess(''), 3000)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || t('permissionManagement.failedToReset'))
+      setError(userMessage(err, 'permissionManagement.failedToReset'))
     } finally {
       setResetting(false)
     }
@@ -106,7 +107,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       setTimeout(() => setSuccess(''), 3000)
     } catch (err: any) {
       loadPermissions() // reload on error
-      setError(err?.response?.data?.error?.message || t('permissionManagement.failedToUpdate'))
+      setError(userMessage(err, 'permissionManagement.failedToUpdate'))
     } finally {
       setSaving(null)
     }
@@ -129,7 +130,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       setTimeout(() => setSuccess(''), 3000)
     } catch (err: any) {
       loadPermissions()
-      setError(err?.response?.data?.error?.message || 'Failed to update')
+      setError(userMessage(err))
     } finally {
       setSaving(null)
     }

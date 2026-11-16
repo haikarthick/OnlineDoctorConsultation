@@ -7,6 +7,7 @@ import PasswordInput from '../components/PasswordInput'
 import { WayToVetLogo } from '../components/WayToVetLogo'
 import './Auth.css'
 
+import { userMessage } from '../utils/userMessage'
 interface RegisterProps {
   onSwitchToLogin: () => void
   onGoHome?: () => void
@@ -150,7 +151,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
       }
     } catch (error) {
       setMessageType('error')
-      setMessage(error instanceof Error ? error.message : t('register.error'))
+      setMessage(userMessage(error, 'register.error'))
     } finally {
       setLoading(false)
     }

@@ -13,6 +13,7 @@ import Step3Review from '../../components/certificateWriter/Step3Review'
 import '../../styles/modules.css'
 import './CertificateWriter.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface CertificateWriterProps {
   onNavigate: (path: string) => void
 }
@@ -310,7 +311,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
       setDraftSaved(true)
       setTimeout(() => setDraftSaved(false), 3000)
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.response?.data?.message || err?.message || t('certificateWriter.failedToSave'))
+      setError(userMessage(err, 'certificateWriter.failedToSave'))
     } finally {
       setSubmitting(false)
     }
@@ -336,7 +337,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
       await apiService.issueCertificate(id)
       setIssued(true)
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.response?.data?.message || err?.message || t('certificateWriter.failedToIssue'))
+      setError(userMessage(err, 'certificateWriter.failedToIssue'))
     } finally {
       setSubmitting(false)
     }

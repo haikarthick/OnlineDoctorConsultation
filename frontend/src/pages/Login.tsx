@@ -7,6 +7,7 @@ import PasswordInput from '../components/PasswordInput'
 import { WayToVetLogo } from '../components/WayToVetLogo'
 import './Auth.css'
 
+import { userMessage } from '../utils/userMessage'
 interface LoginProps {
   onSwitchToRegister: () => void
   onGoHome?: () => void
@@ -72,7 +73,7 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
       setMessage('✓ Login successful! Redirecting...')
       setDbWaking(false)
     } catch (error) {
-      const msg = error instanceof Error ? error.message : t('login.error')
+      const msg = userMessage(error, 'login.error')
       const status = (error as { accountStatus?: string })?.accountStatus || ''
       if (msg.toLowerCase().includes('database is not ready') || msg.toLowerCase().includes('not ready yet')) {
         setDbWaking(true)

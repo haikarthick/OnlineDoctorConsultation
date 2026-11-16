@@ -16,6 +16,7 @@ import PreferencesSection from '../components/settings/PreferencesSection'
 import PrivacyDataSection from '../components/settings/PrivacyDataSection'
 import RoleAndAccountSection from '../components/settings/RoleAndAccountSection'
 
+import { userMessage } from '../utils/userMessage'
 const Settings: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
@@ -102,7 +103,7 @@ const Settings: React.FC = () => {
       const r = await apiService.getMyRoleChangeRequests()
       setRoleRequests((r as any).data || [])
     } catch (err: any) {
-      setRcMsg(err?.response?.data?.message || t('register.error'))
+      setRcMsg(userMessage(err, 'register.error'))
     } finally {
       setRcSubmitting(false)
     }

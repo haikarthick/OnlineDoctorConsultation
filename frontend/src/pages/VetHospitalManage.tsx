@@ -27,6 +27,7 @@ import AddEditServiceModal from '../components/vetHospitalManage/AddEditServiceM
 import DocumentReviewModal from '../components/vetHospitalManage/DocumentReviewModal'
 import DocViewerModal from '../components/vetHospitalManage/DocViewerModal'
 
+import { userMessage } from '../utils/userMessage'
 const VetHospitalManage: React.FC = () => {
   const { t } = useTranslation()
   const { formatCurrency, formatSlotTime, settings } = useSettings()
@@ -154,7 +155,7 @@ const VetHospitalManage: React.FC = () => {
       setInviteForm({ email: '', firstName: '', lastName: '', phone: '', hospitalRole: 'staff', departmentId: '' })
       setInvitesLoaded(false)
     } catch (err: any) {
-      setModalMsg({ text: err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitalManage.errors.inviteFailed'), isError: true })
+      setModalMsg({ text: userMessage(err, 'vetHospitalManage.errors.inviteFailed'), isError: true })
     }
   }
 
@@ -213,7 +214,7 @@ const VetHospitalManage: React.FC = () => {
       setHospital(updated)
       flash(t('vetHospitalManage.toasts.docUploaded'))
     } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.response?.data?.error?.message || 'Upload failed'
+      const msg = userMessage(err)
       setDocError(p => ({ ...p, [docType]: msg }))
     } finally {
       setDocUploading(p => ({ ...p, [docType]: false }))
@@ -249,7 +250,7 @@ const VetHospitalManage: React.FC = () => {
       setHospital(updatedHospital)
       setReviewForm(null)
       flash(`Document ${reviewForm.status} ✓`)
-    } catch (err: any) { mFlash(err?.response?.data?.message || err?.response?.data?.error?.message || 'Review failed', true) }
+    } catch (err: any) { mFlash(userMessage(err), true) }
   }
 
   // Load all vets when Add Doctor modal opens
@@ -321,7 +322,7 @@ const VetHospitalManage: React.FC = () => {
         closeDocModal()
       }
       const docs = await vetHospitalApi.listDoctors(hospital.id); setDoctors(docs)
-    } catch (err: any) { mFlash(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitalManage.errors.operationFailed'), true) }
+    } catch (err: any) { mFlash(userMessage(err, 'vetHospitalManage.errors.operationFailed'), true) }
   }
 
   const handleRemoveDoctor = async (doc: HospitalDoctor) => {
@@ -360,7 +361,7 @@ const VetHospitalManage: React.FC = () => {
         closeDeptModal()
       }
       const depts = await vetHospitalApi.listDepartments(hospital.id); setDepartments(depts)
-    } catch (err: any) { mFlash(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitalManage.errors.operationFailed'), true) }
+    } catch (err: any) { mFlash(userMessage(err, 'vetHospitalManage.errors.operationFailed'), true) }
   }
 
   const handleDeleteDept = async (dept: HospitalDepartment) => {
@@ -401,7 +402,7 @@ const VetHospitalManage: React.FC = () => {
         closeServiceModal()
       }
       const svcs = await vetHospitalApi.listServices(hospital.id); setServices(svcs)
-    } catch (err: any) { mFlash(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitalManage.errors.operationFailed'), true) }
+    } catch (err: any) { mFlash(userMessage(err, 'vetHospitalManage.errors.operationFailed'), true) }
   }
 
   const handleDeleteService = async (svc: HospitalService) => {
@@ -420,7 +421,7 @@ const VetHospitalManage: React.FC = () => {
     try {
       const updated = await vetHospitalApi.updateHospital(hospital.id, settingsForm as any)
       setHospital(updated); flash(t('vetHospitalManage.toasts.profileUpdated'))
-    } catch (err: any) { flash(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitalManage.errors.updateFailed'), true) }
+    } catch (err: any) { flash(userMessage(err, 'vetHospitalManage.errors.updateFailed'), true) }
   }
 
   const openEditDoctor = (doc: HospitalDoctor) => {

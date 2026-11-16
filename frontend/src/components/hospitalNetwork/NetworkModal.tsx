@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../../services/api'
 import { HospitalNetwork, EMPTY_NETWORK_FORM, NETWORK_TYPES } from './hospitalNetworksShared'
 
+import { userMessage } from '../../utils/userMessage'
 export interface NetworkModalProps {
   editing: HospitalNetwork | null
   onClose: () => void
@@ -53,7 +54,7 @@ const NetworkModal: React.FC<NetworkModalProps> = ({ editing, onClose, onSaved, 
       }
       onSaved(result.data ?? result)
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? err?.message ?? 'An error occurred')
+      setError(userMessage(err))
     } finally {
       setSaving(false)
     }

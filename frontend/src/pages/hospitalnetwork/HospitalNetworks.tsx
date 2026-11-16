@@ -33,6 +33,7 @@ import ReferralsTab from '../../components/hospitalNetwork/ReferralsTab'
 import LeaveManagementTab from '../../components/hospitalNetwork/LeaveManagementTab'
 import AnalyticsTab from '../../components/hospitalNetwork/AnalyticsTab'
 
+import { userMessage } from '../../utils/userMessage'
 // ─── Main Component ───────────────────────────────────────────────────────────
 const HospitalNetworks: React.FC = () => {
   const { t } = useTranslation()
@@ -169,7 +170,7 @@ const HospitalNetworks: React.FC = () => {
       const result = await apiService.listHospitalNetworks()
       setNetworks(result.data ?? result ?? [])
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Failed to load networks')
+      setError(userMessage(err))
     } finally {
       setLoading(false)
     }
@@ -238,7 +239,7 @@ const HospitalNetworks: React.FC = () => {
       await loadNetworks()
       await loadApprovalHistory(selectedNetwork.id)
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? err?.message ?? 'Failed to record action')
+      setError(userMessage(err))
     } finally {
       setApprovalSaving(false)
     }
@@ -261,7 +262,7 @@ const HospitalNetworks: React.FC = () => {
       setBrandingSaved(true)
       setTimeout(() => setBrandingSaved(false), 3000)
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? err?.message ?? 'Failed to save settings')
+      setError(userMessage(err))
     } finally {
       setBrandingSaving(false)
     }
@@ -339,7 +340,7 @@ const HospitalNetworks: React.FC = () => {
         if (cancelled) return
         setSecurityAudit([])
         setSecurityAuditError(
-          e?.response?.data?.message || e?.response?.data?.error || e?.message || 'Failed to load'
+          userMessage(e)
         )
       })
       .finally(() => { if (!cancelled) setSecurityAuditLoading(false) })
@@ -389,7 +390,7 @@ const HospitalNetworks: React.FC = () => {
       const result = await apiService.listNetworkReferrals({ networkId: selectedNetwork.id, direction })
       setReferrals(result.referrals || result.data || [])
     } catch (err: any) {
-      setReferralError(err?.response?.data?.message || err?.message || t('networkReferrals.error'))
+      setReferralError(userMessage(err, 'networkReferrals.error'))
     } finally {
       setReferralsLoading(false)
     }
@@ -411,7 +412,7 @@ const HospitalNetworks: React.FC = () => {
       const res = await apiService.getNetworkAnalytics(networkId)
       setAnalyticsData(res.data?.data ?? res.data ?? null)
     } catch (err: any) {
-      setAnalyticsError(err?.response?.data?.message || err?.message || 'Failed to load analytics')
+      setAnalyticsError(userMessage(err))
     } finally {
       setAnalyticsLoading(false)
     }
@@ -438,7 +439,7 @@ const HospitalNetworks: React.FC = () => {
       URL.revokeObjectURL(url)
       setShowComplianceModal(false)
     } catch (err: any) {
-      setComplianceError(err?.response?.data?.message || err?.message || 'Failed to generate report')
+      setComplianceError(userMessage(err))
     } finally {
       setComplianceGenerating(false)
     }
@@ -488,7 +489,7 @@ const HospitalNetworks: React.FC = () => {
       loadReferrals(referralDirection)
       setTimeout(() => setReferralSuccess(''), 4000)
     } catch (err: any) {
-      setReferralError(err?.response?.data?.message || err?.message || t('networkReferrals.error'))
+      setReferralError(userMessage(err, 'networkReferrals.error'))
     } finally {
       setReferralSubmitting(false)
     }
@@ -505,7 +506,7 @@ const HospitalNetworks: React.FC = () => {
       loadReferrals(referralDirection)
       setTimeout(() => setReferralSuccess(''), 4000)
     } catch (err: any) {
-      setReferralError(err?.response?.data?.message || err?.message || t('networkReferrals.error'))
+      setReferralError(userMessage(err, 'networkReferrals.error'))
     } finally {
       setRespondingSubmitting(false)
     }
@@ -519,7 +520,7 @@ const HospitalNetworks: React.FC = () => {
       setEnrollmentSuccessIds(s => new Set(s).add(animalId))
       loadAllEnrollments(selectedNetwork.id)
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Failed to request enrollment')
+      setError(userMessage(err))
     } finally { setRequestingEnrollment(null) }
   }
 
@@ -539,7 +540,7 @@ const HospitalNetworks: React.FC = () => {
       setInviteSuccess(true)
       setTimeout(() => { setShowInviteModal(false); setInviteSuccess(false); setInviteForm({ patientName: '', patientEmail: '', patientPhone: '', animalName: '', animalSpecies: '', message: '' }) }, 2000)
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Failed to send invite')
+      setError(userMessage(err))
     } finally { setInviteLoading(false) }
   }
 
@@ -567,7 +568,7 @@ const HospitalNetworks: React.FC = () => {
         setWalkInForm({ patientName: '', patientPhone: '', patientEmail: '', animalName: '', animalSpecies: '', animalBreed: '', reasonForVisit: '', hospitalId: '', consentCollected: false })
       }, 2500)
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Walk-in registration failed')
+      setError(userMessage(err))
     } finally { setWalkInLoading(false) }
   }
 
@@ -592,7 +593,7 @@ const HospitalNetworks: React.FC = () => {
         setSelectedNetwork(prev => prev ? { ...prev, isApproved: true } : prev)
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Approval failed')
+      setError(userMessage(err))
       setApproveState(s => ({ ...s, [network.id]: 'idle' }))
     }
   }
@@ -617,7 +618,7 @@ const HospitalNetworks: React.FC = () => {
       setSuccessMsg('Member removed.')
       loadDetail(selectedNetwork)
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Failed to remove member')
+      setError(userMessage(err))
     }
   }
 
@@ -644,7 +645,7 @@ const HospitalNetworks: React.FC = () => {
       setEditingMember(null)
       loadDetail(selectedNetwork)
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Failed to update member')
+      setError(userMessage(err))
     } finally {
       setEditMemberLoading(false)
     }
@@ -657,7 +658,7 @@ const HospitalNetworks: React.FC = () => {
       setSuccessMsg(t('hospitalNetworks.deactivated'))
       loadNetworks()
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || 'Failed to deactivate network')
+      setError(userMessage(err))
     }
   }
 
@@ -682,7 +683,7 @@ const HospitalNetworks: React.FC = () => {
         setInviteStaffError(res.message || res.error || 'Failed to send invite')
       }
     } catch (e: any) {
-      const errMsg = e.response?.data?.error || e.response?.data?.message || e.message || 'Failed to send invite'
+      const errMsg = userMessage(e)
       setInviteStaffError(
         e.response?.status === 409
           ? (errMsg.includes('already a member') ? 'This email is already a member of this network.' : 'A pending invitation already exists for this email. Check the pending invites list below.')
@@ -723,7 +724,7 @@ const HospitalNetworks: React.FC = () => {
       setDeletingBranch(null)
       loadDetail(selectedNetwork)
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to remove hospital')
+      setError(userMessage(err))
       setDeletingBranch(null)
     }
   }

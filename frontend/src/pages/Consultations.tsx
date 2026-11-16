@@ -15,6 +15,7 @@ import ActionLogModal from '../components/consultations/ActionLogModal'
 import CancelBookingModal from '../components/consultations/CancelBookingModal'
 import NoShowModal from '../components/consultations/NoShowModal'
 
+import { userMessage } from '../utils/userMessage'
 const Consultations: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
@@ -133,7 +134,7 @@ const Consultations: React.FC = () => {
       setBookings(bRes.data?.items || (Array.isArray(bRes.data) ? bRes.data : []))
       setConsultations(cRes.data?.items || (Array.isArray(cRes.data) ? cRes.data : []))
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.message || t('consultations.failedToLoad'))
+      setError(userMessage(err, 'consultations.failedToLoad'))
     } finally { setLoading(false) }
   }
   useAutoRefresh(['bookings', 'consultations'], loadData)
@@ -141,7 +142,7 @@ const Consultations: React.FC = () => {
   const handleConfirmBooking = async (id: string) => {
     setActionLoading(id)
     try { await apiService.confirmBooking(id); loadData() }
-    catch (err: any) { setError(err?.response?.data?.error?.message || t('consultations.failedToConfirm')) }
+    catch (err: any) { setError(userMessage(err, 'consultations.failedToConfirm')) }
     finally { setActionLoading(null) }
   }
 
@@ -159,10 +160,7 @@ const Consultations: React.FC = () => {
       loadData()
     } catch (err: any) {
       setNoShowError(
-        err?.response?.data?.error?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        t('consultations.failedToMarkNoShow')
+        userMessage(err, 'consultations.failedToMarkNoShow')
       )
     } finally { setNoShowSaving(false) }
   }
@@ -181,7 +179,7 @@ const Consultations: React.FC = () => {
       setCancelError('')
       loadData()
     } catch (err: any) {
-      setCancelError(err?.response?.data?.message || err?.response?.data?.error?.message || t('consultations.failedToCancel'))
+      setCancelError(userMessage(err, 'consultations.failedToCancel'))
     }
   }
 
@@ -265,7 +263,7 @@ const Consultations: React.FC = () => {
       setRescheduleError('')
       loadData()
     } catch (err: any) {
-      setRescheduleError(err?.response?.data?.message || err?.response?.data?.error?.message || t('consultations.failedToReschedule'))
+      setRescheduleError(userMessage(err, 'consultations.failedToReschedule'))
     } finally {
       setRescheduleSubmitting(false)
     }
@@ -308,7 +306,7 @@ const Consultations: React.FC = () => {
           navigate(`/video-consultation/${res.data.id}`)
         }
       }
-    } catch (err: any) { setError(err?.response?.data?.error?.message || t('consultations.failedToStart')) }
+    } catch (err: any) { setError(userMessage(err, 'consultations.failedToStart')) }
   }
 
   const fmt = (d: string) => {

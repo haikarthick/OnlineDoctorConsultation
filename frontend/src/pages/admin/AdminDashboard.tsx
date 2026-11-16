@@ -6,6 +6,7 @@ import { AdminDashboardStats } from '../../types'
 import '../../styles/modules.css'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
+import { userMessage } from '../../utils/userMessage'
 interface RevenueTrend {
   date: string
   revenue: number
@@ -57,7 +58,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
       const result = await apiService.getAdminDashboard()
       setStats(result.data)
     } catch (err: any) {
-setError(err?.response?.data?.error?.message || err?.message || 'Failed to load dashboard data')
+setError(userMessage(err))
     } finally {
       setLoading(false)
     }

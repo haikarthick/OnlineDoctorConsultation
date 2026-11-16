@@ -12,6 +12,7 @@ import { Protocol, ProtocolChange, Stats, EMPTY_FORM } from '../../components/va
 import '../../styles/modules.css'
 import './VaccineProtocolAdmin.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface VaccineProtocolAdminProps {
   onNavigate: (path: string) => void
 }
@@ -60,7 +61,7 @@ const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate:
       setProtocols(res.data?.protocols || [])
       setStats(res.data?.stats || null)
     } catch (e: any) {
-      setError(e.response?.data?.message || t('common.errorLoading'))
+      setError(userMessage(e, 'common.errorLoading'))
     } finally {
       setLoading(false)
     }
@@ -98,7 +99,7 @@ const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate:
       setShowFormModal(false)
       load()
     } catch (e: any) {
-      setError(e.response?.data?.message || t('common.errorSaving'))
+      setError(userMessage(e, 'common.errorSaving'))
     } finally {
       setFormSaving(false)
     }
@@ -115,7 +116,7 @@ const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate:
       }
       load()
     } catch (e: any) {
-      setError(e.response?.data?.message || t('common.errorSaving'))
+      setError(userMessage(e, 'common.errorSaving'))
     }
   }
 
@@ -143,7 +144,7 @@ const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate:
       setShowAddChange(false)
       setChangeForm({ changedField: '', oldValue: '', newValue: '', changeReason: '', regulatoryStandard: '', effectiveDate: new Date().toISOString().split('T')[0] })
     } catch (e: any) {
-      setError(e.response?.data?.message || t('common.errorSaving'))
+      setError(userMessage(e, 'common.errorSaving'))
     } finally {
       setSavingChange(false)
     }

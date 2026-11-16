@@ -11,6 +11,7 @@ import { useMasterData } from '../context/MasterDataContext'
 import { useTranslation } from 'react-i18next'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
+import { userMessage } from '../utils/userMessage'
 interface TimeSlot { startTime: string; endTime: string; isAvailable: boolean }
 
 /** Filter out past time slots for today using browser local time + 15min buffer */
@@ -156,7 +157,7 @@ const HospitalBooking: React.FC = () => {
       })
       setBookingSuccess(true)
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to create booking')
+      setError(userMessage(err))
     } finally { setSubmitting(false) }
   }
 

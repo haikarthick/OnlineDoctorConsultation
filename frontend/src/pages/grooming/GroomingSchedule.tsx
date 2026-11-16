@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void }
 
 interface ScheduleRow {
@@ -70,7 +71,7 @@ const GroomingSchedule: React.FC<Props> = ({ onNavigate }) => {
       setWeek(merged)
       setOverrides(Array.isArray(ovr.data) ? ovr.data : [])
       setBlocks(Array.isArray(blk.data) ? blk.data : [])
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [t])
   useEffect(() => { load() }, [load])
 
@@ -88,7 +89,7 @@ const GroomingSchedule: React.FC<Props> = ({ onNavigate }) => {
       })
       flash(t('groomingSchedule.saved'))
       await load()
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setSavingDay(null) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setSavingDay(null) }
   }
 
   const addOverride = async () => {
@@ -105,7 +106,7 @@ const GroomingSchedule: React.FC<Props> = ({ onNavigate }) => {
       setOvrForm({ ...ovrForm, overrideDate: '', reason: '' })
       flash(t('groomingSchedule.saved'))
       await load()
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) }
+    } catch (e: any) { setErr(userMessage(e)) }
   }
 
   const addBlock = async () => {
@@ -122,16 +123,16 @@ const GroomingSchedule: React.FC<Props> = ({ onNavigate }) => {
       setBlockForm({ ...blockForm, reason: '', blockDate: '' })
       flash(t('groomingSchedule.saved'))
       await load()
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) }
+    } catch (e: any) { setErr(userMessage(e)) }
   }
 
   const removeOverride = async (id: string) => {
     try { await apiService.deleteGroomingDateOverride(providerId, id); await load() }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message) }
+    catch (e: any) { setErr(userMessage(e)) }
   }
   const removeBlock = async (id: string) => {
     try { await apiService.deleteGroomingBlockedSlot(providerId, id); await load() }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message) }
+    catch (e: any) { setErr(userMessage(e)) }
   }
 
   if (loading) return <div className="module-page"><div className="loading-container"><div className="loading-spinner" /></div></div>

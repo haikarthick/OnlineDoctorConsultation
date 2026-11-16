@@ -5,6 +5,7 @@ import { payGroomingOrderFlow, payGroomingBalanceFlow } from '../../utils/groomi
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void }
 
 const MyGroomingOrders: React.FC<Props> = ({ onNavigate }) => {
@@ -33,7 +34,7 @@ const MyGroomingOrders: React.FC<Props> = ({ onNavigate }) => {
       setLoading(true); setErr('')
       setItems((await apiService.listMyGroomingOrders()).data || [])
       try { setDisputes((await apiService.listMyGroomingDisputes()).data || []) } catch { /* optional */ }
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [])
   useEffect(() => { load() }, [load])
 
@@ -46,23 +47,23 @@ const MyGroomingOrders: React.FC<Props> = ({ onNavigate }) => {
     if (!cancelFor) return
     const id = cancelFor.id
     try { setBusy(id); await apiService.cancelGroomingOrder(id, cancelReason.trim() || undefined); setCancelFor(null); flash(t('groomingOrders.cancelled')); load() }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+    catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) }
   }
 
   const confirmDispute = async () => {
     if (!disputeFor || !disputeReason.trim()) return
     const id = disputeFor.id
     try { setBusy(id); await apiService.raiseGroomingDispute(id, { reason: disputeReason.trim() }); setDisputeFor(null); flash(t('groomingDispute.raised')); load() }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+    catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) }
   }
 
   const pay = async (id: string) => {
     try { setBusy(id); await payGroomingOrderFlow(id, false); flash(t('groomingOrders.paid')); load() }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message || 'Payment failed') } finally { setBusy(null) }
+    catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) }
   }
   const payBalance = async (id: string) => {
     try { setBusy(id); await payGroomingBalanceFlow(id); flash(t('groomingOrders.balancePaid')); load() }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message || 'Payment failed') } finally { setBusy(null) }
+    catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) }
   }
 
   // declined_by_provider is terminal and already refunded - offering Cancel on it would send the

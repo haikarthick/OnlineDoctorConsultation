@@ -7,6 +7,7 @@ import StockAdjustmentModal from './StockAdjustmentModal'
 import ReorderRequestModal from './ReorderRequestModal'
 import { totalStockByMedication, isLowStock as isLowStockRow } from '../../utils/pharmacyStock'
 
+import { userMessage } from '../../utils/userMessage'
 interface InventoryItem {
   id: string
   med_id: string
@@ -78,7 +79,7 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
       setMedications(Array.isArray(medRes.data) ? medRes.data : [])
       setSuppliers((Array.isArray(suppRes.data) ? suppRes.data : []).filter((s: Supplier) => s.is_approved !== false))
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setLoading(false)
     }
@@ -160,7 +161,7 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
       load()
       onRefresh?.()
     } catch (err: any) {
-      setAddError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setAddError(userMessage(err, 'common.error'))
     } finally {
       setAddSaving(false)
     }

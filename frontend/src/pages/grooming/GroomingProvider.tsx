@@ -5,6 +5,7 @@ import { useSettings } from '../../context/SettingsContext'
 import { usePermission } from '../../context/PermissionContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void }
 
 type Tab = 'overview' | 'services' | 'locations' | 'resources' | 'staff'
@@ -35,14 +36,14 @@ const GroomingProvider: React.FC<Props> = () => {
       const res = await apiService.getMyGroomingProvider()
       setProvider(res.data || null)
     } catch (e: any) {
-      setErr(e?.response?.data?.message || e.message)
+      setErr(userMessage(e))
     } finally { setLoading(false) }
   }, [])
 
   useEffect(() => { load() }, [load])
 
   const flash = (m: string) => { setMsg(m); setErr(''); setTimeout(() => setMsg(''), 3000) }
-  const fail = (e: any) => setErr(e?.response?.data?.message || e?.message || t('grooming.genericError'))
+  const fail = (e: any) => setErr(userMessage(e, 'grooming.genericError'))
 
   const handleCreate = async () => {
     if (!form.businessName.trim()) { setErr(t('grooming.businessNameRequired')); return }

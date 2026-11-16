@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { returnPathFrom, takeReturnTo } from '../utils/returnPath'
+import { UserFacingError } from '../utils/userMessage'
 import { User, AuthContextType, RegisterData, UserRole } from '../types'
 
 const API_BASE = '/api/v1'
@@ -85,11 +86,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // so reading only data.error dropped the real explanation and fell through to the
         // literal 'Login failed'. A vet waiting on approval was therefore told exactly what a
         // typo'd password is told, concluded their registration had not gone through, and
-        // signed up again. Standard AppError replies carry BOTH message and error.message,
+        // signed up again. Standard AppError replies carry BOTH message and userMessage(err),
         // so this ordering changes nothing for them.
-        const err = new Error(
-          data.message || data.error?.message || data.error || 'Login failed'
-        ) as Error & { accountStatus?: string }
+        const err = new UserFacingError(
+          data.message || data.error?.message || data.error || 'Login failed' // guard-ok: the server's sign-in reply is written for the person
+        )
         // Let the caller render a blocked-but-legitimate account as information rather than
         // as a failure the user is expected to correct.
         if (data.accountStatus) err.accountStatus = data.accountStatus
@@ -132,7 +133,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (result.data?.refreshToken) localStorage.setItem('refreshToken', result.data.refreshToken)
         navigate(returnPathFrom(location.state, takeReturnTo()), { replace: true })
       } else {
-        throw new Error(result.error?.message || result.message || result.error || 'Registration failed')
+        throw new UserFacingError(result.error?.message || result.message || result.error || 'Registration failed')
       }
     } catch (error) {
       throw error

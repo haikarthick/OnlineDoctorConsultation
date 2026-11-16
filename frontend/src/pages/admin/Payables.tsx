@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate?: (path: string) => void }
 
 /**
@@ -41,7 +42,7 @@ const Payables: React.FC<Props> = () => {
       ])
       setGrooming(g.status === 'fulfilled' ? g.value?.data : null)
       setDoctors(d.status === 'fulfilled' ? d.value?.data : null)
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [])
   useEffect(() => { load() }, [load])
 
@@ -64,7 +65,7 @@ const Payables: React.FC<Props> = () => {
       setPayDialog(null)
       await load()
     } catch (e: any) {
-      setErr(e?.response?.data?.error?.message || e?.response?.data?.message || e.message)
+      setErr(userMessage(e))
     } finally { setBusy(null) }
   }
 

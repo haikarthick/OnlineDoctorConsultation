@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
+import { userMessage } from '../utils/userMessage'
 const STATUS_COLORS: Record<string, string> = {
   bred: '#3b82f6', confirmed_pregnant: '#22c55e', not_pregnant: '#94a3b8',
   delivered: '#8b5cf6', aborted: '#ef4444', reabsorbed: '#f97316'
@@ -57,7 +58,7 @@ const BreedingManager: React.FC = () => {
       setUpcomingDue(dueRes.data || [])
     } catch (err: any) {
       console.error('Failed to load breeding data:', err?.message)
-      setError(err?.response?.data?.error || err?.message || 'Failed to load data')
+      setError(userMessage(err))
     }
     finally { setLoading(false) }
   }
@@ -92,7 +93,7 @@ const BreedingManager: React.FC = () => {
       setFormData({ damId: '', sireId: '', breedingDate: '', breedingMethod: 'natural', notes: '', status: 'bred', offspringCount: '', liveOffspring: '', stillborn: '' })
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || t('breedingManager.toasts.failed'))
+      setError(userMessage(err, 'breedingManager.toasts.failed'))
     }
   }
 

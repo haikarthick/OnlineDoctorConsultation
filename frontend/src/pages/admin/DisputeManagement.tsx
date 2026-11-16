@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import '../../styles/modules.css'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
+import { userMessage } from '../../utils/userMessage'
 interface Dispute {
   id: string
   subject: string
@@ -61,7 +62,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
       const filtered = statusFilter ? data.filter((d: Dispute) => d.status === statusFilter) : data
       setDisputes(filtered)
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to load disputes')
+      setError(userMessage(err))
     } finally {
       setLoading(false)
     }
@@ -78,7 +79,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
       setResolveStatus('resolved')
       await loadDisputes()
     } catch (err: any) {
-      setResolveError(err?.response?.data?.error || err?.message || 'Failed to resolve dispute')
+      setResolveError(userMessage(err))
     } finally {
       setResolveLoading(false)
     }

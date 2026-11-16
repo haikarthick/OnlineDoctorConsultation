@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import apiService from '../../services/api'
 import { BranchHospitalFormData } from './hospitalNetworksShared'
 
+import { userMessage } from '../../utils/userMessage'
 const SPECIALIZATION_OPTIONS = ['Cardiology', 'Surgery', 'Emergency', 'Orthopedics', 'Dermatology', 'Ophthalmology', 'Neurology', 'Oncology', 'Internal Medicine', 'General Practice']
 
 const CreateBranchHospitalModal: React.FC<{
@@ -28,7 +29,7 @@ const CreateBranchHospitalModal: React.FC<{
       onSuccess()
       onClose()
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || 'Failed to create branch hospital')
+      setError(userMessage(err))
     } finally {
       setSaving(false)
     }

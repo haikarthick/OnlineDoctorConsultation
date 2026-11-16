@@ -6,6 +6,7 @@ import { Enterprise, ProductBatch, TraceabilityEvent, QRCode as QRCodeType } fro
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
 
+import { userMessage } from '../utils/userMessage'
 const STATUS_COLORS: Record<string, string> = {
   in_production: '#3b82f6', quality_check: '#f59e0b', in_transit: '#8b5cf6', delivered: '#22c55e', recalled: '#ef4444'
 }
@@ -83,7 +84,7 @@ const SupplyChainPage: React.FC = () => {
       setShowForm(false)
       setFormData({ batchNumber: '', productType: '', description: '', quantity: '', unit: 'kg', productionDate: '', expiryDate: '', qualityGrade: '', currentHolder: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleCreateEvent = async (e: React.FormEvent) => {
@@ -101,7 +102,7 @@ const SupplyChainPage: React.FC = () => {
       setShowEventForm(false)
       setEventForm({ batchId: '', eventType: 'production', title: '', description: '', location: '', gpsLat: '', gpsLng: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleVerifyEvent = async (id: string) => {

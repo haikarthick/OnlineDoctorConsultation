@@ -6,6 +6,7 @@ import apiService from '../../services/api'
 import '../ModulePage.css'
 import './NetworkMemberships.css'
 
+import { userMessage } from '../../utils/userMessage'
 const NetworkMemberships: React.FC = () => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
@@ -27,7 +28,7 @@ const NetworkMemberships: React.FC = () => {
       const arr = Array.isArray(result) ? result : (Array.isArray(result?.data) ? result.data : [])
       setEnrollments(arr.filter((item: any) => item != null))
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? err?.message ?? 'Failed to load enrollments')
+      setError(userMessage(err))
     } finally {
       setLoading(false)
     }
@@ -52,7 +53,7 @@ const NetworkMemberships: React.FC = () => {
       setSuccessMsg(t('networkMemberships.acceptSuccess', { network: networkName, animal: animalName }))
       await loadEnrollments()
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? err?.message ?? 'Failed to accept')
+      setError(userMessage(err))
     } finally {
       setActing(null)
     }
@@ -65,7 +66,7 @@ const NetworkMemberships: React.FC = () => {
       setSuccessMsg(t('networkMemberships.declineSuccess'))
       await loadEnrollments()
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? err?.message ?? 'Failed to decline')
+      setError(userMessage(err))
     } finally {
       setActing(null)
     }

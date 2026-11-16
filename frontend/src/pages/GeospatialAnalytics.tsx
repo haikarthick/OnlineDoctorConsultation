@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
 import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
+import { userMessage } from '../utils/userMessage'
 const ZONE_TYPES = ['pasture', 'barn', 'medical', 'quarantine', 'feeding', 'water', 'boundary', 'custom']
 const ZONE_COLORS: Record<string, string> = { pasture: '#22c55e', barn: '#a78bfa', medical: '#ef4444', quarantine: '#f97316', feeding: '#eab308', water: '#3b82f6', boundary: '#64748b', custom: '#ec4899' }
 const EVENT_TYPES = ['location_update', 'zone_entry', 'zone_exit', 'zone_breach', 'sos_alert']
@@ -57,7 +58,7 @@ const GeospatialAnalytics: React.FC = () => {
       setZones(zRes.data?.items || [])
       setEvents(eRes.data?.items || [])
       setHeatmapData(hRes.data?.points || hRes.data?.clusters || [])
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
     setLoading(false)
   }
 
@@ -70,7 +71,7 @@ const GeospatialAnalytics: React.FC = () => {
       setShowZoneForm(false)
       setSuccessMsg(t('geospatialAnalytics.zoneCreated'))
       fetchAll()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const createEvent = async () => {
@@ -83,7 +84,7 @@ const GeospatialAnalytics: React.FC = () => {
       setShowEventForm(false)
       setSuccessMsg(t('geospatialAnalytics.eventRecorded'))
       fetchAll()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const loadTrail = async () => {
@@ -91,7 +92,7 @@ const GeospatialAnalytics: React.FC = () => {
     try {
       const r = await apiService.getMovementTrail(trailAnimalId)
       setTrailData(r.data)
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   if (!enterpriseId) {

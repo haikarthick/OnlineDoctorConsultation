@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
+import { userMessage } from '../../utils/userMessage'
 import '../../styles/modules.css'
 
 interface DoctorRow {
@@ -58,7 +59,7 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
       setMessage(t('taxAdmin.rateSaved'))
       await loadTaxCodes()
     } catch (err: any) {
-      setMessage(err.response?.data?.error || t('taxAdmin.rateSaveFailed'))
+      setMessage(userMessage(err, 'taxAdmin.rateSaveFailed'))
     } finally { setTaxBusy(null) }
   }, [taxEdits, loadTaxCodes, t])
 
@@ -118,7 +119,7 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
       setMessage(t('commissionAdmin.saved'))
       await load(search)
     } catch (err: any) {
-      setMessage(err.response?.data?.error || t('commissionAdmin.saveFailed'))
+      setMessage(userMessage(err, 'commissionAdmin.saveFailed'))
     } finally {
       setSavingId(null)
     }

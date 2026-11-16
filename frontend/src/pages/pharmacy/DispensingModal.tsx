@@ -6,6 +6,7 @@ import { useMasterData } from '../../context/MasterDataContext'
 import DispensingReceiptView, { DispensingReceiptData } from '../../components/pharmacy/DispensingReceiptView'
 import MedicationLabelPrint, { LabelItem } from '../../components/pharmacy/MedicationLabelPrint'
 
+import { userMessage } from '../../utils/userMessage'
 interface Medication {
   name: string
   dosage: string
@@ -215,7 +216,7 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
         unit: l.unit,
       })))
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setSaving(false)
     }

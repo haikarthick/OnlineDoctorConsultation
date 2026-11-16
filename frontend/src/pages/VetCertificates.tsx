@@ -7,6 +7,7 @@ import CertificatePrintView, { CertificatePrintData, CertificateTemplate } from 
 import '../styles/modules.css'
 import './VetCertificates.css'
 
+import { userMessage } from '../utils/userMessage'
 interface VetCertificatesProps {
   onNavigate: (path: string) => void
 }
@@ -105,7 +106,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
       setCertificates(data.certificates || [])
       setTotal(data.total || 0)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.response?.data?.message || t('vetCertificates.failedToLoad'))
+      setError(userMessage(err, 'vetCertificates.failedToLoad'))
     } finally {
       setLoading(false)
     }
@@ -149,7 +150,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
       setIssueTarget(null)
       loadCertificates()
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || t('certificateWriter.failedToIssue'))
+      setError(userMessage(err, 'certificateWriter.failedToIssue'))
     } finally {
       setIssuing(false)
     }
@@ -164,7 +165,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
       setRevokeReason('')
       loadCertificates()
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || t('vetCertificates.failedToLoad'))
+      setError(userMessage(err, 'vetCertificates.failedToLoad'))
     } finally {
       setRevoking(false)
     }
@@ -176,7 +177,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
       await apiService.deleteCertificate(cert.id)
       loadCertificates()
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to delete certificate')
+      setError(userMessage(err))
     }
   }
 

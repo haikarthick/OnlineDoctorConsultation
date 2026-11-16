@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import apiService from '../services/api'
 
+import { userMessage } from '../utils/userMessage'
 export interface PricingPlan {
   id: string
   name: string
@@ -55,7 +56,7 @@ export function usePricing(): PricingData {
         }
       })
       .catch(err => {
-        setData(d => ({ ...d, loading: false, error: err.message }))
+        setData(d => ({ ...d, loading: false, error: userMessage(err) }))
       })
   }, [])
 

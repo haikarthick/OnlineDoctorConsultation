@@ -94,7 +94,8 @@ export class ErrorBoundary extends Component<Props, State> {
               {i18n.t('errorBoundary.reloadPage')}
             </button>
           </div>
-          {this.state.error && (
+          {/* The technical text of a crash is for developers: people see only the plain heading above. */}
+          {import.meta.env.DEV && this.state.error && (
             <div style={{ marginTop: '24px', textAlign: 'left', maxWidth: '600px', margin: '24px auto' }}>
               <div style={{
                 background: '#fef2f2',
@@ -105,7 +106,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 fontSize: '13px',
                 color: '#991b1b',
               }}>
-                <strong>{i18n.t('errorBoundary.errorLabel')}</strong>{this.state.error.message}
+                <strong>{i18n.t('errorBoundary.errorLabel')}</strong>{this.state.error.message}{/* guard-ok: shown in development only */}
               </div>
               {import.meta.env.DEV && (
                 <pre style={{

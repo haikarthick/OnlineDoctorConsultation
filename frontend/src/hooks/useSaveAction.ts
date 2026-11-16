@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 
+import { userMessage } from '../utils/userMessage'
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'failed'
 
 export interface SaveAction<TArgs extends unknown[]> {
@@ -17,7 +18,7 @@ export interface SaveAction<TArgs extends unknown[]> {
 }
 
 function messageFrom(err: any, fallback: string): string {
-  return err?.response?.data?.error?.message || err?.response?.data?.message || fallback
+  return userMessage(err, undefined, fallback)
 }
 
 /**

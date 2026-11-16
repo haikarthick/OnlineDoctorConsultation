@@ -17,6 +17,7 @@ import FreezeAccountModal from '../../components/userManagement/FreezeAccountMod
 import SuspendAccountModal from '../../components/userManagement/SuspendAccountModal'
 import ResetPasswordModal from '../../components/userManagement/ResetPasswordModal'
 
+import { userMessage } from '../../utils/userMessage'
 interface UserManagementProps {
   onNavigate: (path: string) => void
 }
@@ -98,7 +99,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       const result = await apiService.adminListPendingUsers()
       setPendingUsers(result.data || [])
     } catch (err: any) {
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to load pending registrations')
+      setActionError(userMessage(err))
     } finally {
       setPendingLoading(false)
     }
@@ -112,7 +113,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       loadPendingUsers()
       loadUsers()
     } catch (err: any) {
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to approve user')
+      setActionError(userMessage(err))
     } finally {
       setProcessing(null)
     }
@@ -128,7 +129,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setRejectRegistrationReason('')
       loadPendingUsers()
     } catch (err: any) {
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to reject user')
+      setActionError(userMessage(err))
     } finally {
       setProcessing(null)
     }
@@ -143,7 +144,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setShowFreezeModal(null)
       setActionReason('')
     } catch (err: any) {
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to freeze account')
+      setActionError(userMessage(err))
     } finally {
       setProcessing(null)
     }
@@ -155,7 +156,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       await apiService.adminUnfreezeUser(u.id)
       setUsers(prev => prev.map(x => x.id === u.id ? { ...x, accountStatus: 'active', isActive: true, freezeReason: undefined } : x))
     } catch (err: any) {
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to unfreeze account')
+      setActionError(userMessage(err))
     } finally {
       setProcessing(null)
     }
@@ -170,7 +171,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setShowSuspendModal(null)
       setActionReason('')
     } catch (err: any) {
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to suspend account')
+      setActionError(userMessage(err))
     } finally {
       setProcessing(null)
     }
@@ -182,7 +183,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       await apiService.adminReactivateUser(u.id)
       setUsers(prev => prev.map(x => x.id === u.id ? { ...x, accountStatus: 'active', isActive: true } : x))
     } catch (err: any) {
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to reactivate account')
+      setActionError(userMessage(err))
     } finally {
       setProcessing(null)
     }
@@ -197,7 +198,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setRoleRequests(result.data || [])
     } catch (err: any) {
       console.error('Failed to load role requests:', err?.message)
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to load role change requests')
+      setActionError(userMessage(err))
     } finally {
       setRequestsLoading(false)
     }
@@ -211,7 +212,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       loadRoleRequests()
     } catch (err: any) {
       console.error('Failed to approve request:', err?.message)
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to approve request')
+      setActionError(userMessage(err))
     } finally {
       setRequestProcessing(null)
     }
@@ -228,7 +229,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       loadRoleRequests()
     } catch (err: any) {
       console.error('Failed to reject request:', err?.message)
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to reject request')
+      setActionError(userMessage(err))
     } finally {
       setRequestProcessing(null)
     }
@@ -263,7 +264,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setRoleVetLicense(''); setRoleVetFee('')
     } catch (err: any) {
       console.error('Failed to change role:', err?.message)
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to change user role')
+      setActionError(userMessage(err))
     } finally {
       setProcessing(null)
     }
@@ -282,7 +283,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       const result = await apiService.getUserRoles(u.id)
       setSecondaryRoles(result.data || [])
     } catch (err: any) {
-      setRolesActionErr(err?.response?.data?.error || err?.message || 'Failed to load roles')
+      setRolesActionErr(userMessage(err))
     } finally {
       setSecondaryRolesLoading(false)
     }
@@ -298,7 +299,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       const result = await apiService.getUserRoles(showSecondaryRolesModal.id)
       setSecondaryRoles(result.data || [])
     } catch (err: any) {
-      setRolesActionErr(err?.response?.data?.error || err?.message || 'Failed to add role')
+      setRolesActionErr(userMessage(err))
     }
   }
 
@@ -310,7 +311,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       const result = await apiService.getUserRoles(showSecondaryRolesModal.id)
       setSecondaryRoles(result.data || [])
     } catch (err: any) {
-      setRolesActionErr(err?.response?.data?.error || err?.message || 'Failed to remove role')
+      setRolesActionErr(userMessage(err))
     }
   }
 
@@ -331,7 +332,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
         setResetPasswordMsg('')
       }, 2000)
     } catch (err: any) {
-      setActionError(err?.response?.data?.error || err?.message || 'Failed to reset password')
+      setActionError(userMessage(err))
     } finally {
       setResetPasswordSaving(false)
     }

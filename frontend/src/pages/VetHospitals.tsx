@@ -8,6 +8,7 @@ import './VetHospitals.css'
 import { useTranslation } from 'react-i18next'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
+import { userMessage } from '../utils/userMessage'
 const HOSPITAL_TYPE_LABELS: Record<string, string> = {
   clinic:           'General Practice',
   emergency_center: 'Emergency & Trauma',
@@ -138,7 +139,7 @@ const VetHospitals: React.FC = () => {
       setShowCreateModal(false)
       navigate('/vet-hospitals/manage')
     } catch (err: any) {
-      setCreateError(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitals.errors.createFailed'))
+      setCreateError(userMessage(err, 'vetHospitals.errors.createFailed'))
     } finally { setCreateLoading(false) }
   }
 

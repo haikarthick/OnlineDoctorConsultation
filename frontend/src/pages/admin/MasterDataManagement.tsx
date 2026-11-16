@@ -7,6 +7,7 @@ import './MasterDataManagement.css'
 import FarmMasterDataTabs from './masterData/FarmMasterDataTabs'
 import { BIRTH_EVENT_TERMS, FARM_SEGMENTS, LOCALE_LABEL_FIELDS, LocaleLabelCols, WATER_TYPES } from './masterData/farmMasterShared'
 
+import { userMessage } from '../../utils/userMessage'
 type TabKey = 'species' | 'breeds' | 'classes' | 'groupTypes' | 'recordTypes' | 'categories' | 'conditions'
 
 interface SpeciesRow {
@@ -128,7 +129,7 @@ const MasterDataManagement: React.FC = () => {
         setSpeciesRows(sres.data || [])
       }
     } catch (e: any) {
-      setError(e?.response?.data?.error?.message || e?.response?.data?.message || t('common.errorLoading', 'Failed to load'))
+      setError(userMessage(e, 'common.errorLoading', "Failed to load"))
     } finally {
       setLoading(false)
     }
@@ -191,7 +192,7 @@ const MasterDataManagement: React.FC = () => {
       setShowModal(false)
       load()
     } catch (e: any) {
-      setError(e?.response?.data?.error?.message || e?.response?.data?.message || t('common.errorSaving', 'Failed to save'))
+      setError(userMessage(e, 'common.errorSaving', "Failed to save"))
     } finally {
       setSaving(false)
     }
@@ -209,7 +210,7 @@ const MasterDataManagement: React.FC = () => {
       setSuccess(isActive ? t('masterData.archivedSuccess', 'Deactivated') : t('masterData.restoredSuccess', 'Reactivated'))
       load()
     } catch (e: any) {
-      setError(e?.response?.data?.error?.message || e?.response?.data?.message || t('common.errorSaving', 'Failed to save'))
+      setError(userMessage(e, 'common.errorSaving', "Failed to save"))
     }
   }
 
@@ -225,7 +226,7 @@ const MasterDataManagement: React.FC = () => {
       setSuccess(t('masterData.deletedSuccess', 'Deleted'))
       load()
     } catch (e: any) {
-      setError(e?.response?.data?.error?.message || e?.response?.data?.message || t('masterData.deleteBlocked', 'Could not delete: it may still be in use'))
+      setError(userMessage(e, 'masterData.deleteBlocked', "Could not delete: it may still be in use"))
     }
   }
 

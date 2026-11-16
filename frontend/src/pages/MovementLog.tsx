@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext'
 import { useMasterData } from '../context/MasterDataContext'
 import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
+import { userMessage } from '../utils/userMessage'
 const MOVEMENT_TYPE_LABELS: Record<string, string> = {
   transfer: 'Transfer', intake: 'Intake', discharge: 'Discharge',
   quarantine: 'Quarantine', sale: 'Sale', death: 'Death',
@@ -79,7 +80,7 @@ const MovementLog: React.FC = () => {
       setMovements(prev => prev.map(m => m.id === movId ? { ...m, status: action === 'approve' ? 'approved' : 'rejected' } : m))
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
-      setError(err.response?.data?.error || t('movementLog.toasts.failed'))
+      setError(userMessage(err, 'movementLog.toasts.failed'))
     } finally {
       setApprovingId(null)
     }
@@ -103,7 +104,7 @@ const MovementLog: React.FC = () => {
       setFormData({ movementType: 'transfer', animalId: '', groupId: '', fromLocationId: '', toLocationId: '', reason: '', notes: '' })
       fetchMovements()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('movementLog.toasts.failed')) }
+    } catch (err: any) { setError(userMessage(err, 'movementLog.toasts.failed')) }
   }
 
   const formatDate = (d: string) => d ? new Date(d).toLocaleString() : '-'

@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import './HolidayManagement.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Holiday {
   id: string; holidayDate: string; name: string; holidayType: string;
   isFullDay: boolean; startTime?: string; endTime?: string; createdAt: string;
@@ -118,7 +119,7 @@ export default function HolidayManagement() {
         msg('Holiday added ✓')
       }
       setShowModal(false); loadHolidays()
-    } catch (err: any) { msg(err?.response?.data?.message || 'Failed to save holiday', true) }
+    } catch (err: any) { msg(userMessage(err), true) }
     finally { setSubmitting(false) }
   }
 

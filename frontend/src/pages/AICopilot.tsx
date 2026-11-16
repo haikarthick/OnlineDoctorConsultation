@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
+import { userMessage } from '../utils/userMessage'
 // Render AI markdown responses nicely
 const AIMessage: React.FC<{ content: string; confidence?: number; sources?: string[] }> = ({ content, confidence, sources }) => (
   <div className="si-369fec94">
@@ -107,7 +108,7 @@ const AICopilot: React.FC = () => {
       const newSession = res.data
       setSessions(prev => [newSession, ...prev])
       selectSession(newSession)
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const sendMessage = async () => {
@@ -138,7 +139,7 @@ const AICopilot: React.FC = () => {
       const drugs = drugInput.split(',').map(d => d.trim()).filter(Boolean)
       const res = await apiService.checkDrugInteractions(drugs)
       setDrugResults(res.data)
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
     setLoading(false)
   }
 
@@ -149,7 +150,7 @@ const AICopilot: React.FC = () => {
       const symptoms = symptomInput.split(',').map(s => s.trim()).filter(Boolean)
       const res = await apiService.analyzeSymptoms(symptoms, speciesInput || undefined)
       setSymptomResults(res.data)
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
     setLoading(false)
   }
 
@@ -178,7 +179,7 @@ const AICopilot: React.FC = () => {
       })
       setScanResults(res.data)
     } catch (e: any) {
-      setError(e?.response?.data?.error?.message || e.message || 'Scan analysis failed')
+      setError(userMessage(e))
     }
     setScanAnalyzing(false)
   }

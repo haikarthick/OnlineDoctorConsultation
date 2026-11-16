@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
+import { userMessage } from '../utils/userMessage'
 const FeedInventory: React.FC = () => {
   const { t } = useTranslation()
 
@@ -56,7 +57,7 @@ const FeedInventory: React.FC = () => {
       setAnalytics(analyticsRes.data || null)
     } catch (err: any) {
       console.error('Failed to load feed inventory data:', err?.message)
-      setError(err?.response?.data?.error || err?.message || 'Failed to load data')
+      setError(userMessage(err))
     }
     finally { setLoading(false) }
   }
@@ -87,7 +88,7 @@ const FeedInventory: React.FC = () => {
       resetForm()
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || t('feedInventory.toasts.saveFailed'))
+      setError(userMessage(err, 'feedInventory.toasts.saveFailed'))
     }
   }
 
@@ -101,7 +102,7 @@ const FeedInventory: React.FC = () => {
       setRestockId(null); setRestockQty('')
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || t('feedInventory.toasts.restockFailed'))
+      setError(userMessage(err, 'feedInventory.toasts.restockFailed'))
     }
   }
 
@@ -120,7 +121,7 @@ const FeedInventory: React.FC = () => {
       setConsumptionData({ feedId: '', quantityUsed: '', notes: '' })
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || t('feedInventory.toasts.consumptionFailed'))
+      setError(userMessage(err, 'feedInventory.toasts.consumptionFailed'))
     }
   }
 

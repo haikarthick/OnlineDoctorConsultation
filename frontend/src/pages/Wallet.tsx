@@ -6,6 +6,7 @@ import '../styles/modules.css'
 import { useTranslation } from 'react-i18next'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
+import { userMessage } from '../utils/userMessage'
 interface WalletProps {
   onNavigate: (path: string) => void
 }
@@ -60,7 +61,7 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
       // The balance moves as soon as the request is made, so both must be refetched.
       await Promise.all([loadWallet(), loadWithdrawals(), loadTransactions(0)])
     } catch (err: any) {
-      setWErr(err?.response?.data?.error?.message || err?.response?.data?.message || err.message)
+      setWErr(userMessage(err))
     } finally { setWBusy(false) }
   }
 
@@ -70,7 +71,7 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
       await apiService.cancelWalletWithdrawal(id)
       await Promise.all([loadWallet(), loadWithdrawals(), loadTransactions(0)])
     } catch (err: any) {
-      setWErr(err?.response?.data?.error?.message || err?.response?.data?.message || err.message)
+      setWErr(userMessage(err))
     } finally { setWBusy(false) }
   }
 

@@ -4,6 +4,7 @@ import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
+import { userMessage } from '../../utils/userMessage'
 interface Medication {
   id: string
   name: string
@@ -65,7 +66,7 @@ export default function MedicationCatalog({ networkId }: Props) {
       setMeds(Array.isArray(medsRes.data) ? medsRes.data : [])
       setSuppliers(Array.isArray(suppRes.data) ? suppRes.data : [])
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setLoading(false)
     }
@@ -140,7 +141,7 @@ export default function MedicationCatalog({ networkId }: Props) {
       setShowModal(false)
       load()
     } catch (err: any) {
-      setModalError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setModalError(userMessage(err, 'common.error'))
     } finally {
       setSaving(false)
     }
@@ -152,7 +153,7 @@ export default function MedicationCatalog({ networkId }: Props) {
       await client.patch(`/networks/${networkId}/medications/${med.id}`, { is_active: false })
       load()
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message)
+      setError(userMessage(err))
     }
   }
 

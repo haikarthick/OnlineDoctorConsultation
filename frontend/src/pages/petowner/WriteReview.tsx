@@ -5,6 +5,7 @@ import apiService from '../../services/api'
 import '../../styles/modules.css'
 import './WriteReview.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface ReviewableConsultation {
   consultationId: string
   bookingId: string
@@ -85,7 +86,7 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
       const result = await apiService.getReviewableConsultations()
       setReviewableConsultations(Array.isArray(result.data) ? result.data : [])
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || t('writeReview.failedToSubmit'))
+      setError(userMessage(err, 'writeReview.failedToSubmit'))
     } finally {
       setLoadingConsultations(false)
     }
@@ -139,7 +140,7 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
       })
       setSubmitted(true)
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || t('writeReview.failedToSubmit'))
+      setError(userMessage(err, 'writeReview.failedToSubmit'))
     } finally {
       setSubmitting(false)
     }

@@ -21,6 +21,7 @@ import PharmacyOverviewTab from './PharmacyOverviewTab'
 import PharmacyAnalyticsTab from './PharmacyAnalyticsTab'
 import type { Pharmacy, DashboardSummary, PendingPrescription, ReadyDispensing, Analytics, NetworkPharmacyRow } from './pharmacyDashboardShared'
 
+import { userMessage } from '../../utils/userMessage'
 const TABS =['overview', 'review', 'dispense', 'inventory', 'alerts', 'catalog', 'suppliers', 'history', 'reorders', 'transfers', 'analytics', 'settings'] as const
 type Tab = typeof TABS[number]
 
@@ -67,7 +68,7 @@ export default function PharmacyDashboard() {
         setSelectedPharmacy(prev => prev ?? primary)
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setLoading(false)
     }
@@ -85,7 +86,7 @@ export default function PharmacyDashboard() {
       setPendingRx(Array.isArray(rxRes.data) ? rxRes.data : [])
       setReadyDispense(Array.isArray(dispRes.data) ? dispRes.data : [])
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     }
   }, [selectedPharmacy, t])
 

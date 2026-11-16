@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface CertificateSettingsProps {
   onNavigate: (path: string) => void
 }
@@ -115,7 +116,7 @@ const CertificateSettings: React.FC<CertificateSettingsProps> = ({ onNavigate })
       setValues(vals)
       setOriginal({ ...vals })
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.response?.data?.message || t('certificateSettings.failedToLoad'))
+      setError(userMessage(err, 'certificateSettings.failedToLoad'))
     } finally {
       setLoading(false)
     }
@@ -138,7 +139,7 @@ const CertificateSettings: React.FC<CertificateSettingsProps> = ({ onNavigate })
         const n = new Set(prev); n.delete(key); return n
       }), 2500)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || t('certificateSettings.failedToSave'))
+      setError(userMessage(err, 'certificateSettings.failedToSave'))
     } finally {
       setSaving(null)
     }

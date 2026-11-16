@@ -5,6 +5,7 @@ import { Enterprise, TreatmentCampaign } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 
+import { userMessage } from '../utils/userMessage'
 const CAMPAIGN_TYPE_LABELS: Record<string, string> = {
   vaccination: 'Vaccination', deworming: 'Deworming', testing: 'Testing',
   treatment: 'Treatment', supplement: 'Supplement', other: 'Other'
@@ -113,7 +114,7 @@ const TreatmentCampaigns: React.FC = () => {
       }
       resetForm(); setShowForm(false); fetchCampaigns()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
+    } catch (err: any) { setError(userMessage(err)) }
   }
 
   const handleDelete = async (id: string) => {
@@ -123,7 +124,7 @@ const TreatmentCampaigns: React.FC = () => {
       setSuccessMsg('Campaign deleted')
       fetchCampaigns()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
+    } catch (err: any) { setError(userMessage(err)) }
   }
 
   const formatDate = (d: string | null | undefined) => d ? new Date(d).toLocaleDateString() : '-'

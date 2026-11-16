@@ -13,6 +13,7 @@ import { RecordVitalsModal, type VitalsForm } from '../components/inpatient/Reco
 import { VitalsHistoryModal } from '../components/inpatient/VitalsHistoryModal'
 import { MedicalHistoryModal } from '../components/inpatient/MedicalHistoryModal'
 
+import { userMessage } from '../utils/userMessage'
 export default function InpatientManagement() {
   const { t } = useTranslation()
   const { formatDateTime, formatCurrency } = useSettings()
@@ -91,7 +92,7 @@ export default function InpatientManagement() {
       setAdmitForm({ admissionType: 'overnight_observation', roomNumber: '', bedNumber: '', careInstructions: '', specialNeeds: '', estimatedDischarge: '', dailyRate: 0 })
       loadData()
     } catch (err: any) {
-      setAdmitError(err?.response?.data?.error || err?.message || 'Failed to admit patient. Please try again.')
+      setAdmitError(userMessage(err))
     }
     setAdmitSubmitting(false)
   }
@@ -130,7 +131,7 @@ export default function InpatientManagement() {
       setVitalsForm({ temperature: '', heartRate: '', weight: '', notes: '' })
       loadData()
     } catch (err: any) {
-      setVitalsError(err?.response?.data?.error || err?.message || 'Failed to save vitals. Please try again.')
+      setVitalsError(userMessage(err))
     }
     setVitalsSubmitting(false)
   }

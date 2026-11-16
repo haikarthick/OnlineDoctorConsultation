@@ -22,3 +22,13 @@ page (`ProtectedRoute`, `RoleRoute`, `PublicOnlyRoute`, `AccessProblem`, `PageLo
 `src/routing.links.test.ts` fails if any `navigate()` / `to=` / `href=` / menu path matches no route in App.tsx
 (it found `/vet-hospitals/:id/manage`, which did not exist). `components/routing/routeGuards.test.tsx` covers the
 guard rules. Translations: `locales/<lang>/modules/routeErrors.json`.
+
+## Error messages (same rule, enforced)
+Every caught error becomes words through `frontend/src/utils/userMessage.ts` - `userMessage(err, 'screen.key')`:
+the server's readable sentence first, else a specific translated one (offline, slow server, session ended, no
+permission, not found, conflict, too many requests, server trouble). Never `err.message`, never a status code,
+never `[object Object]`. Only `UserFacingError` (sign-in / registration replies) passes its own text through.
+`frontend/src/errorMessages.guard.test.ts` fails the build when a screen reads `err.message` or
+`response.data.error` by hand (`// guard-ok: reason` marks a justified exception). The crash screen
+(`ErrorBoundary`) shows technical text in development only. Texts: `locales/<lang>/modules/errors.json`.
+Known remaining gap: server-side messages are English only; making them translatable is a separate piece of work.

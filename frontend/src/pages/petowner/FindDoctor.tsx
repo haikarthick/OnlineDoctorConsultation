@@ -15,6 +15,7 @@ import SearchFiltersBar from '../../components/findDoctor/SearchFiltersBar'
 import ResultsToolbar from '../../components/findDoctor/ResultsToolbar'
 import Pagination from '../../components/findDoctor/Pagination'
 
+import { userMessage } from '../../utils/userMessage'
 interface FindDoctorProps {
   onNavigate: (path: string) => void
 }
@@ -112,7 +113,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
         setTotal(totalCount)
       }
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.message || t('findDoctor.failedToLoad'))
+      setError(userMessage(err, 'findDoctor.failedToLoad'))
     } finally {
       setLoading(false)
     }

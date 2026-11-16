@@ -22,6 +22,7 @@ import FarmerEnterpriseOverviewPanel from '../components/dashboard/FarmerEnterpr
 import FeatureCardGrid from '../components/dashboard/FeatureCardGrid'
 import ProTipsPanel from '../components/dashboard/ProTipsPanel'
 
+import { userMessage } from '../utils/userMessage'
 const FARMER_FEATURES: FeatureCardDef[] = [
   { icon: '💊', iconClass: 'si-237b0eb5', titleKey: 'dashboard.features.herdMedicalTitle', descKey: 'dashboard.features.herdMedicalDesc', path: '/herd-medical' },
   { icon: '🧬', iconClass: 'si-decf142f', titleKey: 'dashboard.features.breedingTitle', descKey: 'dashboard.features.breedingDesc', path: '/breeding' },
@@ -218,7 +219,7 @@ const Dashboard: React.FC = () => {
       })
       setActivities(acts)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.message || t('common.failedToLoad'))
+      setError(userMessage(err, 'common.failedToLoad'))
     } finally {
       setLoading(false)
     }
@@ -228,12 +229,12 @@ const Dashboard: React.FC = () => {
   // ── Doctor actions ──
   const handleConfirm = async (id: string) => {
     try { await apiService.confirmBooking(id); loadDashboardData() }
-    catch (err: any) { setError(err?.response?.data?.error?.message || t('common.failedToSave')) }
+    catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
   const handleCancel = async (id: string) => {
     if (!window.confirm(t('dashboard.cancelBooking'))) return
     try { await apiService.cancelBooking(id, t('dashboard.declinedByDoctor')); loadDashboardData() }
-    catch (err: any) { setError(err?.response?.data?.error?.message || t('common.failedToSave')) }
+    catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   /* ════════════════════════════════════════════════════════

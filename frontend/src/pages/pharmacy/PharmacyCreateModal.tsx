@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 
+import { userMessage } from '../../utils/userMessage'
 export default function PharmacyCreateModal({
   networkId,
   onClose,
@@ -31,7 +32,7 @@ export default function PharmacyCreateModal({
               setCreateForm({ pharmacy_name: '', license_number: '', phone: '', email: '', address: '' })
               await onCreated()
             } catch (err: any) {
-              onError(err?.response?.data?.message || err?.response?.data?.error || err.message)
+              onError(userMessage(err))
             } finally { setCreating(false) }
           }}
         >

@@ -5,6 +5,7 @@ import { useSettings } from '../../context/SettingsContext'
 import { usePermission } from '../../context/PermissionContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void }
 
 const FindGrooming: React.FC<Props> = ({ onNavigate }) => {
@@ -27,7 +28,7 @@ const FindGrooming: React.FC<Props> = ({ onNavigate }) => {
       const res = await apiService.discoverGroomingProviders({ search: debounced || undefined, mobile: mobileOnly ? 'true' : undefined })
       setItems(res.data?.providers || [])
       setTotal(res.data?.total || 0)
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [debounced, mobileOnly])
   useEffect(() => { load() }, [load])
 

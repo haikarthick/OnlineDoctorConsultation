@@ -23,6 +23,7 @@ import HospitalVisitsTab from '../components/medicalRecords/HospitalVisitsTab'
 import CertificatesTab from '../components/medicalRecords/CertificatesTab'
 import RecordModals from '../components/medicalRecords/RecordModals'
 
+import { userMessage } from '../utils/userMessage'
 const MedicalRecords: React.FC = () => {
   const { t } = useTranslation()
 
@@ -97,7 +98,7 @@ const MedicalRecords: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Failed to load animals:', err?.message)
-      setError(err?.response?.data?.error?.message || err?.message || t('medicalRecords.failedToLoad'))
+      setError(userMessage(err, 'medicalRecords.failedToLoad'))
     }
   }, [selectedAnimal, deepLinkAnimalId])
 
@@ -229,7 +230,7 @@ const MedicalRecords: React.FC = () => {
     try {
       await Promise.all([loadAnimals(), loadStats(), loadPrescriptions(), loadConsultations()])
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.message || t('medicalRecords.failedToLoad'))
+      setError(userMessage(err, 'medicalRecords.failedToLoad'))
     } finally { setLoading(false) }
   }, [loadAnimals, loadStats, loadPrescriptions, loadConsultations])
 
@@ -289,7 +290,7 @@ const MedicalRecords: React.FC = () => {
       loadStats()
       if (activeTab === 'records') loadMedRecords(recordTypeFilter)
     } catch (err: any) {
-      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || t('medicalRecords.failedToSaveRecord'))
+      setModalError(userMessage(err, 'medicalRecords.failedToSaveRecord'))
     } finally { setSaving(false) }
   }
 
@@ -301,7 +302,7 @@ const MedicalRecords: React.FC = () => {
       setShowModal(null); setModalData({})
       loadVaccinations()
     } catch (err: any) {
-      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || t('medicalRecords.failedToSaveVaccination'))
+      setModalError(userMessage(err, 'medicalRecords.failedToSaveVaccination'))
     } finally { setSaving(false) }
   }
 
@@ -313,7 +314,7 @@ const MedicalRecords: React.FC = () => {
       setShowModal(null); setModalData({})
       loadWeightHistory()
     } catch (err: any) {
-      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || t('medicalRecords.failedToSaveWeight'))
+      setModalError(userMessage(err, 'medicalRecords.failedToSaveWeight'))
     } finally { setSaving(false) }
   }
 
@@ -325,7 +326,7 @@ const MedicalRecords: React.FC = () => {
       setShowModal(null); setModalData({})
       loadAllergies()
     } catch (err: any) {
-      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || t('medicalRecords.failedToSaveAllergy'))
+      setModalError(userMessage(err, 'medicalRecords.failedToSaveAllergy'))
     } finally { setSaving(false) }
   }
 
@@ -337,7 +338,7 @@ const MedicalRecords: React.FC = () => {
       setShowModal(null); setModalData({})
       loadLabResults()
     } catch (err: any) {
-      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || t('medicalRecords.failedToSaveLabResult'))
+      setModalError(userMessage(err, 'medicalRecords.failedToSaveLabResult'))
     } finally { setSaving(false) }
   }
 

@@ -6,6 +6,7 @@ import { Enterprise, GeneticProfile, LineagePair } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
 
+import { userMessage } from '../utils/userMessage'
 const GenomicLineagePage: React.FC = () => {
   const { t } = useTranslation()
   const { speciesLabel } = useMasterData()
@@ -80,7 +81,7 @@ const GenomicLineagePage: React.FC = () => {
       setShowForm(false)
       setFormData({ animalId: '', sireId: '', damId: '', generation: '', inbreedingCoefficient: '', dnaTestDate: '', dnaLab: '', dnaSampleId: '', breedPurityPct: '', notes: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleCreatePair = async (e: React.FormEvent) => {
@@ -97,7 +98,7 @@ const GenomicLineagePage: React.FC = () => {
       setShowPairForm(false)
       setPairForm({ sireId: '', damId: '', compatibilityScore: '', predictedInbreeding: '', recommendation: 'neutral', reason: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const recColor = (r: string) => {

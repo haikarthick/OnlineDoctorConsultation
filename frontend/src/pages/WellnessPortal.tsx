@@ -9,6 +9,7 @@ import { useSettings } from '../context/SettingsContext'
 import { useMasterData } from '../context/MasterDataContext'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
+import { userMessage } from '../utils/userMessage'
 const SCORE_COLORS = (score: number) => score >= 80 ? '#22c55e' : score >= 60 ? '#eab308' : score >= 40 ? '#f97316' : '#ef4444'
 const PRIORITY_COLORS: Record<string, string> = { low: '#94a3b8', medium: '#3b82f6', high: '#f97316', urgent: '#ef4444' }
 
@@ -59,7 +60,7 @@ const WellnessPortal: React.FC = () => {
       setScorecards(scRes.data?.items || [])
       setReminders(remRes.data?.items || [])
       setAnimals(animRes.data?.animals || animRes.data?.items || [])
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
     setLoading(false)
   }
   useAutoRefresh('wellness', fetchAll)
@@ -77,7 +78,7 @@ const WellnessPortal: React.FC = () => {
       setShowScorecardForm(false)
       setSuccessMsg(t('wellnessPortal.toasts.scorecardCreated'))
       fetchAll()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const createReminder = async () => {
@@ -91,17 +92,17 @@ const WellnessPortal: React.FC = () => {
       setShowReminderForm(false)
       setSuccessMsg(t('wellnessPortal.toasts.reminderCreated'))
       fetchAll()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const completeReminder = async (id: string) => {
-    try { await apiService.completeReminder(id); setSuccessMsg(t('wellnessPortal.toasts.completed')); fetchAll() } catch (e: any) { setError(e.message) }
+    try { await apiService.completeReminder(id); setSuccessMsg(t('wellnessPortal.toasts.completed')); fetchAll() } catch (e: any) { setError(userMessage(e)) }
   }
 
   const snoozeReminder = async (id: string) => {
     const until = new Date()
     until.setDate(until.getDate() + 3)
-    try { await apiService.snoozeReminder(id, until.toISOString().split('T')[0]); setSuccessMsg(t('wellnessPortal.toasts.snoozed')); fetchAll() } catch (e: any) { setError(e.message) }
+    try { await apiService.snoozeReminder(id, until.toISOString().split('T')[0]); setSuccessMsg(t('wellnessPortal.toasts.snoozed')); fetchAll() } catch (e: any) { setError(userMessage(e)) }
   }
 
   const renderScoreGauge = (label: string, score: number, emoji: string) => (

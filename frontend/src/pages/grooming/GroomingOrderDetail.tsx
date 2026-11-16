@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void; id?: string }
 
 const SCENT_KEYS = ['Skin', 'Coat', 'Ears', 'Nails', 'Teeth'] as const
@@ -33,12 +34,12 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
       if (o.reportCard) setReport(o.reportCard)
       try { const mine = (await apiService.getMyGroomingProvider()).data; setIsProvider(!!mine && mine.id === o.providerId) } catch { setIsProvider(false) }
       try { setEscalations((await apiService.listGroomingEscalations(id)).data || []) } catch { setEscalations([]) }
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [id])
   useEffect(() => { load() }, [load])
 
   const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 2500) }
-  const fail = (e: any) => setErr(e?.response?.data?.message || e?.message)
+  const fail = (e: any) => setErr(userMessage(e))
 
   const saveIntake = async () => { try { setBusy(true); await apiService.saveGroomingIntake(id!, intake); flash(t('groomingDetail.intakeSaved')); load() } catch (e) { fail(e) } finally { setBusy(false) } }
   const setItem = async (itemId: string, status: string) => { try { await apiService.updateGroomingItem(id!, itemId, status); load() } catch (e) { fail(e) } }

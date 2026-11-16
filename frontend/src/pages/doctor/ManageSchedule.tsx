@@ -15,6 +15,7 @@ import VacationModal from '../../components/manageSchedule/VacationModal'
 import BlockModal from '../../components/manageSchedule/BlockModal'
 import HolidayModal from '../../components/manageSchedule/HolidayModal'
 
+import { userMessage } from '../../utils/userMessage'
 interface ManageScheduleProps {
   onNavigate: (path: string) => void
 }
@@ -97,7 +98,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
       else await apiService.createSchedule(schedForm)
       setShowSchedForm(false); setEditingSchedId(null); resetSchedForm()
       loadAll(); msg(editingSchedId ? t('manageSchedule.scheduleUpdated') : t('manageSchedule.scheduleCreated'))
-    } catch (err: any) { setSchedFormError(err?.response?.data?.message || err?.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setSchedFormError(userMessage(err, 'common.failedToSave')) }
     finally { setSubmitting(false) }
   }
 
@@ -136,7 +137,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
         reason: overrideForm.reason || undefined
       })
       setShowOverrideForm(false); loadAll(); loadCalendar(); msg(t('manageSchedule.overrideSaved'))
-    } catch (err: any) { msg(err?.response?.data?.message || t('manageSchedule.failedToSaveOverride'), true) }
+    } catch (err: any) { msg(userMessage(err, 'manageSchedule.failedToSaveOverride'), true) }
     finally { setSubmitting(false) }
   }
 
@@ -155,7 +156,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
       if (dates.length === 0 || dates.length > 90) { msg(t('manageSchedule.select1to90days'), true); return }
       await apiService.bulkCreateDateOverrides({ dates, overrideType: 'unavailable', reason: vacationForm.reason || 'Vacation / Leave' })
       setShowVacationForm(false); loadAll(); loadCalendar(); msg(t('manageSchedule.daysMarkedAsLeave', { count: dates.length }))
-    } catch (err: any) { msg(err?.response?.data?.message || t('manageSchedule.failedToSetVacation'), true) }
+    } catch (err: any) { msg(userMessage(err, 'manageSchedule.failedToSetVacation'), true) }
     finally { setSubmitting(false) }
   }
 
@@ -173,7 +174,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
         startTime: blockForm.startTime, endTime: blockForm.endTime, reason: blockForm.reason || undefined
       })
       setShowBlockForm(false); loadAll(); msg(t('manageSchedule.timeBlockCreated'))
-    } catch (err: any) { msg(err?.response?.data?.message || t('manageSchedule.failedToCreateBlock'), true) }
+    } catch (err: any) { msg(userMessage(err, 'manageSchedule.failedToCreateBlock'), true) }
     finally { setSubmitting(false) }
   }
 
@@ -192,7 +193,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
         ...(holidayForm.isFullDay ? {} : { startTime: holidayForm.startTime, endTime: holidayForm.endTime })
       })
       setShowHolidayForm(false); loadAll(); loadCalendar(); msg(t('manageSchedule.holidayAdded'))
-    } catch (err: any) { msg(err?.response?.data?.message || t('manageSchedule.failedToAddHoliday'), true) }
+    } catch (err: any) { msg(userMessage(err, 'manageSchedule.failedToAddHoliday'), true) }
     finally { setSubmitting(false) }
   }
 

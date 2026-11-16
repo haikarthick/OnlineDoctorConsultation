@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface SettlementsProps {
   onNavigate?: (path: string) => void
 }
@@ -48,7 +49,7 @@ const Settlements: React.FC<SettlementsProps> = () => {
       setMessage(successMsg)
       await load()
     } catch (err: any) {
-      setMessage(err.response?.data?.error?.message || err.response?.data?.error || t('settlementsAdmin.actionFailed'))
+      setMessage(userMessage(err, 'settlementsAdmin.actionFailed'))
     } finally { setBusyId(null) }
   }, [load, t])
 

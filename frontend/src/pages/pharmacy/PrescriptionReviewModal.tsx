@@ -4,6 +4,7 @@ import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
 import { useMasterData } from '../../context/MasterDataContext'
 
+import { userMessage } from '../../utils/userMessage'
 interface Medication {
   name: string
   dosage: string
@@ -78,7 +79,7 @@ export default function PrescriptionReviewModal({ prescription, onClose, onDone 
       })
       onDone()
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setSaving(false)
     }

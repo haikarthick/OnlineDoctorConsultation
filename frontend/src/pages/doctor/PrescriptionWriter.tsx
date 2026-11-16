@@ -8,6 +8,7 @@ import { SubjectSummary } from '../../components/shared/SubjectSummary'
 import { Medication } from '../../types'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface PrescriptionWriterProps {
   consultationId?: string
   onNavigate: (path: string) => void
@@ -174,7 +175,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
       } as any)
       setSubmitted(true)
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || err.response?.data?.message || t('prescriptionWriter.failedToCreate'))
+      setError(userMessage(err, 'prescriptionWriter.failedToCreate'))
     } finally {
       setSubmitting(false)
     }

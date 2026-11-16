@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import apiService from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { AIChatMessage } from '../types'
+import { userMessage } from '../utils/userMessage'
 import './FloatingChatWidget.css'
 
 interface PetSummary {
@@ -59,8 +60,7 @@ const FloatingChatWidget: React.FC = () => {
 
   // Helper: extract readable error from API response
   const getApiError = (err: any): string => {
-    const data = err?.response?.data
-    return data?.error?.message || data?.message || err?.message || 'Unknown error'
+    return userMessage(err)
   }
 
   // Create a brand-new session via the API

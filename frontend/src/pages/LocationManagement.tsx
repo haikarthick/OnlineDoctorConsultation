@@ -6,6 +6,7 @@ import { Enterprise, FarmLocation, LocationType } from '../types'
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
 
+import { userMessage } from '../utils/userMessage'
 const LOCATION_TYPE_LABELS: Record<string, string> = {
   barn: 'Barn', stable: 'Stable', pen: 'Pen', paddock: 'Paddock',
   field: 'Field', pasture: 'Pasture', quarantine: 'Quarantine', isolation: 'Isolation',
@@ -109,7 +110,7 @@ const LocationManagement: React.FC = () => {
       }
       resetForm(); setShowForm(false); fetchLocations()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleDelete = async (id: string) => {
@@ -119,7 +120,7 @@ const LocationManagement: React.FC = () => {
       setSuccessMsg(t('locationManagement.toasts.deleted'))
       fetchLocations()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToDelete')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToDelete')) }
   }
 
   const renderTreeNode = (loc: FarmLocation, depth = 0) => (

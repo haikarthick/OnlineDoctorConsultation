@@ -10,6 +10,7 @@ import ChatPanel from '../../components/videoConsultation/ChatPanel'
 import { formatDuration } from '../../components/videoConsultation/videoConsultationShared'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface VideoConsultationProps {
   consultationId?: string
   onNavigate: (path: string) => void
@@ -225,7 +226,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
           })
           if (created.data) sessionData = created.data
         } catch (err: any) {
-          setError(t('videoConsultation.failedToCreateVideoRoom') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
+          setError(t('videoConsultation.failedToCreateVideoRoom') + ': ' + (userMessage(err)))
         }
       }
 
@@ -248,7 +249,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
         }
       }
     } catch (err: any) {
-      setError(t('videoConsultation.failedToInitialize') + ': ' + (err?.message || ''))
+      setError(t('videoConsultation.failedToInitialize') + ': ' + (userMessage(err)))
     } finally { setLoading(false) }
   }
 
@@ -313,7 +314,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
         await startLocalStream()
       }
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || t('videoConsultation.failedToStartSession'))
+      setError(userMessage(err, 'videoConsultation.failedToStartSession'))
     }
   }
 
@@ -335,10 +336,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
       if (result.data) setSession(result.data)
       stopLocalStream()
     } catch (err: any) {
-const msg = err?.response?.data?.error?.message
-        || err?.response?.data?.message
-        || err?.message
-        || t('videoConsultation.failedToEndSession')
+      const msg = userMessage(err, 'videoConsultation.failedToEndSession')
       setError(msg)
       // Even if API fails, clean up local resources
       stopLocalStream()
@@ -394,11 +392,8 @@ const msg = err?.response?.data?.error?.message
         })
       }
     } catch (err: any) {
-setNewMessage(messageText) // restore message on failure
-      const msg = err?.response?.data?.error?.message
-        || err?.response?.data?.message
-        || err?.message
-        || t('videoConsultation.failedToSendMessage')
+      setNewMessage(messageText) // restore message on failure
+      const msg = userMessage(err, 'videoConsultation.failedToSendMessage')
       setError(msg)
     }
   }

@@ -7,6 +7,7 @@ import PrescriptionPrintView, { PrescriptionPrintData, PrescriptionTemplate } fr
 import '../../styles/modules.css'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
+import { userMessage } from '../../utils/userMessage'
 interface PrescriptionsProps {
   onNavigate: (path: string) => void
 }
@@ -67,7 +68,7 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
       const items: PrescriptionItem[] = res.data?.items || (Array.isArray(res.data) ? res.data : [])
       setPrescriptions(items)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.response?.data?.message || t('prescriptions.failedToLoad'))
+      setError(userMessage(err, 'prescriptions.failedToLoad'))
     } finally {
       setLoading(false)
     }
@@ -100,7 +101,7 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
       await apiService.deactivatePrescription(id)
       setPrescriptions(prev => prev.map(rx => rx.id === id ? { ...rx, isActive: false } : rx))
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || t('prescriptions.failedToDeactivate'))
+      setError(userMessage(err, 'prescriptions.failedToDeactivate'))
     } finally {
       setDeactivating(null)
     }
@@ -171,7 +172,7 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
       setPrintTemplate(template)
       setPrintData(printPayload)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || t('prescriptions.failedToPrint'))
+      setError(userMessage(err, 'prescriptions.failedToPrint'))
     } finally {
       setLoadingPrint(null)
     }

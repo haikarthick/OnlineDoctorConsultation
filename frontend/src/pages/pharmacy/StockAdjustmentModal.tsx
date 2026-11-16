@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 
 
+import { userMessage } from '../../utils/userMessage'
 interface InventoryItem {
   id: string
   med_id: string
@@ -46,7 +47,7 @@ export default function StockAdjustmentModal({ pharmacyId, item, onClose, onDone
       })
       onDone()
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setSaving(false)
     }

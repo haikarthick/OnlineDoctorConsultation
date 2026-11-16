@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import './NetworkSubscriptions.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface SubscriptionPlan {
   id: string
   name: string
@@ -87,7 +88,7 @@ export default function NetworkSubscriptions() {
         setPlans(pricingRes.data?.plans || [])
       }
     } catch (e: any) {
-      setError(e.message)
+      setError(userMessage(e))
     } finally {
       setLoading(false)
     }
@@ -108,7 +109,7 @@ export default function NetworkSubscriptions() {
       setShowPlanModal(false)
       setEditingPlan(null)
       loadData()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handlePublishToggle = async (plan: SubscriptionPlan) => {
@@ -116,7 +117,7 @@ export default function NetworkSubscriptions() {
       await apiService.updateNetworkPlan(plan.id, { is_published: !plan.isPublished })
       showMsg(`Plan ${plan.isPublished ? 'hidden' : 'published'}`)
       loadData()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handleSetSubscription = async () => {
@@ -132,7 +133,7 @@ export default function NetworkSubscriptions() {
       showMsg('Subscription updated')
       setShowSubModal(null)
       loadData()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handleSuspend = async () => {
@@ -143,7 +144,7 @@ export default function NetworkSubscriptions() {
       setShowSuspendModal(null)
       setSuspendReason('')
       loadData()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handleUnsuspend = async (networkId: string) => {
@@ -151,7 +152,7 @@ export default function NetworkSubscriptions() {
       await apiService.unsuspendNetwork(networkId)
       showMsg('Network unsuspended')
       loadData()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handleOverrideSeats = async () => {
@@ -162,7 +163,7 @@ export default function NetworkSubscriptions() {
       setShowOverrideModal(null)
       setOverrideSeatLimit('')
       loadData()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handlePricingSave = async (updates: Record<string, string>) => {
@@ -170,7 +171,7 @@ export default function NetworkSubscriptions() {
       await apiService.updatePricingSettings(updates)
       showMsg('Pricing settings saved')
       loadData()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   if (loading) return <div className="module-page"><div className="loading-spinner" /></div>

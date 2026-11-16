@@ -17,6 +17,7 @@ import AnimalDetailModal from '../components/animals/AnimalDetailModal'
 import BulkImportModal from '../components/animals/BulkImportModal'
 import { emptyAnimalFormData, animalToFormData, buildAnimalPayload, type AnimalData, type EnterpriseOption, type GroupOption } from '../components/animals/animalsShared'
 
+import { userMessage } from '../utils/userMessage'
 const Animals: React.FC = () => {
   const { t } = useTranslation()
   const { breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
@@ -168,7 +169,7 @@ const Animals: React.FC = () => {
       setImportPreview([])
       await fetchAnimals()
     } catch (err: any) {
-      setImportError(err?.response?.data?.error || err?.message || 'Import failed')
+      setImportError(userMessage(err))
     } finally {
       setImportLoading(false)
     }
@@ -211,7 +212,7 @@ const Animals: React.FC = () => {
       fetchAnimals()
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || t('animals.toasts.failedRemove'))
+      setError(userMessage(err, 'animals.toasts.failedRemove'))
     }
   }
 

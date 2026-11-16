@@ -24,6 +24,7 @@ import { SavedSearchesTab } from '../components/marketplace/SavedSearchesTab'
 import { PricesTab } from '../components/marketplace/PricesTab'
 import { AdminPanel } from '../components/marketplace/AdminPanel'
 
+import { userMessage } from '../utils/userMessage'
 const Marketplace: React.FC = () => {
   const { formatCurrency, settings } = useSettings()
   const { user } = useAuth()
@@ -225,7 +226,7 @@ const Marketplace: React.FC = () => {
       const res = await apiService.getMarketplaceThreadMessages(activeThread.id)
       setThreadMessages(res.data?.items || [])
       fetchThreads()
-    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message); setMessageDraft(body) }
+    } catch (e: any) { setError(userMessage(e)); setMessageDraft(body) }
   }
 
   const toggleFavorite = async (listingId: string) => {
@@ -239,7 +240,7 @@ const Marketplace: React.FC = () => {
     } catch (e: any) {
       // Revert on failure
       setFavoriteIds(prev => { const n = new Set(prev); isFav ? n.add(listingId) : n.delete(listingId); return n })
-      setError(e?.response?.data?.error?.message || e.message)
+      setError(userMessage(e))
     }
   }
 
@@ -251,7 +252,7 @@ const Marketplace: React.FC = () => {
       setTab('messages')
       fetchThreads()
       openThread(thread)
-    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const saveCurrentSearch = async () => {
@@ -261,7 +262,7 @@ const Marketplace: React.FC = () => {
       setSuccessMsg(t('marketplace.engagement.searchSaved'))
       setShowSaveSearch(false); setSaveSearchName('')
       fetchSavedSearches()
-    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const applySavedSearch = (s: MarketplaceSavedSearch) => {
@@ -335,11 +336,11 @@ const Marketplace: React.FC = () => {
       const url = res.url || res.fileUrl
       if (url) { sf('videoUrl', url); setSuccessMsg(t('marketplace.sell.videoUploaded')) }
     } catch (err: any) {
-      const apiErr = err?.response?.data?.error
+      const apiErr = err?.response?.data?.error // guard-ok: reads the structured error CODE, never shown
       if (apiErr?.code === 'VIDEO_TOO_LONG') {
         setError(t('marketplace.sell.videoTooLong', { maxSec: apiErr.maxSeconds || MAX_VIDEO_DURATION_SECONDS, defaultValue: `Video is too long - max ${MAX_VIDEO_DURATION_SECONDS} seconds` }))
       } else {
-        setError(apiErr?.message || t('marketplace.sell.uploadFailed', 'Upload failed'))
+        setError(userMessage(err, 'marketplace.sell.uploadFailed', 'Upload failed'))
       }
     }
     setUploadingVideo(false)
@@ -348,12 +349,12 @@ const Marketplace: React.FC = () => {
 
   const toggleSearchAlerts = async (s: MarketplaceSavedSearch) => {
     try { await apiService.updateMarketplaceSavedSearch(s.id, { alertsEnabled: !s.alertsEnabled }); fetchSavedSearches() }
-    catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    catch (e: any) { setError(userMessage(e)) }
   }
 
   const deleteSavedSearch = async (id: string) => {
     try { await apiService.deleteMarketplaceSavedSearch(id); fetchSavedSearches() }
-    catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    catch (e: any) { setError(userMessage(e)) }
   }
 
   // ── Phase 5: config, reports, funnel ──
@@ -367,7 +368,7 @@ const Marketplace: React.FC = () => {
       await apiService.reportMarketplaceListing(reportModal.listingId, reportReason, reportDetails || undefined)
       setSuccessMsg(t('marketplace.report.submitted'))
       setReportModal(null); setReportReason(''); setReportDetails('')
-    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   // Pre-purchase vet check - funnel into a paid consultation (the revenue layer)
@@ -386,7 +387,7 @@ const Marketplace: React.FC = () => {
       await apiService.adminResolveMarketplaceReport(id, status, adminReportResolution[id] || undefined)
       setSuccessMsg(t('marketplace.report.resolved'))
       fetchAdminReports()
-    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   useEffect(() => { fetchDashboard(); fetchListings(); loadFavoriteIds(); loadUnreadCount(); loadConfig() }, [])
@@ -406,7 +407,7 @@ const Marketplace: React.FC = () => {
         const bidsRes = await apiService.listMarketplaceBids(listing.id)
         setBids(bidsRes.data?.items || [])
       }
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   // Shared by the dashboard and favorites tabs: switch to Browse and open a listing's detail.
@@ -441,7 +442,7 @@ const Marketplace: React.FC = () => {
         images: [], linkedAnimalId: '',
         sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false })
       setSellStep(0); setTab('browse'); fetchListings(); fetchDashboard()
-    } catch (e: any) { setError(e?.response?.data?.message || e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   // Auto-populate sell form from selected animal
@@ -521,7 +522,7 @@ const Marketplace: React.FC = () => {
       }
       setSellForm((prev: Record<string, any>) => ({ ...prev, images: urls }))
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || t('marketplace.sell.uploadFailed', 'Image upload failed'))
+      setError(userMessage(err, 'marketplace.sell.uploadFailed', "Image upload failed"))
     }
     setUploadingImages(false)
     e.target.value = ''
@@ -532,7 +533,7 @@ const Marketplace: React.FC = () => {
     try {
       await apiService.placeMarketplaceBid(selectedListing.id, { amount: +bidAmount, message: bidMessage })
       setSuccessMsg(t('marketplace.bidPlaced')); setBidAmount(''); setBidMessage(''); viewListing(selectedListing)
-    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   // Free classifieds: reserving holds the listing while buyer and seller
@@ -544,7 +545,7 @@ const Marketplace: React.FC = () => {
         await apiService.createInquiry(listing.id, '')
         setSuccessMsg(t('marketplace.inquirySent', 'Inquiry sent! The seller will be notified.'))
         setSelectedListing(null)
-      } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+      } catch (e: any) { setError(userMessage(e)) }
       return
     }
     try {
@@ -553,7 +554,7 @@ const Marketplace: React.FC = () => {
       fetchListings(); fetchDashboard()
       // Re-open the listing: the reservation reveals the seller's contact details
       viewListing(listing)
-    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const fetchOrders = async (role: 'buyer' | 'seller' = orderRole) => {
@@ -566,7 +567,7 @@ const Marketplace: React.FC = () => {
       await apiService.confirmMarketplaceDeal(orderId, dealPaymentMethod[orderId] || undefined)
       setSuccessMsg(t('marketplace.deal.confirmRecorded'))
       fetchOrders(orderRole); fetchListings(); fetchDashboard()
-    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const cancelDeal = async (orderId: string) => {
@@ -574,7 +575,7 @@ const Marketplace: React.FC = () => {
       await apiService.cancelMarketplaceDeal(orderId)
       setSuccessMsg(t('marketplace.deal.dealCancelled'))
       fetchOrders(orderRole); fetchListings(); fetchDashboard()
-    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const fetchInquiries = async (role: 'buyer' | 'seller' = orderRole) => {
@@ -614,7 +615,7 @@ const Marketplace: React.FC = () => {
       await apiService.updateMonetizationSetting(key, { isEnabled: !current })
       setSuccessMsg(t('marketplace.monetization.settingUpdated'))
       fetchMonetizationSettings()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handleSavePlan = async () => {
@@ -635,7 +636,7 @@ const Marketplace: React.FC = () => {
       setEditingPlan(null)
       setPlanForm({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
       fetchMonetizationSettings()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handleDeletePlan = async (id: string) => {
@@ -643,31 +644,31 @@ const Marketplace: React.FC = () => {
       await apiService.deleteMonetizationPlan(id)
       setSuccessMsg(t('marketplace.monetization.planDeleted'))
       fetchMonetizationSettings()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handleTogglePlanActive = async (plan: any) => {
     try {
       await apiService.updateMonetizationPlan(plan.id, { isActive: !plan.is_active })
       fetchMonetizationSettings()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handleAdminApprove = async (id: string) => {
-    try { await apiService.adminApproveMarketplaceListing(id); setSuccessMsg(t('marketplace.admin.listingApproved')); fetchAdminData() } catch (e: any) { setError(e.message) }
+    try { await apiService.adminApproveMarketplaceListing(id); setSuccessMsg(t('marketplace.admin.listingApproved')); fetchAdminData() } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handleAdminReject = async (id: string) => {
     if (!adminRejectReason.trim()) { setError(t('marketplace.admin.rejectionRequired')); return }
-    try { await apiService.adminRejectMarketplaceListing(id, adminRejectReason); setSuccessMsg(t('marketplace.admin.listingRejected')); setAdminRejectReason(''); fetchAdminData() } catch (e: any) { setError(e.message) }
+    try { await apiService.adminRejectMarketplaceListing(id, adminRejectReason); setSuccessMsg(t('marketplace.admin.listingRejected')); setAdminRejectReason(''); fetchAdminData() } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handleToggleHotDeal = async (id: string, current: boolean) => {
-    try { await apiService.adminToggleHotDeal(id, !current); fetchAdminData() } catch (e: any) { setError(e.message) }
+    try { await apiService.adminToggleHotDeal(id, !current); fetchAdminData() } catch (e: any) { setError(userMessage(e)) }
   }
 
   const handleToggleFeatured = async (id: string, current: boolean) => {
-    try { await apiService.adminToggleFeatured(id, !current); fetchAdminData() } catch (e: any) { setError(e.message) }
+    try { await apiService.adminToggleFeatured(id, !current); fetchAdminData() } catch (e: any) { setError(userMessage(e)) }
   }
 
   const updateFilter = (key: string, value: string) => setFilters(f => value ? { ...f, [key]: value } : (() => { const n = { ...f }; delete n[key]; return n })())
@@ -698,7 +699,7 @@ const Marketplace: React.FC = () => {
       await apiService.setAuctionEnabled(!auctionEnabled)
       setAuctionEnabledState(!auctionEnabled)
       setSuccessMsg(auctionEnabled ? t('marketplace.admin.auctionDisabled', 'Auction feature disabled') : t('marketplace.admin.auctionEnabled', 'Auction feature enabled'))
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   // ── Browse/Sell/Orders/Admin tab prop-wiring handlers ──
@@ -711,7 +712,7 @@ const Marketplace: React.FC = () => {
       await apiService.createInquiry(selectedListing.id, '')
       setSuccessMsg(t('marketplace.inquirySent', 'Inquiry sent! The seller will be notified.'))
       viewListing(selectedListing)
-    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
   const handleMessageSellerClick = () => { if (selectedListing) messageSeller(selectedListing) }
   const handleReportClick = () => { if (selectedListing) setReportModal({ listingId: selectedListing.id, title: selectedListing.title }) }

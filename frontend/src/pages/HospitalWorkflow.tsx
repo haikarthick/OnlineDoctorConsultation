@@ -20,6 +20,7 @@ import NewCaseModal from '../components/hospitalWorkflow/NewCaseModal'
 import ReferralsList from '../components/hospitalWorkflow/ReferralsList'
 import NewReferralModal from '../components/hospitalWorkflow/NewReferralModal'
 
+import { userMessage } from '../utils/userMessage'
 export default function HospitalWorkflow() {
   const { t } = useTranslation()
   const { formatDateTime } = useSettings()
@@ -103,7 +104,7 @@ export default function HospitalWorkflow() {
         if (list.length > 0) setHospitalId(list[0].id)
       } catch (err: any) {
         console.error('Failed to load hospitals:', err)
-        setLoadError(err?.response?.data?.message || err?.message || 'Failed to load hospitals')
+        setLoadError(userMessage(err))
       } finally {
         setLoading(false)
       }
@@ -122,7 +123,7 @@ export default function HospitalWorkflow() {
       setQueueStats(s.data || null)
     } catch (err: any) {
       console.error('Failed to load queue:', err)
-      setLoadError(err?.response?.data?.message || 'Failed to load queue data')
+      setLoadError(userMessage(err))
     }
   }, [hospitalId])
 
@@ -185,7 +186,7 @@ export default function HospitalWorkflow() {
       setCheckInForm({ reason: '', priority: 'normal', animalId: '', ownerId: '' })
       loadQueue()
     } catch (err: any) {
-      setCheckInError(err?.response?.data?.message || err?.message || 'Check-in failed. Please try again.')
+      setCheckInError(userMessage(err))
     }
     setCheckInSubmitting(false)
   }
@@ -272,7 +273,7 @@ export default function HospitalWorkflow() {
       setWalkInPhotoFile(null)
       setWalkInPhotoPreview('')
     } catch (err: any) {
-      setWalkInError(err?.response?.data?.message || err?.message || t('hospitalWorkflow.walkIn.registerFailed'))
+      setWalkInError(userMessage(err, 'hospitalWorkflow.walkIn.registerFailed'))
     }
     setWalkInRegistering(false)
   }
@@ -337,7 +338,7 @@ export default function HospitalWorkflow() {
       setReferralAnimal(null)
       loadReferrals()
     } catch (err: any) {
-      setReferralError(err?.response?.data?.error || err?.message || 'Failed to create referral')
+      setReferralError(userMessage(err))
     }
     setReferralSubmitting(false)
   }

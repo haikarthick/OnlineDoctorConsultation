@@ -14,6 +14,7 @@ import {
   recordableTypesFor, formatQuantity, totalsByType, dueTiming, type DueItem, type FarmRecord, type RecordSubject,
 } from '../components/farmRecords/recordShared'
 
+import { userMessage } from '../utils/userMessage'
 /**
  * Daily records: milk, eggs, feed, sample weights, water readings and deaths - one screen for the
  * whole farm, phone first. Every animal and group that has something to record today is a card;
@@ -79,7 +80,7 @@ const FarmRecords: React.FC = () => {
       setRecords(recordsRes.data?.items || [])
       setDue(dueRes.data?.items || [])
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.response?.data?.message || t('farmRecords.loadFailed'))
+      setError(userMessage(err, 'farmRecords.loadFailed'))
     } finally {
       setLoading(false)
     }

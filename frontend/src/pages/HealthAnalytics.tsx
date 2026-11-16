@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
 import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
+import { userMessage } from '../utils/userMessage'
 const SEVERITY_COLORS: Record<string, string> = {
   low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444'
 }
@@ -57,7 +58,7 @@ const HealthAnalytics: React.FC = () => {
       setObservations(obsRes.data?.items || [])
     } catch (err: any) {
       console.error('Failed to load health analytics data:', err?.message)
-      setError(err?.response?.data?.error || err?.message || 'Failed to load data')
+      setError(userMessage(err))
     }
     finally { setLoading(false) }
   }
@@ -82,7 +83,7 @@ const HealthAnalytics: React.FC = () => {
       setFormData({ animalId: '', observationType: 'general', severity: 'low', title: '', description: '', bodyTemperature: '', heartRate: '', respiratoryRate: '', weightAtObservation: '' })
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || t('common.failedToSave'))
+      setError(userMessage(err, 'common.failedToSave'))
     }
   }
 

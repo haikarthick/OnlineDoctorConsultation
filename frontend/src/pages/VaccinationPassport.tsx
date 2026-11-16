@@ -13,6 +13,7 @@ import { ComplianceSummaryTab } from '../components/vaccinationPassport/Complian
 import { CertHistoryTab } from '../components/vaccinationPassport/CertHistoryTab'
 import { PrintPreviewModal } from '../components/vaccinationPassport/PrintPreviewModal'
 
+import { userMessage } from '../utils/userMessage'
 interface VaccinationPassportProps {
   onNavigate: (path: string) => void
 }
@@ -96,7 +97,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
         setSelectedAnimalForHistory(loaded[0].animalId)
       }
     } catch (err: any) {
-      setError(err?.response?.data?.error || t('vaccinationPassport.errors.loadFailed'))
+      setError(userMessage(err, 'vaccinationPassport.errors.loadFailed'))
     } finally {
       setLoading(false)
     }

@@ -6,6 +6,7 @@ import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { Enterprise, WorkforceTask, ShiftSchedule } from '../types'
 import { useTranslation } from 'react-i18next'
 
+import { userMessage } from '../utils/userMessage'
 const PRIORITY_COLORS: Record<string, string> = {
   low: '#6b7280', medium: '#3b82f6', high: '#f97316', critical: '#ef4444'
 }
@@ -60,7 +61,7 @@ const WorkforcePage: React.FC = () => {
       setShifts(shiftRes.data?.items || [])
     } catch (err: any) {
       console.error('Failed to load workforce data:', err?.message)
-      setError(err?.response?.data?.error || err?.message || 'Failed to load data')
+      setError(userMessage(err))
     }
     finally { setLoading(false) }
   }
@@ -83,7 +84,7 @@ const WorkforcePage: React.FC = () => {
       setShowForm(false)
       setFormData({ title: '', description: '', taskType: 'general', priority: 'medium', assignedTo: '', dueDate: '', estimatedHours: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleCreateShift = async (e: React.FormEvent) => {
@@ -100,7 +101,7 @@ const WorkforcePage: React.FC = () => {
       setShowShiftForm(false)
       setShiftForm({ userId: '', shiftDate: '', startTime: '08:00', endTime: '17:00', roleOnShift: '', notes: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleUpdateStatus = async (id: string, status: string) => {

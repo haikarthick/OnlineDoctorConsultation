@@ -16,6 +16,7 @@ import Step4Confirm from '../../components/bookConsultation/Step4Confirm'
 import BookingSuccessScreen from '../../components/bookConsultation/BookingSuccessScreen'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface BookConsultationProps {
   onNavigate: (path: string) => void
 }
@@ -175,7 +176,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
         }
       }
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.message || t('bookConsultation.failedToCreate'))
+      setError(userMessage(err, 'bookConsultation.failedToCreate'))
     } finally {
       setLoading(false)
     }
@@ -356,7 +357,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
         setSuccess(true)
       }
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || err.response?.data?.message || t('bookConsultation.failedToCreate'))
+      setError(userMessage(err, 'bookConsultation.failedToCreate'))
     } finally {
       setLoading(false)
     }

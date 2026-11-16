@@ -7,6 +7,7 @@ import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
 
+import { userMessage } from '../utils/userMessage'
 const SEVERITY_COLORS: Record<string, string> = {
   low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444'
 }
@@ -86,7 +87,7 @@ const DiseasePredictionPage: React.FC = () => {
       setShowForm(false)
       setFormData({ diseaseName: '', riskScore: '', confidence: '', predictedOnset: '', riskFactors: '', recommendedActions: '', animalId: '', enterpriseId: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleCreateOutbreak = async (e: React.FormEvent) => {
@@ -107,7 +108,7 @@ const DiseasePredictionPage: React.FC = () => {
       setShowOutbreakForm(false)
       setOutbreakForm({ diseaseName: '', severity: 'low', affectedCount: '', totalAtRisk: '', radiusKm: '', centerLat: '', centerLng: '', enterpriseId: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleResolve = async (id: string) => {

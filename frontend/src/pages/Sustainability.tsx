@@ -5,6 +5,7 @@ import { Enterprise, SustainabilityMetric, SustainabilityGoal } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
 
+import { userMessage } from '../utils/userMessage'
 const METRIC_TYPES = [
   { value: 'carbon_emissions', label: '🏭 Carbon Emissions', unit: 'kg CO2e' },
   { value: 'water_usage', label: '💧 Water Usage', unit: 'liters' },
@@ -69,7 +70,7 @@ const Sustainability: React.FC = () => {
       setDashboard(dashRes.data)
       setMetrics(metricsRes.data?.items || [])
       setGoals(goalsRes.data?.items || [])
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
     setLoading(false)
   }
 
@@ -78,7 +79,7 @@ const Sustainability: React.FC = () => {
     try {
       const res = await apiService.getCarbonFootprint(selectedEnterpriseId)
       setCarbonEst(res.data)
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const createMetric = async () => {
@@ -88,7 +89,7 @@ const Sustainability: React.FC = () => {
       setShowMetricForm(false)
       setSuccessMsg(t('sustainability.metricRecorded'))
       fetchData()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const createGoal = async () => {
@@ -101,7 +102,7 @@ const Sustainability: React.FC = () => {
       setShowGoalForm(false)
       setSuccessMsg(t('sustainability.goalCreated'))
       fetchData()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const getProgressColor = (pct: number) => pct >= 75 ? '#22c55e' : pct >= 50 ? '#eab308' : pct >= 25 ? '#f97316' : '#ef4444'

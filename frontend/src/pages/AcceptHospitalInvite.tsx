@@ -5,6 +5,7 @@ import apiService from '../services/api'
 import PasswordInput from '../components/PasswordInput'
 import './AcceptHospitalInvite.css'
 
+import { userMessage } from '../utils/userMessage'
 interface InviteInfo {
   email: string
   name: string
@@ -50,7 +51,7 @@ export default function AcceptHospitalInvite() {
         }
       })
       .catch(e => {
-        setErrorMsg(e.message || 'Failed to validate invite')
+        setErrorMsg(userMessage(e))
         setStep('error')
       })
   }, [token])
@@ -77,7 +78,7 @@ export default function AcceptHospitalInvite() {
         setFormError(res.message || 'Failed to create account')
       }
     } catch (e: any) {
-      setFormError(e?.response?.data?.message || e?.message || 'Failed to create account')
+      setFormError(userMessage(e))
     } finally {
       setSubmitting(false)
     }

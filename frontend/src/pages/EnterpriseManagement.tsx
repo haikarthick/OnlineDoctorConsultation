@@ -13,6 +13,7 @@ import { EnterpriseMembersPanel } from '../components/enterprise/EnterpriseMembe
 import { InviteMemberModal } from '../components/enterprise/InviteMemberModal'
 import { EnterpriseFormModal, EnterpriseFormData } from '../components/enterprise/EnterpriseFormModal'
 
+import { userMessage } from '../utils/userMessage'
 const EMPTY_FORM: EnterpriseFormData = {
   name: '', enterpriseType: '' as EnterpriseType, description: '',
   address: '', city: '', state: '', country: 'US', postalCode: '',
@@ -94,7 +95,7 @@ const EnterpriseManagement: React.FC = () => {
       fetchMembers(selectedEnterprise.id)
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
-      setInviteError(err.response?.data?.error || 'Failed to invite member')
+      setInviteError(userMessage(err))
     } finally {
       setInviteLoading(false)
     }
@@ -109,7 +110,7 @@ const EnterpriseManagement: React.FC = () => {
       setSuccessMsg('Member role updated')
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update role')
+      setError(userMessage(err))
     } finally {
       setUpdatingMemberId(null)
     }
@@ -124,7 +125,7 @@ const EnterpriseManagement: React.FC = () => {
       setSuccessMsg('Member removed')
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to remove member')
+      setError(userMessage(err))
     }
   }
 
@@ -174,7 +175,7 @@ const EnterpriseManagement: React.FC = () => {
       fetchEnterprises()
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || t('common.failedToSave'))
+      setError(userMessage(err, 'common.failedToSave'))
     }
   }
 
@@ -187,7 +188,7 @@ const EnterpriseManagement: React.FC = () => {
       if (selectedEnterprise?.id === id) setSelectedEnterprise(null)
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || t('common.failedToDelete'))
+      setError(userMessage(err, 'common.failedToDelete'))
     }
   }
 

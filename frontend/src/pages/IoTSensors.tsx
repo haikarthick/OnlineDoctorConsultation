@@ -5,6 +5,7 @@ import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, IoTSensor, SensorReading } from '../types'
 import { useTranslation } from 'react-i18next'
 
+import { userMessage } from '../utils/userMessage'
 const SENSOR_ICONS: Record<string, string> = {
   temperature: '🌡️', humidity: '💧', weight: '⚖️', activity: '🏃', air_quality: '🌬️',
   heart_rate: '💓', water_flow: '🚿', gps: '📍', camera: '📷', pressure: '🔵'
@@ -86,7 +87,7 @@ const IoTSensorPage: React.FC = () => {
       setShowForm(false)
       setFormData({ sensorType: 'temperature', sensorName: '', serialNumber: '', manufacturer: '', unit: '°C', minThreshold: '', maxThreshold: '', readingIntervalSeconds: '300' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleRecordReading = async (e: React.FormEvent) => {
@@ -101,7 +102,7 @@ const IoTSensorPage: React.FC = () => {
       setShowReadingForm(false)
       if (selectedSensor) fetchReadings(selectedSensor)
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   return (

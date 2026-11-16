@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import apiService from '../../services/api'
 import { BranchHospitalFormData, NetworkHospital } from './hospitalNetworksShared'
 
+import { userMessage } from '../../utils/userMessage'
 const EditBranchHospitalModal: React.FC<{
   networkId: string;
   hospital: NetworkHospital;
@@ -33,7 +34,7 @@ const EditBranchHospitalModal: React.FC<{
       onSuccess()
       onClose()
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || 'Failed to update branch hospital')
+      setError(userMessage(err))
     } finally {
       setSaving(false)
     }

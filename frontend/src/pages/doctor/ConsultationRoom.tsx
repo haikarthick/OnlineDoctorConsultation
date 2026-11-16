@@ -15,6 +15,7 @@ import ReferralModal, { ReferralFormState } from '../../components/consultationR
 import { formatDuration } from '../../components/consultationRoom/consultationRoomShared'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface ConsultationRoomProps {
   consultationId?: string
   onNavigate: (path: string) => void
@@ -242,7 +243,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       setShowReferralModal(false)
       setTimeout(() => setReferralSuccess(''), 4000)
     } catch (err: any) {
-      setReferralError(err?.response?.data?.error || err?.message || 'Failed to send referral')
+      setReferralError(userMessage(err))
     } finally {
       setReferralSubmitting(false)
     }
@@ -310,14 +311,14 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
             startMessagePolling(created.data.id)
           }
         } catch (err: any) {
-          setError(t('consultationRoom.failedToCreateVideoSession') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
+          setError(t('consultationRoom.failedToCreateVideoSession') + ': ' + (userMessage(err)))
         }
       }
 
       // Load consultation data for notes
       loadConsultationData()
     } catch (err: any) {
-      setError(t('consultationRoom.failedToInitializeRoom') + ': ' + (err?.message || ''))
+      setError(t('consultationRoom.failedToInitializeRoom') + ': ' + (userMessage(err)))
     } finally {
       setLoading(false)
     }
@@ -416,7 +417,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         await startLocalStream()
       }
     } catch (err: any) {
-      setError(t('consultationRoom.failedToStartCall') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
+      setError(t('consultationRoom.failedToStartCall') + ': ' + (userMessage(err)))
     }
   }
 
@@ -440,7 +441,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       if (result.data) setSession(result.data)
       stopLocalStream()
     } catch (err: any) {
-      setError(t('consultationRoom.failedToEndCall') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
+      setError(t('consultationRoom.failedToEndCall') + ': ' + (userMessage(err)))
       stopLocalStream()
     }
   }
@@ -598,7 +599,7 @@ setNewMessage(text)
       setNotesSaved(true)
       setTimeout(() => setNotesSaved(false), 3000)
     } catch (err: any) {
-setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
+setError(t('consultationRoom.failedToSaveNotes') + ': ' + (userMessage(err)))
     } finally {
       setSavingNotes(false)
     }
@@ -625,7 +626,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
       stopLocalStream()
       onNavigate('/dashboard')
     } catch (err: any) {
-      setError(t('consultationRoom.failedToComplete') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
+      setError(t('consultationRoom.failedToComplete') + ': ' + (userMessage(err)))
     }
   }
 

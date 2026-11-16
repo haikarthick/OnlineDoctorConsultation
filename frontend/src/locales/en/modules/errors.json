@@ -1,0 +1,13 @@
+{
+  "errors": {
+    "offline": "You seem to be offline, so this didn't go through. Check your signal and try again. Nothing you entered is lost.",
+    "slowServer": "The server is taking longer than usual to respond. Please wait a moment and try again.",
+    "sessionEnded": "Your session has ended. Please sign in again.",
+    "forbidden": "Your account isn't allowed to do this. If you think it should be, ask your administrator or the farm owner.",
+    "notFound": "We couldn't find what you asked for. It may have been removed or moved. Go back and try again.",
+    "conflict": "This was changed by someone else a moment ago. Refresh the page to see the latest, then try again.",
+    "tooManyRequests": "You're doing that too quickly. Please wait a minute and try again.",
+    "serverTrouble": "Something went wrong on our side, not yours. Please try again in a moment. If it keeps happening, contact support.",
+    "generic": "That didn't work. Please check what you entered and try again."
+  }
+}

@@ -18,6 +18,7 @@ import AddLabResultModal from '../components/herdMedical/AddLabResultModal'
 import ViewRecordModal from '../components/herdMedical/ViewRecordModal'
 import type { Enterprise, Animal, AnimalGroup, Tab, ModalType } from '../components/herdMedical/herdMedicalShared'
 
+import { userMessage } from '../utils/userMessage'
 const HerdMedicalManagement: React.FC = () => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
@@ -248,7 +249,7 @@ const HerdMedicalManagement: React.FC = () => {
       setSuccess(t('herdMedical.success.recordCreated')); setModal(null)
       setRecordForm({ subjectType: 'animal', animalId: '', groupId: '', recordType: 'diagnosis', title: '', content: '', severity: 'normal', followUpDate: '', medications: '', eventDate: new Date().toISOString().slice(0, 10), headCountTreated: '', affectedCount: '', mortalityCount: '' })
       loadRecords(); loadStats()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToCreateRecord')) }
+    } catch (err: any) { setError(userMessage(err, 'herdMedical.error.failedToCreateRecord')) }
     finally { setModalSaving(false) }
   }
 
@@ -272,7 +273,7 @@ const HerdMedicalManagement: React.FC = () => {
       setSuccess(t('herdMedical.success.vaccinationRecorded')); setModal(null)
       setVaccForm({ subjectType: 'animal', animalId: '', groupId: '', vaccineName: '', vaccineType: '', dateAdministered: new Date().toISOString().slice(0, 10), nextDueDate: '', batchNumber: '', manufacturer: '', dosage: '', certificateNumber: '', headCountTreated: '' })
       loadVaccinations(); loadStats()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToRecordVaccination')) }
+    } catch (err: any) { setError(userMessage(err, 'herdMedical.error.failedToRecordVaccination')) }
     finally { setModalSaving(false) }
   }
 
@@ -289,7 +290,7 @@ const HerdMedicalManagement: React.FC = () => {
       setSuccess(t('herdMedical.success.allergyRecorded')); setModal(null)
       setAllergyForm({ animalId: '', allergen: '', reaction: '', severity: 'normal', notes: '' })
       loadAllergies(); loadStats()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToRecordAllergy')) }
+    } catch (err: any) { setError(userMessage(err, 'herdMedical.error.failedToRecordAllergy')) }
     finally { setModalSaving(false) }
   }
 
@@ -308,7 +309,7 @@ const HerdMedicalManagement: React.FC = () => {
       setSuccess(t('herdMedical.success.labRecorded')); setModal(null)
       setLabForm({ animalId: '', testName: '', testDate: new Date().toISOString().slice(0, 10), testCategory: '', resultValue: '', normalRange: '', unit: '', status: 'pending', interpretation: '', labName: '', notes: '' })
       loadLabResults(); loadStats()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToRecordLabResult')) }
+    } catch (err: any) { setError(userMessage(err, 'herdMedical.error.failedToRecordLabResult')) }
     finally { setModalSaving(false) }
   }
 
@@ -316,7 +317,7 @@ const HerdMedicalManagement: React.FC = () => {
     if (!window.confirm(t('herdMedical.confirm.archiveRecord'))) return
     clearMessages()
     try { await apiService.deleteMedicalRecord(id); setSuccess(t('herdMedical.success.recordArchived')); loadRecords(); loadStats() }
-    catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToArchive')) }
+    catch (err: any) { setError(userMessage(err, 'herdMedical.error.failedToArchive')) }
   }
 
   const handleViewRecord = async (id: string) => {
@@ -327,7 +328,7 @@ const HerdMedicalManagement: React.FC = () => {
   const handleUpdateLabStatus = async (id: string, status: string) => {
     clearMessages()
     try { await apiService.updateLabResult(id, { status }); setSuccess(t('herdMedical.success.labUpdated')); loadLabResults() }
-    catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToUpdate')) }
+    catch (err: any) { setError(userMessage(err, 'common.failedToUpdate')) }
   }
 
   // MAIN RENDER

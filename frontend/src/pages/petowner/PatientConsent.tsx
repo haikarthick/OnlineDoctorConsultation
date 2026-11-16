@@ -11,6 +11,7 @@ import GrantConsentModal from '../../components/patientConsent/GrantConsentModal
 import type { Animal, PatientConsent, ScopeType, ConsentFormState } from '../../components/patientConsent/patientConsentShared'
 import { DEFAULT_FORM, todayISO, tomorrowISO } from '../../components/patientConsent/patientConsentShared'
 
+import { userMessage } from '../../utils/userMessage'
 const PatientConsentPage: React.FC = () => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
@@ -169,7 +170,7 @@ const PatientConsentPage: React.FC = () => {
       setSuccessMsg('Consent granted successfully.')
       loadConsents(selectedAnimal.id)
     } catch (err: any) {
-      const msg = err?.response?.data?.error || err?.response?.data?.message || 'Failed to grant consent.'
+      const msg = userMessage(err)
       setErrorMsg(msg)
     } finally {
       setSubmitting(false)
@@ -185,7 +186,7 @@ const PatientConsentPage: React.FC = () => {
       setSuccessMsg('Consent revoked.')
       if (selectedAnimal) loadConsents(selectedAnimal.id)
     } catch (err: any) {
-      const msg = err?.response?.data?.error || err?.response?.data?.message || 'Failed to revoke consent.'
+      const msg = userMessage(err)
       setErrorMsg(msg)
     } finally {
       setRevoking(null)

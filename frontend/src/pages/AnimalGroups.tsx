@@ -11,6 +11,7 @@ import { useCssVar } from '../hooks/useCssVar'
 import GroupFormModal from '../components/animalGroups/GroupFormModal'
 import { emptyGroupForm, groupToFormData, buildGroupPayload, type GroupFormData } from '../components/animalGroups/groupShared'
 
+import { userMessage } from '../utils/userMessage'
 interface SimpleAnimal { id: string; name: string; species: string; breed?: string; uniqueId?: string; groupId?: string; groupName?: string }
 
 /** One group's colour as a CSS variable on its card (the colour is the farmer's pick, so it is dynamic). */
@@ -123,7 +124,7 @@ const AnimalGroups: React.FC = () => {
       setSuccessMsg(t('animalGroups.toasts.deleted'))
       fetchGroups()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToDelete')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToDelete')) }
   }
 
   const groupIcon = (g: AnimalGroup) => groupTypeIcon(g.species, g.groupType) || (g.species ? speciesIcon(g.species) : null) || '📦'
@@ -179,7 +180,7 @@ const AnimalGroups: React.FC = () => {
       await openManageAnimals(manageGroup)
       fetchGroups()
     } catch (err: any) {
-      setAnimalError(err.response?.data?.error?.message || t('animalGroups.manage.assignFailed'))
+      setAnimalError(userMessage(err, 'animalGroups.manage.assignFailed'))
     }
   }
 
@@ -193,7 +194,7 @@ const AnimalGroups: React.FC = () => {
       await openManageAnimals(manageGroup)
       fetchGroups()
     } catch (err: any) {
-      setAnimalError(err.response?.data?.error?.message || t('animalGroups.manage.removeFailed'))
+      setAnimalError(userMessage(err, 'animalGroups.manage.removeFailed'))
     }
   }
 

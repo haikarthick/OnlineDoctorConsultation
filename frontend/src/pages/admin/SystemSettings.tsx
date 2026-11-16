@@ -19,6 +19,7 @@ import OtherSettingsSection from '../../components/systemSettings/OtherSettingsS
 import EmailTemplatesCard, { EmailTemplate } from '../../components/systemSettings/EmailTemplatesCard'
 import EmailTemplateEditModal from '../../components/systemSettings/EmailTemplateEditModal'
 
+import { userMessage } from '../../utils/userMessage'
 interface SystemSettingsProps {
   onNavigate: (path: string) => void
 }
@@ -407,7 +408,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       const res = await apiService.adminSendTestEmail(testEmailTo)
       setTestEmailResult({ success: true, message: res.message || 'Sent', previewUrl: res.data?.previewUrl })
     } catch (err: any) {
-      setTestEmailResult({ success: false, message: err.response?.data?.message || err.message || 'Failed' })
+      setTestEmailResult({ success: false, message: userMessage(err) })
     } finally {
       setTestEmailSending(false)
     }
