@@ -1740,6 +1740,12 @@
   background-clip: text;
   letter-spacing: -0.5px;
 }
+/* Phone: stack the title above its text / actions. This lives here, not only in ModulePage.css, because that file loads only
+   when some page has imported it - a page that did not (Master Data) kept the desktop row and squeezed the title to 101px. */
+@media (max-width: 768px) {
+  .module-header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 24px; padding-bottom: 20px; }
+  .module-header h1 { font-size: 22px; }
+}
 /* Prevent gradient text from cascading into interactive elements */
 .module-header button,
 .module-header select,
