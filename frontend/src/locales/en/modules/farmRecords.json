@@ -85,6 +85,12 @@
     "deathsSaved_one": "{{count}} death recorded.",
     "deathsSaved_other": "{{count}} deaths recorded.",
     "disabledTitle": "Daily records are not switched on yet",
-    "disabledBody": "Ask your platform administrator to switch on daily records."
+    "disabledBody": "Ask your platform administrator to switch on daily records.",
+    "recent": {
+      "title": "Recorded on the farm - last 7 days",
+      "total": "{{total}} in {{days}} days",
+      "latest": "latest: {{value}} on {{date}}",
+      "hint": "What the farm team wrote down. Shown to you because you are booked for this animal."
+    }
   }
 }

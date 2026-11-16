@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { SubjectSummary } from '../shared/SubjectSummary'
+import { RecentFarmRecords } from '../farmRecords/RecentFarmRecords'
 
 interface MedicalHistoryPanelProps {
   historyLoading: boolean
@@ -37,6 +38,8 @@ const MedicalHistoryPanel: React.FC<MedicalHistoryPanelProps> = ({
         <>
           {/* Animal at a glance - one component for every screen that shows an animal */}
           <SubjectSummary animal={animalInfo} emphasis showFarm />
+          {/* What the farm team recorded in the last 7 days - only for the vet booked for this animal */}
+          <RecentFarmRecords animalId={animalInfo.id} />
 
           {/* Allergies */}
           <div className="si-bab8e8bc">

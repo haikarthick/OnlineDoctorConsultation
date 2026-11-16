@@ -2,7 +2,8 @@ import database from '../utils/database';
 import logger from '../utils/logger';
 import { ValidationError, NotFoundError, ForbiddenError } from '../utils/errors';
 import FarmProfileService from './FarmProfileService';
-import FarmAccessService from './FarmAccessService';
+import FarmAccessService, { VET_NOT_BOOKED_MESSAGE } from './FarmAccessService';
+import { logClinicalAccess } from '../middleware/hospitalDataIsolation';
 import BatchManagementService from './BatchManagementService';
 
 /**
@@ -66,7 +67,7 @@ class FarmRecordService {
   }
 
   /** Loads the animal or group a record is about, checking the caller may use its farm. */
-  async loadSubject(input: { animalId?: string | null; groupId?: string | null }, caller: Caller, write = false): Promise<Subject> {
+  async loadSubject(input: { animalId?: string | null; groupId?: string | null }, caller: Caller, write = false, skipFarmAccess = false): Promise<Subject> {
     if (!!input.animalId === !!input.groupId) {
       throw new ValidationError('A record is about one animal or one group - choose which.');
     }
@@ -82,7 +83,7 @@ class FarmRecordService {
       const a = r.rows[0];
       if (!a) throw new NotFoundError('Animal not found');
       if (!a.enterprise_id) throw new ValidationError('This animal is not on a farm yet. Put it on a farm first, then record against it.');
-      await this.assertFarmAccess(a.enterprise_id, caller, write);
+      if (!skipFarmAccess) await this.assertFarmAccess(a.enterprise_id, caller, write);
       return {
         enterpriseId: a.enterprise_id, kind: 'animal', id: a.id, speciesCode: a.species || null,
         animalClass: a.animal_class || null, gender: a.gender || null,
@@ -98,7 +99,7 @@ class FarmRecordService {
     );
     const g = r.rows[0];
     if (!g) throw new NotFoundError('Group not found');
-    await this.assertFarmAccess(g.enterprise_id, caller, write);
+    if (!skipFarmAccess) await this.assertFarmAccess(g.enterprise_id, caller, write);
     return {
       enterpriseId: g.enterprise_id, kind: 'group', id: g.id, speciesCode: g.species || null, animalClass: null,
       gender: null, managementMode: g.management_mode || null, groupType: g.group_type || null, cycleId: g.cycle_id || null,
@@ -164,6 +165,26 @@ class FarmRecordService {
     // one (milk: am / pm) already insisted on it above.
     if (!known.has('session')) session = 'day';
     return { quantity, session, detail };
+  }
+
+  /** The caller's role on the farm that owns this animal / group (null: not on that farm). */
+  private async farmRoleFor(ref: { animalId?: string | null; groupId?: string | null }, caller: Caller): Promise<string | null> {
+    const r = ref.animalId
+      ? await database.query(`SELECT enterprise_id FROM animals WHERE id = $1`, [ref.animalId])
+      : await database.query(`SELECT enterprise_id FROM animal_groups WHERE id = $1`, [ref.groupId]);
+    const enterpriseId = r.rows[0]?.enterprise_id;
+    if (!enterpriseId) return null;
+    return FarmAccessService.roleOf(enterpriseId, caller.userId);
+  }
+
+  /** Every read by a consulting vet is recorded (the animal's access log; groups go to the server log). */
+  private auditVetRead(vetId: string, ref: { animalId?: string | null; groupId?: string | null }): void {
+    if (ref.animalId) {
+      logClinicalAccess({ accessedBy: vetId, accessorRole: 'veterinarian', animalId: ref.animalId, accessType: 'view', recordType: 'farm_records', accessGranted: true })
+        .catch(() => { /* an audit failure must not block the vet's read */ });
+    } else {
+      logger.info('Consulting vet read group farm records', { vetId, groupId: ref.groupId });
+    }
   }
 
   private labelOf(key: string): string {
@@ -256,8 +277,19 @@ class FarmRecordService {
       throw new ValidationError('Say which farm, animal or group to list records for.');
     }
     if (filter.animalId || filter.groupId) {
-      const s = await this.loadSubject({ animalId: filter.animalId, groupId: filter.groupId }, caller);
+      const subjectRef = { animalId: filter.animalId, groupId: filter.groupId };
+      let viaConsultation = false;
+      if (caller.role === 'veterinarian') {
+        // A vet who is not on the farm reads only what the appointment they hold covers.
+        const probe = await this.farmRoleFor(subjectRef, caller);
+        if (!probe) {
+          if (!(await FarmAccessService.consultingVetMayRead(caller.userId, subjectRef))) throw new ForbiddenError(VET_NOT_BOOKED_MESSAGE);
+          viaConsultation = true;
+        }
+      }
+      const s = await this.loadSubject(subjectRef, caller, false, viaConsultation);
       filter.enterpriseId = s.enterpriseId;
+      if (viaConsultation) this.auditVetRead(caller.userId, subjectRef);
     } else {
       await this.assertFarmAccess(filter.enterpriseId!, caller);
     }

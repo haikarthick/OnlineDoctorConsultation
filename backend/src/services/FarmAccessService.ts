@@ -74,6 +74,12 @@ function refusalFor(role: FarmRole, action: FarmAction): string {
 
 export interface Actor { userId: string; role?: string }
 
+/** How long after an appointment is completed the booked vet may still read that animal's farm records. */
+export const VET_ACCESS_DAYS = 30;
+
+export const VET_NOT_BOOKED_MESSAGE =
+  'Farm records are shared only with the vet who is booked for an appointment about this animal or group (and for 30 days after it ends). Ask the farm owner to book you for it.'; // keep the 30 in step with VET_ACCESS_DAYS
+
 class FarmAccessService {
 
   /** The person's role on this farm, or null when they have no claim on it. */
@@ -105,6 +111,30 @@ class FarmAccessService {
   async can(enterpriseId: string, actor: Actor, action: FarmAction): Promise<boolean> {
     if (actor.role === 'admin') return true;
     return roleCan(await this.roleOf(enterpriseId, actor.userId), action);
+  }
+
+  /**
+   * A consulting vet - NOT a farm member - may READ the farm records of one animal or one group while they
+   * hold an appointment for it: a confirmed (or rescheduled) booking or a live consultation, and for
+   * 30 days after it was completed. Only that animal / group; never the farm, its team or its finances.
+   * Pending (not yet confirmed), cancelled, missed and no-show appointments give no access.
+   */
+  async consultingVetMayRead(vetUserId: string, subject: { animalId?: string | null; groupId?: string | null }): Promise<boolean> {
+    if (!subject.animalId && !subject.groupId) return false;
+    const r = await database.query(
+      `SELECT 1 WHERE
+         EXISTS (SELECT 1 FROM bookings b
+                  WHERE b.veterinarian_id = $1
+                    AND (($2::uuid IS NOT NULL AND b.animal_id = $2::uuid) OR ($3::uuid IS NOT NULL AND b.group_id = $3::uuid))
+                    AND (b.status IN ('confirmed', 'rescheduled')
+                         OR (b.status = 'completed' AND b.updated_at >= NOW() - ($4::int * INTERVAL '1 day'))))
+         OR EXISTS (SELECT 1 FROM consultations c
+                     WHERE c.veterinarian_id = $1 AND $2::uuid IS NOT NULL AND c.animal_id = $2::uuid
+                       AND (c.status IN ('confirmed', 'scheduled', 'in_progress')
+                            OR (c.status = 'completed' AND c.completed_at >= NOW() - ($4::int * INTERVAL '1 day'))))`,
+      [vetUserId, subject.animalId || null, subject.groupId || null, VET_ACCESS_DAYS]
+    );
+    return r.rows.length > 0;
   }
 
   /** The action a plain HTTP method needs: looking is 'read'; anything else changes something (not for a viewer). */

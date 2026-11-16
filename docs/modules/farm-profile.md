@@ -186,3 +186,20 @@ below a manager) invite by mobile number and/or email with a role (`FarmInvitati
 - The older `POST /enterprises/:id/invite-member` now creates an invitation (no instant add).
 - Screens: `components/enterprise/{InviteMemberModal,InviteResultNotice,FarmInvitationsPanel,PendingFarmInvitations}.tsx`,
   `pages/JoinFarm.tsx`, `pages/admin/SmsSettings.tsx`. Verified: 41 server checks, 19 browser checks.
+
+## Vet access to farm records (2026-11-16, owner rule)
+Only the vet booked for an appointment about an animal or group may read that animal's / group's farm records.
+`FarmAccessService.consultingVetMayRead`: a **confirmed or rescheduled** booking, or a consultation that is
+confirmed / scheduled / in progress, and **30 days** after it was completed (`VET_ACCESS_DAYS`; for a booking the clock
+is its `updated_at`, so a later edit of a completed booking extends access). Pending, cancelled, missed and no-show give
+none. Read-only and only for that one animal / group: never the farm, its summary, due list, team or finances, and no
+writes. Each read by such a vet is written to `clinical_data_access_log` (animals; groups go to the server log). A vet
+refused is told how access works ("ask the farm owner to book you for it"). On screen: `RecentFarmRecords` (last 7 days
+per record type) under the animal summary in the consultation room and the prescribe panel; it shows nothing when there
+is nothing to show. Verified by a 19-check real-server run.
+
+**Found, not changed (needs the owner):** `GET /animals/:id` still lets ANY veterinarian open ANY non-network animal's
+profile (`AnimalController.getAnimal`), which conflicts with the rule above for the animal profile itself; tightening it
+could affect certificates and hospital flows. Also `logClinicalAccess` writes access types such as `get_medical_records`
+that the table's CHECK (`view, search, export, print, api_call, audit`) rejects, so those audit rows silently fail
+(hospital-network code - change-protected).

@@ -3601,3 +3601,11 @@ button.record-due-row { cursor: pointer; }
 .join-farm-actions .btn { min-height: var(--tap-min); flex: 1 1 140px; }
 .join-farm-subtitle { margin: 4px 0 0; font-size: 18px; }
 .join-farm-form { display: flex; flex-direction: column; gap: 10px; }
+
+/* ── Vet side: what the farm recorded (components/farmRecords/RecentFarmRecords.tsx) ── */
+.recent-farm-records { margin: 12px 0; padding: 10px 14px; border-radius: var(--radius-lg); background: var(--brand-soft); }
+.recent-farm-records-title { margin: 0 0 6px; font-size: 15px; }
+.recent-farm-records-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.recent-farm-record { overflow-wrap: anywhere; font-size: 14px; }
+.recent-farm-record-latest { color: var(--gray-600); }
+.recent-farm-records-hint { margin: 6px 0 0; color: var(--gray-600); font-size: 12px; }

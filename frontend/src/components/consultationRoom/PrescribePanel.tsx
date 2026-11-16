@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { SubjectSummary } from '../shared/SubjectSummary'
+import { RecentFarmRecords } from '../farmRecords/RecentFarmRecords'
 
 interface PrescribePanelProps {
   conId: string
@@ -22,6 +23,7 @@ const PrescribePanel: React.FC<PrescribePanelProps> = ({ conId, animalInfo, onNa
   return (
     <div className="si-c710217c">
       {animalInfo && <SubjectSummary animal={animalInfo} emphasis />}
+      {animalInfo && <RecentFarmRecords animalId={animalInfo.id} />}
       <p className="si-09dee8a9">
         {t('consultationRoom.quickPrescribeAccess')}
       </p>
