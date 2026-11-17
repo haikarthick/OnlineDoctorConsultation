@@ -35,10 +35,10 @@ function getAI(): AiClient | null {
     if (groqKey) {
       _ai = {
         client: new OpenAI({ apiKey: groqKey, baseURL: 'https://api.groq.com/openai/v1' }),
-        model: 'llama-3.3-70b-versatile',
-        provider: 'Groq (llama-3.3-70b)'
+        model: process.env.GROQ_MODEL?.split(',')[0]?.trim() || 'llama-3.3-70b-versatile',
+        provider: 'Groq'
       };
-      logger.info('AI Copilot: using Groq llama-3.3-70b (free tier)');
+      logger.info('AI Copilot: using Groq (free tier)', { model: _ai.model });
     } else if (openaiKey) {
       _ai = {
         client: new OpenAI({ apiKey: openaiKey }),
@@ -332,6 +332,14 @@ class AiCopilotService {
       logger.warn('Failed to build user context for AI', { error: err?.message, userId });
       return '';
     }
+  }
+
+  // Models to try, best first: the one in use, then GROQ_MODEL (set on Render to switch without a deploy),
+  // then known Groq text models.
+  private modelChain(ai: AiClient): string[] {
+    if (!ai.provider.includes('Groq')) return [ai.model];
+    const configured = process.env.GROQ_MODEL?.split(',').map(s => s.trim()).filter(Boolean) ?? [];
+    return Array.from(new Set([ai.model, ...configured, 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant']));
   }
 
   // Helper: keep the newest `n` rows per animal (rows arrive newest first)
@@ -726,12 +734,31 @@ IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and sho
         }
         messages.push({ role: 'user', content: userMessage });
 
-        const completion = await ai.client.chat.completions.create({
-          model: ai.model,
-          messages,
-          max_tokens: 800,
-          temperature: 0.5
-        });
+        // Providers retire models (Groq answered 404 for llama-3.3-70b-versatile). Try the models
+        // in order; a "model not found" moves on to the next, and the one that works is remembered.
+        let completion: OpenAI.Chat.ChatCompletion | null = null;
+        let modelError: any = null;
+        for (const model of this.modelChain(ai)) {
+          try {
+            completion = await ai.client.chat.completions.create({
+              model,
+              messages,
+              max_tokens: 800,
+              temperature: 0.5
+            });
+            if (model !== ai.model) {
+              logger.warn('AI Copilot: switched model', { from: ai.model, to: model });
+              ai.model = model;
+            }
+            break;
+          } catch (e: any) {
+            const gone = e?.status === 404 || e?.code === 'model_not_found' || e?.code === 'model_decommissioned';
+            if (!gone) throw e;
+            modelError = e;
+            logger.error('AI model unavailable, trying the next one', { model, error: e?.message });
+          }
+        }
+        if (!completion) throw modelError;
 
         const content = completion.choices[0]?.message?.content ?? 'I was unable to generate a response. Please try again.';
         const tokens = completion.usage?.total_tokens ?? Math.ceil(content.length / 4);
