@@ -1,6 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
-import { DatabaseError, NotFoundError } from '../utils/errors';
+import { DatabaseError, NotFoundError, ValidationError } from '../utils/errors';
+import FarmProfileService from './FarmProfileService';
+import { ANIMAL_BREEDING_STATUSES } from '../utils/breedingStatus';
 import logger from '../utils/logger';
 
 export interface Animal {
@@ -30,6 +32,12 @@ export interface Animal {
   breedingStatus?: string;
   lastBreedingDate?: string;
   expectedDueDate?: string;
+  /** Production facts a vet needs to dose and advise (migration 044). */
+  avgDailyMilkLitres?: number | null;
+  parity?: number | null;
+  lastBirthDate?: string | null;
+  dryOffDate?: string | null;
+  birthWeight?: number | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -59,9 +67,57 @@ export interface AnimalCreateDTO {
   breedingStatus?: string;
   lastBreedingDate?: string;
   expectedDueDate?: string;
+  avgDailyMilkLitres?: number | null;
+  parity?: number | null;
+  lastBirthDate?: string | null;
+  dryOffDate?: string | null;
+  birthWeight?: number | null;
 }
 
+/**
+ * Which resolver field each farm-only DTO key belongs to. A value for one of these is accepted
+ * only when the farm profile for that species/class says the field applies (a bull has no milk
+ * yield; a calf has no calvings) - the same rule the screens use to hide the field, enforced here
+ * so a stale client or an import cannot store what the screen would never have asked for.
+ */
+const FARM_FIELD_RULES: Array<{ key: keyof AnimalCreateDTO; field: string; label: string }> = [
+  { key: 'avgDailyMilkLitres', field: 'avgDailyMilk', label: 'average daily milk' },
+  { key: 'dryOffDate', field: 'dryOffDate', label: 'dry-off date' },
+  { key: 'parity', field: 'parity', label: 'number of births' },
+  { key: 'lastBirthDate', field: 'lastBirthDate', label: 'last birth date' },
+  { key: 'breedingStatus', field: 'pregnancyStatus', label: 'breeding status' },
+  { key: 'lastBreedingDate', field: 'lastBreedingDate', label: 'last breeding date' },
+  { key: 'expectedDueDate', field: 'expectedDueDate', label: 'expected due date' },
+];
+
+const isBlank = (v: unknown) => v === undefined || v === null || v === '';
+
 export class AnimalService {
+  /**
+   * Refuses a farm-only field that does not apply to this animal, with a message that names the
+   * field and the animal. `existing` fills in what a partial update leaves out.
+   */
+  private async assertFarmFieldsAllowed(
+    data: Partial<AnimalCreateDTO>,
+    existing?: { species?: string; animalClass?: string | null; gender?: string | null }
+  ): Promise<void> {
+    const present = FARM_FIELD_RULES.filter(rule => !isBlank(data[rule.key]));
+    if (present.length === 0) return;
+    const species = data.species ?? existing?.species;
+    const profile = await FarmProfileService.resolve({
+      speciesCode: species,
+      animalClass: data.animalClass !== undefined ? data.animalClass : existing?.animalClass,
+      gender: data.gender !== undefined ? data.gender : existing?.gender,
+      managementMode: 'individual',
+    });
+    const refused = present.filter(rule => profile.fields[rule.field as keyof typeof profile.fields] === 'hidden');
+    if (refused.length > 0) {
+      throw new ValidationError(
+        `${refused.map(r => r.label).join(', ')} cannot be set for this animal (${species || 'unknown species'}${data.animalClass ?? existing?.animalClass ? `, ${data.animalClass ?? existing?.animalClass}` : ''}). Check the species and class.`
+      );
+    }
+  }
+
   // Map species name → 3-letter code for VC-SPE-YY-NNNNN format
   private getSpeciesCode(species: string): string {
     const s = species.toLowerCase().trim().replace(/[^a-z\s]/g, '').trim();
@@ -153,14 +209,18 @@ export class AnimalService {
 
   async createAnimal(ownerId: string, data: AnimalCreateDTO): Promise<Animal> {
     try {
+      await this.assertFarmFieldsAllowed(data);
       const id = uuidv4();
       const uniqueId = await this.generateUniqueId(data.species);
       const query = `
         INSERT INTO animals (id, owner_id, unique_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id,
                              ear_tag_id, registration_number, is_neutered, insurance_provider, insurance_policy_number, insurance_expiry,
                              medical_notes, enterprise_id, group_id, animal_class, sire_id, dam_id,
-                             breeding_status, last_breeding_date, expected_due_date, is_active, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, true, NOW(), NOW())
+                             breeding_status, last_breeding_date, expected_due_date,
+                             avg_daily_milk_litres, parity, last_birth_date, dry_off_date, birth_weight,
+                             is_active, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26,
+                $27, $28, $29, $30, $31, true, NOW(), NOW())
         RETURNING id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
                   gender, weight, color, microchip_id as "microchipId", ear_tag_id as "earTagId",
                   registration_number as "registrationNumber", is_neutered as "isNeutered",
@@ -169,6 +229,8 @@ export class AnimalService {
                   enterprise_id as "enterpriseId", group_id as "groupId",
                   animal_class as "animalClass", sire_id as "sireId", dam_id as "damId",
                   breeding_status as "breedingStatus", last_breeding_date as "lastBreedingDate", expected_due_date as "expectedDueDate",
+                  avg_daily_milk_litres as "avgDailyMilkLitres", parity, last_birth_date as "lastBirthDate",
+                  dry_off_date as "dryOffDate", birth_weight as "birthWeight",
                   is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [
@@ -179,11 +241,16 @@ export class AnimalService {
         data.insuranceExpiry || null, data.medicalNotes || null,
         data.enterpriseId || null, data.groupId || null,
         data.animalClass || null, data.sireId || null, data.damId || null,
-        data.breedingStatus || null, data.lastBreedingDate || null, data.expectedDueDate || null
+        data.breedingStatus || null, data.lastBreedingDate || null, data.expectedDueDate || null,
+        isBlank(data.avgDailyMilkLitres) ? null : data.avgDailyMilkLitres,
+        isBlank(data.parity) ? null : data.parity,
+        data.lastBirthDate || null, data.dryOffDate || null,
+        isBlank(data.birthWeight) ? null : data.birthWeight
       ]);
       logger.info('Animal created', { id, ownerId, uniqueId });
       return result.rows[0];
     } catch (error) {
+      if (error instanceof ValidationError) throw error;
       throw new DatabaseError('Error creating animal', { originalError: error });
     }
   }
@@ -223,12 +290,18 @@ export class AnimalService {
                a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
                a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
                a.expected_due_date as "expectedDueDate",
+               a.avg_daily_milk_litres as "avgDailyMilkLitres", a.parity, a.last_birth_date as "lastBirthDate",
+               a.dry_off_date as "dryOffDate", a.birth_weight as "birthWeight",
                a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                sire.name as "sireName", dam.name as "damName",
+               a.enterprise_id as "enterpriseId", a.group_id as "groupId",
+               ent.name as "enterpriseName", grp.name as "groupName",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt"
         FROM animals a
         LEFT JOIN animals sire ON sire.id = a.sire_id
         LEFT JOIN animals dam ON dam.id = a.dam_id
+        LEFT JOIN enterprises ent ON ent.id = a.enterprise_id
+        LEFT JOIN animal_groups grp ON grp.id = a.group_id
         WHERE a.id = $1
       `;
       const result = await database.query(query, [animalId]);
@@ -253,6 +326,8 @@ export class AnimalService {
                a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
                a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
                a.expected_due_date as "expectedDueDate",
+               a.avg_daily_milk_litres as "avgDailyMilkLitres", a.parity, a.last_birth_date as "lastBirthDate",
+               a.dry_off_date as "dryOffDate", a.birth_weight as "birthWeight",
                a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                (SELECT acc.network_id FROM animal_care_contexts acc
@@ -298,6 +373,8 @@ export class AnimalService {
                a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
                a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
                a.expected_due_date as "expectedDueDate",
+               a.avg_daily_milk_litres as "avgDailyMilkLitres", a.parity, a.last_birth_date as "lastBirthDate",
+               a.dry_off_date as "dryOffDate", a.birth_weight as "birthWeight",
                a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
@@ -341,6 +418,8 @@ export class AnimalService {
                a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
                a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
                a.expected_due_date as "expectedDueDate",
+               a.avg_daily_milk_litres as "avgDailyMilkLitres", a.parity, a.last_birth_date as "lastBirthDate",
+               a.dry_off_date as "dryOffDate", a.birth_weight as "birthWeight",
                a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
@@ -365,8 +444,8 @@ export class AnimalService {
     try {
       // Find user's network membership
       const memberResult = await database.query(
-        `SELECT network_id, hospital_id FROM hospital_network_members 
-         WHERE user_id = $1 AND is_active = true LIMIT 1`,
+        `SELECT network_id, hospital_id FROM hospital_network_members
+         WHERE user_id = $1 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW()) LIMIT 1`,
         [userId]
       );
       if (memberResult.rows.length === 0) {
@@ -384,6 +463,8 @@ export class AnimalService {
                a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
                a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
                a.expected_due_date as "expectedDueDate",
+               a.avg_daily_milk_litres as "avgDailyMilkLitres", a.parity, a.last_birth_date as "lastBirthDate",
+               a.dry_off_date as "dryOffDate", a.birth_weight as "birthWeight",
                a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
@@ -427,9 +508,22 @@ export class AnimalService {
         insuranceExpiry: 'insurance_expiry', medicalNotes: 'medical_notes',
         animalClass: 'animal_class', sireId: 'sire_id', damId: 'dam_id',
         breedingStatus: 'breeding_status', lastBreedingDate: 'last_breeding_date', expectedDueDate: 'expected_due_date',
+        avgDailyMilkLitres: 'avg_daily_milk_litres', parity: 'parity', lastBirthDate: 'last_birth_date',
+        dryOffDate: 'dry_off_date', birthWeight: 'birth_weight',
+        enterpriseId: 'enterprise_id', groupId: 'group_id',
       };
-      const entries = Object.entries(updates).filter(([_, v]) => v !== undefined);
+      // Only these keys may name a column; anything else in the payload is ignored rather than
+      // being spliced into the SQL.
+      const entries = Object.entries(updates)
+        .filter(([key, v]) => v !== undefined && key in fieldMap)
+        // A cleared field arrives as '' - store NULL (a DATE or number column rejects '').
+        .map(([key, v]) => [key, v === '' ? null : v] as [string, unknown]);
       if (entries.length === 0) return this.getAnimal(animalId);
+
+      // Validate against what the animal is NOW merged with what is being changed.
+      const current = await database.query('SELECT species, animal_class as "animalClass", gender FROM animals WHERE id = $1', [animalId]);
+      if (current.rows.length === 0) throw new NotFoundError('Animal', animalId);
+      await this.assertFarmFieldsAllowed(updates, current.rows[0]);
 
       const sets = entries.map(([key], i) => `${fieldMap[key] || key} = $${i + 2}`);
       const values = entries.map(([_, v]) => v);
@@ -444,13 +538,15 @@ export class AnimalService {
                   insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
                   animal_class as "animalClass", sire_id as "sireId", dam_id as "damId",
                   breeding_status as "breedingStatus", last_breeding_date as "lastBreedingDate", expected_due_date as "expectedDueDate",
+                  avg_daily_milk_litres as "avgDailyMilkLitres", parity, last_birth_date as "lastBirthDate",
+                  dry_off_date as "dryOffDate", birth_weight as "birthWeight",
                   is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [animalId, ...values]);
       if (result.rows.length === 0) throw new NotFoundError('Animal', animalId);
       return result.rows[0];
     } catch (error) {
-      if (error instanceof NotFoundError) throw error;
+      if (error instanceof NotFoundError || error instanceof ValidationError) throw error;
       throw new DatabaseError('Error updating animal', { originalError: error });
     }
   }

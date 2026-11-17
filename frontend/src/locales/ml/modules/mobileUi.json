@@ -1,0 +1,69 @@
+{
+  "mobileUi": {
+    "close": "അടയ്ക്കുക",
+    "tabBarLabel": "പ്രധാന നാവിഗേഷൻ",
+    "quickActionsTitle": "എന്താണ് ചെയ്യേണ്ടത്?",
+    "tabs": {
+      "home": "ഹോം",
+      "add": "ചേർക്കുക",
+      "more": "കൂടുതൽ"
+    },
+    "stepper": {
+      "less": "കുറയ്ക്കുക",
+      "more": "കൂട്ടുക"
+    },
+    "date": {
+      "today": "ഇന്ന്",
+      "yesterday": "ഇന്നലെ",
+      "other": "മറ്റൊരു തീയതി"
+    },
+    "save": {
+      "saving": "സേവ് ചെയ്യുന്നു...",
+      "saved": "സേവ് ചെയ്തു",
+      "offlineTitle": "കണക്ഷൻ ഇല്ല",
+      "offlineHint": "നിങ്ങളുടെ രേഖ ഈ സ്ക്രീനിൽ തന്നെയുണ്ട്. സിഗ്നൽ കിട്ടിയാൽ \"വീണ്ടും ശ്രമിക്കുക\" അമർത്തുക.",
+      "failedTitle": "സേവ് ചെയ്യാനായില്ല",
+      "retry": "വീണ്ടും ശ്രമിക്കുക"
+    },
+    "step": {
+      "stepOf": "ഘട്ടം {{current}} / {{total}}",
+      "back": "പിന്നിലേക്ക്",
+      "next": "അടുത്തത്"
+    },
+    "tabLabels": {
+      "animals": "മൃഗങ്ങൾ",
+      "herd-medical": "ചികിത്സ",
+      "animal-groups": "ഗ്രൂപ്പുകൾ",
+      "medical": "രേഖകൾ",
+      "consultations": "ഡോക്ടർ",
+      "admin-consultations": "ഡോക്ടർ",
+      "prescriptions": "മരുന്ന്",
+      "manage-schedule": "ഷെഡ്യൂൾ",
+      "grooming-schedule": "ഷെഡ്യൂൾ",
+      "hospital-workflow": "ക്യൂ",
+      "inpatient": "ഇൻപേഷ്യന്റ്",
+      "hospital-networks": "നെറ്റ്‌വർക്ക്",
+      "vet-hospitals": "ആശുപത്രി",
+      "settings": "ക്രമീകരണം",
+      "pharmacy": "ഫാർമസി",
+      "grooming-orders": "ഓർഡറുകൾ",
+      "grooming-earnings": "വരുമാനം",
+      "grooming-provider": "ബിസിനസ്",
+      "admin-dashboard": "അഡ്മിൻ",
+      "admin-users": "യൂസർ",
+      "admin-finance-reports": "ധനകാര്യം",
+      "financial": "ധനകാര്യം",
+      "health-analytics": "വിശകലനം",
+      "admin-disputes": "തർക്കങ്ങൾ",
+      "admin-cancellation-dashboard": "റദ്ദാക്കൽ"
+    },
+    "tabLabelsByRole": {
+      "pet_owner": {
+        "animals": "മൃഗം"
+      },
+      "veterinarian": {
+        "animals": "മൃഗം"
+      }
+    }
+  }
+}

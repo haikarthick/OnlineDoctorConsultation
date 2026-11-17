@@ -1,10 +1,12 @@
 import database from '../utils/database';
 import logger from '../utils/logger';
+import FarmProfileService from './FarmProfileService';
+import { animalStatusForRecordStatus, isBirthStatus } from '../utils/breedingStatus';
 
 class BreedingService {
 
   async create(data: any): Promise<any> {
-    const gestationDays = data.gestationDays || this.estimateGestation(data.species);
+    const gestationDays = data.gestationDays || await this.estimateGestation(data.species, data.damId);
     const expectedDue = data.expectedDueDate || (gestationDays
       ? new Date(new Date(data.breedingDate).getTime() + gestationDays * 86400000).toISOString().split('T')[0]
       : null);
@@ -18,18 +20,41 @@ class BreedingService {
        data.semenBatch || null, data.technicianId || null, data.notes || null]
     );
 
-    // Update dam breeding status
+    // Update dam breeding status. The record's status is mapped onto the animal's own vocabulary
+    // (utils/breedingStatus.ts) - writing it through verbatim is what used to leave animals with a
+    // status their screens could not show.
     if (data.damId) {
       await database.query(
-        `UPDATE animals SET breeding_status = 'bred', last_breeding_date = $1, expected_due_date = $2, updated_at = NOW() WHERE id = $3`,
-        [data.breedingDate, expectedDue, data.damId]
+        `UPDATE animals SET breeding_status = $1, last_breeding_date = $2, expected_due_date = $3, updated_at = NOW() WHERE id = $4`,
+        [animalStatusForRecordStatus(data.status || 'bred') || 'bred', data.breedingDate, expectedDue, data.damId]
       );
     }
 
     return this.mapRow(result.rows[0]);
   }
 
+  /**
+   * True when every given animal belongs to the farm, or to the caller (an animal's owner may
+   * breed it within their own farm). Platform admins are not restricted. Stops a record from
+   * naming another tenant's animal as dam or sire - which would let it rewrite that animal's
+   * breeding status and birth count.
+   */
+  async animalsAllowed(enterpriseId: string, animalIds: Array<string | null | undefined>, userId: string, role?: string): Promise<boolean> {
+    const ids = Array.from(new Set(animalIds.filter((x): x is string => !!x)));
+    if (ids.length === 0 || role === 'admin') return true;
+    const r = await database.query(
+      `SELECT COUNT(*) AS n FROM animals WHERE id = ANY($1::uuid[]) AND (enterprise_id = $2 OR owner_id = $3)`,
+      [ids, enterpriseId, userId]
+    );
+    return parseInt(r.rows[0]?.n || '0', 10) === ids.length;
+  }
+
   async update(id: string, data: any): Promise<any> {
+    // The status BEFORE this edit: a birth must be counted when the record becomes 'delivered',
+    // not every time a delivered record is saved again (editing a note must not add a calving).
+    const before = await database.query('SELECT status FROM breeding_records WHERE id = $1', [id]);
+    const previousStatus: string | null = before.rows[0]?.status ?? null;
+
     const result = await database.query(
       `UPDATE breeding_records SET
         breeding_method = COALESCE($2, breeding_method),
@@ -53,12 +78,28 @@ class BreedingService {
     // Update dam status based on breeding record status
     const record = result.rows[0];
     if (record && record.dam_id) {
-      let breedingStatus = record.status;
-      if (record.status === 'delivered') breedingStatus = 'open';
-      await database.query(
-        `UPDATE animals SET breeding_status = $1, updated_at = NOW() WHERE id = $2`,
-        [breedingStatus, record.dam_id]
-      );
+      const breedingStatus = animalStatusForRecordStatus(record.status);
+      if (breedingStatus) {
+        await database.query(
+          `UPDATE animals SET breeding_status = $1, updated_at = NOW() WHERE id = $2`,
+          [breedingStatus, record.dam_id]
+        );
+      }
+      // A birth ends the pregnancy and starts the next lactation: record the date, count it once,
+      // and clear the dry-off and due dates that belonged to the pregnancy that just ended.
+      if (isBirthStatus(record.status)) {
+        const newlyDelivered = !isBirthStatus(previousStatus);
+        await database.query(
+          `UPDATE animals
+              SET last_birth_date = COALESCE($1::date, last_birth_date, CURRENT_DATE),
+                  parity = CASE WHEN $3 THEN COALESCE(parity, 0) + 1 ELSE parity END,
+                  dry_off_date = CASE WHEN $3 THEN NULL ELSE dry_off_date END,
+                  expected_due_date = NULL,
+                  updated_at = NOW()
+            WHERE id = $2`,
+          [record.actual_birth_date || null, record.dam_id, newlyDelivered]
+        );
+      }
     }
 
     return this.mapRow(result.rows[0]);
@@ -127,13 +168,25 @@ class BreedingService {
     return stats.rows[0];
   }
 
-  private estimateGestation(species?: string): number | null {
-    if (!species) return null;
-    const map: Record<string, number> = {
-      cattle: 283, cow: 283, horse: 340, pig: 114, sheep: 148,
-      goat: 150, dog: 63, cat: 65, rabbit: 31, chicken: 21,
-    };
-    return map[species.toLowerCase()] || null;
+  /**
+   * Days to the expected birth, from master data (master_species.gestation_days, admin-editable)
+   * instead of the hardcoded map that used to live here and had no buffalo. The breeding screen
+   * never sends a species, so when none is given it is read from the dam - before this, no
+   * expected due date was ever calculated unless the farmer typed the gestation days themselves.
+   * Best effort: a lookup problem must never stop the breeding record from being saved.
+   */
+  private async estimateGestation(species?: string | null, damId?: string | null): Promise<number | null> {
+    try {
+      let speciesCode = species || null;
+      if (!speciesCode && damId) {
+        const dam = await database.query('SELECT species FROM animals WHERE id = $1', [damId]);
+        speciesCode = dam.rows[0]?.species || null;
+      }
+      return await FarmProfileService.gestationDaysFor(speciesCode);
+    } catch (error: any) {
+      logger.warn('Could not estimate gestation days', { error: error.message });
+      return null;
+    }
   }
 
   private mapRow(row: any): any {

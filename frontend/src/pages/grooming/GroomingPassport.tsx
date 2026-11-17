@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void; animalId?: string }
 
 const CATS = ['skin', 'coat', 'ears', 'nails', 'teeth'] as const
@@ -24,7 +25,7 @@ const GroomingPassport: React.FC<Props> = ({ onNavigate, animalId }) => {
   const load = useCallback(async () => {
     if (!animalId) return
     try { setLoading(true); setErr(''); setData((await apiService.getGroomingPetPassport(animalId)).data) }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [animalId])
   useEffect(() => { load() }, [load])
 

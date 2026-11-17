@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
 import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
+import { userMessage } from '../utils/userMessage'
 const ZONE_TYPES = ['pasture', 'barn', 'medical', 'quarantine', 'feeding', 'water', 'boundary', 'custom']
 const ZONE_COLORS: Record<string, string> = { pasture: '#22c55e', barn: '#a78bfa', medical: '#ef4444', quarantine: '#f97316', feeding: '#eab308', water: '#3b82f6', boundary: '#64748b', custom: '#ec4899' }
 const EVENT_TYPES = ['location_update', 'zone_entry', 'zone_exit', 'zone_breach', 'sos_alert']
@@ -57,7 +58,7 @@ const GeospatialAnalytics: React.FC = () => {
       setZones(zRes.data?.items || [])
       setEvents(eRes.data?.items || [])
       setHeatmapData(hRes.data?.points || hRes.data?.clusters || [])
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
     setLoading(false)
   }
 
@@ -70,7 +71,7 @@ const GeospatialAnalytics: React.FC = () => {
       setShowZoneForm(false)
       setSuccessMsg(t('geospatialAnalytics.zoneCreated'))
       fetchAll()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const createEvent = async () => {
@@ -83,7 +84,7 @@ const GeospatialAnalytics: React.FC = () => {
       setShowEventForm(false)
       setSuccessMsg(t('geospatialAnalytics.eventRecorded'))
       fetchAll()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const loadTrail = async () => {
@@ -91,7 +92,7 @@ const GeospatialAnalytics: React.FC = () => {
     try {
       const r = await apiService.getMovementTrail(trailAnimalId)
       setTrailData(r.data)
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   if (!enterpriseId) {
@@ -217,9 +218,9 @@ const GeospatialAnalytics: React.FC = () => {
                       {ZONE_TYPES.map(zt => <option key={zt} value={zt}>{zt}</option>)}</select></div>
                 </div>
                 <div className="si-c3866b40">
-                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.centerLatitude')}</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLat} onChange={e => setZoneForm(f => ({ ...f, centerLat: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.centerLongitude')}</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLng} onChange={e => setZoneForm(f => ({ ...f, centerLng: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.radiusMeters')}</label><input className="module-input" type="number" value={zoneForm.radiusMeters} onChange={e => setZoneForm(f => ({ ...f, radiusMeters: e.target.value }))} /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.centerLatitude')}</label><input className="module-input" type="number" inputMode="decimal" step="0.0001" value={zoneForm.centerLat} onChange={e => setZoneForm(f => ({ ...f, centerLat: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.centerLongitude')}</label><input className="module-input" type="number" inputMode="decimal" step="0.0001" value={zoneForm.centerLng} onChange={e => setZoneForm(f => ({ ...f, centerLng: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.radiusMeters')}</label><input className="module-input" type="number" inputMode="decimal" value={zoneForm.radiusMeters} onChange={e => setZoneForm(f => ({ ...f, radiusMeters: e.target.value }))} /></div>
                 </div>
                 <div className="si-1d133837">
                   <div><label className="module-label">{t('geospatialAnalytics.color')}</label><input type="color" value={zoneForm.color} onChange={e => setZoneForm(f => ({ ...f, color: e.target.value }))} /></div>
@@ -335,8 +336,8 @@ const GeospatialAnalytics: React.FC = () => {
                       {EVENT_TYPES.map(et => <option key={et} value={et}>{et.replace(/_/g, ' ')}</option>)}</select></div>
                 </div>
                 <div className="si-c3866b40">
-                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.latitude')}</label><input className="module-input" type="number" step="0.0001" value={eventForm.latitude} onChange={e => setEventForm(f => ({ ...f, latitude: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.longitude')}</label><input className="module-input" type="number" step="0.0001" value={eventForm.longitude} onChange={e => setEventForm(f => ({ ...f, longitude: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.latitude')}</label><input className="module-input" type="number" inputMode="decimal" step="0.0001" value={eventForm.latitude} onChange={e => setEventForm(f => ({ ...f, latitude: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.longitude')}</label><input className="module-input" type="number" inputMode="decimal" step="0.0001" value={eventForm.longitude} onChange={e => setEventForm(f => ({ ...f, longitude: e.target.value }))} placeholder="Click map or type" /></div>
                 </div>
                 <div><label className="module-label">{t('geospatialAnalytics.metadata')}</label><input className="module-input" value={eventForm.metadata} onChange={e => setEventForm(f => ({ ...f, metadata: e.target.value }))} placeholder='{"speed": 5.2, "heading": 270}' /></div>
               </div>

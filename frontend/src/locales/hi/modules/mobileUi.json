@@ -1,0 +1,69 @@
+{
+  "mobileUi": {
+    "close": "बंद करें",
+    "tabBarLabel": "मुख्य नेविगेशन",
+    "quickActionsTitle": "आप क्या करना चाहते हैं?",
+    "tabs": {
+      "home": "होम",
+      "add": "जोड़ें",
+      "more": "और"
+    },
+    "stepper": {
+      "less": "घटाएँ",
+      "more": "बढ़ाएँ"
+    },
+    "date": {
+      "today": "आज",
+      "yesterday": "कल",
+      "other": "दूसरी तारीख"
+    },
+    "save": {
+      "saving": "सहेज रहे हैं...",
+      "saved": "सहेजा गया",
+      "offlineTitle": "कनेक्शन नहीं है",
+      "offlineHint": "आपकी प्रविष्टि इसी स्क्रीन पर है। सिग्नल आने पर \"फिर कोशिश करें\" दबाएँ।",
+      "failedTitle": "सहेज नहीं सका",
+      "retry": "फिर कोशिश करें"
+    },
+    "step": {
+      "stepOf": "चरण {{current}} / {{total}}",
+      "back": "पीछे",
+      "next": "आगे"
+    },
+    "tabLabels": {
+      "animals": "पशु",
+      "herd-medical": "स्वास्थ्य",
+      "animal-groups": "समूह",
+      "medical": "रिकॉर्ड",
+      "consultations": "परामर्श",
+      "admin-consultations": "परामर्श",
+      "prescriptions": "दवाएँ",
+      "manage-schedule": "समय-सारणी",
+      "grooming-schedule": "समय-सारणी",
+      "hospital-workflow": "कतार",
+      "inpatient": "भर्ती",
+      "hospital-networks": "नेटवर्क",
+      "vet-hospitals": "अस्पताल",
+      "settings": "सेटिंग",
+      "pharmacy": "फ़ार्मेसी",
+      "grooming-orders": "ऑर्डर",
+      "grooming-earnings": "कमाई",
+      "grooming-provider": "व्यवसाय",
+      "admin-dashboard": "एडमिन",
+      "admin-users": "उपयोगकर्ता",
+      "admin-finance-reports": "वित्त",
+      "financial": "वित्त",
+      "health-analytics": "विश्लेषण",
+      "admin-disputes": "विवाद",
+      "admin-cancellation-dashboard": "रद्द"
+    },
+    "tabLabelsByRole": {
+      "pet_owner": {
+        "animals": "पालतू"
+      },
+      "veterinarian": {
+        "animals": "पालतू"
+      }
+    }
+  }
+}

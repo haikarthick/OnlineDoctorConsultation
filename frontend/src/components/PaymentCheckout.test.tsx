@@ -50,7 +50,7 @@ describe('PaymentCheckout', () => {
   })
 
   it('surfaces a visible error banner when checkout initiation fails, without calling onSuccess', async () => {
-    mockedApi.initiatePaymentCheckout.mockRejectedValue(new Error('network down'))
+    mockedApi.initiatePaymentCheckout.mockRejectedValue(new Error('boom'))
 
     render(<PaymentCheckout bookingId="booking-1" amount={500} onSuccess={onSuccess} onCancel={onCancel} />)
     await waitFor(() => expect(mockedApi.getWallet).toHaveBeenCalled())
@@ -58,7 +58,7 @@ describe('PaymentCheckout', () => {
     fireEvent.click(screen.getByRole('button', { name: /payment.payButton/ }))
 
     await waitFor(() => expect(mockedApi.initiatePaymentCheckout).toHaveBeenCalledWith('booking-1', false))
-    expect(await screen.findByText('payment.checkoutFailed')).toBeInTheDocument()
+    expect(await screen.findByText('errors.generic')).toBeInTheDocument()
     expect(onSuccess).not.toHaveBeenCalled()
   })
 

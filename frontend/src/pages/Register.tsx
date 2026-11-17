@@ -7,6 +7,7 @@ import PasswordInput from '../components/PasswordInput'
 import { WayToVetLogo } from '../components/WayToVetLogo'
 import './Auth.css'
 
+import { userMessage } from '../utils/userMessage'
 interface RegisterProps {
   onSwitchToLogin: () => void
   onGoHome?: () => void
@@ -150,7 +151,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
       }
     } catch (error) {
       setMessageType('error')
-      setMessage(error instanceof Error ? error.message : t('register.error'))
+      setMessage(userMessage(error, 'register.error'))
     } finally {
       setLoading(false)
     }
@@ -310,11 +311,11 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="reg-experience">Years of Experience</label>
-                    <input id="reg-experience" type="number" name="yearsOfExperience" min="0" max="60" placeholder="5" value={formData.yearsOfExperience} onChange={handleChange} />
+                    <input id="reg-experience" type="number" inputMode="decimal" name="yearsOfExperience" min="0" max="60" placeholder="5" value={formData.yearsOfExperience} onChange={handleChange} />
                   </div>
                   <div className="form-group">
                     <label htmlFor="reg-fee">Consultation Fee (₹)</label>
-                    <input id="reg-fee" type="number" name="consultationFee" min="0" placeholder="500" value={formData.consultationFee} onChange={handleChange} />
+                    <input id="reg-fee" type="number" inputMode="decimal" name="consultationFee" min="0" placeholder="500" value={formData.consultationFee} onChange={handleChange} />
                   </div>
                 </div>
                 <div className="form-group">

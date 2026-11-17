@@ -196,7 +196,8 @@ class HospitalNetworkController {
         const directors = await database.query(
           `SELECT hnm.user_id FROM hospital_network_members hnm
            JOIN vet_hospitals vh ON vh.branch_network_id = hnm.network_id
-           WHERE vh.id = $1 AND hnm.network_role IN ('hospital_director', 'corporate_admin') AND hnm.is_active = true`,
+           WHERE vh.id = $1 AND hnm.network_role IN ('hospital_director', 'corporate_admin') AND hnm.is_active = true
+             AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())`,
           [refData.toHospitalId]
         );
         for (const director of directors.rows) {

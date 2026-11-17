@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, ReactNode } from 'react'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
@@ -12,6 +12,11 @@ import {
   MARKETPLACE_PET_OWNER_SPECIES,
   AnimalClassTerm,
 } from '../constants/speciesBreeds'
+import type {
+  FarmMaster, FarmSpecies, FarmAnimalClass, FarmGroupType, FarmRecordType, FarmSegment, ManagementMode,
+} from '../utils/farmProfile/resolveFarmProfile'
+import { groupTypesForSpecies as resolveGroupTypesForSpecies } from '../utils/farmProfile/resolveFarmProfile'
+import { GROUP_TYPE_LABELS } from '../types'
 
 // Fallback marketplace-eligible species list - union of the old hardcoded farmer/pet-owner
 // arrays, used only until the live master-data fetch resolves (see loadMasterData below).
@@ -76,8 +81,46 @@ const FALLBACK_BREED_ENTRIES: Record<string, BreedEntry[]> = Object.fromEntries(
   Object.entries(FALLBACK_BREED_DATABASE).map(([sp, names]) => [sp, (names as string[]).map(n => ({ name: n }))])
 )
 
+/** A group type as a picker shows it: the stored `value` plus its label columns and flags. */
+export interface GroupTypeEntry extends LocaleLabels {
+  value: string; labelKey: string | null; label: string | null; icon: string | null
+  managementMode: ManagementMode | null; suggestedClass: string | null
+  isHealthHold: boolean; yieldsMilk: boolean; yieldsEggs: boolean
+}
+/** A daily record / event type as a tile shows it. Whether it applies comes from useFarmProfile. */
+export interface RecordTypeEntry extends LocaleLabels {
+  code: string; kind: 'daily' | 'event'; labelKey: string | null; label: string | null; icon: string | null; unit: string | null
+  /** What the entry form asks for, as master data says it: [{key, type: number|choice|text|picker, required?, options?}]. */
+  fields: RecordFieldDef[]
+}
+
+/** One field of a record type's entry form. */
+export interface RecordFieldDef { key: string; type: string; required?: boolean; options?: string[] }
+
+const EMPTY_FARM_MASTER: FarmMaster = { species: [], classes: [], groupTypes: [], recordTypes: [] }
+
 interface MasterDataContextType {
   speciesCategories: Array<{ label: string; species: string[] }>
+  /** Species picker groups ordered for a role: a farmer sees livestock, poultry and aquaculture
+   *  first, everyone else sees pets first (the stored sort order). Use via useSpeciesCategories(). */
+  speciesCategoriesFor: (role?: string | null) => Array<{ label: string; species: string[] }>
+  /** Master data in the shape the farm profile resolver reads. Empty until the first load -
+   *  check farmMasterLoaded before relying on a profile. Use via useFarmProfile(). */
+  farmMaster: FarmMaster
+  farmMasterLoaded: boolean
+  /** Group types offered for a species (its own list, else its farm segment's), for pickers. */
+  groupTypesForSpecies: (species?: string | null) => GroupTypeEntry[]
+  /** Label/icon row for a record type code (milk, eggs, heat ...), or undefined. */
+  recordTypeEntry: (code: string) => RecordTypeEntry | undefined
+  /**
+   * The words for a group's type, whatever screen shows it: the master-data label for the group's
+   * species (translated per locale), else the legacy generic label ("Herd", "Pen / Corral") for a
+   * group created before group types were master data, else the stored value. Use this instead of
+   * printing `group.groupType` or reading a hardcoded label list.
+   */
+  groupTypeLabel: (species: string | null | undefined, value: string | null | undefined, t: TFunction) => string
+  /** The master-data icon for a group type, or null when it has none (legacy values). */
+  groupTypeIcon: (species: string | null | undefined, value: string | null | undefined) => string | null
   speciesIcon: (species?: string) => string
   breedsForSpecies: (species?: string) => string[]
   /** Localized display name for a breed (canonical `name` stays the stored value).
@@ -116,6 +159,11 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
   const [speciesTranslatedLabels, setSpeciesTranslatedLabels] = useState<Record<string, Record<string, string>>>({})
   const [marketplaceCategories, setMarketplaceCategories] = useState<MasterMarketplaceCategory[]>(FALLBACK_MARKETPLACE_CATEGORIES)
   const [marketplaceConditions, setMarketplaceConditions] = useState<MasterMarketplaceCondition[]>(FALLBACK_MARKETPLACE_CONDITIONS)
+  // Farm profile engine (migration 043): the rows the resolver reads, plus the label rows.
+  const [farmMaster, setFarmMaster] = useState<FarmMaster>(EMPTY_FARM_MASTER)
+  const [farmMasterLoaded, setFarmMasterLoaded] = useState(false)
+  const [groupTypeEntries, setGroupTypeEntries] = useState<Record<string, GroupTypeEntry>>({})
+  const [recordTypeEntries, setRecordTypeEntries] = useState<Record<string, RecordTypeEntry>>({})
   const { i18n } = useTranslation()
 
   const loadMasterData = useCallback(async () => {
@@ -127,6 +175,15 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
         apiService.get('/master-data/marketplace/categories'),
         apiService.get('/master-data/marketplace/conditions'),
       ])
+
+      // Loaded separately and tolerantly: a failure here must not take the species, breed and
+      // class pickers down with it (they are used on every animal form in the app).
+      const [groupTypesRes, recordTypesRes] = await Promise.allSettled([
+        apiService.get('/master-data/group-types'),
+        apiService.get('/master-data/record-types'),
+      ])
+      const groupTypes: any[] = groupTypesRes.status === 'fulfilled' ? (groupTypesRes.value.data?.data || []) : []
+      const recordTypes: any[] = recordTypesRes.status === 'fulfilled' ? (recordTypesRes.value.data?.data || []) : []
 
       const species: any[] = speciesRes.data?.data || []
       const breeds: any[] = breedsRes.data?.data || []
@@ -179,10 +236,67 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
         if (!classMap[c.speciesCode]) classMap[c.speciesCode] = []
         classMap[c.speciesCode].push({
           value: c.value, labelKey: c.labelKey || '', label: c.label ?? null, impliedGender: c.impliedGender,
-          canBePregnant: c.canBePregnant, canProduceMilk: c.canProduceMilk, ...pickLocaleFields(c),
+          canBePregnant: c.canBePregnant, canProduceMilk: c.canProduceMilk,
+          canLayEggs: !!c.canLayEggs, isJuvenile: !!c.isJuvenile, ...pickLocaleFields(c),
         })
       }
       setClassesBySpecies(classMap)
+
+      // ── Farm profile master (the resolver's input) ──
+      const farmSpecies: FarmSpecies[] = species.map((sp: any) => ({
+        code: sp.code,
+        farmSegment: (sp.farmSegment || 'pet') as FarmSegment,
+        hasEarTag: !!sp.hasEarTag,
+        defaultManagementMode: (sp.defaultManagementMode === 'batch' ? 'batch' : 'individual') as ManagementMode,
+        producesMilk: !!sp.producesMilk, producesEggs: !!sp.producesEggs, producesWool: !!sp.producesWool,
+        isAquatic: !!sp.isAquatic, litterExpected: !!sp.litterExpected,
+        gestationDays: sp.gestationDays ?? null, incubationDays: sp.incubationDays ?? null,
+        birthEventTerm: sp.birthEventTerm || 'birth',
+        waterType: sp.waterType ?? null, waterQualityRanges: sp.waterQualityRanges ?? null,
+      }))
+      const farmClasses: FarmAnimalClass[] = classes.map((c: any) => ({
+        speciesCode: c.speciesCode || '', value: c.value, impliedGender: c.impliedGender,
+        canBePregnant: !!c.canBePregnant, canProduceMilk: !!c.canProduceMilk,
+        canLayEggs: !!c.canLayEggs, isJuvenile: !!c.isJuvenile,
+      }))
+      const farmGroupTypes: FarmGroupType[] = groupTypes.map((g: any) => ({
+        speciesCode: g.speciesCode ?? null, farmSegment: g.farmSegment ?? null, value: g.value,
+        managementMode: g.managementMode ?? null, suggestedClass: g.suggestedClass ?? null,
+        isHealthHold: !!g.isHealthHold, yieldsMilk: !!g.yieldsMilk, yieldsEggs: !!g.yieldsEggs,
+        sortOrder: g.sortOrder ?? 0,
+      }))
+      const farmRecordTypes: FarmRecordType[] = recordTypes.map((r: any) => ({
+        code: r.code, kind: r.kind, subject: r.subject, unit: r.unit ?? null, sortOrder: r.sortOrder ?? 0,
+        rules: (r.rules || []).map((rule: any) => ({
+          farmSegment: rule.farmSegment ?? null, managementMode: rule.managementMode ?? null,
+          requiresSpeciesFlag: rule.requiresSpeciesFlag ?? null, aquatic: rule.aquatic ?? null,
+          requiresClassFlag: rule.requiresClassFlag ?? null, requiresGroupFlag: rule.requiresGroupFlag ?? null,
+        })),
+      }))
+      setFarmMaster({ species: farmSpecies, classes: farmClasses, groupTypes: farmGroupTypes, recordTypes: farmRecordTypes })
+
+      // Label rows, keyed so a picker can find the row for a resolver result. A group type is
+      // unique per scope, so the key carries the scope ("species:Cattle" / "segment:poultry").
+      const gtEntries: Record<string, GroupTypeEntry> = {}
+      for (const g of groupTypes) {
+        const scope = g.speciesCode ? `species:${g.speciesCode}` : `segment:${g.farmSegment}`
+        gtEntries[`${scope}|${g.value}`] = {
+          value: g.value, labelKey: g.labelKey ?? null, label: g.label ?? null, icon: g.icon ?? null,
+          managementMode: g.managementMode ?? null, suggestedClass: g.suggestedClass ?? null,
+          isHealthHold: !!g.isHealthHold, yieldsMilk: !!g.yieldsMilk, yieldsEggs: !!g.yieldsEggs,
+          ...pickLocaleFields(g),
+        }
+      }
+      setGroupTypeEntries(gtEntries)
+      const rtEntries: Record<string, RecordTypeEntry> = {}
+      for (const r of recordTypes) {
+        rtEntries[r.code] = {
+          code: r.code, kind: r.kind, labelKey: r.labelKey ?? null, label: r.label ?? null,
+          icon: r.icon ?? null, unit: r.unit ?? null, fields: Array.isArray(r.fields) ? r.fields : [], ...pickLocaleFields(r),
+        }
+      }
+      setRecordTypeEntries(rtEntries)
+      setFarmMasterLoaded(groupTypesRes.status === 'fulfilled' && recordTypesRes.status === 'fulfilled')
 
       if (categories.length > 0) {
         setMarketplaceCategories(categories.sort((a, b) => a.sortOrder - b.sortOrder).map((c: any) => ({ code: c.code, labelKey: c.labelKey, label: c.label, icon: c.icon, ...pickLocaleFields(c) })))
@@ -255,11 +369,50 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
     return species
   }, [speciesLabelKeys, speciesTranslatedLabels, i18n.language])
 
+  // Farmers asked to see livestock, poultry and aquaculture before pets. The order is by ROLE,
+  // not global: a pet owner still sees pets first. A category counts as "farm" when any of its
+  // species belongs to a farm segment - read from data, so a new category needs no code here.
+  const speciesCategoriesFor = useCallback((role?: string | null) => {
+    if (role !== 'farmer' || farmMaster.species.length === 0) return speciesCategories
+    const segmentOf = new Map(farmMaster.species.map(sp => [sp.code, sp.farmSegment]))
+    const isFarmCategory = (cat: { species: string[] }) => cat.species.some(code => (segmentOf.get(code) || 'pet') !== 'pet')
+    return [...speciesCategories.filter(isFarmCategory), ...speciesCategories.filter(cat => !isFarmCategory(cat))]
+  }, [speciesCategories, farmMaster.species])
+
+  const groupTypesForSpecies = useCallback((species?: string | null): GroupTypeEntry[] => {
+    return resolveGroupTypesForSpecies(farmMaster, species)
+      .map(g => groupTypeEntries[`${g.speciesCode ? `species:${g.speciesCode}` : `segment:${g.farmSegment}`}|${g.value}`])
+      .filter((entry): entry is GroupTypeEntry => !!entry)
+  }, [farmMaster, groupTypeEntries])
+
+  const recordTypeEntry = useCallback((code: string): RecordTypeEntry | undefined => recordTypeEntries[code], [recordTypeEntries])
+
+  const groupTypeLabel = useCallback((species: string | null | undefined, value: string | null | undefined, t: TFunction): string => {
+    if (!value) return ''
+    const entry = groupTypesForSpecies(species).find(g => g.value === value)
+    if (entry) return resolveLabel(entry, t) || value
+    return (GROUP_TYPE_LABELS as Record<string, string>)[value] || value
+  }, [groupTypesForSpecies, resolveLabel])
+
+  const groupTypeIcon = useCallback((species: string | null | undefined, value: string | null | undefined): string | null => {
+    if (!value) return null
+    return groupTypesForSpecies(species).find(g => g.value === value)?.icon || null
+  }, [groupTypesForSpecies])
+
+  const value = useMemo(() => ({
+    speciesCategories, speciesCategoriesFor, farmMaster, farmMasterLoaded, groupTypesForSpecies, recordTypeEntry,
+    groupTypeLabel, groupTypeIcon,
+    speciesIcon, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm,
+    earTagSpecies, marketplaceEligibleSpecies, speciesLabel, marketplaceCategories, marketplaceConditions, resolveLabel,
+  }), [
+    speciesCategories, speciesCategoriesFor, farmMaster, farmMasterLoaded, groupTypesForSpecies, recordTypeEntry,
+    groupTypeLabel, groupTypeIcon,
+    speciesIcon, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm,
+    earTagSpecies, marketplaceEligibleSpecies, speciesLabel, marketplaceCategories, marketplaceConditions, resolveLabel,
+  ])
+
   return (
-    <MasterDataContext.Provider value={{
-      speciesCategories, speciesIcon, breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm,
-      earTagSpecies, marketplaceEligibleSpecies, speciesLabel, marketplaceCategories, marketplaceConditions, resolveLabel,
-    }}>
+    <MasterDataContext.Provider value={value}>
       {children}
     </MasterDataContext.Provider>
   )

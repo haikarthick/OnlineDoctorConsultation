@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 
+import { userMessage } from '../utils/userMessage'
 interface UseApiState<T> {
   data: T | null
   loading: boolean
@@ -20,7 +21,7 @@ export function useApi<T>() {
       setState({ data: result, loading: false, error: null })
       return result
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred'
+      const message = userMessage(err)
       setState({ data: null, loading: false, error: message })
       return null
     }

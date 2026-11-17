@@ -147,6 +147,24 @@ const templates: Record<string, EmailTemplate> = {
     text: (d) => `Payment of $${(d.amount / 100).toFixed(2)} received.\nPayment ID: ${d.paymentId}\nConsultation: ${d.consultationId}`,
   },
 
+  farm_invite: {
+    subject: (d) => `${d.inviter} invited you to join ${d.farm} on waytovet`,
+    html: (d) => `
+    <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:32px;background:#fff;border:1px solid #e5e7eb;border-radius:12px">
+      <div style="text-align:center;margin-bottom:24px"><span style="font-size:48px">🐄</span></div>
+      <h2 style="color:#667eea;text-align:center">You have been invited to a farm</h2>
+      <p>Hi ${d.inviteeName || 'there'},</p>
+      <p><strong>${d.inviter}</strong> invited you to join <strong>${d.farm}</strong> as a <strong>${d.role}</strong>.</p>
+      <p style="text-align:center;margin:24px 0">
+        <a href="${d.inviteUrl}" style="background:#667eea;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">Open the invitation</a>
+      </p>
+      <p style="color:#6b7280;font-size:13px">This invitation lasts 7 days. If you did not expect it, you can ignore this email.</p>
+      <p style="color:#6b7280;font-size:13px">Or copy this link: <a href="${d.inviteUrl}">${d.inviteUrl}</a></p>
+      <p style="margin-top:32px;color:#999;font-size:12px">- The waytovet Team</p>
+    </div>`,
+    text: (d) => `${d.inviter} invited you to join ${d.farm} as a ${d.role}.\n\nOpen the invitation: ${d.inviteUrl}\n\nThis link lasts 7 days.`,
+  },
+
   staff_invite: {
     subject: (d) => `You're invited to join ${d.networkName} on waytovet`,
     html: (d) => `
@@ -249,6 +267,12 @@ class EmailService {
    * Send an email via Resend, SMTP, or log-only depending on available provider.
    */
   async send(options: EmailOptions): Promise<{ messageId: string; previewUrl?: string | false; mode?: string }> {
+    // A person invited by mobile number only has a placeholder address in a reserved domain: never mail it.
+    const toList = Array.isArray(options.to) ? options.to : [options.to];
+    if (toList.every(a => typeof a === 'string' && a.toLowerCase().endsWith('.invalid'))) {
+      logger.info('Email skipped: placeholder address');
+      return { messageId: 'skipped-placeholder', mode: 'skipped' };
+    }
     await this.ensureInitialized();
 
     let subject = options.subject;

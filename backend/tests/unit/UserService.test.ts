@@ -23,7 +23,8 @@ describe('UserService', () => {
         updatedAt: new Date()
       };
 
-      (database.query as jest.Mock).mockResolvedValue({ rows: [mockUser] });
+      // first query: is the mobile number already on another account? (no)   second: the insert
+      (database.query as jest.Mock).mockResolvedValueOnce({ rows: [] }).mockResolvedValue({ rows: [mockUser] });
 
       const result = await UserService.createUser({
         email: 'test@example.com',
@@ -129,5 +130,44 @@ describe('UserService', () => {
         expect.arrayContaining(['veterinarian'])
       );
     });
+  });
+});
+
+describe('UserService - mobile number as a login identifier', () => {
+  beforeEach(() => { jest.clearAllMocks(); });
+
+  it('signs in by mobile number however it is typed (looked up by the normalised form)', async () => {
+    (database.query as jest.Mock).mockResolvedValue({ rows: [{ id: 'u1', email: 'a@b.c' }] });
+    for (const typed of ['98765 43210', '+91 98765-43210', '09876543210']) {
+      await UserService.getUserByIdentifier(typed);
+      const [sql, params] = (database.query as jest.Mock).mock.calls.pop();
+      expect(sql).toMatch(/phone_e164 = \$1/);
+      expect(params).toEqual(['+919876543210']);
+    }
+  });
+
+  it('signs in by email as before', async () => {
+    (database.query as jest.Mock).mockResolvedValue({ rows: [] });
+    await UserService.getUserByIdentifier('tom@farm.com');
+    const [sql, params] = (database.query as jest.Mock).mock.calls.pop();
+    expect(sql).toMatch(/FROM users WHERE email = \$1/);
+    expect(params).toEqual(['tom@farm.com']);
+  });
+
+  it('a long number that cannot be a mobile finds nobody, without touching the database', async () => {
+    expect(await UserService.getUserByIdentifier('5876543210')).toBeNull();
+    expect(database.query).not.toHaveBeenCalled();
+  });
+
+  it('a number already on another account is refused in words; the same account may keep its own', async () => {
+    (database.query as jest.Mock).mockResolvedValue({ rows: [{ id: 'other' }] });
+    await expect(UserService.phoneForStorage('98765 43210')).rejects.toThrow(/already registered/);
+    await expect(UserService.phoneForStorage('98765 43210', 'other')).resolves.toBe('+919876543210');
+  });
+
+  it('a blank number is simply none; an impossible one is a plain validation message', async () => {
+    expect(await UserService.phoneForStorage('')).toBeNull();
+    expect(await UserService.phoneForStorage(undefined)).toBeNull();
+    await expect(UserService.phoneForStorage('abc')).rejects.toThrow(/valid mobile number/);
   });
 });

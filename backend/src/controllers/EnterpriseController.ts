@@ -1,10 +1,12 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import EnterpriseService from '../services/EnterpriseService';
+import FarmAccessService, { NO_ACCESS_MESSAGE, FarmRole } from '../services/FarmAccessService';
 import AnimalGroupService from '../services/AnimalGroupService';
 import LocationService from '../services/LocationService';
 import MovementService from '../services/MovementService';
 import TreatmentCampaignService from '../services/TreatmentCampaignService';
+import logger from '../utils/logger';
 import { ValidationError, ForbiddenError } from '../utils/errors';
 
 class EnterpriseController {
@@ -20,8 +22,7 @@ class EnterpriseController {
   async getEnterprise(req: AuthRequest, res: Response): Promise<void> {
     const enterprise = await EnterpriseService.getEnterprise(req.params.id);
     if (req.userRole !== 'admin') {
-      const hasAccess = await EnterpriseService.hasAccess(req.params.id, req.userId!);
-      if (!hasAccess) throw new ForbiddenError('Access denied');
+      await FarmAccessService.assert(req.params.id, { userId: req.userId!, role: req.userRole }, 'read');
     }
     res.json({ success: true, data: enterprise });
   }
@@ -64,23 +65,43 @@ class EnterpriseController {
   }
 
   async addMember(req: AuthRequest, res: Response): Promise<void> {
-    await this.ensureEnterpriseAccess(req.params.id, req.userId!, req.userRole!, ['owner', 'manager']);
+    const actorRole = await FarmAccessService.assert(req.params.id, { userId: req.userId!, role: req.userRole }, 'manage_team');
     const { userId, role, title } = req.body;
     if (!userId || !role) throw new ValidationError('userId and role are required');
+    FarmAccessService.assertTeamChange(actorRole, { kind: 'add', newRole: role });
     const member = await EnterpriseService.addMember(req.params.id, userId, role, title);
     res.status(201).json({ success: true, data: member });
   }
 
   async updateMember(req: AuthRequest, res: Response): Promise<void> {
-    await this.ensureEnterpriseAccess(req.params.enterpriseId, req.userId!, req.userRole!, ['owner', 'manager']);
+    const actorRole = await FarmAccessService.assert(req.params.enterpriseId, { userId: req.userId!, role: req.userRole }, 'manage_team');
     const { role, title } = req.body;
     if (!role) throw new ValidationError('role is required');
+    const target = await EnterpriseService.getMember(req.params.enterpriseId, req.params.userId);
+    FarmAccessService.assertTeamChange(actorRole, { kind: 'change_role', targetRole: target.role as FarmRole, newRole: role });
     const member = await EnterpriseService.updateMemberRole(req.params.enterpriseId, req.params.userId, role, title);
     res.json({ success: true, data: member });
   }
 
+  async transferOwnership(req: AuthRequest, res: Response): Promise<void> {
+    await FarmAccessService.assert(req.params.id, { userId: req.userId!, role: req.userRole }, 'change_roles'); // owner / admin only
+    const { userId } = req.body;
+    if (!userId) throw new ValidationError('Choose which manager the farm goes to.');
+    const r = await EnterpriseService.transferOwnership(req.params.id, userId);
+    logger.info('Farm ownership transferred', { enterpriseId: req.params.id, by: req.userId, ...r });
+    try {
+      const farm = await EnterpriseService.getEnterprise(req.params.id);
+      const NotificationService = (await import('../services/NotificationService')).default;
+      await NotificationService.createNotification(r.newOwnerId, 'system', `You are now the owner of ${farm.name}`, `${farm.name} was handed to you. You can add and remove managers and change roles.`, 'in_app', { type: 'farm_ownership', enterpriseId: req.params.id });
+      await NotificationService.createNotification(r.previousOwnerId, 'system', `${farm.name} was handed over`, `You are now a manager of ${farm.name}.`, 'in_app', { type: 'farm_ownership', enterpriseId: req.params.id });
+    } catch { /* a notification failure never undoes the hand-over */ }
+    res.json({ success: true, data: r });
+  }
+
   async removeMember(req: AuthRequest, res: Response): Promise<void> {
-    await this.ensureEnterpriseAccess(req.params.enterpriseId, req.userId!, req.userRole!, ['owner', 'manager']);
+    const actorRole = await FarmAccessService.assert(req.params.enterpriseId, { userId: req.userId!, role: req.userRole }, 'manage_team');
+    const target = await EnterpriseService.getMember(req.params.enterpriseId, req.params.userId);
+    FarmAccessService.assertTeamChange(actorRole, { kind: 'remove', targetRole: target.role as FarmRole });
     await EnterpriseService.removeMember(req.params.enterpriseId, req.params.userId);
     res.json({ success: true, message: 'Member removed' });
   }
@@ -202,6 +223,16 @@ class EnterpriseController {
     res.json({ success: true, data: result });
   }
 
+  /** Approve or reject a pending movement: the farm's owner or a manager (or an admin) - nobody else changes the record of what moved. */
+  async decideMovement(req: AuthRequest, res: Response): Promise<void> {
+    const action = req.body?.action;
+    if (action !== 'approve' && action !== 'reject') throw new ValidationError('Choose approve or reject.');
+    const enterpriseId = await MovementService.farmOf(req.params.id);
+    await FarmAccessService.assert(enterpriseId, { userId: req.userId!, role: req.userRole }, 'manage_farm');
+    const status = await MovementService.setDecision(req.params.id, action, req.userId!);
+    res.json({ success: true, data: { status, message: `Movement ${status}` } });
+  }
+
   async getMovement(req: AuthRequest, res: Response): Promise<void> {
     const movement = await MovementService.getMovement(req.params.id);
     await this.ensureEnterpriseAccess(movement.enterpriseId, req.userId!, req.userRole!);
@@ -265,11 +296,12 @@ class EnterpriseController {
     requiredRoles?: string[]
   ): Promise<void> {
     if (userRole === 'admin') return; // Admins can access everything
-    const hasAccess = await EnterpriseService.hasAccess(enterpriseId, userId);
-    if (!hasAccess) throw new ForbiddenError('You do not have access to this enterprise');
-    if (requiredRoles) {
-      const hasRole = await EnterpriseService.hasRole(enterpriseId, userId, [...requiredRoles, 'owner']);
-      if (!hasRole) throw new ForbiddenError('Insufficient role for this action');
+    // The farm role comes from FarmAccessService (the owner is always 'owner'); this screen keeps its own
+    // finer per-action list of roles (e.g. a supervisor may create a group, a worker may assign animals).
+    const role = await FarmAccessService.roleOf(enterpriseId, userId);
+    if (!role) throw new ForbiddenError(NO_ACCESS_MESSAGE);
+    if (requiredRoles && !([...requiredRoles, 'owner'] as string[]).includes(role)) {
+      throw new ForbiddenError(`Your role on this farm (${role.replace('_', ' ')}) does not include this. Ask the farm owner or a manager.`);
     }
   }
 }

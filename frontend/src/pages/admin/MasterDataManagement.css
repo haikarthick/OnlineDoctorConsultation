@@ -23,3 +23,44 @@
   color: #6b7280;
   margin: -4px 0 12px;
 }
+
+/* ── Farm profile additions (migration 043). Scoped to this page's root so nothing leaks into
+   other pages: page stylesheets are global in this app (docs/DESIGN_SYSTEM.md section 2b). ── */
+:where(.master-data-page) .md-section-title {
+  margin: 20px 0 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-200);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+:where(.master-data-page) .md-hint {
+  margin: 4px 0 12px;
+}
+
+:where(.master-data-page) .md-tab-hint {
+  margin: 16px 0 12px;
+}
+
+:where(.master-data-page) .md-flag {
+  display: flex;
+}
+
+:where(.master-data-page) .md-scope-picker {
+  max-width: 360px;
+  margin-top: 16px;
+}
+
+:where(.master-data-page) .md-toolbar {
+  margin: 4px 0 12px;
+}
+
+:where(.master-data-page) .md-rule-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+}
+
+:where(.master-data-page) .md-toolbar-top {
+  margin-top: 16px;
+}

@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
-import { DatabaseError, NotFoundError } from '../utils/errors';
+import { DatabaseError, NotFoundError, ValidationError } from '../utils/errors';
 import logger from '../utils/logger';
 
 // ─── Interfaces ──────────────────────────────────────────────
@@ -47,7 +47,23 @@ export interface TreatmentCampaignCreateDTO {
 
 export class TreatmentCampaignService {
 
+  /**
+   * A campaign's group must be one of THIS farm's groups (it used to accept any group id, so a campaign could be filed
+   * against another farm's group and, once completed, write a health record into it). Returns the group's head count.
+   */
+  private async groupCountOnFarm(groupId: string, enterpriseId: string): Promise<number> {
+    const g = await database.query(`SELECT current_count FROM animal_groups WHERE id = $1 AND enterprise_id = $2`, [groupId, enterpriseId]);
+    if (g.rows.length === 0) throw new ValidationError('That group is not on this farm. Choose a group from this farm.');
+    return Number(g.rows[0].current_count || 0);
+  }
+
   async createCampaign(data: TreatmentCampaignCreateDTO): Promise<TreatmentCampaign> {
+    // "How many are to be treated" defaults to the group's head count, so progress (treated / to treat) means something
+    // without the farmer having to count first.
+    if (data.groupId) {
+      const heads = await this.groupCountOnFarm(data.groupId, data.enterpriseId);
+      if (!data.targetCount) data.targetCount = heads;
+    }
     try {
       const id = uuidv4();
       const result = await database.query(
@@ -102,12 +118,17 @@ export class TreatmentCampaignService {
   }
 
   async updateCampaign(id: string, data: Partial<TreatmentCampaignCreateDTO> & { status?: string; completedCount?: number; administeredBy?: string }): Promise<TreatmentCampaign> {
+    if (data.groupId) {
+      const current = await this.getCampaign(id);
+      const heads = await this.groupCountOnFarm(data.groupId, current.enterpriseId);
+      if (!data.targetCount && !current.targetCount) data.targetCount = heads;
+    }
     const setClauses: string[] = [];
     const params: any[] = [];
     let idx = 1;
 
     const fieldMap: Record<string, string> = {
-      name: 'name', campaignType: 'campaign_type', description: 'description',
+      name: 'name', campaignType: 'campaign_type', description: 'description', groupId: 'group_id',
       productUsed: 'product_used', dosage: 'dosage', targetCount: 'target_count',
       scheduledDate: 'scheduled_date', cost: 'cost', notes: 'notes',
       status: 'status', completedCount: 'completed_count', administeredBy: 'administered_by',

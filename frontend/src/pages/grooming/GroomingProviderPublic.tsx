@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void; id?: string }
 
 const GroomingProviderPublic: React.FC<Props> = ({ onNavigate, id }) => {
@@ -16,7 +17,7 @@ const GroomingProviderPublic: React.FC<Props> = ({ onNavigate, id }) => {
   const load = useCallback(async () => {
     if (!id) return
     try { setLoading(true); setErr(''); setP((await apiService.getPublicGroomingProvider(id)).data) }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [id])
   useEffect(() => { load() }, [load])
 

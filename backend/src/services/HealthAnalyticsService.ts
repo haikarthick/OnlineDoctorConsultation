@@ -103,11 +103,19 @@ class HealthAnalyticsService {
        ORDER BY ho.created_at DESC LIMIT 10`, [enterpriseId]
     );
 
-    // Mortality (deceased animals last 12 months by month)
+    // Mortality, last 12 months by month: individually-kept animals that died PLUS the deaths recorded against flocks and
+    // batches (the population ledger). Counting only animal rows made a flock that lost 300 birds read as zero deaths.
     const mortality = await database.query(
-      `SELECT date_trunc('month', updated_at) as month, COUNT(*) as count
-       FROM animals WHERE enterprise_id = $1 AND status = 'deceased' AND updated_at > NOW() - INTERVAL '12 months'
-       GROUP BY month ORDER BY month`, [enterpriseId]
+      `SELECT month, SUM(count)::int as count FROM (
+         SELECT date_trunc('month', updated_at) as month, COUNT(*) as count
+           FROM animals WHERE enterprise_id = $1 AND status = 'deceased' AND updated_at > NOW() - INTERVAL '12 months'
+          GROUP BY 1
+         UNION ALL
+         SELECT date_trunc('month', e.event_date) as month, SUM(-e.quantity) as count
+           FROM group_population_events e JOIN animal_groups g ON g.id = e.group_id
+          WHERE g.enterprise_id = $1 AND e.event_type = 'mortality' AND e.event_date > NOW() - INTERVAL '12 months'
+          GROUP BY 1
+       ) m GROUP BY month ORDER BY month`, [enterpriseId]
     );
 
     return {

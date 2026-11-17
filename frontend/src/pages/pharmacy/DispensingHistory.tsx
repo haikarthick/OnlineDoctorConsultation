@@ -6,6 +6,7 @@ import { useMasterData } from '../../context/MasterDataContext'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import DispensingReceiptView, { DispensingReceiptData } from '../../components/pharmacy/DispensingReceiptView'
 
+import { userMessage } from '../../utils/userMessage'
 interface DispensingRecord {
   id: string
   prescription_id: string
@@ -63,7 +64,7 @@ export default function DispensingHistory({ pharmacyId }: Props) {
       const res = await client.get(`/pharmacies/${pharmacyId}/dispensing-history?limit=100`)
       setRecords(Array.isArray(res.data) ? res.data : [])
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setLoading(false)
     }
@@ -82,7 +83,7 @@ export default function DispensingHistory({ pharmacyId }: Props) {
       await client.patch(`/dispensing/${id}`, { dispensing_status: status })
       setRecords(prev => prev.map(r => r.id === id ? { ...r, dispensing_status: status } : r))
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message)
+      setError(userMessage(err))
     } finally {
       setUpdatingId(null)
     }

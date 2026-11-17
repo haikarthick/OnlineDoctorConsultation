@@ -397,6 +397,7 @@ export class VetHospitalService {
       `SELECT 1 FROM hospital_network_members hnm
        JOIN hospital_network_hospitals hnh ON hnh.network_id = hnm.network_id
        WHERE hnm.user_id = $1 AND hnh.hospital_id = $2 AND hnm.is_active = true
+         AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())
        LIMIT 1`,
       [userId, hospitalId]
     );
@@ -439,7 +440,8 @@ export class VetHospitalService {
         `SELECT hnm.network_id, hnh.hospital_id
          FROM hospital_network_members hnm
          JOIN hospital_network_hospitals hnh ON hnh.network_id = hnm.network_id
-         WHERE hnm.user_id = $1 AND hnm.is_active = true`,
+         WHERE hnm.user_id = $1 AND hnm.is_active = true
+           AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())`,
         [userId]
       );
       if (memberCheck.rows.length > 0) {
@@ -505,6 +507,7 @@ export class VetHospitalService {
        LEFT JOIN hospital_doctors hd ON hd.hospital_id = h.id AND hd.doctor_id = $1 AND hd.is_active = true
        LEFT JOIN staff_positions sp ON sp.hospital_id = h.id AND sp.user_id = $1 AND sp.is_active = true
        LEFT JOIN hospital_network_members hnm ON hnm.hospital_id = h.id AND hnm.user_id = $1 AND hnm.is_active = true
+         AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())
        WHERE h.is_active = true
          AND (hd.id IS NOT NULL OR sp.id IS NOT NULL OR hnm.id IS NOT NULL)
        ORDER BY h.id, hd.is_primary_hospital DESC NULLS LAST, h.name ASC`,

@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void }
 
 type StatusFilter = 'pending' | 'verified' | 'rejected' | 'suspended'
@@ -46,7 +47,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
         const res = await apiService.adminListGroomingProviders(filter)
         setItems(Array.isArray(res.data) ? res.data : [])
       }
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [filter])
   useEffect(() => { load() }, [load])
   useEffect(() => { apiService.adminGroomingReconciliation().then(r => setRecon(r.data)).catch(() => {}) }, [msg])
@@ -55,7 +56,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
   const settle = async (id: string) => {
     const ref = prompt(t('groomingAdmin.settlePrompt')); if (ref === null) return
     try { setBusy(id); const r = await apiService.adminSettleGrooming(id, { method: 'bank_transfer', reference: ref || undefined }); flash(t('groomingAdmin.settled', { amount: formatCurrency(Number(r.data?.netPaid || 0)) })); setEarningsFor(null); load() }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+    catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) }
   }
 
   // Settling used to be a bare prompt() for a payment reference with no view of
@@ -65,7 +66,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
     try {
       const r = await apiService.adminGroomingProviderEarnings(provider.id)
       setEarnings(r.data || null)
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message); setEarningsFor(null) }
+    } catch (e: any) { setErr(userMessage(e)); setEarningsFor(null) }
     finally { setEarningsLoading(false) }
   }
 
@@ -93,14 +94,14 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
       setDisputeModal(null)
       flash(t('groomingAdmin.disputes.updated'))
       load()
-    } catch (e: any) { setErr(e?.response?.data?.message || e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setErr(userMessage(e)) }
     finally { setBusy(null) }
   }
 
   const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 3000) }
-  const verify = async (id: string) => { try { setBusy(id); await apiService.adminVerifyGroomingProvider(id); flash(t('groomingAdmin.verified')); load() } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) } }
-  const suspend = async (id: string) => { const r = prompt(t('groomingAdmin.suspendReason')); if (!r) return; try { setBusy(id); await apiService.adminSuspendGroomingProvider(id, r); flash(t('groomingAdmin.suspended')); load() } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) } }
-  const doReject = async () => { if (!reason.trim() || !rejectModal) return; try { setBusy(rejectModal); await apiService.adminRejectGroomingProvider(rejectModal, reason.trim()); setRejectModal(null); setReason(''); flash(t('groomingAdmin.rejected')); load() } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) } }
+  const verify = async (id: string) => { try { setBusy(id); await apiService.adminVerifyGroomingProvider(id); flash(t('groomingAdmin.verified')); load() } catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) } }
+  const suspend = async (id: string) => { const r = prompt(t('groomingAdmin.suspendReason')); if (!r) return; try { setBusy(id); await apiService.adminSuspendGroomingProvider(id, r); flash(t('groomingAdmin.suspended')); load() } catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) } }
+  const doReject = async () => { if (!reason.trim() || !rejectModal) return; try { setBusy(rejectModal); await apiService.adminRejectGroomingProvider(rejectModal, reason.trim()); setRejectModal(null); setReason(''); flash(t('groomingAdmin.rejected')); load() } catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) } }
 
   return (
     <div className="module-page">
@@ -280,7 +281,7 @@ const GroomingProvidersAdmin: React.FC<Props> = () => {
                 <div className="form-group">
                   <label className="form-label">{t('groomingAdmin.disputes.refundAmount')}</label>
                   <input
-                    className="form-input" type="number" min="0" step="0.01"
+                    className="form-input" type="number" inputMode="decimal" min="0" step="0.01"
                     value={disputeRefund} onChange={e => setDisputeRefund(e.target.value)}
                     placeholder="0.00"
                   />

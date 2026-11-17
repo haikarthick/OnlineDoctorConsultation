@@ -5,6 +5,7 @@ import { Enterprise, ComplianceDocument, ComplianceSummary } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 
+import { userMessage } from '../utils/userMessage'
 const STATUS_COLORS: Record<string, string> = {
   draft: '#94a3b8', active: '#22c55e', expired: '#ef4444', revoked: '#dc2626', pending_renewal: '#f97316'
 }
@@ -84,7 +85,7 @@ const ComplianceDocs: React.FC = () => {
       resetForm()
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || t('complianceDocs.toasts.saveFailed'))
+      setError(userMessage(err, 'complianceDocs.toasts.saveFailed'))
     }
   }
 

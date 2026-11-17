@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { takeSessionEnded } from '../utils/returnPath'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
@@ -6,6 +7,7 @@ import PasswordInput from '../components/PasswordInput'
 import { WayToVetLogo } from '../components/WayToVetLogo'
 import './Auth.css'
 
+import { userMessage } from '../utils/userMessage'
 interface LoginProps {
   onSwitchToRegister: () => void
   onGoHome?: () => void
@@ -19,6 +21,8 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
+  // Signed out because the session ended while working: explain, instead of silently showing sign-in.
+  const [sessionEnded] = useState(takeSessionEnded)
   // Set when the credentials were CORRECT but the account is blocked (pending_approval /
   // frozen / suspended). That is not a mistake the user can fix by retrying, so it must not
   // be rendered as a red failure alongside "wrong password".
@@ -69,7 +73,7 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
       setMessage('✓ Login successful! Redirecting...')
       setDbWaking(false)
     } catch (error) {
-      const msg = error instanceof Error ? error.message : t('login.error')
+      const msg = userMessage(error, 'login.error')
       const status = (error as { accountStatus?: string })?.accountStatus || ''
       if (msg.toLowerCase().includes('database is not ready') || msg.toLowerCase().includes('not ready yet')) {
         setDbWaking(true)
@@ -164,6 +168,10 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
               </div>
             )}
 
+            {sessionEnded && !message && (
+              <div className="session-ended" role="status">{t('routeErrors.sessionExpired')}</div>
+            )}
+
             {message && !accountStatus && (
               <div
                 className={`message ${message.includes('✓') ? 'success' : 'error'}`}
@@ -179,12 +187,15 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
                 <label htmlFor="login-email">{t('login.email')}</label>
                 <input
                   id="login-email"
-                  type="email"
-                  placeholder="you@email.com"
+                  type="text"
+                  inputMode="email"
+                  placeholder={t('login.identifierPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  autoComplete="email"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
                   aria-required="true"
                 />
               </div>

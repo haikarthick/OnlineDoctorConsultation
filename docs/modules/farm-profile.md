@@ -1,0 +1,323 @@
+# Farm profile engine
+
+"Parent drives children": which fields, sections, daily records and events apply to an animal or
+a group is decided by **master data**, never by a species name in code. Design and owner
+decisions: `docs/FARM_MANAGEMENT_PLAN.md` §6. Shipped as Phase 1 of that plan (migration 043).
+
+## The rule
+
+No component or service may contain `if (species === 'Cattle')` (or any species name). Ask the
+resolver. An admin-added species then works without a deploy.
+
+- Frontend: `useFarmProfile({ speciesCode, animalClass, gender, managementMode, groupType })`
+  from `frontend/src/hooks/useFarmProfile.ts` → `{ profile, ready }`. Species pickers use
+  `useSpeciesCategories()` from the same file (farmer sees farm stock first, others pets first).
+- Backend: `FarmProfileService.resolve(...)`; write endpoints for daily records/events call
+  `FarmProfileService.assertRecordTypeAllowed(input, code, 'animal' | 'group')`.
+
+## One resolver, two copies
+
+`resolveFarmProfile.ts` exists byte-for-byte in `backend/src/services/farmProfile/` and
+`frontend/src/utils/farmProfile/`. The backend validates writes with it, the frontend shows and
+hides with it. `frontend/src/utils/farmProfile/resolveFarmProfile.parity.test.ts` fails if they
+differ: edit one, copy it over the other. Behaviour tests (one per farm type) live in
+`backend/tests/unit/FarmProfileResolver.test.ts`. The file must stay dependency-free.
+
+## Data
+
+| Table | What it holds |
+|---|---|
+| `master_species` (+ columns) | `farm_segment`, `produces_milk/eggs/wool`, `is_aquatic`, `litter_expected`, `gestation_days`, `incubation_days`, `birth_event_term`, `scientific_name`, `water_type`, `water_quality_ranges` |
+| `master_animal_classes` (+ columns) | `can_lay_eggs`, `is_juvenile` (beside `implied_gender`, `can_be_pregnant`, `can_produce_milk`) |
+| `master_group_types` | Life-stage / purpose group types. Scoped to ONE species **or** ONE farm segment (CHECK). A species with its own list uses it, otherwise its segment's list. `animal_groups.group_type` stores `value` as text; old generic values stay valid. |
+| `master_record_types` | Daily records and events (`milk`, `eggs`, `heat`, `stocking`, ...). `code` is used by application logic, so the admin screen edits wording/icon/unit/order/on-off only. |
+| `master_record_type_rules` | When a record type applies. It applies if ANY rule matches; a rule matches when every stated condition holds (NULL = any). A rule with no segment means "any farm stock" - pets are in only if a rule names them. |
+
+Labels for the new rows live on the row (`label` + `label_hi/kn/ml/ta/te`), not in the i18n
+files; render them with `resolveLabel` from `useMasterData()`.
+
+## Routes (`backend/src/routes/farm-profile.routes.ts`)
+
+- `GET /master-data/group-types`, `GET /master-data/record-types` - public, active only.
+- `GET /farm-profile/resolve?species=&animalClass=&gender=&managementMode=&groupType=`
+- `/admin/master-data/group-types` - admin CRUD (+ archive/restore).
+- `/admin/master-data/record-types` - admin list, update, archive/restore. No create/delete.
+
+Platform reference data: no tenant id is taken, so there is no tenant scoping here.
+
+## Animals (Phase 3, migration 044)
+
+- **Production fields** on `animals`: `avg_daily_milk_litres`, `parity` (number of births),
+  `last_birth_date`, `dry_off_date`; `birth_weight` now read and written. There is **no**
+  `lactation_number` column: for a milking animal it equals `parity`, and a stored copy would drift.
+- **One breeding-status vocabulary** on `animals.breeding_status`:
+  `not_bred | bred | pregnant | not_pregnant` (DB CHECK). Breeding-record statuses map onto it in
+  `backend/src/utils/breedingStatus.ts` (`confirmed_pregnant` -> `pregnant`; `delivered`, `aborted`,
+  `reabsorbed` -> `not_bred`). Frontend twin: `frontend/src/constants/breedingStatus.ts`. Anything
+  that writes the column must go through the mapping; seed SQL must use these four words or NULL
+  (the runtime gate fails otherwise - a seed row with `'active'` skipped 28 demo sections).
+- **A birth is counted once**: `BreedingService.update` reads the record's previous status, and only
+  the transition into `delivered` adds to `parity` (editing a delivered record's note does not).
+- **Write path**: `AnimalService.createAnimal/updateAnimal` is the only writer, including bulk import
+  (`POST /animals/bulk-import` now goes through it). It refuses a farm-only field the profile hides
+  for that species/class (`FARM_FIELD_RULES`) with a message naming the field and the animal.
+- **Form**: `components/animals/AnimalFormModal.tsx` is a `StepForm` (steps are an array: basics,
+  details, milk and breeding, farm and group). `buildAnimalPayload()` (in `animalsShared.tsx`) sends
+  only fields the profile shows; on edit an emptied visible field clears (null), a hidden field is
+  left untouched.
+- **One summary for every vet-facing screen**: `components/shared/SubjectSummary.tsx` (consultation
+  room, prescription writer, prescribe panel). It shows pregnancy / milk / births and, with
+  `emphasis`, a "check before choosing a medicine" note. Pure logic is in
+  `utils/farmProfile/animalFacts.ts` (`lactationState`, `doseWarnings`).
+- **Resolver rule**: with no class chosen, only an explicitly `female` animal is assumed able to be
+  pregnant or milked (otherwise every pet of unspecified gender showed breeding fields).
+- Tenant checks added in this phase: animal create/update checks the caller may use the farm and
+  group (`AnimalController.assertPlacementAllowed`); breeding create/update check the farm and that
+  dam and sire belong to it. `PUT /animals/:id` is now validated (it was not).
+
+## Groups (Phase 3b)
+
+- **Group types come from master data** (`master_group_types`, per species), not `types/enterprise.ts`.
+  Use `useMasterData().groupTypesForSpecies`, and print with `groupTypeLabel(species, value, t)` /
+  `groupTypeIcon` (falls back to the legacy `GROUP_TYPE_LABELS` for old stored values). Never print the
+  raw stored value.
+- **Record-keeping style** (`management_mode`: individual or batch) is decided when the group is
+  created: the master group type's mode first, then the species default (`AnimalGroupService.createGroup`).
+  The form suggests it, the farmer may override it, and it is **locked on edit** (the form only sends
+  `managementMode` when creating).
+- **Form**: `components/animalGroups/GroupFormModal.tsx` (`StepForm`: what / details) with
+  `buildGroupPayload` in `groupShared.ts`. Species uses the shared `components/mobile/SpeciesPicker.tsx`
+  (also used by the animal form). Planned count steps by 100 for a batch.
+- **Cards**: `pages/AnimalGroups.tsx`; the group colour is passed to CSS via `useCssVar` (no inline style).
+- Test fixture for master data in component tests: `frontend/src/test/farmMasterFixture.ts`.
+
+## Daily records (Phase 4a, migration 045, flag `farm.records.enabled`)
+
+- **One table**, `farm_daily_records`: subject = animal XOR group, one row per subject / record type /
+  date / session (unique index), always on a farm. Saving the same slot again corrects it (200,
+  `replaced: true`) and keeps the old values in `farm_daily_record_edits`; deletes are audited too.
+- **Master data decides everything**: whether a record applies is `FarmProfileService.assertRecordTypeAllowed`;
+  what it asks for is the record type's `fields` (`quantity` -> column, `session` -> column, the rest ->
+  `detail`). `FarmRecordService` has no species names in it - a new record type needs no code.
+- **Deaths are not stored here**: `mortality` is written through `BatchManagementService.recordPopulationEvent`
+  (the ledger owns head count). Other events (breeding, sale, harvest...) are Phase 4b and write through
+  their existing sources of truth.
+- **Batch-group events** (Phase 4b-1): `POST /farm-records/events` -> `FarmEventService.recordGroupEvent`. Place flock /
+  stock pond (opens the cycle, or adds to the open one), cull, partial sale, partial harvest, clear-out and final
+  harvest (sell, then close the cycle). It only ever writes through `BatchManagementService` (the ledger owns head
+  count) and `GROUP_EVENT_ACTIONS` is the one table saying what each event does - mirrored by `GROUP_EVENT_CODES` in
+  `recordShared.ts`. Applicability is still the profile engine's. Harvest needs the **number of animals taken** (the
+  head count); weight, amount and buyer go into the ledger reason text. 
+- **Events on one animal** (Phase 4b-2): same endpoint with `animalId`. Mating -> `BreedingService.create` (expected
+  birth date from master gestation days); pregnancy check -> the open breeding record; birth -> completes it
+  (`BreedingService.update` counts the birth once; with no mating on record a record is made from the birth entry);
+  dry-off -> the animal's date; weight -> weight history; heat -> one observation row a day; sale / death -> animal
+  status, a note, and out of its group. A sold or dead animal accepts nothing more. Not done yet: creating the calf
+  as an animal on birth, weaning, shearing, water exchange, the due list.
+- **Due list** (Phase 4b-3): `GET /farm-records/due` (`FarmDueService`) - expected births (the date stored when the
+  mating was recorded), each animal's latest vaccination whose next-due date is within 14 days or past, and withdrawals
+  ending within 7 days. Only recorded dates - nothing is guessed from a species (no 'check pregnancy at day 45': that
+  needs a sourced value in master data first). Shown at the top of the Daily records screen; a birth row opens the birth entry.
+  Not done: sending due items through the notification system, a pregnancy-check or dry-off reminder.
+- **Who may do what**: any owner / active member / admin reads; `farm_vet` and `viewer` cannot write (403
+  with the reason); a worker deletes only what they entered, owner/manager any. A farm the caller has no
+  claim on is a 404. The demo seed makes Maria Garcia a worker and Dr. Carter a farm vet on Tom's farm -
+  use Emily (pet owner) as the outsider in tests.
+- **Dark launch**: every route except `GET /farm-records/enabled` answers 404 while the flag is off.
+  The flag is cached 60 s (`services/farmRecords/FarmRecordsConfig.ts`).
+- **Screen** (Phase 4a): `pages/FarmRecords.tsx` at `/farm-records` (first tile of the farmer's "+" sheet; menu item hidden
+  until the flag is on - `useFarmRecordsEnabled`, which never caches a failed probe). Herds/flocks first, then
+  single animals with the most to record. One entry sheet for everything: `components/farmRecords/RecordEntrySheet.tsx`
+  renders the record type's own `fields` (from `recordTypeEntry(code).fields`); pure logic in `recordShared.ts`.
+  Picker-type fields (feed item) are not shown yet - they need the feed inventory as a source list.
+- Dates are read as text (`record_date::text`): a DATE parsed into a JS Date shifts a day in timezones
+  ahead of UTC (India).
+
+## Gotchas
+
+- A breed rename must move the text on `animals`, `animal_groups`, `group_cycles` and
+  `marketplace_listings` in the same transaction (`MasterDataService.updateBreed` does; migration
+  043 has the SQL equivalent). They are plain text, not foreign keys.
+- `BreedingService` takes gestation days from `master_species` via the dam's species. The
+  breeding screen never sends a species, so before migration 043 no due date was ever calculated.
+- Seeded values with weak sourcing are listed in the header of
+  `backend/migrations/043_farm_profile_engine.sql`; all are admin-editable.
+
+## Farm roles (one rule everywhere, 2026-11-16)
+`backend/src/services/FarmAccessService.ts` is the only place that decides what a farm role may do (the screen's
+copy for button visibility is `frontend/src/utils/farmRoles.ts`).
+
+| action | owner | manager | supervisor | worker | farm vet | viewer |
+|---|---|---|---|---|---|---|
+| read | x | x | x | x | x | x |
+| record (daily records, events, head count, putting animals on the farm) | x | x | x | x | | |
+| clinical (health / analytics screens that change data) | x | x | x | x | x | |
+| manage farm | x | x | | | | |
+| manage team (add / remove supervisors, workers, viewers, farm vets) | x | x | | | | |
+| change roles, make / remove a manager | x | | | | | |
+
+A platform admin may do everything. The owner's own place cannot be removed or changed; a farm has one owner.
+Applied in: `EnterpriseController` (per-action role lists kept, now through `roleOf`), Tier 2/3/4 controllers (read =
+GET, anything else = clinical), `ensureGroupAccess` (batch routes), `AnimalController` placement, medical-record
+group writes (a viewer is refused), `requireEnterpriseAccess` middleware, the daily-records module, and the member
+endpoints (`assertTeamChange`: a manager cannot promote, cannot touch managers or the owner). A person with no
+role is told: "You don't have access to this farm. Only the farm owner can add people. Please ask them to
+invite you." (403, never "not found"). Verified by `backend/tests/unit/FarmAccessService.test.ts` and a real-server
+run (28 checks). Still to build: invitations for people without an account, SMS, and a farm workspace for people whose
+platform role is not farmer (see the plan in the conversation / `docs/FARM_MANAGEMENT_PLAN.md`).
+
+## Farm team: invitations, SMS, workspace (2026-11-16)
+**Owner-driven only.** Nobody requests access; there is no farm directory. The owner (and managers, for the roles
+below a manager) invite by mobile number and/or email with a role (`FarmInvitationService`, migration 048,
+`routes/farm-invitations.routes.ts`).
+- Lifecycle: `pending -> accepted | declined | expired | revoked`, valid 7 days; resend gives a new link (only the
+  token's SHA-256 is stored) after a 60 s cooldown; one pending invitation per farm and number / email.
+- The link (`/join-farm?token=...`, public) shows the farm, role and inviter only. Signed in: Accept / Decline.
+  Has an account, signed out: sign in, then straight back. No account: create one from the link (platform role
+  `farmer`, number marked verified, a placeholder `...@phone.waytovet.invalid` email when invited by number only -
+  never mailed, never shown). Accept / decline also work from the banner at the top of every screen (by the person's
+  own number / email, no link needed).
+- **Farm workspace for any platform role**: `EnterpriseService.addMember` (the choke point) adds the additive
+  `farmer` role (`user_roles`) to a member whose platform role is not farmer, so a pet owner or vet who joins a farm
+  gets the farm screens; what they may do on a farm is their farm role (`FarmAccessService`).
+- Delivery: SMS (`SmsService`, Admin -> SMS Settings, migration 046: MSG91 / Twilio / log provider, DLT template ids,
+  write-only secrets, test send, send log), email (`farm_invite` template), in-app notification for an existing
+  account. SMS off or failing never blocks: the invitation is created and the link is shown to share by hand.
+- The older `POST /enterprises/:id/invite-member` now creates an invitation (no instant add).
+- Screens: `components/enterprise/{InviteMemberModal,InviteResultNotice,FarmInvitationsPanel,PendingFarmInvitations}.tsx`,
+  `pages/JoinFarm.tsx`, `pages/admin/SmsSettings.tsx`. Verified: 41 server checks, 19 browser checks.
+
+## Vet access to farm records (2026-11-16, owner rule)
+Only the vet booked for an appointment about an animal or group may read that animal's / group's farm records.
+`FarmAccessService.consultingVetMayRead`: a **confirmed or rescheduled** booking, or a consultation that is
+confirmed / scheduled / in progress, and **30 days** after it was completed (`VET_ACCESS_DAYS`; for a booking the clock
+is its `updated_at`, so a later edit of a completed booking extends access). Pending, cancelled, missed and no-show give
+none. Read-only and only for that one animal / group: never the farm, its summary, due list, team or finances, and no
+writes. Each read by such a vet is written to `clinical_data_access_log` (animals; groups go to the server log). A vet
+refused is told how access works ("ask the farm owner to book you for it"). On screen: `RecentFarmRecords` (last 7 days
+per record type) under the animal summary in the consultation room and the prescribe panel; it shows nothing when there
+is nothing to show. Verified by a 19-check real-server run.
+
+**Found, not changed (needs the owner):** `GET /animals/:id` still lets ANY veterinarian open ANY non-network animal's
+profile (`AnimalController.getAnimal`), which conflicts with the rule above for the animal profile itself; tightening it
+could affect certificates and hospital flows. Also `logClinicalAccess` writes access types such as `get_medical_records`
+that the table's CHECK (`view, search, export, print, api_call, audit`) rejects, so those audit rows silently fail
+(hospital-network code - change-protected).
+
+## Reminders and newborns (2026-11-16)
+- **Due reminders**: `FarmDueNotifier` (scheduler, every 6 h, off while `farm.records.enabled` is off) sends the owner, managers
+  and supervisors ONE in-app note per farm per day (deduped by `metadata.dedupeKey`) when something recorded is due within 3 days
+  or overdue (births, vaccinations, withdrawals). Same dates as the due list; nothing guessed.
+- **Birth -> newborn animals**: the birth entry offers "Add the newborn(s) to the farm" (on by default, editable name and sex,
+  at most as many as were born alive, max 10). They are created through `AnimalService.createAnimal` with dam, the mating's sire,
+  the farm and the birth date; class is left for the farmer. A birth entered twice on the same day is refused (no double parity).
+
+## Handing a farm over (2026-11-16)
+`POST /enterprises/:id/transfer-ownership {userId}` - owner (or platform admin) only, and only to an ACTIVE MANAGER of the
+farm (`EnterpriseService.transferOwnership`, one transaction): `enterprises.owner_id` and the manager's seat become owner,
+the previous owner becomes a manager; both are notified. The team screen offers "Make owner" on managers, with a
+confirmation. Verified by a 13-check real-server run.
+
+## Saving with no signal: the outbox (2026-11-16)
+When a save fails because the phone cannot reach the server, the entry sheet offers "Save on this phone, send later"
+(`RecordEntrySheet` -> `useFarmOutbox().add`). Entries live in `utils/farmOutbox.ts` (localStorage, per signed-in
+person) and `hooks/useFarmOutbox.ts` sends them oldest-first when the screen opens, when the phone comes back online and
+every 30 s; `FarmOutboxBanner` on the Farm records screen lists what is waiting. Rules: only "could not reach the
+server" keeps an entry waiting; if the server answered and refused (animal sold, number not allowed) the entry stays
+with the server's reason and waits for the farmer (Send again / Discard). Each entry's id is its `Idempotency-Key`:
+`POST /farm-records/events` stores the answer in `farm_event_receipts` (migration 049) and replays it, so an entry whose
+first attempt did arrive is never counted twice (daily records are already one-per-day-per-subject upserts). Refused
+events store no receipt. Verified by an 8-check real-server run plus 8 unit tests.
+
+## Vets opening an animal, and the access audit (2026-11-16, owner decisions)
+`GET /animals/:id` no longer lets any vet open any animal: a vet needs a (not cancelled) booking or consultation with them
+for it, to be the farm vet of its farm, or a hospital-network access path already granted. Otherwise they are told in words
+to ask the owner to book them. The clinical access audit (`clinical_data_access_log`) was silently failing for every
+private-animal read: the middleware wrote `get_animal_profile` into `access_type`, which the table restricts to a closed
+list. It now writes `view` (reads) / `api_call` (changes) and the screen name goes in `record_type`. Verified by a 6-check
+real-server run (unbooked 403, booked 200, cancelled 403, audit row written as `view/animal_profile`).
+
+## Breeding, Feed and Movement screens (Phase 5, 2026-11-16)
+All three now use the shared phone blocks (`StepForm`, `ChipSelect`, `NumberStepper`, `BottomSheet`, `useSaveAction`) and
+cards instead of tables; classes `breeding-*`, `feed-*`, `movement-*` in `modules.css`.
+- **Breeding**: the mother and father are picked from the farm's own live animals (female / male, the father of the mother's
+  species) - it used to take a typed UUID. Birth figures appear only for outcomes that have them.
+- **Feed**: money uses the platform currency (`useSettings().formatCurrency`; it was a hardcoded `$`), feed types and units
+  are translated, restock / log use / delete are sheets with the shared save behaviour, trend bars use `feed-bar-N` classes.
+- **Movement**: backend fixes found on the way - `movement_records.status` existed only if a seed script ran (migration 050 +
+  `init.sql`; existing rows become `completed`), the list never returned `status`, group movements could never be approved
+  (the farm was looked up through an animal), approval was owner-only (now owner or manager, `FarmAccessService
+  'manage_farm'`), and **a movement could name another farm's animal, group or place** (it rewrote that animal's location) -
+  `MovementService.assertBelongsToFarm` now refuses it in words. Verified by a 15-check real-server run.
+
+## Treatment campaigns (Phase 5, 2026-11-16)
+Cards + step form on the shared blocks. Bugs found and fixed on the way: the page sent `targetGroupId` / `medication` /
+`targetSpecies` while the server knows `groupId` / `productUsed` (unknown fields are stripped, so a chosen group and the
+medication were **silently never saved**), it showed `treatedCount/totalAnimals` which the server never returns (it is
+`completedCount/targetCount`), it offered a "Supplement" type the table rejects (the type list now matches
+`treatment_campaigns.campaign_type`, and the server says in words to choose one from the list), a campaign could name
+another farm's group (`groupCountOnFarm` now refuses it), and "how many to treat" is filled from the group's head count.
+"Start" is one tap; "Mark done" opens the progress step so the real number treated is entered (it goes into the group's
+health record). Create / edit buttons are shown only to owner, manager, supervisor and farm vet (`hooks/useMyFarmRole.ts`,
+shared with the Movement screen; the server still decides). Verified by a 10-check real-server run.
+
+## Locations (Phase 5, 2026-11-16)
+Cards, tree (indent by `loc-depth-N` class) and map views; add / edit is a three-step form (what, size, where) with a
+"use my current location" button for the coordinates; delete is a sheet that says what happens to what is inside. Backend:
+a place's parent must be a place of the same farm and not the place itself or one of its own parts (it used to accept any
+id - another farm's place name then showed on this farm's screen, and a loop broke the tree); the place type is validated
+against `locations.location_type`; deleting a place moves the places inside it up one level. The screen asks for up to 200
+places (it silently stopped at 50 before). Only owner and manager see the change buttons (`useMyFarmRole`). Verified by an
+11-check real-server run. Phase 5's five farm screens (Breeding, Feed, Movement, Campaigns, Locations) are now all on the
+shared phone blocks; the batch-plan leftovers (group passport, group certificates, group consultations, batch prescriptions)
+remain - the hospital-network parts of those need the owner's sign-off.
+
+## Group appointments and prescriptions (2026-11-16)
+A consultation can now be about a whole group: `consultations.group_id` (migration 051, `init.sql` §68). The group comes from
+the **booking** (never from a typed id); without a booking it is accepted only for a group the person has a role on.
+`GET /consultations/:id` returns the group's name, type, species and head count; the vet's room shows it with
+`components/shared/GroupSummary.tsx` (the group counterpart of `SubjectSummary`), the farm team's last-7-days records
+(`RecentFarmRecords groupId`) and the vet's own records for the group (`GET /medical-records?groupId=`). A prescription from
+that room is ONE prescription for the group; its cycle is the group's open cycle and `head_count_treated` defaults to the
+group's head count.
+Bugs found and fixed on the way (all reproduced on a real server first): prescribing from a consultation room was **refused**
+with a raw validation message (`xor('animalId','groupId')` required a subject in the request, and the service's lookup of the
+consultation's subject queried the missing `consultations.group_id`, failed and was swallowed) - the schema now allows
+"neither" and the service says in words when there is still none; a vet could write a prescription into any group id (now
+only a group they are booked or in consultation for); and a vet's open consultation with an owner was handed back for a
+**different** animal or group booked later (the dedupe ignored the subject) - it now matches the same subject only.
+Verified by an 11-check real-server run. Group enrolment in a hospital network (cycle-bound consent) is the one Phase 5 item
+left; it is change-protected hospital-network code and needs the owner's sign-off on the specific isolation changes first.
+
+## Sharing a group with a hospital network (2026-11-16, owner approved)
+A farm shares a GROUP (herd / flock) with a hospital network for **one production cycle**. Own tables (migration 052, `init.sql`
+§69) and own route file (`routes/group-network-sharing.routes.ts`, `services/GroupNetworkSharingService.ts`): the animal
+enrolment code and tables (`animal_care_contexts`, `patient_data_consent`) are change-protected and were not touched. The
+only edits near protected code are one line mounting the new routes, one hook in `BatchManagementService.closeCycle`, and one
+panel rendered in the network's Patients tab.
+- **Why a code, not a request from the network:** a network cannot browse farms (directory is scoped, memory
+  network-hospital audit I-3) and a group id must never be enough to ask for one (the animal flow guards that with a "footprint"
+  check; a group has no visit history). So consent comes first: the **owner** creates a one-time code for the group's current
+  cycle (choose: medical records, vaccinations, prescriptions) and gives it to the hospital. Only the SHA-256 of the code is
+  stored; it is shown once; valid 14 days; cancellable.
+- **Network side:** staff with the existing `enrollPatient` permission redeem it (branch-scoped roles enrol into their own branch);
+  `viewEnrolledPatients` lists shared groups and reads their records, read-only, **only that cycle's records**, only what the owner
+  allowed, never `is_confidential` ones, each read written to `clinical_data_access_log` (`record_type='group_records'`,
+  `record_id` = the group). Non-members get 404, an unshared group 403 with a plain next step.
+- **Cycle-bound:** `group_care_contexts.cycle_id`; closing the cycle ends the sharing (`ended_reason='cycle_closed'`) and cancels
+  unused codes; the next cycle needs a new code. A group with no cycle is shared for 90 days.
+- **Owner controls:** only the farm owner (or a platform admin) can create / cancel codes or stop a sharing; the owner is notified
+  when a network redeems a code; "Share with a hospital" on the group card (`ShareGroupSheet`).
+Verified by a 29-check real-server run (owner-only, wrong / used / cancelled code, non-member 404, branch scoping, scope
+respected, audit row, cycle close ends it, new cycle needs a new code, owner stops it, earlier cycle's records not shown).
+
+## Appointments with no animal or group (2026-11-16, owner decision: stays optional)
+The booking form keeps the animal "optional" (a general question, e.g. about feeding, has no single animal). Verified end to
+end on a real server (23 checks): book -> confirm -> both booking lists -> consultation -> room -> video call and chat ->
+notes -> prescription -> complete -> booking completed. What an animal-less appointment cannot do yet has a plain next step:
+- **Prescription**: the writer shows "Which animal is this prescription for?" with the owner's animals (nothing to choose if the
+  owner has none - it says to add one first). Server: the animal must be the patient's own (or on their farm), or one the vet
+  already has an appointment / network relationship with - a vet could previously prescribe for ANY animal id.
+- **Referral**: a referral is about one animal (protected network code requires it); the room now says in words to ask the owner
+  to add the animal and book again, instead of a raw validation error.
+- **Medical history panel**: shows "No animal linked" with what that means.

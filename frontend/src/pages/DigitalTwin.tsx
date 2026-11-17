@@ -4,6 +4,7 @@ import './ModulePage.css'
 import { Enterprise, DigitalTwin, SimulationRun } from '../types'
 import { useTranslation } from 'react-i18next'
 
+import { userMessage } from '../utils/userMessage'
 const SCENARIO_TYPES = [
   { value: 'disease_spread', label: '🦠 Disease Spread', desc: 'Model pathogen transmission through animal populations' },
   { value: 'resource_optimization', label: '⚙️ Resource Optimization', desc: 'Optimize workforce and feed allocation' },
@@ -65,7 +66,7 @@ const DigitalTwinPage: React.FC = () => {
       setDashboard(dashRes.data)
       setTwins(twinsRes.data?.items || [])
       setSimulations(simsRes.data?.items || [])
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
     setLoading(false)
   }
 
@@ -76,7 +77,7 @@ const DigitalTwinPage: React.FC = () => {
       setTwinForm({ name: '', twinType: 'farm', description: '' })
       setSuccessMsg(t('digitalTwin.twinCreated'))
       fetchData()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const runSimulation = async () => {
@@ -95,14 +96,14 @@ const DigitalTwinPage: React.FC = () => {
       setShowSimForm(false)
       setSuccessMsg(t('digitalTwin.simulationCompleted'))
       fetchData()
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const viewSimResult = async (sim: SimulationRun) => {
     try {
       const res = await apiService.getSimulation(sim.id)
       setSelectedSimulation(res.data)
-    } catch (e: any) { setError(e.message) }
+    } catch (e: any) { setError(userMessage(e)) }
   }
 
   const renderDashboard = () => {

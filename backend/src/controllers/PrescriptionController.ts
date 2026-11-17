@@ -11,7 +11,7 @@ class PrescriptionController {
       throw new ForbiddenError('Only veterinarians can create prescriptions');
     }
 
-    const prescription = await PrescriptionService.createPrescription(authReq.userId!, req.body);
+    const prescription = await PrescriptionService.createPrescription(authReq.userId!, req.body, authReq.userRole);
     res.status(201).json({ success: true, data: prescription });
   }
 

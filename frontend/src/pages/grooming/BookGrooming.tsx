@@ -5,6 +5,7 @@ import { payGroomingOrderFlow } from '../../utils/groomingCheckout'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void }
 
 interface Slot { startTime: string; endTime: string; isAvailable: boolean; remainingCapacity: number }
@@ -70,7 +71,7 @@ const BookGrooming: React.FC<Props> = ({ onNavigate }) => {
         const a = await apiService.listAnimals({ limit: 100 })
         setAnimals(a.data?.animals || a.data?.items || (Array.isArray(a.data) ? a.data : []))
       } catch { /* animals optional */ }
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [providerId, serviceId, t])
   useEffect(() => { load() }, [load])
 
@@ -88,7 +89,7 @@ const BookGrooming: React.FC<Props> = ({ onNavigate }) => {
         setClosedReason(res.data?.closedReason || '')
         setTime(prev => (list.some(s => s.startTime === prev && s.isAvailable) ? prev : ''))
       } catch (e: any) {
-        if (!cancelled) { setSlots([]); setClosedReason(e?.response?.data?.message || e.message) }
+        if (!cancelled) { setSlots([]); setClosedReason(userMessage(e)) }
       } finally { if (!cancelled) setSlotsLoading(false) }
     })()
     return () => { cancelled = true }
@@ -117,7 +118,7 @@ const BookGrooming: React.FC<Props> = ({ onNavigate }) => {
     } catch (e: any) {
       // The slot can be taken between rendering and submitting, so refresh what is left rather
       // than leaving a stale grid that still shows the time as free.
-      setErr(e?.response?.data?.message || e.message)
+      setErr(userMessage(e))
       if (date) {
         try {
           const res = await apiService.getGroomingAvailability(providerId, date, { serviceId })

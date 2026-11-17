@@ -5,6 +5,7 @@ import apiService from '../services/api'
 import PasswordInput from '../components/PasswordInput'
 import './Auth.css'
 
+import { userMessage } from '../utils/userMessage'
 interface ResetPasswordProps {
   onGoToLogin: () => void
 }
@@ -65,7 +66,7 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
       await apiService.resetPassword(token, newPassword)
       setPageState('success')
     } catch (err: any) {
-      setError(err?.response?.data?.message || t('resetPassword.genericError'))
+      setError(userMessage(err, 'resetPassword.genericError'))
     } finally {
       setLoading(false)
     }

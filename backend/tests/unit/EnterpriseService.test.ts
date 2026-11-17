@@ -76,10 +76,24 @@ describe('EnterpriseService', () => {
     it('should add a member to an enterprise', async () => {
       const memberRow = { id: 'm1', enterprise_id: 'e1', user_id: 'u1', role: 'manager', is_active: true };
       (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ id: 'm1' }] })
-        .mockResolvedValueOnce({ rows: [memberRow] });
+        .mockResolvedValueOnce({ rows: [{ id: 'm1' }] })       // the insert
+        .mockResolvedValueOnce({ rows: [{ role: 'farmer' }] }) // grantFarmWorkspace: already a farmer, nothing to add
+        .mockResolvedValueOnce({ rows: [memberRow] });         // getMember
       const result = await enterpriseService.addMember('e1', 'u1', 'manager');
       expect(result).toBeDefined();
+    });
+
+    it('gives a member whose platform role is not farmer the farm workspace (additive farmer role)', async () => {
+      const memberRow = { id: 'm1', enterprise_id: 'e1', user_id: 'u1', role: 'worker', is_active: true };
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [{ role: 'pet_owner' }] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [memberRow] });
+      await enterpriseService.addMember('e1', 'u1', 'worker');
+      const insertRole = (database.query as jest.Mock).mock.calls.find(c => /INSERT INTO user_roles/.test(c[0]));
+      expect(insertRole).toBeDefined();
+      expect(insertRole![1]).toEqual(['u1']);
     });
   });
 
@@ -128,13 +142,14 @@ describe('EnterpriseService', () => {
   describe('getEnterpriseStats', () => {
     it('should return enterprise stats', async () => {
       (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ count: '10' }] })
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [{ count: '3' }] })
-        .mockResolvedValueOnce({ rows: [{ count: '5' }] })
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [{ count: '4' }] })
-        .mockResolvedValueOnce({ rows: [{ total: '20', recent: '5', vaccinations: '15', overdue: '2', upcoming: '3' }] });
+        .mockResolvedValueOnce({ rows: [{ count: '10' }] })  // animals
+        .mockResolvedValueOnce({ rows: [] })                 // groups
+        .mockResolvedValueOnce({ rows: [{ head: '0' }] })    // batchHead
+        .mockResolvedValueOnce({ rows: [{ count: '3' }] })   // locations
+        .mockResolvedValueOnce({ rows: [{ count: '5' }] })   // campaigns
+        .mockResolvedValueOnce({ rows: [] })                 // members
+        .mockResolvedValueOnce({ rows: [{ count: '4' }] })   // vaccStats
+        .mockResolvedValueOnce({ rows: [{ total: '20', recent: '5', vaccinations: '15', overdue: '2', upcoming: '3' }] }); // medRecords
       const result = await enterpriseService.getEnterpriseStats('e1');
       expect(result).toBeDefined();
       expect(result).toHaveProperty('totalAnimals');

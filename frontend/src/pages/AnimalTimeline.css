@@ -133,6 +133,7 @@
   flex-shrink: 0;
   width: 24px;
   text-align: center;
+  color: var(--s-color, inherit);
 }
 
 .tl-search-dropdown-label {
@@ -454,8 +455,10 @@
 /* ─── Rail ────────────────────────────────────────────────── */
 .tl-rail-wrap {
   position: relative;
+  height: var(--h, auto);
   overflow: hidden;
   user-select: none;
+  cursor: grab;
   background: #fafbfc;
   border-bottom: 1.5px solid #f1f5f9;
   min-height: 140px;
@@ -467,6 +470,7 @@
 /* ─── Ticks / grid ────────────────────────────────────────── */
 .tl-tick-line {
   position: absolute;
+  left: var(--x, 0);
   top: 0;
   bottom: 0;
   width: 1px;
@@ -476,6 +480,7 @@
 
 .tl-tick-label {
   position: absolute;
+  left: var(--x, 0);
   top: 6px;
   font-size: 0.7rem;
   color: #94a3b8;
@@ -490,6 +495,7 @@
 /* ─── Today line ──────────────────────────────────────────── */
 .tl-today-line {
   position: absolute;
+  left: var(--x, 0);
   top: 0;
   bottom: 0;
   width: 2px;
@@ -514,6 +520,8 @@
 /* ─── Event nodes ─────────────────────────────────────────── */
 .tl-node {
   position: absolute;
+  left: var(--x, 0);
+  top: var(--y, 0);
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -544,6 +552,35 @@
   50%       { opacity: 0.9; transform: translateX(-50%) scale(1.15); }
 }
 
+/* Severity ring/text colors - closed enum, see severityColor() in animalTimelineShared.ts */
+.tl-ring-critical    { border-color: #d32f2f; }
+.tl-ring-high        { border-color: #f44336; }
+.tl-ring-medium      { border-color: #ff9800; }
+.tl-ring-low         { border-color: #4caf50; }
+.tl-sevtext-critical { color: #d32f2f; }
+.tl-sevtext-high     { color: #f44336; }
+.tl-sevtext-medium   { color: #ff9800; }
+.tl-sevtext-low      { color: #4caf50; }
+.tl-status-active    { color: #2e7d32; }
+
+/* Event-type color/bg - closed enum, see EVENT_TYPES in animalTimelineShared.ts. Applied on an
+   ancestor element so descendants (dot/icon/pill) can consume it via CSS inheritance. */
+.tl-type-vaccination         { --type-color: #4caf50; --type-bg: #e8f5e9; }
+.tl-type-record_diagnosis    { --type-color: #2196f3; --type-bg: #e3f2fd; }
+.tl-type-record_surgery      { --type-color: #f44336; --type-bg: #ffebee; }
+.tl-type-record_imaging      { --type-color: #607d8b; --type-bg: #eceff1; }
+.tl-type-record_follow_up    { --type-color: #00bcd4; --type-bg: #e0f7fa; }
+.tl-type-record_vaccination  { --type-color: #4caf50; --type-bg: #e8f5e9; }
+.tl-type-record_prescription { --type-color: #9c27b0; --type-bg: #f3e5f5; }
+.tl-type-record_lab_report   { --type-color: #ff9800; --type-bg: #fff3e0; }
+.tl-type-record_other        { --type-color: #78909c; --type-bg: #eceff1; }
+.tl-type-prescription        { --type-color: #9c27b0; --type-bg: #f3e5f5; }
+.tl-type-lab_result          { --type-color: #ff9800; --type-bg: #fff3e0; }
+.tl-type-weight               { --type-color: #009688; --type-bg: #e0f2f1; }
+.tl-type-booking              { --type-color: #3f51b5; --type-bg: #e8eaf6; }
+.tl-type-consultation         { --type-color: #673ab7; --type-bg: #ede7f6; }
+.tl-type-allergy              { --type-color: #ff5722; --type-bg: #fbe9e7; }
+
 .tl-node-dot {
   width: 28px;
   height: 28px;
@@ -553,6 +590,7 @@
   justify-content: center;
   font-size: 0.95rem;
   line-height: 1;
+  background: var(--type-color, #78909c);
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   border: 2px solid #fff;
   transition: transform 0.15s, box-shadow 0.15s;
@@ -618,6 +656,8 @@
 
 .tl-dist-seg {
   height: 100%;
+  width: var(--w, 0);
+  background: var(--c, #78909c);
   border-radius: 1px;
   min-width: 3px;
   transition: width 0.3s ease;
@@ -642,6 +682,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  background: var(--c, #78909c);
   flex-shrink: 0;
 }
 
@@ -674,10 +715,12 @@
 
 .tl-scrubber-dot {
   position: absolute;
+  left: var(--x, 0);
   top: 50%;
   width: 5px;
   height: 5px;
   border-radius: 50%;
+  background: var(--c, #78909c);
   transform: translate(-50%, -50%);
   pointer-events: none;
   opacity: 0.7;
@@ -685,6 +728,8 @@
 
 .tl-scrubber-thumb {
   position: absolute;
+  left: var(--x, 0);
+  width: var(--w, 0);
   top: 2px;
   bottom: 2px;
   border-radius: 9px;
@@ -706,6 +751,7 @@
 
 .tl-scrubber-year {
   position: absolute;
+  left: var(--x, 0);
   font-size: 0.65rem;
   color: #94a3b8;
   transform: translateX(-50%);
@@ -716,6 +762,8 @@
 /* ─── Hover Tooltip ───────────────────────────────────────── */
 .tl-tooltip {
   position: fixed;
+  left: var(--x, 0);
+  top: var(--y, 0);
   z-index: 9999;
   background: #fff;
   border: 1.5px solid #e2e8f0;
@@ -749,6 +797,8 @@
   justify-content: center;
   font-size: 1rem;
   flex-shrink: 0;
+  background: var(--type-bg, #eceff1);
+  color: var(--type-color, #78909c);
 }
 
 .tl-tt-title {
@@ -774,6 +824,7 @@
 
 .tl-tt-key { font-size: 0.73rem; color: #94a3b8; font-weight: 500; }
 .tl-tt-val { font-size: 0.78rem; font-weight: 600; color: #374151; }
+.tl-status-inactive { color: #757575; }
 
 .tl-tt-desc {
   font-size: 0.75rem;
@@ -854,12 +905,14 @@
   align-items: flex-start;
   gap: 12px;
   padding: 20px;
+  background: var(--type-bg, #eceff1);
 }
 
 .tl-drawer-icon {
   font-size: 2rem;
   line-height: 1;
   flex-shrink: 0;
+  color: var(--type-color, #78909c);
 }
 
 .tl-drawer-title-wrap {
@@ -885,6 +938,8 @@
   font-size: 0.72rem;
   font-weight: 600;
   align-self: flex-start;
+  background: var(--type-color, #78909c);
+  color: #fff;
 }
 
 .tl-drawer-close {

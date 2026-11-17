@@ -4,6 +4,7 @@ import './ModulePage.css'
 import { Enterprise, ReportTemplate, GeneratedReport } from '../types'
 import { useTranslation } from 'react-i18next'
 
+import { userMessage } from '../utils/userMessage'
 const REPORT_TYPES = [
   { value: 'animal_census', label: '🐄 Animal Census', desc: 'Comprehensive animal inventory by species, breed, gender' },
   { value: 'health_summary', label: '🏥 Health Summary', desc: 'Health observations, resolution rates, severity analysis' },
@@ -79,7 +80,7 @@ const ReportBuilderPage: React.FC = () => {
       const report = result.data
       if (report) { setSelectedReport(report); setTab('view') }
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('reportBuilder.failedGenerate')) }
+    } catch (err: any) { setError(userMessage(err, 'reportBuilder.failedGenerate')) }
     finally { setGenerating(false) }
   }
 
@@ -103,7 +104,7 @@ const ReportBuilderPage: React.FC = () => {
       setShowTemplateForm(false)
       setTemplateForm({ name: '', description: '', reportType: 'animal_census' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleDeleteReport = async (id: string) => {
@@ -195,8 +196,8 @@ const ReportBuilderPage: React.FC = () => {
                       <option value="json">JSON</option><option value="csv">CSV</option><option value="pdf">PDF</option>
                     </select>
                   </div>
-                  <div className="form-group"><label>{t('reportBuilder.days')}</label><input type="number" value={genForm.days} onChange={e => setGenForm({ ...genForm, days: e.target.value })} /></div>
-                  <div className="form-group"><label>{t('reportBuilder.months')}</label><input type="number" value={genForm.months} onChange={e => setGenForm({ ...genForm, months: e.target.value })} /></div>
+                  <div className="form-group"><label>{t('reportBuilder.days')}</label><input type="number" inputMode="decimal" value={genForm.days} onChange={e => setGenForm({ ...genForm, days: e.target.value })} /></div>
+                  <div className="form-group"><label>{t('reportBuilder.months')}</label><input type="number" inputMode="decimal" value={genForm.months} onChange={e => setGenForm({ ...genForm, months: e.target.value })} /></div>
                 </div>
                 <button type="submit" className="btn-primary" disabled={generating}>
                   {generating ? `⏳ ${t('reportBuilder.generating')}` : `🚀 ${t('reportBuilder.tabs.generate')}`}

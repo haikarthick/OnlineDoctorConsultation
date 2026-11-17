@@ -14,6 +14,8 @@
  */
 
 import { Response, NextFunction } from 'express';
+import FarmAccessService from '../services/FarmAccessService';
+import { ForbiddenError } from '../utils/errors';
 import { AuthRequest } from './auth';
 import database from '../utils/database';
 import logger from '../utils/logger';
@@ -86,6 +88,7 @@ export async function checkAnimalAccess(
       const memberRes = await database.query(
         `SELECT id FROM hospital_network_members
          WHERE network_id = $1 AND user_id = $2 AND is_active = true
+           AND (valid_until IS NULL OR valid_until > NOW())
          LIMIT 1`,
         [ctx.network_id, userId]
       );
@@ -111,10 +114,12 @@ export async function checkAnimalAccess(
            OR pdc.granted_to_hospital_id IN (
              SELECT hospital_id FROM hospital_network_members
              WHERE user_id = $2 AND is_active = true AND hospital_id IS NOT NULL
+               AND (valid_until IS NULL OR valid_until > NOW())
            )
            OR pdc.granted_to_network_id IN (
              SELECT network_id FROM hospital_network_members
              WHERE user_id = $2 AND is_active = true
+               AND (valid_until IS NULL OR valid_until > NOW())
            )
          )
        LIMIT 1`,
@@ -242,7 +247,8 @@ export function requireAnimalAccess(
         accessedBy: userId,
         accessorRole: userRole,
         animalId,
-        accessType: `${req.method.toLowerCase()}_${recordType}`,
+        // access_type is a closed list in the table (init.sql); the screen being read goes in record_type.
+        accessType: req.method === 'GET' || req.method === 'HEAD' ? 'view' : 'api_call',
         recordType,
         consentId: decision.consentId,
         networkId: decision.networkId,
@@ -285,23 +291,15 @@ export function requireEnterpriseAccess() {
       return next(); // Admins can access all enterprises
     }
 
-    // Check if user is a member of this enterprise
-    const membershipRes = await database.query(
-      `SELECT id FROM enterprise_members WHERE enterprise_id = $1 AND user_id = $2 AND is_active = true`,
-      [enterpriseId, req.userId]
-    );
-
-    if (membershipRes.rows.length === 0) {
-      logger.warn('Enterprise access denied', {
-        userId: req.userId,
-        enterpriseId,
-        path: req.path,
-      });
-      return res.status(403).json({
-        success: false,
-        error: 'You do not have access to this enterprise',
-        code: 'ENTERPRISE_ACCESS_DENIED',
-      });
+    // One rule for every farm screen (services/FarmAccessService.ts): members only; a viewer only looks.
+    try {
+      await FarmAccessService.assert(enterpriseId, { userId: req.userId!, role: req.userRole }, FarmAccessService.actionForMethod(req.method));
+    } catch (err: any) {
+      if (err instanceof ForbiddenError) {
+        logger.warn('Enterprise access denied', { userId: req.userId, enterpriseId, path: req.path });
+        return res.status(403).json({ success: false, message: err.message, error: { message: err.message, code: 'ENTERPRISE_ACCESS_DENIED' } });
+      }
+      throw err;
     }
 
     next();

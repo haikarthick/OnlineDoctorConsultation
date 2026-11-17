@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
+import { userMessage } from '../utils/userMessage'
 const SEVERITY_COLORS: Record<string, string> = { info: '#3b82f6', warning: '#f97316', critical: '#ef4444' }
 const RULE_TYPES = ['vaccination_due', 'breeding_due', 'low_feed_stock', 'document_expiry', 'health_threshold', 'custom']
 
@@ -79,7 +80,7 @@ const AlertCenter: React.FC = () => {
       setRuleFormData({ name: '', ruleType: 'vaccination_due', severity: 'warning', conditions: '{}' })
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || t('alertCenter.toasts.saveFailed'))
+      setError(userMessage(err, 'alertCenter.toasts.saveFailed'))
     }
   }
 
@@ -130,7 +131,7 @@ const AlertCenter: React.FC = () => {
       setSuccessMsg(t('alertCenter.toasts.checksComplete', { count }))
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || t('alertCenter.toasts.checksFailed'))
+      setError(userMessage(err, 'alertCenter.toasts.checksFailed'))
     }
   }
 

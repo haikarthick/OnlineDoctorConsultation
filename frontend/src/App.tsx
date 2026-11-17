@@ -4,7 +4,9 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, usePa
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { SettingsProvider } from './context/SettingsContext'
 import { MasterDataProvider } from './context/MasterDataContext'
-import { PermissionProvider, usePermission, ROUTE_PERMISSION_MAP } from './context/PermissionContext'
+import { PermissionProvider } from './context/PermissionContext'
+import { PageLoader, ProtectedRoute, RoleRoute, PublicOnlyRoute } from './components/routing/RouteGuards'
+import { PendingFarmInvitations } from './components/enterprise/PendingFarmInvitations'
 import { SocketProvider } from './context/SocketContext'
 import { Layout } from './components/Layout'
 import FloatingChatWidget from './components/FloatingChatWidget'
@@ -65,6 +67,17 @@ const PendingPolicyModal = lazy(() => import('./components/PendingPolicyModal'))
 // Enterprise Module
 const EnterpriseManagement = lazy(() => import('./pages/EnterpriseManagement'))
 const AnimalGroups = lazy(() => import('./pages/AnimalGroups'))
+const FarmRecords = lazy(() => import('./pages/FarmRecords'))
+const JoinFarm = lazy(() => import('./pages/JoinFarm'))
+const SmsSettings = lazy(() => import('./pages/admin/SmsSettings'))
+const NotFound = lazy(() => import('./pages/NotFound'))
+
+/** An address the app has no page for: say so (inside the app shell when signed in), never redirect silently. */
+function NotFoundRoute() {
+  const { isAuthenticated, loading } = useAuth()
+  if (loading) return <PageLoader />
+  return isAuthenticated ? <AppLayout><NotFound /></AppLayout> : <NotFound />
+}
 const LocationManagement = lazy(() => import('./pages/LocationManagement'))
 const MovementLog = lazy(() => import('./pages/MovementLog'))
 const TreatmentCampaigns = lazy(() => import('./pages/TreatmentCampaigns'))
@@ -134,51 +147,6 @@ const GroomingOrderDetail = React.lazy(() => import('./pages/grooming/GroomingOr
 const GroomingEarnings = React.lazy(() => import('./pages/grooming/GroomingEarnings'))
 const GroomingPassport = React.lazy(() => import('./pages/grooming/GroomingPassport'))
 
-/** Suspense fallback spinner shown while lazy chunks load */
-function PageLoader() {
-  return (
-    <div role="status" aria-label="Loading page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-      <div className="spinner" aria-hidden="true" style={{
-        width: 40, height: 40, border: '4px solid #e0e0e0',
-        borderTop: '4px solid #2e7d32', borderRadius: '50%',
-        animation: 'spin 0.8s linear infinite'
-      }} />
-      <span className="sr-only">Loading…</span>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
-  )
-}
-
-/** Wrapper: redirects unauthenticated users to /login */
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth()
-  if (loading) return <PageLoader />
-  if (!isAuthenticated) return <Navigate to="/login" replace />
-  return <>{children}</>
-}
-
-/** Wrapper: enforces RBAC permission on a route. Redirects to /dashboard if no access */
-function RoleRoute({ children, path }: { children: React.ReactNode; path: string }) {
-  const { isAuthenticated, loading: authLoading } = useAuth()
-  const { hasPermission, loading } = usePermission()
-  if (authLoading) return <PageLoader />
-  if (!isAuthenticated) return <Navigate to="/login" replace />
-  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><p>Loading...</p></div>
-  const requiredPermission = ROUTE_PERMISSION_MAP[path]
-  if (requiredPermission && !hasPermission(requiredPermission)) {
-    return <Navigate to="/dashboard" replace />
-  }
-  return <>{children}</>
-}
-
-/** Wrapper: redirects authenticated users to /dashboard */
-function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth()
-  if (loading) return <PageLoader />
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />
-  return <>{children}</>
-}
-
 /** Layout wrapper that injects react-router navigation */
 function AppLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
@@ -195,6 +163,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
         <PendingPolicyModal />
       </Suspense>
       <div className="layout-content">
+        <PendingFarmInvitations />
         {children}
       </div>
     </Layout>
@@ -296,6 +265,7 @@ function AppRoutes() {
         <ResetPassword onGoToLogin={() => navigate('/login')} />
       } />
       <Route path="/accept-invite" element={<AcceptInvite />} />
+      <Route path="/join-farm" element={<JoinFarm />} />
       <Route path="/browse-marketplace" element={<PublicMarketplace />} />
       <Route path="/policies/:docType" element={<PolicyPage />} />
 
@@ -323,6 +293,7 @@ function AppRoutes() {
 
       {/* ── Enterprise Module ── */}
       <Route path="/enterprises" element={<RoleRoute path="/enterprises"><AppLayout><EnterpriseManagement /></AppLayout></RoleRoute>} />
+      <Route path="/farm-records" element={<RoleRoute path="/farm-records"><AppLayout><FarmRecords /></AppLayout></RoleRoute>} />
       <Route path="/animal-groups" element={<RoleRoute path="/animal-groups"><AppLayout><AnimalGroups /></AppLayout></RoleRoute>} />
       <Route path="/locations" element={<RoleRoute path="/locations"><AppLayout><LocationManagement /></AppLayout></RoleRoute>} />
       <Route path="/movement-log" element={<RoleRoute path="/movement-log"><AppLayout><MovementLog /></AppLayout></RoleRoute>} />
@@ -379,6 +350,7 @@ function AppRoutes() {
       <Route path="/admin/consultations" element={<RoleRoute path="/admin/consultations"><AppLayout><RoutedPage Component={ConsultationManagement} /></AppLayout></RoleRoute>} />
       <Route path="/admin/payments" element={<RoleRoute path="/admin/payments"><AppLayout><RoutedPage Component={PaymentManagement} /></AppLayout></RoleRoute>} />
       <Route path="/admin/reviews" element={<RoleRoute path="/admin/reviews"><AppLayout><RoutedPage Component={ReviewModeration} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/sms-settings" element={<RoleRoute path="/admin/sms-settings"><AppLayout><SmsSettings /></AppLayout></RoleRoute>} />
       <Route path="/admin/settings" element={<RoleRoute path="/admin/settings"><AppLayout><RoutedPage Component={SystemSettings} /></AppLayout></RoleRoute>} />
       <Route path="/admin/prescription-settings" element={<RoleRoute path="/admin/prescription-settings"><AppLayout><RoutedPage Component={PrescriptionSettings} /></AppLayout></RoleRoute>} />
       <Route path="/admin/audit-logs" element={<RoleRoute path="/admin/audit-logs"><AppLayout><RoutedPage Component={AuditLogs} /></AppLayout></RoleRoute>} />
@@ -432,7 +404,7 @@ function AppRoutes() {
       <Route path="/grooming/passport/:animalId" element={<RoleRoute path="/grooming/passport/:animalId"><AppLayout><RoutedPage Component={GroomingPassport} paramKey="animalId" /></AppLayout></RoleRoute>} />
 
       {/* Catch-all → home */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundRoute />} />
     </Routes>
     </Suspense>
     </>

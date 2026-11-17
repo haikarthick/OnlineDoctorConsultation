@@ -1,0 +1,69 @@
+{
+  "mobileUi": {
+    "close": "Close",
+    "tabBarLabel": "Main navigation",
+    "quickActionsTitle": "What do you want to do?",
+    "tabs": {
+      "home": "Home",
+      "add": "Add",
+      "more": "More"
+    },
+    "stepper": {
+      "less": "Decrease",
+      "more": "Increase"
+    },
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "other": "Other date"
+    },
+    "save": {
+      "saving": "Saving...",
+      "saved": "Saved",
+      "offlineTitle": "No connection",
+      "offlineHint": "Your entry is still on this screen. Tap Retry when you have signal.",
+      "failedTitle": "Could not save",
+      "retry": "Retry"
+    },
+    "step": {
+      "stepOf": "Step {{current}} of {{total}}",
+      "back": "Back",
+      "next": "Next"
+    },
+    "tabLabels": {
+      "animals": "Animals",
+      "herd-medical": "Health",
+      "animal-groups": "Groups",
+      "medical": "Records",
+      "consultations": "Consults",
+      "admin-consultations": "Consults",
+      "prescriptions": "Medicines",
+      "manage-schedule": "Schedule",
+      "grooming-schedule": "Schedule",
+      "hospital-workflow": "Queue",
+      "inpatient": "Inpatients",
+      "hospital-networks": "Networks",
+      "vet-hospitals": "Hospitals",
+      "settings": "Settings",
+      "pharmacy": "Pharmacy",
+      "grooming-orders": "Orders",
+      "grooming-earnings": "Earnings",
+      "grooming-provider": "Business",
+      "admin-dashboard": "Admin",
+      "admin-users": "Users",
+      "admin-finance-reports": "Finance",
+      "financial": "Finance",
+      "health-analytics": "Insights",
+      "admin-disputes": "Disputes",
+      "admin-cancellation-dashboard": "Cancels"
+    },
+    "tabLabelsByRole": {
+      "pet_owner": {
+        "animals": "Pets"
+      },
+      "veterinarian": {
+        "animals": "Pets"
+      }
+    }
+  }
+}

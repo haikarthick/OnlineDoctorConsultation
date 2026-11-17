@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 
 
+import { userMessage } from '../../utils/userMessage'
 interface InventoryItem {
   id: string
   med_id: string
@@ -46,7 +47,7 @@ export default function StockAdjustmentModal({ pharmacyId, item, onClose, onDone
       })
       onDone()
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setSaving(false)
     }
@@ -80,7 +81,7 @@ export default function StockAdjustmentModal({ pharmacyId, item, onClose, onDone
           <div className="pharm-form-row">
             <div className="pharm-form-group">
               <label>{t('pharmacy.stock.quantity')} <span className="req-star">*</span></label>
-              <input type="number" min="1" value={form.adjustment_qty} onChange={e => setForm(f => ({ ...f, adjustment_qty: parseInt(e.target.value) || 1 }))} />
+              <input type="number" inputMode="decimal" min="1" value={form.adjustment_qty} onChange={e => setForm(f => ({ ...f, adjustment_qty: parseInt(e.target.value) || 1 }))} />
             </div>
             <div className="pharm-form-group">
               <label>{t('pharmacy.table.batch')}</label>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 
+import { userMessage } from '../../utils/userMessage'
 interface Pharmacy {
   id: string
   pharmacy_name: string
@@ -67,7 +68,7 @@ export default function PharmacySettings({ pharmacy, onRefresh }: Props) {
       setSuccess(t('pharmacy.settings.saved'))
       onRefresh?.()
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setSaving(false)
     }

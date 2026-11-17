@@ -5,6 +5,7 @@ import PrescriptionReviewModal from './PrescriptionReviewModal'
 import DispensingModal from './DispensingModal'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
+import { userMessage } from '../../utils/userMessage'
 interface Prescription {
   id: string
   pet_name: string
@@ -37,7 +38,7 @@ export default function DispensingWorkflow({ pharmacyId, mode, onRefresh }: Prop
       const res = await client.get(path)
       setItems(res.data || [])
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setLoading(false)
     }

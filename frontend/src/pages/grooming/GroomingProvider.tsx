@@ -5,6 +5,7 @@ import { useSettings } from '../../context/SettingsContext'
 import { usePermission } from '../../context/PermissionContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void }
 
 type Tab = 'overview' | 'services' | 'locations' | 'resources' | 'staff'
@@ -35,14 +36,14 @@ const GroomingProvider: React.FC<Props> = () => {
       const res = await apiService.getMyGroomingProvider()
       setProvider(res.data || null)
     } catch (e: any) {
-      setErr(e?.response?.data?.message || e.message)
+      setErr(userMessage(e))
     } finally { setLoading(false) }
   }, [])
 
   useEffect(() => { load() }, [load])
 
   const flash = (m: string) => { setMsg(m); setErr(''); setTimeout(() => setMsg(''), 3000) }
-  const fail = (e: any) => setErr(e?.response?.data?.message || e?.message || t('grooming.genericError'))
+  const fail = (e: any) => setErr(userMessage(e, 'grooming.genericError'))
 
   const handleCreate = async () => {
     if (!form.businessName.trim()) { setErr(t('grooming.businessNameRequired')); return }
@@ -230,13 +231,13 @@ const ServicesTab: React.FC<any> = ({ provider, canManage, formatCurrency, flash
             <div className="module-form-group"><label className="module-label">{t('grooming.serviceName')} *</label>
               <input className="module-input" value={n.name} onChange={e => setN({ ...n, name: e.target.value })} placeholder={t('grooming.serviceNamePlaceholder')} /></div>
             <div className="module-form-group"><label className="module-label">{t('grooming.price')} *</label>
-              <input className="module-input" type="number" min={0} value={n.basePrice} onChange={e => setN({ ...n, basePrice: e.target.value })} /></div>
+              <input className="module-input" type="number" inputMode="decimal" min={0} value={n.basePrice} onChange={e => setN({ ...n, basePrice: e.target.value })} /></div>
           </div>
           <div className="module-form-row">
             <div className="module-form-group"><label className="module-label">{t('grooming.durationMin')}</label>
-              <input className="module-input" type="number" min={0} value={n.durationMinutes} onChange={e => setN({ ...n, durationMinutes: Number(e.target.value) })} /></div>
+              <input className="module-input" type="number" inputMode="decimal" min={0} value={n.durationMinutes} onChange={e => setN({ ...n, durationMinutes: Number(e.target.value) })} /></div>
             <div className="module-form-group"><label className="module-label">{t('grooming.taxPercent')}</label>
-              <input className="module-input" type="number" min={0} value={n.taxPercent} onChange={e => setN({ ...n, taxPercent: Number(e.target.value) })} /></div>
+              <input className="module-input" type="number" inputMode="decimal" min={0} value={n.taxPercent} onChange={e => setN({ ...n, taxPercent: Number(e.target.value) })} /></div>
             <div className="module-form-group"><label className="module-label">{t('grooming.paymentRule')}</label>
               <select className="module-input" value={n.paymentRule} onChange={e => setN({ ...n, paymentRule: e.target.value })}>
                 <option value="full">{t('grooming.payFull')}</option>

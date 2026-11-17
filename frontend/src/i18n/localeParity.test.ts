@@ -17,7 +17,10 @@ import { describe, it, expect } from 'vitest'
  * Uses import.meta.glob rather than fs/path so it needs no @types/node - the
  * frontend deliberately does not depend on Node typings.
  *
- * Edit src/locales - public/locales is generated from it by copy-locales.cjs.
+ * Edit src/locales/<lang>/modules/*.json - public/locales is generated from it by
+ * copy-locales.cjs (and the English bundle is merged the same way in src/i18n/index.ts).
+ * Each locale used to be one ~8,400-line translation.json; it's split by module now
+ * purely for editability, so this test reads the split files and merges them itself.
  */
 
 const LOCALES = ['en', 'hi', 'kn', 'ml', 'ta', 'te'] as const
@@ -36,16 +39,31 @@ function flatten(obj: Record<string, unknown>, prefix = '', out: Flat = {}): Fla
   return out
 }
 
-const localeModules = import.meta.glob('../locales/*/translation.json', { eager: true }) as Record<
+const localeModules = import.meta.glob('../locales/*/modules/*.json', { eager: true }) as Record<
   string,
   { default: Record<string, unknown> }
 >
 
-const catalogs: Record<string, Flat> = {}
+// Merge each locale's module files into one object first, so a key duplicated across
+// two module files in the same locale fails loudly here rather than silently letting
+// one file's copy of the key win.
+const merged: Record<string, Record<string, unknown>> = {}
 for (const [filePath, mod] of Object.entries(localeModules)) {
   const parts = filePath.split('/')
-  const locale = parts[parts.length - 2]
-  catalogs[locale] = flatten(mod.default)
+  const locale = parts[parts.length - 3]
+  const moduleFile = parts[parts.length - 1]
+  merged[locale] ??= {}
+  for (const key of Object.keys(mod.default)) {
+    if (Object.prototype.hasOwnProperty.call(merged[locale], key)) {
+      throw new Error(`Duplicate top-level key "${key}" in ${locale}/modules/${moduleFile} - already defined by another module file for this locale.`)
+    }
+    merged[locale][key] = mod.default[key]
+  }
+}
+
+const catalogs: Record<string, Flat> = {}
+for (const [locale, data] of Object.entries(merged)) {
+  catalogs[locale] = flatten(data)
 }
 
 const enKeys = new Set(Object.keys(catalogs.en ?? {}))

@@ -21,11 +21,29 @@
   border-radius: 4px;
   transition: width 0.4s ease;
   min-width: 4px;
+  width: var(--fill);
 }
+.vp-compliance-bar.tier-high { background-color: #22c55e; }
+.vp-compliance-bar.tier-medium { background-color: #f59e0b; }
+.vp-compliance-bar.tier-low { background-color: #ef4444; }
 .vp-compliance-label {
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
+}
+.vp-compliance-label.tier-high { color: #22c55e; }
+.vp-compliance-label.tier-medium { color: #f59e0b; }
+.vp-compliance-label.tier-low { color: #ef4444; }
+
+/* ── Group tab filters/stats (fixed layout, not dynamic) ───── */
+.vp-group-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.vp-group-tab .module-stats {
+  margin-bottom: 16px;
 }
 
 /* ── Passport card ─────────────────────────────── */

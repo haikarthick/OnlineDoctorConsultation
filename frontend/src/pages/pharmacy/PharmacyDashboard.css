@@ -254,6 +254,11 @@
 }
 .analytics-card .value { font-size: 1.7rem; font-weight: 800; color: #1a237e; }
 .analytics-card .label { font-size: 0.8rem; color: #666; margin-top: 4px; }
+.analytics-card .value.analytics-value-ok { color: #2e7d32; }
+.analytics-card .value.analytics-value-pending-warn { color: #e65100; }
+.analytics-card .value.analytics-value-stock-warn { color: #f57f17; }
+.analytics-card .value.analytics-value-expiring-warn { color: #e65100; }
+.top-medication-bar-fill { height: 100%; background: #3949ab; border-radius: 4px; width: var(--fill); }
 
 /* ── Empty state ── */
 .pharmacy-empty {

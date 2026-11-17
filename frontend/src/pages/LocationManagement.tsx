@@ -1,26 +1,41 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
-import { useScrollToForm } from '../hooks/useScrollToForm'
-import { Enterprise, FarmLocation, LocationType } from '../types'
+import { Enterprise, FarmLocation } from '../types'
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
+import { BottomSheet } from '../components/mobile/BottomSheet'
+import { ChipSelect } from '../components/mobile/ChipSelect'
+import { NumberStepper } from '../components/mobile/NumberStepper'
+import { SaveState } from '../components/mobile/SaveState'
+import { StepForm, type FormStep } from '../components/mobile/StepForm'
+import { useSaveAction } from '../hooks/useSaveAction'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
+import { userMessage } from '../utils/userMessage'
 
-const LOCATION_TYPE_LABELS: Record<string, string> = {
-  barn: 'Barn', stable: 'Stable', pen: 'Pen', paddock: 'Paddock',
-  field: 'Field', pasture: 'Pasture', quarantine: 'Quarantine', isolation: 'Isolation',
-  aviary: 'Aviary', tank: 'Tank', pond: 'Pond', enclosure: 'Enclosure',
-  kennel: 'Kennel', cattery: 'Cattery', warehouse: 'Warehouse', office: 'Office',
-  treatment_area: 'Treatment Area', milking_parlor: 'Milking Parlor', feed_storage: 'Feed Storage', other: 'Other'
-}
-
+/** The kinds the table accepts (locations.location_type). */
+const LOCATION_TYPES = [
+  'barn', 'stable', 'pen', 'paddock', 'field', 'pasture', 'quarantine', 'isolation', 'aviary', 'tank',
+  'pond', 'enclosure', 'kennel', 'cattery', 'warehouse', 'office', 'treatment_area', 'milking_parlor', 'feed_storage', 'other',
+]
 const LOCATION_TYPE_ICONS: Record<string, string> = {
   barn: '🏚️', stable: '🐴', pen: '🐷', paddock: '🌿', field: '🌾',
   pasture: '🌳', quarantine: '⚠️', isolation: '🔒', aviary: '🦜',
   tank: '🐟', pond: '🌊', enclosure: '🦁', kennel: '🐕', cattery: '🐈',
   warehouse: '🏭', office: '🏢', treatment_area: '🏥', milking_parlor: '🥛',
-  feed_storage: '🌽', other: '📍'
+  feed_storage: '🌽', other: '📍',
 }
+const AREA_UNITS = ['sqft', 'sqm', 'acres', 'hectares']
+/** Who may add, change or remove a place (server: EnterpriseController.createLocation). */
+const MANAGE_ROLES = ['owner', 'manager']
+
+interface LocationForm {
+  name: string; locationType: string; parentLocationId: string; capacity: string; area: string; areaUnit: string
+  description: string; gpsLatitude: string; gpsLongitude: string
+}
+const emptyForm = (): LocationForm => ({ name: '', locationType: '', parentLocationId: '', capacity: '', area: '', areaUnit: 'sqft', description: '', gpsLatitude: '', gpsLongitude: '' })
+/** A bar width in 5% steps (a class each - no inline style). */
+const barStep = (used: number, total: number) => Math.min(20, Math.max(0, Math.round((used / Math.max(1, total)) * 20)))
 
 const LocationManagement: React.FC = () => {
   const { t } = useTranslation()
@@ -32,107 +47,191 @@ const LocationManagement: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'tree' | 'map'>('grid')
   const [showForm, setShowForm] = useState(false)
-  const formRef = useScrollToForm(showForm)
-  const [editingLocation, setEditingLocation] = useState<FarmLocation | null>(null)
-  const [formData, setFormData] = useState({
-    name: '', locationType: '' as LocationType, parentLocationId: '',
-    capacity: '', area: '', areaUnit: 'sqft', description: '',
-    gpsLatitude: '', gpsLongitude: ''
-  })
+  const [editing, setEditing] = useState<FarmLocation | null>(null)
+  const [step, setStep] = useState(0)
+  const [form, setForm] = useState<LocationForm>(emptyForm)
+  const [deleting, setDeleting] = useState<FarmLocation | null>(null)
+  const [locating, setLocating] = useState(false)
+  const [gpsNote, setGpsNote] = useState('')
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
 
+  const farm = enterprises.find(e => e.id === selectedEnterpriseId)
+  const role = useMyFarmRole(farm)
+  const canManage = !!role && MANAGE_ROLES.includes(role)
+
   useEffect(() => {
-    const fetchEnterprises = async () => {
-      try {
-        const res = await apiService.listEnterprises({ limit: 100 })
+    apiService.listEnterprises({ limit: 100 })
+      .then((res: any) => {
         const items = res.data?.items || []
         setEnterprises(items)
         if (items.length === 1) setSelectedEnterpriseId(items[0].id)
-      } catch { setEnterprises([]) }
-    }
-    fetchEnterprises()
+      })
+      .catch(() => setEnterprises([]))
   }, [])
 
   const fetchLocations = async () => {
     if (!selectedEnterpriseId) return
     try {
-      setLoading(true)
+      setLoading(true); setError('')
       const [listRes, treeRes] = await Promise.all([
-        apiService.listLocations(selectedEnterpriseId),
-        apiService.getLocationTree(selectedEnterpriseId)
+        apiService.listLocations(selectedEnterpriseId, { limit: 200 }),
+        apiService.getLocationTree(selectedEnterpriseId),
       ])
       setLocations(listRes.data?.items || [])
       setLocationTree(treeRes.data || [])
-    } catch { setLocations([]); setLocationTree([]) }
-    finally { setLoading(false) }
+    } catch (err: any) {
+      setLocations([]); setLocationTree([])
+      setError(userMessage(err, 'locationManagement.loadFailed'))
+    } finally { setLoading(false) }
   }
-
   useEffect(() => { fetchLocations() }, [selectedEnterpriseId])
 
-  const resetForm = () => {
-    setFormData({ name: '', locationType: '' as LocationType, parentLocationId: '', capacity: '', area: '', areaUnit: 'sqft', description: '', gpsLatitude: '', gpsLongitude: '' })
-    setEditingLocation(null); setError('')
-  }
+  const typeLabel = (c: string) => t('locationManagement.types.' + c, { defaultValue: c })
+  const unitLabel = (u: string) => t('locationManagement.areaUnits.' + u, { defaultValue: u })
+  const set = <K extends keyof LocationForm>(key: K, value: LocationForm[K]) => setForm(f => ({ ...f, [key]: value }))
 
+  const save = useSaveAction(async () => {
+    const num = (v: string) => (v !== '' && !Number.isNaN(parseFloat(v.replace(',', '.'))) ? parseFloat(v.replace(',', '.')) : undefined)
+    const payload: Record<string, unknown> = {
+      enterpriseId: selectedEnterpriseId, name: form.name.trim(), locationType: form.locationType,
+      parentLocationId: form.parentLocationId || undefined,
+      capacity: form.capacity ? Math.round(num(form.capacity) || 0) : 0,
+      area: num(form.area), areaUnit: form.areaUnit, description: form.description || undefined,
+      gpsLatitude: num(form.gpsLatitude), gpsLongitude: num(form.gpsLongitude),
+    }
+    if (editing) await apiService.updateLocation(editing.id, payload)
+    else await apiService.createLocation(payload as any)
+  }, t('locationManagement.toasts.failed'))
+
+  const close = () => { setShowForm(false); setEditing(null); setStep(0); setGpsNote(''); save.reset() }
+  const openNew = () => { setForm(emptyForm()); setEditing(null); setStep(0); setGpsNote(''); save.reset(); setShowForm(true) }
   const openEdit = (loc: FarmLocation) => {
-    setEditingLocation(loc)
-    setFormData({
-      name: loc.name, locationType: loc.locationType as LocationType,
-      parentLocationId: loc.parentLocationId || '', capacity: loc.capacity?.toString() || '',
-      area: loc.area?.toString() || '', areaUnit: loc.areaUnit || 'sqft',
-      description: loc.description || '',
-      gpsLatitude: loc.gpsLatitude?.toString() || '', gpsLongitude: loc.gpsLongitude?.toString() || ''
+    setEditing(loc); setStep(0); setGpsNote(''); save.reset()
+    setForm({
+      name: loc.name, locationType: loc.locationType, parentLocationId: loc.parentLocationId || '',
+      capacity: loc.capacity ? String(loc.capacity) : '', area: loc.area ? String(loc.area) : '', areaUnit: loc.areaUnit || 'sqft',
+      description: loc.description || '', gpsLatitude: loc.gpsLatitude != null ? String(loc.gpsLatitude) : '', gpsLongitude: loc.gpsLongitude != null ? String(loc.gpsLongitude) : '',
     })
     setShowForm(true)
   }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    if (!formData.name || !formData.locationType) { setError(t('locationManagement.modal.validation')); return }
-    try {
-      const payload: any = {
-        ...formData, enterpriseId: selectedEnterpriseId,
-        capacity: formData.capacity ? parseInt(formData.capacity) : 0,
-        area: formData.area ? parseFloat(formData.area) : undefined,
-        parentLocationId: formData.parentLocationId || undefined,
-        gpsLatitude: formData.gpsLatitude ? parseFloat(formData.gpsLatitude) : undefined,
-        gpsLongitude: formData.gpsLongitude ? parseFloat(formData.gpsLongitude) : undefined,
-      }
-      if (editingLocation) {
-        await apiService.updateLocation(editingLocation.id, payload)
-        setSuccessMsg(t('locationManagement.toasts.updated'))
-      } else {
-        await apiService.createLocation(payload)
-        setSuccessMsg(t('locationManagement.toasts.created'))
-      }
-      resetForm(); setShowForm(false); fetchLocations()
-      setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+  const submit = async () => {
+    setSuccessMsg('')
+    const wasEditing = !!editing
+    if (await save.run()) {
+      close()
+      setSuccessMsg(t(wasEditing ? 'locationManagement.toasts.updated' : 'locationManagement.toasts.created'))
+      void fetchLocations()
+    }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(t('locationManagement.toasts.deleteConfirm'))) return
-    try {
-      await apiService.deleteLocation(id)
-      setSuccessMsg(t('locationManagement.toasts.deleted'))
-      fetchLocations()
-      setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToDelete')) }
+  const removal = useSaveAction(async () => { if (deleting) await apiService.deleteLocation(deleting.id) }, t('locationManagement.toasts.deleteFailed'))
+  const submitDelete = async () => {
+    if (await removal.run()) { setDeleting(null); setSuccessMsg(t('locationManagement.toasts.deleted')); void fetchLocations() }
   }
 
-  const renderTreeNode = (loc: FarmLocation, depth = 0) => (
-    <div key={loc.id} style={{ marginLeft: depth * 24, padding: '0.5rem', borderLeft: depth > 0 ? '2px solid var(--border)' : 'none' }}>
-      <div className="si-0dd04361">
+  // Standing at the place with the phone is the easiest way to get its coordinates.
+  const useMyLocation = () => {
+    setGpsNote('')
+    if (!('geolocation' in navigator)) { setGpsNote(t('locationManagement.gpsUnavailable')); return }
+    setLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      pos => { setForm(f => ({ ...f, gpsLatitude: pos.coords.latitude.toFixed(6), gpsLongitude: pos.coords.longitude.toFixed(6) })); setLocating(false) },
+      () => { setLocating(false); setGpsNote(t('locationManagement.gpsDenied')) },
+      { enableHighAccuracy: true, timeout: 15000 },
+    )
+  }
+
+  const withGps = locations.filter(l => l.gpsLatitude && l.gpsLongitude)
+  const withoutGps = locations.filter(l => !l.gpsLatitude || !l.gpsLongitude)
+
+  const steps: FormStep[] = [
+    {
+      id: 'what', title: t('locationManagement.steps.what'),
+      blockedReason: !form.name.trim() ? t('locationManagement.blocked.name') : !form.locationType ? t('locationManagement.blocked.type') : undefined,
+      content: (
+        <>
+          <div className="loc-field">
+            <label htmlFor="loc-name">{t('locationManagement.form.name')}</label>
+            <input id="loc-name" type="text" className="an-field" value={form.name} onChange={e => set('name', e.target.value)} />
+          </div>
+          <div className="loc-field">
+            <label htmlFor="loc-type">{t('locationManagement.form.type')}</label>
+            <select id="loc-type" className="an-field" value={form.locationType} onChange={e => set('locationType', e.target.value)}>
+              <option value="">{t('locationManagement.form.typeChoose')}</option>
+              {LOCATION_TYPES.map(c => <option key={c} value={c}>{LOCATION_TYPE_ICONS[c]} {typeLabel(c)}</option>)}
+            </select>
+          </div>
+          <div className="loc-field">
+            <label htmlFor="loc-parent">{t('locationManagement.form.parentLocation')}</label>
+            <select id="loc-parent" className="an-field" value={form.parentLocationId} onChange={e => set('parentLocationId', e.target.value)}>
+              <option value="">{t('locationManagement.modal.parentDefault')}</option>
+              {locations.filter(l => l.id !== editing?.id).map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+            </select>
+          </div>
+        </>
+      ),
+    },
+    {
+      id: 'size', title: t('locationManagement.steps.size'),
+      content: (
+        <>
+          <NumberStepper label={t('locationManagement.form.capacity')} value={form.capacity} onChange={v => set('capacity', v)} integer min={0} hint={t('locationManagement.form.capacityHint')} />
+          <NumberStepper label={t('locationManagement.form.area')} value={form.area} onChange={v => set('area', v)} min={0} />
+          <ChipSelect label={t('locationManagement.form.areaUnit')} variant="segmented" value={form.areaUnit}
+            options={AREA_UNITS.map(u => ({ value: u, label: unitLabel(u) }))} onChange={v => set('areaUnit', v)} />
+        </>
+      ),
+    },
+    {
+      id: 'where', title: t('locationManagement.steps.where'),
+      content: (
+        <>
+          <button type="button" className="btn btn-secondary loc-gps-button" onClick={useMyLocation} disabled={locating}>
+            📍 {locating ? t('locationManagement.locating') : t('locationManagement.useMyLocation')}
+          </button>
+          {gpsNote && <p className="loc-hint" role="status">{gpsNote}</p>}
+          <div className="loc-field">
+            <label htmlFor="loc-lat">{t('locationManagement.form.gpsLatitude')}</label>
+            <input id="loc-lat" type="number" inputMode="decimal" step="0.000001" className="an-field" value={form.gpsLatitude} onChange={e => set('gpsLatitude', e.target.value)} />
+          </div>
+          <div className="loc-field">
+            <label htmlFor="loc-lng">{t('locationManagement.form.gpsLongitude')}</label>
+            <input id="loc-lng" type="number" inputMode="decimal" step="0.000001" className="an-field" value={form.gpsLongitude} onChange={e => set('gpsLongitude', e.target.value)} />
+          </div>
+          <p className="loc-hint">💡 {t('locationManagement.clickMapHint')}</p>
+          <MapView
+            height={220}
+            markers={form.gpsLatitude && form.gpsLongitude ? [{
+              id: 'form-location', lat: +form.gpsLatitude, lng: +form.gpsLongitude, color: '#3b82f6', pulse: true,
+              popup: <div><strong>{form.name || t('locationManagement.modal.createTitle')}</strong></div>,
+            }] : []}
+            onClick={(lat, lng) => setForm(f => ({ ...f, gpsLatitude: lat.toFixed(6), gpsLongitude: lng.toFixed(6) }))}
+            center={form.gpsLatitude && form.gpsLongitude ? [+form.gpsLatitude, +form.gpsLongitude] : undefined}
+            zoom={form.gpsLatitude ? 14 : undefined}
+          />
+          <div className="loc-field">
+            <label htmlFor="loc-desc">{t('common.description')}</label>
+            <textarea id="loc-desc" rows={2} className="an-field an-field--textarea" value={form.description} onChange={e => set('description', e.target.value)} />
+          </div>
+        </>
+      ),
+    },
+  ]
+
+  const renderTreeNode = (loc: FarmLocation, depth = 0): React.ReactNode => (
+    <div key={loc.id} className={`loc-node loc-depth-${Math.min(depth, 6)}`}>
+      <div className="loc-node-row">
         <span>{LOCATION_TYPE_ICONS[loc.locationType] || '📍'}</span>
-        <strong>{loc.name}</strong>
-        <span className="badge si-cf3f332c">{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span>
-        <span className="si-93f5e4c5">
-          {loc.currentOccupancy}/{loc.capacity} {t('locationManagement.occupancy').toLowerCase()}
-        </span>
-        <button className="btn btn-sm btn-secondary si-bad86510" onClick={() => openEdit(loc)}>{t('common.edit')}</button>
-        <button className="btn btn-sm btn-danger si-e712fc62" onClick={() => handleDelete(loc.id)}>×</button>
+        <strong className="loc-node-name">{loc.name}</strong>
+        <span className="badge">{typeLabel(loc.locationType)}</span>
+        <span className="loc-node-occ">{loc.currentOccupancy}/{loc.capacity} {t('locationManagement.occupancy').toLowerCase()}</span>
+        {canManage && (
+          <>
+            <button className="btn btn-sm btn-secondary" onClick={() => openEdit(loc)}>{t('common.edit')}</button>
+            <button className="btn btn-sm btn-danger" aria-label={t('common.delete')} onClick={() => { removal.reset(); setDeleting(loc) }}>×</button>
+          </>
+        )}
       </div>
       {loc.children?.map(child => renderTreeNode(child, depth + 1))}
     </div>
@@ -146,26 +245,47 @@ const LocationManagement: React.FC = () => {
           <p className="subtitle">{t('locationManagement.subtitle')}</p>
         </div>
         <div className="header-actions">
-          {selectedEnterpriseId && (
-            <>
-              <button className={`btn btn-sm ${viewMode === 'grid' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('grid')}>{t('locationManagement.viewGrid')}</button>
-              <button className={`btn btn-sm ${viewMode === 'tree' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('tree')}>{t('locationManagement.viewTree')}</button>
-              <button className={`btn btn-sm ${viewMode === 'map' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('map')}>{t('locationManagement.viewMap')}</button>
-              <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>{t('locationManagement.newLocation')}</button>
-            </>
-          )}
+          {selectedEnterpriseId && canManage && <button className="btn btn-primary" onClick={openNew}>{t('locationManagement.newLocation')}</button>}
         </div>
       </div>
 
-      {successMsg && <div className="alert alert-success">{successMsg}</div>}
-      {error && !showForm && <div className="alert alert-error">{error}</div>}
+      {successMsg && <div className="alert alert-success" role="status">{successMsg}</div>}
+      {error && <div className="alert alert-error" role="alert">{error}</div>}
 
       <div className="filters-bar">
-        <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input si-58fb376a">
+        <select aria-label={t('locationManagement.selectEnterprise')} value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input">
           <option value="">{t('locationManagement.selectEnterprise')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
+
+      {selectedEnterpriseId && (
+        <ChipSelect label={t('locationManagement.viewAs')} variant="segmented" value={viewMode} onChange={v => setViewMode(v as 'grid' | 'tree' | 'map')}
+          options={[{ value: 'grid', label: t('locationManagement.viewGrid') }, { value: 'tree', label: t('locationManagement.viewTree') }, { value: 'map', label: t('locationManagement.viewMap') }]} />
+      )}
+
+      {showForm && (
+        <div className="edit-form-overlay" onClick={close}>
+          <div className="edit-form-panel edit-form-modal" onClick={e => e.stopPropagation()}>
+            <button className="edit-form-close" onClick={close} aria-label={t('mobileUi.close')}>✕</button>
+            <h2>{editing ? t('locationManagement.modal.editTitle') : t('locationManagement.modal.createTitle')}</h2>
+            <StepForm
+              steps={steps} current={step} onStepChange={setStep} onSubmit={submit}
+              submitLabel={editing ? t('locationManagement.modal.updateBtn') : t('locationManagement.modal.createBtn')}
+              busy={save.status === 'saving'} onCancel={close}
+              saveNowLabel={editing ? t('farmProfile.form.saveNow') : undefined}
+              footer={<SaveState status={save.status} error={save.error} offline={save.offline} onRetry={save.retry} />}
+            />
+          </div>
+        </div>
+      )}
+
+      <BottomSheet open={!!deleting} title={t('locationManagement.toasts.deleteConfirm')} onClose={() => { setDeleting(null); removal.reset() }}>
+        <p>{deleting?.name}</p>
+        <p className="loc-hint">{t('locationManagement.deleteExplain')}</p>
+        <SaveState status={removal.status} error={removal.error} offline={removal.offline} onRetry={removal.retry} />
+        <button type="button" className="btn btn-danger loc-sheet-action" disabled={removal.status === 'saving'} onClick={submitDelete}>{t('common.delete')}</button>
+      </BottomSheet>
 
       {!selectedEnterpriseId ? (
         <div className="empty-state">
@@ -180,172 +300,70 @@ const LocationManagement: React.FC = () => {
           <div className="empty-icon">📍</div>
           <h3>{t('locationManagement.emptyTitle')}</h3>
           <p>{t('locationManagement.emptySubtitle')}</p>
-          <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>{t('locationManagement.createBtn')}</button>
+          {canManage && <button className="btn btn-primary" onClick={openNew}>{t('locationManagement.createBtn')}</button>}
         </div>
       ) : viewMode === 'tree' ? (
-        <div className="si-478f1da8">
-          {locationTree.map(loc => renderTreeNode(loc))}
-        </div>
+        <div className="loc-tree">{locationTree.map(loc => renderTreeNode(loc))}</div>
       ) : viewMode === 'map' ? (
         <div>
-          {/* Interactive Location Map */}
-          <div className="si-a87c8813">
-            <div className="si-5214c8b8">
-              <h3 className="si-44087c4b">{t('locationManagement.mapTitle')}</h3>
-              <p className="si-29492778">
-                {locations.filter(l => l.gpsLatitude && l.gpsLongitude).length} of {locations.length} locations have GPS coordinates
-              </p>
-            </div>
-            <MapView
-              height={500}
-              markers={locations.filter(l => l.gpsLatitude && l.gpsLongitude).map(loc => ({
-                id: loc.id,
-                lat: +(loc.gpsLatitude || 0),
-                lng: +(loc.gpsLongitude || 0),
-                color: loc.locationType === 'quarantine' || loc.locationType === 'isolation' ? '#ef4444'
-                  : loc.locationType === 'treatment_area' ? '#f97316'
-                  : loc.locationType === 'barn' || loc.locationType === 'stable' ? '#8b5cf6'
-                  : '#22c55e',
-                popup: (
-                  <div>
-                    <strong>{LOCATION_TYPE_ICONS[loc.locationType] || '📍'} {loc.name}</strong><br />
-                    <span className="si-756a9f21">{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span><br />
-                    <span className="si-756a9f21">{t('locationManagement.occupancy')}: {loc.currentOccupancy} / {loc.capacity}</span>
-                    {loc.area && <><br /><span className="si-756a9f21">Area: {loc.area} {loc.areaUnit}</span></>}
-                    {loc.description && <><br /><span className="si-dd67611c">{loc.description}</span></>}
-                  </div>
-                ),
-              }))}
-              onClick={(lat, lng) => {
-                if (showForm) {
-                  setFormData(f => ({ ...f, gpsLatitude: lat.toFixed(6), gpsLongitude: lng.toFixed(6) }))
-                }
-              }}
-              fitToData={locations.filter(l => l.gpsLatitude && l.gpsLongitude).length > 0}
-            />
-          </div>
-          {locations.filter(l => !l.gpsLatitude || !l.gpsLongitude).length > 0 && (
-            <div className="si-ef04e5fd">
-              ⚠️ {locations.filter(l => !l.gpsLatitude || !l.gpsLongitude).length} location(s) don't have GPS coordinates: {locations.filter(l => !l.gpsLatitude || !l.gpsLongitude).map(l => l.name).join(', ')}. Edit them to add coordinates.
-            </div>
+          <h3>{t('locationManagement.mapTitle')}</h3>
+          <p className="loc-hint">{t('locationManagement.gpsCount', { have: withGps.length, total: locations.length })}</p>
+          <MapView
+            height={380}
+            markers={withGps.map(loc => ({
+              id: loc.id, lat: +(loc.gpsLatitude || 0), lng: +(loc.gpsLongitude || 0),
+              color: loc.locationType === 'quarantine' || loc.locationType === 'isolation' ? '#ef4444'
+                : loc.locationType === 'treatment_area' ? '#f97316'
+                : loc.locationType === 'barn' || loc.locationType === 'stable' ? '#8b5cf6'
+                : '#22c55e',
+              popup: (
+                <div>
+                  <strong>{LOCATION_TYPE_ICONS[loc.locationType] || '📍'} {loc.name}</strong><br />
+                  <span>{typeLabel(loc.locationType)}</span><br />
+                  <span>{t('locationManagement.occupancy')}: {loc.currentOccupancy} / {loc.capacity}</span>
+                  {loc.area ? <><br /><span>{t('locationManagement.area')} {loc.area} {unitLabel(loc.areaUnit || 'sqft')}</span></> : null}
+                  {loc.description && <><br /><span>{loc.description}</span></>}
+                </div>
+              ),
+            }))}
+            fitToData={withGps.length > 0}
+          />
+          {withoutGps.length > 0 && (
+            <p className="loc-warning" role="status">⚠️ {t('locationManagement.gpsMissing', { names: withoutGps.map(l => l.name).join(', ') })}</p>
           )}
         </div>
       ) : (
-        <div className="si-a1694610">
+        <ul className="loc-list">
           {locations.map(loc => (
-            <div key={loc.id} className="card si-a43a6b11">
-              <div className="si-99f8abcc">
-                <span className="si-91db75dc">{LOCATION_TYPE_ICONS[loc.locationType] || '📍'}</span>
-                <div>
-                  <h3 className="si-44087c4b">{loc.name}</h3>
-                  <span className="badge si-8c23064b">{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span>
+            <li key={loc.id} className="loc-card">
+              <div className="loc-card-head">
+                <span className="loc-card-icon">{LOCATION_TYPE_ICONS[loc.locationType] || '📍'}</span>
+                <div className="loc-card-title">
+                  <strong className="loc-card-name">{loc.name}</strong>
+                  <span className="badge">{typeLabel(loc.locationType)}</span>
                 </div>
               </div>
-              {loc.parentLocationName && <p className="si-93f5e4c5">{t('locationManagement.inside')} {loc.parentLocationName}</p>}
-              <div className="si-60e2e250">
-                <div className="si-89c2f30f">
-                  <span>{t('locationManagement.occupancy')}</span>
-                  <span className="si-b2cfcbec">{loc.currentOccupancy} / {loc.capacity}</span>
-                </div>
-                {loc.capacity > 0 && (
-                  <div className="si-ade9e368">
-                    <div style={{ height: '100%', width: `${Math.min(100, (loc.currentOccupancy / loc.capacity) * 100)}%`, background: loc.currentOccupancy >= loc.capacity ? 'var(--danger)' : 'var(--primary)', borderRadius: '3px' }} />
-                  </div>
-                )}
+              {loc.parentLocationName && <p className="loc-hint">{t('locationManagement.inside')} {loc.parentLocationName}</p>}
+              <div className="loc-occupancy">
+                <span>{t('locationManagement.occupancy')}</span>
+                <strong className={loc.capacity > 0 && loc.currentOccupancy >= loc.capacity ? 'loc-full' : ''}>{loc.currentOccupancy} / {loc.capacity}</strong>
               </div>
-              {loc.area && <p className="si-9cbc3f5c">{t('locationManagement.area')} {loc.area} {loc.areaUnit}</p>}
-              {loc.description && <p className="si-93f5e4c5">{loc.description}</p>}
-              <div className="si-3429dc13">
-                <button className="btn btn-sm btn-secondary" onClick={() => openEdit(loc)}>{t('common.edit')}</button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(loc.id)}>{t('common.delete')}</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Create/Edit Form */}
-      {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
-      {showForm && (
-        <div ref={formRef} className="edit-form-panel">
-            <h2>{editingLocation ? t('locationManagement.modal.editTitle') : t('locationManagement.modal.createTitle')}</h2>
-            <form onSubmit={handleSubmit}>
-              {error && <div className="alert alert-error">{error}</div>}
-              <div className="form-group">
-                <label>{t('locationManagement.form.name')}</label>
-                <input type="text" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} required />
-              </div>
-              <div className="si-ec24da01">
-                <div className="form-group">
-                  <label>{t('locationManagement.form.type')}</label>
-                  <select value={formData.locationType} onChange={e => setFormData(f => ({ ...f, locationType: e.target.value as LocationType }))} required>
-                    <option value="">Select...</option>
-                    {Object.entries(LOCATION_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>{t('locationManagement.form.parentLocation')}</label>
-                  <select value={formData.parentLocationId} onChange={e => setFormData(f => ({ ...f, parentLocationId: e.target.value }))}>
-                    <option value="">{t('locationManagement.modal.parentDefault')}</option>
-                    {locations.filter(l => l.id !== editingLocation?.id).map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>{t('locationManagement.form.capacity')}</label>
-                  <input type="number" value={formData.capacity} onChange={e => setFormData(f => ({ ...f, capacity: e.target.value }))} />
-                </div>
-                <div className="form-group">
-                  <label>{t('locationManagement.form.area')}</label>
-                  <div className="si-6fdaaf49">
-                    <input type="number" step="0.01" value={formData.area} onChange={e => setFormData(f => ({ ...f, area: e.target.value }))} className="si-6acd75e8" />
-                    <select value={formData.areaUnit} onChange={e => setFormData(f => ({ ...f, areaUnit: e.target.value }))} className="si-4706e1bb">
-                      <option value="sqft">sqft</option><option value="sqm">sqm</option>
-                      <option value="acres">acres</option><option value="hectares">ha</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div className="form-group">
-                <label>{t('common.description')}</label>
-                <textarea rows={2} value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} />
-              </div>
-              <div className="si-ec24da01">
-                <div className="form-group">
-                  <label>{t('locationManagement.form.gpsLatitude')}</label>
-                  <input type="number" step="0.000001" placeholder="Click map or type" value={formData.gpsLatitude} onChange={e => setFormData(f => ({ ...f, gpsLatitude: e.target.value }))} />
-                </div>
-                <div className="form-group">
-                  <label>{t('locationManagement.form.gpsLongitude')}</label>
-                  <input type="number" step="0.000001" placeholder="Click map or type" value={formData.gpsLongitude} onChange={e => setFormData(f => ({ ...f, gpsLongitude: e.target.value }))} />
-                </div>
-              </div>
-              {showForm && (
-                <div className="si-78f76e08">
-                  <div className="si-45536f4a">
-                    💡 Click the map to set GPS coordinates
-                  </div>
-                  <MapView
-                    height={220}
-                    markers={formData.gpsLatitude && formData.gpsLongitude ? [{
-                      id: 'form-location',
-                      lat: +formData.gpsLatitude,
-                      lng: +formData.gpsLongitude,
-                      color: '#3b82f6',
-                      pulse: true,
-                      popup: <div><strong>{formData.name || 'New Location'}</strong></div>,
-                    }] : []}
-                    onClick={(lat, lng) => setFormData(f => ({ ...f, gpsLatitude: lat.toFixed(6), gpsLongitude: lng.toFixed(6) }))}
-                    center={formData.gpsLatitude && formData.gpsLongitude ? [+formData.gpsLatitude, +formData.gpsLongitude] : undefined}
-                    zoom={formData.gpsLatitude ? 14 : undefined}
-                  />
+              {loc.capacity > 0 && (
+                <div className="loc-bar" role="progressbar" aria-valuemin={0} aria-valuemax={loc.capacity} aria-valuenow={loc.currentOccupancy}>
+                  <div className={`loc-bar-fill loc-bar-${barStep(loc.currentOccupancy, loc.capacity)} ${loc.currentOccupancy >= loc.capacity ? 'is-full' : ''}`} />
                 </div>
               )}
-              <div className="si-5af10afb">
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
-                <button type="submit" className="btn btn-primary">{editingLocation ? t('locationManagement.modal.updateBtn') : t('locationManagement.modal.createBtn')}</button>
-              </div>
-            </form>
-        </div>
+              {loc.area ? <p className="loc-hint">{t('locationManagement.area')} {loc.area} {unitLabel(loc.areaUnit || 'sqft')}</p> : null}
+              {loc.description && <p className="loc-desc">{loc.description}</p>}
+              {canManage && (
+                <div className="loc-card-actions">
+                  <button className="btn btn-sm btn-secondary" onClick={() => openEdit(loc)}>{t('common.edit')}</button>
+                  <button className="btn btn-sm btn-danger" onClick={() => { removal.reset(); setDeleting(loc) }}>{t('common.delete')}</button>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   )

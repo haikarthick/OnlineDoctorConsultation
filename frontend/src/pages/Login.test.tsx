@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { UserFacingError } from '../utils/userMessage'
 import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Login from './Login'
@@ -22,7 +23,7 @@ vi.mock('react-i18next', () => ({
 
 /** The exact shape AuthContext throws for a blocked account. */
 function blockedError(accountStatus: string, message: string) {
-  const err = new Error(message) as Error & { accountStatus?: string }
+  const err = new UserFacingError(message)
   err.accountStatus = accountStatus
   return err
 }
@@ -84,7 +85,7 @@ describe('Login - blocked account states', () => {
   })
 
   it('still shows a genuine credential failure as an error', async () => {
-    mockLogin.mockRejectedValue(new Error('Invalid email or password'))
+    mockLogin.mockRejectedValue(new UserFacingError('Invalid email or password'))
     const { container } = render(<Login onSwitchToRegister={vi.fn()} />)
     await submit()
 

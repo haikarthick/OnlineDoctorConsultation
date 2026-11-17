@@ -15,6 +15,7 @@ import BookingService from '../services/BookingService';
 import NotificationService from '../services/NotificationService';
 import MarketplaceService from '../services/MarketplaceService';
 import MarketplaceEngagementService from '../services/MarketplaceEngagementService';
+import FarmDueNotifier from '../services/FarmDueNotifier';
 import database from './database';
 import logger from './logger';
 
@@ -35,6 +36,11 @@ export function startScheduler(): void {
   // Then every 24 hours
   setInterval(runExpiryCheck, TWENTY_FOUR_HOURS);
   setInterval(runPharmacyStockAlerts, TWENTY_FOUR_HOURS);
+
+  // Farm daily records: tell the owner and managers what is coming up (births, vaccinations, withdrawals).
+  // A no-op while farm.records.enabled is off; one note per person per farm per day.
+  runFarmDueReminders();
+  setInterval(runFarmDueReminders, SIX_HOURS);
 
   // Check for missed bookings every 15 minutes
   setInterval(runMissedBookingsCheck, FIFTEEN_MINUTES);
@@ -230,25 +236,54 @@ async function runMarketplaceSavedSearchAlerts(): Promise<void> {
 }
 
 /** Daily digest to each network's pharmacists: low-stock items + batches expiring within 30 days. */
+async function runFarmDueReminders(): Promise<void> {
+  try {
+    const n = await FarmDueNotifier.run();
+    if (n > 0) logger.info('Farm due reminders sent', { notified: n });
+  } catch (err: any) {
+    logger.warn('Farm due reminders failed', { error: err.message });
+  }
+}
+
 async function runPharmacyStockAlerts(): Promise<void> {
   try {
     const pharmaciesRes = await database.query(
-      `SELECT hp.id AS pharmacy_id, hp.network_id, hp.pharmacy_name,
-         COUNT(*) FILTER (WHERE pi.quantity <= pi.min_stock_level) AS low_stock_count,
-         COUNT(*) FILTER (WHERE pi.expiry_date IS NOT NULL AND pi.expiry_date <= CURRENT_DATE + INTERVAL '30 days' AND pi.expiry_date >= CURRENT_DATE) AS expiring_count
+      `WITH stock_per_med AS (
+         SELECT pi.pharmacy_id, pi.med_id, SUM(pi.quantity) AS total_qty, pm.min_stock_level
+         FROM pharmacy_inventory pi
+         JOIN pharmacy_medications pm ON pm.id = pi.med_id
+         WHERE pi.is_active = true
+         GROUP BY pi.pharmacy_id, pi.med_id, pm.min_stock_level
+       ),
+       low_stock AS (
+         SELECT pharmacy_id, COUNT(*) AS low_stock_count
+         FROM stock_per_med
+         WHERE total_qty <= min_stock_level
+         GROUP BY pharmacy_id
+       ),
+       expiring AS (
+         SELECT pharmacy_id, COUNT(*) AS expiring_count
+         FROM pharmacy_inventory
+         WHERE is_active = true AND expiry_date IS NOT NULL
+           AND expiry_date <= CURRENT_DATE + INTERVAL '30 days' AND expiry_date >= CURRENT_DATE
+         GROUP BY pharmacy_id
+       )
+       SELECT hp.id AS pharmacy_id, hp.network_id, hp.pharmacy_name,
+              COALESCE(ls.low_stock_count, 0) AS low_stock_count,
+              COALESCE(ex.expiring_count, 0) AS expiring_count
        FROM hospital_pharmacies hp
-       JOIN pharmacy_inventory pi ON pi.pharmacy_id = hp.id
+       LEFT JOIN low_stock ls ON ls.pharmacy_id = hp.id
+       LEFT JOIN expiring ex ON ex.pharmacy_id = hp.id
        WHERE hp.is_active = true
-       GROUP BY hp.id, hp.network_id, hp.pharmacy_name
-       HAVING COUNT(*) FILTER (WHERE pi.quantity <= pi.min_stock_level) > 0
-           OR COUNT(*) FILTER (WHERE pi.expiry_date IS NOT NULL AND pi.expiry_date <= CURRENT_DATE + INTERVAL '30 days' AND pi.expiry_date >= CURRENT_DATE) > 0`
+         AND (COALESCE(ls.low_stock_count, 0) > 0 OR COALESCE(ex.expiring_count, 0) > 0)`
     );
     let sent = 0;
     for (const pharmacy of pharmaciesRes.rows) {
       const pharmacistsRes = await database.query(
         `SELECT hnm.user_id FROM hospital_network_members hnm
          JOIN users u ON u.id = hnm.user_id
-         WHERE hnm.network_id = $1 AND hnm.is_active = true AND u.role = 'pharmacist'`,
+         WHERE hnm.network_id = $1 AND hnm.is_active = true AND u.role = 'pharmacist'
+           AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())`,
         [pharmacy.network_id]
       );
       const parts: string[] = [];
@@ -286,7 +321,8 @@ async function scheduleWeeklyDigest(): Promise<void> {
       try {
         const membersRes = await database.query(
           `SELECT user_id FROM hospital_network_members
-           WHERE network_id = $1 AND network_role IN ('corporate_admin', 'hospital_director') AND is_active = true`,
+           WHERE network_id = $1 AND network_role IN ('corporate_admin', 'hospital_director') AND is_active = true
+             AND (valid_until IS NULL OR valid_until > NOW())`,
           [network.id]
         );
         for (const member of membersRes.rows) {

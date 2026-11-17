@@ -8,6 +8,7 @@ import './VetHospitals.css'
 import { useTranslation } from 'react-i18next'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
+import { userMessage } from '../utils/userMessage'
 const HOSPITAL_TYPE_LABELS: Record<string, string> = {
   clinic:           'General Practice',
   emergency_center: 'Emergency & Trauma',
@@ -131,14 +132,14 @@ const VetHospitals: React.FC = () => {
     if (!formData.name || !formData.hospitalType) { setCreateError(t('vetHospitals.errors.nameTypeRequired')); return }
     setCreateLoading(true); setCreateError('')
     try {
-      const hospital = await vetHospitalApi.createHospital({
+      await vetHospitalApi.createHospital({
         ...formData,
         establishedYear: formData.establishedYear ? parseInt(formData.establishedYear) : undefined,
       } as any)
       setShowCreateModal(false)
-      navigate(`/vet-hospitals/${hospital.id}/manage`)
+      navigate('/vet-hospitals/manage')
     } catch (err: any) {
-      setCreateError(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitals.errors.createFailed'))
+      setCreateError(userMessage(err, 'vetHospitals.errors.createFailed'))
     } finally { setCreateLoading(false) }
   }
 
@@ -282,7 +283,7 @@ const VetHospitals: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>{t('vetHospitals.form.establishedYear')}</label>
-                  <input type="number" value={formData.establishedYear} onChange={e => setFormData(f => ({ ...f, establishedYear: e.target.value }))} placeholder="2010" min="1900" max={new Date().getFullYear()} />
+                  <input type="number" inputMode="decimal" value={formData.establishedYear} onChange={e => setFormData(f => ({ ...f, establishedYear: e.target.value }))} placeholder="2010" min="1900" max={new Date().getFullYear()} />
                 </div>
               </div>
               <div className="form-actions">

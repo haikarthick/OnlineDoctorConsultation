@@ -4,7 +4,9 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 9999;
+  /* Above the phone tab bar (1002) but BELOW every modal overlay (9998+): a floating helper must
+     never cover a form's Save button. */
+  z-index: 1003;
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -463,5 +465,13 @@
     bottom: 8px;
     right: 8px;
     border-radius: 12px;
+  }
+}
+
+/* Phones, signed-in app: sit above the bottom tab bar (tokens in styles/modules.css) instead of
+   covering its last tab. Public pages have no tab bar and keep the corner position. */
+@media (max-width: 768px) {
+  body:has(.bottom-tabbar) .chat-widget-bubble {
+    bottom: calc(var(--tabbar-height, 64px) + env(safe-area-inset-bottom, 0px) + 12px);
   }
 }

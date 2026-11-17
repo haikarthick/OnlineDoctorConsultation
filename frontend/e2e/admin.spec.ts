@@ -179,6 +179,8 @@ test.describe('Admin - Shared Pages Access', () => {
     '/wallet',
     '/enterprises',
     '/animal-groups',
+    '/farm-records',
+    '/admin/sms-settings',
     '/herd-medical',
     '/locations',
     '/movement-log',

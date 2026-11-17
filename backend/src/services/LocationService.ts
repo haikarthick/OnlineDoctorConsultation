@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
-import { DatabaseError, NotFoundError } from '../utils/errors';
+import { DatabaseError, NotFoundError, ValidationError } from '../utils/errors';
 import logger from '../utils/logger';
 
 // ─── Interfaces ──────────────────────────────────────────────
@@ -41,7 +41,27 @@ export interface LocationCreateDTO {
 
 export class LocationService {
 
+  /**
+   * A place can sit inside another place of the SAME farm - never inside another farm's place (that would show the
+   * other farm's place name on this farm's screen), never inside itself or one of its own parts (the tree would loop).
+   */
+  private async assertParentAllowed(parentId: string, enterpriseId: string, selfId?: string): Promise<void> {
+    const found = await database.query(`SELECT 1 FROM locations WHERE id = $1 AND enterprise_id = $2 AND is_active = true`, [parentId, enterpriseId]);
+    if (found.rows.length === 0) throw new ValidationError('The place you chose to put this inside is not on this farm. Choose a place from this farm.');
+    if (!selfId) return;
+    const loop = await database.query(
+      `WITH RECURSIVE up AS (
+         SELECT id, parent_location_id FROM locations WHERE id = $1
+         UNION
+         SELECT l.id, l.parent_location_id FROM locations l JOIN up ON l.id = up.parent_location_id
+       ) SELECT 1 FROM up WHERE id = $2`,
+      [parentId, selfId]
+    );
+    if (loop.rows.length > 0) throw new ValidationError('A place cannot be inside itself or inside one of its own parts. Choose a different place.');
+  }
+
   async createLocation(data: LocationCreateDTO): Promise<Location> {
+    if (data.parentLocationId) await this.assertParentAllowed(data.parentLocationId, data.enterpriseId);
     try {
       const id = uuidv4();
       const result = await database.query(
@@ -102,6 +122,10 @@ export class LocationService {
   }
 
   async updateLocation(id: string, data: Partial<LocationCreateDTO>): Promise<Location> {
+    if (data.parentLocationId) {
+      const current = await this.getLocation(id);
+      await this.assertParentAllowed(data.parentLocationId, current.enterpriseId, id);
+    }
     const setClauses: string[] = [];
     const params: any[] = [];
     let idx = 1;
@@ -126,6 +150,8 @@ export class LocationService {
   }
 
   async deleteLocation(id: string): Promise<void> {
+    // Places that were inside it move up one level instead of pointing at a place that no longer shows.
+    await database.query(`UPDATE locations SET parent_location_id = (SELECT parent_location_id FROM locations WHERE id = $1), updated_at = NOW() WHERE parent_location_id = $1`, [id]);
     await database.query(`UPDATE animals SET current_location_id = NULL WHERE current_location_id = $1`, [id]);
     await database.query(`UPDATE locations SET is_active = false, updated_at = NOW() WHERE id = $1`, [id]);
   }

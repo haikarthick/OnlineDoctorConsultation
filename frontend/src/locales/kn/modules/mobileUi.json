@@ -1,0 +1,69 @@
+{
+  "mobileUi": {
+    "close": "ಮುಚ್ಚಿ",
+    "tabBarLabel": "ಮುಖ್ಯ ನ್ಯಾವಿಗೇಷನ್",
+    "quickActionsTitle": "ನೀವು ಏನು ಮಾಡಬೇಕು?",
+    "tabs": {
+      "home": "ಮುಖಪುಟ",
+      "add": "ಸೇರಿಸಿ",
+      "more": "ಇನ್ನಷ್ಟು"
+    },
+    "stepper": {
+      "less": "ಕಡಿಮೆ",
+      "more": "ಹೆಚ್ಚು"
+    },
+    "date": {
+      "today": "ಇಂದು",
+      "yesterday": "ನಿನ್ನೆ",
+      "other": "ಬೇರೆ ದಿನಾಂಕ"
+    },
+    "save": {
+      "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ...",
+      "saved": "ಉಳಿಸಲಾಗಿದೆ",
+      "offlineTitle": "ಸಂಪರ್ಕ ಇಲ್ಲ",
+      "offlineHint": "ನಿಮ್ಮ ದಾಖಲೆ ಈ ಪರದೆಯಲ್ಲೇ ಇದೆ. ಸಿಗ್ನಲ್ ಬಂದ ಮೇಲೆ \"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ\" ಒತ್ತಿ.",
+      "failedTitle": "ಉಳಿಸಲು ಆಗಲಿಲ್ಲ",
+      "retry": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"
+    },
+    "step": {
+      "stepOf": "ಹಂತ {{current}} / {{total}}",
+      "back": "ಹಿಂದೆ",
+      "next": "ಮುಂದೆ"
+    },
+    "tabLabels": {
+      "animals": "ಪ್ರಾಣಿ",
+      "herd-medical": "ಆರೋಗ್ಯ",
+      "animal-groups": "ಗುಂಪುಗಳು",
+      "medical": "ದಾಖಲೆ",
+      "consultations": "ವೈದ್ಯರು",
+      "admin-consultations": "ವೈದ್ಯರು",
+      "prescriptions": "ಔಷಧಿ",
+      "manage-schedule": "ವೇಳಾಪಟ್ಟಿ",
+      "grooming-schedule": "ವೇಳಾಪಟ್ಟಿ",
+      "hospital-workflow": "ಸರದಿ",
+      "inpatient": "ಒಳರೋಗಿ",
+      "hospital-networks": "ನೆಟ್‌ವರ್ಕ್",
+      "vet-hospitals": "ಆಸ್ಪತ್ರೆ",
+      "settings": "ಸೆಟ್ಟಿಂಗ್",
+      "pharmacy": "ಫಾರ್ಮಸಿ",
+      "grooming-orders": "ಆರ್ಡರ್",
+      "grooming-earnings": "ಆದಾಯ",
+      "grooming-provider": "ವ್ಯವಹಾರ",
+      "admin-dashboard": "ಅಡ್ಮಿನ್",
+      "admin-users": "ಬಳಕೆದಾರ",
+      "admin-finance-reports": "ಹಣಕಾಸು",
+      "financial": "ಹಣಕಾಸು",
+      "health-analytics": "ವಿಶ್ಲೇಷಣೆ",
+      "admin-disputes": "ವಿವಾದ",
+      "admin-cancellation-dashboard": "ರದ್ದು"
+    },
+    "tabLabelsByRole": {
+      "pet_owner": {
+        "animals": "ಸಾಕುಪ್ರಾಣಿ"
+      },
+      "veterinarian": {
+        "animals": "ಸಾಕುಪ್ರಾಣಿ"
+      }
+    }
+  }
+}

@@ -7354,3 +7354,1671 @@
 </details>
 
 ---
+
+## 2026-11-13 05:34 · `fe7f5c5` · 📝 DOCS
+
+**Commit:** docs: add root CLAUDE.md and docs/modules index for progressive context disclosure  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - CLAUDE.md
+  - docs/modules/README.md
+
+</details>
+
+---
+
+## 2026-11-13 06:04 · `989415f` · OTHER
+
+**Commit:** refactor(routes): extract pharmacy and grooming into their own route files  
+**Author:** haikarthick  
+**Categories:** API  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - CLAUDE.md
+  - backend/src/routes/grooming.routes.ts
+  - backend/src/routes/index.ts
+  - backend/src/routes/pharmacy.routes.ts
+
+</details>
+
+---
+
+## 2026-11-13 06:27 · `5b93f65` · OTHER
+
+**Commit:** refactor(routes): split 8 more modules out of routes/index.ts  
+**Author:** haikarthick  
+**Categories:** API  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - CLAUDE.md
+  - backend/src/routes/admin-and-permissions.routes.ts
+  - backend/src/routes/catalog-and-roles.routes.ts
+  - backend/src/routes/core-clinical.routes.ts
+  - backend/src/routes/enterprise-farm.routes.ts
+  - backend/src/routes/index.ts
+  - backend/src/routes/marketplace.routes.ts
+  - backend/src/routes/medical-records.routes.ts
+  - backend/src/routes/payments-and-reviews.routes.ts
+  - backend/src/routes/pricing-visibility.routes.ts
+
+</details>
+
+---
+
+## 2026-11-13 08:00 · `c0e0dea` · OTHER
+
+**Commit:** refactor(routes): finish the route split - extract network-hospital zone  
+**Author:** haikarthick  
+**Categories:** API  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - CLAUDE.md
+  - backend/src/routes/hospital-network.routes.ts
+  - backend/src/routes/hospital-staff-invites.routes.ts
+  - backend/src/routes/index.ts
+  - backend/src/routes/network-financial-summary.routes.ts
+  - backend/src/routes/network-permissions-and-workflow.routes.ts
+  - backend/src/routes/network-subscriptions.routes.ts
+
+</details>
+
+---
+
+## 2026-11-13 08:19 · `802d3da` · OTHER
+
+**Commit:** feat(skills): add 4 project skills for module scaffolding, UI, security, and shipping  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - .claude/skills/add-module/SKILL.md
+  - .claude/skills/pre-ship/SKILL.md
+  - .claude/skills/tenant-isolation-review/SKILL.md
+  - .claude/skills/ui-review/SKILL.md
+  - CLAUDE.md
+
+</details>
+
+---
+
+## 2026-11-13 09:01 · `2c99230` · OTHER
+
+**Commit:** fix(ci): repair GitHub Actions pipeline, broken on every push since 2026-08-05  
+**Author:** haikarthick  
+**Categories:** CONFIG  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - .github/workflows/ci-cd.yml
+  - backend/tests/unit/AnimalGroupService.test.ts
+  - backend/tests/unit/EnterpriseService.test.ts
+  - backend/tests/unit/MovementService.test.ts
+  - backend/tests/unit/validation.extended.test.ts
+  - backend/tests/unit/validation.test.ts
+
+</details>
+
+---
+
+## 2026-11-13 09:58 · `ccb3762` · OTHER
+
+**Commit:** fix(dev-harness): stop running runtime-verify locally by default  
+**Author:** haikarthick  
+**Categories:** TOOLING  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - .claude/skills/pre-ship/SKILL.md
+  - CLAUDE.md
+  - backend/scripts/pre-deploy.js
+  - docs/VERIFICATION.md
+
+</details>
+
+---
+
+## 2026-11-13 10:17 · `faf4c70` · OTHER
+
+**Commit:** feat(skills): add ui-resilience-review for animation performance and edge-case data  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - .claude/skills/ui-resilience-review/SKILL.md
+  - CLAUDE.md
+
+</details>
+
+---
+
+## 2026-11-13 10:35 · `6417237` · OTHER
+
+**Commit:** feat(skills): add feature-delivery as the default BA-Dev-QA-ship pipeline  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - .claude/skills/feature-delivery/SKILL.md
+  - CLAUDE.md
+
+</details>
+
+---
+
+## 2026-11-13 11:03 · `98328bb` · OTHER
+
+**Commit:** refactor(i18n): split each locale's 8,400-line translation.json into 16 module files  
+**Author:** haikarthick  
+**Categories:** i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (108)</summary>
+
+  - .claude/skills/add-module/SKILL.md
+  - CLAUDE.md
+  - docs/DESIGN_SYSTEM.md
+  - frontend/scripts/copy-locales.cjs
+  - frontend/src/i18n/index.ts
+  - frontend/src/i18n/localeParity.test.ts
+  - frontend/src/locales/en/modules/admin.json
+  - frontend/src/locales/en/modules/analytics.json
+  - frontend/src/locales/en/modules/animals.json
+  - frontend/src/locales/en/modules/auth.json
+  - frontend/src/locales/en/modules/common.json
+  - frontend/src/locales/en/modules/consultations.json
+  - frontend/src/locales/en/modules/dashboard.json
+  - frontend/src/locales/en/modules/enterprise.json
+  - frontend/src/locales/en/modules/grooming.json
+  - frontend/src/locales/en/modules/home.json
+  - frontend/src/locales/en/modules/hospital.json
+  - frontend/src/locales/en/modules/hospitalNetwork.json
+  - frontend/src/locales/en/modules/marketplace.json
+  - frontend/src/locales/en/modules/medicalRecords.json
+  - ... and 88 more
+
+</details>
+
+---
+
+## 2026-11-13 12:15 · `0594c8f` · OTHER
+
+**Commit:** refactor(types): split frontend/src/types/index.ts into 12 module files  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (13)</summary>
+
+  - frontend/src/types/analytics.ts
+  - frontend/src/types/animals.ts
+  - frontend/src/types/automation.ts
+  - frontend/src/types/clientPortal.ts
+  - frontend/src/types/common.ts
+  - frontend/src/types/consultations.ts
+  - frontend/src/types/core.ts
+  - frontend/src/types/enterprise.ts
+  - frontend/src/types/hospital.ts
+  - frontend/src/types/index.ts
+  - frontend/src/types/marketplace.ts
+  - frontend/src/types/medicalRecords.ts
+  - frontend/src/types/vetProfile.ts
+
+</details>
+
+---
+
+## 2026-11-13 12:29 · `c74f68e` · OTHER
+
+**Commit:** refactor(api): split the 3,561-line ApiService class into 16 module files  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (19)</summary>
+
+  - frontend/src/services/api.ts
+  - frontend/src/services/api/core.ts
+  - frontend/src/services/api/modules/admin.ts
+  - frontend/src/services/api/modules/analytics.ts
+  - frontend/src/services/api/modules/auth.ts
+  - frontend/src/services/api/modules/automation.ts
+  - frontend/src/services/api/modules/clientPortal.ts
+  - frontend/src/services/api/modules/consultations.ts
+  - frontend/src/services/api/modules/enterprise.ts
+  - frontend/src/services/api/modules/grooming.ts
+  - frontend/src/services/api/modules/hospital.ts
+  - frontend/src/services/api/modules/marketplace.ts
+  - frontend/src/services/api/modules/medicalRecords.ts
+  - frontend/src/services/api/modules/networkReferralsAdmin.ts
+  - frontend/src/services/api/modules/networkSubscriptions.ts
+  - frontend/src/services/api/modules/patientConsentRoles.ts
+  - frontend/src/services/api/modules/payments.ts
+  - frontend/src/services/api/modules/schedule.ts
+  - frontend/src/services/api/utils.ts
+
+</details>
+
+---
+
+## 2026-11-13 12:48 · `0c0cc97` · OTHER
+
+**Commit:** refactor(validation): split the 2,113-line Joi schema file into 14 module files  
+**Author:** haikarthick  
+**Categories:** TOOLING  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (17)</summary>
+
+  - backend/scripts/runtime-verify.js
+  - backend/src/middleware/validation.ts
+  - backend/src/middleware/validation/admin.ts
+  - backend/src/middleware/validation/auth.ts
+  - backend/src/middleware/validation/automation.ts
+  - backend/src/middleware/validation/clientPortal.ts
+  - backend/src/middleware/validation/consultations.ts
+  - backend/src/middleware/validation/core.ts
+  - backend/src/middleware/validation/enterprise.ts
+  - backend/src/middleware/validation/grooming.ts
+  - backend/src/middleware/validation/hospital.ts
+  - backend/src/middleware/validation/hospitalNetwork.ts
+  - backend/src/middleware/validation/marketplace.ts
+  - backend/src/middleware/validation/masterData.ts
+  - backend/src/middleware/validation/medicalRecords.ts
+  - backend/src/middleware/validation/payments.ts
+  - backend/src/middleware/validation/tier3.ts
+
+</details>
+
+---
+
+## 2026-11-13 13:17 · `9dde6fc` · OTHER
+
+**Commit:** refactor(database): split the 2,101-line database.ts - the highest-risk file in this audit  
+**Author:** haikarthick  
+**Categories:** TOOLING · UTILS · DB  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (16)</summary>
+
+  - backend/scripts/runtime-verify.js
+  - backend/scripts/schema-check.js
+  - backend/src/utils/database.ts
+  - backend/src/utils/database/constants.ts
+  - backend/src/utils/database/ensurePaymentModuleSchema.ts
+  - backend/src/utils/database/ensureSchemaPublic.ts
+  - backend/src/utils/database/helpers.ts
+  - backend/src/utils/database/repairSchema.ts
+  - backend/src/utils/database/runSQLMigrations.ts
+  - backend/src/utils/database/seed/phase1GeneralSafetyNets.ts
+  - backend/src/utils/database/seed/phase2AnimalsAndMore.ts
+  - backend/src/utils/database/seed/phase3NetworkSubscriptions.ts
+  - backend/src/utils/database/seed/phase4Pharmacy.ts
+  - backend/src/utils/database/seed/phase5PharmacyBillingAndPasswordReset.ts
+  - backend/src/utils/database/syncBookingStatuses.ts
+  - docs/VERIFICATION.md
+
+</details>
+
+---
+
+## 2026-11-13 13:43 · `a3f9cce` · OTHER
+
+**Commit:** refactor(services): split the 2,345-line HospitalNetworkService.ts  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (13)</summary>
+
+  - backend/src/services/HospitalNetworkService.ts
+  - backend/src/services/hospitalNetwork/analyticsAndCompliance.ts
+  - backend/src/services/hospitalNetwork/consentAndPatientId.ts
+  - backend/src/services/hospitalNetwork/dashboard.ts
+  - backend/src/services/hospitalNetwork/enrollment.ts
+  - backend/src/services/hospitalNetwork/financialSummary.ts
+  - backend/src/services/hospitalNetwork/leaveAndTransfer.ts
+  - backend/src/services/hospitalNetwork/members.ts
+  - backend/src/services/hospitalNetwork/networkCrud.ts
+  - backend/src/services/hospitalNetwork/referralsAndBranch.ts
+  - backend/src/services/hospitalNetwork/rowMappersAndDeactivate.ts
+  - backend/src/services/hospitalNetwork/standaloneExports.ts
+  - backend/src/services/hospitalNetwork/types.ts
+
+</details>
+
+---
+
+## 2026-11-13 13:44 · `f7c3a9d` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 13:45 · `dace36e` · 📝 DOCS
+
+**Commit:** docs: note the database.ts/HospitalNetworkService.ts split in CLAUDE.md  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - CLAUDE.md
+
+</details>
+
+---
+
+## 2026-11-13 13:46 · `75e4c64` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 14:19 · `213c1f9` · OTHER
+
+**Commit:** refactor(pages): split the 606-line PublicMarketplace.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - frontend/src/components/marketplace/PublicListingCard.tsx
+  - frontend/src/components/marketplace/PublicListingDetail.tsx
+  - frontend/src/components/marketplace/publicListingShared.ts
+  - frontend/src/pages/PublicMarketplace.tsx
+
+</details>
+
+---
+
+## 2026-11-13 14:20 · `0263f54` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 14:31 · `14f2e0f` · OTHER
+
+**Commit:** refactor(pages): split the 610-line EnterpriseManagement.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/enterprise/EnterpriseCard.tsx
+  - frontend/src/components/enterprise/EnterpriseFormModal.tsx
+  - frontend/src/components/enterprise/EnterpriseMapOverview.tsx
+  - frontend/src/components/enterprise/EnterpriseMembersPanel.tsx
+  - frontend/src/components/enterprise/EnterpriseStatsPanel.tsx
+  - frontend/src/components/enterprise/InviteMemberModal.tsx
+  - frontend/src/components/enterprise/enterpriseShared.ts
+  - frontend/src/pages/EnterpriseManagement.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-11-13 14:32 · `fa98a67` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 16:10 · `5055f88` · OTHER
+
+**Commit:** refactor(pages): split the 617-line InpatientManagement.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/inpatient/AdmitPatientModal.tsx
+  - frontend/src/components/inpatient/InpatientCard.tsx
+  - frontend/src/components/inpatient/InpatientStatsPanel.tsx
+  - frontend/src/components/inpatient/InpatientStatusFilters.tsx
+  - frontend/src/components/inpatient/MedicalHistoryModal.tsx
+  - frontend/src/components/inpatient/RecordVitalsModal.tsx
+  - frontend/src/components/inpatient/VitalsHistoryModal.tsx
+  - frontend/src/components/inpatient/inpatientShared.ts
+  - frontend/src/pages/InpatientManagement.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-11-13 16:11 · `2f5fcd3` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 16:18 · `22b615b` · OTHER
+
+**Commit:** refactor(pages): split the 634-line VaccineProtocolAdmin.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - frontend/src/components/vaccineProtocol/VaccineProtocolCard.tsx
+  - frontend/src/components/vaccineProtocol/VaccineProtocolFilterBar.tsx
+  - frontend/src/components/vaccineProtocol/VaccineProtocolFormModal.tsx
+  - frontend/src/components/vaccineProtocol/VaccineProtocolHistoryModal.tsx
+  - frontend/src/components/vaccineProtocol/VaccineProtocolStatsPanel.tsx
+  - frontend/src/components/vaccineProtocol/vaccineProtocolShared.tsx
+  - frontend/src/pages/admin/VaccineProtocolAdmin.tsx
+
+</details>
+
+---
+
+## 2026-11-13 16:18 · `ea1a6c0` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 16:28 · `354ddd6` · OTHER
+
+**Commit:** refactor(pages): split the 649-line PharmacyDashboard.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/pages/pharmacy/PharmacyAnalyticsTab.tsx
+  - frontend/src/pages/pharmacy/PharmacyCreateModal.tsx
+  - frontend/src/pages/pharmacy/PharmacyDashboard.css
+  - frontend/src/pages/pharmacy/PharmacyDashboard.tsx
+  - frontend/src/pages/pharmacy/PharmacyOverviewTab.tsx
+  - frontend/src/pages/pharmacy/pharmacyDashboardShared.ts
+
+</details>
+
+---
+
+## 2026-11-13 16:28 · `4f2ea98` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 16:37 · `e0c1f0f` · OTHER
+
+**Commit:** refactor(components): split the 669-line CertificatePrintView.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/CertificatePrintView.css
+  - frontend/src/components/CertificatePrintView.tsx
+  - frontend/src/components/certificates/CertificateFooter.tsx
+  - frontend/src/components/certificates/CertificateHeader.tsx
+  - frontend/src/components/certificates/CertificateInfoGrid.tsx
+  - frontend/src/components/certificates/CertificateTypeDetails.tsx
+  - frontend/src/components/certificates/CertificateVaccineTable.tsx
+  - frontend/src/components/certificates/certificatePrintShared.tsx
+
+</details>
+
+---
+
+## 2026-11-13 16:38 · `96dca6f` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 16:48 · `747481d` · OTHER
+
+**Commit:** refactor(pages): split the 726-line FindDoctor.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/findDoctor/AvailabilityPanel.tsx
+  - frontend/src/components/findDoctor/Pagination.tsx
+  - frontend/src/components/findDoctor/ResultsToolbar.tsx
+  - frontend/src/components/findDoctor/SearchFiltersBar.tsx
+  - frontend/src/components/findDoctor/VetCard.tsx
+  - frontend/src/components/findDoctor/findDoctorShared.ts
+  - frontend/src/pages/petowner/FindDoctor.tsx
+  - frontend/src/styles/extracted-inline-styles.css
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-11-13 16:49 · `0908e8b` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 16:56 · `0c200c4` · OTHER
+
+**Commit:** refactor(pages): split the 758-line PatientConsent.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - frontend/src/components/patientConsent/AnimalSidebar.tsx
+  - frontend/src/components/patientConsent/ConsentCard.tsx
+  - frontend/src/components/patientConsent/GrantConsentModal.tsx
+  - frontend/src/components/patientConsent/Toggle.tsx
+  - frontend/src/components/patientConsent/patientConsentShared.ts
+  - frontend/src/pages/petowner/PatientConsent.tsx
+
+</details>
+
+---
+
+## 2026-11-13 16:57 · `0e8889d` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 17:08 · `ee4df21` · OTHER
+
+**Commit:** refactor(pages): split the 821-line Home.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (14)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/home/AdvancedCapabilitiesSection.tsx
+  - frontend/src/components/home/ClosingSections.tsx
+  - frontend/src/components/home/EnterpriseTypesSection.tsx
+  - frontend/src/components/home/FeaturesTabsSection.tsx
+  - frontend/src/components/home/GroomingHomeSection.tsx
+  - frontend/src/components/home/HeroSection.tsx
+  - frontend/src/components/home/HomeNavChrome.tsx
+  - frontend/src/components/home/HospitalsSection.tsx
+  - frontend/src/components/home/HowItWorksSection.tsx
+  - frontend/src/components/home/MarketplaceCtaSection.tsx
+  - frontend/src/components/home/homeContent.ts
+  - frontend/src/pages/Home.css
+  - frontend/src/pages/Home.tsx
+
+</details>
+
+---
+
+## 2026-11-13 17:09 · `256ae86` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 17:25 · `7d72b36` · OTHER
+
+**Commit:** refactor(pages): split the 858-line Dashboard.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (15)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/dashboard/DashboardStatsGrid.tsx
+  - frontend/src/components/dashboard/FarmerEnterpriseOverviewPanel.tsx
+  - frontend/src/components/dashboard/FeatureCardGrid.tsx
+  - frontend/src/components/dashboard/HospitalStaffStatsPanel.tsx
+  - frontend/src/components/dashboard/PendingApprovalsPanel.tsx
+  - frontend/src/components/dashboard/ProTipsPanel.tsx
+  - frontend/src/components/dashboard/QuickActionsPanel.tsx
+  - frontend/src/components/dashboard/RecentActivityPanel.tsx
+  - frontend/src/components/dashboard/RecentConsultationsPanel.tsx
+  - frontend/src/components/dashboard/UpcomingBookingsPanel.tsx
+  - frontend/src/components/dashboard/dashboardRoleConfig.ts
+  - frontend/src/components/dashboard/dashboardShared.ts
+  - frontend/src/pages/Dashboard.css
+  - frontend/src/pages/Dashboard.tsx
+
+</details>
+
+---
+
+## 2026-11-13 17:25 · `b2005d5` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 17:36 · `ec9fd92` · OTHER
+
+**Commit:** refactor(pages): split the 863-line Settings.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (16)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/settings/BecomeGroomerCard.tsx
+  - frontend/src/components/settings/CertificateServicesPanel.tsx
+  - frontend/src/components/settings/ClinicAvailabilitySection.tsx
+  - frontend/src/components/settings/ConsultationFeeSection.tsx
+  - frontend/src/components/settings/NotificationPreferencesPanel.tsx
+  - frontend/src/components/settings/PreferencesSection.tsx
+  - frontend/src/components/settings/PrivacyDataSection.tsx
+  - frontend/src/components/settings/ProfileSection.tsx
+  - frontend/src/components/settings/RoleAndAccountSection.tsx
+  - frontend/src/components/settings/RoleChangeHistoryTable.tsx
+  - frontend/src/components/settings/RoleChangeRequestPanel.tsx
+  - frontend/src/components/settings/VetProfessionalSection.tsx
+  - frontend/src/components/settings/settingsShared.ts
+  - frontend/src/pages/Settings.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-11-13 17:37 · `4ac0ece` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 17:46 · `e40e84c` · OTHER
+
+**Commit:** refactor(pages): split the 868-line VideoConsultation.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/videoConsultation/ChatPanel.tsx
+  - frontend/src/components/videoConsultation/EndedSessionView.tsx
+  - frontend/src/components/videoConsultation/VideoStage.tsx
+  - frontend/src/components/videoConsultation/videoConsultationShared.ts
+  - frontend/src/pages/petowner/VideoConsultation.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-11-13 17:47 · `6751853` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 17:57 · `fdd8517` · OTHER
+
+**Commit:** refactor(pages): split the 869-line ManageSchedule.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (13)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/manageSchedule/BlockModal.tsx
+  - frontend/src/components/manageSchedule/CalendarTab.tsx
+  - frontend/src/components/manageSchedule/HolidayModal.tsx
+  - frontend/src/components/manageSchedule/HolidaysTab.tsx
+  - frontend/src/components/manageSchedule/OverrideModal.tsx
+  - frontend/src/components/manageSchedule/ScheduleFormModal.tsx
+  - frontend/src/components/manageSchedule/TimeBlocksTab.tsx
+  - frontend/src/components/manageSchedule/VacationModal.tsx
+  - frontend/src/components/manageSchedule/WeeklyScheduleTab.tsx
+  - frontend/src/components/manageSchedule/manageScheduleShared.ts
+  - frontend/src/pages/doctor/ManageSchedule.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-11-13 17:58 · `d13ca36` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 18:07 · `5fcd6b7` · OTHER
+
+**Commit:** refactor(pages): split the 877-line VaccinationPassport.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/vaccinationPassport/CertHistoryTab.tsx
+  - frontend/src/components/vaccinationPassport/ComplianceSummaryTab.tsx
+  - frontend/src/components/vaccinationPassport/GroupPassportTab.tsx
+  - frontend/src/components/vaccinationPassport/PassportCard.tsx
+  - frontend/src/components/vaccinationPassport/PrintPreviewModal.tsx
+  - frontend/src/components/vaccinationPassport/VaccinationPassportHelpers.tsx
+  - frontend/src/components/vaccinationPassport/vaccinationPassportShared.ts
+  - frontend/src/pages/VaccinationPassport.css
+  - frontend/src/pages/VaccinationPassport.tsx
+
+</details>
+
+---
+
+## 2026-11-13 18:08 · `204f957` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 18:24 · `9cb5218` · OTHER
+
+**Commit:** refactor(pages): split the 900-line AnimalTimeline.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (12)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/animalTimeline/EventDetailDrawer.tsx
+  - frontend/src/components/animalTimeline/EventHoverTooltip.tsx
+  - frontend/src/components/animalTimeline/GroupHistoryPanel.tsx
+  - frontend/src/components/animalTimeline/TimelineFilterPanel.tsx
+  - frontend/src/components/animalTimeline/TimelineHeader.tsx
+  - frontend/src/components/animalTimeline/TimelineRail.tsx
+  - frontend/src/components/animalTimeline/TimelineScrubberBar.tsx
+  - frontend/src/components/animalTimeline/TimelineStatsBar.tsx
+  - frontend/src/components/animalTimeline/animalTimelineShared.ts
+  - frontend/src/pages/AnimalTimeline.css
+  - frontend/src/pages/AnimalTimeline.tsx
+
+</details>
+
+---
+
+## 2026-11-13 18:25 · `2880a83` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 18:34 · `07a49cf` · OTHER
+
+**Commit:** refactor(pages): split the 1,002-line CertificateWriter.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - frontend/src/components/certificateWriter/IssuedSuccessScreen.tsx
+  - frontend/src/components/certificateWriter/Step1AnimalAndType.tsx
+  - frontend/src/components/certificateWriter/Step2ClinicalDetails.tsx
+  - frontend/src/components/certificateWriter/Step3Review.tsx
+  - frontend/src/components/certificateWriter/certificateWriterShared.ts
+  - frontend/src/pages/doctor/CertificateWriter.tsx
+
+</details>
+
+---
+
+## 2026-11-13 18:35 · `ff74912` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-13 18:49 · `06c985b` · OTHER
+
+**Commit:** refactor(pages): split the 1,017-line Animals.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/animals/AnimalCard.tsx
+  - frontend/src/components/animals/AnimalDetailModal.tsx
+  - frontend/src/components/animals/AnimalFilterBar.tsx
+  - frontend/src/components/animals/AnimalFormModal.tsx
+  - frontend/src/components/animals/BulkImportModal.tsx
+  - frontend/src/components/animals/animalsShared.tsx
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-11-13 18:50 · `4c7ad13` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 00:55 · `b8976dc` · OTHER
+
+**Commit:** refactor(pages): split the 1,025-line HerdMedicalManagement.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (18)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/herdMedical/AddAllergyModal.tsx
+  - frontend/src/components/herdMedical/AddLabResultModal.tsx
+  - frontend/src/components/herdMedical/AddRecordModal.tsx
+  - frontend/src/components/herdMedical/AddVaccinationModal.tsx
+  - frontend/src/components/herdMedical/AllergiesTab.tsx
+  - frontend/src/components/herdMedical/AnimalSelect.tsx
+  - frontend/src/components/herdMedical/GroupFilterSelect.tsx
+  - frontend/src/components/herdMedical/LabResultsTab.tsx
+  - frontend/src/components/herdMedical/OverviewTab.tsx
+  - frontend/src/components/herdMedical/RecordsTab.tsx
+  - frontend/src/components/herdMedical/RoleInfoBanner.tsx
+  - frontend/src/components/herdMedical/SubjectPicker.tsx
+  - frontend/src/components/herdMedical/VaccinationsTab.tsx
+  - frontend/src/components/herdMedical/ViewRecordModal.tsx
+  - frontend/src/components/herdMedical/herdMedicalShared.ts
+  - frontend/src/pages/HerdMedicalManagement.tsx
+  - frontend/src/pages/ModulePage.css
+
+</details>
+
+---
+
+## 2026-11-14 00:56 · `cb2b167` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 01:05 · `cbd6d41` · OTHER
+
+**Commit:** refactor(pages): split the 1,056-line BookConsultation.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (12)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/bookConsultation/BookingProgressSteps.tsx
+  - frontend/src/components/bookConsultation/BookingSuccessScreen.tsx
+  - frontend/src/components/bookConsultation/DoctorInfoPanel.tsx
+  - frontend/src/components/bookConsultation/EnterpriseAnimalSelector.tsx
+  - frontend/src/components/bookConsultation/Step1SelectDoctor.tsx
+  - frontend/src/components/bookConsultation/Step2ChooseTime.tsx
+  - frontend/src/components/bookConsultation/Step3Details.tsx
+  - frontend/src/components/bookConsultation/Step4Confirm.tsx
+  - frontend/src/components/bookConsultation/bookConsultationShared.ts
+  - frontend/src/pages/petowner/BookConsultation.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-11-14 01:06 · `a1cfcfb` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 01:17 · `172dbc1` · OTHER
+
+**Commit:** refactor(pages): split the 1,143-line UserManagement.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - frontend/src/components/userManagement/FreezeAccountModal.tsx
+  - frontend/src/components/userManagement/PendingApprovalsTab.tsx
+  - frontend/src/components/userManagement/ResetPasswordModal.tsx
+  - frontend/src/components/userManagement/RoleChangeModal.tsx
+  - frontend/src/components/userManagement/RoleChangeRequestsTab.tsx
+  - frontend/src/components/userManagement/SecondaryRolesModal.tsx
+  - frontend/src/components/userManagement/SuspendAccountModal.tsx
+  - frontend/src/components/userManagement/UsersSearchAndTable.tsx
+  - frontend/src/components/userManagement/VetProfileModal.tsx
+  - frontend/src/components/userManagement/userManagementShared.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+
+</details>
+
+---
+
+## 2026-11-14 01:17 · `2fdfc1e` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 01:27 · `f07bd43` · OTHER
+
+**Commit:** refactor(pages): split the 1,157-line Consultations.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/consultations/ActionLogModal.tsx
+  - frontend/src/components/consultations/BookingCard.tsx
+  - frontend/src/components/consultations/CancelBookingModal.tsx
+  - frontend/src/components/consultations/HistoryCard.tsx
+  - frontend/src/components/consultations/NoShowModal.tsx
+  - frontend/src/components/consultations/RescheduleModal.tsx
+  - frontend/src/components/consultations/TabsAndFilters.tsx
+  - frontend/src/components/consultations/consultationsShared.tsx
+  - frontend/src/pages/Consultations.tsx
+  - frontend/src/pages/ModulePage.css
+
+</details>
+
+---
+
+## 2026-11-14 01:28 · `117168d` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 01:38 · `fcf42df` · OTHER
+
+**Commit:** refactor(pages): split the 1,197-line ConsultationRoom.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/consultationRoom/ChatPanel.tsx
+  - frontend/src/components/consultationRoom/ConsultationVideoStage.tsx
+  - frontend/src/components/consultationRoom/EndedSessionView.tsx
+  - frontend/src/components/consultationRoom/MedicalHistoryPanel.tsx
+  - frontend/src/components/consultationRoom/NotesPanel.tsx
+  - frontend/src/components/consultationRoom/PrescribePanel.tsx
+  - frontend/src/components/consultationRoom/ReferralModal.tsx
+  - frontend/src/components/consultationRoom/consultationRoomShared.ts
+  - frontend/src/pages/doctor/ConsultationRoom.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-11-14 01:40 · `2af0ffe` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 01:54 · `b64a91e` · OTHER
+
+**Commit:** refactor(pages): split the 1,317-line HospitalWorkflow.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (17)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/hospitalWorkflow/CaseDetailModal.tsx
+  - frontend/src/components/hospitalWorkflow/CasesList.tsx
+  - frontend/src/components/hospitalWorkflow/CheckInModal.tsx
+  - frontend/src/components/hospitalWorkflow/NewCaseModal.tsx
+  - frontend/src/components/hospitalWorkflow/NewReferralModal.tsx
+  - frontend/src/components/hospitalWorkflow/QueueList.tsx
+  - frontend/src/components/hospitalWorkflow/QueueStatsTiles.tsx
+  - frontend/src/components/hospitalWorkflow/ReferralsList.tsx
+  - frontend/src/components/hospitalWorkflow/StagePipelineFilter.tsx
+  - frontend/src/components/hospitalWorkflow/TransitionModal.tsx
+  - frontend/src/components/hospitalWorkflow/TriageModal.tsx
+  - frontend/src/components/hospitalWorkflow/WalkInRegisterForm.tsx
+  - frontend/src/components/hospitalWorkflow/WorkflowStatsGrid.tsx
+  - frontend/src/components/hospitalWorkflow/hospitalWorkflowShared.ts
+  - frontend/src/pages/HospitalWorkflow.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-11-14 01:55 · `063b244` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 02:08 · `8adfdfb` · OTHER
+
+**Commit:** refactor(pages): split the 1,347-line VetHospitalManage.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (18)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/vetHospitalManage/AddEditDepartmentModal.tsx
+  - frontend/src/components/vetHospitalManage/AddEditDoctorModal.tsx
+  - frontend/src/components/vetHospitalManage/AddEditServiceModal.tsx
+  - frontend/src/components/vetHospitalManage/AppointmentsTab.tsx
+  - frontend/src/components/vetHospitalManage/DepartmentsTab.tsx
+  - frontend/src/components/vetHospitalManage/DocViewerModal.tsx
+  - frontend/src/components/vetHospitalManage/DoctorsTab.tsx
+  - frontend/src/components/vetHospitalManage/DocumentReviewModal.tsx
+  - frontend/src/components/vetHospitalManage/DocumentsTab.tsx
+  - frontend/src/components/vetHospitalManage/InviteDoctorModal.tsx
+  - frontend/src/components/vetHospitalManage/OverviewTab.tsx
+  - frontend/src/components/vetHospitalManage/ServicesTab.tsx
+  - frontend/src/components/vetHospitalManage/SettingsTab.tsx
+  - frontend/src/components/vetHospitalManage/VerificationBanner.tsx
+  - frontend/src/components/vetHospitalManage/vetHospitalManageShared.ts
+  - frontend/src/pages/VetHospitalManage.tsx
+  - frontend/src/pages/VetHospitals.css
+
+</details>
+
+---
+
+## 2026-11-14 02:09 · `5a7876c` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 02:28 · `65ba35e` · OTHER
+
+**Commit:** refactor(pages): split the 1,400-line MedicalRecords.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (18)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/medicalRecords/AllergiesTab.tsx
+  - frontend/src/components/medicalRecords/CertificatesTab.tsx
+  - frontend/src/components/medicalRecords/ConsultationsTab.tsx
+  - frontend/src/components/medicalRecords/HospitalVisitsTab.tsx
+  - frontend/src/components/medicalRecords/LabResultsTab.tsx
+  - frontend/src/components/medicalRecords/MedicalRecordsHeader.tsx
+  - frontend/src/components/medicalRecords/OverviewTab.tsx
+  - frontend/src/components/medicalRecords/PrescriptionsTab.tsx
+  - frontend/src/components/medicalRecords/RecordModals.tsx
+  - frontend/src/components/medicalRecords/RecordsTab.tsx
+  - frontend/src/components/medicalRecords/TabsNav.tsx
+  - frontend/src/components/medicalRecords/TimelineTab.tsx
+  - frontend/src/components/medicalRecords/VaccinationsTab.tsx
+  - frontend/src/components/medicalRecords/WeightTab.tsx
+  - frontend/src/components/medicalRecords/medicalRecordsShared.tsx
+  - frontend/src/pages/MedicalRecords.tsx
+  - frontend/src/pages/ModulePage.css
+
+</details>
+
+---
+
+## 2026-11-14 02:29 · `b9b5470` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 02:42 · `f88e09b` · OTHER
+
+**Commit:** refactor(pages): split the 1,441-line SystemSettings.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (18)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/systemSettings/AddSettingModal.tsx
+  - frontend/src/components/systemSettings/BookingCard.tsx
+  - frontend/src/components/systemSettings/CancellationPolicyCard.tsx
+  - frontend/src/components/systemSettings/ConsultationCard.tsx
+  - frontend/src/components/systemSettings/CurrencyCard.tsx
+  - frontend/src/components/systemSettings/DisplayCard.tsx
+  - frontend/src/components/systemSettings/EmailConfigCard.tsx
+  - frontend/src/components/systemSettings/EmailTemplateEditModal.tsx
+  - frontend/src/components/systemSettings/EmailTemplatesCard.tsx
+  - frontend/src/components/systemSettings/MaintenanceCard.tsx
+  - frontend/src/components/systemSettings/OtherSettingsSection.tsx
+  - frontend/src/components/systemSettings/PaymentGatewayCard.tsx
+  - frontend/src/components/systemSettings/RazorpayCredentialsCard.tsx
+  - frontend/src/components/systemSettings/SettingsNav.tsx
+  - frontend/src/components/systemSettings/systemSettingsShared.ts
+  - frontend/src/pages/admin/SystemSettings.tsx
+  - frontend/src/styles/modules.css
+
+</details>
+
+---
+
+## 2026-11-14 02:42 · `b359e6e` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 13:21 · `dbeeea5` · OTHER
+
+**Commit:** refactor(pages): split the 2,528-line Marketplace.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (26)</summary>
+
+  - frontend/src/components/marketplace/AdminListingsSubtab.tsx
+  - frontend/src/components/marketplace/AdminPanel.tsx
+  - frontend/src/components/marketplace/AdminPlansSubtab.tsx
+  - frontend/src/components/marketplace/AdminReportsSubtab.tsx
+  - frontend/src/components/marketplace/AdminRevenueSubtab.tsx
+  - frontend/src/components/marketplace/AdminSettingsSubtab.tsx
+  - frontend/src/components/marketplace/AuctionCountdown.tsx
+  - frontend/src/components/marketplace/BrowseTab.tsx
+  - frontend/src/components/marketplace/DashboardTab.tsx
+  - frontend/src/components/marketplace/FavoritesTab.tsx
+  - frontend/src/components/marketplace/ListingCard.tsx
+  - frontend/src/components/marketplace/ListingDetail.tsx
+  - frontend/src/components/marketplace/MessagesTab.tsx
+  - frontend/src/components/marketplace/OrdersTab.tsx
+  - frontend/src/components/marketplace/PricesTab.tsx
+  - frontend/src/components/marketplace/ReportModal.tsx
+  - frontend/src/components/marketplace/ReviewItem.tsx
+  - frontend/src/components/marketplace/SavedSearchesTab.tsx
+  - frontend/src/components/marketplace/SellStep0BasicInfo.tsx
+  - frontend/src/components/marketplace/SellStep1AnimalDetails.tsx
+  - ... and 6 more
+
+</details>
+
+---
+
+## 2026-11-14 14:12 · `99c389c` · OTHER
+
+**Commit:** refactor(pages): split the 3,562-line HospitalNetworks.tsx  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (37)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/src/components/hospitalNetwork/AddMemberModal.tsx
+  - frontend/src/components/hospitalNetwork/AnalyticsTab.tsx
+  - frontend/src/components/hospitalNetwork/ApprovalActionModal.tsx
+  - frontend/src/components/hospitalNetwork/ApprovalWorkflowPanel.tsx
+  - frontend/src/components/hospitalNetwork/AuditAccessLogTable.tsx
+  - frontend/src/components/hospitalNetwork/AuditTab.tsx
+  - frontend/src/components/hospitalNetwork/BranchHospitalsPanel.tsx
+  - frontend/src/components/hospitalNetwork/BrandingSettingsPanel.tsx
+  - frontend/src/components/hospitalNetwork/ComplianceExportModal.tsx
+  - frontend/src/components/hospitalNetwork/CreateBranchHospitalModal.tsx
+  - frontend/src/components/hospitalNetwork/CreateReferralModal.tsx
+  - frontend/src/components/hospitalNetwork/DeleteBranchConfirmModal.tsx
+  - frontend/src/components/hospitalNetwork/EditBranchHospitalModal.tsx
+  - frontend/src/components/hospitalNetwork/EditMemberModal.tsx
+  - frontend/src/components/hospitalNetwork/EnrollmentsPanel.tsx
+  - frontend/src/components/hospitalNetwork/InviteStaffModal.tsx
+  - frontend/src/components/hospitalNetwork/LeaveManagementTab.tsx
+  - frontend/src/components/hospitalNetwork/LeaveRequestModal.tsx
+  - frontend/src/components/hospitalNetwork/NetworkDetailHeader.tsx
+  - ... and 17 more
+
+</details>
+
+---
+
+## 2026-11-14 14:12 · `3b2dea3` · OTHER
+
+**Commit:** chore(memory): sync auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-11-14 14:42 · `9e89922` · OTHER
+
+**Commit:** fix(frontend): locale date formatting, stale isFarmer dep, unreachable reject-registration modal  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/src/components/manageSchedule/CalendarTab.tsx
+  - frontend/src/components/manageSchedule/HolidaysTab.tsx
+  - frontend/src/components/manageSchedule/TimeBlocksTab.tsx
+  - frontend/src/components/userManagement/PendingApprovalsTab.tsx
+  - frontend/src/components/userManagement/RejectRegistrationModal.tsx
+  - frontend/src/components/vaccineProtocol/VaccineProtocolHistoryModal.tsx
+  - frontend/src/pages/AnimalTimeline.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/pages/admin/VaccineProtocolAdmin.tsx
+  - frontend/src/pages/doctor/ManageSchedule.tsx
+
+</details>
+
+---
+
+## 2026-11-14 15:00 · `4591d18` · OTHER
+
+**Commit:** fix(network,pharmacy): enforce membership expiry + fix stock-alert column bug  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (20)</summary>
+
+  - backend/src/controllers/HospitalNetworkController.ts
+  - backend/src/middleware/hospitalDataIsolation.ts
+  - backend/src/routes/hospital-network.routes.ts
+  - backend/src/routes/hospital-staff-invites.routes.ts
+  - backend/src/routes/network-subscriptions.routes.ts
+  - backend/src/routes/pharmacy.routes.ts
+  - backend/src/routes/pricing-visibility.routes.ts
+  - backend/src/services/AnimalService.ts
+  - backend/src/services/MedicalRecordService.ts
+  - backend/src/services/PrescriptionService.ts
+  - backend/src/services/VetHospitalService.ts
+  - backend/src/services/hospitalNetwork/dashboard.ts
+  - backend/src/services/hospitalNetwork/enrollment.ts
+  - backend/src/services/hospitalNetwork/financialSummary.ts
+  - backend/src/services/hospitalNetwork/leaveAndTransfer.ts
+  - backend/src/services/hospitalNetwork/members.ts
+  - backend/src/services/hospitalNetwork/networkCrud.ts
+  - backend/src/services/hospitalNetwork/referralsAndBranch.ts
+  - backend/src/services/hospitalNetwork/rowMappersAndDeactivate.ts
+  - backend/src/utils/scheduler.ts
+
+</details>
+
+---

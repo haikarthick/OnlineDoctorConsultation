@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface FinanceReportsProps {
   onNavigate?: (path: string) => void
 }
@@ -45,7 +46,7 @@ const FinanceReports: React.FC<FinanceReportsProps> = () => {
       a.click()
       URL.revokeObjectURL(url)
     } catch (err: any) {
-      setExportError(err?.response?.data?.error?.message || err?.message || t('financeAdmin.gstExportFailed'))
+      setExportError(userMessage(err, 'financeAdmin.gstExportFailed'))
     } finally {
       setExporting(false)
     }

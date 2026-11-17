@@ -90,4 +90,20 @@ describe('LocationService', () => {
       expect(Array.isArray(result)).toBe(true);
     });
   });
+
+  describe('farm boundary', () => {
+    it('refuses a parent place that is not on the farm, in words, and writes nothing', async () => {
+      (database.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      await expect(locationService.createLocation({ enterpriseId: 'e1', name: 'X', locationType: 'pen', parentLocationId: 'foreign' } as any)).rejects.toThrow(/not on this farm/);
+      expect((database.query as jest.Mock).mock.calls.some(c => String(c[0]).includes('INSERT INTO locations'))).toBe(false);
+    });
+
+    it('refuses putting a place inside one of its own parts', async () => {
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ id: 'l1', enterprise_id: 'e1', name: 'A', location_type: 'barn' }] }) // getLocation (current)
+        .mockResolvedValueOnce({ rows: [{}] })                                                                      // parent is on this farm
+        .mockResolvedValueOnce({ rows: [{}] });                                                                     // ...and is below the place itself
+      await expect(locationService.updateLocation('l1', { parentLocationId: 'child' })).rejects.toThrow(/inside itself or inside one of its own parts/);
+    });
+  });
 });

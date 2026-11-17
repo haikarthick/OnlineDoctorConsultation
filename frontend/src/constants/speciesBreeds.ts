@@ -42,13 +42,13 @@ export const BREED_DATABASE: Record<string, string[]> = {
   Arowana: ['Silver', 'Golden', 'Red', 'Black', 'Pearl', 'Mixed', 'Other'],
   Goldfish: ['Common', 'Comet', 'Fantail', 'Oranda', 'Ryukin', 'Black Moor', 'Telescope', 'Bubble Eye', 'Mixed', 'Other'],
   // ── Livestock / Farm ──
-  Cattle: ['Gir', 'Sahiwal', 'Red Sindhi', 'Tharparkar', 'Ongole', 'Hallikar', 'Khillari', 'Deoni', 'Kangayam', 'Umblachery', 'Malnad Gidda', 'Punganur', 'Vechur', 'Hariana', 'Rathi', 'Holstein Friesian (HF)', 'Jersey', 'Brown Swiss', 'Simmental', 'Mixed Breed', 'Other'],
-  Buffalo: ['Murrah', 'Surti', 'Mehsana', 'Jaffarabadi', 'Nili-Ravi', 'Pandharpuri', 'Marathwadi', 'Nagpuri', 'Toda (Nilgiri)', 'Mixed', 'Other'],
+  Cattle: ['Gir', 'Sahiwal', 'Red Sindhi', 'Tharparkar', 'Ongole', 'Hallikar', 'Khillari', 'Deoni', 'Kangayam', 'Bargur', 'Umblachery', 'Pulikulam', 'Malnad Gidda', 'Punganur', 'Vechur', 'Hariana', 'Rathi', 'Holstein Friesian (HF)', 'HF Cross', 'Jersey', 'Jersey Cross', 'Brown Swiss', 'Cross Breed', 'Other'],
+  Buffalo: ['Murrah', 'Surti', 'Mehsana', 'Jaffarabadi', 'Nili-Ravi', 'Pandharpuri', 'Marathwadi', 'Nagpuri', 'Toda (Nilgiri)', 'Bargur', 'Cross Breed', 'Other'],
   Horse: ['Marwari', 'Kathiawari', 'Manipuri Pony', 'Bhutia', 'Spiti', 'Zanskari', 'Thoroughbred', 'Arabian', 'Quarter Horse', 'Warmblood', 'Standardbred', 'Mixed Breed', 'Other'],
   Donkey: ['Indian Donkey', 'Halari', 'Spiti', 'Mixed', 'Other'],
-  Sheep: ['Nellore', 'Deccani', 'Mandya', 'Bellary', 'Madras Red', 'Coimbatore', 'Mecheri', 'Ramnad White', 'Vembur', 'Nilgiri', 'Korriedale', 'Garole', 'Merino', 'Suffolk', 'Rambouillet', 'Mixed Breed', 'Other'],
-  Goat: ['Jamunapari', 'Barbari', 'Sirohi', 'Black Bengal', 'Osmanabadi', 'Salem Black', 'Malabari', 'Sangamneri', 'Ganjam', 'Kanniadu', 'Boer', 'Alpine', 'Saanen', 'Nubian', 'Angora', 'Mixed Breed', 'Other'],
-  Pig: ['Desi (Indigenous)', 'Ghungroo', 'Niang Megha', 'Yorkshire (Large White)', 'Landrace', 'Duroc', 'Hampshire', 'Berkshire', 'Mixed Breed', 'Other'],
+  Sheep: ['Nellore', 'Deccani', 'Mandya', 'Bellary', 'Madras Red', 'Coimbatore', 'Kilakarsal', 'Mecheri', 'Ramnad White', 'Tiruchi Black', 'Vembur', 'Katchaikatty Black', 'Chevaadu', 'Nilgiri', 'Korriedale', 'Garole', 'Merino', 'Suffolk', 'Rambouillet', 'Cross Breed', 'Other'],
+  Goat: ['Jamunapari', 'Barbari', 'Sirohi', 'Black Bengal', 'Osmanabadi', 'Salem Black', 'Malabari', 'Sangamneri', 'Ganjam', 'Kanni Adu', 'Kodi Adu', 'Boer', 'Alpine', 'Saanen', 'Nubian', 'Angora', 'Cross Breed', 'Other'],
+  Pig: ['Desi (Indigenous)', 'Ghoongroo', 'Niang Megha', 'Agonda Goan', 'Tenyi Vo', 'Nicobari', 'Doom', 'Zovawk', 'Ghurrah', 'Mali', 'Purnea', 'Banda', 'Manipuri Black', 'Wak Chambil', 'Andamani', 'Karkambi', 'Nagal', 'Yorkshire (Large White)', 'Landrace', 'Duroc', 'Hampshire', 'Berkshire', 'Cross Breed', 'Other'],
   Camel: ['Dromedary (One-humped)', 'Bactrian (Two-humped)', 'Mixed', 'Other'],
   Yak: ['Domestic Yak', 'Mixed', 'Other'],
   Deer: ['Spotted Deer (Chital)', 'Sambhar', 'Barking Deer (Muntjac)', 'Mixed', 'Other'],
@@ -63,6 +63,33 @@ export const BREED_DATABASE: Record<string, string[]> = {
   // ── Exotic Large ──
   Llama: ['Suri', 'Huacaya', 'Mixed', 'Other'],
   Alpaca: ['Suri', 'Huacaya', 'Mixed', 'Other'],
+  // ── Aquaculture (official-source list, migration 043) ──
+  Catla: ['Other'],
+  Rohu: ['Other'],
+  Mrigal: ['Other'],
+  Bata: ['Other'],
+  Calbasu: ['Other'],
+  'Silver Carp': ['Other'],
+  'Grass Carp': ['Other'],
+  'Common Carp': ['Mirror Carp', 'Scale Carp', 'Other'],
+  Tilapia: ['Mozambique Tilapia', 'Nile Tilapia (GIFT)', 'Other'],
+  Magur: ['Other'],
+  Singhi: ['Other'],
+  Murrel: ['Striped Murrel', 'Giant Murrel', 'Spotted Murrel', 'Other'],
+  'Climbing Perch': ['Other'],
+  Pangasius: ['Other'],
+  'Giant Gourami': ['Other'],
+  'Freshwater Prawn': ['Other'],
+  'Asian Seabass': ['Other'],
+  Milkfish: ['Other'],
+  'Grey Mullet': ['Other'],
+  Pearlspot: ['Other'],
+  'Long Whiskers Catfish': ['Other'],
+  'Red Snapper': ['Other'],
+  'Vannamei Shrimp': ['Other'],
+  'Black Tiger Shrimp': ['Other'],
+  'Indian White Shrimp': ['Other'],
+  'Mud Crab': ['Other'],
   // ── Other ──
   Other: [],
 }
@@ -77,6 +104,7 @@ export const SPECIES_CATEGORIES: Array<{ label: string; species: string[] }> = [
   { label: 'Livestock / Farm', species: ['Cattle', 'Buffalo', 'Horse', 'Donkey', 'Sheep', 'Goat', 'Pig', 'Camel', 'Yak', 'Deer'] },
   { label: 'Poultry', species: ['Chicken', 'Duck', 'Turkey', 'Quail', 'Emu', 'Ostrich', 'Peacock'] },
   { label: 'Exotic Large', species: ['Llama', 'Alpaca'] },
+  { label: 'Aquaculture', species: ['Catla', 'Rohu', 'Mrigal', 'Bata', 'Calbasu', 'Silver Carp', 'Grass Carp', 'Common Carp', 'Tilapia', 'Magur', 'Singhi', 'Murrel', 'Climbing Perch', 'Pangasius', 'Giant Gourami', 'Freshwater Prawn', 'Asian Seabass', 'Milkfish', 'Grey Mullet', 'Pearlspot', 'Long Whiskers Catfish', 'Red Snapper', 'Vannamei Shrimp', 'Black Tiger Shrimp', 'Indian White Shrimp', 'Mud Crab'] },
   { label: 'Other', species: ['Other'] },
 ]
 
@@ -103,6 +131,9 @@ export interface AnimalClassTerm {
   impliedGender: 'male' | 'female' | 'unknown'
   canBePregnant: boolean
   canProduceMilk: boolean
+  /** Farm profile flags (migration 043). Absent on the built-in fallback rows = false. */
+  canLayEggs?: boolean
+  isJuvenile?: boolean
 }
 
 export const ANIMAL_CLASS_TERMS: Record<string, AnimalClassTerm[]> = {
@@ -182,6 +213,7 @@ export const SPECIES_ICONS: Record<string, string> = {
   Chicken: '🐔', Duck: '🦆', Turkey: '🦃', Quail: '🐦',
   Emu: '🦤', Ostrich: '🦢', Peacock: '🦚',
   Llama: '🦙', Alpaca: '🦙',
+  Catla: '🐟', Rohu: '🐟', Mrigal: '🐟', Bata: '🐟', Calbasu: '🐟', 'Silver Carp': '🐟', 'Grass Carp': '🐟', 'Common Carp': '🐟', Tilapia: '🐟', Magur: '🐟', Singhi: '🐟', Murrel: '🐟', 'Climbing Perch': '🐟', Pangasius: '🐟', 'Giant Gourami': '🐟', 'Freshwater Prawn': '🦐', 'Asian Seabass': '🐟', Milkfish: '🐟', 'Grey Mullet': '🐟', Pearlspot: '🐟', 'Long Whiskers Catfish': '🐟', 'Red Snapper': '🐟', 'Vannamei Shrimp': '🦐', 'Black Tiger Shrimp': '🦐', 'Indian White Shrimp': '🦐', 'Mud Crab': '🦀',
   Other: '🐾',
 }
 

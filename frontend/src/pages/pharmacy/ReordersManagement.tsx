@@ -4,6 +4,7 @@ import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
+import { userMessage } from '../../utils/userMessage'
 interface ReorderRequest {
   id: string
   pharmacy_id: string
@@ -54,7 +55,7 @@ export default function ReordersManagement({ pharmacyId }: Props) {
       const res = await client.get(`/pharmacies/${pharmacyId}/reorders`)
       setReorders(Array.isArray(res.data) ? res.data : [])
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setLoading(false)
     }
@@ -75,7 +76,7 @@ export default function ReordersManagement({ pharmacyId }: Props) {
       await client.patch(`/pharmacies/${pharmacyId}/reorders/${id}`, { status, ...extraData })
       await load()
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message)
+      setError(userMessage(err))
     } finally {
       setUpdatingId(null)
     }

@@ -1,0 +1,56 @@
+{
+  "smsSettings": {
+    "title": "SMS Settings",
+    "subtitle": "Send text messages (farm invitations and reminders). Many farm workers have no email, so SMS is their main channel.",
+    "loading": "Loading...",
+    "loadFailed": "Could not load the SMS settings.",
+    "saveFailed": "Could not save the SMS settings.",
+    "testError": "Could not send the test message.",
+    "statusOn": "SMS is switched on",
+    "statusOff": "SMS is switched off - no text messages are being sent",
+    "dltNote": "In India, text messages need DLT registration (a registered sender name and approved message templates) with your SMS provider. When that is done, enter the details here and switch SMS on. Nothing needs to be deployed.",
+    "enable": "Send text messages",
+    "provider": "SMS provider",
+    "providers": {
+      "msg91": "MSG91",
+      "twilio": "Twilio",
+      "log": "Test only (writes to the server log, sends nothing)"
+    },
+    "fields": {
+      "msg91_authKey": "MSG91 auth key",
+      "msg91_senderId": "Sender ID (DLT)",
+      "msg91_dltEntityId": "DLT entity ID (PE ID)",
+      "twilio_accountSid": "Twilio account SID",
+      "twilio_authToken": "Twilio auth token",
+      "twilio_from": "Sender number or ID",
+      "defaultCountryCode": "Country code for numbers typed without one (91 = India)",
+      "templateId": "DLT template ID (MSG91 flow ID)",
+      "templateText": "Message text"
+    },
+    "secretSet": "A value is saved. Leave blank to keep it, or type a new one to replace it.",
+    "secretNotSet": "Not set yet",
+    "templateTitle": "Farm invitation message",
+    "templateHint": "Variables: {inviter} {farm} {role} {link}. The text must match the DLT-approved template.",
+    "save": "Save settings",
+    "saving": "Please wait...",
+    "saved": "Saved.",
+    "unsaved": "You have changes that are not saved yet.",
+    "saveFirst": "Save your changes first, then send a test.",
+    "testTitle": "Send a test message",
+    "testHint": "Sends a sample invitation to the number below, so you can check the settings work before real invitations depend on them.",
+    "testNumber": "Mobile number",
+    "testSend": "Send test",
+    "testSent": "Test sent. It should arrive shortly.",
+    "testLogged": "Written to the server log only (the provider is set to Test only).",
+    "testSkipped": "Not sent: {{reason}}",
+    "testFailed": "The provider did not accept it: {{reason}}",
+    "logTitle": "Recent messages",
+    "logEmpty": "No messages yet.",
+    "statuses": {
+      "sent": "Sent",
+      "failed": "Failed",
+      "skipped": "Not sent",
+      "logged": "Logged only"
+    }
+  }
+}

@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void; id?: string }
 
 const SCENT_KEYS = ['Skin', 'Coat', 'Ears', 'Nails', 'Teeth'] as const
@@ -33,12 +34,12 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
       if (o.reportCard) setReport(o.reportCard)
       try { const mine = (await apiService.getMyGroomingProvider()).data; setIsProvider(!!mine && mine.id === o.providerId) } catch { setIsProvider(false) }
       try { setEscalations((await apiService.listGroomingEscalations(id)).data || []) } catch { setEscalations([]) }
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [id])
   useEffect(() => { load() }, [load])
 
   const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 2500) }
-  const fail = (e: any) => setErr(e?.response?.data?.message || e?.message)
+  const fail = (e: any) => setErr(userMessage(e))
 
   const saveIntake = async () => { try { setBusy(true); await apiService.saveGroomingIntake(id!, intake); flash(t('groomingDetail.intakeSaved')); load() } catch (e) { fail(e) } finally { setBusy(false) } }
   const setItem = async (itemId: string, status: string) => { try { await apiService.updateGroomingItem(id!, itemId, status); load() } catch (e) { fail(e) } }
@@ -144,7 +145,7 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
             : isProvider && <div className="eta-row">
                 <div className="module-form-group is-flush">
                   <label className="module-label">{t('groomingVar.etaLabel')}</label>
-                  <input className="module-input input-narrow" type="number" min={0} value={eta} onChange={e => setEta(e.target.value)} />
+                  <input className="module-input input-narrow" type="number" inputMode="decimal" min={0} value={eta} onChange={e => setEta(e.target.value)} />
                 </div>
                 <button className="module-btn primary" disabled={busy} onClick={setOnTheWay}>🚚 {t('groomingVar.markOnTheWay')}</button>
               </div>}
@@ -174,7 +175,7 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
               <div className="module-form-group"><label className="module-label">{t('groomingVar.workName')}</label>
                 <input className="module-input" value={varName} onChange={e => setVarName(e.target.value)} placeholder={t('groomingVar.workPlaceholder')} /></div>
               <div className="module-form-group"><label className="module-label">{t('groomingVar.price')}</label>
-                <input className="module-input" type="number" min={0} value={varPrice} onChange={e => setVarPrice(e.target.value)} /></div>
+                <input className="module-input" type="number" inputMode="decimal" min={0} value={varPrice} onChange={e => setVarPrice(e.target.value)} /></div>
               <div className="module-form-group"><label className="module-label">{t('groomingVar.reason')}</label>
                 <input className="module-input" value={varReason} onChange={e => setVarReason(e.target.value)} /></div>
               <button className="module-btn primary" disabled={busy} onClick={requestVariable}>{t('groomingVar.requestApproval')}</button>

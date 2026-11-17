@@ -4,6 +4,7 @@ import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
+import { userMessage } from '../../utils/userMessage'
 /**
  * Stock alerts.
  *
@@ -67,7 +68,7 @@ export default function PharmacyAlerts({ pharmacyId, onReorder }: Props) {
       setExpiry(Array.isArray(expRes.data) ? expRes.data : [])
       setLowStock(Array.isArray(lowRes.data) ? lowRes.data : [])
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setLoading(false)
     }

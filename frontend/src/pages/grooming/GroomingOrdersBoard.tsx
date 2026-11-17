@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void }
 
 // next quick-transitions offered per status (mirrors backend PROVIDER_TRANSITIONS)
@@ -47,7 +48,7 @@ const GroomingOrdersBoard: React.FC<Props> = ({ onNavigate }) => {
       setProviderId(prov.id)
       const res = await apiService.listGroomingProviderOrders(prov.id, filter || undefined)
       setOrders(res.data || [])
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [filter, t])
   useEffect(() => { load() }, [load])
 
@@ -58,12 +59,12 @@ const GroomingOrdersBoard: React.FC<Props> = ({ onNavigate }) => {
 
   const act = async (id: string, to: string) => {
     try { setBusy(id); await apiService.transitionGroomingOrder(id, to); await load() }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+    catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) }
   }
 
   const accept = async (id: string) => {
     try { setBusy(id); setErr(''); await apiService.acceptGroomingOrder(id); await load() }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+    catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) }
   }
 
   const confirmDecline = async () => {
@@ -73,7 +74,7 @@ const GroomingOrdersBoard: React.FC<Props> = ({ onNavigate }) => {
       await apiService.declineGroomingOrder(declining.id, declining.reason.trim())
       setDeclining(null)
       await load()
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) }
   }
 
   // Bookings waiting on the provider are pulled out of the main list and shown first: they are

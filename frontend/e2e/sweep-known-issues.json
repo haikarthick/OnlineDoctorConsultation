@@ -1,0 +1,4 @@
+{
+  "_rule": "Problems that existed before the sweep. This list may only SHRINK - fix one, delete its line. A new problem fails the gate.",
+  "issues": []
+}

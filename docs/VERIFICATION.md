@@ -20,6 +20,12 @@ Every signal said ship. The feature was broken for every user, because the only 
 could have caught it was *running it*. The root cause (startup self-heal reverting a tracked
 migration on every boot) is invisible to every static tool, and invisible in the migration log.
 
+> **Start at `docs/HARNESS.md`.** It is the single rulebook over every layer (static net, runtime
+> gate, whole-app browser sweep, ratchets, process rules). This file is the deep-dive on the
+> database/runtime gate. Since 2026-11-17 the push gate also runs **check 0**: frontend
+> `tsc --noEmit`, ESLint errors and the full `vitest` suite - previously wired into neither the hook
+> nor CI - and PHASE 7 includes the whole-app sweep (`e2e/app-sweep.spec.ts`).
+
 ## The five gates (`npm run pre-deploy`, runs on every push)
 
 | # | Check | Catches | Nature |
@@ -29,6 +35,19 @@ migration on every boot) is invisible to every static tool, and invisible in the
 | 3 | Schema validation | column-name mismatches between code and `init.sql` | static |
 | 4 | E2E route coverage | routes with no test | static |
 | 5 | **Runtime verification** | **everything the above cannot see** | **executes** |
+
+**Gate 5 runs in CI on every push, not locally by default (since 2026-11-13).** It still runs —
+just on GitHub's machine instead of the developer's. On Windows, this gate boots a real throwaway
+Postgres cluster, and Windows has no `fork()`, so Postgres has to relaunch itself as a new process
+for every connection/worker — each one briefly flashes a console window, and the run is genuinely
+heavy (~2-3 min of real CPU/DB/browser load) on a modest laptop. That stopped being an acceptable
+local default once two things were true: the identical check runs in GitHub Actions on every push
+(`runtime-verify` job, `.github/workflows/ci-cd.yml`), and `vetcare-dev`'s Render service deploys
+`After CI Checks Pass` rather than on raw push — so a broken change genuinely cannot reach Render
+before this gate has run; it just doesn't have to run on the developer's hardware to do it.
+Set `RUN_RUNTIME_VERIFY=1` to opt back in locally (e.g. offline, or wanting confidence before
+waiting ~3 minutes for CI). If `vetcare-demo` is not *also* set to deploy after CI checks pass,
+treat pushes destined for `demo` with the same caution as before this change.
 
 ## Gate 5 — `backend/scripts/runtime-verify.js`
 
@@ -64,6 +83,12 @@ and every test starts signed out via an `addInitScript` that clears storage befo
 The obvious `goto('/') → clear → goto('/register')` approach is racy — the SPA's own redirect
 interrupts the second navigation.
 
+### PHASE 7 and the server's console pipe (2026-11-17)
+
+PHASE 7 must run Playwright **asynchronously** (`runAsync`). The harness server's output is drained by
+this process's event loop; blocking that loop (`execFileSync`) fills the pipe and freezes the server, which
+shows up as every `page.goto` timing out. Details and the other harness lessons: `docs/HARNESS.md`.
+
 ### Design decisions worth keeping
 
 - **Schema is `vetcare_dev`, not `public`.** All deployments are schema-scoped. Testing on
@@ -95,6 +120,11 @@ Beyond the bug it was built for, immediately and unprompted:
 None were reachable by any static check.
 
 ## Running it
+
+Two separate env vars, two separate layers — don't confuse them: `RUN_RUNTIME_VERIFY=1` tells
+`npm run pre-deploy` (the push gate) to run this gate locally at all (see above — off by default
+now). `SKIP_RUNTIME_VERIFY=1`, below, tells `runtime-verify.js` *itself* to no-op if it can't find
+a local Postgres, once it's already decided to run.
 
 ```bash
 cd backend
@@ -168,8 +198,19 @@ delete the block.
 1. `docker/init.sql` — fresh installs
 2. a migration in `backend/migrations/` — existing databases (**never hardcode `public.`**;
    bare identifiers resolve through the runner's `search_path`)
-3. `backend/src/utils/database.ts` — check whether the self-heal rebuilds that constraint. If
-   it does, derive it from a shared constant (`SYSTEM_ROLES`, `INVOICE_TYPES`); **never inline
-   the list**, that is precisely how it falls behind
+3. `backend/src/utils/database/` (split from the old single `database.ts` on 2026-11-13 - see
+   `constants.ts`, `ensureSchemaPublic.ts`, `ensurePaymentModuleSchema.ts`, `seed/phase*.ts`) —
+   check whether the self-heal rebuilds that constraint. If it does, derive it from a shared
+   constant in `database/constants.ts` (`SYSTEM_ROLES`, `INVOICE_TYPES`, `PAYMENT_SOURCES`,
+   `PAYMENT_STATUSES`, `BOOKING_STATUSES`, `BOOKING_TYPES`); **never inline the list**, that is
+   precisely how it falls behind
 4. the app-level validator (`validation.ts`, `PermissionService.ts`, …)
 5. run `npm run verify:runtime` and watch phases 5 and 6
+
+## Why deploys stopped (2026-11-16) and the rule that prevents it
+Render auto-deploys `vetcare-dev` only for a commit whose CI checks PASS. The full legacy E2E suite used to be a job in
+`ci-cd.yml` (25 minutes, `continue-on-error`). With frequent pushes each newer push cancelled it (`cancel-in-progress`),
+so almost every run ended **cancelled** and no commit ever had passing checks - Render's last deploy was 2026-11-14.
+It now lives in `.github/workflows/e2e-full.yml` (nightly + manual), outside any commit's checks. **Do not put a slow or
+cancellable job back into the push pipeline.** Also: the deploy job needs the GitHub secret `RENDER_DEPLOY_HOOK_DEV`
+(`..._DEMO` for demo); if it is missing the job now raises a visible warning instead of a silent green.

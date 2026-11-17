@@ -6,6 +6,7 @@ import { useSettings } from '../context/SettingsContext'
 import PaymentCheckout from '../components/PaymentCheckout'
 import '../styles/modules.css'
 
+import { userMessage } from '../utils/userMessage'
 /**
  * Referrals (docs/PAYMENT_MODULE_PLAN.md §4.4, D10).
  * Patients: act on offered referrals (accept / choose another doctor / refund)
@@ -111,7 +112,7 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
         await load()
       }
     } catch (err: any) {
-      setMessage(err.response?.data?.error?.message || err.response?.data?.error || t('referrals.actionFailed'))
+      setMessage(userMessage(err, 'referrals.actionFailed'))
     } finally { setBusy(false) }
   }
 
@@ -125,7 +126,7 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
       setMessage(t('referrals.refunded'))
       await load()
     } catch (err: any) {
-      setMessage(err.response?.data?.error?.message || err.response?.data?.error || t('referrals.actionFailed'))
+      setMessage(userMessage(err, 'referrals.actionFailed'))
     } finally { setBusy(false) }
   }
 
@@ -157,7 +158,7 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
       setMessage(t('referrals.created'))
       await load()
     } catch (err: any) {
-      setMessage(err.response?.data?.error?.message || err.response?.data?.error || t('referrals.actionFailed'))
+      setMessage(userMessage(err, 'referrals.actionFailed'))
     } finally { setBusy(false) }
   }
 

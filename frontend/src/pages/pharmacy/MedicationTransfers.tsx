@@ -4,6 +4,7 @@ import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
+import { userMessage } from '../../utils/userMessage'
 interface MedLine { med_id: string; name: string; quantity: number; unit: string }
 
 interface TransferRequest {
@@ -72,7 +73,7 @@ export default function MedicationTransfers({ networkId }: Props) {
       setHospitals(Array.isArray(rawHospitals) ? rawHospitals : [])
       setMedications(Array.isArray(medRes.data) ? medRes.data : [])
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setLoading(false)
     }
@@ -93,7 +94,7 @@ export default function MedicationTransfers({ networkId }: Props) {
       await client.patch(`/networks/${networkId}/med-requests/${id}`, { status, ...extra })
       await load()
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message)
+      setError(userMessage(err))
     } finally {
       setUpdatingId(null)
     }
@@ -155,7 +156,7 @@ export default function MedicationTransfers({ networkId }: Props) {
       setShowCreate(false)
       await load()
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setSaving(false)
     }
@@ -344,7 +345,7 @@ export default function MedicationTransfers({ networkId }: Props) {
                       </select>
                     </div>
                     <div className="pharm-form-group si-7120288a">
-                      <input type="number" min="1" value={line.quantity}
+                      <input type="number" inputMode="decimal" min="1" value={line.quantity}
                         onChange={e => updateLine(idx, { quantity: parseInt(e.target.value) || 1 })} />
                     </div>
                     <div className="pharm-form-group si-7120288a">

@@ -1,0 +1,69 @@
+{
+  "mobileUi": {
+    "close": "மூடு",
+    "tabBarLabel": "முதன்மை வழிசெலுத்தல்",
+    "quickActionsTitle": "என்ன செய்ய வேண்டும்?",
+    "tabs": {
+      "home": "முகப்பு",
+      "add": "சேர்",
+      "more": "மேலும்"
+    },
+    "stepper": {
+      "less": "குறை",
+      "more": "கூட்டு"
+    },
+    "date": {
+      "today": "இன்று",
+      "yesterday": "நேற்று",
+      "other": "வேறு தேதி"
+    },
+    "save": {
+      "saving": "சேமிக்கிறது...",
+      "saved": "சேமிக்கப்பட்டது",
+      "offlineTitle": "இணைப்பு இல்லை",
+      "offlineHint": "நீங்கள் பதிவு செய்தது இந்தத் திரையில் அப்படியே உள்ளது. சிக்னல் வந்ததும் மீண்டும் முயற்சி என்பதைத் தொடவும்.",
+      "failedTitle": "சேமிக்க முடியவில்லை",
+      "retry": "மீண்டும் முயற்சி"
+    },
+    "step": {
+      "stepOf": "படி {{current}} / {{total}}",
+      "back": "பின்",
+      "next": "அடுத்து"
+    },
+    "tabLabels": {
+      "animals": "விலங்கு",
+      "herd-medical": "நலம்",
+      "animal-groups": "குழு",
+      "medical": "பதிவுகள்",
+      "consultations": "டாக்டர்",
+      "admin-consultations": "டாக்டர்",
+      "prescriptions": "மருந்து",
+      "manage-schedule": "அட்டவணை",
+      "grooming-schedule": "அட்டவணை",
+      "hospital-workflow": "வரிசை",
+      "inpatient": "உள்நோயாளிகள்",
+      "hospital-networks": "வலையமைப்பு",
+      "vet-hospitals": "மருத்துவமனை",
+      "settings": "அமைப்புகள்",
+      "pharmacy": "மருந்தகம்",
+      "grooming-orders": "ஆர்டர்கள்",
+      "grooming-earnings": "வருமானம்",
+      "grooming-provider": "தொழில்",
+      "admin-dashboard": "நிர்வாகம்",
+      "admin-users": "பயனர்",
+      "admin-finance-reports": "நிதி",
+      "financial": "நிதி",
+      "health-analytics": "பகுப்பாய்வு",
+      "admin-disputes": "புகார்கள்",
+      "admin-cancellation-dashboard": "ரத்துகள்"
+    },
+    "tabLabelsByRole": {
+      "pet_owner": {
+        "animals": "பிராணி"
+      },
+      "veterinarian": {
+        "animals": "பிராணி"
+      }
+    }
+  }
+}

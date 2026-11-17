@@ -472,3 +472,16 @@ test.describe('Auto-Discovered - /grooming/earnings', () => {
     await context.close()
   })
 })
+
+test.describe('Auto-Discovered - /join-farm', () => {
+  // Public page opened from an invitation link. Without a token it must explain, not crash.
+  test('should load /join-farm without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await page.goto('/join-farm')
+    await page.waitForLoadState('domcontentloaded')
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
+})

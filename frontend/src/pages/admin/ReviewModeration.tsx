@@ -5,6 +5,7 @@ import apiService from '../../services/api'
 import { Review } from '../../types'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface ReviewModerationProps {
   onNavigate: (path: string) => void
 }
@@ -38,7 +39,7 @@ const ReviewModeration: React.FC<ReviewModerationProps> = ({ onNavigate }) => {
       const items = result.data?.items || (Array.isArray(result.data) ? result.data : [])
       setReviews(prev => page === 0 ? items : [...prev, ...items])
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to load reviews')
+      setError(userMessage(err))
     } finally {
       setLoading(false)
     }
@@ -64,7 +65,7 @@ const ReviewModeration: React.FC<ReviewModerationProps> = ({ onNavigate }) => {
         : 'removed'
       setReviews(reviews.map(r => r.id === reviewId ? { ...r, status: newStatus } : r))
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to moderate review')
+      setError(userMessage(err))
     } finally {
       setProcessing(null)
     }

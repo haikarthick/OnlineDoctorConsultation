@@ -9,9 +9,9 @@ export class ConsultationService {
     try {
       const consultationId = uuidv4();
       const query = `
-        INSERT INTO consultations (id, user_id, veterinarian_id, animal_id, animal_type, symptom_description, status, scheduled_at, booking_id, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
-        RETURNING id, user_id as "userId", veterinarian_id as "veterinarianId", animal_id as "animalId",
+        INSERT INTO consultations (id, user_id, veterinarian_id, animal_id, animal_type, symptom_description, status, scheduled_at, booking_id, group_id, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+        RETURNING id, user_id as "userId", veterinarian_id as "veterinarianId", animal_id as "animalId", group_id as "groupId",
                   animal_type as "animalType", symptom_description as "symptomDescription", status,
                   scheduled_at as "scheduledAt", booking_id as "bookingId",
                   created_at as "createdAt", updated_at as "updatedAt"
@@ -26,7 +26,8 @@ export class ConsultationService {
         data.symptomDescription,
         'scheduled',
         data.scheduledAt || new Date(),
-        data.bookingId || null
+        data.bookingId || null,
+        data.groupId || null
       ]);
 
       logger.info('Consultation created', { consultationId, userId, veterinarianId, animalId: data.animalId });
@@ -39,11 +40,16 @@ export class ConsultationService {
   async getConsultation(consultationId: string): Promise<Consultation> {
     try {
       const query = `
-        SELECT id, user_id as "userId", veterinarian_id as "veterinarianId", animal_id as "animalId", animal_type as "animalType",
-               symptom_description as "symptomDescription", status, scheduled_at as "scheduledAt",
-               started_at as "startedAt", completed_at as "completedAt", diagnosis, prescription, notes, duration,
-               created_at as "createdAt", updated_at as "updatedAt"
-        FROM consultations WHERE id = $1
+        SELECT c.id, c.user_id as "userId", c.veterinarian_id as "veterinarianId", c.animal_id as "animalId", c.animal_type as "animalType",
+               c.group_id as "groupId",
+               c.symptom_description as "symptomDescription", c.status, c.scheduled_at as "scheduledAt",
+               c.started_at as "startedAt", c.completed_at as "completedAt", c.diagnosis, c.prescription, c.notes, c.duration,
+               c.created_at as "createdAt", c.updated_at as "updatedAt",
+               -- When the appointment is about a whole group, the room needs to know which one and how big it is.
+               ag.name as "groupName", ag.group_type as "groupType", ag.species as "groupSpecies",
+               ag.management_mode as "groupManagementMode", ag.current_count as "groupHeadCount", ag.enterprise_id as "groupEnterpriseId"
+        FROM consultations c LEFT JOIN animal_groups ag ON ag.id = c.group_id
+        WHERE c.id = $1
       `;
 
       const result = await database.query(query, [consultationId]);

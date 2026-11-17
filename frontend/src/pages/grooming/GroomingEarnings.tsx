@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void }
 
 const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
@@ -33,7 +34,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
       setSettlements((await apiService.listGroomingSettlements(prov.id)).data || [])
       try { setReport((await apiService.getGroomingProviderReport(prov.id)).data) } catch { /* optional */ }
       try { setDisputes((await apiService.listGroomingProviderDisputes(prov.id)).data || []) } catch { /* optional */ }
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setLoading(false) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setLoading(false) }
   }, [])
   useEffect(() => { load() }, [load])
 
@@ -42,7 +43,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
   // that can be validated and cancelled rather than an untyped string box.
   const respondDispute = async (id: string, status: string, refundAmount?: number) => {
     try { setBusy(id); await apiService.respondGroomingDispute(id, { status, refundAmount }); setRefundFor(null); load() }
-    catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+    catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) }
   }
   void providerId
 
@@ -50,7 +51,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
     try {
       setBusy(settlementId); setErr('')
       setStatement((await apiService.getGroomingSettlementStatement(settlementId)).data)
-    } catch (e: any) { setErr(e?.response?.data?.message || e.message) } finally { setBusy(null) }
+    } catch (e: any) { setErr(userMessage(e)) } finally { setBusy(null) }
   }
 
   if (loading) return <div className="module-page"><div className="loading-container"><div className="loading-spinner" /></div></div>
@@ -226,7 +227,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
             <h3>{t('groomingDispute.partialRefund')}</h3>
             <p className="slot-hint">{refundFor.orderNumber} · {refundFor.reason}</p>
             <label className="module-label">{t('groomingDispute.refundPrompt')}</label>
-            <input className="module-input" type="number" min="0" step="0.01" value={refundAmt}
+            <input className="module-input" type="number" inputMode="decimal" min="0" step="0.01" value={refundAmt}
               onChange={e => setRefundAmt(e.target.value)} />
             <div className="slot-hint">{t('groomingDispute.refundHint')}</div>
             <div className="modal-footer">

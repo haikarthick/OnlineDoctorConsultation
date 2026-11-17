@@ -2,39 +2,42 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import apiService from '../services/api'
 import './ModulePage.css'
-import { Enterprise, AnimalGroup, GROUP_TYPE_LABELS, AnimalGroupType } from '../types'
+import { Enterprise, AnimalGroup } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
-import { useScrollToForm } from '../hooks/useScrollToForm'
+import { useFarmProfile, useSpeciesCategories } from '../hooks/useFarmProfile'
+import { useSaveAction } from '../hooks/useSaveAction'
+import { useCssVar } from '../hooks/useCssVar'
+import GroupFormModal from '../components/animalGroups/GroupFormModal'
+import { ShareGroupSheet } from '../components/animalGroups/ShareGroupSheet'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
+import { emptyGroupForm, groupToFormData, buildGroupPayload, type GroupFormData } from '../components/animalGroups/groupShared'
 
-const PURPOSE_OPTIONS = [
-  { value: 'dairy', label: 'Dairy' }, { value: 'meat', label: 'Meat' },
-  { value: 'breeding', label: 'Breeding' }, { value: 'layer', label: 'Layer' },
-  { value: 'broiler', label: 'Broiler' }, { value: 'companion', label: 'Companion' },
-  { value: 'exhibition', label: 'Exhibition' }, { value: 'conservation', label: 'Conservation' },
-  { value: 'racing', label: 'Racing' }, { value: 'working', label: 'Working' },
-  { value: 'research', label: 'Research' }, { value: 'rehabilitation', label: 'Rehabilitation' },
-  { value: 'sale', label: 'Sale' }, { value: 'other', label: 'Other' },
-]
-
+import { userMessage } from '../utils/userMessage'
 interface SimpleAnimal { id: string; name: string; species: string; breed?: string; uniqueId?: string; groupId?: string; groupName?: string }
+
+/** One group's colour as a CSS variable on its card (the colour is the farmer's pick, so it is dynamic). */
+const GroupCardShell: React.FC<{ color?: string | null; children: React.ReactNode }> = ({ color, children }) => {
+  const ref = useCssVar('--group-color', color || null)
+  return <div ref={ref} className="card group-card">{children}</div>
+}
 
 const AnimalGroups: React.FC = () => {
   const { t } = useTranslation()
-  const { speciesLabel } = useMasterData()
+  const { speciesLabel, speciesIcon, groupTypeLabel, groupTypeIcon } = useMasterData()
+  const speciesCategories = useSpeciesCategories()
 
   const navigate = useNavigate()
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
+  // Only the farm's owner decides to share a group's records with a hospital network.
+  const [shareGroup, setShareGroup] = useState<{ id: string; name: string } | null>(null)
+  const myFarmRole = useMyFarmRole(enterprises.find(e => e.id === selectedEnterpriseId))
   const [groups, setGroups] = useState<AnimalGroup[]>([])
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
-  const formRef = useScrollToForm(showForm)
   const [editingGroup, setEditingGroup] = useState<AnimalGroup | null>(null)
-  const [formData, setFormData] = useState({
-    name: '', groupType: '' as AnimalGroupType, species: '', breed: '',
-    purpose: '', targetCount: '', description: '', colorCode: '#4F46E5'
-  })
+  const [formData, setFormData] = useState<GroupFormData>(emptyGroupForm)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
 
@@ -81,37 +84,42 @@ const AnimalGroups: React.FC = () => {
 
   useEffect(() => { fetchGroups() }, [fetchGroups])
 
+  // What the form shows follows the species and group type chosen; the same profile builds the payload.
+  const { profile: formProfile } = useFarmProfile({
+    speciesCode: formData.species, groupType: formData.groupType, managementMode: formData.managementMode || undefined,
+  })
+  const saveGroup = useSaveAction(
+    async (payload: Record<string, unknown>, editingId: string | null) => {
+      if (editingId) await apiService.updateAnimalGroup(editingId, payload)
+      else await apiService.createAnimalGroup(payload as any)
+    },
+    t('common.failedToSave'),
+  )
+
   const resetForm = () => {
-    setFormData({ name: '', groupType: '' as AnimalGroupType, species: '', breed: '', purpose: '', targetCount: '', description: '', colorCode: '#4F46E5' })
+    setFormData(emptyGroupForm)
     setEditingGroup(null); setError('')
+    saveGroup.reset()
   }
 
   const openEdit = (g: AnimalGroup) => {
+    saveGroup.reset()
     setEditingGroup(g)
-    setFormData({
-      name: g.name, groupType: g.groupType as AnimalGroupType, species: g.species || '', breed: g.breed || '',
-      purpose: g.purpose || '', targetCount: g.targetCount?.toString() || '', description: g.description || '',
-      colorCode: g.colorCode || '#4F46E5'
-    })
+    setFormData(groupToFormData(g))
     setShowForm(true)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
     setError('')
-    if (!formData.name || !formData.groupType) { setError(t('animalGroups.toasts.nameRequired')); return }
-    try {
-      const payload: any = { ...formData, enterpriseId: selectedEnterpriseId, targetCount: formData.targetCount ? parseInt(formData.targetCount) : 0 }
-      if (editingGroup) {
-        await apiService.updateAnimalGroup(editingGroup.id, payload)
-        setSuccessMsg(t('animalGroups.toasts.updated'))
-      } else {
-        await apiService.createAnimalGroup(payload)
-        setSuccessMsg(t('animalGroups.toasts.created'))
-      }
-      resetForm(); setShowForm(false); fetchGroups()
-      setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    if (!formData.name.trim() || !formData.groupType) { setError(t('animalGroups.toasts.nameRequired')); return }
+    const payload = buildGroupPayload(formData, formProfile, { editing: !!editingGroup, enterpriseId: selectedEnterpriseId })
+    const wasEditing = !!editingGroup
+    // On failure the form stays open and filled; the footer shows the server's own message with Retry.
+    const saved = await saveGroup.run(payload, editingGroup?.id ?? null)
+    if (!saved) return
+    setSuccessMsg(wasEditing ? t('animalGroups.toasts.updated') : t('animalGroups.toasts.created'))
+    resetForm(); setShowForm(false); fetchGroups()
+    setTimeout(() => setSuccessMsg(''), 3000)
   }
 
   const handleDelete = async (id: string) => {
@@ -121,17 +129,10 @@ const AnimalGroups: React.FC = () => {
       setSuccessMsg(t('animalGroups.toasts.deleted'))
       fetchGroups()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToDelete')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToDelete')) }
   }
 
-  const groupIcon = (t: AnimalGroupType) => {
-    const icons: Record<string, string> = {
-      herd: '🐄', flock: '🐔', pen: '🐷', paddock: '🐴', enclosure: '🦁',
-      tank: '🐟', aviary: '🦜', kennel_group: '🐕', breeding_group: '🧬',
-      quarantine: '⚠️', nursery: '🍼', production: '🏭', other: '📦'
-    }
-    return icons[t] || '📦'
-  }
+  const groupIcon = (g: AnimalGroup) => groupTypeIcon(g.species, g.groupType) || (g.species ? speciesIcon(g.species) : null) || '📦'
 
   // ══════════════════════════════════════════════════════════
   // MANAGE ANIMALS IN GROUP
@@ -184,7 +185,7 @@ const AnimalGroups: React.FC = () => {
       await openManageAnimals(manageGroup)
       fetchGroups()
     } catch (err: any) {
-      setAnimalError(err.response?.data?.error?.message || t('animalGroups.manage.assignFailed'))
+      setAnimalError(userMessage(err, 'animalGroups.manage.assignFailed'))
     }
   }
 
@@ -198,7 +199,7 @@ const AnimalGroups: React.FC = () => {
       await openManageAnimals(manageGroup)
       fetchGroups()
     } catch (err: any) {
-      setAnimalError(err.response?.data?.error?.message || t('animalGroups.manage.removeFailed'))
+      setAnimalError(userMessage(err, 'animalGroups.manage.removeFailed'))
     }
   }
 
@@ -278,21 +279,23 @@ const AnimalGroups: React.FC = () => {
           <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>{t('animalGroups.createBtn')}</button>
         </div>
       ) : (
-        <div className="si-22cdfbdb">
+        <div className="group-card-grid">
           {groups.map(g => (
-            <div key={g.id} className="card" style={{ borderRadius: '12px', padding: '1.25rem', borderLeft: `4px solid ${g.colorCode || 'var(--primary)'}` }}>
+            <GroupCardShell key={g.id} color={g.colorCode}>
               <div className="si-99f8abcc">
-                <span className="si-91db75dc">{groupIcon(g.groupType as AnimalGroupType)}</span>
+                <span className="si-91db75dc">{groupIcon(g)}</span>
                 <div>
                   <h3 className="si-44087c4b">{g.name}</h3>
-                  <span className="badge si-8c23064b">{GROUP_TYPE_LABELS[g.groupType as AnimalGroupType] || g.groupType}</span>
+                  <span className="badge si-8c23064b">{groupTypeLabel(g.species, g.groupType, t)}</span>
                 </div>
               </div>
               {g.species && <p className="si-cf622af4">{t('animalGroups.species')} {speciesLabel(g.species, t)} {g.breed ? `(${g.breed})` : ''}</p>}
               {g.purpose && <p className="si-cf622af4">{t('animalGroups.purpose')} {g.purpose}</p>}
               <div className="si-bbfa5d5e">
-                <span>🐾 {g.currentCount} {t('animalGroups.animals')}</span>
-                {g.targetCount > 0 && <span className="si-c46367a3">/ {g.targetCount} {t('animalGroups.target')}</span>}
+                {/* "12 of 20 planned": the planned count is a hope, the first number is the real count. */}
+                {g.targetCount > 0
+                  ? <span>🐾 {t('farmProfile.groupForm.plannedOf', { count: g.currentCount, planned: g.targetCount })}</span>
+                  : <span>🐾 {g.currentCount} {t('animalGroups.animals')}</span>}
               </div>
               {g.description && <p className="si-9cbc3f5c">{g.description}</p>}
               <div className="si-0eca3602">
@@ -309,10 +312,13 @@ const AnimalGroups: React.FC = () => {
                   title={t('animalGroups.bookConsultation')}>
                   {t('animalGroups.bookConsultation')}
                 </button>
+                {myFarmRole === 'owner' && (
+                  <button className="btn btn-sm btn-secondary" onClick={() => setShareGroup({ id: g.id, name: g.name })}>{t('groupSharing.shareButton')}</button>
+                )}
                 <button className="btn btn-sm btn-secondary" onClick={() => openEdit(g)}>{t('common.edit')}</button>
                 <button className="btn btn-sm btn-danger" onClick={() => handleDelete(g.id)}>{t('common.delete')}</button>
               </div>
-            </div>
+            </GroupCardShell>
           ))}
         </div>
       )}
@@ -327,7 +333,7 @@ const AnimalGroups: React.FC = () => {
               <div>
                 <h2 className="si-44087c4b">{t('animalGroups.manage.title', { name: manageGroup.name })}</h2>
                 <p className="si-34b83357">
-                  {GROUP_TYPE_LABELS[manageGroup.groupType as AnimalGroupType] || manageGroup.groupType}
+                  {groupTypeLabel(manageGroup.species, manageGroup.groupType, t)}
                   {manageGroup.species ? ` • ${speciesLabel(manageGroup.species, t)}` : ''}
                 </p>
               </div>
@@ -461,7 +467,7 @@ const AnimalGroups: React.FC = () => {
               <div>
                 <h2 className="si-44087c4b">{t('animalGroups.health.title', { name: healthGroup.name })}</h2>
                 <p className="si-34b83357">
-                  {GROUP_TYPE_LABELS[healthGroup.groupType as AnimalGroupType] || healthGroup.groupType}
+                  {groupTypeLabel(healthGroup.species, healthGroup.groupType, t)}
                   {healthGroup.species ? ` • ${speciesLabel(healthGroup.species, t)}` : ''}
                   {healthGroup.managementMode === 'batch' ? ` • ${t('animalGroups.health.batch')}` : ''}
                 </p>
@@ -486,14 +492,14 @@ const AnimalGroups: React.FC = () => {
               <div className="si-41acd90c">{t('animalGroups.health.noData')}</div>
             ) : (
               <div className="si-0adf99df">
-                <div className="si-bbfa5d5e" style={{ marginBottom: 12 }}>
+                <div className="si-bbfa5d5e group-health-badges">
                   <span className="badge si-8c23064b">{t('animalGroups.health.placed')}: {healthMetrics.placedCount ?? 0}</span>
                   <span className="badge si-8c23064b">{t('animalGroups.health.current')}: {healthMetrics.currentCount ?? 0}</span>
                   {healthMetrics.cycleNumber != null && (
                     <span className="badge si-8c23064b">{t('animalGroups.health.cycle')} #{healthMetrics.cycleNumber}</span>
                   )}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+                <div className="group-health-grid">
                   {[
                     { label: t('animalGroups.health.mortalityRate'), value: fmtPct(healthMetrics.mortalityRate), icon: '☠️' },
                     { label: t('animalGroups.health.cullRate'), value: fmtPct(healthMetrics.cullRate), icon: '🗑️' },
@@ -501,14 +507,14 @@ const AnimalGroups: React.FC = () => {
                     { label: t('animalGroups.health.morbidityRate'), value: fmtPct(healthMetrics.morbidityRate), icon: '🩺' },
                     { label: t('animalGroups.health.treatmentCoverage'), value: fmtPct(healthMetrics.treatmentCoverage), icon: '💊' },
                   ].map((m, i) => (
-                    <div key={i} style={{ padding: '0.75rem', borderRadius: 8, border: '1px solid var(--gray-200, #e5e7eb)' }}>
-                      <div style={{ fontSize: 20 }}>{m.icon}</div>
-                      <div style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--primary, #4F46E5)' }}>{m.value}</div>
-                      <div style={{ fontSize: 12, opacity: 0.7 }}>{m.label}</div>
+                    <div key={i} className="group-health-metric">
+                      <div className="group-health-metric-icon">{m.icon}</div>
+                      <div className="group-health-metric-value">{m.value}</div>
+                      <div className="group-health-metric-label">{m.label}</div>
                     </div>
                   ))}
                 </div>
-                <p className="si-9cbc3f5c" style={{ textAlign: 'left', marginTop: 12 }}>
+                <p className="si-9cbc3f5c group-health-note">
                   {t('animalGroups.health.ratesNote')}
                 </p>
               </div>
@@ -521,64 +527,22 @@ const AnimalGroups: React.FC = () => {
         </div>
       )}
 
-      {/* Create/Edit Form Modal */}
-      {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
+      {/* Create/Edit Form - short steps; group types and record-keeping style come from master data */}
       {showForm && (
-        <div ref={formRef} className="edit-form-panel">
-            <h2>{editingGroup ? t('animalGroups.modal.editTitle') : t('animalGroups.modal.createTitle')}</h2>
-            <form onSubmit={handleSubmit}>
-              {error && <div className="alert alert-error">{error}</div>}
-              <div className="form-group">
-                <label>{t('animalGroups.modal.name')}</label>
-                <input type="text" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} required />
-              </div>
-              <div className="si-ec24da01">
-                <div className="form-group">
-                  <label>{t('animalGroups.modal.type')}</label>
-                  <select value={formData.groupType} onChange={e => setFormData(f => ({ ...f, groupType: e.target.value as AnimalGroupType }))} required>
-                    <option value="">{t('animalGroups.modal.selectType')}</option>
-                    {Object.entries(GROUP_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>{t('animalGroups.modal.purpose')}</label>
-                  <select value={formData.purpose} onChange={e => setFormData(f => ({ ...f, purpose: e.target.value }))}>
-                    <option value="">{t('animalGroups.modal.selectPurpose')}</option>
-                    {PURPOSE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>{t('animalGroups.modal.species')}</label>
-                  <input type="text" value={formData.species} onChange={e => setFormData(f => ({ ...f, species: e.target.value }))} placeholder="e.g. Cattle" />
-                </div>
-                <div className="form-group">
-                  <label>{t('animalGroups.modal.breed')}</label>
-                  <input type="text" value={formData.breed} onChange={e => setFormData(f => ({ ...f, breed: e.target.value }))} />
-                </div>
-                <div className="form-group">
-                  <label>{t('animalGroups.modal.targetCount')}</label>
-                  <input type="number" value={formData.targetCount} onChange={e => setFormData(f => ({ ...f, targetCount: e.target.value }))} />
-                </div>
-                <div className="form-group">
-                  <label>{t('animalGroups.modal.colorCode')}</label>
-                  <div className="si-0dd04361">
-                    <div style={{ width: 36, height: 36, borderRadius: 6, border: '2px solid #d1d5db', background: formData.colorCode, flexShrink: 0 }} />
-                    <input type="color" value={formData.colorCode} onChange={e => setFormData(f => ({ ...f, colorCode: e.target.value }))} className="si-63147c7d" title="Pick a color" />
-                    <input type="text" value={formData.colorCode} onChange={e => { const v = e.target.value; if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setFormData(f => ({ ...f, colorCode: v })) }} className="si-4ab6b540" placeholder="#4F46E5" />
-                  </div>
-                </div>
-              </div>
-              <div className="form-group">
-                <label>{t('animalGroups.modal.description')}</label>
-                <textarea rows={2} value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} />
-              </div>
-              <div className="si-5af10afb">
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
-                <button type="submit" className="btn btn-primary">{editingGroup ? t('animalGroups.modal.updateBtn') : t('animalGroups.modal.createBtn')}</button>
-              </div>
-            </form>
-        </div>
+        <GroupFormModal
+          form={formData}
+          setForm={setFormData}
+          editingGroup={editingGroup}
+          onClose={() => { setShowForm(false); resetForm() }}
+          onSubmit={handleSubmit}
+          saveStatus={saveGroup.status}
+          saveError={saveGroup.error}
+          saveOffline={saveGroup.offline}
+          onRetry={handleSubmit}
+          speciesCategories={speciesCategories}
+        />
       )}
+      <ShareGroupSheet group={shareGroup} onClose={() => setShareGroup(null)} />
     </div>
   )
 }

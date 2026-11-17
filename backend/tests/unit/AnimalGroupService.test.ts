@@ -18,10 +18,41 @@ describe('AnimalGroupService', () => {
   describe('createGroup', () => {
     it('should create an animal group', async () => {
       const group = { id: 'mock-uuid', enterprise_id: 'e1', name: 'Dairy Herd A', group_type: 'herd', current_count: '0' };
-      (database.query as jest.Mock).mockResolvedValueOnce({ rows: [group] });
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [] }) // master_group_types lookup: no opinion for a generic "herd"
+        .mockResolvedValueOnce({ rows: [{ default_management_mode: 'individual' }] }) // master_species lookup
+        .mockResolvedValueOnce({ rows: [group] }); // INSERT
       const result = await animalGroupService.createGroup({ enterpriseId: 'e1', name: 'Dairy Herd A', groupType: 'herd' });
       expect(result).toEqual(expect.objectContaining({ id: 'mock-uuid', name: 'Dairy Herd A' }));
       expect(database.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO animal_groups'), expect.any(Array));
+    });
+
+    const insertParams = () => (database.query as jest.Mock).mock.calls.find(c => String(c[0]).includes('INSERT INTO animal_groups'))![1];
+
+    it('lets the group TYPE decide the record-keeping style (fatteners are a batch)', async () => {
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ management_mode: 'batch' }] }) // master_group_types lookup
+        .mockResolvedValueOnce({ rows: [{ id: 'mock-uuid', enterprise_id: 'e1', name: 'Fat', group_type: 'fatteners', management_mode: 'batch', current_count: '0' }] });
+      await animalGroupService.createGroup({ enterpriseId: 'e1', name: 'Fat', groupType: 'fatteners', species: 'Pig' });
+      expect(insertParams()).toContain('batch');
+      // the species default is never consulted when the type already answered
+      expect((database.query as jest.Mock).mock.calls.some(c => String(c[0]).includes('default_management_mode'))).toBe(false);
+    });
+
+    it('an explicit mode from the caller always wins and needs no lookup', async () => {
+      (database.query as jest.Mock).mockResolvedValueOnce({ rows: [{ id: 'mock-uuid', enterprise_id: 'e1', name: 'x', group_type: 'fatteners', current_count: '0' }] });
+      await animalGroupService.createGroup({ enterpriseId: 'e1', name: 'x', groupType: 'fatteners', species: 'Pig', managementMode: 'individual' } as any);
+      expect(insertParams()).toContain('individual');
+      expect(database.query).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to the species default when the type has no opinion', async () => {
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [{ default_management_mode: 'batch' }] })
+        .mockResolvedValueOnce({ rows: [{ id: 'mock-uuid', enterprise_id: 'e1', name: 'x', group_type: 'other', current_count: '0' }] });
+      await animalGroupService.createGroup({ enterpriseId: 'e1', name: 'x', groupType: 'other', species: 'Chicken' });
+      expect(insertParams()).toContain('batch');
     });
   });
 

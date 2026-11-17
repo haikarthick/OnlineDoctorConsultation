@@ -177,7 +177,13 @@ class ScheduleController {
 
   // ── Monthly Calendar Summary ──────────────────────────────
   async getMonthlyAvailability(req: Request, res: Response) {
-    const vetId = req.params.vetId || (req as AuthRequest).userId!;
+    // The vet's own schedule screen asks for 'me'. It reached the database as the text "me" and
+    // Postgres rejected it as a bad uuid, so a vet's calendar tab answered 500 every time.
+    const requested = req.params.vetId;
+    const vetId = !requested || requested === 'me' ? (req as AuthRequest).userId! : requested;
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(vetId)) {
+      throw new ValidationError('That veterinarian could not be found. Go back and pick the veterinarian again.');
+    }
     const year = Number(req.query.year);
     const month = Number(req.query.month);
     if (!year || !month) throw new ValidationError('year and month query params are required');

@@ -5,6 +5,7 @@ import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, IoTSensor, SensorReading } from '../types'
 import { useTranslation } from 'react-i18next'
 
+import { userMessage } from '../utils/userMessage'
 const SENSOR_ICONS: Record<string, string> = {
   temperature: '🌡️', humidity: '💧', weight: '⚖️', activity: '🏃', air_quality: '🌬️',
   heart_rate: '💓', water_flow: '🚿', gps: '📍', camera: '📷', pressure: '🔵'
@@ -86,7 +87,7 @@ const IoTSensorPage: React.FC = () => {
       setShowForm(false)
       setFormData({ sensorType: 'temperature', sensorName: '', serialNumber: '', manufacturer: '', unit: '°C', minThreshold: '', maxThreshold: '', readingIntervalSeconds: '300' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleRecordReading = async (e: React.FormEvent) => {
@@ -101,7 +102,7 @@ const IoTSensorPage: React.FC = () => {
       setShowReadingForm(false)
       if (selectedSensor) fetchReadings(selectedSensor)
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   return (
@@ -243,9 +244,9 @@ const IoTSensorPage: React.FC = () => {
                     <div className="form-group"><label>{t('iotSensors.serialNumber')}</label><input value={formData.serialNumber} onChange={e => setFormData({ ...formData, serialNumber: e.target.value })} /></div>
                     <div className="form-group"><label>{t('iotSensors.manufacturer')}</label><input value={formData.manufacturer} onChange={e => setFormData({ ...formData, manufacturer: e.target.value })} /></div>
                     <div className="form-group"><label>{t('iotSensors.unit')}</label><input value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('iotSensors.minThreshold')}</label><input type="number" step="0.01" value={formData.minThreshold} onChange={e => setFormData({ ...formData, minThreshold: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('iotSensors.maxThreshold')}</label><input type="number" step="0.01" value={formData.maxThreshold} onChange={e => setFormData({ ...formData, maxThreshold: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('iotSensors.readingInterval')}</label><input type="number" value={formData.readingIntervalSeconds} onChange={e => setFormData({ ...formData, readingIntervalSeconds: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('iotSensors.minThreshold')}</label><input type="number" inputMode="decimal" step="0.01" value={formData.minThreshold} onChange={e => setFormData({ ...formData, minThreshold: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('iotSensors.maxThreshold')}</label><input type="number" inputMode="decimal" step="0.01" value={formData.maxThreshold} onChange={e => setFormData({ ...formData, maxThreshold: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('iotSensors.readingInterval')}</label><input type="number" inputMode="decimal" value={formData.readingIntervalSeconds} onChange={e => setFormData({ ...formData, readingIntervalSeconds: e.target.value })} /></div>
                   </div>
                   <button type="submit" className="btn-primary">{t('iotSensors.registerSensor')}</button>
                 </form>
@@ -261,7 +262,7 @@ const IoTSensorPage: React.FC = () => {
                         {sensors.map(s => <option key={s.id} value={s.id}>{(s as any).sensor_name || s.sensorName} ({(s as any).sensor_type || s.sensorType})</option>)}
                       </select>
                     </div>
-                    <div className="form-group"><label>{t('iotSensors.value')} *</label><input required type="number" step="0.01" value={readingForm.value} onChange={e => setReadingForm({ ...readingForm, value: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('iotSensors.value')} *</label><input required type="number" inputMode="decimal" step="0.01" value={readingForm.value} onChange={e => setReadingForm({ ...readingForm, value: e.target.value })} /></div>
                     <div className="form-group"><label>{t('iotSensors.unit')}</label><input value={readingForm.unit} onChange={e => setReadingForm({ ...readingForm, unit: e.target.value })} /></div>
                   </div>
                   <button type="submit" className="btn-primary">{t('iotSensors.recordReading')}</button>

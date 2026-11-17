@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import '../../styles/modules.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface PrescriptionSettingsProps {
   onNavigate: (path: string) => void
 }
@@ -113,7 +114,7 @@ const PrescriptionSettings: React.FC<PrescriptionSettingsProps> = ({ onNavigate 
       setValues(vals)
       setOriginal({ ...vals })
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.response?.data?.message || t('prescriptionSettings.failedToLoad'))
+      setError(userMessage(err, 'prescriptionSettings.failedToLoad'))
     } finally {
       setLoading(false)
     }
@@ -136,7 +137,7 @@ const PrescriptionSettings: React.FC<PrescriptionSettingsProps> = ({ onNavigate 
         const n = new Set(prev); n.delete(key); return n
       }), 2500)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || t('prescriptionSettings.failedToSave'))
+      setError(userMessage(err, 'prescriptionSettings.failedToSave'))
     } finally {
       setSaving(null)
     }

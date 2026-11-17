@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import './VetEarnings.css'
 
+import { userMessage } from '../../utils/userMessage'
 interface EarningsSummary {
   totalConsultations: number
   totalEarned: number
@@ -92,7 +93,7 @@ const VetEarnings: React.FC = () => {
       setShowPayoutForm(false)
       setActionMsg(t('withdrawals.payoutSaved'))
     } catch (err: any) {
-      setActionMsg(err?.response?.data?.error?.message || err?.response?.data?.error || t('withdrawals.payoutSaveFailed'))
+      setActionMsg(userMessage(err, 'withdrawals.payoutSaveFailed'))
     } finally { setActionBusy(false) }
   }
 
@@ -104,7 +105,7 @@ const VetEarnings: React.FC = () => {
       setActionMsg(t('withdrawals.requested'))
       await Promise.all([loadWithdrawals(), loadLedger()])
     } catch (err: any) {
-      setActionMsg(err?.response?.data?.error?.message || err?.response?.data?.error || t('withdrawals.requestFailed'))
+      setActionMsg(userMessage(err, 'withdrawals.requestFailed'))
     } finally { setActionBusy(false) }
   }
 
@@ -143,7 +144,7 @@ const VetEarnings: React.FC = () => {
       setDaily(data.daily || [])
       setRecent(data.recent || [])
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to load earnings')
+      setError(userMessage(err))
     } finally {
       setLoading(false)
     }

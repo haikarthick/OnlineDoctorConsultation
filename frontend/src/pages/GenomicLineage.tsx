@@ -6,6 +6,7 @@ import { Enterprise, GeneticProfile, LineagePair } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
 
+import { userMessage } from '../utils/userMessage'
 const GenomicLineagePage: React.FC = () => {
   const { t } = useTranslation()
   const { speciesLabel } = useMasterData()
@@ -80,7 +81,7 @@ const GenomicLineagePage: React.FC = () => {
       setShowForm(false)
       setFormData({ animalId: '', sireId: '', damId: '', generation: '', inbreedingCoefficient: '', dnaTestDate: '', dnaLab: '', dnaSampleId: '', breedPurityPct: '', notes: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const handleCreatePair = async (e: React.FormEvent) => {
@@ -97,7 +98,7 @@ const GenomicLineagePage: React.FC = () => {
       setShowPairForm(false)
       setPairForm({ sireId: '', damId: '', compatibilityScore: '', predictedInbreeding: '', recommendation: 'neutral', reason: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
+    } catch (err: any) { setError(userMessage(err, 'common.failedToSave')) }
   }
 
   const recColor = (r: string) => {
@@ -194,12 +195,12 @@ const GenomicLineagePage: React.FC = () => {
                     <div className="form-group"><label>{t('genomicLineage.animalId')} *</label><input required value={formData.animalId} onChange={e => setFormData({ ...formData, animalId: e.target.value })} /></div>
                     <div className="form-group"><label>{t('genomicLineage.sireId')}</label><input value={formData.sireId} onChange={e => setFormData({ ...formData, sireId: e.target.value })} /></div>
                     <div className="form-group"><label>{t('genomicLineage.damId')}</label><input value={formData.damId} onChange={e => setFormData({ ...formData, damId: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('genomicLineage.generation')}</label><input type="number" value={formData.generation} onChange={e => setFormData({ ...formData, generation: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('genomicLineage.inbreedingCoeff')}</label><input type="number" step="0.0001" min="0" max="1" value={formData.inbreedingCoefficient} onChange={e => setFormData({ ...formData, inbreedingCoefficient: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.generation')}</label><input type="number" inputMode="decimal" value={formData.generation} onChange={e => setFormData({ ...formData, generation: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.inbreedingCoeff')}</label><input type="number" inputMode="decimal" step="0.0001" min="0" max="1" value={formData.inbreedingCoefficient} onChange={e => setFormData({ ...formData, inbreedingCoefficient: e.target.value })} /></div>
                     <div className="form-group"><label>{t('genomicLineage.dnaTestDate')}</label><input type="date" value={formData.dnaTestDate} onChange={e => setFormData({ ...formData, dnaTestDate: e.target.value })} /></div>
                     <div className="form-group"><label>{t('genomicLineage.dnaLab')}</label><input value={formData.dnaLab} onChange={e => setFormData({ ...formData, dnaLab: e.target.value })} /></div>
                     <div className="form-group"><label>{t('genomicLineage.dnaSampleId')}</label><input value={formData.dnaSampleId} onChange={e => setFormData({ ...formData, dnaSampleId: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('genomicLineage.breedPurity')}</label><input type="number" min="0" max="100" value={formData.breedPurityPct} onChange={e => setFormData({ ...formData, breedPurityPct: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.breedPurity')}</label><input type="number" inputMode="decimal" min="0" max="100" value={formData.breedPurityPct} onChange={e => setFormData({ ...formData, breedPurityPct: e.target.value })} /></div>
                     <div className="form-group full-width"><label>{t('common.notes')}</label><textarea value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} /></div>
                   </div>
                   <button type="submit" className="btn-primary">{t('genomicLineage.createProfile')}</button>
@@ -240,8 +241,8 @@ const GenomicLineagePage: React.FC = () => {
                   <div className="form-grid">
                     <div className="form-group"><label>{t('genomicLineage.sireId')} *</label><input required value={pairForm.sireId} onChange={e => setPairForm({ ...pairForm, sireId: e.target.value })} /></div>
                     <div className="form-group"><label>{t('genomicLineage.damId')} *</label><input required value={pairForm.damId} onChange={e => setPairForm({ ...pairForm, damId: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('genomicLineage.compatibilityScore')}</label><input type="number" min="0" max="100" value={pairForm.compatibilityScore} onChange={e => setPairForm({ ...pairForm, compatibilityScore: e.target.value })} /></div>
-                    <div className="form-group"><label>{t('genomicLineage.predictedInbreeding')}</label><input type="number" step="0.0001" min="0" max="1" value={pairForm.predictedInbreeding} onChange={e => setPairForm({ ...pairForm, predictedInbreeding: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.compatibilityScore')}</label><input type="number" inputMode="decimal" min="0" max="100" value={pairForm.compatibilityScore} onChange={e => setPairForm({ ...pairForm, compatibilityScore: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.predictedInbreeding')}</label><input type="number" inputMode="decimal" step="0.0001" min="0" max="1" value={pairForm.predictedInbreeding} onChange={e => setPairForm({ ...pairForm, predictedInbreeding: e.target.value })} /></div>
                     <div className="form-group"><label>{t('genomicLineage.recommendation')}</label>
                       <select value={pairForm.recommendation} onChange={e => setPairForm({ ...pairForm, recommendation: e.target.value })}>
                         <option value="highly_recommended">Highly Recommended</option>

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
 import { useSettings } from '../context/SettingsContext'
 
+import { userMessage } from '../utils/userMessage'
 interface PaymentCheckoutProps {
   bookingId: string
   amount: number
@@ -121,7 +122,7 @@ export default function PaymentCheckout({ bookingId, amount, expiresAt, onSucces
               })
               onSuccess()
             } catch (err: any) {
-              setError(err.response?.data?.error?.message || err.response?.data?.error || t('payment.verificationFailed'))
+              setError(userMessage(err, 'payment.verificationFailed'))
             } finally {
               setProcessing(false)
             }
@@ -132,7 +133,7 @@ export default function PaymentCheckout({ bookingId, amount, expiresAt, onSucces
         rzp.open()
       }
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || err.response?.data?.error || err.response?.data?.message || t('payment.checkoutFailed'))
+      setError(userMessage(err, 'payment.checkoutFailed'))
     } finally {
       setProcessing(false)
     }
@@ -151,7 +152,7 @@ export default function PaymentCheckout({ bookingId, amount, expiresAt, onSucces
       await apiService.verifyPayment({ paymentId: breakdown.paymentId })
       onSuccess()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || err.response?.data?.error || err.response?.data?.message || t('payment.verificationFailed'))
+      setError(userMessage(err, 'payment.verificationFailed'))
     } finally {
       setProcessing(false)
     }

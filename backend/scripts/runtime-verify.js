@@ -142,6 +142,33 @@ function psql(db, sqlOrFile, { file = false, singleTx = false } = {}) {
   return pgRun('psql', args);
 }
 
+/**
+ * Runs a child process WITHOUT blocking this process's event loop, and resolves/rejects with its
+ * captured output. This matters: the harness server's stdout/stderr are pipes that THIS process
+ * drains through event handlers. A synchronous call (execFileSync) freezes that draining, the
+ * server's console pipe fills after ~64KB of request logging, the server blocks on its next log
+ * line and every request hangs - which looked exactly like "the app froze" during the whole-app
+ * browser sweep. Never wait synchronously for anything while the server is up.
+ */
+function runAsync(file, args, { cwd, env, timeout }) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(file, args, { cwd, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    let stdout = '', stderr = '';
+    const timer = setTimeout(() => {
+      killTree(child);
+      reject(Object.assign(new Error(`timed out after ${timeout}ms`), { stdout, stderr }));
+    }, timeout);
+    child.stdout.on('data', d => { stdout += d.toString(); });
+    child.stderr.on('data', d => { stderr += d.toString(); });
+    child.on('error', e => { clearTimeout(timer); reject(Object.assign(e, { stdout, stderr })); });
+    child.on('close', code => {
+      clearTimeout(timer);
+      if (code === 0) resolve({ stdout, stderr });
+      else reject(Object.assign(new Error(`exited with code ${code}`), { stdout, stderr }));
+    });
+  });
+}
+
 function killTree(proc) {
   if (!proc || proc.killed) return;
   try {
@@ -299,11 +326,13 @@ function diffSnapshots(before, after) {
 
 // ── Registerable roles, parsed from the Joi schema (single source of truth) ──
 function registerableRoles() {
-  const src = fs.readFileSync(path.join(BACKEND, 'src', 'middleware', 'validation.ts'), 'utf8');
+  // registerSchema lives in validation/auth.ts, not validation.ts directly, since 2026-11-13
+  // (validation.ts split into validation/<module>.ts - validation.ts is now just a barrel).
+  const src = fs.readFileSync(path.join(BACKEND, 'src', 'middleware', 'validation', 'auth.ts'), 'utf8');
   // The register schema's role field, e.g.
   //   role: Joi.string().valid('pet_owner', 'farmer', ..., 'groomer').default('pet_owner')
   const m = src.match(/role:\s*Joi\.string\(\)\s*\.valid\(([^)]*)\)\s*\.default\(/);
-  if (!m) throw new Error('Could not parse the registration role list from validation.ts - ' +
+  if (!m) throw new Error('Could not parse the registration role list from validation/auth.ts - ' +
     'if the schema was refactored, update registerableRoles() so this stays in sync.');
   const roles = [...m[1].matchAll(/'([a-z_]+)'/g)].map(x => x[1]);
   if (roles.length === 0) throw new Error('Parsed an empty role list from validation.ts');
@@ -465,6 +494,7 @@ async function http(method, url, body, token) {
           ...process.env,
           // Individual params, NOT DATABASE_URL: config forces SSL whenever DATABASE_URL is
           // set, and a local cluster rejects SSL.
+          GROQ_API_KEY: '', OPENAI_API_KEY: '', // never call a real AI provider from a verification run
           DATABASE_URL: '', DB_HOST: '127.0.0.1', DB_PORT: String(PG_PORT),
           DB_USER: 'postgres', DB_PASSWORD: '', DB_NAME: 'verifydb', DB_SCHEMA: SCHEMA,
           MOCK_DB: 'false', MOCK_REDIS: 'true',
@@ -489,6 +519,8 @@ async function http(method, url, body, token) {
           // and surface as phantom failures. Defaults in app.ts are untouched - this is an
           // opt-in override for the verification run only.
           AUTH_RATE_LIMIT_MAX: '100000', AUTH_RATE_LIMIT_WINDOW_MS: '60000',
+          // Same reason, for the whole-app sweep that opens every screen of every role.
+          API_RATE_LIMIT_MAX: '1000000', SENSITIVE_RATE_LIMIT_MAX: '1000000',
           PORT: String(port), NODE_ENV: 'development',
         },
       });
@@ -561,7 +593,7 @@ async function http(method, url, body, token) {
           if (problems.length > 10) lines.push(`... and ${problems.length - 10} more`);
           lines.push('');
           lines.push('Server startup code overwrote schema that a tracked migration established.');
-          lines.push('Look in backend/src/utils/database.ts (ensureSchemaPublic / ensure*Table):');
+          lines.push('Look in backend/src/utils/database/ (ensureSchemaPublic.ts, ensurePaymentModuleSchema.ts, seed/phase*.ts):');
           lines.push('those blocks run on EVERY boot, AFTER migrations, and are not tracked.');
           fail(`${problems.length} schema object(s) CHANGED or REMOVED by server startup.`, lines);
         } else {
@@ -580,13 +612,16 @@ async function http(method, url, body, token) {
       const problems = [];
       const base = `http://127.0.0.1:${port}/api/v1`;
 
+      // A mobile number is a login identifier now: unique per account, and a real Indian mobile (starts 6-9).
+      let mobileSeq = Math.floor(Date.now() / 1000) % 100000000;
+      const uniqueMobile = () => `9${String(mobileSeq++).padStart(9, '0')}`;
       for (const role of roles) {
         // Fixtures must satisfy the real Joi rules: a resolvable-looking TLD, and names
         // restricted to /^[a-zA-Z\s'-]+$/ (so no underscores from the role slug).
         const safeName = role.replace(/_/g, ' ');
         const email = `verify.${role.replace(/_/g, '.')}.${Date.now()}@example.com`;
         const body = {
-          firstName: 'Verify', lastName: safeName, email, phone: '5550000000',
+          firstName: 'Verify', lastName: safeName, email, phone: uniqueMobile(),
           password: 'Password1', confirmPassword: 'Password1', role, acceptTerms: true,
         };
         if (role === 'veterinarian') body.licenseNumber = 'VERIFY-LIC-1';
@@ -661,7 +696,38 @@ async function http(method, url, body, token) {
       }
     }
 
+    // ── PHASE 6c: the AI assistant can read the user's own data ──
+    // buildUserContext() swallowed its own SQL errors, so a wrong column name left the assistant
+    // knowing NOTHING about the user's animals while every static check and every screen stayed green
+    // (2026-11-17). A seeded farmer with animals asks about one; the server must build the context.
+    if (serverHealthy && port) {
+      step('PHASE 6c AI assistant builds a farmer\'s context');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const mark = serverLog.length;
+      const login = await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' });
+      const token = login.json?.data?.token;
+      if (!token) {
+        fail('Could not sign in as the seeded demo farmer to test the AI assistant.', [`HTTP ${login.status}`]);
+      } else {
+        const sess = await http('POST', `${apiBase}/ai-copilot/sessions`, { title: 'verify' }, token);
+        const sessionId = sess.json?.data?.id || sess.json?.data?.session?.id;
+        const sent = sessionId
+          ? await http('POST', `${apiBase}/ai-copilot/sessions/${sessionId}/messages`, { content: 'How is Bessie doing in health?' }, token)
+          : sess;
+        const newLog = serverLog.slice(mark);
+        const ctxFail = newLog.split('\n').filter(l => /Failed to build user context for AI/.test(l)).map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(-200));
+        if (!sessionId || sent.status >= 400) {
+          fail('The AI assistant did not answer a seeded farmer.', [`session: HTTP ${sess.status}`, `message: HTTP ${sent.status} ${JSON.stringify(sent.json || {}).slice(0, 200)}`]);
+        } else if (ctxFail.length) {
+          fail('The AI assistant could not build the user\'s context (it would answer knowing nothing about their animals).', ctxFail);
+        } else {
+          ok('context built from the real schema');
+        }
+      }
+    }
+
     // ── PHASE 7: the browser ──
+    let sweepAccounts = [];
     if (serverHealthy && port) {
       const FRONTEND = path.join(ROOT, 'frontend');
       const distIndex = path.join(FRONTEND, 'dist', 'index.html');
@@ -679,8 +745,42 @@ async function http(method, url, body, token) {
             INSERT INTO system_settings (key, value, description)
             VALUES ('grooming.enabled', 'true', 'enabled by runtime-verify PHASE 7')
             ON CONFLICT (key) DO UPDATE SET value = 'true';`);
+          // Same for the farm daily-records module: the sweep must see the flag-on screens.
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public;
+            INSERT INTO system_settings (key, value, description)
+            VALUES ('farm.records.enabled', 'true', 'enabled by runtime-verify PHASE 7')
+            ON CONFLICT (key) DO UPDATE SET value = 'true';`);
         } catch { /* settings table shape differs - the browser pass still runs without it */ }
 
+        // The whole-app sweep (frontend/e2e/app-sweep.spec.ts) signs in as every role. Farmer and
+        // pet owner it registers itself; roles that need approval or cannot self-register are
+        // prepared here, where the database can be reached, and handed over as SWEEP_ACCOUNTS.
+        sweepAccounts = [];
+        try {
+          const apiBase = `http://127.0.0.1:${port}/api/v1`;
+          const stamp = Date.now();
+          let seq = (Math.floor(stamp / 1000) % 100000000) + 5000;
+          for (const role of ['veterinarian', 'corporate_admin', 'admin']) {
+            const email = `sweep.${role.replace(/_/g, '.')}.${stamp}@example.com`;
+            const body = {
+              firstName: 'Sweep', lastName: role.replace(/_/g, ' '), email, phone: `9${String(seq++).padStart(9, '0')}`,
+              password: 'Password1', confirmPassword: 'Password1', role: role === 'admin' ? 'pet_owner' : role, acceptTerms: true,
+            };
+            if (role === 'veterinarian') body.licenseNumber = 'SWEEP-LIC-1';
+            const reg = await http('POST', `${apiBase}/auth/register`, body);
+            if (!reg.json?.success) continue; // the sweep skips a role it has no account for, and says so
+            const sql = [`UPDATE users SET account_status = 'active', is_active = true WHERE email = '${email}';`];
+            if (role === 'admin') {
+              sql.push(`UPDATE users SET role = 'admin' WHERE email = '${email}';`);
+              sql.push(`DELETE FROM user_roles WHERE user_id = (SELECT id FROM users WHERE email = '${email}');`);
+              sql.push(`INSERT INTO user_roles (user_id, role, is_primary) SELECT id, 'admin', true FROM users WHERE email = '${email}';`);
+            }
+            psql('verifydb', `SET search_path TO ${SCHEMA}, public; ${sql.join(' ')}`);
+            sweepAccounts.push({ role, email, password: 'Password1' });
+          }
+        } catch { /* best effort: the sweep still covers farmer and pet owner */ }
+
+        // VERIFY_E2E_GREP narrows the browser run (e.g. while developing a spec); default is @critical.
         step(`PHASE 7  Browser journeys (${FULL ? 'FULL e2e suite' : 'critical journeys'} vs the real SPA)`);
         try {
           // --retries=0: a gate must be deterministic. Retries would hide a genuinely flaky
@@ -689,18 +789,14 @@ async function http(method, url, body, token) {
           // (deprecated + unescaped args) and `npx.cmd` is not reliably spawnable - both fail
           // with EMPTY stdout/stderr, which makes a real test failure look like a mystery.
           const cli = path.join(FRONTEND, 'node_modules', '@playwright', 'test', 'cli.js');
-          execFileSync(process.execPath, [cli, 'test', ...(FULL ? [] : ['--grep', '@critical']), '--reporter', 'list', '--retries=0'], {
+          await runAsync(process.execPath, [cli, 'test', ...(FULL ? [] : ['--grep', process.env.VERIFY_E2E_GREP || '@critical']), '--reporter', 'list', '--retries=0', `--workers=${process.env.VERIFY_E2E_WORKERS || 1}`], {
             cwd: FRONTEND,
-            encoding: 'utf8',
-            stdio: 'pipe',
-            windowsHide: true,
             // @critical is a handful of journeys; --full is 462 tests on a single worker and
             // needs far longer. Overridable via VERIFY_E2E_TIMEOUT_MS.
-            timeout: Number(process.env.VERIFY_E2E_TIMEOUT_MS) || (FULL ? 3600000 : 600000),
-            maxBuffer: 64 * 1024 * 1024,
-            env: { ...process.env, E2E_BASE_URL: `http://127.0.0.1:${port}`, CI: '1' },
+            timeout: Number(process.env.VERIFY_E2E_TIMEOUT_MS) || (FULL ? 3600000 : 1800000),
+            env: { ...process.env, E2E_BASE_URL: `http://127.0.0.1:${port}`, CI: '1', SWEEP_ACCOUNTS: JSON.stringify(sweepAccounts) },
           });
-          ok('registration, shell render, i18n, password toggle');
+          ok('registration, shell render, i18n, password toggle, whole-app sweep');
         } catch (e) {
           const out = `${(e.stdout || '').toString()}\n${(e.stderr || '').toString()}`.trim();
           if (/Executable doesn't exist|playwright install/i.test(out)) {
@@ -746,6 +842,43 @@ async function http(method, url, body, token) {
         }
       }
     }
+    // VERIFY_HOLD=1: keep the whole stack alive so a spec can be developed against it by hand
+    // instead of paying ~3 minutes of setup per attempt. Release with: touch <tmp>/vetcare-verify-release
+    if (process.env.VERIFY_HOLD === '1' && port) {
+      const info = path.join(os.tmpdir(), 'vetcare-verify-hold.json');
+      const release = path.join(os.tmpdir(), 'vetcare-verify-release');
+      try { fs.rmSync(release, { force: true }); } catch { /* none */ }
+      fs.writeFileSync(info, JSON.stringify({ port, pgPort: PG_PORT, schema: SCHEMA, sweepAccounts, release }), 'utf8');
+      log(`  HOLDING the stack on http://127.0.0.1:${port} - details in ${info}; create ${release} to stop.`);
+      const until = Date.now() + 90 * 60_000;
+      while (Date.now() < until && !fs.existsSync(release)) await new Promise(r => setTimeout(r, 2000));
+    }
+    // ── PHASE 8: nothing the app did during the whole run failed in SQL ──
+    // Phases 6-7 drive every screen as every role. A query naming a column or table that does not exist
+    // is logged by the server and (usually) swallowed or turned into a vague 500, so no assertion above
+    // sees it. Read the server's own log: any such error is a defect, whichever screen caused it.
+    if (serverHealthy) {
+      step('PHASE 8  Server log: no SQL schema errors during the run');
+      const clean = l => l.replace(/\x1b\[[0-9;]*m/g, '');
+      const SQL_DEFECT = /(column|relation|function|type) "?[\w.\\"()]+"? (of relation "?\w+"? )?does not exist|syntax error at or near|invalid input syntax for type|bind message supplies|operator does not exist|could not determine data type/i;
+      const found = new Map();
+      for (const raw of serverLog.split('\n')) {
+        const l = clean(raw);
+        if (!/error|warn/i.test(l.slice(0, 40)) || !SQL_DEFECT.test(l)) continue;
+        const msg = (l.match(SQL_DEFECT) || [''])[0];
+        const where = (l.match(/"query":"([^"]{0,70})/) || [])[1] || '';
+        found.set(`${msg} | ${where}`, (found.get(`${msg} | ${where}`) || 0) + 1);
+      }
+      if (found.size) {
+        fail(`${found.size} SQL schema error(s) were logged by the server during the run.`,
+          [...found.entries()].slice(0, 12).map(([k, n]) => `${n}x  ${k}`)
+            .concat(['', 'A query names a column/table that does not exist, or binds the wrong parameters.',
+              'Find it with the text above; the full log is dumped on a browser failure (see PHASE 7).']));
+      } else {
+        ok('clean');
+      }
+    }
+
   } catch (err) {
     fail('Runtime verification crashed.', String(err.stack || err.message).split('\n').slice(0, 12));
   } finally {

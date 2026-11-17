@@ -17,6 +17,7 @@
   top: 0;
   left: 0;
   height: 3px;
+  width: var(--fill);
   background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
   z-index: 1100;
   transition: width 0.15s ease-out;

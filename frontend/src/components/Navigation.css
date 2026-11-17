@@ -398,7 +398,8 @@
 
   .nav-sidebar {
     width: 280px;
-    height: calc(100vh - 56px);
+    /* Stops above the bottom tab bar so the last menu items and Logout stay reachable. */
+    height: calc(100vh - 56px - var(--tabbar-height, 64px) - env(safe-area-inset-bottom, 0px));
     top: 56px;
     left: -300px;
     transition: left 0.3s ease;

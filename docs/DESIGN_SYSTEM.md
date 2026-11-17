@@ -211,7 +211,10 @@ consistency one. `:hover` and `:focus-visible` in CSS cover both.
 Carried over from the usability standard — Admin screens are held to these too:
 
 - **No raw i18n keys rendered.** Every label resolves; every new key lands in all six locales
-  (`en, hi, kn, ml, ta, te`). Edit `src/locales` — `public/locales` is generated.
+  (`en, hi, kn, ml, ta, te`). Edit `src/locales/<lang>/modules/<module>.json` (split by module
+  since 2026-11-13 — a single ~8,400-line file per locale was unmanageable to edit); add the key
+  to the module file matching the feature, not a new file. `public/locales` is generated from
+  these by `copy-locales.cjs` — never edit it directly.
 - **Every role gets a real branch.** No persona sees an empty or dead screen.
 - **Overflow protection.** Long names truncate or wrap; tables scroll inside
   `.data-table-container` rather than breaking the page.
@@ -268,6 +271,15 @@ Regression guards live in `AuthContext.test.tsx` ("blocked account states") and
 `Login.test.tsx`. Both fail if the message extraction regresses — verified by reverting the fix.
 
 ---
+
+## 5b. Phone-first building blocks — use these, don't reinvent
+
+Every role shares one set of phone components in `frontend/src/components/mobile/` (bottom tab bar,
+bottom sheet, chips, number stepper, quick date, step form, save state) and one tab-bar config
+(`frontend/src/navigation/bottomTabs.ts`). On a phone screen use them instead of a new modal, a
+`<select>` for a short list, or a bespoke save handler. Their sizes and colours are tokens
+(`--tap-min`, `--tabbar-height`, `--brand`, ...). Every numeric input declares `inputMode`
+(enforced by a test). Full guide and the "I want to change X" table: `docs/modules/mobile-ui.md`.
 
 ## 6. The ratchet — how the debt gets paid
 

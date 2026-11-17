@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import apiService from '../../services/api';
 import './NetworkRoleMatrix.css';
+import { userMessage } from '../../utils/userMessage'
 
 type AccessLevel = 'full' | 'view' | 'none' | 'platform_only';
 
@@ -124,7 +125,7 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
       const res = await apiService.adminGetNetworkRolePermissions(networkId);
       setDbMatrix(res.data?.matrix || {});
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to load network permissions');
+      setError(userMessage(err));
     } finally {
       setLoadingMatrix(false);
     }
@@ -160,7 +161,7 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
       setSuccess(`Saved: ${featureKey} for ${networkRole}`);
       setTimeout(() => setSuccess(''), 2000);
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to save permission');
+      setError(userMessage(err));
       setDbMatrix(prev => ({
         ...prev,
         [networkRole]: { ...prev[networkRole], [featureKey]: current },
@@ -180,7 +181,7 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
       setSuccess(`Reset ${networkRole} to defaults`);
       setTimeout(() => setSuccess(''), 2500);
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to reset permissions');
+      setError(userMessage(err));
     } finally {
       setResettingRole(null);
     }
@@ -199,7 +200,7 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
       await loadRoles();
       await loadMatrix();
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to create custom role');
+      setError(userMessage(err));
     } finally {
       setCreatingRole(false);
     }
@@ -215,7 +216,7 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
       await loadRoles();
       await loadMatrix();
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to update role');
+      setError(userMessage(err));
     }
   };
 
@@ -229,7 +230,7 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
       await loadRoles();
       await loadMatrix();
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to delete role');
+      setError(userMessage(err));
     }
   };
 

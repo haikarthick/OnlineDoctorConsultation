@@ -101,6 +101,17 @@ jobs:
         working-directory: frontend
         run: npx tsc --noEmit
 
+      # Harness rule H1 (docs/HARNESS.md): these two were never run in CI before, so the
+      # error-message guard, locale parity, routing, translation-key and shared-control tests
+      # protected nothing. Same commands as the local pre-push gate.
+      - name: Lint (errors only)
+        working-directory: frontend
+        run: npx eslint src --ext .ts,.tsx --quiet
+
+      - name: Unit + guard tests
+        working-directory: frontend
+        run: npx vitest run
+
       - name: Build
         working-directory: frontend
         run: npm run build
@@ -123,8 +134,12 @@ jobs:
   # See docs/VERIFICATION.md and backend/scripts/runtime-verify.js.
   runtime-verify:
     name: Runtime Verification (${{ matrix.mode }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Pinned, not ubuntu-latest: that rolls forward on its own schedule, and the pinned
+    # @playwright/test version doesn't support `--with-deps` on every new release the moment it
+    # lands (broke silently when runners moved to ubuntu26.04 - see the 2026-11-13 CI-repair
+    # commit). Bump this deliberately alongside a Playwright upgrade, not by GitHub's default.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -208,99 +223,10 @@ jobs:
         working-directory: frontend
         run: node e2e/generate-tests.cjs
 
-  # ═════════════════════════════════════════════
-  #  2c. E2E Tests (Playwright)
-  # ═════════════════════════════════════════════
-  e2e-test:
-    name: E2E Tests (Playwright)
-    runs-on: ubuntu-latest
-    needs: [frontend-test]
-    if: github.event_name == 'push'
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: veterinary_consultation
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports: ['5432:5432']
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install backend deps
-        working-directory: backend
-        run: npm ci
-
-      - name: Install frontend deps
-        working-directory: frontend
-        run: npm ci
-
-      - name: Install Playwright browsers
-        working-directory: frontend
-        run: npx playwright install --with-deps chromium
-
-      - name: Start backend server
-        working-directory: backend
-        run: npm start &
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: veterinary_consultation
-          JWT_SECRET: e2e-test-secret
-          PORT: 3000
-          NODE_ENV: test
-
-      - name: Start frontend dev server
-        working-directory: frontend
-        run: npx vite --port 5173 &
-        env:
-          VITE_API_URL: http://localhost:3000
-
-      - name: Wait for servers
-        run: |
-          echo "Waiting for backend..."
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:3000/api/v1/health > /dev/null 2>&1 && break
-            sleep 2
-          done
-          echo "Waiting for frontend..."
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:5173 > /dev/null 2>&1 && break
-            sleep 2
-          done
-
-      - name: Run Playwright E2E tests
-        working-directory: frontend
-        run: npx playwright test
-        env:
-          E2E_BASE_URL: http://localhost:5173
-
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-report
-          path: frontend/playwright-report/
-          retention-days: 14
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-results
-          path: frontend/test-results/
-          retention-days: 7
+  # (The full legacy E2E suite is NOT part of this pipeline any more: it lives in e2e-full.yml, nightly.
+  #  It is informational and takes ~25 minutes; as a job here, every newer push cancelled it, which made
+  #  the whole run "cancelled" and kept the commit from ever having passing CI checks - and Render only
+  #  auto-deploys a commit whose checks pass. See docs/VERIFICATION.md.)
 
   # ═════════════════════════════════════════════
   #  3. Security Scan (Trivy)
@@ -386,6 +312,7 @@ jobs:
           esac
 
           if [ -z "$HOOK_URL" ]; then
+            echo "::warning title=No Render deploy hook::Set the RENDER_DEPLOY_HOOK_$(echo $ENV | tr a-z A-Z) secret. Nothing was deployed by this job; Render's own auto-deploy (if enabled) is the only trigger."
             echo "⚠️  No deploy hook configured for $ENV - skipping deployment."
             echo "    Set the RENDER_DEPLOY_HOOK_$(echo $ENV | tr a-z A-Z) secret in GitHub."
             exit 0
@@ -467,5 +394,3 @@ jobs:
 
     outputs:
       image_tag: ${{ steps.meta.outputs.sha_short }}
-            echo "Deployment successful!"
-            docker image prune -f

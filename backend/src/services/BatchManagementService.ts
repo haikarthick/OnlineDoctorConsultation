@@ -127,6 +127,9 @@ export class BatchManagementService {
         `UPDATE group_cycles SET status = 'closed', ended_at = CURRENT_DATE, current_count = 0, updated_at = NOW()
           WHERE id = $1`, [cycleId]
       );
+      // A cycle-bound sharing with a hospital network ends with the cycle (the next cycle needs a new code from the owner).
+      await (await import('./GroupNetworkSharingService')).default.endForCycle(cycleId, client);
+
       // Everyone still in the batch stops being a member when the population leaves.
       await client.query(
         `UPDATE animal_group_memberships SET left_at = CURRENT_DATE, exit_reason = 'cycle_closed'

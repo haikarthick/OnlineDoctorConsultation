@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
+import { userMessage } from '../../utils/userMessage'
 interface Supplier {
   id: string
   name: string
@@ -38,7 +39,7 @@ export default function PharmacySuppliers({ networkId }: Props) {
       const res = await client.get(`/networks/${networkId}/suppliers`)
       setSuppliers(res.data || [])
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err?.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setLoading(false)
     }
@@ -78,7 +79,7 @@ export default function PharmacySuppliers({ networkId }: Props) {
       setShowModal(false)
       load()
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || err?.message || t('common.error'))
+      setError(userMessage(err, 'common.error'))
     } finally {
       setSaving(false)
     }
@@ -186,7 +187,7 @@ export default function PharmacySuppliers({ networkId }: Props) {
                 </div>
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.suppliers.leadTimeDays')}</label>
-                  <input type="number" min="1" value={form.lead_time_days} onChange={e => setForm(f => ({ ...f, lead_time_days: parseInt(e.target.value) || 7 }))} />
+                  <input type="number" inputMode="decimal" min="1" value={form.lead_time_days} onChange={e => setForm(f => ({ ...f, lead_time_days: parseInt(e.target.value) || 7 }))} />
                 </div>
               </div>
               <div className="pharm-form-group">

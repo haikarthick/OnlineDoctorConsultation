@@ -5,6 +5,7 @@ import ConsultationService from '../services/ConsultationService';
 import database from '../utils/database';
 import { ValidationError, NotFoundError, ForbiddenError } from '../utils/errors';
 import logger from '../utils/logger';
+import FarmAccessService, { NO_ACCESS_MESSAGE } from '../services/FarmAccessService';
 
 export class ConsultationController {
   async createConsultation(req: AuthRequest, res: Response): Promise<void> {
@@ -65,6 +66,20 @@ export class ConsultationController {
         }
       }
 
+      // The subject comes from the booking when there is one (never trust a group id typed into the request), otherwise
+      // from the request - and then only for a group the person has a role on.
+      let groupId: string | null = null;
+      let subjectAnimalId: string | null = animalId || null;
+      if (bookingId) {
+        const b = await database.query('SELECT animal_id, group_id FROM bookings WHERE id = $1', [bookingId]);
+        if (b.rows[0]) { groupId = b.rows[0].group_id || null; subjectAnimalId = subjectAnimalId || b.rows[0].animal_id || null; }
+      } else if (req.body.groupId) {
+        const g = await database.query('SELECT enterprise_id FROM animal_groups WHERE id = $1', [req.body.groupId]);
+        const role = g.rows[0] ? await FarmAccessService.roleOf(g.rows[0].enterprise_id, patientId) : null;
+        if (!role && req.userRole !== 'admin') throw new ForbiddenError(NO_ACCESS_MESSAGE);
+        groupId = req.body.groupId;
+      }
+
       // === DEDUP LAYER 2: Vet+patient active consultation dedup ===
       try {
         const dupCheck = await database.query(
@@ -75,8 +90,10 @@ export class ConsultationController {
                   created_at as "createdAt", updated_at as "updatedAt"
            FROM consultations 
            WHERE veterinarian_id = $1 AND user_id = $2 AND status IN ('scheduled', 'in_progress')
+             -- The SAME subject only: an open consultation about one animal must not be handed back for another animal or a group.
+             AND animal_id IS NOT DISTINCT FROM $3::uuid AND group_id IS NOT DISTINCT FROM $4::uuid
            ORDER BY created_at DESC LIMIT 1`,
-          [veterinarianId, patientId]
+          [veterinarianId, patientId, subjectAnimalId, groupId]
         );
         if (dupCheck.rows.length > 0) {
           const existing = dupCheck.rows[0];
@@ -105,7 +122,7 @@ export class ConsultationController {
       const consultation = await ConsultationService.createConsultation(
         patientId,
         veterinarianId,
-        { animalType, symptomDescription, scheduledAt, animalId, bookingId }
+        { animalType, symptomDescription, scheduledAt, animalId: subjectAnimalId, groupId, bookingId }
       );
 
       // Link the booking to this consultation

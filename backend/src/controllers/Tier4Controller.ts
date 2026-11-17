@@ -12,18 +12,22 @@ import sustainabilityService from '../services/SustainabilityService';
 import wellnessService from '../services/WellnessService';
 import geospatialService from '../services/GeospatialService';
 import enterpriseService from '../services/EnterpriseService';
+import FarmAccessService from '../services/FarmAccessService';
+import { ForbiddenError } from '../utils/errors';
 import logger from '../utils/logger';
 
 async function ensureAccess(req: Request, res: Response, enterpriseId: string): Promise<boolean> {
-  const userId = (req as any).userId;
-  const role = (req as any).userRole;
-  if (role === 'admin') return true;
-  const hasAccess = await enterpriseService.hasAccess(enterpriseId, userId);
-  if (!hasAccess) {
-    res.status(403).json({ error: { message: 'No access to this enterprise' } });
-    return false;
+  // One rule for every farm screen (services/FarmAccessService.ts): a viewer only looks.
+  try {
+    await FarmAccessService.assert(enterpriseId, { userId: (req as any).userId, role: (req as any).userRole }, FarmAccessService.actionForMethod(req.method));
+    return true;
+  } catch (err: any) {
+    if (err instanceof ForbiddenError) {
+      res.status(403).json({ success: false, message: err.message, error: { message: err.message } });
+      return false;
+    }
+    throw err;
   }
-  return true;
 }
 
 class Tier4Controller {
