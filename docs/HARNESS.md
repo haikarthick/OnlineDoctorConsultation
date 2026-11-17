@@ -34,6 +34,7 @@ runs. So nothing reaches `vetcare-dev` unchecked.
 | **H7** | A shared control (`components/mobile/*`, `components/shared/*`) has a behaviour test that **performs the action** and asserts the visible result. Shared patterns live in the shared layer, never as a one-page special. | `components/mobile/mobileBlocks.test.tsx` and siblings; review via `ui-review` | automatic + process |
 | **H8** | **Ratchets only shrink.** Inline styles (ESLint allowlist), unscoped CSS (`css-scoping-allowlist.json`), and known sweep problems (`e2e/sweep-known-issues.json`) may lose lines, never gain them. Fixing one means deleting its line. | each file's own check | automatic |
 | **H9** | A change touching DB, routes or auth runs against a real Postgres and a real booted server. | runtime gate (`docs/VERIFICATION.md`) | automatic |
+| **H9b** | **No SQL schema error may appear in the server's own log during the whole run.** A query naming a column that does not exist is usually caught and swallowed (a `try/catch` that returns an empty value) or becomes a vague 500, so no screen-level check sees it. The gate reads the server log after driving every screen as every role, and PHASE 6c has a seeded farmer ask the AI assistant about an animal. | runtime gate PHASE 6c + PHASE 8 | automatic |
 | **H10** | **Design contract before code** for any screen: what the sub-views are and how a person moves between them, the largest realistic data size (40 animals, not 3), what changes on phone vs desktop, which shared controls it reuses. A list that can grow past ~8 cards must be grouped or filterable *by design*. | `feature-delivery` skill, Phase 2 | process |
 | **H11** | A red check is fixed, not bypassed: never `--no-verify`, never loosen or delete a check to get green, never add to a ratchet without the owner's say-so. A check that cannot run must **fail**, not skip silently. | `pre-ship` skill; review | process |
 | **H12** | "Done" for a UI change means the sweep ran green (or its new findings are explained) and the screenshots/behaviour were looked at - not just that unit tests passed. | `pre-ship` skill | process |
@@ -89,6 +90,13 @@ Each of these cost hours to find; each looked like "the app is broken" and was n
    Release with `%TEMP%/vetcare-verify-release`.
 6. **Git Bash rewrites arguments that start with `/`** (`/dashboard` became a Windows path). Set
    `MSYS_NO_PATHCONV=1` when passing routes to the sweep from a shell.
+
+7. **A swallowed error is invisible to every other check.** `buildUserContext()` caught its own SQL error and
+   returned an empty string, so the AI assistant answered knowing nothing about a user's animals while
+   `tsc`, the schema check (it only reads `INSERT` lists) and every screen stayed green. Prefer logging at
+   `error` level and failing loudly; PHASE 8 exists because a `warn`-and-continue hides exactly this.
+8. **Anything sent to an outside provider must be bounded.** Prompt data had no size limit; a provider
+   refuses an oversized request and the person gets no answer. Cap per section and overall.
 
 ## What the harness cannot see (honest list)
 

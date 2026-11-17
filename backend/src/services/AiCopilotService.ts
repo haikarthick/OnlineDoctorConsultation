@@ -57,6 +57,9 @@ function getAI(): AiClient | null {
 // Keep backward-compat helper used in existing methods
 function getOpenAI(): OpenAI | null { return getAI()?.client ?? null; }
 
+/** Hard ceiling (characters, ~4 per token) for the personal data sent with a question. */
+const AI_CONTEXT_MAX_CHARS = 12000;
+
 const SYSTEM_PROMPT = `You are an expert AI Veterinary Copilot integrated into a professional veterinary consultation platform. Your role is to assist veterinarians and farmers with:
 - Symptom analysis and differential diagnoses across all common livestock and companion animal species (cattle, sheep, goats, pigs, poultry, dogs, cats, horses, etc.)
 - Drug interaction checks and pharmacology guidance
@@ -97,7 +100,13 @@ const DRUG_INTERACTIONS: Record<string, { interactsWith: string[]; severity: str
 class AiCopilotService {
 
   // ── Build Personalized User Context (FULL life history) ──
-  private async buildUserContext(userId: string): Promise<string> {
+  /**
+   * What the assistant is told about the person asking. It must stay SMALL: the provider rejects an
+   * oversized request (Groq's free tier is ~12K tokens a minute) and a rejected request means no answer
+   * at all. So: the animal the question is about gets deep history, every other animal a short recent
+   * summary, each section is capped, and the whole thing has a hard ceiling.
+   */
+  private async buildUserContext(userId: string, question: string = ''): Promise<string> {
     try {
       const sections: string[] = [];
 
@@ -113,8 +122,8 @@ class AiCopilotService {
 
       // 2. ALL animals owned by this user (including inactive for historical context)
       const animalsRes = await pool.query(
-        `SELECT id, name, species, breed, date_of_birth, gender, animal_class, weight, weight_unit,
-                microchip_number, is_neutered, is_active, color, created_at
+        `SELECT id, name, unique_id, species, breed, date_of_birth, gender, animal_class, weight, weight_unit,
+                microchip_id, is_neutered, is_active, color, created_at
          FROM animals WHERE owner_id = $1
          ORDER BY is_active DESC, created_at DESC`,
         [userId]
@@ -140,6 +149,15 @@ class AiCopilotService {
       const animalIds = animalsRes.rows.map((a: any) => a.id);
       if (animalIds.length === 0) return sections.join('\n\n');
 
+      // The animal(s) the question names - by platform ID (VC-COW-26-000005) or by name - get deep history.
+      const q = question.toLowerCase();
+      const escapeRe = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const focus = animalsRes.rows.filter((a: any) =>
+        (a.unique_id && q.includes(String(a.unique_id).toLowerCase())) ||
+        (a.name && new RegExp(`(^|[^a-z0-9])${escapeRe(String(a.name).toLowerCase())}($|[^a-z0-9])`).test(q)));
+      const historyIds: string[] = (focus.length > 0 ? focus : animalsRes.rows).map((a: any) => a.id);
+      const perAnimal = focus.length > 0 ? 12 : 3; // rows kept per animal in each history section
+
       // Run all history queries in parallel for speed
       const [medRes, vaccRes, rxRes, consultRes, allergyRes, weightRes, labRes, bookingRes] = await Promise.all([
         // 3. ALL medical records (complete life history)
@@ -148,8 +166,8 @@ class AiCopilotService {
            FROM medical_records mr
            JOIN animals a ON mr.animal_id = a.id
            WHERE mr.animal_id = ANY($1)
-           ORDER BY mr.created_at DESC`,
-          [animalIds]
+           ORDER BY mr.created_at DESC LIMIT 300`,
+          [historyIds]
         ),
         // 4. ALL vaccinations (complete history)
         pool.query(
@@ -158,32 +176,33 @@ class AiCopilotService {
            FROM vaccination_records v
            JOIN animals a ON v.animal_id = a.id
            WHERE v.animal_id = ANY($1)
-           ORDER BY v.date_administered DESC`,
-          [animalIds]
+           ORDER BY v.date_administered DESC LIMIT 300`,
+          [historyIds]
         ),
         // 5. ALL prescriptions (complete history)
         pool.query(
-          `SELECT p.medication_name, p.dosage, p.frequency, p.duration, p.status,
-                  p.instructions, p.start_date, p.end_date, p.created_at,
+          // A prescription's medicines are a JSON list on the row itself (not columns), and it points at
+          // the animal directly or through its consultation.
+          `SELECT p.medications, p.instructions, p.is_active, p.valid_until, p.created_at,
                   a.name AS animal_name
            FROM prescriptions p
-           JOIN consultations c ON p.consultation_id = c.id
-           JOIN animals a ON c.animal_id = a.id
-           WHERE c.animal_id = ANY($1)
-           ORDER BY p.created_at DESC`,
-          [animalIds]
+           LEFT JOIN consultations c ON p.consultation_id = c.id
+           JOIN animals a ON a.id = COALESCE(p.animal_id, c.animal_id)
+           WHERE COALESCE(p.animal_id, c.animal_id) = ANY($1)
+           ORDER BY p.created_at DESC LIMIT 300`,
+          [historyIds]
         ),
         // 6. ALL consultations (complete history)
         pool.query(
-          `SELECT c.reason, c.status, c.diagnosis, c.notes, c.treatment_plan,
+          `SELECT c.symptom_description AS reason, c.status, c.diagnosis, c.notes, c.prescription,
                   c.follow_up_date, c.created_at, a.name AS animal_name,
                   u.first_name AS vet_first, u.last_name AS vet_last
            FROM consultations c
            JOIN animals a ON c.animal_id = a.id
-           LEFT JOIN users u ON c.doctor_id = u.id
+           LEFT JOIN users u ON c.veterinarian_id = u.id
            WHERE c.animal_id = ANY($1)
-           ORDER BY c.created_at DESC`,
-          [animalIds]
+           ORDER BY c.created_at DESC LIMIT 300`,
+          [historyIds]
         ),
         // 7. ALL allergies
         pool.query(
@@ -192,8 +211,8 @@ class AiCopilotService {
            FROM allergy_records al
            JOIN animals a ON al.animal_id = a.id
            WHERE al.animal_id = ANY($1)
-           ORDER BY al.identified_date DESC NULLS LAST`,
-          [animalIds]
+           ORDER BY al.identified_date DESC NULLS LAST LIMIT 300`,
+          [historyIds]
         ),
         // 8. Weight history (full trend)
         pool.query(
@@ -201,8 +220,8 @@ class AiCopilotService {
            FROM weight_history wh
            JOIN animals a ON wh.animal_id = a.id
            WHERE wh.animal_id = ANY($1)
-           ORDER BY wh.recorded_at DESC`,
-          [animalIds]
+           ORDER BY wh.recorded_at DESC LIMIT 300`,
+          [historyIds]
         ),
         // 9. ALL lab results
         pool.query(
@@ -212,8 +231,8 @@ class AiCopilotService {
            FROM lab_results lr
            JOIN animals a ON lr.animal_id = a.id
            WHERE lr.animal_id = ANY($1)
-           ORDER BY lr.test_date DESC`,
-          [animalIds]
+           ORDER BY lr.test_date DESC LIMIT 300`,
+          [historyIds]
         ),
         // 10. Upcoming & recent bookings
         pool.query(
@@ -224,14 +243,14 @@ class AiCopilotService {
            LEFT JOIN animals a ON b.animal_id = a.id
            LEFT JOIN users u ON b.veterinarian_id = u.id
            WHERE b.pet_owner_id = $1
-           ORDER BY b.scheduled_date DESC`,
+           ORDER BY b.scheduled_date DESC LIMIT 300`,
           [userId]
         ),
       ]);
 
       // 3. Medical records - group by animal, show all with year headers
       if (medRes.rows.length > 0) {
-        const grouped = this.groupByAnimal(medRes.rows, (r: any) =>
+        const grouped = this.groupByAnimal(this.capPerAnimal(medRes.rows, perAnimal), (r: any) =>
           `[${new Date(r.created_at).toLocaleDateString()}] ${r.record_type}: ${r.title}${r.content ? ` - ${r.content.substring(0, 150)}` : ''}`
         );
         sections.push(`## Complete Medical History (${medRes.rows.length} records)\n${grouped}`);
@@ -239,7 +258,7 @@ class AiCopilotService {
 
       // 4. Vaccinations - full history
       if (vaccRes.rows.length > 0) {
-        const grouped = this.groupByAnimal(vaccRes.rows, (v: any) =>
+        const grouped = this.groupByAnimal(this.capPerAnimal(vaccRes.rows, perAnimal), (v: any) =>
           `${v.vaccine_name} on ${new Date(v.date_administered).toLocaleDateString()}${v.next_due_date ? ` (next due: ${new Date(v.next_due_date).toLocaleDateString()})` : ''}${v.batch_number ? ` [batch: ${v.batch_number}]` : ''}`
         );
         sections.push(`## Complete Vaccination History (${vaccRes.rows.length} records)\n${grouped}`);
@@ -247,16 +266,16 @@ class AiCopilotService {
 
       // 5. Prescriptions - full history
       if (rxRes.rows.length > 0) {
-        const grouped = this.groupByAnimal(rxRes.rows, (p: any) =>
-          `[${new Date(p.created_at).toLocaleDateString()}] ${p.medication_name} ${p.dosage || ''} ${p.frequency || ''} for ${p.duration || 'ongoing'} (${p.status})${p.instructions ? ` - ${p.instructions.substring(0, 100)}` : ''}`
+        const grouped = this.groupByAnimal(this.capPerAnimal(rxRes.rows, perAnimal), (p: any) =>
+          `[${new Date(p.created_at).toLocaleDateString()}] ${(Array.isArray(p.medications) ? p.medications : []).map((m: any) => [m.name, m.dosage, m.frequency, m.duration && `for ${m.duration}`].filter(Boolean).join(' ')).join('; ') || 'medication'} (${p.is_active ? 'active' : 'ended'})${p.instructions ? ` - ${p.instructions.substring(0, 100)}` : ''}`
         );
         sections.push(`## Complete Prescription History (${rxRes.rows.length} records)\n${grouped}`);
       }
 
       // 6. Consultations - full history
       if (consultRes.rows.length > 0) {
-        const grouped = this.groupByAnimal(consultRes.rows, (c: any) =>
-          `[${new Date(c.created_at).toLocaleDateString()}] ${c.reason || 'General'}${c.diagnosis ? ` → Dx: ${c.diagnosis}` : ''}${c.treatment_plan ? ` → Tx: ${c.treatment_plan.substring(0, 100)}` : ''} (${c.status})${c.vet_first ? ` with Dr. ${c.vet_first} ${c.vet_last}` : ''}${c.follow_up_date ? ` [follow-up: ${new Date(c.follow_up_date).toLocaleDateString()}]` : ''}`
+        const grouped = this.groupByAnimal(this.capPerAnimal(consultRes.rows, perAnimal), (c: any) =>
+          `[${new Date(c.created_at).toLocaleDateString()}] ${c.reason || 'General'}${c.diagnosis ? ` → Dx: ${c.diagnosis}` : ''}${c.prescription ? ` → Tx: ${String(c.prescription).substring(0, 100)}` : ''} (${c.status})${c.vet_first ? ` with Dr. ${c.vet_first} ${c.vet_last}` : ''}${c.follow_up_date ? ` [follow-up: ${new Date(c.follow_up_date).toLocaleDateString()}]` : ''}`
         );
         sections.push(`## Complete Consultation History (${consultRes.rows.length} records)\n${grouped}`);
       }
@@ -271,7 +290,7 @@ class AiCopilotService {
 
       // 8. Weight history (show trend per animal)
       if (weightRes.rows.length > 0) {
-        const grouped = this.groupByAnimal(weightRes.rows, (w: any) =>
+        const grouped = this.groupByAnimal(this.capPerAnimal(weightRes.rows, focus.length > 0 ? 12 : 2), (w: any) =>
           `${new Date(w.recorded_at).toLocaleDateString()}: ${w.weight}${w.unit || 'kg'}${w.notes ? ` (${w.notes})` : ''}`
         );
         sections.push(`## Weight History / Growth Trend\n${grouped}`);
@@ -279,7 +298,7 @@ class AiCopilotService {
 
       // 9. Lab results - full history, flag abnormals
       if (labRes.rows.length > 0) {
-        const grouped = this.groupByAnimal(labRes.rows, (lr: any) =>
+        const grouped = this.groupByAnimal(this.capPerAnimal(labRes.rows, perAnimal), (lr: any) =>
           `[${new Date(lr.test_date).toLocaleDateString()}] ${lr.test_name}${lr.test_category ? ` (${lr.test_category})` : ''}: ${lr.result_value || 'pending'}${lr.unit ? ` ${lr.unit}` : ''}${lr.normal_range ? ` [normal: ${lr.normal_range}]` : ''}${lr.is_abnormal ? ' ⚠️ ABNORMAL' : ''}${lr.interpretation ? ` - ${lr.interpretation.substring(0, 100)}` : ''}`
         );
         sections.push(`## Complete Lab Results (${labRes.rows.length})\n${grouped}`);
@@ -305,11 +324,24 @@ class AiCopilotService {
         }
       }
 
-      return sections.join('\n\n');
+      const full = sections.join('\n\n');
+      if (full.length <= AI_CONTEXT_MAX_CHARS) return full;
+      const cut = full.slice(0, AI_CONTEXT_MAX_CHARS);
+      return `${cut.slice(0, cut.lastIndexOf('\n'))}\n[Older history left out to keep the answer fast.]`;
     } catch (err: any) {
       logger.warn('Failed to build user context for AI', { error: err?.message, userId });
       return '';
     }
+  }
+
+  // Helper: keep the newest `n` rows per animal (rows arrive newest first)
+  private capPerAnimal<T extends { animal_name?: string }>(rows: T[], n: number): T[] {
+    const seen: Record<string, number> = {};
+    return rows.filter(r => {
+      const k = r.animal_name || 'Unknown';
+      seen[k] = (seen[k] || 0) + 1;
+      return seen[k] <= n;
+    });
   }
 
   // Helper: calculate human-readable age from DOB
@@ -547,10 +579,11 @@ IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and sho
     );
 
     // Build personalized user context from their animals, records, prescriptions, etc.
-    const userContext = await this.buildUserContext(userId);
+    const userContext = await this.buildUserContext(userId, content);
 
     // Generate AI response (real GPT or fallback)
-    const aiResponse = await this.generateAiResponse(content, history.rows, userContext);
+    // Only the recent turns go to the provider: an ever-growing chat would eventually be refused as too large.
+    const aiResponse = await this.generateAiResponse(content, history.rows.slice(-12), userContext);
 
     // Save AI response
     const aiMsgId = uuidv4();

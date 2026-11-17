@@ -494,6 +494,7 @@ async function http(method, url, body, token) {
           ...process.env,
           // Individual params, NOT DATABASE_URL: config forces SSL whenever DATABASE_URL is
           // set, and a local cluster rejects SSL.
+          GROQ_API_KEY: '', OPENAI_API_KEY: '', // never call a real AI provider from a verification run
           DATABASE_URL: '', DB_HOST: '127.0.0.1', DB_PORT: String(PG_PORT),
           DB_USER: 'postgres', DB_PASSWORD: '', DB_NAME: 'verifydb', DB_SCHEMA: SCHEMA,
           MOCK_DB: 'false', MOCK_REDIS: 'true',
@@ -695,6 +696,36 @@ async function http(method, url, body, token) {
       }
     }
 
+    // ── PHASE 6c: the AI assistant can read the user's own data ──
+    // buildUserContext() swallowed its own SQL errors, so a wrong column name left the assistant
+    // knowing NOTHING about the user's animals while every static check and every screen stayed green
+    // (2026-11-17). A seeded farmer with animals asks about one; the server must build the context.
+    if (serverHealthy && port) {
+      step('PHASE 6c AI assistant builds a farmer\'s context');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const mark = serverLog.length;
+      const login = await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' });
+      const token = login.json?.data?.token;
+      if (!token) {
+        fail('Could not sign in as the seeded demo farmer to test the AI assistant.', [`HTTP ${login.status}`]);
+      } else {
+        const sess = await http('POST', `${apiBase}/ai-copilot/sessions`, { title: 'verify' }, token);
+        const sessionId = sess.json?.data?.id || sess.json?.data?.session?.id;
+        const sent = sessionId
+          ? await http('POST', `${apiBase}/ai-copilot/sessions/${sessionId}/messages`, { content: 'How is Bessie doing in health?' }, token)
+          : sess;
+        const newLog = serverLog.slice(mark);
+        const ctxFail = newLog.split('\n').filter(l => /Failed to build user context for AI/.test(l)).map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(-200));
+        if (!sessionId || sent.status >= 400) {
+          fail('The AI assistant did not answer a seeded farmer.', [`session: HTTP ${sess.status}`, `message: HTTP ${sent.status} ${JSON.stringify(sent.json || {}).slice(0, 200)}`]);
+        } else if (ctxFail.length) {
+          fail('The AI assistant could not build the user\'s context (it would answer knowing nothing about their animals).', ctxFail);
+        } else {
+          ok('context built from the real schema');
+        }
+      }
+    }
+
     // ── PHASE 7: the browser ──
     let sweepAccounts = [];
     if (serverHealthy && port) {
@@ -817,11 +848,37 @@ async function http(method, url, body, token) {
       const info = path.join(os.tmpdir(), 'vetcare-verify-hold.json');
       const release = path.join(os.tmpdir(), 'vetcare-verify-release');
       try { fs.rmSync(release, { force: true }); } catch { /* none */ }
-      fs.writeFileSync(info, JSON.stringify({ port, sweepAccounts, release }), 'utf8');
+      fs.writeFileSync(info, JSON.stringify({ port, pgPort: PG_PORT, schema: SCHEMA, sweepAccounts, release }), 'utf8');
       log(`  HOLDING the stack on http://127.0.0.1:${port} - details in ${info}; create ${release} to stop.`);
       const until = Date.now() + 90 * 60_000;
       while (Date.now() < until && !fs.existsSync(release)) await new Promise(r => setTimeout(r, 2000));
     }
+    // ── PHASE 8: nothing the app did during the whole run failed in SQL ──
+    // Phases 6-7 drive every screen as every role. A query naming a column or table that does not exist
+    // is logged by the server and (usually) swallowed or turned into a vague 500, so no assertion above
+    // sees it. Read the server's own log: any such error is a defect, whichever screen caused it.
+    if (serverHealthy) {
+      step('PHASE 8  Server log: no SQL schema errors during the run');
+      const clean = l => l.replace(/\x1b\[[0-9;]*m/g, '');
+      const SQL_DEFECT = /(column|relation|function|type) "?[\w.\\"()]+"? (of relation "?\w+"? )?does not exist|syntax error at or near|invalid input syntax for type|bind message supplies|operator does not exist|could not determine data type/i;
+      const found = new Map();
+      for (const raw of serverLog.split('\n')) {
+        const l = clean(raw);
+        if (!/error|warn/i.test(l.slice(0, 40)) || !SQL_DEFECT.test(l)) continue;
+        const msg = (l.match(SQL_DEFECT) || [''])[0];
+        const where = (l.match(/"query":"([^"]{0,70})/) || [])[1] || '';
+        found.set(`${msg} | ${where}`, (found.get(`${msg} | ${where}`) || 0) + 1);
+      }
+      if (found.size) {
+        fail(`${found.size} SQL schema error(s) were logged by the server during the run.`,
+          [...found.entries()].slice(0, 12).map(([k, n]) => `${n}x  ${k}`)
+            .concat(['', 'A query names a column/table that does not exist, or binds the wrong parameters.',
+              'Find it with the text above; the full log is dumped on a browser failure (see PHASE 7).']));
+      } else {
+        ok('clean');
+      }
+    }
+
   } catch (err) {
     fail('Runtime verification crashed.', String(err.stack || err.message).split('\n').slice(0, 12));
   } finally {
