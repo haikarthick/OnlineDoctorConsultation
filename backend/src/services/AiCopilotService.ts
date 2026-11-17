@@ -17,6 +17,7 @@ import pool from '../utils/database';
 import logger from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 import OpenAI from 'openai';
+import { matchKnowledgeTopic, AI_UNAVAILABLE_MESSAGE, AI_BUSY_MESSAGE } from './aiCopilot/offlineAnswers';
 
 interface AiClient {
   client: OpenAI;
@@ -340,7 +341,7 @@ class AiCopilotService {
       return {
         success: false,
         analysis: null,
-        error: 'No AI provider configured. Set GROQ_API_KEY in the backend environment.',
+        error: 'Scan analysis is not available right now, so this image could not be read. Please try again later, or ask a veterinarian to review the scan from Find a doctor.',
         provider: 'none'
       };
     }
@@ -705,17 +706,10 @@ IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and sho
         return { content, confidence: 90, sources: [ai.provider, 'Veterinary Knowledge Base'], tokens };
       } catch (err: any) {
         if (err?.status === 429) {
+          // The technical detail belongs in the log. The person reading the chat is told, in plain
+          // words, that it is busy and what they can do instead - never about keys or billing pages.
           logger.error('AI quota exceeded (429). Add billing on OpenAI or switch to Groq (free).', { provider: ai.provider });
-          return {
-            content: `⚠️ The AI provider (${ai.provider}) returned a quota/billing error (429).
-
-To fix this:
-- **OpenAI users**: Add billing at https://platform.openai.com/settings/billing
-- **Free alternative**: Get a free Groq key at https://console.groq.com, set GROQ_API_KEY in your backend .env, and restart the backend.
-
-In the meantime, please use the Symptom Analysis or Drug Interactions tabs.`,
-            confidence: 0, sources: ['System'], tokens: 50
-          };
+          return { content: AI_BUSY_MESSAGE, confidence: 0, sources: ['System'], tokens: 50 };
         }
         logger.error('AI API error, falling back to local KB', { error: err?.message });
       }
@@ -728,6 +722,13 @@ In the meantime, please use the Symptom Analysis or Drug Interactions tabs.`,
       if (lc.includes(key)) {
         return { content: knowledge.response, confidence: knowledge.confidence, sources: knowledge.sources, tokens: Math.ceil(knowledge.response.length / 4) };
       }
+    }
+
+    // People mistype ("feer") and use their own words ("loose motion"): look for the topic they meant.
+    const topic = matchKnowledgeTopic(userMessage, Object.keys(VET_KNOWLEDGE));
+    if (topic) {
+      const knowledge = VET_KNOWLEDGE[topic];
+      return { content: knowledge.response, confidence: knowledge.confidence, sources: knowledge.sources, tokens: Math.ceil(knowledge.response.length / 4) };
     }
 
     if (lc.includes('interaction') || lc.includes('drug') || lc.includes('medication')) {
@@ -745,7 +746,8 @@ In the meantime, please use the Symptom Analysis or Drug Interactions tabs.`,
     }
 
     return {
-      content: `⚠️ AI Copilot offline - no AI provider configured.\n\nSet one of these in your backend .env and restart:\n- **Free**: GROQ_API_KEY=<key from https://console.groq.com>\n- **Paid**: OPENAI_API_KEY=<key from https://platform.openai.com>`,
+      // `ai` is set when a provider IS configured but did not answer (busy, timed out): say that, not "not set up".
+      content: ai ? AI_BUSY_MESSAGE : AI_UNAVAILABLE_MESSAGE,
       confidence: 40, sources: ['Local Knowledge Base'], tokens: 55
     };
   }
