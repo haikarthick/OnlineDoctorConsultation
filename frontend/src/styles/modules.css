@@ -3525,6 +3525,29 @@ textarea.module-input {
 .record-card-icon { font-size: 28px; line-height: 1; flex: none; }
 .record-card-title { display: flex; flex-direction: column; min-width: 0; }
 .record-card-sub { color: var(--gray-600); font-size: 14px; }
+/* Colour families: batch/flock = amber, herd = green, single animal = indigo. */
+.record-kind-section { --kind: #4f46e5; --kind-soft: #eef2ff; --kind-ink: #3730a3; margin-top: 20px; }
+.record-kind-section.is-batch, .record-kind-tab.is-batch { --kind: #d97706; --kind-soft: #fffbeb; --kind-ink: #92400e; }
+.record-kind-section.is-herd, .record-kind-tab.is-herd { --kind: #059669; --kind-soft: #ecfdf5; --kind-ink: #065f46; }
+.record-kind-tab.is-single { --kind: #4f46e5; --kind-soft: #eef2ff; --kind-ink: #3730a3; }
+.record-kind-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 8px; margin-top: 12px; }
+.record-kind-tab { all: unset; box-sizing: border-box; cursor: pointer; flex: 0 0 auto; display: flex; flex-direction: column; gap: 2px; min-height: var(--tap-min); padding: 8px 16px; border-radius: var(--radius-lg); border: 2px solid var(--gray-200); background: #fff; color: var(--gray-900); --kind: var(--gray-700); --kind-soft: var(--gray-100); --kind-ink: var(--gray-900); }
+.record-kind-tab:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.record-kind-tab.is-selected { border-color: var(--kind); background: var(--kind-soft); color: var(--kind-ink); }
+.record-kind-tab-name { font-weight: 700; font-size: 15px; white-space: nowrap; }
+.record-kind-tab-count { font-size: 13px; opacity: 0.8; }
+.record-search { width: 100%; margin: 4px 0 8px; }
+.record-kind-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 10px 14px; margin-bottom: 12px; border-radius: var(--radius-lg); background: var(--kind-soft); border-left: 6px solid var(--kind); }
+.record-kind-title { font-size: 18px; margin: 0; color: var(--kind-ink); }
+.record-kind-hint { flex: 1 1 200px; font-size: 14px; color: var(--gray-700); min-width: 0; }
+.record-kind-progress { font-size: 14px; font-weight: 700; color: var(--kind-ink); }
+.record-card.is-batch { --kind: #d97706; --kind-soft: #fffbeb; }
+.record-card.is-herd { --kind: #059669; --kind-soft: #ecfdf5; }
+.record-card.is-single { --kind: #4f46e5; --kind-soft: #eef2ff; }
+.record-card.is-batch, .record-card.is-herd, .record-card.is-single { border-top: 4px solid var(--kind); }
+.record-card.is-batch .record-card-icon, .record-card.is-herd .record-card-icon, .record-card.is-single .record-card-icon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: var(--kind-soft); font-size: 26px; }
+.record-card.is-done { background: linear-gradient(var(--kind-soft), #fff 60%); }
+@media (max-width: 480px) { .record-kind-hint { display: none; } }
 .record-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .record-chip { background: var(--success-light); color: #065f46; border-radius: var(--chip-radius); padding: 6px 12px; font-size: 14px; }
 .record-chip.is-empty { background: var(--gray-100); color: var(--gray-600); }

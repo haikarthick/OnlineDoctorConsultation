@@ -115,6 +115,19 @@
       "saveLater": "No signal - save on this phone and send later",
       "queued": "Saved on your phone. It will be sent as soon as you have signal.",
       "sent": "The entries that were waiting have been sent."
+    },
+    "kinds": {
+      "label": "Show",
+      "all": "All",
+      "batch": "Flocks & batches",
+      "herd": "Herds",
+      "single": "Single animals",
+      "batchHint": "One entry covers the whole flock or batch",
+      "herdHint": "Record once for the whole herd or group",
+      "singleHint": "Record for one animal at a time",
+      "progress": "{{done}} of {{total}} done",
+      "search": "Search by name",
+      "noMatch": "No animal or group matches that name. Clear the search to see everything."
     }
   }
 }

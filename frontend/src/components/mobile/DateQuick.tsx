@@ -49,6 +49,11 @@ export const DateQuick: React.FC<DateQuickProps> = ({ label, value, onChange, ma
             type="date"
             value={value}
             max={max || today}
+            onClick={() => {
+              // The input is invisible and sits over the chip. Desktop browsers only focus a date
+              // segment on click, so nothing seemed to happen: open the calendar explicitly.
+              try { inputRef.current?.showPicker?.() } catch { /* already open or not allowed: the segments still work */ }
+            }}
             onChange={e => { if (e.target.value) onChange(e.target.value) }}
           />
         </label>

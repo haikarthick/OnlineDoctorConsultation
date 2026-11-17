@@ -17,6 +17,11 @@ import {
 } from '../components/farmRecords/recordShared'
 
 import { userMessage } from '../utils/userMessage'
+
+/** Three families of subject, each with its own colour: batches/flocks, herds, single animals. */
+type CardKind = 'batch' | 'herd' | 'single'
+const KIND_ORDER: CardKind[] = ['batch', 'herd', 'single']
+const KIND_ICON: Record<CardKind, string> = { batch: '🐣', herd: '🐄', single: '🐾' }
 /**
  * Daily records: milk, eggs, feed, sample weights, water readings and deaths - one screen for the
  * whole farm, phone first. Every animal and group that has something to record today is a card;
@@ -41,6 +46,8 @@ const FarmRecords: React.FC = () => {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [open, setOpen] = useState<{ subject: RecordSubject; type?: string } | null>(null)
+  const [view, setView] = useState<'all' | CardKind>('all')
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     apiService.listEnterprises({ limit: 100 })
@@ -100,7 +107,9 @@ const FarmRecords: React.FC = () => {
         speciesCode: subject.speciesCode, animalClass: subject.animalClass, gender: subject.gender,
         managementMode: subject.managementMode, groupType: subject.groupType,
       })
-      return { subject, types: recordableTypesFor(profile, subject.kind, { emptyGroup: subject.headCount === 0 }) }
+      // Colour family comes from how the farm keeps records (master data), never from a species name.
+      const kind: CardKind = subject.kind === 'animal' ? 'single' : profile.managementMode === 'batch' ? 'batch' : 'herd'
+      return { subject, kind, types: recordableTypesFor(profile, subject.kind, { emptyGroup: subject.headCount === 0 }) }
     })
     .filter(c => c.types.length > 0)
     // Herds and flocks first (one entry covers many animals), then single animals with the most to
@@ -109,6 +118,19 @@ const FarmRecords: React.FC = () => {
       (x.subject.kind === y.subject.kind ? 0 : x.subject.kind === 'group' ? -1 : 1) ||
       y.types.length - x.types.length ||
       x.subject.name.localeCompare(y.subject.name)), [subjects, farmMaster])
+
+  const sections = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    const visible = q ? cards.filter(c => c.subject.name.toLowerCase().includes(q)) : cards
+    return KIND_ORDER
+      .map(kind => {
+        const list = visible.filter(c => c.kind === kind)
+        const doneCount = list.filter(c => records.some(r => (c.subject.kind === 'animal' ? r.animalId === c.subject.id : r.groupId === c.subject.id))).length
+        return { kind, list, doneCount }
+      })
+      .filter(s => s.list.length > 0)
+  }, [cards, records, search])
+  const shownSections = view === 'all' ? sections : sections.filter(s => s.kind === view)
 
   const recordsOf = (s: RecordSubject) => records.filter(r => (s.kind === 'animal' ? r.animalId === s.id : r.groupId === s.id))
   const totals = useMemo(() => totalsByType(records), [records])
@@ -227,12 +249,44 @@ const FarmRecords: React.FC = () => {
               <button className="btn btn-primary" onClick={() => navigate('/animal-groups')}>{t('farmRecords.goHerds')}</button>
             </div>
           ) : (
+            <>
+              <div className="record-kind-tabs" role="group" aria-label={t('farmRecords.kinds.label')}>
+                <button type="button" className={`record-kind-tab ${view === 'all' ? 'is-selected' : ''}`} aria-pressed={view === 'all'} onClick={() => setView('all')}>
+                  <span className="record-kind-tab-name">{t('farmRecords.kinds.all')}</span>
+                  <span className="record-kind-tab-count">{cards.length}</span>
+                </button>
+                {KIND_ORDER.filter(k => cards.some(c => c.kind === k)).map(k => {
+                  const all = cards.filter(c => c.kind === k)
+                  const done = all.filter(c => recordsOf(c.subject).length > 0).length
+                  return (
+                    <button key={k} type="button" className={`record-kind-tab is-${k} ${view === k ? 'is-selected' : ''}`} aria-pressed={view === k} onClick={() => setView(k)}>
+                      <span className="record-kind-tab-name"><span aria-hidden="true">{KIND_ICON[k]}</span> {t(`farmRecords.kinds.${k}`)}</span>
+                      <span className="record-kind-tab-count">{t('farmRecords.kinds.progress', { done, total: all.length })}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {cards.length > 8 && (
+                <input type="search" className="search-input record-search" value={search} onChange={e => setSearch(e.target.value)}
+                  placeholder={t('farmRecords.kinds.search')} aria-label={t('farmRecords.kinds.search')} />
+              )}
+
+              {shownSections.length === 0 && <p className="record-note">{t('farmRecords.kinds.noMatch')}</p>}
+
+              {shownSections.map(section => (
+              <section key={section.kind} className={`record-kind-section is-${section.kind}`} aria-label={t(`farmRecords.kinds.${section.kind}`)}>
+                <header className="record-kind-head">
+                  <h2 className="record-kind-title"><span aria-hidden="true">{KIND_ICON[section.kind]}</span> {t(`farmRecords.kinds.${section.kind}`)}</h2>
+                  <span className="record-kind-hint">{t(`farmRecords.kinds.${section.kind}Hint`)}</span>
+                  <span className="record-kind-progress">{t('farmRecords.kinds.progress', { done: section.doneCount, total: section.list.length })}</span>
+                </header>
             <div className="record-card-grid">
-              {cards.map(({ subject, types }) => {
+              {section.list.map(({ subject, types }) => {
                 const done = recordsOf(subject)
                 const head = counts[subject.id]
                 return (
-                  <div key={`${subject.kind}:${subject.id}`} className="card record-card">
+                  <div key={`${subject.kind}:${subject.id}`} className={`card record-card is-${section.kind} ${done.length > 0 ? 'is-done' : ''}`}>
                     <div className="record-card-head">
                       <span className="record-card-icon" aria-hidden="true">{speciesIcon(subject.speciesCode || '')}</span>
                       <div className="record-card-title">
@@ -271,6 +325,9 @@ const FarmRecords: React.FC = () => {
                 )
               })}
             </div>
+              </section>
+              ))}
+            </>
           )}
         </>
       )}
