@@ -10,8 +10,13 @@ This repo's `git push` already runs a 5-gate pipeline automatically via a pre-pu
 it is **not** the same as the change being verified, because two of those five gates are static
 and one specific kind of bug is invisible to anything static.
 
-## The five automatic gates (for context, not action — these just run)
+## The automatic gates (for context, not action — these just run)
 
+The full rulebook, with what enforces each rule, is `docs/HARNESS.md` (H1-H12). Read it once; it
+replaces guessing what "verified" means.
+
+0. **Frontend `tsc --noEmit`, ESLint errors, `vitest run`** (H1) — `vite build` does not
+   type-check, and the frontend tests used to run nowhere. They run first and in CI.
 1. Backend build (`tsc`)
 2. Frontend build + bundle budget
 3. Schema validation (column names in code vs. `docker/init.sql`)
@@ -66,6 +71,13 @@ for `demo` with the old level of caution — run this locally before pushing, do
 
 ## For a UI change specifically
 
+The whole-app sweep (`frontend/e2e/app-sweep.spec.ts`, inside gate 5) visits **every** route for
+every gate role on a phone and a desktop, taps every tab/chip/toggle, checks hidden date pickers
+open, and fails on a crash, console error, blank screen, leaked i18n key, error text or sideways
+scroll. A UI change is not done until that ran green (CI shows it) **and** you looked at the
+screen yourself or said plainly that you did not (H12). A new sweep finding is fixed, not
+allow-listed; `e2e/sweep-known-issues.json` only shrinks (H8).
+
 `tsc` and `vitest` verify correctness, not that the feature actually works or looks right. If you
 can run the app, do — start it and actually click through the golden path and at least one edge
 case before calling a frontend task done. If you can't, say so explicitly rather than reporting
@@ -91,5 +103,7 @@ not a substitute for the sign-off that area requires. See the `tenant-isolation-
 - [ ] `npm run verify:runtime` actually run (not just assumed green via the static gates), if the
       change touched DB/routes/auth
 - [ ] For a UI change: ran the app and exercised it, or said plainly that you didn't
+- [ ] No check was loosened, skipped, `--no-verify`'d or added to a ratchet to get green (H11)
+- [ ] A shared control I touched has a behaviour test that performs the action (H7)
 - [ ] Committed with a message describing *why*, pushed to `origin/develop`
 - [ ] If this touched the network-hospital zone: approval was obtained, not assumed

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useCssVar } from '../hooks/useCssVar'
 
 /**
  * WayToVetLogo
@@ -39,7 +40,6 @@ export interface WayToVetLogoProps {
   onDark?: boolean
   title?: string
   className?: string
-  style?: React.CSSProperties
 }
 
 export const WayToVetLogo: React.FC<WayToVetLogoProps> = ({
@@ -48,8 +48,9 @@ export const WayToVetLogo: React.FC<WayToVetLogoProps> = ({
   onDark = false,
   title = 'waytovet',
   className,
-  style,
 }) => {
+  // The only dynamic value is the size; the class turns it into gap and font size (no inline style).
+  const sizeRef = useCssVar('--wtv-size', `${size}px`)
   // Unique gradient ids so multiple instances on one page never collide.
   const uid = React.useId().replace(/:/g, '')
   const bgId = `wtv-bg-${uid}`
@@ -63,7 +64,7 @@ export const WayToVetLogo: React.FC<WayToVetLogoProps> = ({
       viewBox="0 0 64 64"
       role="img"
       aria-label={title}
-      style={{ display: 'block', flexShrink: 0 }}
+      className="wtv-logo-mark"
     >
       <defs>
         {/* Rounded-square brand badge in the site's primary gradient */}
@@ -118,31 +119,17 @@ export const WayToVetLogo: React.FC<WayToVetLogoProps> = ({
 
   if (variant === 'mark') {
     return (
-      <span className={className} style={{ display: 'inline-flex', ...style }}>
+      <span ref={sizeRef} className={`wtv-logo ${className || ''}`.trim()}>
         {mark}
       </span>
     )
   }
 
   return (
-    <span
-      className={className}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.28, ...style }}
-    >
+    <span ref={sizeRef} className={`wtv-logo is-full ${onDark ? 'is-on-dark' : ''} ${className || ''}`.trim()}>
       {mark}
-      <span
-        style={{
-          fontSize: size * 0.62,
-          fontWeight: 800,
-          letterSpacing: '-0.04em',
-          lineHeight: 1,
-          color: onDark ? '#ffffff' : '#1f2540',
-          whiteSpace: 'nowrap',
-          fontFamily:
-            'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
-        }}
-      >
-        way<span style={{ color: onDark ? '#c4b5fd' : '#667eea' }}>to</span>vet
+      <span className="wtv-logo-word">
+        way<span className="wtv-logo-to">to</span>vet
       </span>
     </span>
   )

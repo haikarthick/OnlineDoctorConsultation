@@ -198,7 +198,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
   }
 
   const certTypeLabel = (type: string) =>
-    t(`vetCertificates.certTypes.${type}` as any) || type.replace(/_/g, ' ')
+    type ? String(t(`vetCertificates.certTypes.${type}` as any, { defaultValue: type.replace(/_/g, ' ') })) : ''
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 

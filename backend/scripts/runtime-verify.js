@@ -142,6 +142,33 @@ function psql(db, sqlOrFile, { file = false, singleTx = false } = {}) {
   return pgRun('psql', args);
 }
 
+/**
+ * Runs a child process WITHOUT blocking this process's event loop, and resolves/rejects with its
+ * captured output. This matters: the harness server's stdout/stderr are pipes that THIS process
+ * drains through event handlers. A synchronous call (execFileSync) freezes that draining, the
+ * server's console pipe fills after ~64KB of request logging, the server blocks on its next log
+ * line and every request hangs - which looked exactly like "the app froze" during the whole-app
+ * browser sweep. Never wait synchronously for anything while the server is up.
+ */
+function runAsync(file, args, { cwd, env, timeout }) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(file, args, { cwd, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    let stdout = '', stderr = '';
+    const timer = setTimeout(() => {
+      killTree(child);
+      reject(Object.assign(new Error(`timed out after ${timeout}ms`), { stdout, stderr }));
+    }, timeout);
+    child.stdout.on('data', d => { stdout += d.toString(); });
+    child.stderr.on('data', d => { stderr += d.toString(); });
+    child.on('error', e => { clearTimeout(timer); reject(Object.assign(e, { stdout, stderr })); });
+    child.on('close', code => {
+      clearTimeout(timer);
+      if (code === 0) resolve({ stdout, stderr });
+      else reject(Object.assign(new Error(`exited with code ${code}`), { stdout, stderr }));
+    });
+  });
+}
+
 function killTree(proc) {
   if (!proc || proc.killed) return;
   try {
@@ -491,6 +518,8 @@ async function http(method, url, body, token) {
           // and surface as phantom failures. Defaults in app.ts are untouched - this is an
           // opt-in override for the verification run only.
           AUTH_RATE_LIMIT_MAX: '100000', AUTH_RATE_LIMIT_WINDOW_MS: '60000',
+          // Same reason, for the whole-app sweep that opens every screen of every role.
+          API_RATE_LIMIT_MAX: '1000000', SENSITIVE_RATE_LIMIT_MAX: '1000000',
           PORT: String(port), NODE_ENV: 'development',
         },
       });
@@ -667,6 +696,7 @@ async function http(method, url, body, token) {
     }
 
     // ── PHASE 7: the browser ──
+    let sweepAccounts = [];
     if (serverHealthy && port) {
       const FRONTEND = path.join(ROOT, 'frontend');
       const distIndex = path.join(FRONTEND, 'dist', 'index.html');
@@ -684,8 +714,42 @@ async function http(method, url, body, token) {
             INSERT INTO system_settings (key, value, description)
             VALUES ('grooming.enabled', 'true', 'enabled by runtime-verify PHASE 7')
             ON CONFLICT (key) DO UPDATE SET value = 'true';`);
+          // Same for the farm daily-records module: the sweep must see the flag-on screens.
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public;
+            INSERT INTO system_settings (key, value, description)
+            VALUES ('farm.records.enabled', 'true', 'enabled by runtime-verify PHASE 7')
+            ON CONFLICT (key) DO UPDATE SET value = 'true';`);
         } catch { /* settings table shape differs - the browser pass still runs without it */ }
 
+        // The whole-app sweep (frontend/e2e/app-sweep.spec.ts) signs in as every role. Farmer and
+        // pet owner it registers itself; roles that need approval or cannot self-register are
+        // prepared here, where the database can be reached, and handed over as SWEEP_ACCOUNTS.
+        sweepAccounts = [];
+        try {
+          const apiBase = `http://127.0.0.1:${port}/api/v1`;
+          const stamp = Date.now();
+          let seq = (Math.floor(stamp / 1000) % 100000000) + 5000;
+          for (const role of ['veterinarian', 'corporate_admin', 'admin']) {
+            const email = `sweep.${role.replace(/_/g, '.')}.${stamp}@example.com`;
+            const body = {
+              firstName: 'Sweep', lastName: role.replace(/_/g, ' '), email, phone: `9${String(seq++).padStart(9, '0')}`,
+              password: 'Password1', confirmPassword: 'Password1', role: role === 'admin' ? 'pet_owner' : role, acceptTerms: true,
+            };
+            if (role === 'veterinarian') body.licenseNumber = 'SWEEP-LIC-1';
+            const reg = await http('POST', `${apiBase}/auth/register`, body);
+            if (!reg.json?.success) continue; // the sweep skips a role it has no account for, and says so
+            const sql = [`UPDATE users SET account_status = 'active', is_active = true WHERE email = '${email}';`];
+            if (role === 'admin') {
+              sql.push(`UPDATE users SET role = 'admin' WHERE email = '${email}';`);
+              sql.push(`DELETE FROM user_roles WHERE user_id = (SELECT id FROM users WHERE email = '${email}');`);
+              sql.push(`INSERT INTO user_roles (user_id, role, is_primary) SELECT id, 'admin', true FROM users WHERE email = '${email}';`);
+            }
+            psql('verifydb', `SET search_path TO ${SCHEMA}, public; ${sql.join(' ')}`);
+            sweepAccounts.push({ role, email, password: 'Password1' });
+          }
+        } catch { /* best effort: the sweep still covers farmer and pet owner */ }
+
+        // VERIFY_E2E_GREP narrows the browser run (e.g. while developing a spec); default is @critical.
         step(`PHASE 7  Browser journeys (${FULL ? 'FULL e2e suite' : 'critical journeys'} vs the real SPA)`);
         try {
           // --retries=0: a gate must be deterministic. Retries would hide a genuinely flaky
@@ -694,18 +758,14 @@ async function http(method, url, body, token) {
           // (deprecated + unescaped args) and `npx.cmd` is not reliably spawnable - both fail
           // with EMPTY stdout/stderr, which makes a real test failure look like a mystery.
           const cli = path.join(FRONTEND, 'node_modules', '@playwright', 'test', 'cli.js');
-          execFileSync(process.execPath, [cli, 'test', ...(FULL ? [] : ['--grep', '@critical']), '--reporter', 'list', '--retries=0'], {
+          await runAsync(process.execPath, [cli, 'test', ...(FULL ? [] : ['--grep', process.env.VERIFY_E2E_GREP || '@critical']), '--reporter', 'list', '--retries=0', `--workers=${process.env.VERIFY_E2E_WORKERS || 1}`], {
             cwd: FRONTEND,
-            encoding: 'utf8',
-            stdio: 'pipe',
-            windowsHide: true,
             // @critical is a handful of journeys; --full is 462 tests on a single worker and
             // needs far longer. Overridable via VERIFY_E2E_TIMEOUT_MS.
-            timeout: Number(process.env.VERIFY_E2E_TIMEOUT_MS) || (FULL ? 3600000 : 600000),
-            maxBuffer: 64 * 1024 * 1024,
-            env: { ...process.env, E2E_BASE_URL: `http://127.0.0.1:${port}`, CI: '1' },
+            timeout: Number(process.env.VERIFY_E2E_TIMEOUT_MS) || (FULL ? 3600000 : 1800000),
+            env: { ...process.env, E2E_BASE_URL: `http://127.0.0.1:${port}`, CI: '1', SWEEP_ACCOUNTS: JSON.stringify(sweepAccounts) },
           });
-          ok('registration, shell render, i18n, password toggle');
+          ok('registration, shell render, i18n, password toggle, whole-app sweep');
         } catch (e) {
           const out = `${(e.stdout || '').toString()}\n${(e.stderr || '').toString()}`.trim();
           if (/Executable doesn't exist|playwright install/i.test(out)) {
@@ -750,6 +810,17 @@ async function http(method, url, body, token) {
           }
         }
       }
+    }
+    // VERIFY_HOLD=1: keep the whole stack alive so a spec can be developed against it by hand
+    // instead of paying ~3 minutes of setup per attempt. Release with: touch <tmp>/vetcare-verify-release
+    if (process.env.VERIFY_HOLD === '1' && port) {
+      const info = path.join(os.tmpdir(), 'vetcare-verify-hold.json');
+      const release = path.join(os.tmpdir(), 'vetcare-verify-release');
+      try { fs.rmSync(release, { force: true }); } catch { /* none */ }
+      fs.writeFileSync(info, JSON.stringify({ port, sweepAccounts, release }), 'utf8');
+      log(`  HOLDING the stack on http://127.0.0.1:${port} - details in ${info}; create ${release} to stop.`);
+      const until = Date.now() + 90 * 60_000;
+      while (Date.now() < until && !fs.existsSync(release)) await new Promise(r => setTimeout(r, 2000));
     }
   } catch (err) {
     fail('Runtime verification crashed.', String(err.stack || err.message).split('\n').slice(0, 12));

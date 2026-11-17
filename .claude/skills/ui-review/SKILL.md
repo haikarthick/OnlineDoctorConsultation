@@ -12,6 +12,19 @@ framing because it's a good forcing function for "does this feel considered."
 
 Do layer 1 first. There's no point judging the polish of a screen that's about to fail the gate.
 
+Layer 1 is now partly **machine-checked across the whole app** (`docs/HARNESS.md`): the browser
+sweep taps every tab and toggle on every route, checks hidden native pickers actually open, and
+flags a phone layout that scrolls sideways. Your review adds what it cannot judge - hierarchy,
+grouping, colour meaning, whether 40 items would still be usable (rule H10).
+
+Two extra non-negotiables, both learned from real bugs:
+
+- **Never put a native input invisibly under a styled control without a test that the tap reaches
+  it.** Desktop browsers only focus a date segment on click; the calendar must be opened
+  explicitly (`showPicker()`), and a behaviour test must assert it (H7).
+- **Never ship a list that can outgrow a screen as one flat scroll.** Group it, give it filter
+  tabs, or a search - decided in the design contract, not after a user complains.
+
 ## Layer 1 — the non-negotiables (read `docs/DESIGN_SYSTEM.md` in full)
 
 These are from that document, restated here because they're the most commonly missed:

@@ -26,5 +26,7 @@ export const emptyVaccineRow = (): VaccineRow => ({
   vaccine: '', batchNo: '', dateAdministered: '', nextDue: '', manufacturer: ''
 })
 
+// An empty type (nothing chosen yet) must show nothing: the key would end in a dot and the translation
+// library prints such a key as text. A type with no translation falls back to its own words.
 export const certTypeLabel = (t: TFunction, type: string) =>
-  t(`vetCertificates.certTypes.${type}` as any) || type.replace(/_/g, ' ')
+  type ? String(t(`vetCertificates.certTypes.${type}` as any, { defaultValue: type.replace(/_/g, ' ') })) : ''

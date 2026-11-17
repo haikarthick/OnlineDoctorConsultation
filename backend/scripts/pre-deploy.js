@@ -3,6 +3,7 @@
  * Pre-Deployment Validation
  * ─────────────────────────
  * Runs ALL checks before deploying to catch issues early:
+ *   0. Frontend type-check, lint errors, unit + guard tests  (H1 - fast, run first)
  *   1. Backend production build
  *   2. Frontend production build (+ bundle budget)
  *   3. Schema validation (column mismatches, static)
@@ -59,6 +60,15 @@ function runCheck(name, command, cwd, timeout = 120000, envOverride = null) {
 }
 
 console.log(`\n${CYAN}━━━ VetCare Pre-Deployment Checks ━━━${RESET}\n`);
+
+// 0. FRONTEND STATIC SAFETY NET (harness rule H1, docs/HARNESS.md).
+//    `vite build` strips types without checking them, so a type error shipped green until now, and
+//    the frontend's vitest suite (error-message guard, locale parity, routing links, translation-key
+//    guard, shared-control behaviour tests) was wired into NEITHER this gate NOR CI. They run
+//    first because they are the cheapest and fail with the clearest message.
+runCheck('Frontend type-check (tsc --noEmit)', 'npx tsc --noEmit', FRONTEND, 300000);
+runCheck('Frontend lint (errors only)', 'npx eslint src --ext .ts,.tsx --quiet', FRONTEND, 300000);
+runCheck('Frontend tests + guards (vitest)', 'npx vitest run', FRONTEND, 600000);
 
 // Mirror render-build.sh EXACTLY: it forces NODE_ENV=production for both build commands (a
 // deployed app is always a production build, even though the dev SERVICE runs NODE_ENV=development

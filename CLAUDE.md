@@ -144,7 +144,15 @@ Invoke these for the workflows they cover rather than improvising each time:
   network/enterprise/pharmacy/group id
 - `pre-ship` — what "done" actually requires, beyond a green `tsc`
 
+## Mandatory: the harness
+Every change must pass the whole-app harness in `docs/HARNESS.md` (rules H1-H12): types, lint, all
+frontend tests and guards on every push and in CI, plus a browser sweep that opens **every route**
+as every gate role on a phone and a desktop and taps every tab. Never bypass, loosen or
+allow-list a failing check to get green; ratchet files only shrink. Design a screen's sub-views and
+its 40-item case **before** coding it (feature-delivery Phase 2).
+
 ## Module docs
+- `docs/HARNESS.md` — the rulebook: what runs where, what enforces each rule, what it cannot see.
 - `docs/modules/mobile-ui.md` — phone tab bar + shared building blocks for every role; the table
   there says which single file to edit for any UI/UX change.
 - `docs/modules/routing.md` - route guards, deep links, session expiry, unknown addresses; one place decides access.

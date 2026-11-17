@@ -101,6 +101,17 @@ jobs:
         working-directory: frontend
         run: npx tsc --noEmit
 
+      # Harness rule H1 (docs/HARNESS.md): these two were never run in CI before, so the
+      # error-message guard, locale parity, routing, translation-key and shared-control tests
+      # protected nothing. Same commands as the local pre-push gate.
+      - name: Lint (errors only)
+        working-directory: frontend
+        run: npx eslint src --ext .ts,.tsx --quiet
+
+      - name: Unit + guard tests
+        working-directory: frontend
+        run: npx vitest run
+
       - name: Build
         working-directory: frontend
         run: npm run build
@@ -128,7 +139,7 @@ jobs:
     # lands (broke silently when runners moved to ubuntu26.04 - see the 2026-11-13 CI-repair
     # commit). Bump this deliberately alongside a Playwright upgrade, not by GitHub's default.
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:

@@ -20,6 +20,12 @@ Every signal said ship. The feature was broken for every user, because the only 
 could have caught it was *running it*. The root cause (startup self-heal reverting a tracked
 migration on every boot) is invisible to every static tool, and invisible in the migration log.
 
+> **Start at `docs/HARNESS.md`.** It is the single rulebook over every layer (static net, runtime
+> gate, whole-app browser sweep, ratchets, process rules). This file is the deep-dive on the
+> database/runtime gate. Since 2026-11-17 the push gate also runs **check 0**: frontend
+> `tsc --noEmit`, ESLint errors and the full `vitest` suite - previously wired into neither the hook
+> nor CI - and PHASE 7 includes the whole-app sweep (`e2e/app-sweep.spec.ts`).
+
 ## The five gates (`npm run pre-deploy`, runs on every push)
 
 | # | Check | Catches | Nature |
@@ -76,6 +82,12 @@ Deterministic by construction: `--retries=0` (retries would hide flakiness behin
 and every test starts signed out via an `addInitScript` that clears storage before app code runs.
 The obvious `goto('/') → clear → goto('/register')` approach is racy — the SPA's own redirect
 interrupts the second navigation.
+
+### PHASE 7 and the server's console pipe (2026-11-17)
+
+PHASE 7 must run Playwright **asynchronously** (`runAsync`). The harness server's output is drained by
+this process's event loop; blocking that loop (`execFileSync`) fills the pipe and freezes the server, which
+shows up as every `page.goto` timing out. Details and the other harness lessons: `docs/HARNESS.md`.
 
 ### Design decisions worth keeping
 

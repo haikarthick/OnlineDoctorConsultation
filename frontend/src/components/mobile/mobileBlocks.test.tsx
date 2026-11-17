@@ -135,6 +135,33 @@ describe('DateQuick', () => {
     fireEvent.click(screen.getByText('mobileUi.date.yesterday'))
     expect(onChange).toHaveBeenCalledWith(localIsoDate(-1))
   })
+
+  // Regression (2026-11-17): the date field is invisible and sits over the "Other" chip. Desktop
+  // browsers only focus a date segment on click, so "Other date" appeared to do nothing.
+  it('opens the calendar when "Other date" is clicked', () => {
+    const showPicker = vi.fn()
+    const original = HTMLInputElement.prototype.showPicker
+    HTMLInputElement.prototype.showPicker = showPicker
+    try {
+      const { container } = render(<DateQuick label="Day" value={localIsoDate(0)} onChange={() => {}} />)
+      fireEvent.click(container.querySelector('input[type="date"]') as HTMLInputElement)
+      expect(showPicker).toHaveBeenCalledTimes(1)
+    } finally {
+      HTMLInputElement.prototype.showPicker = original
+    }
+  })
+
+  it('does not break where the browser has no calendar API', () => {
+    const original = HTMLInputElement.prototype.showPicker
+    // @ts-expect-error simulating an older browser
+    HTMLInputElement.prototype.showPicker = undefined
+    try {
+      const { container } = render(<DateQuick label="Day" value={localIsoDate(0)} onChange={() => {}} />)
+      expect(() => fireEvent.click(container.querySelector('input[type="date"]') as HTMLInputElement)).not.toThrow()
+    } finally {
+      HTMLInputElement.prototype.showPicker = original
+    }
+  })
 })
 
 describe('ChipSelect', () => {

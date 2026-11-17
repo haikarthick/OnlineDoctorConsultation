@@ -60,6 +60,18 @@ Decide the shape before writing code:
 - Has a UI surface → identify which existing patterns it should match (`modules.css` classes,
   which module's pages it's visually closest to) before building, not after — matching an
   existing pattern is cheaper than retrofitting one later.
+- **Write the design contract (harness rule H10, `docs/HARNESS.md`) before any UI code** - four
+  answers, in the plan, so the review has something to hold the result against:
+  1. *Sub-views*: how does a person switch between the parts of this screen (tabs, sections,
+     filters), and what is the default one?
+  2. *Largest realistic data*: design for 40 animals / 200 rows / a 60-character name in Tamil,
+     not the 3 in the demo. A list that can pass ~8 cards must be grouped, filtered or searchable
+     **by design** - never "one long scroll" (that is exactly how Daily records shipped as one
+     undifferentiated wall of cards).
+  3. *Phone vs desktop*: what changes at 390px, and which shared building blocks are reused
+     (`components/mobile/*`, `components/shared/*`). A new pattern goes in the shared layer.
+  4. *Native controls*: any date/time/file/select styled over a native input - how does the tap
+     reach the native control, and which test proves it (H7)?
 - State the plan concretely enough that Phase 4's review has something specific to check against.
 
 ## Phase 3 — Build
@@ -86,6 +98,11 @@ the change "looks small," small changes are exactly where a skipped review goes 
    is a valid outcome; a review that didn't run is not.
 
 ## Phase 5 — Ship
+
+The harness (`docs/HARNESS.md`) runs on its own at push and in CI - `tsc`, lint, every frontend
+test, the whole-app browser sweep. Do not weaken, skip or add exceptions to it to get green (H11).
+A **new module behind a feature flag** must also have its flag switched on in `runtime-verify.js`
+PHASE 7, or the sweep never sees its screens.
 
 Run the **`pre-ship` skill**. Don't report the feature done until its checklist is actually
 satisfied — verification run (or explicitly not, with a reason), committed, pushed to

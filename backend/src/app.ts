@@ -90,10 +90,12 @@ const authLimiter = rateLimit({
   keyGenerator: (req) => req.ip || req.socket.remoteAddress || 'unknown',
 })
 
-// Moderate: general API (per-user when authenticated)
+// Moderate: general API (per-user when authenticated). The two env overrides exist ONLY for the
+// verification run (runtime-verify.js): the whole-app browser sweep opens every screen of every
+// role from one address and would otherwise be answered with 429s that look like app bugs.
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 300,
+  max: Number(process.env.API_RATE_LIMIT_MAX) || 300,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -103,7 +105,7 @@ const apiLimiter = rateLimit({
 // Sensitive: admin & payment operations
 const sensitiveLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 60,
+  max: Number(process.env.SENSITIVE_RATE_LIMIT_MAX) || 60,
   message: 'Rate limit reached for sensitive operations. Try again later.',
   standardHeaders: true,
   legacyHeaders: false,

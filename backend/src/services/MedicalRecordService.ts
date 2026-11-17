@@ -1125,18 +1125,21 @@ export class MedicalRecordService {
         vetAnimalFilter = `WHERE (a.owner_id = $${paramIdx} OR a.id IN (SELECT animal_id FROM consultations WHERE veterinarian_id = $${paramIdx} AND animal_id IS NOT NULL) OR a.id IN (SELECT animal_id FROM bookings WHERE veterinarian_id = $${paramIdx} AND animal_id IS NOT NULL))`;
         prescriptionFilter = `WHERE p.veterinarian_id = $${paramIdx} OR p.pet_owner_id = $${paramIdx}`;
         consultationFilter = `WHERE c.veterinarian_id = $${paramIdx} OR c.user_id = $${paramIdx}`;
-        params.push(userId, userId, userId); // Push userId 3 times (used in multiple places in vetAnimalFilter)
-        paramIdx += 3;
+        // Every filter above refers to the SAME placeholder ($1), so exactly ONE value is bound. (It used
+        // to bind three: Postgres rejects that as 08P01 and Medical records answered 500 for everyone
+        // except admins.)
+        params.push(userId);
+        paramIdx += 1;
       }
 
       const [records, vaccinations, allergies, labs, upcoming, prescriptions, consultations] = await Promise.all([
-        database.query(`SELECT COUNT(*) as count, record_type as type FROM medical_records mr ${userFilter} GROUP BY record_type`, params.slice(0, userFilter ? 3 : 0)),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records vr LEFT JOIN animals a ON a.id = vr.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 3) : []),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN ar.is_active THEN 1 END) as active FROM allergy_records ar LEFT JOIN animals a ON a.id = ar.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 3) : []),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN lr.status = 'pending' THEN 1 END) as pending FROM lab_results lr LEFT JOIN animals a ON a.id = lr.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 3) : []),
-        database.query(`SELECT COUNT(*) as count FROM medical_records mr ${userFilter ? userFilter + ' AND' : 'WHERE'} follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE AND follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`, params.slice(0, userFilter ? 3 : 0)),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN p.is_active THEN 1 END) as active FROM prescriptions p ${prescriptionFilter}`, prescriptionFilter ? params.slice(0, 3) : []),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN c.status = 'completed' THEN 1 END) as completed FROM consultations c ${consultationFilter}`, consultationFilter ? params.slice(0, 3) : []),
+        database.query(`SELECT COUNT(*) as count, record_type as type FROM medical_records mr ${userFilter} GROUP BY record_type`, params.slice(0, userFilter ? 1 : 0)),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records vr LEFT JOIN animals a ON a.id = vr.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 1) : []),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN ar.is_active THEN 1 END) as active FROM allergy_records ar LEFT JOIN animals a ON a.id = ar.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 1) : []),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN lr.status = 'pending' THEN 1 END) as pending FROM lab_results lr LEFT JOIN animals a ON a.id = lr.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 1) : []),
+        database.query(`SELECT COUNT(*) as count FROM medical_records mr ${userFilter ? userFilter.replace(/^WHERE (.*)$/, 'WHERE ($1) AND') : 'WHERE'} follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE AND follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`, params.slice(0, userFilter ? 1 : 0)),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN p.is_active THEN 1 END) as active FROM prescriptions p ${prescriptionFilter}`, prescriptionFilter ? params.slice(0, 1) : []),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN c.status = 'completed' THEN 1 END) as completed FROM consultations c ${consultationFilter}`, consultationFilter ? params.slice(0, 1) : []),
       ]);
 
       const recordsByType: Record<string, number> = {};
