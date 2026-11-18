@@ -38,13 +38,18 @@ free classifieds module (no payments) - see memory `marketplace-gap-analysis-pla
 | 5 | Contact: masked phone, reveal on Call/WhatsApp tap (logged, 30/day, seller notified, who-viewed) | done 2026-11-18 (buyer phone verification not required - it only exists for farm-invite sign-ups) |
 | 6 | Quality gates: component tests (filters, My listings, gallery, photo step), media + SQL unit tests | done 2026-11-18 |
 
-## Open items (not done, owner to prioritise)
-- Search: full-text still uses the English configuration; Hindi/Tamil/Telugu/Kannada/Malayalam queries and transliterated breed names match poorly. Needs unaccent/trigram + localized labels in the index.
-- Video: not compressed or transcoded on the phone (needs an in-browser encoder). Protection today is the 50 MB / 60 s cap plus Cloudinary q_auto on delivery.
-- Public page: no near-me / distance (needs the same geolocation control as the signed-in page).
-- Map view: next phase, by owner decision.
-- Video moderation: only the existing animal review queue + report button; no automated screening yet.
-- Manual check needed by the owner: take a photo and record a video on a real Android phone over mobile data; confirm Call and WhatsApp open the right app.
+## Follow-up round (2026-11-18, same day) - open items closed
+- **Search in Indian languages - done.** Search also matches description, place, district and state. The app maps typed Hindi/Tamil/Telugu/Kannada/Malayalam breed and species names to the canonical names stored on listings (`utils/searchAliases.ts`, from the locale files and any admin-typed names) and sends them as `searchAliases`; the server matches them exactly (bound parameter, max 10). Limit: only breeds/species the app has a translation for are understood; free words inside a description are still matched by plain substring, not by language-aware stemming. No pg_trgm/unaccent index was added (an extension that cannot be created would abort init.sql, which is one transaction).
+- **Video compression on the phone - done, UNTESTED ON A DEVICE.** `utils/videoCompress.ts` re-records a large video at 720p/1.5 Mbps in the browser (plays once in real time; progress shown). Falls back to the original when the browser cannot (no MediaRecorder/captureStream) or anything fails. Needs a real-phone test (Chrome Android, Safari iOS).
+- **Public near-me and distance - done** (shared `hooks/useNearMe.ts` + `NearMeBar`).
+- **Map view - done** (list/map toggle on both pages, reuses `components/MapView`, lazy-loaded). Pins are rounded to ~1 km. PRIVACY FIX in the same change: exact seller coordinates were previously returned to every signed-in user; now only the seller/admin get them.
+- **Automated photo screening - hook only, OFF by default.** Set `MEDIA_MODERATION` (a Cloudinary moderation add-on, e.g. aws_rek) to screen marketplace PHOTOS at upload; a rejected photo is deleted and the person gets a plain message. Never applied to medical photos. Not verified against a live add-on (needs an account/add-on). Video screening is asynchronous at Cloudinary and is NOT handled: videos still rely on the report button and the review queue.
+- **Harness:** runtime-verify PHASE 6d drives the marketplace on the real schema; it now refuses to run against a backend/dist older than backend/src.
+
+## Still open
+- Manual check by the owner on a real Android phone over mobile data: take a photo, record a video (watch the 'making the video smaller' progress), confirm Call/WhatsApp open the right app, confirm the map pins show.
+- Video moderation (asynchronous) and enabling `MEDIA_MODERATION` in an environment that has the add-on.
+- OpenStreetMap's public tile server is used for the map; its usage policy discourages heavy traffic. If the marketplace map gets real volume, switch the tile URL in `components/MapView.tsx` to a paid/own tile provider.
 
 Each phase: tsc + lint + vitest + build, runtime verify for DB/route changes, then commit and push to
 origin/develop. Manual functional checks needed from the owner are listed at the end of each phase.

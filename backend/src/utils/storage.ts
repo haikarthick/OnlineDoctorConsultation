@@ -31,6 +31,29 @@ export interface StoredFile {
   key: string;
   /** Video duration in seconds - only set by drivers that can report it (Cloudinary) */
   duration?: number;
+  /** Automated screening result, only when MEDIA_MODERATION is set and the upload was screened (Cloudinary) */
+  moderation?: 'approved' | 'rejected' | 'pending';
+}
+
+/**
+ * Folders whose uploads are screened when MEDIA_MODERATION is set. Marketplace photos are shown to the public;
+ * medical photos (wounds, surgery, post-mortems) are NOT screened - an automated "graphic content" check would
+ * wrongly flag exactly the pictures a vet needs to see.
+ */
+export const MODERATED_FOLDER_PREFIXES = ['marketplace'];
+
+export function shouldModerate(folder: string, isVideo: boolean, setting: string | undefined): boolean {
+  return !!setting && !isVideo && MODERATED_FOLDER_PREFIXES.some(p => folder === p || folder.startsWith(p + '/'));
+}
+
+/** Cloudinary returns `moderation: [{ kind, status }]` on an upload that was screened. Rejected wins over pending wins over approved. */
+export function summarizeModeration(moderation: unknown): 'approved' | 'rejected' | 'pending' | undefined {
+  if (!Array.isArray(moderation) || moderation.length === 0) return undefined;
+  const statuses = moderation.map((m: any) => String(m?.status || '').toLowerCase());
+  if (statuses.includes('rejected')) return 'rejected';
+  if (statuses.includes('pending')) return 'pending';
+  if (statuses.includes('approved')) return 'approved';
+  return undefined;
 }
 
 export interface StorageDriver {
@@ -166,6 +189,9 @@ class CloudinaryStorage implements StorageDriver {
       ];
     }
 
+    // Optional automated screening (a Cloudinary moderation add-on, e.g. MEDIA_MODERATION=aws_rek). Off unless set.
+    if (shouldModerate(folder, isVideo, process.env.MEDIA_MODERATION)) uploadOptions.moderation = process.env.MEDIA_MODERATION;
+
     const result: any = await new Promise((resolve, reject) => {
       const uploadStream = this.cloudinary.uploader.upload_stream(uploadOptions, (err: any, res: any) => {
         if (err) reject(err); else resolve(res);
@@ -181,6 +207,7 @@ class CloudinaryStorage implements StorageDriver {
       url: result.secure_url,
       key: result.public_id,
       duration: typeof result.duration === 'number' ? result.duration : undefined,
+      moderation: summarizeModeration(result.moderation),
     };
   }
 

@@ -577,6 +577,7 @@ const Marketplace: React.FC = () => {
     setUploadingImages(true)
     setUploadProgress({ done: 0, total: batch.length })
     let failed = 0
+    let rejectedMessage = ''
     // One photo at a time: each is shrunk on the phone first (a 6 MB camera photo becomes a few hundred KB),
     // and one that fails never blocks the others - the farmer keeps every photo that did go through.
     for (const original of batch) {
@@ -588,10 +589,16 @@ const Marketplace: React.FC = () => {
           if (url) setSellForm((prev: Record<string, any>) => ({ ...prev, images: [...(prev.images || []), url].slice(0, MAX_LISTING_IMAGES) }))
           else failed++
         }
-      } catch { failed++ }
+      } catch (err: any) {
+        failed++
+        // A photo the automatic check turned away comes with its own plain explanation - show that one
+        const apiErr = err?.response?.data?.error // guard-ok: reads the structured error CODE, never shown
+        if (apiErr?.code === 'MEDIA_REJECTED') rejectedMessage = userMessage(err)
+      }
       setUploadProgress(p => ({ done: p.done + 1, total: p.total }))
     }
-    if (failed > 0) setError(t('marketplace.sell.photosFailed', { count: failed }))
+    if (rejectedMessage) setError(rejectedMessage)
+    else if (failed > 0) setError(t('marketplace.sell.photosFailed', { count: failed }))
     else if (files.length > room) setSuccessMsg(t('marketplace.sell.photoLimit', { max: MAX_LISTING_IMAGES }))
     setUploadingImages(false)
   }

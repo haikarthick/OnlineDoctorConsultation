@@ -33,6 +33,20 @@ export class FileController {
     }
     const storedFile = await storage.save(req.file, folder);
 
+    // Automated screening (only when configured, only marketplace photos): a rejected photo is removed
+    // straight away and the person is told in plain words what to do. "Pending" is let through and left to
+    // the report button and the review queue.
+    if (storedFile.moderation === 'rejected') {
+      const deleted = await storage.delete(storedFile.key);
+      if (!deleted) logger.error(`Orphaned rejected photo left in storage - delete failed for key=${storedFile.key}`);
+      return res.status(422).json({
+        error: {
+          code: 'MEDIA_REJECTED',
+          message: 'This photo could not be accepted because it may not be suitable to show to buyers. Please choose a different photo of the animal.',
+        },
+      });
+    }
+
     // Track in registry
     const record = {
       ...storedFile,
