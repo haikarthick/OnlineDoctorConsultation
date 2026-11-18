@@ -1,5 +1,6 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
+import { INDIAN_STATES } from '../../constants/indianStates'
 
 export const SellStep3Pricing: React.FC<{
   sellForm: Record<string, any>; sf: (key: string, value: any) => void;
@@ -55,6 +56,23 @@ export const SellStep3Pricing: React.FC<{
       <div className="module-form-group">
         <label className="module-label">{t('marketplace.sell.location')}</label>
         <input className="module-input" value={sellForm.location} onChange={e => sf('location', e.target.value)} placeholder={t('marketplace.sell.locationPlaceholder')} />
+        <div className="module-form-row">
+          <div className="module-form-group">
+            <label className="module-label">{t('marketplace.filters.state')}</label>
+            <select className="module-input" value={sellForm.state || ''} onChange={e => sf('state', e.target.value)}>
+              <option value="">{t('marketplace.filters.anyState')}</option>
+              {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div className="module-form-group">
+            <label className="module-label">{t('marketplace.filters.district')}</label>
+            <input className="module-input" value={sellForm.district || ''} maxLength={80} onChange={e => sf('district', e.target.value)} />
+          </div>
+          <div className="module-form-group">
+            <label className="module-label">{t('marketplace.filters.pincode')}</label>
+            <input className="module-input" type="text" inputMode="numeric" pattern="[0-9]*" maxLength={6} value={sellForm.pincode || ''} onChange={e => sf('pincode', e.target.value.replace(/\D/g, ''))} />
+          </div>
+        </div>
         <div className="mp-geo-row">
           <button type="button" className="module-btn small" onClick={onUseMyLocation} disabled={geoLocating}>
             📍 {geoLocating ? t('marketplace.sell.locating') : t('marketplace.sell.useMyLocation')}

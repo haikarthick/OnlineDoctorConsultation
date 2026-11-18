@@ -46,6 +46,10 @@ export const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCu
 
         <h4 className="mp-card-title">{l.title}</h4>
 
+        {(l.district || l.state || l.location) && (
+          <div className="mp-card-place">📍 {[l.location, l.district, l.state].filter(Boolean).slice(0, 2).join(', ')}</div>
+        )}
+
         {(species || breed) && (
           <div className="mp-card-livestock">
             {species && <span className="mp-tag species">{speciesLabel(species, t)}</span>}

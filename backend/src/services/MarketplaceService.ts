@@ -61,7 +61,7 @@ class MarketplaceService {
       sellerId, enterpriseId, limit = 50, offset = 0,
       species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender, animalClass,
       listingTier, isHotDeal, vaccinationStatus, healthCertificate, sortBy,
-      userLat, userLng, radiusKm,
+      userLat, userLng, radiusKm, state, district, pincode, minAge, maxAge,
     } = filters;
 
     // Shared WHERE builder so the count query always matches the item query
@@ -90,6 +90,11 @@ class MarketplaceService {
       ftsRankExpr = `ts_rank(${tsvec}, plainto_tsquery('english', $${qIdx}))`;
     }
     if (species) add('l.species = $?', species);
+    if (state) add('LOWER(l.state) = LOWER($?)', String(state));
+    if (district) add('LOWER(l.district) = LOWER($?)', String(district));
+    if (pincode) add('l.pincode = $?', String(pincode));
+    if (minAge) add('l.animal_age_months >= $?', minAge);
+    if (maxAge) add('l.animal_age_months <= $?', maxAge);
     if (breed) add('l.breed ILIKE $?', `%${breed}%`);
     if (minMilkYield) add('l.daily_milk_yield >= $?', minMilkYield);
     if (maxMilkYield) add('l.daily_milk_yield <= $?', maxMilkYield);
@@ -126,8 +131,12 @@ class MarketplaceService {
     else if (sortBy === 'views') orderBy = 'l.views_count DESC';
     else if (sortBy === 'distance' && hasGeo) orderBy = `earth_distance(ll_to_earth(${latN}::float8, ${lngN}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) ASC NULLS LAST`;
 
+    // Distance from the buyer in km, only when they shared a position (latN/lngN are numerically coerced)
+    const distanceSelect = hasGeo
+      ? `, CASE WHEN l.latitude IS NOT NULL AND l.longitude IS NOT NULL THEN earth_distance(ll_to_earth(${latN}::float8, ${lngN}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) / 1000 END as distance_km`
+      : '';
     // Aggregated LEFT JOIN instead of correlated subqueries (avoids N+1 per row)
-    const query = `SELECT l.*, u.first_name || ' ' || u.last_name as seller_name, e.name as enterprise_name,
+    const query = `SELECT l.*${distanceSelect}, u.first_name || ' ' || u.last_name as seller_name, e.name as enterprise_name,
                  COALESCE(b.bid_count, 0) as bid_count, b.highest_bid,
                  AVG(l.price) OVER (PARTITION BY l.species, l.breed) as breed_avg_price,
                  EXISTS(SELECT 1 FROM vaccination_records v WHERE v.animal_id = l.linked_animal_id AND v.is_valid = true) as has_health_passport
@@ -228,8 +237,8 @@ class MarketplaceService {
         linked_animal_id, auction_end_time, reserve_price, contact_phone,
         latitude, longitude, admin_approved,
         seller_type, registration_number, welfare_attestation, terms_accepted, terms_accepted_at,
-        video_url, animal_class
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45)`,
+        video_url, animal_class, state, district, pincode
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48)`,
       [
         id, data.enterpriseId || null, data.sellerId, data.title, data.description || null,
         category, data.listingType || 'fixed_price', data.price || null,
@@ -251,6 +260,7 @@ class MarketplaceService {
         data.welfareAttestation || false, data.termsAccepted || false,
         data.termsAccepted ? new Date().toISOString() : null,
         data.videoUrl || null, data.animalClass || null,
+        data.state || null, data.district || null, data.pincode || null,
       ]
     );
     const result = await pool.query('SELECT * FROM marketplace_listings WHERE id = $1', [id]);
@@ -274,6 +284,7 @@ class MarketplaceService {
       'title', 'description', 'price', 'quantity', 'status', 'category', 'condition', 'location',
       'species', 'breed', 'gender', 'animal_class', 'listing_type',
       'vaccination_status', 'contact_phone', 'seller_type', 'registration_number',
+      'state', 'district', 'pincode',
     ];
     const sets: string[] = []; const vals: any[] = []; let idx = 1;
     for (const [key, val] of Object.entries(data)) {
@@ -746,7 +757,7 @@ class MarketplaceService {
       limit = 24, offset = 0,
       species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender, animalClass,
       vaccinationStatus, healthCertificate, sortBy,
-      userLat, userLng, radiusKm,
+      userLat, userLng, radiusKm, state, district, pincode, minAge, maxAge,
     } = filters;
 
     // Build WHERE clause once, shared by the page query and the count query
@@ -767,6 +778,11 @@ class MarketplaceService {
       pubFtsRank = `ts_rank(${PUB_TSVEC}, plainto_tsquery('english', $${qIdx}))`;
     }
     if (species) { where += ` AND l.species = $${idx++}`; params.push(species); }
+    if (state) { where += ` AND LOWER(l.state) = LOWER($${idx++})`; params.push(String(state)); }
+    if (district) { where += ` AND LOWER(l.district) = LOWER($${idx++})`; params.push(String(district)); }
+    if (pincode) { where += ` AND l.pincode = $${idx++}`; params.push(String(pincode)); }
+    if (minAge) { where += ` AND l.animal_age_months >= $${idx++}`; params.push(minAge); }
+    if (maxAge) { where += ` AND l.animal_age_months <= $${idx++}`; params.push(maxAge); }
     if (breed) { where += ` AND l.breed ILIKE $${idx++}`; params.push(`%${breed}%`); }
     if (minMilkYield) { where += ` AND l.daily_milk_yield >= $${idx++}`; params.push(minMilkYield); }
     if (maxMilkYield) { where += ` AND l.daily_milk_yield <= $${idx++}`; params.push(maxMilkYield); }
@@ -790,6 +806,7 @@ class MarketplaceService {
     // Only select safe public columns - no seller email/phone/id
     let query = `SELECT l.id, l.title, l.description, l.category, l.listing_type, l.price, l.currency,
                  l.quantity, l.unit, l.condition, l.images, l.location, l.tags, l.featured,
+                 l.state, l.district,
                  l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender, l.animal_class,
                  l.lactation_number, l.daily_milk_yield, l.pregnancy_status, l.pregnancy_month,
                  l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,

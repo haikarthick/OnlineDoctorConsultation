@@ -259,7 +259,8 @@
       "premiumPriced": "Premium Priced",
       "hasVideo": "वीडियो है",
       "featured": "विशेष",
-      "passportTitle": "टीकाकरण रिकॉर्ड waytovet में सत्यापित"
+      "passportTitle": "टीकाकरण रिकॉर्ड waytovet में सत्यापित",
+      "kmAway": "{{km}} किमी दूर"
     },
     "orders": {
       "asBuyer": "🔍 खोजकर्ता के रूप में",
@@ -563,6 +564,31 @@
     "interlink": {
       "treasureBanner": "उत्पाद, चारा या उपकरण खरीद या बेच रहे हैं?",
       "visitTreasure": "Treasure Mount पर जाएं"
+    },
+    "filters": {
+      "title": "फ़िल्टर",
+      "button": "फ़िल्टर",
+      "price": "कीमत",
+      "min": "न्यूनतम",
+      "max": "अधिकतम",
+      "anyBreed": "कोई भी नस्ल",
+      "age": "उम्र",
+      "ageAny": "कोई भी",
+      "ageUnder1": "1 साल से कम",
+      "age1to3": "1 से 3 साल",
+      "age3to5": "3 से 5 साल",
+      "age5plus": "5+ साल",
+      "milk": "प्रतिदिन दूध",
+      "place": "स्थान",
+      "anyState": "कोई भी राज्य",
+      "state": "राज्य",
+      "district": "ज़िला",
+      "pincode": "पिनकोड",
+      "more": "और",
+      "reset": "रीसेट",
+      "show": "{{count}} परिणाम दिखाएँ",
+      "active": "लगाए गए फ़िल्टर",
+      "remove": "फ़िल्टर हटाएँ"
     }
   },
   "publicMarketplace": {

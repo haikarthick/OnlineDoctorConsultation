@@ -259,7 +259,8 @@
       "premiumPriced": "Premium Priced",
       "hasVideo": "వీడియో ఉంది",
       "featured": "ప్రత్యేకం",
-      "passportTitle": "టీకా రికార్డులు waytovet లో ధృవీకరించబడ్డాయి"
+      "passportTitle": "టీకా రికార్డులు waytovet లో ధృవీకరించబడ్డాయి",
+      "kmAway": "{{km}} కి.మీ దూరంలో"
     },
     "orders": {
       "asBuyer": "🔍 అన్వేషకుడిగా",
@@ -563,6 +564,31 @@
     "interlink": {
       "treasureBanner": "ఉత్పత్తులు, దాణా లేదా పరికరాలు కొనుగోలు/అమ్మకం?",
       "visitTreasure": "Treasure Mount సందర్శించండి"
+    },
+    "filters": {
+      "title": "ఫిల్టర్లు",
+      "button": "ఫిల్టర్లు",
+      "price": "ధర",
+      "min": "కనిష్ఠం",
+      "max": "గరిష్ఠం",
+      "anyBreed": "ఏ జాతి అయినా",
+      "age": "వయసు",
+      "ageAny": "ఏదైనా",
+      "ageUnder1": "1 సంవత్సరం లోపు",
+      "age1to3": "1 నుండి 3 సంవత్సరాలు",
+      "age3to5": "3 నుండి 5 సంవత్సరాలు",
+      "age5plus": "5+ సంవత్సరాలు",
+      "milk": "రోజుకు పాలు",
+      "place": "ప్రాంతం",
+      "anyState": "ఏ రాష్ట్రమైనా",
+      "state": "రాష్ట్రం",
+      "district": "జిల్లా",
+      "pincode": "పిన్‌కోడ్",
+      "more": "మరిన్ని",
+      "reset": "రీసెట్",
+      "show": "{{count}} ఫలితాలను చూపించు",
+      "active": "వర్తింపజేసిన ఫిల్టర్లు",
+      "remove": "ఫిల్టర్ తొలగించు"
     }
   },
   "publicMarketplace": {

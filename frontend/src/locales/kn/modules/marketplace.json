@@ -259,7 +259,8 @@
       "premiumPriced": "Premium Priced",
       "hasVideo": "ವೀಡಿಯೊ ಇದೆ",
       "featured": "ವಿಶೇಷ",
-      "passportTitle": "ಲಸಿಕೆ ದಾಖಲೆಗಳನ್ನು waytovet ನಲ್ಲಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ"
+      "passportTitle": "ಲಸಿಕೆ ದಾಖಲೆಗಳನ್ನು waytovet ನಲ್ಲಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
+      "kmAway": "{{km}} ಕಿಮೀ ದೂರ"
     },
     "orders": {
       "asBuyer": "🔍 ಹುಡುಕುವವರಾಗಿ",
@@ -563,6 +564,31 @@
     "interlink": {
       "treasureBanner": "ಉತ್ಪನ್ನಗಳು, ಆಹಾರ ಅಥವಾ ಸಲಕರಣೆ ಖರೀದಿ/ಮಾರಾಟ?",
       "visitTreasure": "Treasure Mount ಗೆ ಭೇಟಿ ನೀಡಿ"
+    },
+    "filters": {
+      "title": "ಫಿಲ್ಟರ್‌ಗಳು",
+      "button": "ಫಿಲ್ಟರ್‌ಗಳು",
+      "price": "ಬೆಲೆ",
+      "min": "ಕನಿಷ್ಠ",
+      "max": "ಗರಿಷ್ಠ",
+      "anyBreed": "ಯಾವುದೇ ತಳಿ",
+      "age": "ವಯಸ್ಸು",
+      "ageAny": "ಯಾವುದೇ",
+      "ageUnder1": "1 ವರ್ಷದೊಳಗೆ",
+      "age1to3": "1 ರಿಂದ 3 ವರ್ಷ",
+      "age3to5": "3 ರಿಂದ 5 ವರ್ಷ",
+      "age5plus": "5+ ವರ್ಷ",
+      "milk": "ದಿನಕ್ಕೆ ಹಾಲು",
+      "place": "ಸ್ಥಳ",
+      "anyState": "ಯಾವುದೇ ರಾಜ್ಯ",
+      "state": "ರಾಜ್ಯ",
+      "district": "ಜಿಲ್ಲೆ",
+      "pincode": "ಪಿನ್‌ಕೋಡ್",
+      "more": "ಇನ್ನಷ್ಟು",
+      "reset": "ಮರುಹೊಂದಿಸಿ",
+      "show": "{{count}} ಫಲಿತಾಂಶ ತೋರಿಸಿ",
+      "active": "ಅನ್ವಯಿಸಿದ ಫಿಲ್ಟರ್‌ಗಳು",
+      "remove": "ಫಿಲ್ಟರ್ ತೆಗೆಯಿರಿ"
     }
   },
   "publicMarketplace": {

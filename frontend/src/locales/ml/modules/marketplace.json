@@ -259,7 +259,8 @@
       "premiumPriced": "Premium Priced",
       "hasVideo": "വീഡിയോ ഉണ്ട്",
       "featured": "ശ്രദ്ധേയം",
-      "passportTitle": "വാക്സിനേഷൻ രേഖകൾ waytovet-ൽ പരിശോധിച്ചു"
+      "passportTitle": "വാക്സിനേഷൻ രേഖകൾ waytovet-ൽ പരിശോധിച്ചു",
+      "kmAway": "{{km}} കി.മീ അകലെ"
     },
     "orders": {
       "asBuyer": "🔍 തിരയുന്നയാളായി",
@@ -563,6 +564,31 @@
     "interlink": {
       "treasureBanner": "ഉൽപ്പന്നങ്ങൾ, തീറ്റ അല്ലെങ്കിൽ ഉപകരണങ്ങൾ വാങ്ങുന്നു/വിൽക്കുന്നു?",
       "visitTreasure": "Treasure Mount സന്ദർശിക്കുക"
+    },
+    "filters": {
+      "title": "ഫിൽട്ടറുകൾ",
+      "button": "ഫിൽട്ടറുകൾ",
+      "price": "വില",
+      "min": "കുറഞ്ഞത്",
+      "max": "കൂടിയത്",
+      "anyBreed": "ഏതെങ്കിലും ഇനം",
+      "age": "പ്രായം",
+      "ageAny": "ഏതും",
+      "ageUnder1": "1 വയസ്സിൽ താഴെ",
+      "age1to3": "1 മുതൽ 3 വയസ്സ്",
+      "age3to5": "3 മുതൽ 5 വയസ്സ്",
+      "age5plus": "5+ വയസ്സ്",
+      "milk": "പ്രതിദിന പാൽ",
+      "place": "സ്ഥലം",
+      "anyState": "ഏതെങ്കിലും സംസ്ഥാനം",
+      "state": "സംസ്ഥാനം",
+      "district": "ജില്ല",
+      "pincode": "പിൻകോഡ്",
+      "more": "കൂടുതൽ",
+      "reset": "റീസെറ്റ്",
+      "show": "{{count}} ഫലങ്ങൾ കാണിക്കുക",
+      "active": "പ്രയോഗിച്ച ഫിൽട്ടറുകൾ",
+      "remove": "ഫിൽട്ടർ നീക്കുക"
     }
   },
   "publicMarketplace": {

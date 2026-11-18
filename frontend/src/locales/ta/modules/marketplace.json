@@ -259,7 +259,8 @@
       "premiumPriced": "Premium Priced",
       "hasVideo": "வீடியோ உள்ளது",
       "featured": "சிறப்பு",
-      "passportTitle": "தடுப்பூசி பதிவுகள் waytovet இல் சரிபார்க்கப்பட்டன"
+      "passportTitle": "தடுப்பூசி பதிவுகள் waytovet இல் சரிபார்க்கப்பட்டன",
+      "kmAway": "{{km}} கி.மீ தொலைவில்"
     },
     "orders": {
       "asBuyer": "🔍 தேடுபவராக",
@@ -563,6 +564,31 @@
     "interlink": {
       "treasureBanner": "பொருட்கள், தீவனம் அல்லது உபகரணங்கள் வாங்க/விற்கவா?",
       "visitTreasure": "Treasure Mount ஐப் பார்"
+    },
+    "filters": {
+      "title": "வடிகட்டிகள்",
+      "button": "வடிகட்டிகள்",
+      "price": "விலை",
+      "min": "குறைந்தது",
+      "max": "அதிகபட்சம்",
+      "anyBreed": "எந்த இனமும்",
+      "age": "வயது",
+      "ageAny": "எதுவும்",
+      "ageUnder1": "1 வயதுக்குக் குறைவு",
+      "age1to3": "1 முதல் 3 ஆண்டுகள்",
+      "age3to5": "3 முதல் 5 ஆண்டுகள்",
+      "age5plus": "5+ ஆண்டுகள்",
+      "milk": "தினசரி பால்",
+      "place": "இடம்",
+      "anyState": "எந்த மாநிலமும்",
+      "state": "மாநிலம்",
+      "district": "மாவட்டம்",
+      "pincode": "அஞ்சல் குறியீடு",
+      "more": "மேலும்",
+      "reset": "மீட்டமை",
+      "show": "{{count}} முடிவுகளைக் காட்டு",
+      "active": "பயன்படுத்தப்பட்ட வடிகட்டிகள்",
+      "remove": "வடிகட்டியை நீக்கு"
     }
   },
   "publicMarketplace": {

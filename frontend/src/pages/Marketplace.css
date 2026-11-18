@@ -969,3 +969,16 @@
   -webkit-overflow-scrolling: touch; padding-bottom: 4px;
 }
 :where(.mp-page) .mp-sections .mp-chip { flex: 0 0 auto; min-height: 40px; }
+
+/* ─── Filters sheet, active-filter chips, place line on a card ─── */
+.mp-fsheet { display: flex; flex-direction: column; gap: 18px; padding-bottom: 8px; }
+.mp-fsheet-h { margin: 0 0 8px; font-size: 15px; font-weight: 700; }
+.mp-fsheet-section .module-input { width: 100%; margin-bottom: 8px; }
+.mp-fsheet-row { display: flex; align-items: center; gap: 8px; }
+.mp-fsheet-row .module-input { margin-bottom: 0; min-width: 0; }
+.mp-fsheet-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.mp-fsheet-chips .mp-chip { min-height: 44px; }
+.mp-fsheet-actions { display: flex; gap: 10px; position: sticky; bottom: 0; padding-top: 10px; background: var(--surface, #fff); }
+.mp-fsheet-actions .module-btn { flex: 1; min-height: var(--tap-min, 48px); }
+.mp-filters-btn { white-space: nowrap; min-height: 44px; }
+.mp-card-place { font-size: 13px; color: #475569; margin: 2px 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

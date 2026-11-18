@@ -259,7 +259,8 @@
       "premiumPriced": "Premium Priced",
       "hasVideo": "Has video",
       "featured": "Featured",
-      "passportTitle": "Vaccination records verified in waytovet"
+      "passportTitle": "Vaccination records verified in waytovet",
+      "kmAway": "{{km}} km away"
     },
     "orders": {
       "asBuyer": "� As Seeker",
@@ -563,6 +564,31 @@
     "interlink": {
       "treasureBanner": "Buying or selling products, feed or equipment?",
       "visitTreasure": "Visit Treasure Mount"
+    },
+    "filters": {
+      "title": "Filters",
+      "button": "Filters",
+      "price": "Price",
+      "min": "Min",
+      "max": "Max",
+      "anyBreed": "Any breed",
+      "age": "Age",
+      "ageAny": "Any",
+      "ageUnder1": "Under 1 year",
+      "age1to3": "1 to 3 years",
+      "age3to5": "3 to 5 years",
+      "age5plus": "5+ years",
+      "milk": "Milk per day",
+      "place": "Place",
+      "anyState": "Any state",
+      "state": "State",
+      "district": "District",
+      "pincode": "Pincode",
+      "more": "More",
+      "reset": "Reset",
+      "show": "Show {{count}} results",
+      "active": "Filters applied",
+      "remove": "Remove filter"
     }
   },
   "publicMarketplace": {

@@ -64,7 +64,7 @@ const Marketplace: React.FC = () => {
     title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
     species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
     pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
-    auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
+    auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '', state: '', district: '', pincode: '',
     images: [], videoUrl: '', linkedAnimalId: '',
     sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false,
   })
@@ -438,7 +438,7 @@ const Marketplace: React.FC = () => {
       setSellForm({ title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
         species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
         pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
-        auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
+        auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '', state: '', district: '', pincode: '',
         images: [], videoUrl: '', linkedAnimalId: '',
         sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false })
       setSelectedAnimalId('')
@@ -844,7 +844,8 @@ const Marketplace: React.FC = () => {
       {/* ════════ BROWSE ════════ */}
       {(tab === 'browse' || tab === 'auctions') && (
         <BrowseTab
-          filters={filters} updateFilter={updateFilter}
+          filters={filters} updateFilter={updateFilter} setFilters={setFilters}
+          breedsForSpecies={breedsForSpecies} breedLabel={breedLabel}
           sortBy={sortBy} onSortByChange={setSortBy}
           categoryKeys={CATEGORY_KEYS} speciesList={SPECIES_LIST}
           classTermsForSpecies={classTermsForSpecies} resolveLabel={resolveLabel} speciesLabel={speciesLabel}

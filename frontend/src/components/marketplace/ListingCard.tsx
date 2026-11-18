@@ -81,6 +81,14 @@ export const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency
           </div>
         )}
 
+        {/* Where it is: district, state, and how far when the buyer shared a position */}
+        {(l.district || l.state || l.location || l.distance_km != null) && (
+          <div className="mp-card-place">
+            📍 {[l.location, l.district, l.state].filter(Boolean).slice(0, 2).join(', ')}
+            {l.distance_km != null && <strong> · {t('marketplace.card.kmAway', { km: Math.max(1, Math.round(+l.distance_km)) })}</strong>}
+          </div>
+        )}
+
         {/* Livestock details row */}
         {(species || breed) && (
           <div className="mp-card-livestock">

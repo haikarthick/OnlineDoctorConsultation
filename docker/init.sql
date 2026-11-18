@@ -2164,6 +2164,11 @@ CREATE INDEX IF NOT EXISTS idx_mp_saved_searches_alerts ON marketplace_saved_sea
 ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS video_url VARCHAR(2000);
 -- Species-correct animal class terms (mirrors backend/migrations/020_animal_class_terms.sql)
 ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_class VARCHAR(30);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS state VARCHAR(80);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS district VARCHAR(80);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS pincode VARCHAR(10);
+CREATE INDEX IF NOT EXISTS idx_mp_listings_state_district ON marketplace_listings (state, district);
+CREATE INDEX IF NOT EXISTS idx_mp_listings_pincode ON marketplace_listings (pincode);
 -- Phase 5: reports + full-text index (mirrors backend/migrations/018_marketplace_trust_discovery.sql)
 CREATE TABLE IF NOT EXISTS marketplace_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
