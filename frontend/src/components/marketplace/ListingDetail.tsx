@@ -17,7 +17,9 @@ export const ListingDetail: React.FC<{
   onReport?: () => void; onBookVetCheck?: () => void; transport?: { url: string };
   t: TFunction;
 }> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
-  const { findClassTerm, speciesLabel, resolveLabel, breedLabel } = useMasterData()
+  const { findClassTerm, speciesLabel, resolveLabel, breedLabel, marketplaceCategories } = useMasterData()
+  const categoryRow = marketplaceCategories.find(c => c.code === l.category)
+  const categoryText = categoryRow ? resolveLabel(categoryRow, t) : t('marketplace.categories.other')
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -53,11 +55,11 @@ export const ListingDetail: React.FC<{
         <div className="mp-detail-main">
           {/* Header badges */}
           <div className="mp-card-badges">
-            <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
+            <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {categoryText}</span>
             <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
             {tier && <span className="mp-badge premium">{{ standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }[tier as 'standard' | 'premium' | 'spotlight'] || tier}</span>}
             {isHot && <span className="mp-badge hot">{t('marketplace.card.hotDeal')}</span>}
-            {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
+            {l.featured && <span className="mp-badge featured">⭐ {t('marketplace.card.featured')}</span>}
           </div>
 
           {images.length > 0 && (

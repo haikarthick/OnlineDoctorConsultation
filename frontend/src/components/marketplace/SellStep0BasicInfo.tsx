@@ -33,7 +33,7 @@ export const SellStep0BasicInfo: React.FC<{
             const vcId = sel?.uniqueId || sel?.unique_id
             return vcId ? (
               <div className="si-a85540c4"
-                title="waytovet Animal ID - click to copy"
+                title={t('marketplace.sell.copyAnimalId')}
                 onClick={() => onCopyId(vcId)}
               >
                 {copiedId === vcId ? `✅ ${t('common.copied')}` : `🏷️ ${vcId}`}
@@ -62,7 +62,7 @@ export const SellStep0BasicInfo: React.FC<{
           <label className="module-label">{t('marketplace.sell.listingType')}</label>
           <select className="module-input" value={sellForm.listingType} onChange={e => sf('listingType', e.target.value)}>
             <option value="fixed_price">{t('marketplace.listingType.fixedPrice')}</option>
-            {(auctionEnabled || isAdmin) && <option value="auction">{t('marketplace.listingType.auctionType')}{!auctionEnabled ? ' (Admin preview)' : ''}</option>}
+            {(auctionEnabled || isAdmin) && <option value="auction">{t('marketplace.listingType.auctionType')}{!auctionEnabled ? ` (${t('marketplace.sell.adminPreview')})` : ''}</option>}
             <option value="wanted">{t('marketplace.listingType.wanted')}</option>
           </select>
         </div>

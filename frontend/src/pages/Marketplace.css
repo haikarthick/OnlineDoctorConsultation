@@ -951,3 +951,21 @@
   .mp-report-actions { flex-direction: column; align-items: stretch; }
   .mp-report-actions .module-input { width: 100%; }
 }
+
+/* ─── Destinations: Browse · Sell · Messages · Me (one set on every device) ─── */
+:where(.mp-page) .mp-destinations {
+  display: flex; gap: 4px; margin: 0 0 12px; padding: 4px;
+  background: var(--brand-soft, #eef0fe); border-radius: 14px;
+}
+:where(.mp-page) .mp-destination {
+  flex: 1 1 0; min-width: 0; min-height: var(--tap-min, 48px); padding: 8px 6px;
+  border: 0; border-radius: 10px; background: transparent; cursor: pointer;
+  font: inherit; font-weight: 600; color: var(--brand-strong, #4c51bf);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+:where(.mp-page) .mp-destination.active { background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
+:where(.mp-page) .mp-sections {
+  display: flex; gap: 8px; margin: 0 0 14px; overflow-x: auto; flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch; padding-bottom: 4px;
+}
+:where(.mp-page) .mp-sections .mp-chip { flex: 0 0 auto; min-height: 40px; }

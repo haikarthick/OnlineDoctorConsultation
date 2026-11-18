@@ -18,7 +18,8 @@
       "admin": "🛡️ ನಿರ್ವಾಹಕ",
       "messages": "💬 ಸಂದೇಶಗಳು",
       "favorites": "❤️ ಮೆಚ್ಚಿನವು",
-      "saved": "🔔 ಉಳಿಸಿದವು"
+      "saved": "🔔 ಉಳಿಸಿದವು",
+      "me": "ನನ್ನದು"
     },
     "categories": {
       "all": "ಎಲ್ಲಾ ವರ್ಗಗಳು",
@@ -206,7 +207,9 @@
       "videoTooLarge": "ವೀಡಿಯೊ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ: ಗರಿಷ್ಠ {{maxMb}}MB",
       "videoTooLong": "ವೀಡಿಯೊ ತುಂಬಾ ಉದ್ದವಾಗಿದೆ: ಗರಿಷ್ಠ {{maxSec}} ಸೆಕೆಂಡುಗಳು",
       "uploadingVideo": "ವೀಡಿಯೊ ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
-      "videoLimits": "ಗರಿಷ್ಠ {{maxSec}} ಸೆಕೆಂಡುಗಳು, {{maxMb}}MB ವರೆಗೆ"
+      "videoLimits": "ಗರಿಷ್ಠ {{maxSec}} ಸೆಕೆಂಡುಗಳು, {{maxMb}}MB ವರೆಗೆ",
+      "adminPreview": "ನಿರ್ವಾಹಕ ಪೂರ್ವವೀಕ್ಷಣೆ",
+      "copyAnimalId": "waytovet ಪ್ರಾಣಿ ಐಡಿ - ನಕಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"
     },
     "detail": {
       "backToListings": "← ಪಟ್ಟಿಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
@@ -254,7 +257,9 @@
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
       "premiumPriced": "Premium Priced",
-      "hasVideo": "ವೀಡಿಯೊ ಇದೆ"
+      "hasVideo": "ವೀಡಿಯೊ ಇದೆ",
+      "featured": "ವಿಶೇಷ",
+      "passportTitle": "ಲಸಿಕೆ ದಾಖಲೆಗಳನ್ನು waytovet ನಲ್ಲಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ"
     },
     "orders": {
       "asBuyer": "🔍 ಹುಡುಕುವವರಾಗಿ",

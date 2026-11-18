@@ -47,7 +47,7 @@ const Marketplace: React.FC = () => {
   const [orders, setOrders] = useState<MarketplaceOrder[]>([])
   const [bids, setBids] = useState<MarketplaceBid[]>([])
   const [loading, setLoading] = useState(false)
-  const [tab, setTab] = useState<TabKey>('dashboard')
+  const [tab, setTab] = useState<TabKey>('browse')
   const [selectedListing, setSelectedListing] = useState<MarketplaceListing | null>(null)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -439,8 +439,9 @@ const Marketplace: React.FC = () => {
         species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
         pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
         auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
-        images: [], linkedAnimalId: '',
+        images: [], videoUrl: '', linkedAnimalId: '',
         sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false })
+      setSelectedAnimalId('')
       setSellStep(0); setTab('browse'); fetchListings(); fetchDashboard()
     } catch (e: any) { setError(userMessage(e)) }
   }
@@ -757,17 +758,38 @@ const Marketplace: React.FC = () => {
     setPlanForm({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
   }
 
-  // ─── Tab definitions ───
-  const tabs: Array<[TabKey, string]> = [
-    ['dashboard', t('marketplace.tabs.dashboard')], ['browse', t('marketplace.tabs.browse')], ['sell', t('marketplace.tabs.sell')],
-    // Auctions tab: always show to admin (to manage the toggle), hide from others when disabled
+  // ─── Navigation: four destinations (Browse · Sell · Messages · Me), sections inside two of them ───
+  // One set of destinations on every device; the bottom bar of the phone layout stays the app's own.
+  const goTab = (key: TabKey) => {
+    setTab(key); setSelectedListing(null)
+    if (key === 'orders') { fetchOrders(); fetchInquiries() }
+    if (key === 'prices') fetchMarketPrices()
+    if (key === 'admin') { fetchAdminData(); fetchMonetizationSettings() }
+    if (key === 'auctions') { setFilters({ listingType: 'auction' }); fetchListings() }
+    if (key === 'browse') setFilters(f => { if (f.listingType !== 'auction') return f; const n = { ...f }; delete n.listingType; return n })
+    if (key === 'messages') { fetchThreads(); loadUnreadCount(); setActiveThread(null) }
+    if (key === 'favorites') { fetchFavorites(); loadFavoriteIds() }
+    if (key === 'saved') fetchSavedSearches()
+  }
+  // Auctions: always shown to admin (to manage the toggle), hidden from others when disabled
+  const browseSections: Array<[TabKey, string]> = [
+    ['browse', t('marketplace.tabs.browse')],
     ...(auctionEnabled || isAdmin ? [['auctions', t('marketplace.tabs.auctions')] as [TabKey, string]] : []),
-    ['messages', `${t('marketplace.tabs.messages')}${unreadCount > 0 ? ` (${unreadCount})` : ''}`],
-    ['favorites', t('marketplace.tabs.favorites')],
-    ['saved', t('marketplace.tabs.saved')],
-    ['orders', t('marketplace.tabs.orders')], ['prices', t('marketplace.tabs.prices')],
+    ['prices', t('marketplace.tabs.prices')],
   ]
-  if (isAdmin) tabs.push(['admin', t('marketplace.tabs.admin')])
+  const meSections: Array<[TabKey, string]> = [
+    ['dashboard', t('marketplace.tabs.dashboard')], ['favorites', t('marketplace.tabs.favorites')],
+    ['saved', t('marketplace.tabs.saved')], ['orders', t('marketplace.tabs.orders')],
+  ]
+  const destinations: Array<{ id: string; label: string; first: TabKey; keys: TabKey[] }> = [
+    { id: 'browse', label: t('marketplace.tabs.browse'), first: 'browse', keys: browseSections.map(s => s[0]) },
+    { id: 'sell', label: t('marketplace.tabs.sell'), first: 'sell', keys: ['sell'] },
+    { id: 'messages', label: `${t('marketplace.tabs.messages')}${unreadCount > 0 ? ` (${unreadCount})` : ''}`, first: 'messages', keys: ['messages'] },
+    { id: 'me', label: t('marketplace.tabs.me'), first: 'dashboard', keys: meSections.map(s => s[0]) },
+    ...(isAdmin ? [{ id: 'admin', label: t('marketplace.tabs.admin'), first: 'admin' as TabKey, keys: ['admin'] as TabKey[] }] : []),
+  ]
+  const activeDestination = destinations.find(d => d.keys.includes(tab))
+  const sections = activeDestination?.id === 'browse' ? browseSections : activeDestination?.id === 'me' ? meSections : []
 
   // ─── Sell Step Titles ───
   const sellSteps = [t('marketplace.sell.steps.basicInfo'), t('marketplace.sell.steps.animalDetails'), t('marketplace.sell.steps.healthCerts'), t('marketplace.sell.steps.pricingLocation'), t('marketplace.sell.steps.reviewPublish')]
@@ -794,20 +816,20 @@ const Marketplace: React.FC = () => {
         />
       )}
 
-      <div className="module-tabs">
-        {tabs.map(([key, label]) => (
-          <button key={key} className={`module-tab ${tab === key ? 'active' : ''}`} onClick={() => {
-            setTab(key); setSelectedListing(null)
-            if (key === 'orders') { fetchOrders(); fetchInquiries() }
-            if (key === 'prices') fetchMarketPrices()
-            if (key === 'admin') { fetchAdminData(); fetchMonetizationSettings() }
-            if (key === 'auctions') { setFilters({ listingType: 'auction' }); fetchListings() }
-            if (key === 'messages') { fetchThreads(); loadUnreadCount(); setActiveThread(null) }
-            if (key === 'favorites') { fetchFavorites(); loadFavoriteIds() }
-            if (key === 'saved') fetchSavedSearches()
-          }}>{label}</button>
+      <nav className="mp-destinations" aria-label={t('marketplace.pageTitle')}>
+        {destinations.map(d => (
+          <button key={d.id} className={`mp-destination ${activeDestination?.id === d.id ? 'active' : ''}`}
+            aria-current={activeDestination?.id === d.id ? 'page' : undefined}
+            onClick={() => { if (activeDestination?.id !== d.id) goTab(d.first); else if (d.keys.length === 1) goTab(d.first) }}>{d.label}</button>
         ))}
-      </div>
+      </nav>
+      {sections.length > 1 && (
+        <div className="mp-sections" role="tablist">
+          {sections.map(([key, label]) => (
+            <button key={key} role="tab" aria-selected={tab === key} className={`mp-chip ${tab === key ? 'active' : ''}`} onClick={() => goTab(key)}>{label}</button>
+          ))}
+        </div>
+      )}
 
       {/* ════════ DASHBOARD ════════ */}
       {tab === 'dashboard' && dashboard && (

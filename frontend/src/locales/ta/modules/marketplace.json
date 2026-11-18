@@ -18,7 +18,8 @@
       "admin": "🛡️ நிர்வாகி",
       "messages": "💬 செய்திகள்",
       "favorites": "❤️ பிடித்தவை",
-      "saved": "🔔 சேமித்தவை"
+      "saved": "🔔 சேமித்தவை",
+      "me": "என்னுடையது"
     },
     "categories": {
       "all": "அனைத்து பிரிவுகள்",
@@ -206,7 +207,9 @@
       "videoTooLarge": "வீடியோ மிகப் பெரியது: அதிகபட்சம் {{maxMb}}MB",
       "videoTooLong": "வீடியோ மிக நீளமானது: அதிகபட்சம் {{maxSec}} விநாடிகள்",
       "uploadingVideo": "வீடியோ பதிவேற்றப்படுகிறது...",
-      "videoLimits": "அதிகபட்சம் {{maxSec}} விநாடிகள், {{maxMb}}MB வரை"
+      "videoLimits": "அதிகபட்சம் {{maxSec}} விநாடிகள், {{maxMb}}MB வரை",
+      "adminPreview": "நிர்வாகி முன்னோட்டம்",
+      "copyAnimalId": "waytovet விலங்கு ஐடி - நகலெடுக்க தட்டவும்"
     },
     "detail": {
       "backToListings": "← பட்டியல்களுக்குத் திரும்பு",
@@ -254,7 +257,9 @@
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
       "premiumPriced": "Premium Priced",
-      "hasVideo": "வீடியோ உள்ளது"
+      "hasVideo": "வீடியோ உள்ளது",
+      "featured": "சிறப்பு",
+      "passportTitle": "தடுப்பூசி பதிவுகள் waytovet இல் சரிபார்க்கப்பட்டன"
     },
     "orders": {
       "asBuyer": "🔍 தேடுபவராக",

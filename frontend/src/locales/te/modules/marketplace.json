@@ -18,7 +18,8 @@
       "admin": "🛡️ అడ్మిన్",
       "messages": "💬 సందేశాలు",
       "favorites": "❤️ ఇష్టమైనవి",
-      "saved": "🔔 సేవ్ చేసినవి"
+      "saved": "🔔 సేవ్ చేసినవి",
+      "me": "నాది"
     },
     "categories": {
       "all": "అన్ని వర్గాలు",
@@ -206,7 +207,9 @@
       "videoTooLarge": "వీడియో చాలా పెద్దది: గరిష్టం {{maxMb}}MB",
       "videoTooLong": "వీడియో చాలా పొడవుగా ఉంది: గరిష్టం {{maxSec}} సెకన్లు",
       "uploadingVideo": "వీడియో అప్‌లోడ్ అవుతోంది...",
-      "videoLimits": "గరిష్టం {{maxSec}} సెకన్లు, {{maxMb}}MB వరకు"
+      "videoLimits": "గరిష్టం {{maxSec}} సెకన్లు, {{maxMb}}MB వరకు",
+      "adminPreview": "అడ్మిన్ ప్రివ్యూ",
+      "copyAnimalId": "waytovet జంతు ఐడి - కాపీ చేయడానికి నొక్కండి"
     },
     "detail": {
       "backToListings": "← జాబితాలకు తిరిగి",
@@ -254,7 +257,9 @@
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
       "premiumPriced": "Premium Priced",
-      "hasVideo": "వీడియో ఉంది"
+      "hasVideo": "వీడియో ఉంది",
+      "featured": "ప్రత్యేకం",
+      "passportTitle": "టీకా రికార్డులు waytovet లో ధృవీకరించబడ్డాయి"
     },
     "orders": {
       "asBuyer": "🔍 అన్వేషకుడిగా",

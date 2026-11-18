@@ -18,7 +18,8 @@
       "admin": "🛡️ Admin",
       "messages": "💬 Messages",
       "favorites": "❤️ Favorites",
-      "saved": "🔔 Saved"
+      "saved": "🔔 Saved",
+      "me": "Me"
     },
     "categories": {
       "all": "All Categories",
@@ -206,7 +207,9 @@
       "videoTooLarge": "Video is too large: max {{maxMb}}MB",
       "videoTooLong": "Video is too long: max {{maxSec}} seconds",
       "uploadingVideo": "Uploading video...",
-      "videoLimits": "Max {{maxSec}} seconds, up to {{maxMb}}MB"
+      "videoLimits": "Max {{maxSec}} seconds, up to {{maxMb}}MB",
+      "adminPreview": "Admin preview",
+      "copyAnimalId": "waytovet Animal ID - tap to copy"
     },
     "detail": {
       "backToListings": "← Back to listings",
@@ -254,7 +257,9 @@
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
       "premiumPriced": "Premium Priced",
-      "hasVideo": "Has video"
+      "hasVideo": "Has video",
+      "featured": "Featured",
+      "passportTitle": "Vaccination records verified in waytovet"
     },
     "orders": {
       "asBuyer": "� As Seeker",

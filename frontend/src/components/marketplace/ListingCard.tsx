@@ -7,7 +7,9 @@ import { CATEGORY_ICONS, g } from './publicListingShared'
 
 // ─── Listing Card Component (authenticated marketplace) ───
 export const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: TFunction; isFavorite?: boolean; onToggleFavorite?: () => void }> = ({ listing: l, formatCurrency, onView, t, isFavorite, onToggleFavorite }) => {
-  const { speciesLabel, breedLabel } = useMasterData()
+  const { speciesLabel, breedLabel, marketplaceCategories, resolveLabel } = useMasterData()
+  const categoryRow = marketplaceCategories.find(c => c.code === l.category)
+  const categoryText = categoryRow ? resolveLabel(categoryRow, t) : t('marketplace.categories.other')
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -63,7 +65,7 @@ export const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency
       <div className="mp-card-body">
         {/* Category + Type badges */}
         <div className="mp-card-badges">
-          <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
+          <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {categoryText}</span>
           <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
           {tier === 'premium' && <span className="mp-badge premium">⭐</span>}
           {isPendingReview && <span className="mp-badge pending-review">⏳ {t('marketplace.deal.pendingReview')}</span>}
@@ -97,7 +99,7 @@ export const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency
           {hasCert && <span className="mp-metric cert">{t('marketplace.card.certified')}</span>}
           {welfareAtt && <span className="mp-metric welfare">🛡️ {t('marketplace.card.welfareAttested')}</span>}
           {sellerType === 'registered_breeder' && <span className={`mp-metric breeder ${breederVerified ? 'verified' : ''}`}>{breederVerified ? '✅' : '📋'} {t('marketplace.card.registeredBreeder')}</span>}
-          {hasHealthPassport && <span className="mp-metric cert" title="Vaccination records verified in waytovet system">🏥 {t('marketplace.card.healthPassport')}</span>}
+          {hasHealthPassport && <span className="mp-metric cert" title={t('marketplace.card.passportTitle')}>🏥 {t('marketplace.card.healthPassport')}</span>}
           {isFairDeal && <span className="mp-metric si-7cbce2ec">💚 {t('marketplace.card.fairDeal')} ({fairDealPct}%)</span>}
           {isPremiumPriced && <span className="mp-metric si-aa4985c8">⭐ {t('marketplace.card.premiumPriced')}</span>}
         </div>
@@ -105,7 +107,7 @@ export const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency
         {/* Price */}
         <div className="mp-card-price">
           {l.price ? formatCurrency(l.price) : t('marketplace.card.contact')}
-          {listingType === 'auction' && bidCount && <span className="mp-bid-count">{bidCount} {t('marketplace.units.listings').replace('listings', 'bids')}</span>}
+          {listingType === 'auction' && bidCount && <span className="mp-bid-count">{bidCount} {t('marketplace.units.bids')}</span>}
         </div>
 
         {/* Footer */}

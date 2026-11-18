@@ -18,7 +18,8 @@
       "admin": "🛡️ അഡ്മിൻ",
       "messages": "💬 സന്ദേശങ്ങൾ",
       "favorites": "❤️ പ്രിയപ്പെട്ടവ",
-      "saved": "🔔 സേവ് ചെയ്തവ"
+      "saved": "🔔 സേവ് ചെയ്തവ",
+      "me": "എന്റേത്"
     },
     "categories": {
       "all": "എല്ലാ വിഭാഗങ്ങളും",
@@ -206,7 +207,9 @@
       "videoTooLarge": "വീഡിയോ വളരെ വലുതാണ്: പരമാവധി {{maxMb}}MB",
       "videoTooLong": "വീഡിയോ വളരെ ദൈർഘ്യമേറിയതാണ്: പരമാവധി {{maxSec}} സെക്കൻഡ്",
       "uploadingVideo": "വീഡിയോ അപ്‌ലോഡ് ചെയ്യുന്നു...",
-      "videoLimits": "പരമാവധി {{maxSec}} സെക്കൻഡ്, {{maxMb}}MB വരെ"
+      "videoLimits": "പരമാവധി {{maxSec}} സെക്കൻഡ്, {{maxMb}}MB വരെ",
+      "adminPreview": "അഡ്മിൻ പ്രിവ്യൂ",
+      "copyAnimalId": "waytovet മൃഗ ഐഡി - പകർത്താൻ ടാപ്പ് ചെയ്യുക"
     },
     "detail": {
       "backToListings": "← ലിസ്റ്റിംഗുകളിലേക്ക് മടങ്ങുക",
@@ -254,7 +257,9 @@
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
       "premiumPriced": "Premium Priced",
-      "hasVideo": "വീഡിയോ ഉണ്ട്"
+      "hasVideo": "വീഡിയോ ഉണ്ട്",
+      "featured": "ശ്രദ്ധേയം",
+      "passportTitle": "വാക്സിനേഷൻ രേഖകൾ waytovet-ൽ പരിശോധിച്ചു"
     },
     "orders": {
       "asBuyer": "🔍 തിരയുന്നയാളായി",
