@@ -3,9 +3,13 @@
 // FileController.ts). Checked client-side first so a farmer on a slow
 // mobile connection gets instant feedback instead of uploading a file
 // that the backend will just reject.
-export const MAX_LISTING_IMAGES = 4
+export const MAX_LISTING_IMAGES = 8
+export const MIN_RECOMMENDED_PHOTOS = 3
+// Photos are shrunk on the phone first (utils/imageCompress.ts), so this only catches a file that
+// could not be shrunk; it matches the server's 5 MB image cap.
 export const MAX_IMAGE_SIZE_MB = 5
-export const MAX_VIDEO_SIZE_MB = 100
+export const MAX_VIDEO_SIZE_MB = 50
+export const RECOMMENDED_VIDEO_SECONDS = 45
 export const MAX_VIDEO_DURATION_SECONDS = 60
 
 /** Reads a video file's duration client-side via an offscreen <video> element. */

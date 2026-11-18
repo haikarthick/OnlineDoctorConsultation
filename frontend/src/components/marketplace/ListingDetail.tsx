@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import type { TFunction } from 'i18next'
 import { MarketplaceListing, MarketplaceBid } from '../../types'
-import { cldCardImageProps, cldDetailImageProps } from '../../utils/media'
+import { ListingGallery } from './ListingGallery'
 import { useMasterData } from '../../context/MasterDataContext'
 import { CATEGORY_ICONS, g } from './publicListingShared'
 import { AuctionCountdown } from './AuctionCountdown'
@@ -45,7 +45,6 @@ export const ListingDetail: React.FC<{
   const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
   const images = typeof l.images === 'string' ? JSON.parse(l.images || '[]') : (l.images || [])
-  const [activeImageIdx, setActiveImageIdx] = useState(0)
 
   return (
     <div className="mp-detail">
@@ -62,22 +61,7 @@ export const ListingDetail: React.FC<{
             {l.featured && <span className="mp-badge featured">⭐ {t('marketplace.card.featured')}</span>}
           </div>
 
-          {images.length > 0 && (
-            <div className="mp-detail-gallery">
-              <div className="mp-detail-gallery-main">
-                <img {...cldDetailImageProps(images[activeImageIdx])} alt={l.title} />
-              </div>
-              {images.length > 1 && (
-                <div className="mp-detail-gallery-thumbs">
-                  {images.map((img: string, i: number) => (
-                    <button key={i} type="button" className={`mp-detail-thumb ${i === activeImageIdx ? 'active' : ''}`} onClick={() => setActiveImageIdx(i)}>
-                      <img {...cldCardImageProps(img)} alt={`${l.title} ${i + 1}`} loading="lazy" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <ListingGallery title={l.title} images={images} videoUrl={g(l, 'videoUrl', 'video_url')} t={t} />
 
           <div className="mp-detail-title-row">
             <h2>{l.title}</h2>
@@ -97,22 +81,6 @@ export const ListingDetail: React.FC<{
 
           {/* Price */}
           <div className="mp-detail-price">{l.price ? formatCurrency(l.price) : t('marketplace.contactForPrice')}</div>
-
-          {/* Video */}
-          {(() => {
-            const videoUrl = g(l, 'videoUrl', 'video_url')
-            if (!videoUrl) return null
-            const isUploaded = String(videoUrl).startsWith('/uploads/') || /\.(mp4|webm|ogg|mov)(\?|$)/i.test(videoUrl)
-            return (
-              <div className="mp-detail-video">
-                {isUploaded ? (
-                  <video controls preload="metadata" src={videoUrl} className="mp-detail-video-el" />
-                ) : (
-                  <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="module-btn small">▶ {t('marketplace.detail.watchVideo')}</a>
-                )}
-              </div>
-            )
-          })()}
 
           {/* Animal Profile Section */}
           {(species || breed || milkYield || weight || age) && (

@@ -2,7 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { TFunction } from 'i18next'
 import { MarketplaceListing } from '../../types'
-import { cldCardImageProps, cldDetailImageProps } from '../../utils/media'
+import { ListingGallery } from './ListingGallery'
 import { useMasterData } from '../../context/MasterDataContext'
 import { CATEGORY_ICONS, g } from './publicListingShared'
 
@@ -13,7 +13,7 @@ export const PublicListingDetail: React.FC<{
   t: TFunction;
 }> = ({ listing: l, formatCurrency, onBack, onLoginPrompt, isAuthenticated, t }) => {
   const navigate = useNavigate()
-  const { findClassTerm, speciesLabel, resolveLabel, breedLabel } = useMasterData()
+  const { findClassTerm, speciesLabel, resolveLabel, breedLabel, marketplaceCategories } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -39,7 +39,8 @@ export const PublicListingDetail: React.FC<{
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
   const images = typeof l.images === 'string' ? JSON.parse(l.images || '[]') : (l.images || [])
   const videoUrl = g(l, 'videoUrl', 'video_url')
-  const [activeImageIdx, setActiveImageIdx] = React.useState(0)
+  const categoryRow = marketplaceCategories.find(c => c.code === l.category)
+  const categoryText = categoryRow ? resolveLabel(categoryRow, t) : t('marketplace.categories.other')
 
   return (
     <div className="mp-detail">
@@ -48,35 +49,14 @@ export const PublicListingDetail: React.FC<{
       <div className="mp-detail-layout">
         <div className="mp-detail-main">
           <div className="mp-card-badges">
-            <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
+            <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {categoryText}</span>
             <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
             {tier && <span className="mp-badge premium">{{ standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }[tier as 'standard' | 'premium' | 'spotlight'] || tier}</span>}
             {isHot && <span className="mp-badge hot">{t('marketplace.card.hotDeal')}</span>}
-            {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
+            {l.featured && <span className="mp-badge featured">⭐ {t('marketplace.card.featured')}</span>}
           </div>
 
-          {images.length > 0 && (
-            <div className="mp-detail-gallery">
-              <div className="mp-detail-gallery-main">
-                <img {...cldDetailImageProps(images[activeImageIdx])} alt={l.title} />
-              </div>
-              {images.length > 1 && (
-                <div className="mp-detail-gallery-thumbs">
-                  {images.map((img: string, i: number) => (
-                    <button key={i} type="button" className={`mp-detail-thumb ${i === activeImageIdx ? 'active' : ''}`} onClick={() => setActiveImageIdx(i)}>
-                      <img {...cldCardImageProps(img)} alt={`${l.title} ${i + 1}`} loading="lazy" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {videoUrl && (
-            <div className="mp-detail-video">
-              <video controls preload="metadata" src={videoUrl} className="mp-detail-video-el" />
-            </div>
-          )}
+          <ListingGallery title={l.title} images={images} videoUrl={videoUrl} t={t} />
 
           <h2>{l.title}</h2>
           <p className="mp-sell-step-desc">{l.description || t('marketplace.detail.noDescription')}</p>

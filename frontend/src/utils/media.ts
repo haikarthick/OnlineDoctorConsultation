@@ -28,6 +28,17 @@ export function cldUrl(url: string | undefined | null, width?: number): string {
   return url.slice(0, insertAt) + transforms.join(',') + '/' + url.slice(insertAt)
 }
 
+/**
+ * A still frame to show before a Cloudinary video is played (and as its thumbnail), so the card
+ * never shows a black box. Undefined for any other URL - the caller then shows no poster.
+ */
+export function videoPosterUrl(url: string | undefined | null, width = 800): string | undefined {
+  if (!url || !isCloudinaryUrl(url) || !url.includes('/video/upload/')) return undefined
+  const insertAt = url.indexOf(CLOUDINARY_UPLOAD_MARKER) + CLOUDINARY_UPLOAD_MARKER.length
+  const withTransform = url.slice(0, insertAt) + `so_0,f_jpg,q_auto,w_${width},c_limit/` + url.slice(insertAt)
+  return withTransform.replace(/\.[a-zA-Z0-9]+(\?.*)?$/, '.jpg$1')
+}
+
 /** src/srcSet/sizes trio for a responsive <img>, sized for a grid-card thumbnail context. */
 export function cldCardImageProps(url: string | undefined | null) {
   if (!url || !isCloudinaryUrl(url)) return { src: url || '' }

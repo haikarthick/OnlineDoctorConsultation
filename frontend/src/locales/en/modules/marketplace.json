@@ -209,7 +209,19 @@
       "uploadingVideo": "Uploading video...",
       "videoLimits": "Max {{maxSec}} seconds, up to {{maxMb}}MB",
       "adminPreview": "Admin preview",
-      "copyAnimalId": "waytovet Animal ID - tap to copy"
+      "copyAnimalId": "waytovet Animal ID - tap to copy",
+      "takePhoto": "Take photo",
+      "choosePhotos": "Choose photos",
+      "recordVideo": "Record video",
+      "chooseVideo": "Choose video",
+      "photosHint": "Add at least {{min}} clear photos: front, side and the udder or rear. The first photo is the cover buyers see in the list.",
+      "photosCount": "{{count}} of {{max}} photos",
+      "uploadProgress": "Uploading {{done}} of {{total}}",
+      "coverPhoto": "Cover",
+      "makeCover": "Make cover",
+      "removePhoto": "Remove photo",
+      "photoLimit": "You can add up to {{max}} photos. Remove one to add another.",
+      "photosFailed": "{{count}} photo(s) could not be added - the connection may have dropped or the file is not a usable photo. The others were kept. Tap Choose photos to try again."
     },
     "detail": {
       "backToListings": "← Back to listings",
@@ -589,6 +601,12 @@
       "show": "Show {{count}} results",
       "active": "Filters applied",
       "remove": "Remove filter"
+    },
+    "gallery": {
+      "video": "Video",
+      "photo": "Photo",
+      "previous": "Previous",
+      "next": "Next"
     }
   },
   "publicMarketplace": {

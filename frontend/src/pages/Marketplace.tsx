@@ -12,7 +12,8 @@ import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats,
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useMasterData } from '../context/MasterDataContext'
 import { g } from '../components/marketplace/publicListingShared'
-import { MAX_LISTING_IMAGES, MAX_IMAGE_SIZE_MB, MAX_VIDEO_SIZE_MB, MAX_VIDEO_DURATION_SECONDS, readVideoDuration, TabKey, AdminSubTab } from '../components/marketplace/marketplaceShared'
+import { MIN_RECOMMENDED_PHOTOS, MAX_LISTING_IMAGES, MAX_IMAGE_SIZE_MB, MAX_VIDEO_SIZE_MB, MAX_VIDEO_DURATION_SECONDS, readVideoDuration, TabKey, AdminSubTab } from '../components/marketplace/marketplaceShared'
+import { compressImage } from '../utils/imageCompress'
 import { ReportModal } from '../components/marketplace/ReportModal'
 import { DashboardTab } from '../components/marketplace/DashboardTab'
 import { BrowseTab } from '../components/marketplace/BrowseTab'
@@ -137,6 +138,7 @@ const Marketplace: React.FC = () => {
   const [userAnimals, setUserAnimals] = useState<any[]>([])
   const [selectedAnimalId, setSelectedAnimalId] = useState('')
   const [uploadingImages, setUploadingImages] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 })
   const [uploadingVideo, setUploadingVideo] = useState(false)
 
   // Load auction enabled state on mount
@@ -503,30 +505,33 @@ const Marketplace: React.FC = () => {
 
   // Handle image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-
-    const oversized = Array.from(files).find(f => f.size > MAX_IMAGE_SIZE_MB * 1024 * 1024)
-    if (oversized) {
-      setError(t('marketplace.sell.imageTooLarge', { maxMb: MAX_IMAGE_SIZE_MB, defaultValue: `Image is too large - max ${MAX_IMAGE_SIZE_MB}MB` }))
-      e.target.value = ''
-      return
-    }
+    const files = Array.from(e.target.files || [])
+    e.target.value = ''
+    if (files.length === 0) return
+    const room = MAX_LISTING_IMAGES - (sellForm.images?.length || 0)
+    if (room <= 0) { setError(t('marketplace.sell.photoLimit', { max: MAX_LISTING_IMAGES })); return }
+    const batch = files.slice(0, room)
 
     setUploadingImages(true)
-    try {
-      const urls: string[] = [...(sellForm.images || [])]
-      for (let i = 0; i < Math.min(files.length, MAX_LISTING_IMAGES - urls.length); i++) {
-        const res = await apiService.uploadImageFile(files[i], 'marketplace')
-        if (res.url) urls.push(res.url)
-        else if (res.fileUrl) urls.push(res.fileUrl)
-      }
-      setSellForm((prev: Record<string, any>) => ({ ...prev, images: urls }))
-    } catch (err: any) {
-      setError(userMessage(err, 'marketplace.sell.uploadFailed', "Image upload failed"))
+    setUploadProgress({ done: 0, total: batch.length })
+    let failed = 0
+    // One photo at a time: each is shrunk on the phone first (a 6 MB camera photo becomes a few hundred KB),
+    // and one that fails never blocks the others - the farmer keeps every photo that did go through.
+    for (const original of batch) {
+      try {
+        const file = await compressImage(original)
+        if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) { failed++ } else {
+          const res = await apiService.uploadImageFile(file, 'marketplace')
+          const url = res.url || res.fileUrl
+          if (url) setSellForm((prev: Record<string, any>) => ({ ...prev, images: [...(prev.images || []), url].slice(0, MAX_LISTING_IMAGES) }))
+          else failed++
+        }
+      } catch { failed++ }
+      setUploadProgress(p => ({ done: p.done + 1, total: p.total }))
     }
+    if (failed > 0) setError(t('marketplace.sell.photosFailed', { count: failed }))
+    else if (files.length > room) setSuccessMsg(t('marketplace.sell.photoLimit', { max: MAX_LISTING_IMAGES }))
     setUploadingImages(false)
-    e.target.value = ''
   }
 
   const placeBid = async () => {
@@ -888,7 +893,7 @@ const Marketplace: React.FC = () => {
           }}
           step2Props={{
             sellForm, sf, setSellForm, marketplaceConditions, resolveLabel,
-            maxListingImages: MAX_LISTING_IMAGES, uploadingImages, onImageUpload: handleImageUpload,
+            maxListingImages: MAX_LISTING_IMAGES, minRecommendedPhotos: MIN_RECOMMENDED_PHOTOS, uploadingImages, uploadProgress, onImageUpload: handleImageUpload,
             uploadingVideo, onVideoUpload: handleVideoUpload, maxVideoDurationSeconds: MAX_VIDEO_DURATION_SECONDS, maxVideoSizeMb: MAX_VIDEO_SIZE_MB,
             onBack: () => setSellStep(1), onNext: () => setSellStep(3), t,
           }}
