@@ -121,7 +121,7 @@ class MarketplaceService {
       const aliases = parseSearchAliases(searchAliases);
       let aliasSql = '';
       if (aliases.length) { const aIdx = idx++; params.push(aliases); aliasSql = ` OR LOWER(l.breed) = ANY($${aIdx}::text[]) OR LOWER(l.species) = ANY($${aIdx}::text[])`; }
-      where.push(`(${tsvec} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx} OR l.description ILIKE $${likeIdx} OR l.location ILIKE $${likeIdx} OR l.district ILIKE $${likeIdx} OR l.state ILIKE $${likeIdx}${aliasSql})`);;
+      where.push(`(${tsvec} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx} OR l.description ILIKE $${likeIdx} OR l.location ILIKE $${likeIdx} OR l.district ILIKE $${likeIdx} OR l.state ILIKE $${likeIdx}${aliasSql})`);
       ftsRankExpr = `ts_rank(${tsvec}, plainto_tsquery('english', $${qIdx}))`;
     }
     if (species) add('l.species = $?', species);
