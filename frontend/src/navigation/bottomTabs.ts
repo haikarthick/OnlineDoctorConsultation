@@ -24,11 +24,11 @@ export interface RoleTabConfig {
 export const BOTTOM_TABS: Record<string, RoleTabConfig> = {
   farmer: {
     tabs: ['dashboard', 'animals', 'herd-medical', 'animal-groups', 'medical', 'consultations'],
-    quickActions: ['farm-records', 'animals', 'animal-groups', 'herd-medical', 'breeding', 'feed-inventory', 'movement-log', 'campaigns', 'book-consultation', 'find-doctor'],
+    quickActions: ['marketplace', 'farm-records', 'animals', 'animal-groups', 'herd-medical', 'breeding', 'feed-inventory', 'movement-log', 'campaigns', 'book-consultation'],
   },
   pet_owner: {
     tabs: ['dashboard', 'animals', 'medical', 'consultations', 'prescriptions'],
-    quickActions: ['book-consultation', 'find-doctor', 'grooming-find', 'vaccination-passport', 'animal-timeline', 'write-review'],
+    quickActions: ['book-consultation', 'find-doctor', 'marketplace', 'grooming-find', 'vaccination-passport', 'animal-timeline', 'write-review'],
   },
   veterinarian: {
     tabs: ['dashboard', 'consultations', 'prescriptions', 'manage-schedule', 'animals'],
