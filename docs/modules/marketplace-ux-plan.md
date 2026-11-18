@@ -31,12 +31,20 @@ free classifieds module (no payments) - see memory `marketplace-gap-analysis-pla
 | # | Phase | Status |
 |---|---|---|
 | 0 | Decisions + design contract (this file) | done |
-| 1 | Navigation + shell, language fixes, video-reset bug | in progress |
-| 2 | Buyer discovery: cards, filter sheet, state/district/pincode, search | |
-| 3 | Photos + video: on-device compression, multi-upload, gallery with video first | |
-| 4 | Easy posting: photo-first flow, draft, My listings (edit/sold/renew/delete) | |
-| 5 | Contact: tiered phone reveal + call/WhatsApp, logging | |
-| 6 | Quality gates: frontend tests, harness sweep entry | |
+| 1 | Navigation + shell (Browse/Sell/Messages/Me), language fixes, video-reset bug | done 2026-11-18 |
+| 2 | Buyer discovery: filters sheet, state/district/pincode, place + distance on cards, public page too | done 2026-11-18 (search still uses the English text config - see below) |
+| 3 | Photos + video: 8 photos compressed on the phone, camera capture, video-first gallery | done 2026-11-18 (video NOT transcoded on the device - see below) |
+| 4 | Easy posting: photo-first flow, draft autosave, phone prefill, My listings (edit / mark sold / delete) | done 2026-11-18 (no renew/pause: listings do not expire by default) |
+| 5 | Contact: masked phone, reveal on Call/WhatsApp tap (logged, 30/day, seller notified, who-viewed) | done 2026-11-18 (buyer phone verification not required - it only exists for farm-invite sign-ups) |
+| 6 | Quality gates: component tests (filters, My listings, gallery, photo step), media + SQL unit tests | done 2026-11-18 |
+
+## Open items (not done, owner to prioritise)
+- Search: full-text still uses the English configuration; Hindi/Tamil/Telugu/Kannada/Malayalam queries and transliterated breed names match poorly. Needs unaccent/trigram + localized labels in the index.
+- Video: not compressed or transcoded on the phone (needs an in-browser encoder). Protection today is the 50 MB / 60 s cap plus Cloudinary q_auto on delivery.
+- Public page: no near-me / distance (needs the same geolocation control as the signed-in page).
+- Map view: next phase, by owner decision.
+- Video moderation: only the existing animal review queue + report button; no automated screening yet.
+- Manual check needed by the owner: take a photo and record a video on a real Android phone over mobile data; confirm Call and WhatsApp open the right app.
 
 Each phase: tsc + lint + vitest + build, runtime verify for DB/route changes, then commit and push to
 origin/develop. Manual functional checks needed from the owner are listed at the end of each phase.

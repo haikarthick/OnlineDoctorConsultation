@@ -155,6 +155,7 @@ its 40-item case **before** coding it (feature-delivery Phase 2).
 - `docs/HARNESS.md` — the rulebook: what runs where, what enforces each rule, what it cannot see.
 - `docs/modules/mobile-ui.md` — phone tab bar + shared building blocks for every role; the table
   there says which single file to edit for any UI/UX change.
+- `docs/modules/marketplace-ux-plan.md` - marketplace UX overhaul (2026-11-18): decisions, phases done, open items.
 - `docs/modules/routing.md` - route guards, deep links, session expiry, unknown addresses; one place decides access.
 - `docs/modules/farm-profile.md` — farm profile engine: one resolver decides which fields, records
   and events apply per species/class/group type; never branch on a species name in code.
