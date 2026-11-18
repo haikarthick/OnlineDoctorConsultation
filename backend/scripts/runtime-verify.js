@@ -424,6 +424,25 @@ async function http(method, url, body, token) {
     log(`${RED}✗ backend/dist not built - run \`npm run build\` in backend/ first.${RESET}\n`);
     process.exit(1);
   }
+  // A stale build verifies the PREVIOUS code, not the change in front of you (2026-11-18: a new search
+  // clause "failed" because dist was one push old). Refuse to run against a build older than the source.
+  {
+    const newest = (dir) => {
+      let latest = 0;
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        const p = path.join(dir, e.name);
+        latest = Math.max(latest, e.isDirectory() ? newest(p) : fs.statSync(p).mtimeMs);
+      }
+      return latest;
+    };
+    const srcTime = newest(path.join(BACKEND, 'src'));
+    const distTime = fs.statSync(distEntry).mtimeMs;
+    if (srcTime > distTime + 1000) {
+      log(`${RED}✗ backend/dist is older than backend/src - it would verify the previous code.${RESET}`);
+      log(`  Run \`npm run build\` in backend/ first, then verify again.\n`);
+      process.exit(1);
+    }
+  }
 
   let failed = false;
   const fail = (title, detailLines = []) => {
@@ -724,6 +743,85 @@ async function http(method, url, body, token) {
           ok('context built from the real schema');
         }
       }
+    }
+
+    // ── PHASE 6d: the marketplace, end to end on the real schema ──
+    // The marketplace builds its SQL from many optional filters (place, age, search in any script, distance)
+    // and from a privacy rule (a stranger gets a ~1 km pin and a masked phone, never the exact spot or the
+    // number). Unit tests mock the database, so only a real query proves the SQL is valid and the rule holds.
+    if (serverHealthy && port) {
+      step('PHASE 6d Marketplace filters, search, privacy and contact reveal');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const mark = serverLog.length;
+      const problems = [];
+      const seller = await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' });
+      const buyer = await http('POST', `${apiBase}/auth/login`, { email: 'maria.garcia@sunrisefarm.com', password: 'Demo@123' });
+      const sTok = seller.json?.data?.token;
+      const bTok = buyer.json?.data?.token;
+      if (!sTok || !bTok) {
+        problems.push(`could not sign in the two seeded farmers (seller HTTP ${seller.status}, buyer HTTP ${buyer.status})`);
+      } else {
+        const unique = `VerifyBreed${Date.now()}`;
+        // category 'feed' goes live without the moderation queue that animal listings wait in
+        const created = await http('POST', `${apiBase}/marketplace/listings`, {
+          title: `${unique} test listing`, description: 'runtime verification', category: 'feed', listingType: 'fixed_price', price: 1234,
+          quantity: 1, unit: 'kg', species: 'cattle', breed: unique, animalAgeMonths: 24, contactPhone: '9876543210',
+          state: 'Kerala', district: 'Thrissur', pincode: '680001', latitude: 10.523456, longitude: 76.214567,
+        }, sTok);
+        const listingId = created.json?.data?.id || created.json?.data?.listing?.id;
+        if (created.status >= 300 || !listingId) {
+          problems.push(`create listing: HTTP ${created.status} ${JSON.stringify(created.json || {}).slice(0, 200)}`);
+        } else {
+          const q = (o) => Object.entries(o).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+          const allFilters = { search: unique, searchAliases: `${unique}|cattle`, state: 'Kerala', district: 'Thrissur', pincode: '680001',
+            minAge: '12', maxAge: '36', minPrice: '1', maxPrice: '100000', userLat: '10.5', userLng: '76.2', radiusKm: '100', sortBy: 'distance' };
+          const authed = await http('GET', `${apiBase}/marketplace/listings?${q(allFilters)}`, null, bTok);
+          const pub = await http('GET', `${apiBase}/public/marketplace/listings?${q(allFilters)}`);
+          for (const [name, r] of [['signed-in list', authed], ['public list', pub]]) {
+            if (r.status !== 200) problems.push(`${name} with every filter: HTTP ${r.status} ${JSON.stringify(r.json || {}).slice(0, 200)}`);
+          }
+          const found = (authed.json?.data?.items || []).find(l => l.id === listingId);
+          if (!found) {
+            // Say what the listing actually looks like, so a failure is diagnosable from the log alone
+            const one = await http('GET', `${apiBase}/marketplace/listings/${listingId}`, null, bTok);
+            const d = one.json?.data || {};
+            problems.push('the new listing was not found by search + state + district + pincode + age + distance (signed-in). '
+              + `It reads back as: status=${d.status} approved=${d.admin_approved} breed=${d.breed} state=${d.state} district=${d.district} pincode=${d.pincode} age=${d.animal_age_months} price=${d.price} (HTTP ${one.status}); `
+              + `the list returned ${(authed.json?.data?.items || []).length} item(s), total=${authed.json?.data?.total}`);
+          }
+          else {
+            if ('latitude' in found || 'longitude' in found) problems.push('a stranger received the seller\'s EXACT latitude/longitude');
+            if (found.map_lat === undefined || found.map_lng === undefined) problems.push('no rounded map pin (map_lat/map_lng) for a listing that has coordinates');
+            if (found.contact_phone) problems.push('a stranger received the seller\'s full phone number in the list');
+            if (!found.contact_phone_masked) problems.push('no masked phone in the list');
+            if (found.distance_km === undefined || found.distance_km === null) problems.push('no distance_km although the buyer shared a position');
+          }
+          const pubFound = (pub.json?.data?.items || []).find(l => l.id === listingId);
+          if (!pubFound) problems.push('the new listing was not found on the public list');
+          else if ('latitude' in pubFound || 'contact_phone' in pubFound) problems.push('the public list exposes exact coordinates or a phone number');
+          // a search that only matches through the alias list (the typed words match nothing in the text)
+          const viaAlias = await http('GET', `${apiBase}/marketplace/listings?${q({ search: 'zzzznomatchzzzz', searchAliases: unique.toLowerCase() })}`, null, bTok);
+          if (!(viaAlias.json?.data?.items || []).some(l => l.id === listingId)) {
+            problems.push(`a search that matches only through searchAliases did not find the listing (HTTP ${viaAlias.status}, ${(viaAlias.json?.data?.items || []).length} item(s), total=${viaAlias.json?.data?.total}, ${JSON.stringify(viaAlias.json?.error || {}).slice(0, 200)})`);
+          }
+
+          const rev = await http('POST', `${apiBase}/marketplace/listings/${listingId}/reveal-contact`, { channel: 'call' }, bTok);
+          if (rev.status !== 200 || rev.json?.data?.phone !== '9876543210') problems.push(`reveal-contact: HTTP ${rev.status} ${JSON.stringify(rev.json || {}).slice(0, 160)}`);
+          const views = await http('GET', `${apiBase}/marketplace/listings/${listingId}/contact-views`, null, sTok);
+          if (views.status !== 200 || (views.json?.data?.items || []).length !== 1) problems.push(`the seller's who-viewed list: HTTP ${views.status} ${JSON.stringify(views.json || {}).slice(0, 160)}`);
+          const strangerViews = await http('GET', `${apiBase}/marketplace/listings/${listingId}/contact-views`, null, bTok);
+          if (strangerViews.status !== 403) problems.push(`a non-seller could read the who-viewed list (HTTP ${strangerViews.status})`);
+          const gone = await http('POST', `${apiBase}/marketplace/listings/00000000-0000-4000-8000-000000000000/reveal-contact`, { channel: 'call' }, bTok);
+          if (gone.status !== 404 || !gone.json?.error?.message) problems.push(`reveal on a missing listing should be a plain 404 message, got HTTP ${gone.status}`);
+          // my listings: the seller sees their own, including the exact spot
+          const mine = await http('GET', `${apiBase}/marketplace/listings?sellerId=${seller.json?.data?.user?.id || ''}&status=&limit=100`, null, sTok);
+          if (mine.status !== 200) problems.push(`the seller's own listing list: HTTP ${mine.status}`);
+          await http('DELETE', `${apiBase}/marketplace/listings/${listingId}`, null, sTok);
+        }
+      }
+      const sqlErrs = serverLog.slice(mark).split('\n').filter(l => /error|ERROR/.test(l) && /marketplace|syntax|column|relation|parameter/i.test(l)).map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(-200));
+      if (problems.length || sqlErrs.length) fail('The marketplace misbehaves on the real schema.', [...problems, ...sqlErrs]);
+      else ok('filters, search aliases, privacy and reveal verified');
     }
 
     // ── PHASE 7: the browser ──

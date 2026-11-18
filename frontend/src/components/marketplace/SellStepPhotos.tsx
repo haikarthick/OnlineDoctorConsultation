@@ -5,9 +5,9 @@ import type { TFunction } from 'i18next'
 export const SellStepPhotos: React.FC<{
   sellForm: Record<string, any>; sf: (key: string, value: any) => void; setSellForm: (updater: (f: Record<string, any>) => Record<string, any>) => void;
   maxListingImages: number; minRecommendedPhotos: number; uploadingImages: boolean; uploadProgress: { done: number; total: number }; onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  uploadingVideo: boolean; onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void; maxVideoDurationSeconds: number; maxVideoSizeMb: number;
+  uploadingVideo: boolean; videoProgress: number | null; onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void; maxVideoDurationSeconds: number; maxVideoSizeMb: number;
   onNext: () => void; t: TFunction;
-}> = ({ sellForm, sf, setSellForm, maxListingImages, minRecommendedPhotos, uploadingImages, uploadProgress, onImageUpload, uploadingVideo, onVideoUpload, maxVideoDurationSeconds, maxVideoSizeMb, onNext, t }) => (
+}> = ({ sellForm, sf, setSellForm, maxListingImages, minRecommendedPhotos, uploadingImages, uploadProgress, onImageUpload, uploadingVideo, videoProgress, onVideoUpload, maxVideoDurationSeconds, maxVideoSizeMb, onNext, t }) => (
   <div className="mp-sell-step">
     <h3>{t('marketplace.sell.photosStepTitle')}</h3>
     <p className="mp-sell-step-desc">{t('marketplace.sell.photosStepDesc')}</p>
@@ -70,7 +70,12 @@ export const SellStepPhotos: React.FC<{
                   <input type="file" accept="video/*" className="mp-file-hidden" onChange={onVideoUpload} disabled={uploadingVideo} />
                 </label>
               </div>
-              {uploadingVideo && <div className="input-error-msg si-8ad4a3c7">{t('marketplace.sell.uploadingVideo', 'Uploading video...')}</div>}
+              {uploadingVideo && (
+                <div className="mp-video-progress" role="status" aria-live="polite">
+                  {videoProgress !== null ? t('marketplace.sell.preparingVideo', { percent: Math.round(videoProgress * 100) }) : t('marketplace.sell.uploadingVideo', 'Uploading video...')}
+                  {videoProgress !== null && <progress max={1} value={videoProgress} />}
+                </div>
+              )}
               <div className="mp-compliance-hint">{t('marketplace.sell.videoHint')}</div>
               <div className="mp-compliance-hint">{t('marketplace.sell.videoLimits', { maxSec: maxVideoDurationSeconds, maxMb: maxVideoSizeMb, defaultValue: `Max ${maxVideoDurationSeconds} seconds, up to ${maxVideoSizeMb}MB` })}</div>
             </>

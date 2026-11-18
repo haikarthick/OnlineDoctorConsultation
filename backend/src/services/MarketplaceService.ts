@@ -64,6 +64,17 @@ export function maskPhone(phone?: string | null): string | null {
   return digits.slice(0, 2) + '•'.repeat(digits.length - 5) + digits.slice(-3);
 }
 
+/**
+ * Words the app resolved from what the person typed (their language's name for a breed or species, mapped to
+ * the canonical name stored on listings). Sent as a '|' separated list; at most 10, each trimmed, lower-cased
+ * and capped in length, then bound as a query parameter - never placed in the SQL text.
+ */
+export function parseSearchAliases(raw: unknown): string[] {
+  if (raw === undefined || raw === null) return [];
+  const parts = Array.isArray(raw) ? raw.flatMap(x => String(x).split('|')) : String(raw).split('|');
+  return Array.from(new Set(parts.map(p => p.trim().toLowerCase()).filter(p => p.length > 0 && p.length <= 100))).slice(0, 10);
+}
+
 /** How many different sellers' numbers one account may reveal per 24 hours. */
 export const REVEAL_DAILY_LIMIT = 30;
 
@@ -81,7 +92,7 @@ class MarketplaceService {
       sellerId, enterpriseId, limit = 50, offset = 0,
       species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender, animalClass,
       listingTier, isHotDeal, vaccinationStatus, healthCertificate, sortBy,
-      userLat, userLng, radiusKm, state, district, pincode, minAge, maxAge,
+      userLat, userLng, radiusKm, state, district, pincode, minAge, maxAge, searchAliases,
     } = filters;
 
     // Shared WHERE builder so the count query always matches the item query
@@ -106,7 +117,11 @@ class MarketplaceService {
       const qIdx = idx++; params.push(search);
       const likeIdx = idx++; params.push(`%${search}%`);
       const tsvec = `to_tsvector('english', coalesce(l.title,'')||' '||coalesce(l.description,'')||' '||coalesce(l.breed,'')||' '||coalesce(l.species,''))`;
-      where.push(`(${tsvec} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx})`);
+      // Also match the description, the place, and the breed/species names the app resolved from the typed words
+      const aliases = parseSearchAliases(searchAliases);
+      let aliasSql = '';
+      if (aliases.length) { const aIdx = idx++; params.push(aliases); aliasSql = ` OR LOWER(l.breed) = ANY($${aIdx}::text[]) OR LOWER(l.species) = ANY($${aIdx}::text[])`; }
+      where.push(`(${tsvec} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx} OR l.description ILIKE $${likeIdx} OR l.location ILIKE $${likeIdx} OR l.district ILIKE $${likeIdx} OR l.state ILIKE $${likeIdx}${aliasSql})`);;
       ftsRankExpr = `ts_rank(${tsvec}, plainto_tsquery('english', $${qIdx}))`;
     }
     if (species) add('l.species = $?', species);
@@ -823,7 +838,7 @@ class MarketplaceService {
       limit = 24, offset = 0,
       species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender, animalClass,
       vaccinationStatus, healthCertificate, sortBy,
-      userLat, userLng, radiusKm, state, district, pincode, minAge, maxAge,
+      userLat, userLng, radiusKm, state, district, pincode, minAge, maxAge, searchAliases,
     } = filters;
 
     // Build WHERE clause once, shared by the page query and the count query
@@ -840,7 +855,10 @@ class MarketplaceService {
     if (search) {
       const qIdx = idx++; params.push(search);
       const likeIdx = idx++; params.push(`%${search}%`);
-      where += ` AND (${PUB_TSVEC} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx})`;
+      const pubAliases = parseSearchAliases(searchAliases);
+      let pubAliasSql = '';
+      if (pubAliases.length) { const aIdx = idx++; params.push(pubAliases); pubAliasSql = ` OR LOWER(l.breed) = ANY($${aIdx}::text[]) OR LOWER(l.species) = ANY($${aIdx}::text[])`; }
+      where += ` AND (${PUB_TSVEC} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx} OR l.description ILIKE $${likeIdx} OR l.location ILIKE $${likeIdx} OR l.district ILIKE $${likeIdx} OR l.state ILIKE $${likeIdx}${pubAliasSql})`;
       pubFtsRank = `ts_rank(${PUB_TSVEC}, plainto_tsquery('english', $${qIdx}))`;
     }
     if (species) { where += ` AND l.species = $${idx++}`; params.push(species); }

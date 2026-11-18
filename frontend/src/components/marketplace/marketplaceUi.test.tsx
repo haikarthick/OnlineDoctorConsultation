@@ -160,7 +160,7 @@ describe('ListingGallery', () => {
 
 describe('SellStepPhotos', () => {
   const base = { sellForm: { images: [] as string[], videoUrl: '' }, sf: vi.fn(), setSellForm: vi.fn(), maxListingImages: 8, minRecommendedPhotos: 3,
-    uploadingImages: false, uploadProgress: { done: 0, total: 0 }, onImageUpload: vi.fn(), uploadingVideo: false, onVideoUpload: vi.fn(),
+    uploadingImages: false, uploadProgress: { done: 0, total: 0 }, onImageUpload: vi.fn(), uploadingVideo: false, videoProgress: null, onVideoUpload: vi.fn(),
     maxVideoDurationSeconds: 60, maxVideoSizeMb: 50, onNext: vi.fn(), t }
   it('offers the camera and the gallery as separate taps, each a real file input', () => {
     const { container } = render(<SellStepPhotos {...base} />)

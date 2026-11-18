@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
@@ -14,7 +14,9 @@ import { useMasterData } from '../context/MasterDataContext'
 import { g } from '../components/marketplace/publicListingShared'
 import { MIN_RECOMMENDED_PHOTOS, MAX_LISTING_IMAGES, MAX_IMAGE_SIZE_MB, MAX_VIDEO_SIZE_MB, MAX_VIDEO_DURATION_SECONDS, readVideoDuration, TabKey, AdminSubTab } from '../components/marketplace/marketplaceShared'
 import { useNearMe } from '../hooks/useNearMe'
+import { resolveSearchAliases } from '../utils/searchAliases'
 import { compressImage } from '../utils/imageCompress'
+import { canCompressVideo, compressVideo, VIDEO_MAX_ORIGINAL_MB } from '../utils/videoCompress'
 import { ReportModal } from '../components/marketplace/ReportModal'
 import { DashboardTab } from '../components/marketplace/DashboardTab'
 import { BrowseTab } from '../components/marketplace/BrowseTab'
@@ -145,6 +147,7 @@ const Marketplace: React.FC = () => {
   const [uploadingImages, setUploadingImages] = useState(false)
   const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 })
   const [uploadingVideo, setUploadingVideo] = useState(false)
+  const [videoProgress, setVideoProgress] = useState<number | null>(null)
 
   // Load auction enabled state on mount
   useEffect(() => {
@@ -205,11 +208,16 @@ const Marketplace: React.FC = () => {
     loadAnimals()
   }, [])
 
+  const aliasResolver = useRef<(text: string) => string[]>(() => [])
+  aliasResolver.current = (text: string) => resolveSearchAliases(text, SPECIES_LIST, breedsForSpecies, sp => speciesLabel(sp, t), breedLabel)
+
   const fetchListings = useCallback(async () => {
     setLoading(true)
     try {
       const params: any = { status: 'active', ...filters, limit: PAGE_SIZE, offset: page * PAGE_SIZE }
       if (sortBy) params.sortBy = sortBy
+      // Search in the person's own language: resolve what they typed to canonical breed/species names
+      if (filters.search) { const aliases = aliasResolver.current(filters.search); if (aliases.length) params.searchAliases = aliases.join('|') }
       if (nearMeActive && userLocation) {
         params.userLat = userLocation.lat
         params.userLng = userLocation.lng
@@ -353,8 +361,11 @@ const Marketplace: React.FC = () => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (file.size > MAX_VIDEO_SIZE_MB * 1024 * 1024) {
-      setError(t('marketplace.sell.videoTooLarge', { maxMb: MAX_VIDEO_SIZE_MB, defaultValue: `Video is too large - max ${MAX_VIDEO_SIZE_MB}MB` }))
+    // A phone that can shrink the video accepts a big original; one that cannot is held to the upload limit
+    const shrinkable = canCompressVideo()
+    const rawCapMb = shrinkable ? VIDEO_MAX_ORIGINAL_MB : MAX_VIDEO_SIZE_MB
+    if (file.size > rawCapMb * 1024 * 1024) {
+      setError(t('marketplace.sell.videoTooLarge', { maxMb: rawCapMb, defaultValue: `Video is too large - max ${rawCapMb}MB` }))
       e.target.value = ''
       return
     }
@@ -375,7 +386,20 @@ const Marketplace: React.FC = () => {
 
     setUploadingVideo(true)
     try {
-      const res = await apiService.uploadVideoFile(file, 'marketplace')
+      // Make it smaller on the phone first (720p): far less mobile data and a much lower chance of a failed upload
+      let toUpload = file
+      if (shrinkable) {
+        setVideoProgress(0)
+        toUpload = await compressVideo(file, f => setVideoProgress(f))
+        setVideoProgress(null)
+      }
+      if (toUpload.size > MAX_VIDEO_SIZE_MB * 1024 * 1024) {
+        setError(t('marketplace.sell.videoTooLarge', { maxMb: MAX_VIDEO_SIZE_MB, defaultValue: `Video is too large - max ${MAX_VIDEO_SIZE_MB}MB` }))
+        setUploadingVideo(false)
+        e.target.value = ''
+        return
+      }
+      const res = await apiService.uploadVideoFile(toUpload, 'marketplace')
       const url = res.url || res.fileUrl
       if (url) { sf('videoUrl', url); setSuccessMsg(t('marketplace.sell.videoUploaded')) }
     } catch (err: any) {
@@ -386,6 +410,7 @@ const Marketplace: React.FC = () => {
         setError(userMessage(err, 'marketplace.sell.uploadFailed', 'Upload failed'))
       }
     }
+    setVideoProgress(null)
     setUploadingVideo(false)
     e.target.value = ''
   }
@@ -940,7 +965,7 @@ const Marketplace: React.FC = () => {
           photosProps={{
             sellForm, sf, setSellForm,
             maxListingImages: MAX_LISTING_IMAGES, minRecommendedPhotos: MIN_RECOMMENDED_PHOTOS, uploadingImages, uploadProgress, onImageUpload: handleImageUpload,
-            uploadingVideo, onVideoUpload: handleVideoUpload, maxVideoDurationSeconds: MAX_VIDEO_DURATION_SECONDS, maxVideoSizeMb: MAX_VIDEO_SIZE_MB,
+            uploadingVideo, videoProgress, onVideoUpload: handleVideoUpload, maxVideoDurationSeconds: MAX_VIDEO_DURATION_SECONDS, maxVideoSizeMb: MAX_VIDEO_SIZE_MB,
             onNext: () => setSellStep(1), t,
           }}
           step0Props={{

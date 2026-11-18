@@ -1031,3 +1031,6 @@
 .mp-location-error { color: #b45309; font-size: 14px; }
 .mp-map-wrap { margin-bottom: 16px; }
 .mp-map-pop { display: flex; flex-direction: column; gap: 4px; min-width: 160px; }
+
+.mp-video-progress { display: flex; flex-direction: column; gap: 6px; font-size: 14px; margin-top: 6px; }
+.mp-video-progress progress { width: 100%; height: 10px; }

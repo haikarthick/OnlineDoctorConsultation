@@ -155,3 +155,45 @@ describe('exact farm coordinates stay private', () => {
     expect(r.items[1].latitude).toBe('10.523456');
   });
 });
+
+import { parseSearchAliases } from '../../src/services/MarketplaceService';
+
+describe('search aliases', () => {
+  it('parses a | separated list: trimmed, lower-cased, de-duplicated, at most 10, none too long', () => {
+    expect(parseSearchAliases(' Gir | gir |Murrah')).toEqual(['gir', 'murrah']);
+    expect(parseSearchAliases(Array.from({ length: 30 }, (_, i) => `b${i}`).join('|'))).toHaveLength(10);
+    expect(parseSearchAliases('x'.repeat(101))).toEqual([]);
+    expect(parseSearchAliases(undefined)).toEqual([]);
+    expect(parseSearchAliases('')).toEqual([]);
+  });
+
+  it('binds the aliases as one array parameter and matches breed or species case-insensitively; the words never enter the SQL text', async () => {
+    jest.clearAllMocks();
+    q.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ count: '0' }] });
+    await marketplaceService.listListings({ search: 'गिर', searchAliases: 'Gir|cattle' });
+    const [sql, params] = q.mock.calls[0];
+    expect(sql).toMatch(/LOWER\(l\.breed\) = ANY\(\$\d+::text\[\]\)/);
+    expect(sql).toMatch(/LOWER\(l\.species\) = ANY\(\$\d+::text\[\]\)/);
+    expect(sql).toMatch(/l\.description ILIKE \$\d+/);
+    // every search placeholder must be a real $n, never a bare number
+    expect(sql).toMatch(/plainto_tsquery\('english', \$\d+\)/);
+    expect(sql).not.toMatch(/ILIKE\s+\d/);
+    expect(sql).not.toMatch(/Gir|गिर/);
+    expect(params).toContainEqual(['gir', 'cattle']);
+  });
+
+  it('adds no alias clause when none were sent', async () => {
+    jest.clearAllMocks();
+    q.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [{ count: '0' }] });
+    await marketplaceService.listListings({ search: 'cow' });
+    expect(q.mock.calls[0][0]).not.toMatch(/ANY\(/);
+  });
+
+  it('the public query takes the aliases too', async () => {
+    jest.clearAllMocks();
+    q.mockResolvedValueOnce({ rows: [{ count: '0' }] }).mockResolvedValueOnce({ rows: [] });
+    await marketplaceService.listPublicListings({ search: 'गिर', searchAliases: 'Gir' });
+    expect(q.mock.calls[0][0]).toMatch(/LOWER\(l\.breed\) = ANY/);
+    expect(q.mock.calls[0][1]).toContainEqual(['gir']);
+  });
+});

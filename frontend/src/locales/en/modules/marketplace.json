@@ -227,7 +227,8 @@
       "photosStepTitle": "📸 Photos and video",
       "photosStepDesc": "Start with photos or a short video. Buyers look at these first.",
       "draftRestored": "Your unfinished listing was restored.",
-      "startOver": "Start over"
+      "startOver": "Start over",
+      "preparingVideo": "Making the video smaller so it uploads faster... {{percent}}%. Please keep this screen open."
     },
     "detail": {
       "backToListings": "← Back to listings",

@@ -7,6 +7,7 @@ import { MarketplaceListing } from '../types'
 import { useMasterData } from '../context/MasterDataContext'
 import { WayToVetLogo } from '../components/WayToVetLogo'
 import { useNearMe } from '../hooks/useNearMe'
+import { resolveSearchAliases } from '../utils/searchAliases'
 import { NearMeBar } from '../components/marketplace/NearMeBar'
 import { ListingsMap } from '../components/marketplace/ListingsMap'
 import { PublicListingCard } from '../components/marketplace/PublicListingCard'
@@ -83,11 +84,15 @@ const PublicMarketplace: React.FC = () => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
   }
 
+  const aliasResolver = React.useRef<(text: string) => string[]>(() => [])
+  aliasResolver.current = (text: string) => resolveSearchAliases(text, SPECIES_LIST, breedsForSpecies, sp => speciesLabel(sp, t), breedLabel)
+
   const fetchListings = useCallback(async () => {
     setLoading(true)
     try {
       const params: any = { ...filters, limit: PAGE_SIZE, offset: page * PAGE_SIZE }
       if (sortBy) params.sortBy = sortBy
+      if (filters.search) { const aliases = aliasResolver.current(filters.search); if (aliases.length) params.searchAliases = aliases.join('|') }
       if (nearMe.active && nearMe.location) {
         params.userLat = nearMe.location.lat
         params.userLng = nearMe.location.lng
