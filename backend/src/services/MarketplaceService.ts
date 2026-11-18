@@ -50,6 +50,19 @@ function stripSensitive(row: any, requestingUserId?: string, isAdmin = false) {
   return row;
 }
 
+/** 98•••••210: enough for a buyer to recognise it is a real number, not enough to copy it. */
+export function maskPhone(phone?: string | null): string | null {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (digits.length < 6) return digits ? '••••' : null;
+  return digits.slice(0, 2) + '•'.repeat(digits.length - 5) + digits.slice(-3);
+}
+
+/** How many different sellers' numbers one account may reveal per 24 hours. */
+export const REVEAL_DAILY_LIMIT = 30;
+
+/** An error whose message is already written for the person reading it (what happened, why, what to do). */
+function userFacing(message: string) { return Object.assign(new Error(message), { userFacing: true }); }
+
 class MarketplaceService {
 
   // ── Listings ──
@@ -155,6 +168,7 @@ class MarketplaceService {
 
     // Contact stays gated until a deal/inquiry reveals it; moderation fields stay private
     for (const row of result.rows) {
+      row.contact_phone_masked = maskPhone(row.contact_phone);
       if (!isAdmin && row.seller_id !== requestingUserId) row.contact_phone = null;
       stripSensitive(row, requestingUserId, isAdmin);
     }
@@ -177,6 +191,7 @@ class MarketplaceService {
       await pool.query('UPDATE marketplace_listings SET views_count = views_count + 1 WHERE id = $1', [id]);
       listing.views_count = (listing.views_count || 0) + 1;
     }
+    listing.contact_phone_masked = maskPhone(listing.contact_phone);
     // Gate contact_phone: reveal to seller, admins, buyers with a revealed
     // inquiry, or buyers with a live/completed reservation on this listing
     if (!isOwner && !isAdmin) {
@@ -194,6 +209,50 @@ class MarketplaceService {
       if (!revealed) listing.contact_phone = null;
     }
     return stripSensitive(listing, requestingUserId, isAdmin);
+  }
+
+  /**
+   * A signed-in buyer taps Call / WhatsApp: show the seller's number and log the tap. The number is
+   * never in a listing response; this is the only way a buyer gets it (apart from a reserved deal).
+   */
+  async revealContact(listingId: string, viewerId: string, channel: 'call' | 'whatsapp' = 'call') {
+    const res = await pool.query(
+      `SELECT id, title, seller_id, status, admin_approved, contact_phone FROM marketplace_listings WHERE id = $1`, [listingId]);
+    const l = res.rows[0];
+    if (!l || l.status === 'deleted' || (l.admin_approved === false && l.seller_id !== viewerId)) {
+      throw userFacing('This listing was not found. The seller may have removed it.');
+    }
+    if (l.seller_id === viewerId) return { phone: l.contact_phone || null };
+    if (!l.contact_phone) throw userFacing('The seller has not added a phone number. Send them a message instead.');
+
+    const recent = await pool.query(
+      `SELECT COUNT(DISTINCT listing_id) AS n, COALESCE(BOOL_OR(listing_id = $2), false) AS already
+       FROM marketplace_contact_reveals WHERE viewer_id = $1 AND created_at > NOW() - INTERVAL '24 hours'`, [viewerId, listingId]);
+    const already = !!recent.rows[0]?.already;
+    if (!already && +(recent.rows[0]?.n || 0) >= REVEAL_DAILY_LIMIT) {
+      throw userFacing('You have viewed a lot of seller phone numbers today. Please try again tomorrow, or send the seller a message instead.');
+    }
+    await pool.query(
+      `INSERT INTO marketplace_contact_reveals (listing_id, viewer_id, seller_id, channel) VALUES ($1, $2, $3, $4)`,
+      [listingId, viewerId, l.seller_id, channel]);
+    if (!already) {
+      await notifySafe(l.seller_id, 'marketplace_contact_view', 'A buyer is interested',
+        `Someone viewed your phone number for "${l.title}". They may call you soon.`, { listingId });
+    }
+    return { phone: l.contact_phone };
+  }
+
+  /** The seller's own view of who looked at their number (first name and last initial, newest first). */
+  async listContactViews(listingId: string, sellerId: string, isAdmin = false) {
+    const owner = await pool.query('SELECT seller_id FROM marketplace_listings WHERE id = $1', [listingId]);
+    if (!owner.rows[0]) throw userFacing('This listing was not found.');
+    if (!isAdmin && owner.rows[0].seller_id !== sellerId) throw userFacing('Only the seller can see who viewed the phone number.');
+    const rows = await pool.query(
+      `SELECT DISTINCT ON (r.viewer_id) r.created_at, r.channel, u.first_name, LEFT(COALESCE(u.last_name, ''), 1) AS last_initial
+       FROM marketplace_contact_reveals r JOIN users u ON u.id = r.viewer_id
+       WHERE r.listing_id = $1 ORDER BY r.viewer_id, r.created_at DESC`, [listingId]);
+    const items = rows.rows.sort((a: any, b: any) => +new Date(b.created_at) - +new Date(a.created_at)).slice(0, 50);
+    return { items };
   }
 
   async createListing(data: any) {

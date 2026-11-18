@@ -259,7 +259,11 @@
       "call": "Call",
       "contactHidden": "Contact details hidden",
       "requestContact": "Request Contact",
-      "watchVideo": "వీడియో చూడండి"
+      "watchVideo": "వీడియో చూడండి",
+      "whatsapp": "వాట్సాప్",
+      "whatsappText": "నమస్కారం, మీ జాబితాపై నాకు ఆసక్తి ఉంది: {{title}}",
+      "phoneMaskedHint": "పూర్తి నంబర్ చూడటానికి కాల్ లేదా వాట్సాప్ నొక్కండి. మీరు చూసినట్టు అమ్మకందారునికి తెలుస్తుంది.",
+      "noPhone": "అమ్మకందారు ఫోన్ నంబర్ జోడించలేదు. బదులుగా వారికి సందేశం పంపండి."
     },
     "card": {
       "hotDeal": "🔥 హాట్ డీల్",
@@ -637,7 +641,9 @@
         "reserved": "రిజర్వ్ చేయబడింది",
         "expired": "గడువు ముగిసింది",
         "rehomed": "అమ్ముడైంది"
-      }
+      },
+      "whoViewed": "నా నంబర్ ఎవరు చూశారు",
+      "noViews": "మీ ఫోన్ నంబర్‌ను ఇంకా ఎవరూ చూడలేదు."
     }
   },
   "publicMarketplace": {

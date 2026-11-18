@@ -259,7 +259,11 @@
       "call": "Call",
       "contactHidden": "Contact details hidden",
       "requestContact": "Request Contact",
-      "watchVideo": "Watch video"
+      "watchVideo": "Watch video",
+      "whatsapp": "WhatsApp",
+      "whatsappText": "Hi, I am interested in your listing: {{title}}",
+      "phoneMaskedHint": "Tap Call or WhatsApp to see the full number. The seller is told that you looked.",
+      "noPhone": "The seller has not added a phone number. Send them a message instead."
     },
     "card": {
       "hotDeal": "🔥 HOT DEAL",
@@ -637,7 +641,9 @@
         "reserved": "Reserved",
         "expired": "Expired",
         "rehomed": "Sold"
-      }
+      },
+      "whoViewed": "Who viewed my number",
+      "noViews": "No one has viewed your phone number yet."
     }
   },
   "publicMarketplace": {

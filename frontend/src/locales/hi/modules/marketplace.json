@@ -259,7 +259,11 @@
       "call": "Call",
       "contactHidden": "Contact details hidden",
       "requestContact": "Request Contact",
-      "watchVideo": "वीडियो देखें"
+      "watchVideo": "वीडियो देखें",
+      "whatsapp": "व्हाट्सऐप",
+      "whatsappText": "नमस्ते, मुझे आपकी लिस्टिंग में रुचि है: {{title}}",
+      "phoneMaskedHint": "पूरा नंबर देखने के लिए कॉल या व्हाट्सऐप दबाएँ। विक्रेता को पता चलेगा कि आपने देखा।",
+      "noPhone": "विक्रेता ने फ़ोन नंबर नहीं जोड़ा है। इसके बजाय उन्हें संदेश भेजें।"
     },
     "card": {
       "hotDeal": "🔥 हॉट डील",
@@ -637,7 +641,9 @@
         "reserved": "रिज़र्व",
         "expired": "समाप्त",
         "rehomed": "बिक गया"
-      }
+      },
+      "whoViewed": "मेरा नंबर किसने देखा",
+      "noViews": "अभी तक किसी ने आपका फ़ोन नंबर नहीं देखा।"
     }
   },
   "publicMarketplace": {

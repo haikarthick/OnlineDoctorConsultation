@@ -10,13 +10,21 @@ type Draft = { title: string; price: string; description: string }
 export const MyListingsTab: React.FC<{
   listings: MarketplaceListing[]; loading: boolean; formatCurrency: (n: number) => string;
   onView: (l: MarketplaceListing) => void;
+  onLoadViews: (id: string) => Promise<Array<{ first_name: string; last_initial: string; channel: string; created_at: string }>>;
   onSave: (id: string, patch: { title: string; price: number | null; description: string }) => Promise<boolean>;
   onMarkSold: (id: string) => void; onDelete: (id: string) => void; onSell: () => void; t: TFunction;
-}> = ({ listings, loading, formatCurrency, onView, onSave, onMarkSold, onDelete, onSell, t }) => {
+}> = ({ listings, loading, formatCurrency, onView, onLoadViews, onSave, onMarkSold, onDelete, onSell, t }) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState<Draft>({ title: '', price: '', description: '' })
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [viewsFor, setViewsFor] = useState<string | null>(null)
+  const [contactViews, setContactViews] = useState<Array<{ first_name: string; last_initial: string; channel: string; created_at: string }>>([])
+  const toggleViews = async (id: string) => {
+    if (viewsFor === id) { setViewsFor(null); return }
+    setViewsFor(id); setContactViews([])
+    setContactViews(await onLoadViews(id))
+  }
 
   const startEdit = (l: MarketplaceListing) => {
     setEditingId(l.id); setConfirmDeleteId(null)
@@ -89,9 +97,21 @@ export const MyListingsTab: React.FC<{
             ) : (
               <div className="mp-mine-actions">
                 <button type="button" className="module-btn small" onClick={() => onView(l)}>{t('marketplace.mine.view')}</button>
+                <button type="button" className="module-btn small" onClick={() => toggleViews(l.id)}>👀 {t('marketplace.mine.whoViewed')}</button>
                 {isOpen && <button type="button" className="module-btn small" onClick={() => startEdit(l)}>{t('marketplace.mine.edit')}</button>}
                 {statusKey === 'active' && <button type="button" className="module-btn small primary" onClick={() => onMarkSold(l.id)}>{t('marketplace.mine.markSold')}</button>}
                 {statusKey !== 'reserved' && <button type="button" className="module-btn small" onClick={() => { setConfirmDeleteId(l.id); setEditingId(null) }}>{t('marketplace.mine.delete')}</button>}
+              </div>
+            )}
+            {viewsFor === l.id && (
+              <div className="mp-mine-views">
+                {contactViews.length === 0 ? <p className="mp-compliance-hint">{t('marketplace.mine.noViews')}</p> : (
+                  <ul>
+                    {contactViews.map((v, i) => (
+                      <li key={i}>{v.channel === 'whatsapp' ? '💬' : '📞'} {v.first_name} {v.last_initial ? v.last_initial + '.' : ''} · {new Date(v.created_at).toLocaleString()}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
             {statusKey === 'reserved' && <p className="mp-compliance-hint">{t('marketplace.mine.reservedHint')}</p>}

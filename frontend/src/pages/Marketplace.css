@@ -1020,3 +1020,7 @@
 .mp-empty-state { text-align: center; padding: 32px 16px; }
 
 .mp-sell-topbar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+
+.mp-contact-btn:disabled { opacity: 0.6; cursor: wait; }
+.mp-mine-views { margin-top: 8px; font-size: 14px; }
+.mp-mine-views ul { margin: 4px 0 0; padding-left: 18px; }

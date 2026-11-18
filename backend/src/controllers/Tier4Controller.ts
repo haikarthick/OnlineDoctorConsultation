@@ -501,6 +501,37 @@ class Tier4Controller {
   }
 
   // ── Reports (trust & safety) ──
+  async revealMarketplaceContact(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await marketplaceService.revealContact(req.params.listingId, userId, req.body?.channel === 'whatsapp' ? 'whatsapp' : 'call');
+      res.json({ data });
+    } catch (err: any) {
+      // Only messages written for the user are passed on; anything else (a database error) stays in the log
+      if (!err.userFacing) {
+        logger.error('revealMarketplaceContact failed', { error: err.message });
+        return res.status(500).json({ error: { message: 'We could not show the phone number right now. Please try again in a moment.' } });
+      }
+      const code = /not found/i.test(err.message) ? 404 : /a lot of seller/i.test(err.message) ? 429 : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
+  }
+
+  async listMarketplaceContactViews(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const isAdmin = (req as any).userRole === 'admin';
+      const data = await marketplaceService.listContactViews(req.params.listingId, userId, isAdmin);
+      res.json({ data });
+    } catch (err: any) {
+      if (!err.userFacing) {
+        logger.error('listMarketplaceContactViews failed', { error: err.message });
+        return res.status(500).json({ error: { message: 'We could not load this list right now. Please try again in a moment.' } });
+      }
+      res.status(/not found/i.test(err.message) ? 404 : 403).json({ error: { message: err.message } });
+    }
+  }
+
   async reportMarketplaceListing(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;

@@ -128,6 +128,10 @@ export const updateSavedSearchSchema = Joi.object({
   alertsEnabled: Joi.boolean().optional(),
 }).min(1);
 
+export const revealContactSchema = Joi.object({
+  channel: Joi.string().valid('call', 'whatsapp').optional(),
+});
+
 export const reportListingSchema = Joi.object({
   reason: Joi.string().valid('scam', 'welfare_concern', 'prohibited', 'miscategorized', 'offensive', 'wrong_info', 'other').required(),
   details: longText(1000).optional().allow('', null),

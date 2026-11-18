@@ -2169,6 +2169,18 @@ ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS district VARCHAR(80);
 ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS pincode VARCHAR(10);
 CREATE INDEX IF NOT EXISTS idx_mp_listings_state_district ON marketplace_listings (state, district);
 CREATE INDEX IF NOT EXISTS idx_mp_listings_pincode ON marketplace_listings (pincode);
+
+-- Seller phone shown on tap; every tap logged (daily cap per viewer, "who viewed my number" for the seller)
+CREATE TABLE IF NOT EXISTS marketplace_contact_reveals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
+  viewer_id UUID NOT NULL REFERENCES users(id),
+  seller_id UUID NOT NULL REFERENCES users(id),
+  channel VARCHAR(10) NOT NULL DEFAULT 'call',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_mp_contact_reveals_listing ON marketplace_contact_reveals (listing_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_mp_contact_reveals_viewer ON marketplace_contact_reveals (viewer_id, created_at DESC);
 -- Phase 5: reports + full-text index (mirrors backend/migrations/018_marketplace_trust_discovery.sql)
 CREATE TABLE IF NOT EXISTS marketplace_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -26,7 +26,7 @@ export const BrowseTab: React.FC<{
   bidAmount: string; bidMessage: string; onBidAmountChange: (v: string) => void; onBidMessageChange: (v: string) => void;
   onPlaceBid: () => void; onBuyNow: () => void; onBack: () => void;
   isAdmin: boolean; onToggleHotDeal: (id: string, v: boolean) => void; onToggleFeatured: (id: string, v: boolean) => void;
-  userId?: string; onRequestContact: () => void; onMessageSeller: () => void; onReport: () => void; onBookVetCheck: () => void;
+  userId?: string; onRequestContact: () => void; onRevealContact: (channel: 'call' | 'whatsapp') => Promise<string | null>; onMessageSeller: () => void; onReport: () => void; onBookVetCheck: () => void;
   transport?: { url: string };
   t: TFunction;
 }> = (props) => {
@@ -35,7 +35,7 @@ export const BrowseTab: React.FC<{
     showSaveSearch, onShowSaveSearchChange, saveSearchName, onSaveSearchNameChange, onSaveCurrentSearch,
     loading, listings, favoriteIds, onToggleFavorite, isAuthenticated, onViewListing, totalListings, pageSize, page, onPageChange,
     formatCurrency, selectedListing, bids, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack,
-    isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, onMessageSeller, onReport, onBookVetCheck, transport, t } = props
+    isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, onRevealContact, onMessageSeller, onReport, onBookVetCheck, transport, t } = props
 
   const [sheetOpen, setSheetOpen] = useState(false)
   // Filters set in the sheet, shown as removable chips so a person always sees why the list is short.
@@ -75,6 +75,7 @@ export const BrowseTab: React.FC<{
         isAdmin={isAdmin} onToggleHotDeal={onToggleHotDeal} onToggleFeatured={onToggleFeatured}
         userId={userId}
         onRequestContact={onRequestContact}
+        onRevealContact={isAuthenticated ? onRevealContact : undefined}
         isFavorite={favoriteIds.has(selectedListing.id)}
         onToggleFavorite={isAuthenticated ? () => onToggleFavorite(selectedListing.id) : undefined}
         onMessageSeller={isAuthenticated ? onMessageSeller : undefined}

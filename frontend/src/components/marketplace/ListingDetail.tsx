@@ -12,11 +12,11 @@ export const ListingDetail: React.FC<{
   bidAmount: string; bidMessage: string; onBidAmountChange: (v: string) => void; onBidMessageChange: (v: string) => void;
   onPlaceBid: () => void; onBuyNow: () => void; onBack: () => void;
   isAdmin: boolean; onToggleHotDeal: (id: string, v: boolean) => void; onToggleFeatured: (id: string, v: boolean) => void;
-  userId?: string; onRequestContact?: () => void;
+  userId?: string; onRequestContact?: () => void; onRevealContact?: (channel: 'call' | 'whatsapp') => Promise<string | null>;
   isFavorite?: boolean; onToggleFavorite?: () => void; onMessageSeller?: () => void;
   onReport?: () => void; onBookVetCheck?: () => void; transport?: { url: string };
   t: TFunction;
-}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
+}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRevealContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
   const { findClassTerm, speciesLabel, resolveLabel, breedLabel, marketplaceCategories } = useMasterData()
   const categoryRow = marketplaceCategories.find(c => c.code === l.category)
   const categoryText = categoryRow ? resolveLabel(categoryRow, t) : t('marketplace.categories.other')
@@ -34,7 +34,21 @@ export const ListingDetail: React.FC<{
   const hasCert = g(l, 'healthCertificate', 'health_certificate')
   const tier = g(l, 'listingTier', 'listing_tier')
   const isHot = g(l, 'isHotDeal', 'is_hot_deal')
-  const contact = g(l, 'contactPhone', 'contact_phone')
+  const ownContact = g(l, 'contactPhone', 'contact_phone')
+  const maskedContact = g(l, 'contactPhoneMasked', 'contact_phone_masked')
+  const [revealedPhone, setRevealedPhone] = React.useState<string | null>(null)
+  const [revealing, setRevealing] = React.useState(false)
+  const contact = ownContact || revealedPhone
+  const reveal = async (channel: 'call' | 'whatsapp') => {
+    if (!onRevealContact || revealing) return
+    setRevealing(true)
+    const phone = await onRevealContact(channel)
+    setRevealing(false)
+    if (!phone) return
+    setRevealedPhone(phone)
+    if (channel === 'call') window.location.href = `tel:${phone}`
+    else window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(t('marketplace.detail.whatsappText', { title: l.title }))}`, '_blank', 'noopener')
+  }
   const listingType = g(l, 'listingType', 'listing_type')
   const highestBid = g(l, 'highestBid', 'highest_bid')
   const sellerName = g(l, 'sellerName', 'seller_name')
@@ -125,21 +139,30 @@ export const ListingDetail: React.FC<{
                   {contact ? (
                     <div className="mp-contact-actions">
                       <span>{contact}</span>
-                      <a href={`https://wa.me/${contact.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi, I'm interested in your listing: ${l.title}`)}`}
+                      <a href={`https://wa.me/${contact.replace(/\D/g, '')}?text=${encodeURIComponent(t('marketplace.detail.whatsappText', { title: l.title }))}`}
                         target="_blank" rel="noopener noreferrer" className="mp-contact-btn whatsapp"
                         onClick={e => e.stopPropagation()}>
-                        💬 WhatsApp
+                        💬 {t('marketplace.detail.whatsapp')}
                       </a>
                       <a href={`tel:${contact}`} className="mp-contact-btn call" onClick={e => e.stopPropagation()}>
                         📞 {t('marketplace.detail.call')}
                       </a>
                     </div>
+                  ) : userId && l.seller_id !== userId && maskedContact ? (
+                    <div>
+                      <div className="mp-contact-actions">
+                        <span>{maskedContact}</span>
+                        <button type="button" className="mp-contact-btn whatsapp" disabled={revealing} onClick={() => reveal('whatsapp')}>💬 {t('marketplace.detail.whatsapp')}</button>
+                        <button type="button" className="mp-contact-btn call" disabled={revealing} onClick={() => reveal('call')}>📞 {t('marketplace.detail.call')}</button>
+                      </div>
+                      <div className="mp-compliance-hint">{t('marketplace.detail.phoneMaskedHint')}</div>
+                    </div>
                   ) : userId && l.seller_id !== userId ? (
                     <div>
-                      <span className="si-7b05444b">{t('marketplace.detail.contactHidden')}</span>
-                      {onRequestContact && (
-                        <button className="module-btn small si-5dc995a0" onClick={onRequestContact}>
-                          📩 {t('marketplace.detail.requestContact')}
+                      <span className="si-7b05444b">{t('marketplace.detail.noPhone')}</span>
+                      {onMessageSeller && (
+                        <button className="module-btn small si-5dc995a0" onClick={onMessageSeller}>
+                          💬 {t('marketplace.engagement.messageSeller')}
                         </button>
                       )}
                     </div>

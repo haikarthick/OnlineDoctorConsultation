@@ -620,6 +620,10 @@ const Marketplace: React.FC = () => {
       return true
     } catch (e: any) { setError(userMessage(e)); return false }
   }
+  const loadContactViews = async (id: string): Promise<Array<{ first_name: string; last_initial: string; channel: string; created_at: string }>> => {
+    try { const res = await apiService.listMarketplaceContactViews(id); return res.data?.items || [] }
+    catch (e: any) { setError(userMessage(e)); return [] }
+  }
   const markMyListingSold = async (id: string) => {
     try { await apiService.updateMarketplaceListing(id, { status: 'sold' }); setSuccessMsg(t('marketplace.mine.soldDone')); fetchMyListings(); fetchListings(); fetchDashboard() }
     catch (e: any) { setError(userMessage(e)) }
@@ -786,6 +790,15 @@ const Marketplace: React.FC = () => {
       viewListing(selectedListing)
     } catch (e: any) { setError(userMessage(e)) }
   }
+  // Buyer taps Call / WhatsApp: ask the server for the number (it logs the tap and enforces the daily cap).
+  // A refusal comes back as a plain sentence from the server and is shown as is.
+  const handleRevealContact = async (channel: 'call' | 'whatsapp'): Promise<string | null> => {
+    if (!selectedListing) return null
+    try {
+      const res = await apiService.revealMarketplaceContact(selectedListing.id, channel)
+      return res.data?.phone || null
+    } catch (e: any) { setError(userMessage(e)); return null }
+  }
   const handleMessageSellerClick = () => { if (selectedListing) messageSeller(selectedListing) }
   const handleReportClick = () => { if (selectedListing) setReportModal({ listingId: selectedListing.id, title: selectedListing.title }) }
   const handleBookVetCheckClick = () => { if (selectedListing) bookVetCheck(selectedListing) }
@@ -935,7 +948,7 @@ const Marketplace: React.FC = () => {
           bidAmount={bidAmount} bidMessage={bidMessage} onBidAmountChange={setBidAmount} onBidMessageChange={setBidMessage}
           onPlaceBid={placeBid} onBuyNow={handleBuyNow} onBack={handleBack}
           isAdmin={isAdmin} onToggleHotDeal={handleToggleHotDeal} onToggleFeatured={handleToggleFeatured}
-          userId={user?.id} onRequestContact={handleRequestContact} onMessageSeller={handleMessageSellerClick} onReport={handleReportClick} onBookVetCheck={handleBookVetCheckClick}
+          userId={user?.id} onRequestContact={handleRequestContact} onRevealContact={handleRevealContact} onMessageSeller={handleMessageSellerClick} onReport={handleReportClick} onBookVetCheck={handleBookVetCheckClick}
           transport={mpConfig?.transport?.enabled && mpConfig.transport.url ? mpConfig.transport : undefined}
           t={t}
         />
@@ -1015,7 +1028,7 @@ const Marketplace: React.FC = () => {
       {tab === 'mine' && (
         <MyListingsTab
           listings={myListings} loading={myLoading} formatCurrency={formatCurrency}
-          onView={viewListingFromTab} onSave={saveMyListing} onMarkSold={markMyListingSold} onDelete={deleteMyListing}
+          onView={viewListingFromTab} onLoadViews={loadContactViews} onSave={saveMyListing} onMarkSold={markMyListingSold} onDelete={deleteMyListing}
           onSell={() => goTab('sell')} t={t}
         />
       )}

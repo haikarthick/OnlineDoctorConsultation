@@ -259,7 +259,11 @@
       "call": "Call",
       "contactHidden": "Contact details hidden",
       "requestContact": "Request Contact",
-      "watchVideo": "ವೀಡಿಯೊ ನೋಡಿ"
+      "watchVideo": "ವೀಡಿಯೊ ನೋಡಿ",
+      "whatsapp": "ವಾಟ್ಸಾಪ್",
+      "whatsappText": "ನಮಸ್ಕಾರ, ನಿಮ್ಮ ಪಟ್ಟಿಯಲ್ಲಿ ನನಗೆ ಆಸಕ್ತಿ ಇದೆ: {{title}}",
+      "phoneMaskedHint": "ಪೂರ್ಣ ಸಂಖ್ಯೆ ನೋಡಲು ಕರೆ ಅಥವಾ ವಾಟ್ಸಾಪ್ ಒತ್ತಿ. ನೀವು ನೋಡಿದ್ದು ಮಾರಾಟಗಾರರಿಗೆ ತಿಳಿಯುತ್ತದೆ.",
+      "noPhone": "ಮಾರಾಟಗಾರರು ಫೋನ್ ಸಂಖ್ಯೆ ಸೇರಿಸಿಲ್ಲ. ಬದಲಿಗೆ ಅವರಿಗೆ ಸಂದೇಶ ಕಳುಹಿಸಿ."
     },
     "card": {
       "hotDeal": "🔥 ಹಾಟ್ ಡೀಲ್",
@@ -637,7 +641,9 @@
         "reserved": "ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
         "expired": "ಅವಧಿ ಮುಗಿದಿದೆ",
         "rehomed": "ಮಾರಾಟವಾಗಿದೆ"
-      }
+      },
+      "whoViewed": "ನನ್ನ ಸಂಖ್ಯೆ ಯಾರು ನೋಡಿದರು",
+      "noViews": "ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ಇನ್ನೂ ಯಾರೂ ನೋಡಿಲ್ಲ."
     }
   },
   "publicMarketplace": {
