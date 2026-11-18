@@ -472,8 +472,8 @@
       }
     },
     "proximity": {
-      "notSupported": "Location not supported on this device",
-      "denied": "Location access denied. Please enable location permissions.",
+      "notSupported": "Your phone or browser cannot share its location. Pick a state and district in Filters instead.",
+      "denied": "Location access was denied. Allow it in your browser settings, or pick a state and district in Filters instead.",
       "nearMeOn": "Near Me (On)",
       "nearMe": "Near Me",
       "searching": "Searching nearby..."
@@ -644,6 +644,18 @@
       },
       "whoViewed": "Who viewed my number",
       "noViews": "No one has viewed your phone number yet."
+    },
+    "view": {
+      "list": "List",
+      "map": "Map",
+      "label": "View as"
+    },
+    "map": {
+      "loading": "Loading the map...",
+      "none": "None of these listings has a location on the map yet. Switch to the list to see them.",
+      "approx": "Pins show the approximate area (about 1 km), not the exact spot.",
+      "someHidden": "{{count}} listing(s) have no location and are not shown here.",
+      "you": "You are here"
     }
   },
   "publicMarketplace": {

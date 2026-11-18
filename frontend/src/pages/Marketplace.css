@@ -1024,3 +1024,10 @@
 .mp-contact-btn:disabled { opacity: 0.6; cursor: wait; }
 .mp-mine-views { margin-top: 8px; font-size: 14px; }
 .mp-mine-views ul { margin: 4px 0 0; padding-left: 18px; }
+
+/* ─── View toggle (list / map), near-me explanation, map popup ─── */
+.mp-view-toggle { display: flex; gap: 8px; margin: 0 0 12px; }
+.mp-view-toggle .mp-chip { min-height: 44px; }
+.mp-location-error { color: #b45309; font-size: 14px; }
+.mp-map-wrap { margin-bottom: 16px; }
+.mp-map-pop { display: flex; flex-direction: column; gap: 4px; min-width: 160px; }

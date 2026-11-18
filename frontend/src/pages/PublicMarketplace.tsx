@@ -6,6 +6,9 @@ import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing } from '../types'
 import { useMasterData } from '../context/MasterDataContext'
 import { WayToVetLogo } from '../components/WayToVetLogo'
+import { useNearMe } from '../hooks/useNearMe'
+import { NearMeBar } from '../components/marketplace/NearMeBar'
+import { ListingsMap } from '../components/marketplace/ListingsMap'
 import { PublicListingCard } from '../components/marketplace/PublicListingCard'
 import { MarketplaceFilterSheet, SHEET_FILTER_KEYS } from '../components/marketplace/MarketplaceFilterSheet'
 import { PublicListingDetail } from '../components/marketplace/PublicListingDetail'
@@ -19,6 +22,8 @@ const PublicMarketplace: React.FC = () => {
   const { isAuthenticated } = useAuth()
   const { classTermsForSpecies, marketplaceCategories, resolveLabel, marketplaceEligibleSpecies, speciesLabel, breedsForSpecies, breedLabel } = useMasterData()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const nearMe = useNearMe()
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   const SPECIES_LIST = marketplaceEligibleSpecies
   const CATEGORY_KEYS: Array<{ value: string; label: string }> = [
     { value: '', label: t('marketplace.categories.all') },
@@ -83,12 +88,18 @@ const PublicMarketplace: React.FC = () => {
     try {
       const params: any = { ...filters, limit: PAGE_SIZE, offset: page * PAGE_SIZE }
       if (sortBy) params.sortBy = sortBy
+      if (nearMe.active && nearMe.location) {
+        params.userLat = nearMe.location.lat
+        params.userLng = nearMe.location.lng
+        params.radiusKm = nearMe.radiusKm
+        if (!params.sortBy) params.sortBy = 'distance'
+      }
       const res = await apiService.listPublicMarketplaceListings(params)
       setListings(res.data?.items || [])
       setTotal(res.data?.total || 0)
     } catch { setListings([]); setTotal(0) }
     setLoading(false)
-  }, [filters, sortBy, page])
+  }, [filters, sortBy, page, nearMe.active, nearMe.location, nearMe.radiusKm])
 
   const fetchStats = useCallback(async () => {
     try {
@@ -245,6 +256,8 @@ const PublicMarketplace: React.FC = () => {
           onClear={() => { setPage(0); setFilters(f => { const n = { ...f }; SHEET_FILTER_KEYS.forEach(k => delete n[k]); return n }) }}
           resultCount={total} t={t} />
 
+        <NearMeBar nearMe={nearMe} t={t} />
+
         {/* Quick Chips */}
         <div className="mp-chip-bar">
           <button className={`mp-chip ${filters.healthCertificate === 'true' ? 'active' : ''}`} onClick={() => updateFilter('healthCertificate', filters.healthCertificate === 'true' ? '' : 'true')}>{t('marketplace.chips.healthCert')}</button>
@@ -272,11 +285,18 @@ const PublicMarketplace: React.FC = () => {
               </span>
             </div>
 
+            <div className="mp-view-toggle" role="tablist" aria-label={t('marketplace.view.label')}>
+              <button type="button" role="tab" aria-selected={viewMode === 'list'} className={`mp-chip ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>☰ {t('marketplace.view.list')}</button>
+              <button type="button" role="tab" aria-selected={viewMode === 'map'} className={`mp-chip ${viewMode === 'map' ? 'active' : ''}`} onClick={() => setViewMode('map')}>🗺️ {t('marketplace.view.map')}</button>
+            </div>
+
             {/* Listings Grid */}
             {loading ? (
               <div className="mp-loading">{t('marketplace.loadingListings')}</div>
             ) : listings.length === 0 ? (
               <div className="mp-empty">{t('marketplace.emptyListings')}</div>
+            ) : viewMode === 'map' ? (
+              <ListingsMap listings={listings} formatCurrency={formatCurrency} onOpen={viewListing} userLocation={nearMe.active ? nearMe.location : null} t={t} />
             ) : (
               <div className="mp-grid">
                 {listings.map(l => (

@@ -47,7 +47,7 @@ export const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCu
         <h4 className="mp-card-title">{l.title}</h4>
 
         {(l.district || l.state || l.location) && (
-          <div className="mp-card-place">📍 {[l.location, l.district, l.state].filter(Boolean).slice(0, 2).join(', ')}</div>
+          <div className="mp-card-place">📍 {[l.location, l.district, l.state].filter(Boolean).slice(0, 2).join(', ')}{l.distance_km != null && <strong> · {t('marketplace.card.kmAway', { km: Math.max(1, Math.round(+l.distance_km)) })}</strong>}</div>
         )}
 
         {(species || breed) && (

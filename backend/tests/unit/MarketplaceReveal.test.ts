@@ -127,3 +127,31 @@ describe('listListings: place and age filters', () => {
     expect(q.mock.calls[0][0]).not.toMatch(/distance_km/);
   });
 });
+
+describe('exact farm coordinates stay private', () => {
+  beforeEach(() => { jest.clearAllMocks(); });
+  const row = () => ({ id: 'l1', seller_id: 's1', contact_phone: '9876543210', admin_approved: true, latitude: '10.523456', longitude: '76.214567' });
+
+  it('a stranger gets a ~1 km rounded pin and no exact coordinates', async () => {
+    q.mockResolvedValueOnce({ rows: [row()] }).mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [] });
+    const r = await marketplaceService.getListing('l1', 'buyer');
+    expect(r.latitude).toBeUndefined();
+    expect(r.longitude).toBeUndefined();
+    expect(r.map_lat).toBe(10.52);
+    expect(r.map_lng).toBe(76.21);
+  });
+
+  it('the seller keeps their own exact coordinates', async () => {
+    q.mockResolvedValueOnce({ rows: [row()] });
+    const r = await marketplaceService.getListing('l1', 's1');
+    expect(r.latitude).toBe('10.523456');
+    expect(r.map_lat).toBe(10.52);
+  });
+
+  it('list results strip them for everyone but the seller', async () => {
+    q.mockResolvedValueOnce({ rows: [row(), { ...row(), id: 'l2', seller_id: 'buyer' }] }).mockResolvedValueOnce({ rows: [{ count: '2' }] });
+    const r = await marketplaceService.listListings({}, 'buyer', false);
+    expect(r.items[0].latitude).toBeUndefined();
+    expect(r.items[1].latitude).toBe('10.523456');
+  });
+});

@@ -3,6 +3,9 @@ import type { TFunction } from 'i18next'
 import { MarketplaceListing, MarketplaceBid } from '../../types'
 import { ListingCard } from './ListingCard'
 import { ListingDetail } from './ListingDetail'
+import { NearMeBar } from './NearMeBar'
+import { ListingsMap } from './ListingsMap'
+import type { NearMeState } from '../../hooks/useNearMe'
 import { MarketplaceFilterSheet, AGE_BANDS, SHEET_FILTER_KEYS } from './MarketplaceFilterSheet'
 
 export const BrowseTab: React.FC<{
@@ -13,8 +16,7 @@ export const BrowseTab: React.FC<{
   categoryKeys: Array<{ value: string; label: string }>; speciesList: string[];
   classTermsForSpecies: (species: string) => any[]; resolveLabel: (term: any, t: TFunction) => string; speciesLabel: (s: string, t: TFunction) => string;
   onSearch: () => void; onClearAllFilters: () => void;
-  nearMeActive: boolean; onNearMeToggle: () => void; radiusKm: string; onRadiusChange: (v: string) => void;
-  userLocation: { lat: number; lng: number } | null; locationError: string;
+  nearMe: NearMeState;
   treasureMount?: { enabled: boolean; url: string };
   showSaveSearch: boolean; onShowSaveSearchChange: (v: boolean) => void;
   saveSearchName: string; onSaveSearchNameChange: (v: string) => void; onSaveCurrentSearch: () => void;
@@ -31,13 +33,14 @@ export const BrowseTab: React.FC<{
   t: TFunction;
 }> = (props) => {
   const { filters, updateFilter, setFilters, breedsForSpecies, breedLabel, sortBy, onSortByChange, categoryKeys, speciesList, classTermsForSpecies, resolveLabel, speciesLabel,
-    onSearch, onClearAllFilters, nearMeActive, onNearMeToggle, radiusKm, onRadiusChange, userLocation, locationError, treasureMount,
+    onSearch, onClearAllFilters, nearMe, treasureMount,
     showSaveSearch, onShowSaveSearchChange, saveSearchName, onSaveSearchNameChange, onSaveCurrentSearch,
     loading, listings, favoriteIds, onToggleFavorite, isAuthenticated, onViewListing, totalListings, pageSize, page, onPageChange,
     formatCurrency, selectedListing, bids, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack,
     isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, onRevealContact, onMessageSeller, onReport, onBookVetCheck, transport, t } = props
 
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   // Filters set in the sheet, shown as removable chips so a person always sees why the list is short.
   // Price and age are each one chip even though each is two keys.
   const activeSheetKeys = SHEET_FILTER_KEYS.filter(k => filters[k])
@@ -126,30 +129,7 @@ export const BrowseTab: React.FC<{
         classTerms={filters.species ? classTermsForSpecies(filters.species) : []} resolveLabel={resolveLabel}
         onClear={clearSheetFilters} resultCount={totalListings} t={t} />
 
-      {/* Proximity filter row */}
-      <div className="mp-proximity-bar">
-        <button
-          className={`mp-chip ${nearMeActive ? 'active' : ''}`}
-          onClick={onNearMeToggle}
-        >
-          📍 {nearMeActive ? t('marketplace.proximity.nearMeOn', 'Near Me ON') : t('marketplace.proximity.nearMe', 'Near Me')}
-        </button>
-        {nearMeActive && (
-          <select className="module-input si-8ceadd67" value={radiusKm} onChange={e => onRadiusChange(e.target.value)}>
-            <option value="5">5 km</option>
-            <option value="10">10 km</option>
-            <option value="25">25 km</option>
-            <option value="50">50 km</option>
-            <option value="100">100 km</option>
-          </select>
-        )}
-        {nearMeActive && userLocation && (
-          <span className="mp-location-hint si-48a0b045">
-            {t('marketplace.proximity.searching', 'Searching within')} {radiusKm} km
-          </span>
-        )}
-        {locationError && <span className="si-a41d01e2">{locationError}</span>}
-      </div>
+      <NearMeBar nearMe={nearMe} t={t} />
 
       {/* Quick filter chips */}
       <div className="mp-chip-bar">
@@ -176,7 +156,13 @@ export const BrowseTab: React.FC<{
           <button className="mp-chip" onClick={() => onShowSaveSearchChange(true)}>🔔 {t('marketplace.engagement.saveThisSearch')}</button>
         )}
       </div>
-      {loading ? <div className="mp-loading">{t('marketplace.loadingListings')}</div> : (
+      <div className="mp-view-toggle" role="tablist" aria-label={t('marketplace.view.label')}>
+        <button type="button" role="tab" aria-selected={viewMode === 'list'} className={`mp-chip ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>☰ {t('marketplace.view.list')}</button>
+        <button type="button" role="tab" aria-selected={viewMode === 'map'} className={`mp-chip ${viewMode === 'map' ? 'active' : ''}`} onClick={() => setViewMode('map')}>🗺️ {t('marketplace.view.map')}</button>
+      </div>
+      {loading ? <div className="mp-loading">{t('marketplace.loadingListings')}</div> : viewMode === 'map' ? (
+        <ListingsMap listings={listings} formatCurrency={formatCurrency} onOpen={onViewListing} userLocation={nearMe.active ? nearMe.location : null} t={t} />
+      ) : (
         <div className="mp-grid">
           {listings.map(l => <ListingCard key={l.id} listing={l} formatCurrency={formatCurrency} onView={() => onViewListing(l)}
             isFavorite={favoriteIds.has(l.id)} onToggleFavorite={isAuthenticated ? () => onToggleFavorite(l.id) : undefined} t={t} />)}

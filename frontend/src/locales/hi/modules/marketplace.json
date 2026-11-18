@@ -472,8 +472,8 @@
       }
     },
     "proximity": {
-      "notSupported": "Location not supported on this device",
-      "denied": "Location access denied. Please enable location permissions.",
+      "notSupported": "आपका फ़ोन या ब्राउज़र अपना स्थान साझा नहीं कर सकता। इसके बजाय फ़िल्टर में राज्य और ज़िला चुनें।",
+      "denied": "स्थान की अनुमति नहीं मिली। ब्राउज़र सेटिंग में अनुमति दें, या फ़िल्टर में राज्य और ज़िला चुनें।",
       "nearMeOn": "Near Me (On)",
       "nearMe": "Near Me",
       "searching": "Searching nearby..."
@@ -644,6 +644,18 @@
       },
       "whoViewed": "मेरा नंबर किसने देखा",
       "noViews": "अभी तक किसी ने आपका फ़ोन नंबर नहीं देखा।"
+    },
+    "view": {
+      "list": "सूची",
+      "map": "नक्शा",
+      "label": "ऐसे देखें"
+    },
+    "map": {
+      "loading": "नक्शा लोड हो रहा है...",
+      "none": "इनमें से किसी लिस्टिंग का स्थान अभी नक्शे पर नहीं है। देखने के लिए सूची पर जाएँ।",
+      "approx": "पिन लगभग क्षेत्र (करीब 1 किमी) दिखाते हैं, सटीक जगह नहीं।",
+      "someHidden": "{{count}} लिस्टिंग का स्थान नहीं है, इसलिए यहाँ नहीं दिख रहीं।",
+      "you": "आप यहाँ हैं"
     }
   },
   "publicMarketplace": {

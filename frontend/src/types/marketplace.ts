@@ -65,6 +65,8 @@ export interface MarketplaceListing {
   district?: string
   pincode?: string
   distance_km?: number | string | null
+  map_lat?: number | string | null
+  map_lng?: number | string | null
   latitude?: number
   longitude?: number
   adminApproved?: boolean

@@ -43,9 +43,16 @@ async function notifySafe(userId: string, type: string, title: string, message: 
 function stripSensitive(row: any, requestingUserId?: string, isAdmin = false) {
   if (!row) return row;
   const isOwner = requestingUserId && row.seller_id === requestingUserId;
+  // A map pin rounded to ~1 km (2 decimals) is all anyone else gets; the exact spot stays with the seller
+  if (row.latitude != null && row.longitude != null && Number.isFinite(+row.latitude) && Number.isFinite(+row.longitude)) {
+    row.map_lat = Math.round(+row.latitude * 100) / 100;
+    row.map_lng = Math.round(+row.longitude * 100) / 100;
+  }
   if (!isOwner && !isAdmin) {
     delete row.admin_notes;
     delete row.rejection_reason;
+    delete row.latitude;
+    delete row.longitude;
   }
   return row;
 }
@@ -863,9 +870,15 @@ class MarketplaceService {
     );
 
     // Only select safe public columns - no seller email/phone/id
+    // Distance from the visitor in km, and a map pin rounded to ~1 km: a farm's exact coordinates are never public
+    const pubHasGeo = !!userLat && !!userLng && Number.isFinite(+userLat) && Number.isFinite(+userLng);
+    const pubDistanceSelect = pubHasGeo
+      ? `, CASE WHEN l.latitude IS NOT NULL AND l.longitude IS NOT NULL THEN earth_distance(ll_to_earth(${+userLat}::float8, ${+userLng}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) / 1000 END as distance_km`
+      : '';
     let query = `SELECT l.id, l.title, l.description, l.category, l.listing_type, l.price, l.currency,
                  l.quantity, l.unit, l.condition, l.images, l.location, l.tags, l.featured,
                  l.state, l.district,
+                 ROUND(l.latitude::numeric, 2) as map_lat, ROUND(l.longitude::numeric, 2) as map_lng${pubDistanceSelect},
                  l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender, l.animal_class,
                  l.lactation_number, l.daily_milk_yield, l.pregnancy_status, l.pregnancy_month,
                  l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
@@ -910,6 +923,8 @@ class MarketplaceService {
               l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
               l.video_url, l.auction_end_time, l.reserve_price, l.views_count, l.created_at, l.status,
               l.seller_type, l.breeder_verified, l.welfare_attestation,
+              l.state, l.district,
+              ROUND(l.latitude::numeric, 2) as map_lat, ROUND(l.longitude::numeric, 2) as map_lng,
               u.first_name as seller_name, l.location as seller_location,
               e.name as enterprise_name,
               a.unique_id as animal_unique_id,

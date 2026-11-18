@@ -13,6 +13,7 @@ import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useMasterData } from '../context/MasterDataContext'
 import { g } from '../components/marketplace/publicListingShared'
 import { MIN_RECOMMENDED_PHOTOS, MAX_LISTING_IMAGES, MAX_IMAGE_SIZE_MB, MAX_VIDEO_SIZE_MB, MAX_VIDEO_DURATION_SECONDS, readVideoDuration, TabKey, AdminSubTab } from '../components/marketplace/marketplaceShared'
+import { useNearMe } from '../hooks/useNearMe'
 import { compressImage } from '../utils/imageCompress'
 import { ReportModal } from '../components/marketplace/ReportModal'
 import { DashboardTab } from '../components/marketplace/DashboardTab'
@@ -134,11 +135,9 @@ const Marketplace: React.FC = () => {
   // Auction feature flag
   const [auctionEnabled, setAuctionEnabledState] = useState(false)
 
-  // Proximity filter
-  const [nearMeActive, setNearMeActive] = useState(false)
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [radiusKm, setRadiusKm] = useState('25')
-  const [locationError, setLocationError] = useState('')
+  // Proximity filter (shared with the public page)
+  const nearMe = useNearMe()
+  const { active: nearMeActive, setActive: setNearMeActive, location: userLocation, radiusKm } = nearMe
 
   // Animal list for auto-populate
   const [userAnimals, setUserAnimals] = useState<any[]>([])
@@ -750,25 +749,6 @@ const Marketplace: React.FC = () => {
   const updateFilter = (key: string, value: string) => setFilters(f => value ? { ...f, [key]: value } : (() => { const n = { ...f }; delete n[key]; return n })())
   const sf = (key: string, value: any) => setSellForm(f => ({ ...f, [key]: value }))
 
-  const handleNearMeToggle = () => {
-    if (nearMeActive) {
-      setNearMeActive(false)
-      setLocationError('')
-      return
-    }
-    if (!navigator.geolocation) {
-      setLocationError(t('marketplace.proximity.notSupported', 'Geolocation not supported by your browser'))
-      return
-    }
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-        setNearMeActive(true)
-        setLocationError('')
-      },
-      () => setLocationError(t('marketplace.proximity.denied', 'Location access denied. Please enable it in browser settings.'))
-    )
-  }
 
   const handleAdminAuctionToggle = async () => {
     try {
@@ -935,8 +915,7 @@ const Marketplace: React.FC = () => {
           categoryKeys={CATEGORY_KEYS} speciesList={SPECIES_LIST}
           classTermsForSpecies={classTermsForSpecies} resolveLabel={resolveLabel} speciesLabel={speciesLabel}
           onSearch={fetchListings} onClearAllFilters={handleClearAllFilters}
-          nearMeActive={nearMeActive} onNearMeToggle={handleNearMeToggle} radiusKm={radiusKm} onRadiusChange={setRadiusKm}
-          userLocation={userLocation} locationError={locationError}
+          nearMe={nearMe}
           treasureMount={mpConfig?.treasureMount}
           showSaveSearch={showSaveSearch} onShowSaveSearchChange={setShowSaveSearch}
           saveSearchName={saveSearchName} onSaveSearchNameChange={setSaveSearchName} onSaveCurrentSearch={saveCurrentSearch}

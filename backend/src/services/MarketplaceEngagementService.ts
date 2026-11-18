@@ -181,6 +181,13 @@ class MarketplaceEngagementService {
         row.contact_phone = null;
         delete row.admin_notes;
         delete row.rejection_reason;
+        // Only a ~1 km map pin, never the seller's exact coordinates
+        if (row.latitude != null && row.longitude != null) {
+          row.map_lat = Math.round(+row.latitude * 100) / 100;
+          row.map_lng = Math.round(+row.longitude * 100) / 100;
+        }
+        delete row.latitude;
+        delete row.longitude;
       }
     }
     return { items: result.rows, total: result.rows.length };
