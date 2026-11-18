@@ -19,7 +19,8 @@
       "messages": "💬 Messages",
       "favorites": "❤️ Favorites",
       "saved": "🔔 Saved",
-      "me": "Me"
+      "me": "Me",
+      "mine": "My listings"
     },
     "categories": {
       "all": "All Categories",
@@ -130,6 +131,7 @@
     },
     "sell": {
       "steps": {
+        "photos": "Photos",
         "basicInfo": "Basic Info",
         "animalDetails": "Animal Details",
         "healthCerts": "Health & Certs",
@@ -221,7 +223,11 @@
       "makeCover": "Make cover",
       "removePhoto": "Remove photo",
       "photoLimit": "You can add up to {{max}} photos. Remove one to add another.",
-      "photosFailed": "{{count}} photo(s) could not be added - the connection may have dropped or the file is not a usable photo. The others were kept. Tap Choose photos to try again."
+      "photosFailed": "{{count}} photo(s) could not be added - the connection may have dropped or the file is not a usable photo. The others were kept. Tap Choose photos to try again.",
+      "photosStepTitle": "📸 Photos and video",
+      "photosStepDesc": "Start with photos or a short video. Buyers look at these first.",
+      "draftRestored": "Your unfinished listing was restored.",
+      "startOver": "Start over"
     },
     "detail": {
       "backToListings": "← Back to listings",
@@ -607,6 +613,31 @@
       "photo": "Photo",
       "previous": "Previous",
       "next": "Next"
+    },
+    "mine": {
+      "empty": "You have no listings yet.",
+      "sellFirst": "Sell an animal",
+      "view": "View",
+      "edit": "Edit",
+      "markSold": "Mark sold",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "keep": "Keep it",
+      "deleteConfirm": "Delete this listing? Buyers will no longer see it.",
+      "saved": "Listing updated.",
+      "soldDone": "Marked as sold. It is no longer shown to buyers.",
+      "deleted": "Listing deleted.",
+      "reservedHint": "A buyer has reserved this animal. Complete or cancel the deal under Inquiries before changing the listing.",
+      "loadFailed": "Your listings could not be loaded. Check your connection and open this tab again.",
+      "status": {
+        "active": "Live",
+        "pending": "Waiting for review",
+        "rejected": "Not approved",
+        "sold": "Sold",
+        "reserved": "Reserved",
+        "expired": "Expired",
+        "rehomed": "Sold"
+      }
     }
   },
   "publicMarketplace": {

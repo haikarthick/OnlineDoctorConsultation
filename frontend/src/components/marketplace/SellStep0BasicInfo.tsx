@@ -9,8 +9,8 @@ export const SellStep0BasicInfo: React.FC<{
   speciesLabel: (s: string, t: TFunction) => string;
   auctionEnabled: boolean; isAdmin: boolean;
   categoryKeys: Array<{ value: string; label: string }>;
-  onNext: () => void; t: TFunction;
-}> = ({ sellForm, sf, fieldErrors, onClearFieldError, userAnimals, selectedAnimalId, onAnimalSelect, copiedId, onCopyId, speciesLabel, auctionEnabled, isAdmin, categoryKeys, onNext, t }) => (
+  onBack: () => void; onNext: () => void; t: TFunction;
+}> = ({ sellForm, sf, fieldErrors, onClearFieldError, userAnimals, selectedAnimalId, onAnimalSelect, copiedId, onCopyId, speciesLabel, auctionEnabled, isAdmin, categoryKeys, onBack, onNext, t }) => (
   <div className="mp-sell-step">
     <h3>{t('marketplace.sell.basicInfoTitle')}</h3>
     <p className="mp-sell-step-desc">{t('marketplace.sell.basicInfoDesc')}</p>
@@ -94,6 +94,7 @@ export const SellStep0BasicInfo: React.FC<{
       </div>
     </div>
     <div className="mp-step-actions">
+      <button className="module-btn" onClick={onBack}>{t('marketplace.sell.back')}</button>
       <button className="module-btn primary" onClick={onNext}>{t('marketplace.sell.next')}</button>
     </div>
   </div>

@@ -30,6 +30,6 @@ export function readVideoDuration(file: File): Promise<number> {
   })
 }
 
-export type TabKey = 'dashboard' | 'browse' | 'sell' | 'auctions' | 'orders' | 'messages' | 'favorites' | 'saved' | 'prices' | 'admin'
+export type TabKey = 'mine' | 'dashboard' | 'browse' | 'sell' | 'auctions' | 'orders' | 'messages' | 'favorites' | 'saved' | 'prices' | 'admin'
 
 export type AdminSubTab = 'listings' | 'reports' | 'settings' | 'plans' | 'revenue'
