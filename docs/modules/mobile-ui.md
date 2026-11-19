@@ -66,3 +66,10 @@ below 9998 or it will cover a form's primary button.
 - The top header's ☰ and the bar's More open the same menu; the header one is left as it was.
 - Phase 3 will move the animal and group forms onto `StepForm`, `ChipSelect` and `NumberStepper`;
   until then those pages keep their existing forms.
+
+## Phone navigation rules (owner feedback 2026-11-19; enforced by sweep H14)
+
+- **One menu entry on a phone: the bottom tab bar's "More" (⋯).** The top bar carries the brand only - never a second hamburger. "More" opens the full menu as a sheet that slides up above the tab bar (`Navigation.css`, `@media (max-width: 768px)`), the same for every role including admin.
+- **A tab label is never cut off.** Destination switchers use icon-over-label cells with short words (`marketplace.dest.*`: Browse, Sell, Messages, My Activity), the label wraps instead of showing "Br...".
+- **Sub-sections wrap, they do not scroll sideways** (`.mp-sections`). A row that hides half its options behind a swipe is a defect (sweep `hidden-tabs`).
+- One shared file styles the menu for every role: `components/Navigation.css`. Never special-case a role.

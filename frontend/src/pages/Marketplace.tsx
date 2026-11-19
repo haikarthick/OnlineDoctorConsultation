@@ -878,12 +878,12 @@ const Marketplace: React.FC = () => {
     ['mine', t('marketplace.tabs.mine')], ['dashboard', t('marketplace.tabs.dashboard')], ['favorites', t('marketplace.tabs.favorites')],
     ['saved', t('marketplace.tabs.saved')], ['orders', t('marketplace.tabs.orders')],
   ]
-  const destinations: Array<{ id: string; label: string; first: TabKey; keys: TabKey[] }> = [
-    { id: 'browse', label: t('marketplace.tabs.browse'), first: 'browse', keys: browseSections.map(s => s[0]) },
-    { id: 'sell', label: t('marketplace.tabs.sell'), first: 'sell', keys: ['sell'] },
-    { id: 'messages', label: `${t('marketplace.tabs.messages')}${unreadCount > 0 ? ` (${unreadCount})` : ''}`, first: 'messages', keys: ['messages'] },
-    { id: 'me', label: t('marketplace.tabs.me'), first: 'mine', keys: meSections.map(s => s[0]) },
-    ...(isAdmin ? [{ id: 'admin', label: t('marketplace.tabs.admin'), first: 'admin' as TabKey, keys: ['admin'] as TabKey[] }] : []),
+  const destinations: Array<{ id: string; icon: string; label: string; badge?: number; first: TabKey; keys: TabKey[] }> = [
+    { id: 'browse', icon: '🐾', label: t('marketplace.dest.browse'), first: 'browse', keys: browseSections.map(s => s[0]) },
+    { id: 'sell', icon: '📝', label: t('marketplace.dest.sell'), first: 'sell', keys: ['sell'] },
+    { id: 'messages', icon: '💬', label: t('marketplace.dest.messages'), badge: unreadCount, first: 'messages', keys: ['messages'] },
+    { id: 'me', icon: '👤', label: t('marketplace.dest.me'), first: 'mine', keys: meSections.map(s => s[0]) },
+    ...(isAdmin ? [{ id: 'admin', icon: '🛡️', label: t('marketplace.dest.admin'), first: 'admin' as TabKey, keys: ['admin'] as TabKey[] }] : []),
   ]
   const activeDestination = destinations.find(d => d.keys.includes(tab))
   const sections = activeDestination?.id === 'browse' ? browseSections : activeDestination?.id === 'me' ? meSections : []
@@ -917,7 +917,11 @@ const Marketplace: React.FC = () => {
         {destinations.map(d => (
           <button key={d.id} className={`mp-destination ${activeDestination?.id === d.id ? 'active' : ''}`}
             aria-current={activeDestination?.id === d.id ? 'page' : undefined}
-            onClick={() => { if (activeDestination?.id !== d.id) goTab(d.first); else if (d.keys.length === 1) goTab(d.first) }}>{d.label}</button>
+            onClick={() => { if (activeDestination?.id !== d.id) goTab(d.first); else if (d.keys.length === 1) goTab(d.first) }}>
+            <span className="mp-dest-icon" aria-hidden="true">{d.icon}</span>
+            <span className="mp-dest-label">{d.label}</span>
+            {!!d.badge && d.badge > 0 && <span className="mp-dest-badge" aria-label={String(d.badge)}>{d.badge > 99 ? '99+' : d.badge}</span>}
+          </button>
         ))}
       </nav>
       {sections.length > 1 && (

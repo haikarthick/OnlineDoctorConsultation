@@ -64,7 +64,7 @@ function i18nNamespaces(): string[] {
 }
 const RAW_KEY = new RegExp(`(?<![\\w.@/-])(?:${i18nNamespaces().join('|')})(?:\\.[A-Za-z][A-Za-z0-9_]*)+`, 'g')
 
-const ERROR_TEXT = /Request failed with status code|Network Error|Internal Server Error|\[object Object\]|\bundefined\b|\bNaN\b|Cannot read propert|Minified React error|Unexpected Application Error/
+const ERROR_TEXT = /Request failed with status code|Network Error|Internal Server Error|\[object Object\]|\bundefined\b|\bNaN\b|Cannot read propert|Minified React error|Unexpected Application Error|column "[a-z_]+" (of relation|does not exist)|relation "[a-z_]+" does not exist|violates .* constraint|duplicate key value/
 const CRASH_TEXT = /Something went wrong|An unexpected error occurred/
 
 /** Console noise that is not a defect. A thrown TypeError is; a blocked favicon is not. */
@@ -156,7 +156,7 @@ async function auditState(page: Page, where: string, viewport: string, route: st
     seenErrors.n = errors.length
   }
 
-  const { text, overflow, hasLayout } = await page.evaluate(() => {
+  const { text, overflow, hasLayout, navProblems } = await page.evaluate((isPhone: boolean) => {
     const doc = document.documentElement
     let overflow = ''
     if (doc.scrollWidth > window.innerWidth + 1) {
@@ -181,8 +181,30 @@ async function auditState(page: Page, where: string, viewport: string, route: st
       const t = (el as HTMLElement).innerText
       if (t) text = text.split(t).join(' ')
     }
-    return { text, overflow, hasLayout: !!document.querySelector('.layout-content') }
-  })
+    // Navigation quality on a phone (owner feedback 2026-11-19): one menu button, no clipped tab
+    // labels ("Br...", "Me..."), no tab row that hides half its tabs behind a sideways scroll.
+    const navProblems: string[] = []
+    if (isPhone) {
+      const visible = (el: Element) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' }
+      const menuButtons = Array.from(document.querySelectorAll('[aria-controls="nav-sidebar"], .nav-mobile-toggle')).filter(visible)
+      if (menuButtons.length > 1) navProblems.push(`menu-duplicated|${menuButtons.length} buttons open the main menu on one phone screen`)
+      const tabLike = 'button.mp-destination, .mp-destination, .bottom-tab, [role="tab"], .mp-chip, .nav-tab, .module-tab'
+      for (const el of Array.from(document.querySelectorAll(tabLike)).filter(visible)) {
+        const label = (el.querySelector('[class*="label"]') || el) as HTMLElement
+        const cs = getComputedStyle(label)
+        if (label.scrollWidth > label.clientWidth + 1 && (cs.textOverflow === 'ellipsis' || cs.overflow === 'hidden')) {
+          navProblems.push(`clipped-label|"${(label.innerText || '').trim().slice(0, 30)}" is cut off on a phone`)
+        }
+      }
+      for (const el of Array.from(document.querySelectorAll('[role="tablist"]')).filter(visible)) {
+        const ox = getComputedStyle(el).overflowX
+        if ((ox === 'auto' || ox === 'scroll') && el.scrollWidth > el.clientWidth + 4) {
+          navProblems.push(`hidden-tabs|a tab row scrolls sideways and hides tabs: ${(el as HTMLElement).innerText.replace(/\s+/g, ' ').slice(0, 40)}`)
+        }
+      }
+    }
+    return { text, overflow, hasLayout: !!document.querySelector('.layout-content'), navProblems: Array.from(new Set(navProblems)).slice(0, 5) }
+  }, viewport === 'phone')
 
   if (CRASH_TEXT.test(text)) add('crash', 'boundary', 'the screen shows the crash page')
   const raw = [...new Set(text.match(RAW_KEY) || [])].slice(0, 3)
@@ -191,6 +213,7 @@ async function auditState(page: Page, where: string, viewport: string, route: st
   if (bad) add('error-text', bad[0], `shows "${bad[0]}" to the user`)
   if (hasLayout && text.replace(/\s+/g, ' ').trim().length < 30) add('blank', 'empty', 'nothing is shown on the screen')
   if (overflow) add('overflow', overflow.split(' reaches')[0], overflow)
+  for (const np of navProblems) { const [k, d] = np.split('|'); add(k, d, d) }
 }
 
 /** Every invisible native date/time field must open its picker when its styled stand-in is tapped. */

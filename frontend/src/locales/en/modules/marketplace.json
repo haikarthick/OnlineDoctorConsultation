@@ -657,6 +657,13 @@
       "approx": "Pins show the approximate area (about 1 km), not the exact spot.",
       "someHidden": "{{count}} listing(s) have no location and are not shown here.",
       "you": "You are here"
+    },
+    "dest": {
+      "browse": "Browse",
+      "sell": "Sell",
+      "messages": "Messages",
+      "me": "My Activity",
+      "admin": "Admin"
     }
   },
   "publicMarketplace": {

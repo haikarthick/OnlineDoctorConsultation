@@ -347,6 +347,14 @@ jobs:
           echo "::warning title=Schema contract not confirmed::Last health response: $LAST"
           exit 0
 
+      - name: Post-deploy write-path smoke (publishes and deletes a real listing)
+        if: needs.resolve-env.outputs.deploy_url != ''
+        uses: actions/checkout@v4
+
+      - name: Run write-path smoke
+        if: needs.resolve-env.outputs.deploy_url != ''
+        run: node backend/scripts/post-deploy-smoke.js "${{ needs.resolve-env.outputs.deploy_url }}"
+
   # ═════════════════════════════════════════════
   #  6. Build & Push Docker Images (main only)
   # ═════════════════════════════════════════════
