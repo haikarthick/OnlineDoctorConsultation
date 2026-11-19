@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import logger from './logger';
 import { AppError } from './errors';
+import { recordSystemError } from '../services/ErrorAlertService';
 
 export const errorHandler = (
   err: Error | AppError,
@@ -47,6 +48,7 @@ export const errorHandler = (
     timestamp
   });
 
+  void recordSystemError({ reference: String(requestId).slice(0, 16), status: 500, method, path: req.originalUrl, message: err.message });
   res.status(500).json({
     success: false,
     message: 'Internal Server Error',

@@ -1,3 +1,4 @@
+jest.mock('../../src/services/ErrorAlertService', () => ({ recordSystemError: jest.fn() }));
 import { isTechnicalMessage, plainMessageFor, safeErrorResponse } from '../../src/middleware/safeErrorResponse';
 
 function run(status: number, body: any) {

@@ -11,6 +11,7 @@
 import { NextFunction, Request, Response } from 'express';
 import crypto from 'crypto';
 import logger from '../utils/logger';
+import { recordSystemError } from '../services/ErrorAlertService';
 
 const TECHNICAL_PATTERNS: RegExp[] = [
   /column ".*" (of relation|does not exist)/i,
@@ -62,6 +63,7 @@ export function safeErrorResponse(req: Request, res: Response, next: NextFunctio
         logger.error('Technical error hidden from client', {
           reference, status: res.statusCode, method: req.method, path: req.originalUrl, original: msg,
         });
+        void recordSystemError({ reference, status: res.statusCode, method: req.method, path: req.originalUrl, message: String(msg) });
         const safe = plainMessageFor(res.statusCode);
         const next5xx = res.statusCode >= 500 ? { reference } : {};
         const replaced = typeof err === 'object'
