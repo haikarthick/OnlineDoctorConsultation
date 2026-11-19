@@ -18,7 +18,9 @@
       "admin": "🛡️ Admin",
       "messages": "💬 Messages",
       "favorites": "❤️ Favorites",
-      "saved": "🔔 Saved"
+      "saved": "🔔 Saved",
+      "me": "Me",
+      "mine": "My listings"
     },
     "categories": {
       "all": "All Categories",
@@ -129,6 +131,7 @@
     },
     "sell": {
       "steps": {
+        "photos": "Photos",
         "basicInfo": "Basic Info",
         "animalDetails": "Animal Details",
         "healthCerts": "Health & Certs",
@@ -206,7 +209,26 @@
       "videoTooLarge": "Video is too large: max {{maxMb}}MB",
       "videoTooLong": "Video is too long: max {{maxSec}} seconds",
       "uploadingVideo": "Uploading video...",
-      "videoLimits": "Max {{maxSec}} seconds, up to {{maxMb}}MB"
+      "videoLimits": "Max {{maxSec}} seconds, up to {{maxMb}}MB",
+      "adminPreview": "Admin preview",
+      "copyAnimalId": "waytovet Animal ID - tap to copy",
+      "takePhoto": "Take photo",
+      "choosePhotos": "Choose photos",
+      "recordVideo": "Record video",
+      "chooseVideo": "Choose video",
+      "photosHint": "Add at least {{min}} clear photos: front, side and the udder or rear. The first photo is the cover buyers see in the list.",
+      "photosCount": "{{count}} of {{max}} photos",
+      "uploadProgress": "Uploading {{done}} of {{total}}",
+      "coverPhoto": "Cover",
+      "makeCover": "Make cover",
+      "removePhoto": "Remove photo",
+      "photoLimit": "You can add up to {{max}} photos. Remove one to add another.",
+      "photosFailed": "{{count}} photo(s) could not be added - the connection may have dropped or the file is not a usable photo. The others were kept. Tap Choose photos to try again.",
+      "photosStepTitle": "📸 Photos and video",
+      "photosStepDesc": "Start with photos or a short video. Buyers look at these first.",
+      "draftRestored": "Your unfinished listing was restored.",
+      "startOver": "Start over",
+      "preparingVideo": "Making the video smaller so it uploads faster... {{percent}}%. Please keep this screen open."
     },
     "detail": {
       "backToListings": "← Back to listings",
@@ -238,7 +260,11 @@
       "call": "Call",
       "contactHidden": "Contact details hidden",
       "requestContact": "Request Contact",
-      "watchVideo": "Watch video"
+      "watchVideo": "Watch video",
+      "whatsapp": "WhatsApp",
+      "whatsappText": "Hi, I am interested in your listing: {{title}}",
+      "phoneMaskedHint": "Tap Call or WhatsApp to see the full number. The seller is told that you looked.",
+      "noPhone": "The seller has not added a phone number. Send them a message instead."
     },
     "card": {
       "hotDeal": "🔥 HOT DEAL",
@@ -254,7 +280,10 @@
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
       "premiumPriced": "Premium Priced",
-      "hasVideo": "Has video"
+      "hasVideo": "Has video",
+      "featured": "Featured",
+      "passportTitle": "Vaccination records verified in waytovet",
+      "kmAway": "{{km}} km away"
     },
     "orders": {
       "asBuyer": "� As Seeker",
@@ -444,8 +473,8 @@
       }
     },
     "proximity": {
-      "notSupported": "Location not supported on this device",
-      "denied": "Location access denied. Please enable location permissions.",
+      "notSupported": "Your phone or browser cannot share its location. Pick a state and district in Filters instead.",
+      "denied": "Location access was denied. Allow it in your browser settings, or pick a state and district in Filters instead.",
       "nearMeOn": "Near Me (On)",
       "nearMe": "Near Me",
       "searching": "Searching nearby..."
@@ -558,6 +587,76 @@
     "interlink": {
       "treasureBanner": "Buying or selling products, feed or equipment?",
       "visitTreasure": "Visit Treasure Mount"
+    },
+    "filters": {
+      "title": "Filters",
+      "button": "Filters",
+      "price": "Price",
+      "min": "Min",
+      "max": "Max",
+      "anyBreed": "Any breed",
+      "age": "Age",
+      "ageAny": "Any",
+      "ageUnder1": "Under 1 year",
+      "age1to3": "1 to 3 years",
+      "age3to5": "3 to 5 years",
+      "age5plus": "5+ years",
+      "milk": "Milk per day",
+      "place": "Place",
+      "anyState": "Any state",
+      "state": "State",
+      "district": "District",
+      "pincode": "Pincode",
+      "more": "More",
+      "reset": "Reset",
+      "show": "Show {{count}} results",
+      "active": "Filters applied",
+      "remove": "Remove filter"
+    },
+    "gallery": {
+      "video": "Video",
+      "photo": "Photo",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "mine": {
+      "empty": "You have no listings yet.",
+      "sellFirst": "Sell an animal",
+      "view": "View",
+      "edit": "Edit",
+      "markSold": "Mark sold",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "keep": "Keep it",
+      "deleteConfirm": "Delete this listing? Buyers will no longer see it.",
+      "saved": "Listing updated.",
+      "soldDone": "Marked as sold. It is no longer shown to buyers.",
+      "deleted": "Listing deleted.",
+      "reservedHint": "A buyer has reserved this animal. Complete or cancel the deal under Inquiries before changing the listing.",
+      "loadFailed": "Your listings could not be loaded. Check your connection and open this tab again.",
+      "status": {
+        "active": "Live",
+        "pending": "Waiting for review",
+        "rejected": "Not approved",
+        "sold": "Sold",
+        "reserved": "Reserved",
+        "expired": "Expired",
+        "rehomed": "Sold"
+      },
+      "whoViewed": "Who viewed my number",
+      "noViews": "No one has viewed your phone number yet."
+    },
+    "view": {
+      "list": "List",
+      "map": "Map",
+      "label": "View as"
+    },
+    "map": {
+      "loading": "Loading the map...",
+      "none": "None of these listings has a location on the map yet. Switch to the list to see them.",
+      "approx": "Pins show the approximate area (about 1 km), not the exact spot.",
+      "someHidden": "{{count}} listing(s) have no location and are not shown here.",
+      "you": "You are here"
     }
   },
   "publicMarketplace": {

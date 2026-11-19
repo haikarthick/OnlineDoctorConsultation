@@ -43,12 +43,43 @@ async function notifySafe(userId: string, type: string, title: string, message: 
 function stripSensitive(row: any, requestingUserId?: string, isAdmin = false) {
   if (!row) return row;
   const isOwner = requestingUserId && row.seller_id === requestingUserId;
+  // A map pin rounded to ~1 km (2 decimals) is all anyone else gets; the exact spot stays with the seller
+  if (row.latitude != null && row.longitude != null && Number.isFinite(+row.latitude) && Number.isFinite(+row.longitude)) {
+    row.map_lat = Math.round(+row.latitude * 100) / 100;
+    row.map_lng = Math.round(+row.longitude * 100) / 100;
+  }
   if (!isOwner && !isAdmin) {
     delete row.admin_notes;
     delete row.rejection_reason;
+    delete row.latitude;
+    delete row.longitude;
   }
   return row;
 }
+
+/** 98•••••210: enough for a buyer to recognise it is a real number, not enough to copy it. */
+export function maskPhone(phone?: string | null): string | null {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (digits.length < 6) return digits ? '••••' : null;
+  return digits.slice(0, 2) + '•'.repeat(digits.length - 5) + digits.slice(-3);
+}
+
+/**
+ * Words the app resolved from what the person typed (their language's name for a breed or species, mapped to
+ * the canonical name stored on listings). Sent as a '|' separated list; at most 10, each trimmed, lower-cased
+ * and capped in length, then bound as a query parameter - never placed in the SQL text.
+ */
+export function parseSearchAliases(raw: unknown): string[] {
+  if (raw === undefined || raw === null) return [];
+  const parts = Array.isArray(raw) ? raw.flatMap(x => String(x).split('|')) : String(raw).split('|');
+  return Array.from(new Set(parts.map(p => p.trim().toLowerCase()).filter(p => p.length > 0 && p.length <= 100))).slice(0, 10);
+}
+
+/** How many different sellers' numbers one account may reveal per 24 hours. */
+export const REVEAL_DAILY_LIMIT = 30;
+
+/** An error whose message is already written for the person reading it (what happened, why, what to do). */
+function userFacing(message: string) { return Object.assign(new Error(message), { userFacing: true }); }
 
 class MarketplaceService {
 
@@ -61,7 +92,7 @@ class MarketplaceService {
       sellerId, enterpriseId, limit = 50, offset = 0,
       species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender, animalClass,
       listingTier, isHotDeal, vaccinationStatus, healthCertificate, sortBy,
-      userLat, userLng, radiusKm,
+      userLat, userLng, radiusKm, state, district, pincode, minAge, maxAge, searchAliases,
     } = filters;
 
     // Shared WHERE builder so the count query always matches the item query
@@ -86,10 +117,19 @@ class MarketplaceService {
       const qIdx = idx++; params.push(search);
       const likeIdx = idx++; params.push(`%${search}%`);
       const tsvec = `to_tsvector('english', coalesce(l.title,'')||' '||coalesce(l.description,'')||' '||coalesce(l.breed,'')||' '||coalesce(l.species,''))`;
-      where.push(`(${tsvec} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx})`);
+      // Also match the description, the place, and the breed/species names the app resolved from the typed words
+      const aliases = parseSearchAliases(searchAliases);
+      let aliasSql = '';
+      if (aliases.length) { const aIdx = idx++; params.push(aliases); aliasSql = ` OR LOWER(l.breed) = ANY($${aIdx}::text[]) OR LOWER(l.species) = ANY($${aIdx}::text[])`; }
+      where.push(`(${tsvec} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx} OR l.description ILIKE $${likeIdx} OR l.location ILIKE $${likeIdx} OR l.district ILIKE $${likeIdx} OR l.state ILIKE $${likeIdx}${aliasSql})`);
       ftsRankExpr = `ts_rank(${tsvec}, plainto_tsquery('english', $${qIdx}))`;
     }
     if (species) add('l.species = $?', species);
+    if (state) add('LOWER(l.state) = LOWER($?)', String(state));
+    if (district) add('LOWER(l.district) = LOWER($?)', String(district));
+    if (pincode) add('l.pincode = $?', String(pincode));
+    if (minAge) add('l.animal_age_months >= $?', minAge);
+    if (maxAge) add('l.animal_age_months <= $?', maxAge);
     if (breed) add('l.breed ILIKE $?', `%${breed}%`);
     if (minMilkYield) add('l.daily_milk_yield >= $?', minMilkYield);
     if (maxMilkYield) add('l.daily_milk_yield <= $?', maxMilkYield);
@@ -126,8 +166,12 @@ class MarketplaceService {
     else if (sortBy === 'views') orderBy = 'l.views_count DESC';
     else if (sortBy === 'distance' && hasGeo) orderBy = `earth_distance(ll_to_earth(${latN}::float8, ${lngN}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) ASC NULLS LAST`;
 
+    // Distance from the buyer in km, only when they shared a position (latN/lngN are numerically coerced)
+    const distanceSelect = hasGeo
+      ? `, CASE WHEN l.latitude IS NOT NULL AND l.longitude IS NOT NULL THEN earth_distance(ll_to_earth(${latN}::float8, ${lngN}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) / 1000 END as distance_km`
+      : '';
     // Aggregated LEFT JOIN instead of correlated subqueries (avoids N+1 per row)
-    const query = `SELECT l.*, u.first_name || ' ' || u.last_name as seller_name, e.name as enterprise_name,
+    const query = `SELECT l.*${distanceSelect}, u.first_name || ' ' || u.last_name as seller_name, e.name as enterprise_name,
                  COALESCE(b.bid_count, 0) as bid_count, b.highest_bid,
                  AVG(l.price) OVER (PARTITION BY l.species, l.breed) as breed_avg_price,
                  EXISTS(SELECT 1 FROM vaccination_records v WHERE v.animal_id = l.linked_animal_id AND v.is_valid = true) as has_health_passport
@@ -146,6 +190,7 @@ class MarketplaceService {
 
     // Contact stays gated until a deal/inquiry reveals it; moderation fields stay private
     for (const row of result.rows) {
+      row.contact_phone_masked = maskPhone(row.contact_phone);
       if (!isAdmin && row.seller_id !== requestingUserId) row.contact_phone = null;
       stripSensitive(row, requestingUserId, isAdmin);
     }
@@ -168,6 +213,7 @@ class MarketplaceService {
       await pool.query('UPDATE marketplace_listings SET views_count = views_count + 1 WHERE id = $1', [id]);
       listing.views_count = (listing.views_count || 0) + 1;
     }
+    listing.contact_phone_masked = maskPhone(listing.contact_phone);
     // Gate contact_phone: reveal to seller, admins, buyers with a revealed
     // inquiry, or buyers with a live/completed reservation on this listing
     if (!isOwner && !isAdmin) {
@@ -185,6 +231,50 @@ class MarketplaceService {
       if (!revealed) listing.contact_phone = null;
     }
     return stripSensitive(listing, requestingUserId, isAdmin);
+  }
+
+  /**
+   * A signed-in buyer taps Call / WhatsApp: show the seller's number and log the tap. The number is
+   * never in a listing response; this is the only way a buyer gets it (apart from a reserved deal).
+   */
+  async revealContact(listingId: string, viewerId: string, channel: 'call' | 'whatsapp' = 'call') {
+    const res = await pool.query(
+      `SELECT id, title, seller_id, status, admin_approved, contact_phone FROM marketplace_listings WHERE id = $1`, [listingId]);
+    const l = res.rows[0];
+    if (!l || l.status === 'deleted' || (l.admin_approved === false && l.seller_id !== viewerId)) {
+      throw userFacing('This listing was not found. The seller may have removed it.');
+    }
+    if (l.seller_id === viewerId) return { phone: l.contact_phone || null };
+    if (!l.contact_phone) throw userFacing('The seller has not added a phone number. Send them a message instead.');
+
+    const recent = await pool.query(
+      `SELECT COUNT(DISTINCT listing_id) AS n, COALESCE(BOOL_OR(listing_id = $2), false) AS already
+       FROM marketplace_contact_reveals WHERE viewer_id = $1 AND created_at > NOW() - INTERVAL '24 hours'`, [viewerId, listingId]);
+    const already = !!recent.rows[0]?.already;
+    if (!already && +(recent.rows[0]?.n || 0) >= REVEAL_DAILY_LIMIT) {
+      throw userFacing('You have viewed a lot of seller phone numbers today. Please try again tomorrow, or send the seller a message instead.');
+    }
+    await pool.query(
+      `INSERT INTO marketplace_contact_reveals (listing_id, viewer_id, seller_id, channel) VALUES ($1, $2, $3, $4)`,
+      [listingId, viewerId, l.seller_id, channel]);
+    if (!already) {
+      await notifySafe(l.seller_id, 'marketplace_contact_view', 'A buyer is interested',
+        `Someone viewed your phone number for "${l.title}". They may call you soon.`, { listingId });
+    }
+    return { phone: l.contact_phone };
+  }
+
+  /** The seller's own view of who looked at their number (first name and last initial, newest first). */
+  async listContactViews(listingId: string, sellerId: string, isAdmin = false) {
+    const owner = await pool.query('SELECT seller_id FROM marketplace_listings WHERE id = $1', [listingId]);
+    if (!owner.rows[0]) throw userFacing('This listing was not found.');
+    if (!isAdmin && owner.rows[0].seller_id !== sellerId) throw userFacing('Only the seller can see who viewed the phone number.');
+    const rows = await pool.query(
+      `SELECT DISTINCT ON (r.viewer_id) r.created_at, r.channel, u.first_name, LEFT(COALESCE(u.last_name, ''), 1) AS last_initial
+       FROM marketplace_contact_reveals r JOIN users u ON u.id = r.viewer_id
+       WHERE r.listing_id = $1 ORDER BY r.viewer_id, r.created_at DESC`, [listingId]);
+    const items = rows.rows.sort((a: any, b: any) => +new Date(b.created_at) - +new Date(a.created_at)).slice(0, 50);
+    return { items };
   }
 
   async createListing(data: any) {
@@ -228,8 +318,8 @@ class MarketplaceService {
         linked_animal_id, auction_end_time, reserve_price, contact_phone,
         latitude, longitude, admin_approved,
         seller_type, registration_number, welfare_attestation, terms_accepted, terms_accepted_at,
-        video_url, animal_class
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45)`,
+        video_url, animal_class, state, district, pincode
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48)`,
       [
         id, data.enterpriseId || null, data.sellerId, data.title, data.description || null,
         category, data.listingType || 'fixed_price', data.price || null,
@@ -251,6 +341,7 @@ class MarketplaceService {
         data.welfareAttestation || false, data.termsAccepted || false,
         data.termsAccepted ? new Date().toISOString() : null,
         data.videoUrl || null, data.animalClass || null,
+        data.state || null, data.district || null, data.pincode || null,
       ]
     );
     const result = await pool.query('SELECT * FROM marketplace_listings WHERE id = $1', [id]);
@@ -274,6 +365,7 @@ class MarketplaceService {
       'title', 'description', 'price', 'quantity', 'status', 'category', 'condition', 'location',
       'species', 'breed', 'gender', 'animal_class', 'listing_type',
       'vaccination_status', 'contact_phone', 'seller_type', 'registration_number',
+      'state', 'district', 'pincode',
     ];
     const sets: string[] = []; const vals: any[] = []; let idx = 1;
     for (const [key, val] of Object.entries(data)) {
@@ -746,7 +838,7 @@ class MarketplaceService {
       limit = 24, offset = 0,
       species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender, animalClass,
       vaccinationStatus, healthCertificate, sortBy,
-      userLat, userLng, radiusKm,
+      userLat, userLng, radiusKm, state, district, pincode, minAge, maxAge, searchAliases,
     } = filters;
 
     // Build WHERE clause once, shared by the page query and the count query
@@ -763,10 +855,18 @@ class MarketplaceService {
     if (search) {
       const qIdx = idx++; params.push(search);
       const likeIdx = idx++; params.push(`%${search}%`);
-      where += ` AND (${PUB_TSVEC} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx})`;
+      const pubAliases = parseSearchAliases(searchAliases);
+      let pubAliasSql = '';
+      if (pubAliases.length) { const aIdx = idx++; params.push(pubAliases); pubAliasSql = ` OR LOWER(l.breed) = ANY($${aIdx}::text[]) OR LOWER(l.species) = ANY($${aIdx}::text[])`; }
+      where += ` AND (${PUB_TSVEC} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx} OR l.description ILIKE $${likeIdx} OR l.location ILIKE $${likeIdx} OR l.district ILIKE $${likeIdx} OR l.state ILIKE $${likeIdx}${pubAliasSql})`;
       pubFtsRank = `ts_rank(${PUB_TSVEC}, plainto_tsquery('english', $${qIdx}))`;
     }
     if (species) { where += ` AND l.species = $${idx++}`; params.push(species); }
+    if (state) { where += ` AND LOWER(l.state) = LOWER($${idx++})`; params.push(String(state)); }
+    if (district) { where += ` AND LOWER(l.district) = LOWER($${idx++})`; params.push(String(district)); }
+    if (pincode) { where += ` AND l.pincode = $${idx++}`; params.push(String(pincode)); }
+    if (minAge) { where += ` AND l.animal_age_months >= $${idx++}`; params.push(minAge); }
+    if (maxAge) { where += ` AND l.animal_age_months <= $${idx++}`; params.push(maxAge); }
     if (breed) { where += ` AND l.breed ILIKE $${idx++}`; params.push(`%${breed}%`); }
     if (minMilkYield) { where += ` AND l.daily_milk_yield >= $${idx++}`; params.push(minMilkYield); }
     if (maxMilkYield) { where += ` AND l.daily_milk_yield <= $${idx++}`; params.push(maxMilkYield); }
@@ -788,8 +888,15 @@ class MarketplaceService {
     );
 
     // Only select safe public columns - no seller email/phone/id
+    // Distance from the visitor in km, and a map pin rounded to ~1 km: a farm's exact coordinates are never public
+    const pubHasGeo = !!userLat && !!userLng && Number.isFinite(+userLat) && Number.isFinite(+userLng);
+    const pubDistanceSelect = pubHasGeo
+      ? `, CASE WHEN l.latitude IS NOT NULL AND l.longitude IS NOT NULL THEN earth_distance(ll_to_earth(${+userLat}::float8, ${+userLng}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) / 1000 END as distance_km`
+      : '';
     let query = `SELECT l.id, l.title, l.description, l.category, l.listing_type, l.price, l.currency,
                  l.quantity, l.unit, l.condition, l.images, l.location, l.tags, l.featured,
+                 l.state, l.district,
+                 ROUND(l.latitude::numeric, 2) as map_lat, ROUND(l.longitude::numeric, 2) as map_lng${pubDistanceSelect},
                  l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender, l.animal_class,
                  l.lactation_number, l.daily_milk_yield, l.pregnancy_status, l.pregnancy_month,
                  l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
@@ -834,6 +941,8 @@ class MarketplaceService {
               l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
               l.video_url, l.auction_end_time, l.reserve_price, l.views_count, l.created_at, l.status,
               l.seller_type, l.breeder_verified, l.welfare_attestation,
+              l.state, l.district,
+              ROUND(l.latitude::numeric, 2) as map_lat, ROUND(l.longitude::numeric, 2) as map_lng,
               u.first_name as seller_name, l.location as seller_location,
               e.name as enterprise_name,
               a.unique_id as animal_unique_id,

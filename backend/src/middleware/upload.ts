@@ -77,13 +77,13 @@ export const uploadDocument = multer({
 
 /**
  * Video-only upload, max 100 MB.
- * 100 MB is a coarse pre-gate against obviously oversized files - the real
+ * 50 MB is a coarse pre-gate against obviously oversized files - the real
  * limit is duration (60s), checked server-side after upload since multer
  * can't read a video's length from the raw bytes.
  */
 export const uploadVideo = multer({
   storage: memoryStorage,
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB (only the marketplace listing video uses this route)
   fileFilter: createFileFilter(VIDEO_MIMES),
 });
 

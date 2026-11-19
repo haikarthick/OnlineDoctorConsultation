@@ -21,6 +21,9 @@ const livestockFields = {
   auctionEndTime: Joi.string().optional().allow('', null),
   reservePrice: Joi.number().min(0).optional().allow(null),
   contactPhone: Joi.string().max(20).optional().allow('', null),
+  state: Joi.string().max(80).optional().allow('', null),
+  district: Joi.string().max(80).optional().allow('', null),
+  pincode: Joi.string().pattern(/^[1-9][0-9]{5}$/).optional().allow('', null),
   latitude: Joi.number().min(-90).max(90).optional().allow(null),
   longitude: Joi.number().min(-180).max(180).optional().allow(null),
   sellerType: Joi.string().valid('individual', 'registered_breeder', 'shelter', 'rescue').optional(),
@@ -40,7 +43,7 @@ export const createMarketplaceListingSchema = Joi.object({
   quantity: positiveInt.optional(),
   unit: shortText(20).optional(),
   condition: shortText(50).optional(),
-  images: Joi.array().items(Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000))).max(4).optional(),
+  images: Joi.array().items(Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000))).max(8).optional(),
   videoUrl: Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000)).optional().allow('', null),
   location: shortText(500).optional().allow('', null),
   shippingOptions: Joi.array().items(Joi.any()).optional(),
@@ -58,7 +61,7 @@ export const updateMarketplaceListingSchema = Joi.object({
   category: shortText(100).optional(),
   condition: shortText(50).optional(),
   location: shortText(500).optional().allow('', null),
-  images: Joi.array().items(Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000))).max(4).optional(),
+  images: Joi.array().items(Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000))).max(8).optional(),
   videoUrl: Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000)).optional().allow('', null),
   tags: Joi.array().items(Joi.string().max(50)).optional(),
   listingType: Joi.string().valid('sale', 'auction', 'wanted').optional(),
@@ -124,6 +127,10 @@ export const updateSavedSearchSchema = Joi.object({
   filters: savedSearchFilters.optional(),
   alertsEnabled: Joi.boolean().optional(),
 }).min(1);
+
+export const revealContactSchema = Joi.object({
+  channel: Joi.string().valid('call', 'whatsapp').optional(),
+});
 
 export const reportListingSchema = Joi.object({
   reason: Joi.string().valid('scam', 'welfare_concern', 'prohibited', 'miscategorized', 'offensive', 'wrong_info', 'other').required(),

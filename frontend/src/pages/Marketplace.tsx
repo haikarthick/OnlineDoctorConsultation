@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
@@ -12,11 +12,16 @@ import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats,
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useMasterData } from '../context/MasterDataContext'
 import { g } from '../components/marketplace/publicListingShared'
-import { MAX_LISTING_IMAGES, MAX_IMAGE_SIZE_MB, MAX_VIDEO_SIZE_MB, MAX_VIDEO_DURATION_SECONDS, readVideoDuration, TabKey, AdminSubTab } from '../components/marketplace/marketplaceShared'
+import { MIN_RECOMMENDED_PHOTOS, MAX_LISTING_IMAGES, MAX_IMAGE_SIZE_MB, MAX_VIDEO_SIZE_MB, MAX_VIDEO_DURATION_SECONDS, readVideoDuration, TabKey, AdminSubTab } from '../components/marketplace/marketplaceShared'
+import { useNearMe } from '../hooks/useNearMe'
+import { resolveSearchAliases } from '../utils/searchAliases'
+import { compressImage } from '../utils/imageCompress'
+import { canCompressVideo, compressVideo, VIDEO_MAX_ORIGINAL_MB } from '../utils/videoCompress'
 import { ReportModal } from '../components/marketplace/ReportModal'
 import { DashboardTab } from '../components/marketplace/DashboardTab'
 import { BrowseTab } from '../components/marketplace/BrowseTab'
 import { SellWizard } from '../components/marketplace/SellWizard'
+import { MyListingsTab } from '../components/marketplace/MyListingsTab'
 import { OrdersTab } from '../components/marketplace/OrdersTab'
 import { MessagesTab } from '../components/marketplace/MessagesTab'
 import { FavoritesTab } from '../components/marketplace/FavoritesTab'
@@ -25,6 +30,16 @@ import { PricesTab } from '../components/marketplace/PricesTab'
 import { AdminPanel } from '../components/marketplace/AdminPanel'
 
 import { userMessage } from '../utils/userMessage'
+// The empty sell form. A new one each call so a published listing never leaks values into the next.
+const blankSellForm = (): Record<string, any> => ({
+    title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
+    species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
+    pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
+    auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '', state: '', district: '', pincode: '',
+    images: [], videoUrl: '', linkedAnimalId: '',
+    sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false,
+  })
+
 const Marketplace: React.FC = () => {
   const { formatCurrency, settings } = useSettings()
   const { user } = useAuth()
@@ -45,9 +60,11 @@ const Marketplace: React.FC = () => {
   const [listings, setListings] = useState<MarketplaceListing[]>([])
   const [dashboard, setDashboard] = useState<any>(null)
   const [orders, setOrders] = useState<MarketplaceOrder[]>([])
+  const [myListings, setMyListings] = useState<MarketplaceListing[]>([])
+  const [myLoading, setMyLoading] = useState(false)
   const [bids, setBids] = useState<MarketplaceBid[]>([])
   const [loading, setLoading] = useState(false)
-  const [tab, setTab] = useState<TabKey>('dashboard')
+  const [tab, setTab] = useState<TabKey>('browse')
   const [selectedListing, setSelectedListing] = useState<MarketplaceListing | null>(null)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -60,14 +77,7 @@ const Marketplace: React.FC = () => {
 
   // Multi-step sell form
   const [sellStep, setSellStep] = useState(0)
-  const [sellForm, setSellForm] = useState<Record<string, any>>({
-    title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
-    species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
-    pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
-    auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
-    images: [], videoUrl: '', linkedAnimalId: '',
-    sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false,
-  })
+  const [sellForm, setSellForm] = useState<Record<string, any>>(blankSellForm)
 
   // Bid
   const [bidAmount, setBidAmount] = useState('')
@@ -127,17 +137,17 @@ const Marketplace: React.FC = () => {
   // Auction feature flag
   const [auctionEnabled, setAuctionEnabledState] = useState(false)
 
-  // Proximity filter
-  const [nearMeActive, setNearMeActive] = useState(false)
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [radiusKm, setRadiusKm] = useState('25')
-  const [locationError, setLocationError] = useState('')
+  // Proximity filter (shared with the public page)
+  const nearMe = useNearMe()
+  const { active: nearMeActive, setActive: setNearMeActive, location: userLocation, radiusKm } = nearMe
 
   // Animal list for auto-populate
   const [userAnimals, setUserAnimals] = useState<any[]>([])
   const [selectedAnimalId, setSelectedAnimalId] = useState('')
   const [uploadingImages, setUploadingImages] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 })
   const [uploadingVideo, setUploadingVideo] = useState(false)
+  const [videoProgress, setVideoProgress] = useState<number | null>(null)
 
   // Load auction enabled state on mount
   useEffect(() => {
@@ -145,6 +155,42 @@ const Marketplace: React.FC = () => {
       setAuctionEnabledState(res?.data?.enabled === true)
     }).catch(() => setAuctionEnabledState(false))
   }, [])
+
+  // ── Draft: a half-written listing survives a refresh or a dropped connection (this device only) ──
+  const draftKey = user?.id ? `mp-sell-draft-${user.id}` : null
+  const clearSellDraft = () => { try { if (draftKey) localStorage.removeItem(draftKey) } catch { /* storage unavailable - nothing to clear */ } }
+  const [draftChecked, setDraftChecked] = useState(false)
+  useEffect(() => {
+    if (!draftKey || draftChecked) return
+    setDraftChecked(true)
+    try {
+      const raw = localStorage.getItem(draftKey)
+      if (raw) {
+        const saved = JSON.parse(raw)
+        if (saved && typeof saved === 'object') {
+          setSellForm({ ...blankSellForm(), ...saved, contactPhone: saved.contactPhone || user?.phone || '' })
+          setSuccessMsg(t('marketplace.sell.draftRestored'))
+          return
+        }
+      }
+    } catch { /* unreadable draft - start fresh */ }
+    // No draft: pre-fill the phone from the profile so it is not retyped on every listing
+    if (user?.phone) setSellForm(f => (f.contactPhone ? f : { ...f, contactPhone: user.phone }))
+  }, [draftKey, draftChecked, user?.phone, t])
+  useEffect(() => {
+    if (!draftKey || !draftChecked) return
+    const meaningful = sellForm.title || sellForm.description || sellForm.images?.length || sellForm.videoUrl || sellForm.species
+    const id = setTimeout(() => {
+      try {
+        if (meaningful) localStorage.setItem(draftKey, JSON.stringify(sellForm))
+      } catch { /* storage full or blocked - the form still works, it just is not saved */ }
+    }, 600)
+    return () => clearTimeout(id)
+  }, [sellForm, draftKey, draftChecked])
+  const startOverSellForm = () => {
+    setSellForm({ ...blankSellForm(), contactPhone: user?.phone || '' })
+    setSelectedAnimalId(''); setSellStep(0); setFieldErrors({}); clearSellDraft()
+  }
 
   const fetchDashboard = useCallback(async () => {
     try { const res = await apiService.getMarketplaceDashboard(); setDashboard(res.data) } catch { setError(t('marketplace.errors.dashboardLoadFailed')) }
@@ -162,11 +208,16 @@ const Marketplace: React.FC = () => {
     loadAnimals()
   }, [])
 
+  const aliasResolver = useRef<(text: string) => string[]>(() => [])
+  aliasResolver.current = (text: string) => resolveSearchAliases(text, SPECIES_LIST, breedsForSpecies, sp => speciesLabel(sp, t), breedLabel)
+
   const fetchListings = useCallback(async () => {
     setLoading(true)
     try {
       const params: any = { status: 'active', ...filters, limit: PAGE_SIZE, offset: page * PAGE_SIZE }
       if (sortBy) params.sortBy = sortBy
+      // Search in the person's own language: resolve what they typed to canonical breed/species names
+      if (filters.search) { const aliases = aliasResolver.current(filters.search); if (aliases.length) params.searchAliases = aliases.join('|') }
       if (nearMeActive && userLocation) {
         params.userLat = userLocation.lat
         params.userLng = userLocation.lng
@@ -310,8 +361,11 @@ const Marketplace: React.FC = () => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (file.size > MAX_VIDEO_SIZE_MB * 1024 * 1024) {
-      setError(t('marketplace.sell.videoTooLarge', { maxMb: MAX_VIDEO_SIZE_MB, defaultValue: `Video is too large - max ${MAX_VIDEO_SIZE_MB}MB` }))
+    // A phone that can shrink the video accepts a big original; one that cannot is held to the upload limit
+    const shrinkable = canCompressVideo()
+    const rawCapMb = shrinkable ? VIDEO_MAX_ORIGINAL_MB : MAX_VIDEO_SIZE_MB
+    if (file.size > rawCapMb * 1024 * 1024) {
+      setError(t('marketplace.sell.videoTooLarge', { maxMb: rawCapMb, defaultValue: `Video is too large - max ${rawCapMb}MB` }))
       e.target.value = ''
       return
     }
@@ -332,7 +386,20 @@ const Marketplace: React.FC = () => {
 
     setUploadingVideo(true)
     try {
-      const res = await apiService.uploadVideoFile(file, 'marketplace')
+      // Make it smaller on the phone first (720p): far less mobile data and a much lower chance of a failed upload
+      let toUpload = file
+      if (shrinkable) {
+        setVideoProgress(0)
+        toUpload = await compressVideo(file, f => setVideoProgress(f))
+        setVideoProgress(null)
+      }
+      if (toUpload.size > MAX_VIDEO_SIZE_MB * 1024 * 1024) {
+        setError(t('marketplace.sell.videoTooLarge', { maxMb: MAX_VIDEO_SIZE_MB, defaultValue: `Video is too large - max ${MAX_VIDEO_SIZE_MB}MB` }))
+        setUploadingVideo(false)
+        e.target.value = ''
+        return
+      }
+      const res = await apiService.uploadVideoFile(toUpload, 'marketplace')
       const url = res.url || res.fileUrl
       if (url) { sf('videoUrl', url); setSuccessMsg(t('marketplace.sell.videoUploaded')) }
     } catch (err: any) {
@@ -343,6 +410,7 @@ const Marketplace: React.FC = () => {
         setError(userMessage(err, 'marketplace.sell.uploadFailed', 'Upload failed'))
       }
     }
+    setVideoProgress(null)
     setUploadingVideo(false)
     e.target.value = ''
   }
@@ -435,12 +503,9 @@ const Marketplace: React.FC = () => {
       // Animal-category listings go through admin review before appearing publicly
       const needsReview = ['animal', 'semen_embryo'].includes(payload.category)
       setSuccessMsg(needsReview ? t('marketplace.deal.submittedForReview') : t('marketplace.listingCreated'))
-      setSellForm({ title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
-        species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
-        pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
-        auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
-        images: [], linkedAnimalId: '',
-        sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false })
+      setSellForm(blankSellForm())
+      clearSellDraft()
+      setSelectedAnimalId('')
       setSellStep(0); setTab('browse'); fetchListings(); fetchDashboard()
     } catch (e: any) { setError(userMessage(e)) }
   }
@@ -502,30 +567,40 @@ const Marketplace: React.FC = () => {
 
   // Handle image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-
-    const oversized = Array.from(files).find(f => f.size > MAX_IMAGE_SIZE_MB * 1024 * 1024)
-    if (oversized) {
-      setError(t('marketplace.sell.imageTooLarge', { maxMb: MAX_IMAGE_SIZE_MB, defaultValue: `Image is too large - max ${MAX_IMAGE_SIZE_MB}MB` }))
-      e.target.value = ''
-      return
-    }
+    const files = Array.from(e.target.files || [])
+    e.target.value = ''
+    if (files.length === 0) return
+    const room = MAX_LISTING_IMAGES - (sellForm.images?.length || 0)
+    if (room <= 0) { setError(t('marketplace.sell.photoLimit', { max: MAX_LISTING_IMAGES })); return }
+    const batch = files.slice(0, room)
 
     setUploadingImages(true)
-    try {
-      const urls: string[] = [...(sellForm.images || [])]
-      for (let i = 0; i < Math.min(files.length, MAX_LISTING_IMAGES - urls.length); i++) {
-        const res = await apiService.uploadImageFile(files[i], 'marketplace')
-        if (res.url) urls.push(res.url)
-        else if (res.fileUrl) urls.push(res.fileUrl)
+    setUploadProgress({ done: 0, total: batch.length })
+    let failed = 0
+    let rejectedMessage = ''
+    // One photo at a time: each is shrunk on the phone first (a 6 MB camera photo becomes a few hundred KB),
+    // and one that fails never blocks the others - the farmer keeps every photo that did go through.
+    for (const original of batch) {
+      try {
+        const file = await compressImage(original)
+        if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) { failed++ } else {
+          const res = await apiService.uploadImageFile(file, 'marketplace')
+          const url = res.url || res.fileUrl
+          if (url) setSellForm((prev: Record<string, any>) => ({ ...prev, images: [...(prev.images || []), url].slice(0, MAX_LISTING_IMAGES) }))
+          else failed++
+        }
+      } catch (err: any) {
+        failed++
+        // A photo the automatic check turned away comes with its own plain explanation - show that one
+        const apiErr = err?.response?.data?.error // guard-ok: reads the structured error CODE, never shown
+        if (apiErr?.code === 'MEDIA_REJECTED') rejectedMessage = userMessage(err)
       }
-      setSellForm((prev: Record<string, any>) => ({ ...prev, images: urls }))
-    } catch (err: any) {
-      setError(userMessage(err, 'marketplace.sell.uploadFailed', "Image upload failed"))
+      setUploadProgress(p => ({ done: p.done + 1, total: p.total }))
     }
+    if (rejectedMessage) setError(rejectedMessage)
+    else if (failed > 0) setError(t('marketplace.sell.photosFailed', { count: failed }))
+    else if (files.length > room) setSuccessMsg(t('marketplace.sell.photoLimit', { max: MAX_LISTING_IMAGES }))
     setUploadingImages(false)
-    e.target.value = ''
   }
 
   const placeBid = async () => {
@@ -555,6 +630,38 @@ const Marketplace: React.FC = () => {
       // Re-open the listing: the reservation reveals the seller's contact details
       viewListing(listing)
     } catch (e: any) { setError(userMessage(e)) }
+  }
+
+  // ── My listings: the seller's own listings in every state, with edit / mark sold / delete ──
+  const fetchMyListings = useCallback(async () => {
+    if (!user?.id) return
+    setMyLoading(true)
+    try {
+      const res = await apiService.listMarketplaceListings({ sellerId: user.id, status: '', limit: 100 })
+      setMyListings((res.data?.items || []).filter((l: MarketplaceListing) => l.status !== 'deleted'))
+    } catch { setMyListings([]); setError(t('marketplace.mine.loadFailed')) }
+    setMyLoading(false)
+  }, [user?.id, t])
+
+  const saveMyListing = async (id: string, patch: { title: string; price: number | null; description: string }): Promise<boolean> => {
+    try {
+      await apiService.updateMarketplaceListing(id, patch)
+      setSuccessMsg(t('marketplace.mine.saved'))
+      fetchMyListings(); fetchListings()
+      return true
+    } catch (e: any) { setError(userMessage(e)); return false }
+  }
+  const loadContactViews = async (id: string): Promise<Array<{ first_name: string; last_initial: string; channel: string; created_at: string }>> => {
+    try { const res = await apiService.listMarketplaceContactViews(id); return res.data?.items || [] }
+    catch (e: any) { setError(userMessage(e)); return [] }
+  }
+  const markMyListingSold = async (id: string) => {
+    try { await apiService.updateMarketplaceListing(id, { status: 'sold' }); setSuccessMsg(t('marketplace.mine.soldDone')); fetchMyListings(); fetchListings(); fetchDashboard() }
+    catch (e: any) { setError(userMessage(e)) }
+  }
+  const deleteMyListing = async (id: string) => {
+    try { await apiService.deleteMarketplaceListing(id); setSuccessMsg(t('marketplace.mine.deleted')); fetchMyListings(); fetchListings(); fetchDashboard() }
+    catch (e: any) { setError(userMessage(e)) }
   }
 
   const fetchOrders = async (role: 'buyer' | 'seller' = orderRole) => {
@@ -674,25 +781,6 @@ const Marketplace: React.FC = () => {
   const updateFilter = (key: string, value: string) => setFilters(f => value ? { ...f, [key]: value } : (() => { const n = { ...f }; delete n[key]; return n })())
   const sf = (key: string, value: any) => setSellForm(f => ({ ...f, [key]: value }))
 
-  const handleNearMeToggle = () => {
-    if (nearMeActive) {
-      setNearMeActive(false)
-      setLocationError('')
-      return
-    }
-    if (!navigator.geolocation) {
-      setLocationError(t('marketplace.proximity.notSupported', 'Geolocation not supported by your browser'))
-      return
-    }
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-        setNearMeActive(true)
-        setLocationError('')
-      },
-      () => setLocationError(t('marketplace.proximity.denied', 'Location access denied. Please enable it in browser settings.'))
-    )
-  }
 
   const handleAdminAuctionToggle = async () => {
     try {
@@ -714,6 +802,15 @@ const Marketplace: React.FC = () => {
       viewListing(selectedListing)
     } catch (e: any) { setError(userMessage(e)) }
   }
+  // Buyer taps Call / WhatsApp: ask the server for the number (it logs the tap and enforces the daily cap).
+  // A refusal comes back as a plain sentence from the server and is shown as is.
+  const handleRevealContact = async (channel: 'call' | 'whatsapp'): Promise<string | null> => {
+    if (!selectedListing) return null
+    try {
+      const res = await apiService.revealMarketplaceContact(selectedListing.id, channel)
+      return res.data?.phone || null
+    } catch (e: any) { setError(userMessage(e)); return null }
+  }
   const handleMessageSellerClick = () => { if (selectedListing) messageSeller(selectedListing) }
   const handleReportClick = () => { if (selectedListing) setReportModal({ listingId: selectedListing.id, title: selectedListing.title }) }
   const handleBookVetCheckClick = () => { if (selectedListing) bookVetCheck(selectedListing) }
@@ -732,7 +829,7 @@ const Marketplace: React.FC = () => {
       return
     }
     setFieldErrors({})
-    setSellStep(1)
+    setSellStep(2)
   }
 
   const handleOrderRoleChange = (role: 'buyer' | 'seller') => { setOrderRole(role); fetchOrders(role); fetchInquiries(role) }
@@ -757,20 +854,42 @@ const Marketplace: React.FC = () => {
     setPlanForm({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
   }
 
-  // ─── Tab definitions ───
-  const tabs: Array<[TabKey, string]> = [
-    ['dashboard', t('marketplace.tabs.dashboard')], ['browse', t('marketplace.tabs.browse')], ['sell', t('marketplace.tabs.sell')],
-    // Auctions tab: always show to admin (to manage the toggle), hide from others when disabled
+  // ─── Navigation: four destinations (Browse · Sell · Messages · Me), sections inside two of them ───
+  // One set of destinations on every device; the bottom bar of the phone layout stays the app's own.
+  const goTab = (key: TabKey) => {
+    setTab(key); setSelectedListing(null)
+    if (key === 'orders') { fetchOrders(); fetchInquiries() }
+    if (key === 'mine') fetchMyListings()
+    if (key === 'prices') fetchMarketPrices()
+    if (key === 'admin') { fetchAdminData(); fetchMonetizationSettings() }
+    if (key === 'auctions') { setFilters({ listingType: 'auction' }); fetchListings() }
+    if (key === 'browse') setFilters(f => { if (f.listingType !== 'auction') return f; const n = { ...f }; delete n.listingType; return n })
+    if (key === 'messages') { fetchThreads(); loadUnreadCount(); setActiveThread(null) }
+    if (key === 'favorites') { fetchFavorites(); loadFavoriteIds() }
+    if (key === 'saved') fetchSavedSearches()
+  }
+  // Auctions: always shown to admin (to manage the toggle), hidden from others when disabled
+  const browseSections: Array<[TabKey, string]> = [
+    ['browse', t('marketplace.tabs.browse')],
     ...(auctionEnabled || isAdmin ? [['auctions', t('marketplace.tabs.auctions')] as [TabKey, string]] : []),
-    ['messages', `${t('marketplace.tabs.messages')}${unreadCount > 0 ? ` (${unreadCount})` : ''}`],
-    ['favorites', t('marketplace.tabs.favorites')],
-    ['saved', t('marketplace.tabs.saved')],
-    ['orders', t('marketplace.tabs.orders')], ['prices', t('marketplace.tabs.prices')],
+    ['prices', t('marketplace.tabs.prices')],
   ]
-  if (isAdmin) tabs.push(['admin', t('marketplace.tabs.admin')])
+  const meSections: Array<[TabKey, string]> = [
+    ['mine', t('marketplace.tabs.mine')], ['dashboard', t('marketplace.tabs.dashboard')], ['favorites', t('marketplace.tabs.favorites')],
+    ['saved', t('marketplace.tabs.saved')], ['orders', t('marketplace.tabs.orders')],
+  ]
+  const destinations: Array<{ id: string; label: string; first: TabKey; keys: TabKey[] }> = [
+    { id: 'browse', label: t('marketplace.tabs.browse'), first: 'browse', keys: browseSections.map(s => s[0]) },
+    { id: 'sell', label: t('marketplace.tabs.sell'), first: 'sell', keys: ['sell'] },
+    { id: 'messages', label: `${t('marketplace.tabs.messages')}${unreadCount > 0 ? ` (${unreadCount})` : ''}`, first: 'messages', keys: ['messages'] },
+    { id: 'me', label: t('marketplace.tabs.me'), first: 'mine', keys: meSections.map(s => s[0]) },
+    ...(isAdmin ? [{ id: 'admin', label: t('marketplace.tabs.admin'), first: 'admin' as TabKey, keys: ['admin'] as TabKey[] }] : []),
+  ]
+  const activeDestination = destinations.find(d => d.keys.includes(tab))
+  const sections = activeDestination?.id === 'browse' ? browseSections : activeDestination?.id === 'me' ? meSections : []
 
   // ─── Sell Step Titles ───
-  const sellSteps = [t('marketplace.sell.steps.basicInfo'), t('marketplace.sell.steps.animalDetails'), t('marketplace.sell.steps.healthCerts'), t('marketplace.sell.steps.pricingLocation'), t('marketplace.sell.steps.reviewPublish')]
+  const sellSteps = [t('marketplace.sell.steps.photos'), t('marketplace.sell.steps.basicInfo'), t('marketplace.sell.steps.animalDetails'), t('marketplace.sell.steps.healthCerts'), t('marketplace.sell.steps.pricingLocation'), t('marketplace.sell.steps.reviewPublish')]
 
   return (
     <div className="module-page mp-page">
@@ -794,20 +913,20 @@ const Marketplace: React.FC = () => {
         />
       )}
 
-      <div className="module-tabs">
-        {tabs.map(([key, label]) => (
-          <button key={key} className={`module-tab ${tab === key ? 'active' : ''}`} onClick={() => {
-            setTab(key); setSelectedListing(null)
-            if (key === 'orders') { fetchOrders(); fetchInquiries() }
-            if (key === 'prices') fetchMarketPrices()
-            if (key === 'admin') { fetchAdminData(); fetchMonetizationSettings() }
-            if (key === 'auctions') { setFilters({ listingType: 'auction' }); fetchListings() }
-            if (key === 'messages') { fetchThreads(); loadUnreadCount(); setActiveThread(null) }
-            if (key === 'favorites') { fetchFavorites(); loadFavoriteIds() }
-            if (key === 'saved') fetchSavedSearches()
-          }}>{label}</button>
+      <nav className="mp-destinations" aria-label={t('marketplace.pageTitle')}>
+        {destinations.map(d => (
+          <button key={d.id} className={`mp-destination ${activeDestination?.id === d.id ? 'active' : ''}`}
+            aria-current={activeDestination?.id === d.id ? 'page' : undefined}
+            onClick={() => { if (activeDestination?.id !== d.id) goTab(d.first); else if (d.keys.length === 1) goTab(d.first) }}>{d.label}</button>
         ))}
-      </div>
+      </nav>
+      {sections.length > 1 && (
+        <div className="mp-sections" role="tablist">
+          {sections.map(([key, label]) => (
+            <button key={key} role="tab" aria-selected={tab === key} className={`mp-chip ${tab === key ? 'active' : ''}`} onClick={() => goTab(key)}>{label}</button>
+          ))}
+        </div>
+      )}
 
       {/* ════════ DASHBOARD ════════ */}
       {tab === 'dashboard' && dashboard && (
@@ -822,13 +941,13 @@ const Marketplace: React.FC = () => {
       {/* ════════ BROWSE ════════ */}
       {(tab === 'browse' || tab === 'auctions') && (
         <BrowseTab
-          filters={filters} updateFilter={updateFilter}
+          filters={filters} updateFilter={updateFilter} setFilters={setFilters}
+          breedsForSpecies={breedsForSpecies} breedLabel={breedLabel}
           sortBy={sortBy} onSortByChange={setSortBy}
           categoryKeys={CATEGORY_KEYS} speciesList={SPECIES_LIST}
           classTermsForSpecies={classTermsForSpecies} resolveLabel={resolveLabel} speciesLabel={speciesLabel}
           onSearch={fetchListings} onClearAllFilters={handleClearAllFilters}
-          nearMeActive={nearMeActive} onNearMeToggle={handleNearMeToggle} radiusKm={radiusKm} onRadiusChange={setRadiusKm}
-          userLocation={userLocation} locationError={locationError}
+          nearMe={nearMe}
           treasureMount={mpConfig?.treasureMount}
           showSaveSearch={showSaveSearch} onShowSaveSearchChange={setShowSaveSearch}
           saveSearchName={saveSearchName} onSaveSearchNameChange={setSaveSearchName} onSaveCurrentSearch={saveCurrentSearch}
@@ -840,7 +959,7 @@ const Marketplace: React.FC = () => {
           bidAmount={bidAmount} bidMessage={bidMessage} onBidAmountChange={setBidAmount} onBidMessageChange={setBidMessage}
           onPlaceBid={placeBid} onBuyNow={handleBuyNow} onBack={handleBack}
           isAdmin={isAdmin} onToggleHotDeal={handleToggleHotDeal} onToggleFeatured={handleToggleFeatured}
-          userId={user?.id} onRequestContact={handleRequestContact} onMessageSeller={handleMessageSellerClick} onReport={handleReportClick} onBookVetCheck={handleBookVetCheckClick}
+          userId={user?.id} onRequestContact={handleRequestContact} onRevealContact={handleRevealContact} onMessageSeller={handleMessageSellerClick} onReport={handleReportClick} onBookVetCheck={handleBookVetCheckClick}
           transport={mpConfig?.transport?.enabled && mpConfig.transport.url ? mpConfig.transport : undefined}
           t={t}
         />
@@ -849,35 +968,39 @@ const Marketplace: React.FC = () => {
       {/* ════════ SELL (Multi-Step) ════════ */}
       {tab === 'sell' && (
         <SellWizard
-          sellSteps={sellSteps} sellStep={sellStep} onStepClick={setSellStep}
+          sellSteps={sellSteps} sellStep={sellStep} onStepClick={setSellStep} onStartOver={startOverSellForm}
+          photosProps={{
+            sellForm, sf, setSellForm,
+            maxListingImages: MAX_LISTING_IMAGES, minRecommendedPhotos: MIN_RECOMMENDED_PHOTOS, uploadingImages, uploadProgress, onImageUpload: handleImageUpload,
+            uploadingVideo, videoProgress, onVideoUpload: handleVideoUpload, maxVideoDurationSeconds: MAX_VIDEO_DURATION_SECONDS, maxVideoSizeMb: MAX_VIDEO_SIZE_MB,
+            onNext: () => setSellStep(1), t,
+          }}
           step0Props={{
             sellForm, sf, fieldErrors, onClearFieldError: handleClearFieldError,
             userAnimals, selectedAnimalId, onAnimalSelect: handleAnimalSelect,
             copiedId, onCopyId: handleCopyId,
             speciesLabel, auctionEnabled, isAdmin, categoryKeys: CATEGORY_KEYS,
-            onNext: handleSellStep0Next, t,
+            onBack: () => setSellStep(0), onNext: handleSellStep0Next, t,
           }}
           step1Props={{
             sellForm, sf, setSellForm, selectedAnimalId,
             speciesCategories, marketplaceEligibleSpecies, speciesLabel,
             breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, resolveLabel,
-            onBack: () => setSellStep(0), onNext: () => setSellStep(2), t,
+            onBack: () => setSellStep(1), onNext: () => setSellStep(3), t,
           }}
           step2Props={{
-            sellForm, sf, setSellForm, marketplaceConditions, resolveLabel,
-            maxListingImages: MAX_LISTING_IMAGES, uploadingImages, onImageUpload: handleImageUpload,
-            uploadingVideo, onVideoUpload: handleVideoUpload, maxVideoDurationSeconds: MAX_VIDEO_DURATION_SECONDS, maxVideoSizeMb: MAX_VIDEO_SIZE_MB,
-            onBack: () => setSellStep(1), onNext: () => setSellStep(3), t,
+            sellForm, sf, marketplaceConditions, resolveLabel,
+            onBack: () => setSellStep(2), onNext: () => setSellStep(4), t,
           }}
           step3Props={{
             sellForm, sf, currency: settings.currency, priceHint, formatCurrency,
             geoLocating, onUseMyLocation: useMyLocationForListing,
-            onBack: () => setSellStep(2), onReview: () => setSellStep(4), t,
+            onBack: () => setSellStep(3), onReview: () => setSellStep(5), t,
           }}
           step4Props={{
             sellForm, sf, currency: settings.currency, speciesLabel, breedLabel, findClassTerm, resolveLabel,
             genderLabels: GENDER_LABELS, vaxLabels: VAX_LABELS,
-            onBack: () => setSellStep(3), onPublish: createListing, t,
+            onBack: () => setSellStep(4), onPublish: createListing, t,
           }}
           t={t}
         />
@@ -909,6 +1032,15 @@ const Marketplace: React.FC = () => {
           favorites={favorites} formatCurrency={formatCurrency}
           onViewListing={viewListingFromTab}
           favoriteIds={favoriteIds} onToggleFavorite={toggleFavorite} t={t}
+        />
+      )}
+
+      {/* ════════ MY LISTINGS ════════ */}
+      {tab === 'mine' && (
+        <MyListingsTab
+          listings={myListings} loading={myLoading} formatCurrency={formatCurrency}
+          onView={viewListingFromTab} onLoadViews={loadContactViews} onSave={saveMyListing} onMarkSold={markMyListingSold} onDelete={deleteMyListing}
+          onSell={() => goTab('sell')} t={t}
         />
       )}
 

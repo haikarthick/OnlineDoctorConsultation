@@ -18,7 +18,9 @@
       "admin": "🛡️ एडमिन",
       "messages": "💬 संदेश",
       "favorites": "❤️ पसंदीदा",
-      "saved": "🔔 सहेजे गए"
+      "saved": "🔔 सहेजे गए",
+      "me": "मेरा",
+      "mine": "मेरी लिस्टिंग"
     },
     "categories": {
       "all": "सभी श्रेणियाँ",
@@ -129,6 +131,7 @@
     },
     "sell": {
       "steps": {
+        "photos": "फ़ोटो",
         "basicInfo": "मूल जानकारी",
         "animalDetails": "पशु विवरण",
         "healthCerts": "स्वास्थ्य और प्रमाणपत्र",
@@ -206,7 +209,26 @@
       "videoTooLarge": "वीडियो बहुत बड़ा है: अधिकतम {{maxMb}}MB",
       "videoTooLong": "वीडियो बहुत लंबा है: अधिकतम {{maxSec}} सेकंड",
       "uploadingVideo": "वीडियो अपलोड हो रहा है...",
-      "videoLimits": "अधिकतम {{maxSec}} सेकंड, {{maxMb}}MB तक"
+      "videoLimits": "अधिकतम {{maxSec}} सेकंड, {{maxMb}}MB तक",
+      "adminPreview": "एडमिन पूर्वावलोकन",
+      "copyAnimalId": "waytovet पशु आईडी - कॉपी करने के लिए टैप करें",
+      "takePhoto": "फ़ोटो खींचें",
+      "choosePhotos": "फ़ोटो चुनें",
+      "recordVideo": "वीडियो बनाएँ",
+      "chooseVideo": "वीडियो चुनें",
+      "photosHint": "कम से कम {{min}} साफ़ फ़ोटो जोड़ें: सामने, बगल और थन या पीछे का हिस्सा। पहली फ़ोटो सूची में खरीदारों को कवर के रूप में दिखती है।",
+      "photosCount": "{{max}} में से {{count}} फ़ोटो",
+      "uploadProgress": "{{total}} में से {{done}} अपलोड हो रहे हैं",
+      "coverPhoto": "कवर",
+      "makeCover": "कवर बनाएँ",
+      "removePhoto": "फ़ोटो हटाएँ",
+      "photoLimit": "आप अधिकतम {{max}} फ़ोटो जोड़ सकते हैं। नई जोड़ने के लिए एक हटाएँ।",
+      "photosFailed": "{{count}} फ़ोटो नहीं जुड़ सकीं - कनेक्शन टूट गया होगा या फ़ाइल सही फ़ोटो नहीं है। बाकी रख ली गई हैं। फिर से कोशिश के लिए \"फ़ोटो चुनें\" दबाएँ।",
+      "photosStepTitle": "📸 फ़ोटो और वीडियो",
+      "photosStepDesc": "फ़ोटो या छोटे वीडियो से शुरू करें। खरीदार सबसे पहले यही देखते हैं।",
+      "draftRestored": "आपकी अधूरी लिस्टिंग वापस ला दी गई है।",
+      "startOver": "नए सिरे से शुरू करें",
+      "preparingVideo": "वीडियो को छोटा किया जा रहा है ताकि जल्दी अपलोड हो... {{percent}}%। कृपया यह स्क्रीन खुली रखें।"
     },
     "detail": {
       "backToListings": "← लिस्टिंग पर वापस",
@@ -238,7 +260,11 @@
       "call": "Call",
       "contactHidden": "Contact details hidden",
       "requestContact": "Request Contact",
-      "watchVideo": "वीडियो देखें"
+      "watchVideo": "वीडियो देखें",
+      "whatsapp": "व्हाट्सऐप",
+      "whatsappText": "नमस्ते, मुझे आपकी लिस्टिंग में रुचि है: {{title}}",
+      "phoneMaskedHint": "पूरा नंबर देखने के लिए कॉल या व्हाट्सऐप दबाएँ। विक्रेता को पता चलेगा कि आपने देखा।",
+      "noPhone": "विक्रेता ने फ़ोन नंबर नहीं जोड़ा है। इसके बजाय उन्हें संदेश भेजें।"
     },
     "card": {
       "hotDeal": "🔥 हॉट डील",
@@ -254,7 +280,10 @@
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
       "premiumPriced": "Premium Priced",
-      "hasVideo": "वीडियो है"
+      "hasVideo": "वीडियो है",
+      "featured": "विशेष",
+      "passportTitle": "टीकाकरण रिकॉर्ड waytovet में सत्यापित",
+      "kmAway": "{{km}} किमी दूर"
     },
     "orders": {
       "asBuyer": "🔍 खोजकर्ता के रूप में",
@@ -444,8 +473,8 @@
       }
     },
     "proximity": {
-      "notSupported": "Location not supported on this device",
-      "denied": "Location access denied. Please enable location permissions.",
+      "notSupported": "आपका फ़ोन या ब्राउज़र अपना स्थान साझा नहीं कर सकता। इसके बजाय फ़िल्टर में राज्य और ज़िला चुनें।",
+      "denied": "स्थान की अनुमति नहीं मिली। ब्राउज़र सेटिंग में अनुमति दें, या फ़िल्टर में राज्य और ज़िला चुनें।",
       "nearMeOn": "Near Me (On)",
       "nearMe": "Near Me",
       "searching": "Searching nearby..."
@@ -558,6 +587,76 @@
     "interlink": {
       "treasureBanner": "उत्पाद, चारा या उपकरण खरीद या बेच रहे हैं?",
       "visitTreasure": "Treasure Mount पर जाएं"
+    },
+    "filters": {
+      "title": "फ़िल्टर",
+      "button": "फ़िल्टर",
+      "price": "कीमत",
+      "min": "न्यूनतम",
+      "max": "अधिकतम",
+      "anyBreed": "कोई भी नस्ल",
+      "age": "उम्र",
+      "ageAny": "कोई भी",
+      "ageUnder1": "1 साल से कम",
+      "age1to3": "1 से 3 साल",
+      "age3to5": "3 से 5 साल",
+      "age5plus": "5+ साल",
+      "milk": "प्रतिदिन दूध",
+      "place": "स्थान",
+      "anyState": "कोई भी राज्य",
+      "state": "राज्य",
+      "district": "ज़िला",
+      "pincode": "पिनकोड",
+      "more": "और",
+      "reset": "रीसेट",
+      "show": "{{count}} परिणाम दिखाएँ",
+      "active": "लगाए गए फ़िल्टर",
+      "remove": "फ़िल्टर हटाएँ"
+    },
+    "gallery": {
+      "video": "वीडियो",
+      "photo": "फ़ोटो",
+      "previous": "पिछला",
+      "next": "अगला"
+    },
+    "mine": {
+      "empty": "अभी आपकी कोई लिस्टिंग नहीं है।",
+      "sellFirst": "पशु बेचें",
+      "view": "देखें",
+      "edit": "बदलें",
+      "markSold": "बिक गया",
+      "delete": "हटाएँ",
+      "cancel": "रद्द करें",
+      "keep": "रहने दें",
+      "deleteConfirm": "यह लिस्टिंग हटाएँ? खरीदार इसे नहीं देख पाएँगे।",
+      "saved": "लिस्टिंग अपडेट हो गई।",
+      "soldDone": "बिका हुआ चिह्नित। अब खरीदारों को नहीं दिखेगा।",
+      "deleted": "लिस्टिंग हटा दी गई।",
+      "reservedHint": "एक खरीदार ने इस पशु को रिज़र्व किया है। लिस्टिंग बदलने से पहले \"पूछताछ\" में सौदा पूरा या रद्द करें।",
+      "loadFailed": "आपकी लिस्टिंग लोड नहीं हो सकीं। कनेक्शन जाँचें और यह टैब फिर खोलें।",
+      "status": {
+        "active": "चालू",
+        "pending": "समीक्षा की प्रतीक्षा",
+        "rejected": "स्वीकृत नहीं",
+        "sold": "बिक गया",
+        "reserved": "रिज़र्व",
+        "expired": "समाप्त",
+        "rehomed": "बिक गया"
+      },
+      "whoViewed": "मेरा नंबर किसने देखा",
+      "noViews": "अभी तक किसी ने आपका फ़ोन नंबर नहीं देखा।"
+    },
+    "view": {
+      "list": "सूची",
+      "map": "नक्शा",
+      "label": "ऐसे देखें"
+    },
+    "map": {
+      "loading": "नक्शा लोड हो रहा है...",
+      "none": "इनमें से किसी लिस्टिंग का स्थान अभी नक्शे पर नहीं है। देखने के लिए सूची पर जाएँ।",
+      "approx": "पिन लगभग क्षेत्र (करीब 1 किमी) दिखाते हैं, सटीक जगह नहीं।",
+      "someHidden": "{{count}} लिस्टिंग का स्थान नहीं है, इसलिए यहाँ नहीं दिख रहीं।",
+      "you": "आप यहाँ हैं"
     }
   },
   "publicMarketplace": {

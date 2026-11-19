@@ -6,7 +6,12 @@ import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing } from '../types'
 import { useMasterData } from '../context/MasterDataContext'
 import { WayToVetLogo } from '../components/WayToVetLogo'
+import { useNearMe } from '../hooks/useNearMe'
+import { resolveSearchAliases } from '../utils/searchAliases'
+import { NearMeBar } from '../components/marketplace/NearMeBar'
+import { ListingsMap } from '../components/marketplace/ListingsMap'
 import { PublicListingCard } from '../components/marketplace/PublicListingCard'
+import { MarketplaceFilterSheet, SHEET_FILTER_KEYS } from '../components/marketplace/MarketplaceFilterSheet'
 import { PublicListingDetail } from '../components/marketplace/PublicListingDetail'
 import { CATEGORY_ICONS } from '../components/marketplace/publicListingShared'
 import './Marketplace.css'
@@ -16,7 +21,10 @@ const PublicMarketplace: React.FC = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
-  const { classTermsForSpecies, marketplaceCategories, resolveLabel, marketplaceEligibleSpecies, speciesLabel } = useMasterData()
+  const { classTermsForSpecies, marketplaceCategories, resolveLabel, marketplaceEligibleSpecies, speciesLabel, breedsForSpecies, breedLabel } = useMasterData()
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const nearMe = useNearMe()
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   const SPECIES_LIST = marketplaceEligibleSpecies
   const CATEGORY_KEYS: Array<{ value: string; label: string }> = [
     { value: '', label: t('marketplace.categories.all') },
@@ -76,17 +84,27 @@ const PublicMarketplace: React.FC = () => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
   }
 
+  const aliasResolver = React.useRef<(text: string) => string[]>(() => [])
+  aliasResolver.current = (text: string) => resolveSearchAliases(text, SPECIES_LIST, breedsForSpecies, sp => speciesLabel(sp, t), breedLabel)
+
   const fetchListings = useCallback(async () => {
     setLoading(true)
     try {
       const params: any = { ...filters, limit: PAGE_SIZE, offset: page * PAGE_SIZE }
       if (sortBy) params.sortBy = sortBy
+      if (filters.search) { const aliases = aliasResolver.current(filters.search); if (aliases.length) params.searchAliases = aliases.join('|') }
+      if (nearMe.active && nearMe.location) {
+        params.userLat = nearMe.location.lat
+        params.userLng = nearMe.location.lng
+        params.radiusKm = nearMe.radiusKm
+        if (!params.sortBy) params.sortBy = 'distance'
+      }
       const res = await apiService.listPublicMarketplaceListings(params)
       setListings(res.data?.items || [])
       setTotal(res.data?.total || 0)
     } catch { setListings([]); setTotal(0) }
     setLoading(false)
-  }, [filters, sortBy, page])
+  }, [filters, sortBy, page, nearMe.active, nearMe.location, nearMe.radiusKm])
 
   const fetchStats = useCallback(async () => {
     try {
@@ -223,17 +241,9 @@ const PublicMarketplace: React.FC = () => {
             <option value="">{t('marketplace.livestock.allSpecies')}</option>
             {SPECIES_LIST.map(s => <option key={s} value={s}>{speciesLabel(s, t)}</option>)}
           </select>
-          <select className="module-input" value={filters.gender || ''} onChange={e => updateFilter('gender', e.target.value)}>
-            <option value="">{t('marketplace.livestock.anyGender')}</option>
-            <option value="male">{t('marketplace.genderLabel.male')}</option>
-            <option value="female">{t('marketplace.genderLabel.female')}</option>
-          </select>
-          {filters.species && classTermsForSpecies(filters.species).length > 0 && (
-            <select className="module-input" value={filters.animalClass || ''} onChange={e => updateFilter('animalClass', e.target.value)}>
-              <option value="">{t('animalClass.anyClass')}</option>
-              {classTermsForSpecies(filters.species).map(c => <option key={c.value} value={c.value}>{resolveLabel(c, t)}</option>)}
-            </select>
-          )}
+          <button type="button" className="module-btn mp-filters-btn" onClick={() => setSheetOpen(true)}>
+            ⚙️ {t('marketplace.filters.button')}{SHEET_FILTER_KEYS.filter(k => filters[k]).length > 0 ? ` (${SHEET_FILTER_KEYS.filter(k => filters[k]).length})` : ''}
+          </button>
           <select className="module-input" value={sortBy} onChange={e => { setSortBy(e.target.value); setPage(0) }}>
             <option value="">{t('marketplace.sort.default')}</option>
             <option value="price_asc">{t('marketplace.sort.priceAsc')}</option>
@@ -243,6 +253,15 @@ const PublicMarketplace: React.FC = () => {
           </select>
           <button className="module-btn primary" onClick={() => applySearch(searchInput)} aria-label={t('common.search')}>🔍</button>
         </div>
+
+        <MarketplaceFilterSheet open={sheetOpen} onClose={() => setSheetOpen(false)} filters={filters}
+          setFilters={u => { setPage(0); setFilters(u) }}
+          breeds={filters.species ? breedsForSpecies(filters.species) : []} breedLabel={breedLabel}
+          classTerms={filters.species ? classTermsForSpecies(filters.species) : []} resolveLabel={resolveLabel}
+          onClear={() => { setPage(0); setFilters(f => { const n = { ...f }; SHEET_FILTER_KEYS.forEach(k => delete n[k]); return n }) }}
+          resultCount={total} t={t} />
+
+        <NearMeBar nearMe={nearMe} t={t} />
 
         {/* Quick Chips */}
         <div className="mp-chip-bar">
@@ -271,11 +290,18 @@ const PublicMarketplace: React.FC = () => {
               </span>
             </div>
 
+            <div className="mp-view-toggle" role="tablist" aria-label={t('marketplace.view.label')}>
+              <button type="button" role="tab" aria-selected={viewMode === 'list'} className={`mp-chip ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>☰ {t('marketplace.view.list')}</button>
+              <button type="button" role="tab" aria-selected={viewMode === 'map'} className={`mp-chip ${viewMode === 'map' ? 'active' : ''}`} onClick={() => setViewMode('map')}>🗺️ {t('marketplace.view.map')}</button>
+            </div>
+
             {/* Listings Grid */}
             {loading ? (
               <div className="mp-loading">{t('marketplace.loadingListings')}</div>
             ) : listings.length === 0 ? (
               <div className="mp-empty">{t('marketplace.emptyListings')}</div>
+            ) : viewMode === 'map' ? (
+              <ListingsMap listings={listings} formatCurrency={formatCurrency} onOpen={viewListing} userLocation={nearMe.active ? nearMe.location : null} t={t} />
             ) : (
               <div className="mp-grid">
                 {listings.map(l => (

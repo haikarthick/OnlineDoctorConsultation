@@ -44,6 +44,18 @@ export const marketplaceApi = {
     return response.data
   },
 
+  /** Signed-in buyer taps Call / WhatsApp: the seller's number is returned (and the tap logged on the server). */
+  async revealMarketplaceContact(listingId: string, channel: 'call' | 'whatsapp') {
+    const response = await sharedClient.post(`/marketplace/listings/${listingId}/reveal-contact`, { channel })
+    return response.data
+  },
+
+  /** The seller's own list of who looked at their number. */
+  async listMarketplaceContactViews(listingId: string) {
+    const response = await sharedClient.get(`/marketplace/listings/${listingId}/contact-views`)
+    return response.data
+  },
+
   async deleteMarketplaceListing(id: string) {
     const response = await sharedClient.delete(`/marketplace/listings/${id}`)
     return response.data

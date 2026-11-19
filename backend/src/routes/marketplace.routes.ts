@@ -15,7 +15,7 @@ import {
   createMarketplaceListingSchema, updateMarketplaceListingSchema, placeBidSchema, createMarketplaceOrderSchema, updateOrderStatusSchema,
   confirmDealSchema, cancelDealSchema,
   startThreadSchema, sendMessageSchema, createSavedSearchSchema, updateSavedSearchSchema,
-  reportListingSchema, resolveReportSchema,
+  reportListingSchema, resolveReportSchema, revealContactSchema,
   updateMonetizationSettingSchema, createMarketplacePlanSchema as createMPlanSchema, updateMarketplacePlanSchema as updateMPlanSchema,
   boostListingSchema, createInquirySchema, respondInquirySchema, createSubscriptionSchema,
   createSustainabilityMetricSchema, updateSustainabilityMetricSchema, createSustainabilityGoalSchema, updateSustainabilityGoalSchema,
@@ -58,6 +58,8 @@ router.get('/marketplace/favorites/ids', authMiddleware, asyncHandler((req: Requ
 router.post('/marketplace/listings/:listingId/favorite', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.addMarketplaceFavorite(req, res)));
 router.delete('/marketplace/listings/:listingId/favorite', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.removeMarketplaceFavorite(req, res)));
 router.get('/marketplace/config', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketplaceConfig(req, res)));
+router.post('/marketplace/listings/:listingId/reveal-contact', authMiddleware, validateBody(revealContactSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.revealMarketplaceContact(req, res)));
+router.get('/marketplace/listings/:listingId/contact-views', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceContactViews(req, res)));
 router.post('/marketplace/listings/:listingId/report', authMiddleware, validateBody(reportListingSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.reportMarketplaceListing(req, res)));
 router.get('/marketplace/admin/reports', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.adminListMarketplaceReports(req, res)));
 router.patch('/marketplace/admin/reports/:id', authMiddleware, roleMiddleware(['admin']), validateBody(resolveReportSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.adminResolveMarketplaceReport(req, res)));

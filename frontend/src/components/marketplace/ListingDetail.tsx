@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import type { TFunction } from 'i18next'
 import { MarketplaceListing, MarketplaceBid } from '../../types'
-import { cldCardImageProps, cldDetailImageProps } from '../../utils/media'
+import { ListingGallery } from './ListingGallery'
 import { useMasterData } from '../../context/MasterDataContext'
 import { CATEGORY_ICONS, g } from './publicListingShared'
 import { AuctionCountdown } from './AuctionCountdown'
@@ -12,12 +12,14 @@ export const ListingDetail: React.FC<{
   bidAmount: string; bidMessage: string; onBidAmountChange: (v: string) => void; onBidMessageChange: (v: string) => void;
   onPlaceBid: () => void; onBuyNow: () => void; onBack: () => void;
   isAdmin: boolean; onToggleHotDeal: (id: string, v: boolean) => void; onToggleFeatured: (id: string, v: boolean) => void;
-  userId?: string; onRequestContact?: () => void;
+  userId?: string; onRequestContact?: () => void; onRevealContact?: (channel: 'call' | 'whatsapp') => Promise<string | null>;
   isFavorite?: boolean; onToggleFavorite?: () => void; onMessageSeller?: () => void;
   onReport?: () => void; onBookVetCheck?: () => void; transport?: { url: string };
   t: TFunction;
-}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
-  const { findClassTerm, speciesLabel, resolveLabel, breedLabel } = useMasterData()
+}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRevealContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
+  const { findClassTerm, speciesLabel, resolveLabel, breedLabel, marketplaceCategories } = useMasterData()
+  const categoryRow = marketplaceCategories.find(c => c.code === l.category)
+  const categoryText = categoryRow ? resolveLabel(categoryRow, t) : t('marketplace.categories.other')
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -32,7 +34,21 @@ export const ListingDetail: React.FC<{
   const hasCert = g(l, 'healthCertificate', 'health_certificate')
   const tier = g(l, 'listingTier', 'listing_tier')
   const isHot = g(l, 'isHotDeal', 'is_hot_deal')
-  const contact = g(l, 'contactPhone', 'contact_phone')
+  const ownContact = g(l, 'contactPhone', 'contact_phone')
+  const maskedContact = g(l, 'contactPhoneMasked', 'contact_phone_masked')
+  const [revealedPhone, setRevealedPhone] = React.useState<string | null>(null)
+  const [revealing, setRevealing] = React.useState(false)
+  const contact = ownContact || revealedPhone
+  const reveal = async (channel: 'call' | 'whatsapp') => {
+    if (!onRevealContact || revealing) return
+    setRevealing(true)
+    const phone = await onRevealContact(channel)
+    setRevealing(false)
+    if (!phone) return
+    setRevealedPhone(phone)
+    if (channel === 'call') window.location.href = `tel:${phone}`
+    else window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(t('marketplace.detail.whatsappText', { title: l.title }))}`, '_blank', 'noopener')
+  }
   const listingType = g(l, 'listingType', 'listing_type')
   const highestBid = g(l, 'highestBid', 'highest_bid')
   const sellerName = g(l, 'sellerName', 'seller_name')
@@ -43,7 +59,6 @@ export const ListingDetail: React.FC<{
   const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
   const images = typeof l.images === 'string' ? JSON.parse(l.images || '[]') : (l.images || [])
-  const [activeImageIdx, setActiveImageIdx] = useState(0)
 
   return (
     <div className="mp-detail">
@@ -53,29 +68,14 @@ export const ListingDetail: React.FC<{
         <div className="mp-detail-main">
           {/* Header badges */}
           <div className="mp-card-badges">
-            <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
+            <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {categoryText}</span>
             <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
             {tier && <span className="mp-badge premium">{{ standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }[tier as 'standard' | 'premium' | 'spotlight'] || tier}</span>}
             {isHot && <span className="mp-badge hot">{t('marketplace.card.hotDeal')}</span>}
-            {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
+            {l.featured && <span className="mp-badge featured">⭐ {t('marketplace.card.featured')}</span>}
           </div>
 
-          {images.length > 0 && (
-            <div className="mp-detail-gallery">
-              <div className="mp-detail-gallery-main">
-                <img {...cldDetailImageProps(images[activeImageIdx])} alt={l.title} />
-              </div>
-              {images.length > 1 && (
-                <div className="mp-detail-gallery-thumbs">
-                  {images.map((img: string, i: number) => (
-                    <button key={i} type="button" className={`mp-detail-thumb ${i === activeImageIdx ? 'active' : ''}`} onClick={() => setActiveImageIdx(i)}>
-                      <img {...cldCardImageProps(img)} alt={`${l.title} ${i + 1}`} loading="lazy" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <ListingGallery title={l.title} images={images} videoUrl={g(l, 'videoUrl', 'video_url')} t={t} />
 
           <div className="mp-detail-title-row">
             <h2>{l.title}</h2>
@@ -95,22 +95,6 @@ export const ListingDetail: React.FC<{
 
           {/* Price */}
           <div className="mp-detail-price">{l.price ? formatCurrency(l.price) : t('marketplace.contactForPrice')}</div>
-
-          {/* Video */}
-          {(() => {
-            const videoUrl = g(l, 'videoUrl', 'video_url')
-            if (!videoUrl) return null
-            const isUploaded = String(videoUrl).startsWith('/uploads/') || /\.(mp4|webm|ogg|mov)(\?|$)/i.test(videoUrl)
-            return (
-              <div className="mp-detail-video">
-                {isUploaded ? (
-                  <video controls preload="metadata" src={videoUrl} className="mp-detail-video-el" />
-                ) : (
-                  <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="module-btn small">▶ {t('marketplace.detail.watchVideo')}</a>
-                )}
-              </div>
-            )
-          })()}
 
           {/* Animal Profile Section */}
           {(species || breed || milkYield || weight || age) && (
@@ -155,21 +139,30 @@ export const ListingDetail: React.FC<{
                   {contact ? (
                     <div className="mp-contact-actions">
                       <span>{contact}</span>
-                      <a href={`https://wa.me/${contact.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi, I'm interested in your listing: ${l.title}`)}`}
+                      <a href={`https://wa.me/${contact.replace(/\D/g, '')}?text=${encodeURIComponent(t('marketplace.detail.whatsappText', { title: l.title }))}`}
                         target="_blank" rel="noopener noreferrer" className="mp-contact-btn whatsapp"
                         onClick={e => e.stopPropagation()}>
-                        💬 WhatsApp
+                        💬 {t('marketplace.detail.whatsapp')}
                       </a>
                       <a href={`tel:${contact}`} className="mp-contact-btn call" onClick={e => e.stopPropagation()}>
                         📞 {t('marketplace.detail.call')}
                       </a>
                     </div>
+                  ) : userId && l.seller_id !== userId && maskedContact ? (
+                    <div>
+                      <div className="mp-contact-actions">
+                        <span>{maskedContact}</span>
+                        <button type="button" className="mp-contact-btn whatsapp" disabled={revealing} onClick={() => reveal('whatsapp')}>💬 {t('marketplace.detail.whatsapp')}</button>
+                        <button type="button" className="mp-contact-btn call" disabled={revealing} onClick={() => reveal('call')}>📞 {t('marketplace.detail.call')}</button>
+                      </div>
+                      <div className="mp-compliance-hint">{t('marketplace.detail.phoneMaskedHint')}</div>
+                    </div>
                   ) : userId && l.seller_id !== userId ? (
                     <div>
-                      <span className="si-7b05444b">{t('marketplace.detail.contactHidden')}</span>
-                      {onRequestContact && (
-                        <button className="module-btn small si-5dc995a0" onClick={onRequestContact}>
-                          📩 {t('marketplace.detail.requestContact')}
+                      <span className="si-7b05444b">{t('marketplace.detail.noPhone')}</span>
+                      {onMessageSeller && (
+                        <button className="module-btn small si-5dc995a0" onClick={onMessageSeller}>
+                          💬 {t('marketplace.engagement.messageSeller')}
                         </button>
                       )}
                     </div>
