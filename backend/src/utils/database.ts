@@ -7,6 +7,7 @@ import RefreshTokenService from '../services/RefreshTokenService';
 import VetHospitalService from '../services/VetHospitalService';
 import { describeParams } from './database/helpers';
 import { runSQLMigrations } from './database/runSQLMigrations';
+import { checkSchemaContract } from './database/schemaContract';
 import { ensureSchemaPublic } from './database/ensureSchemaPublic';
 import { repairSchema as repairSchemaImpl } from './database/repairSchema';
 import { phase1GeneralSafetyNets } from './database/seed/phase1GeneralSafetyNets';
@@ -97,6 +98,9 @@ class PostgresDatabase {
       // Apply any pending backend/migrations/*.sql files using the server's own pool
       // (correct search_path, connection timeout, proper error handling)
       await runSQLMigrations(this.pool);
+
+      // Verify (and where safe, repair) that the schema really contains what the migrations promise.
+      try { await checkSchemaContract(this.pool); } catch (e: any) { logger.warn('Schema contract check failed', { error: e.message }); }
 
       // Ensure default system settings exist
       try {

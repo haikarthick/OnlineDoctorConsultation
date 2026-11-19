@@ -325,17 +325,26 @@ jobs:
         if: needs.resolve-env.outputs.deploy_url != ''
         run: |
           URL="${{ needs.resolve-env.outputs.deploy_url }}"
-          echo "⏳ Waiting 120s for $URL to come up..."
+          echo "Waiting 120s for $URL to come up..."
           sleep 120
-          for i in 1 2 3 4 5; do
-            if curl -sf "$URL/api/v1/health" > /dev/null 2>&1; then
-              echo "✅ Health check passed on attempt $i"
+          LAST=""
+          for i in 1 2 3 4 5 6; do
+            LAST=$(curl -s -m 30 "$URL/api/v1/health" || true)
+            # The deployed app must report its schema contract: every column/table the
+            # migrations promise exists. A drift here is exactly the "column does not exist"
+            # error users hit on 2026-11-19 while the old check still said healthy.
+            if echo "$LAST" | grep -q '"schemaContract":"drift"'; then
+              echo "::error title=Database schema drift::$LAST"
+              exit 1
+            fi
+            if echo "$LAST" | grep -q '"schemaContract":"ok"'; then
+              echo "Health check passed on attempt $i - schema contract ok"
               exit 0
             fi
-            echo "  Attempt $i failed, retrying in 30s..."
+            echo "  Attempt $i: no schemaContract=ok yet (still deploying?), retrying in 30s..."
             sleep 30
           done
-          echo "⚠️  Health check did not pass (Render free tier may still be spinning up)"
+          echo "::warning title=Schema contract not confirmed::Last health response: $LAST"
           exit 0
 
   # ═════════════════════════════════════════════

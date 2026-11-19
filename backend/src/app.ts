@@ -12,6 +12,7 @@ import 'express-async-errors';
 import config from './config';
 import logger from './utils/logger';
 import { errorHandler, asyncHandler } from './utils/errorHandler';
+import { safeErrorResponse } from './middleware/safeErrorResponse';
 import { requestLogger, authMiddleware } from './middleware/auth';
 import { csrfProtection, csrfTokenRoute } from './middleware/csrf';
 import routes from './routes';
@@ -145,6 +146,9 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Logging
 app.use(requestLogger);
+
+// No technical text (SQL, stack, library message) may reach a person - see the file header.
+app.use(safeErrorResponse);
 
 // Serve uploaded files statically.
 // Harden against stored-XSS via spoofed-MIME uploads: `nosniff` stops the
