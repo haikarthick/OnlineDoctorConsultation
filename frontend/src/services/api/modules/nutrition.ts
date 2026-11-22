@@ -7,6 +7,11 @@ export interface NutritionPlanPayload {
   markReviewed?: boolean; reviewNote?: string | null
 }
 
+export interface RationPayload {
+  milkLitresPerDay?: number | null; milkFatPct?: number | null
+  feeds: Array<{ ingredientId: string; pricePerKg?: number | null; minKg?: number | null; maxKg?: number | null }>
+}
+
 export const nutritionApi = {
   /** Whether the module is switched on (nutrition.enabled). Needs a signed-in user. */
   async nutritionStatus() {
@@ -40,6 +45,15 @@ export const nutritionApi = {
   },
   async saveNutritionPlan(animalId: string, data: NutritionPlanPayload) {
     const response = await sharedClient.post(`/nutrition/animals/${animalId}/plan`, data)
+    return response.data
+  },
+  /** Least-cost ration for a cow, buffalo, goat or sheep from the feeds the farmer has (migration 057). */
+  async previewRation(animalId: string, data: RationPayload) {
+    const response = await sharedClient.post(`/nutrition/animals/${animalId}/ration/preview`, data)
+    return response.data
+  },
+  async saveRation(animalId: string, data: RationPayload) {
+    const response = await sharedClient.post(`/nutrition/animals/${animalId}/ration`, data)
     return response.data
   },
   async reviewNutritionPlan(planId: string, data: { overrideKcal?: number | null; note?: string | null }) {

@@ -13,6 +13,7 @@ export interface NutritionFacts {
   activityLevel: string | null
   housing: string | null
   breedingStatus: string | null
+  avgDailyMilkLitres?: number | null
   weightKg: number | null
   weightRecordedAt: string | null
   bcs9: number | null
@@ -41,6 +42,10 @@ export interface PlanItem {
   ingredientId: string | null
   label: string
   sharePct: number | null
+  /** 'g' for a pet plan, 'kg' (as fed, per day) for a farm ration. */
+  unit?: 'g' | 'kg'
+  amountPerDay?: number | null
+  costPerDay?: number | null
   gramsPerDay: number | null
   gramsPerMeal: number | null
   kcalPerDay: number | null
@@ -59,6 +64,15 @@ export interface NutritionPlan {
   mealsPerDay: number
   energy: { reasons?: string[]; requiresVet?: boolean; factorSource?: string; idealWeightKg?: number | null; suggestedGoal?: string } | null
   reviewNote: string | null
+  dailyDmKg?: number | null
+  ration?: {
+    need: { nelMcal: number; dmiMinKg: number; dmiMaxKg: number } | null
+    supplied: { dmKg: number; nelMcal: number } | null
+    state: 'lactating' | 'dry' | null
+    totalCostPerDay: number | null
+    costPerLitre: number | null
+    milkLitresPerDay: number | null
+  } | null
   createdByName: string
   createdAt: string
   reviewedByName: string

@@ -14,7 +14,7 @@ type Tab = 'species' | 'factors' | 'foods' | 'unsafe' | 'sets' | 'usage'
 const MODELS = ['companion_energy', 'ruminant_dm', 'monogastric_spec', 'aqua_biomass', 'equine_dm', 'guidance_only'] as const
 const STATUSES = ['unvalidated', 'vet_validated', 'retired'] as const
 const FOOD_KINDS = ['commercial_food', 'home_food', 'treat', 'forage', 'concentrate', 'mineral', 'supplement', 'compound_feed', 'aqua_feed'] as const
-const BASES = ['per_1000kcal', 'per_kg_dm', 'percent_dm', 'per_day', 'per_kg_bw075'] as const
+const BASES = ['per_1000kcal', 'per_kg_dm', 'percent_dm', 'per_day', 'per_kg_bw075', 'percent_bw', 'fraction', 'percent_milk'] as const
 const LOCALES = [['labelHi', 'हिन्दी'], ['labelKn', 'ಕನ್ನಡ'], ['labelMl', 'മലയാളം'], ['labelTa', 'தமிழ்'], ['labelTe', 'తెలుగు']] as const
 
 /**

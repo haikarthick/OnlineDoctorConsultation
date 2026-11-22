@@ -218,14 +218,38 @@
     "flags": {
       "title": "Needs attention",
       "seen": "Seen",
-      "bcs_high": { "title": "Body condition is above ideal", "next": "Plan slow weight loss and keep treats small. Ask a vet if it keeps rising." },
-      "bcs_low": { "title": "Body condition is below ideal", "next": "Ask a vet - being thin can be a sign of illness." },
-      "muscle_loss": { "title": "Muscle loss noted", "next": "Ask a vet to check - muscle loss can happen even when the weight looks normal." },
-      "rapid_weight_loss": { "title": "Losing weight fast: about {{pctPerWeek}}% a week", "next": "Faster than is safe. Check the food amounts and ask a vet." },
-      "weight_drift": { "title": "Weight changed by {{pct}}% while the goal is to keep it steady", "next": "Weigh again in a week. If it keeps changing, adjust the plan." },
-      "no_recent_weight": { "title": "No weight in the last {{days}} days", "next": "Weigh now - plans work best with a recent weight." },
-      "treats_over_limit": { "title": "Treats were {{pct}}% of the energy this week", "next": "Keep treats under 10% of the day's food." },
-      "unsafe_food_logged": { "title": "Unsafe food given: {{food}} ({{date}})", "next": "If it ate a lot or seems unwell, call a vet now." }
+      "bcs_high": {
+        "title": "Body condition is above ideal",
+        "next": "Plan slow weight loss and keep treats small. Ask a vet if it keeps rising."
+      },
+      "bcs_low": {
+        "title": "Body condition is below ideal",
+        "next": "Ask a vet - being thin can be a sign of illness."
+      },
+      "muscle_loss": {
+        "title": "Muscle loss noted",
+        "next": "Ask a vet to check - muscle loss can happen even when the weight looks normal."
+      },
+      "rapid_weight_loss": {
+        "title": "Losing weight fast: about {{pctPerWeek}}% a week",
+        "next": "Faster than is safe. Check the food amounts and ask a vet."
+      },
+      "weight_drift": {
+        "title": "Weight changed by {{pct}}% while the goal is to keep it steady",
+        "next": "Weigh again in a week. If it keeps changing, adjust the plan."
+      },
+      "no_recent_weight": {
+        "title": "No weight in the last {{days}} days",
+        "next": "Weigh now - plans work best with a recent weight."
+      },
+      "treats_over_limit": {
+        "title": "Treats were {{pct}}% of the energy this week",
+        "next": "Keep treats under 10% of the day's food."
+      },
+      "unsafe_food_logged": {
+        "title": "Unsafe food given: {{food}} ({{date}})",
+        "next": "If it ate a lot or seems unwell, call a vet now."
+      }
     },
     "safe": {
       "guidanceTitle": "How to feed safely for now",
@@ -281,7 +305,20 @@
       "home_chapati": "Chapati (plain)",
       "home_fish_boiled": "Fish, boiled, no bones",
       "home_pumpkin_boiled": "Pumpkin, boiled",
-      "home_paneer": "Paneer"
+      "home_paneer": "Paneer",
+      "feed_green_maize": "Green maize fodder",
+      "feed_berseem": "Berseem (green)",
+      "feed_napier": "Napier / hybrid napier (green)",
+      "feed_sorghum_green": "Green sorghum (jowar) fodder",
+      "feed_wheat_straw": "Wheat straw (bhusa)",
+      "feed_paddy_straw": "Paddy straw",
+      "feed_maize_grain": "Maize grain (crushed)",
+      "feed_wheat_bran": "Wheat bran (chokar)",
+      "feed_cottonseed_cake": "Cottonseed cake (binola khal)",
+      "feed_groundnut_cake": "Groundnut cake",
+      "feed_mustard_cake": "Mustard cake",
+      "feed_cattle_feed": "Compound cattle feed (BIS type II)",
+      "feed_mineral_mixture": "Mineral mixture"
     },
     "unsafe": {
       "chocolate": "Chocolate and cocoa",
@@ -388,7 +425,10 @@
         "per_kg_dm": "per kg dry matter",
         "percent_dm": "% of dry matter",
         "per_day": "per day",
-        "per_kg_bw075": "per kg^0.75 body weight"
+        "per_kg_bw075": "per kg^0.75 body weight",
+        "percent_bw": "% of body weight",
+        "fraction": "fraction",
+        "percent_milk": "% of milk"
       },
       "usageHelp": "How nutrition is being used - for deciding later, from real use, whether to offer paid plans.",
       "period": "Period",
@@ -403,9 +443,53 @@
         "feeding_logged": "Feedings recorded",
         "measurement_added": "Weights / conditions recorded",
         "facts_saved": "Missing details filled in",
-        "food_added": "Own foods added"
+        "food_added": "Own foods added",
+        "ration_saved": "Farm rations saved"
       },
       "activePlans": "Active plans"
+    },
+    "ration": {
+      "title": "Ration for {{name}}",
+      "make": "Work out a ration",
+      "change": "Change ration",
+      "milk": "Milk per day",
+      "milkHint": "Today's yield. Saved on the animal's profile too. 0 for a dry animal.",
+      "fat": "Milk fat (optional)",
+      "fatHint": "From the dairy slip. Leave empty to use the usual value.",
+      "groups": {
+        "fodder": "Green fodder and straw you have",
+        "concentrate": "Concentrates and cattle feed you have",
+        "mineral": "Mineral mixture"
+      },
+      "pricesTitle": "Your prices",
+      "price": "Price per kg",
+      "priceHint": "Leave empty for home-grown fodder.",
+      "maxKg": "Most you can give a day (optional)",
+      "maxKgHint": "For example, how much green fodder you have per animal.",
+      "cannotBalance": "These feeds cannot meet the need yet:",
+      "reasons": {
+        "energy_too_low": "Not enough energy - add grain, cattle feed or more green fodder.",
+        "protein_too_low": "Not enough protein - add an oil cake (groundnut, cotton, mustard) or cattle feed.",
+        "minerals_missing": "Minerals are short - add mineral mixture.",
+        "no_forage": "Add green fodder or straw - the rumen needs it.",
+        "limits_too_tight": "Your limits leave too little room - raise a \"most you can give\" limit.",
+        "no_feeds": "Choose the feeds you have."
+      },
+      "costPerDay": "₹{{cost}} a day",
+      "costPerLitre": "₹{{cost}} per litre of milk",
+      "line": "{{kg}} kg a day · ₹{{cost}}",
+      "needLine": "Needs {{energy}} Mcal energy; can eat {{dmMin}}-{{dmMax}} kg dry matter; this ration gives {{dm}} kg.",
+      "basedOn": "Based on: {{set}}",
+      "save": "Save ration",
+      "currentTitle": "Current ration",
+      "perDay": "{{kg}} kg dry matter a day",
+      "cost": "₹{{cost}} a day",
+      "costLitre": "₹{{cost}} per litre",
+      "itemLine": "{{kg}} kg a day",
+      "itemCost": "₹{{cost}} a day",
+      "recordHint": "Record what was fed each day in Daily records.",
+      "none": "No ration yet",
+      "noneBody": "Tick the feeds you have and their prices - we find the cheapest mix that meets this animal's needs."
     }
   }
 }

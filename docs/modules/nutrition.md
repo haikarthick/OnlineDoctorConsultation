@@ -54,10 +54,24 @@ room (`MedicalHistoryPanel`), and the `/nutrition` page. Compact mode = one-line
 7. **Free for everyone** (owner, 2026-11-22). Usage is recorded in `nutrition_usage_events` (admin -> Usage) so the
    later pricing decision rests on real use; paid plans change `isEntitled` only.
 
+## Farm rations (Phase 2, migration 057)
+
+- `ruminant_dm` (cattle, buffalo, goats, sheep, camels): least-cost ration from the feeds the farmer has.
+  Method `engine/ruminantRation.ts` (NEL maintenance x BW^0.75 + NRC 2001 milk-energy equation + late-pregnancy
+  allowance; protein / Ca / P / NDF / forage as % of dry matter; intake as % of body weight), solved by
+  `engine/leastCost.ts` (own two-phase simplex, no dependency). Service `FarmRationService.ts`, routes
+  `POST /nutrition/animals/:id/ration[/preview]`, UI `RationBuilderSheet.tsx` + the ration view in `PlanTab.tsx`.
+- Requirement sets (cattle / buffalo / small ruminants x in milk / dry) and 13 common Indian feeds are seeded
+  `unvalidated` - typical values for the owner's vet to confirm; a farm's bag label or lab report wins.
+- Milk yield typed in the ration is saved on the animal profile (`avg_daily_milk_litres`) via AnimalService.
+  Feed actually given is recorded once, in farm Daily records - the ration screen keeps no second copy.
+- Feed price is prefilled from the farm's `feed_inventory.cost_per_unit` when the stock row links the library feed
+  (`feed_inventory.ingredient_id`).
+
 ## Known gaps
 
-- Farm calculators (`ruminant_dm`, `monogastric_spec`, `aqua_biomass`, `equine_dm`) are Phase 2 of the plan: the
-  panel shows weight/condition tracking and guidance for these species until then.
+- `monogastric_spec` (poultry, pigs), `aqua_biomass` (fish, shrimp) and `equine_dm` calculators are not built yet:
+  those species get weight/condition tracking and guidance. Group (herd/flock/pond) rations are per animal for now.
 - Risk-rule thresholds for weight-change speed and drift are conservative platform defaults pending vet
   validation (`engine/rules.ts` `RULE_LIMITS`).
 - Translations in hi/kn/ml/ta/te were written without a native-speaker review (same open item as the tab labels).

@@ -927,6 +927,34 @@ async function http(method, url, body, token) {
           }
           const list = await http('GET', `${apiBase}/nutrition/animals?filter=attention`, null, owner);
           if (!(list.json?.data?.items || []).some(x => x.id === animalId)) problems.push(`the animal with open alerts is missing from the "needs attention" list (HTTP ${list.status})`);
+          // Farm ration (Phase 2, migration 057): a 400 kg cow giving 10 L, balanced from the seeded feed library.
+          const cow = await http('POST', `${apiBase}/animals`, { name: 'Verify Lakshmi', species: 'Cattle', gender: 'female' }, owner);
+          const cowId = cow.json?.data?.id;
+          if (!cowId) problems.push(`create cow: HTTP ${cow.status} ${JSON.stringify(cow.json || {}).slice(0, 160)}`);
+          else {
+            await http('POST', `${apiBase}/nutrition/animals/${cowId}/measurements`, { weight: 400, unit: 'kg' }, owner);
+            const feedList = await http('GET', `${apiBase}/nutrition/foods?animalId=${cowId}`, null, owner);
+            const byCode = Object.fromEntries((feedList.json?.data?.items || []).map(f => [f.code, f.id]));
+            const wanted = ['feed_green_maize', 'feed_wheat_straw', 'feed_cattle_feed', 'feed_groundnut_cake', 'feed_mineral_mixture'];
+            const missingFeeds = wanted.filter(c => !byCode[c]);
+            if (missingFeeds.length) problems.push(`the seeded feed library is missing ${missingFeeds.join(', ')} for a cow`);
+            else {
+              const ration = { milkLitresPerDay: 10, feeds: [
+                { ingredientId: byCode.feed_green_maize, pricePerKg: 2 }, { ingredientId: byCode.feed_wheat_straw, pricePerKg: 6 },
+                { ingredientId: byCode.feed_cattle_feed, pricePerKg: 25 }, { ingredientId: byCode.feed_groundnut_cake, pricePerKg: 45 },
+                { ingredientId: byCode.feed_mineral_mixture, pricePerKg: 80 },
+              ] };
+              const rp = await http('POST', `${apiBase}/nutrition/animals/${cowId}/ration/preview`, ration, owner);
+              const rr = rp.json?.data?.result;
+              if (rp.status !== 200 || rr?.status !== 'ok' || !(rr.costPerLitre > 0)) problems.push(`ration preview: HTTP ${rp.status} ${JSON.stringify(rp.json?.data?.result?.reasons || rp.json?.error || {}).slice(0, 200)}`);
+              const rs = await http('POST', `${apiBase}/nutrition/animals/${cowId}/ration`, ration, owner);
+              if (rs.status !== 201 || rs.json?.data?.model !== 'ruminant_dm' || !(rs.json?.data?.items || []).length) problems.push(`save ration: HTTP ${rs.status} ${JSON.stringify(rs.json || {}).slice(0, 200)}`);
+              const cowNow = await http('GET', `${apiBase}/animals/${cowId}`, null, owner);
+              if (Number(cowNow.json?.data?.avgDailyMilkLitres) !== 10) problems.push(`the milk yield typed in the ration was not saved on the animal profile (got ${cowNow.json?.data?.avgDailyMilkLitres})`);
+              const strawOnly = await http('POST', `${apiBase}/nutrition/animals/${cowId}/ration/preview`, { milkLitresPerDay: 15, feeds: [{ ingredientId: byCode.feed_wheat_straw, pricePerKg: 6 }] }, owner);
+              if (strawOnly.json?.data?.result?.status !== 'infeasible') problems.push('a straw-only ration for a 15 L cow was not reported as impossible');
+            }
+          }
           // The admin's list (all animals) binds the same parameters as everyone else's - it once did not.
           const admin = await http('POST', `${apiBase}/auth/login`, { email: 'admin@vetcare.com', password: 'Admin@123' });
           const aTok = admin.json?.data?.token;

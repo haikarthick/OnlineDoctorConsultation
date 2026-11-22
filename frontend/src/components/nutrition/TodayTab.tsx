@@ -59,6 +59,25 @@ export const TodayTab: React.FC<Props> = ({ data, onChanged }) => {
       {data.flags.length > 0 && <FlagList flags={data.flags} canAct={data.permissions.canWrite} onChanged={onChanged} />}
       {warning && <p className="nutri-note is-danger" role="alert">{warning}</p>}
 
+      {data.model === 'ruminant_dm' ? (
+        // Farm animals: today's ration at a glance; feed given is recorded once, in Daily records.
+        <section className="nutri-card" aria-label={t('nutrition.today.title')}>
+          <h3 className="nutri-card-title">{t('nutrition.today.title')}</h3>
+          {data.plan?.ration ? (
+            <ul className="nutri-list">
+              {data.plan.items.map(item => (
+                <li key={item.id} className="nutri-list-row">
+                  <span className="nutri-list-main"><strong>{item.label}</strong></span>
+                  <span className="nutri-list-meta">{t('nutrition.ration.itemLine', { kg: item.amountPerDay ?? '-' })}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="nutri-hint">{t('nutrition.ration.noneBody')}</p>
+          )}
+          <p className="nutri-hint">{t('nutrition.ration.recordHint')}</p>
+        </section>
+      ) : (
       <section className="nutri-card" aria-label={t('nutrition.today.title')}>
         <h3 className="nutri-card-title">{t('nutrition.today.title')}</h3>
         {target ? (
@@ -94,6 +113,7 @@ export const TodayTab: React.FC<Props> = ({ data, onChanged }) => {
           </div>
         )}
       </section>
+      )}
 
       <section className="nutri-card" aria-label={t('nutrition.today.entriesTitle')}>
         <h3 className="nutri-card-title">{t('nutrition.today.entriesTitle')}</h3>

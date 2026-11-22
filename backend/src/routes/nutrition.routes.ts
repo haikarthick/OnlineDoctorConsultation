@@ -4,7 +4,9 @@ import {
   nutritionFactsSchema, nutritionMeasurementSchema, nutritionPlanSchema, nutritionPlanReviewSchema,
   nutritionFeedingSchema, nutritionFoodSchema, nutritionFlagStatusSchema, nutritionSpeciesModelSchema,
   nutritionEnergyFactorSchema, nutritionAdminFoodSchema, nutritionUnsafeFoodSchema, nutritionRequirementSetSchema,
+  nutritionRationSchema,
 } from '../middleware/validation';
+import FarmRationService from '../services/nutrition/FarmRationService';
 import { asyncHandler } from '../utils/errorHandler';
 import { isNutritionEnabled } from '../services/nutrition/NutritionConfig';
 import NutritionService from '../services/nutrition/NutritionService';
@@ -65,6 +67,15 @@ router.post('/nutrition/animals/:animalId/plan/preview', ...gate, validateBody(n
 
 router.post('/nutrition/animals/:animalId/plan', ...gate, validateBody(nutritionPlanSchema), asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json({ success: true, data: await NutritionService.savePlan(req.params.animalId, req.body, caller(req)) });
+}));
+
+// ─── Farm rations (cattle, buffalo, goats, sheep, camels - migration 057) ───
+router.post('/nutrition/animals/:animalId/ration/preview', ...gate, validateBody(nutritionRationSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await FarmRationService.preview(req.params.animalId, req.body, caller(req)) });
+}));
+
+router.post('/nutrition/animals/:animalId/ration', ...gate, validateBody(nutritionRationSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await FarmRationService.save(req.params.animalId, req.body, caller(req)) });
 }));
 
 router.post('/nutrition/plans/:planId/review', ...gate, validateBody(nutritionPlanReviewSchema), asyncHandler(async (req: Request, res: Response) => {

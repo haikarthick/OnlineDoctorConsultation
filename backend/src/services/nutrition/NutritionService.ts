@@ -218,7 +218,10 @@ class NutritionService {
     unsafe: Array<{ food: string; item: string; severity: string }>; mealsPerDay: number;
   }> {
     const { facts } = await this.loadFacts(access.animal.id);
-    if (!CALCULATOR_MODELS.has(facts.model)) {
+    if (facts.model === 'ruminant_dm') {
+      throw new ValidationError('For cattle, buffalo, goats and sheep, use "Work out a ration" - it balances the feeds you have.');
+    }
+    if (facts.model !== 'companion_energy' || !CALCULATOR_MODELS.has(facts.model)) {
       throw new ValidationError('A food calculator for this kind of animal is not available yet. The safe-food guide, weight and body condition tracking work now.');
     }
     if (input.goal && !(PLAN_GOALS as readonly string[]).includes(input.goal)) throw new ValidationError('Choose a goal from the list.');
@@ -338,11 +341,20 @@ class NutritionService {
       vetOverrideKcal: num(p.vet_override_kcal), effectiveKcal: num(p.vet_override_kcal) ?? num(p.daily_energy_kcal),
       mealsPerDay: meals, energyFactorKey: p.energy_factor_key, engineVersion: p.engine_version,
       energy: p.result?.energy || null, reviewNote: p.review_note,
+      // Farm rations (ruminant_dm): dry matter, need vs supplied, cost per day / per litre.
+      dailyDmKg: num(p.daily_dm_kg),
+      ration: p.nutrition_model === 'ruminant_dm' ? {
+        need: p.result?.need || null, supplied: p.result?.supplied || null, state: p.result?.state || null,
+        totalCostPerDay: p.result?.totalCostPerDay ?? null, costPerLitre: p.result?.costPerLitre ?? null,
+        milkLitresPerDay: p.inputs?.milkLitresPerDay ?? null,
+      } : null,
       createdBy: p.created_by, createdByName: p.created_by_name, createdAt: p.created_at,
       reviewedBy: p.reviewed_by, reviewedByName: p.reviewed_by_name, reviewedAt: p.reviewed_at,
       items: items.rows.map((x: any) => ({
-        id: x.id, ingredientId: x.ingredient_id, label: x.label, sharePct: num(x.share_pct),
-        gramsPerDay: num(x.amount_per_day), gramsPerMeal: num(x.amount_per_day) === null ? null : Math.round(Number(x.amount_per_day) / meals),
+        id: x.id, ingredientId: x.ingredient_id, label: x.label, sharePct: num(x.share_pct), unit: x.unit || 'g',
+        amountPerDay: num(x.amount_per_day), costPerDay: num(x.cost_per_day),
+        gramsPerDay: x.unit === 'kg' ? null : num(x.amount_per_day),
+        gramsPerMeal: x.unit === 'kg' || num(x.amount_per_day) === null ? null : Math.round(Number(x.amount_per_day) / meals),
         kcalPerDay: num(x.kcal_per_day), kcalPer100g: num(x.energy_kcal_per_100g),
       })),
     };

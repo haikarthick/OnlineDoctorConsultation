@@ -445,7 +445,8 @@ risk-flag precision (reviewed-true/flags), time per vet nutrition consult, consu
 - **Phase 1 built** (see `docs/modules/nutrition.md`): schema for all species, engine, access gate, pet calculator,
   body history, plan / review / feeding / alerts, shared panel in every role's animal screen, admin data screens,
   usage tracking, six languages.
-- Next: Phase 2 farm calculators into the same tables and panel.
+- **Phase 2 (part 1) built:** least-cost rations for cattle, buffalo, goats, sheep, camels (migration 057).
+- Next: poultry/pig feed specs, aquaculture biomass feeding, group rations, FCR tracking.
 
 ### 12.3 Original wording of the four questions (kept for the record)
 1. **External AI (re-asked in plain words):** some futuristic features - explaining a plan in Tamil in simple

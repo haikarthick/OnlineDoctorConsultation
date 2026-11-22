@@ -63,6 +63,18 @@ export const nutritionFoodSchema = Joi.object({
   kind: Joi.string().valid('commercial_food', 'home_food', 'treat').optional(),
 });
 
+// Farm ration (ruminant_dm): the feeds the farmer has, their prices and limits (migration 057).
+export const nutritionRationSchema = Joi.object({
+  milkLitresPerDay: Joi.number().min(0).max(200).allow(null, '').optional(),
+  milkFatPct: Joi.number().greater(0).max(15).allow(null, '').optional(),
+  feeds: Joi.array().items(Joi.object({
+    ingredientId: Joi.string().uuid().required(),
+    pricePerKg: Joi.number().min(0).max(100000).allow(null, '').optional(),
+    minKg: Joi.number().min(0).max(500).allow(null, '').optional(),
+    maxKg: Joi.number().min(0).max(500).allow(null, '').optional(),
+  })).min(1).max(25).required(),
+});
+
 export const nutritionFlagStatusSchema = Joi.object({
   status: Joi.string().valid('reviewed', 'dismissed').required(),
 });
@@ -128,7 +140,7 @@ export const nutritionRequirementSetSchema = Joi.object({
   status: status.optional(),
   requirements: Joi.array().items(Joi.object({
     nutrient: Joi.string().max(40).required(),
-    basis: Joi.string().valid('per_1000kcal', 'per_kg_dm', 'percent_dm', 'per_day', 'per_kg_bw075').required(),
+    basis: Joi.string().valid('per_1000kcal', 'per_kg_dm', 'percent_dm', 'per_day', 'per_kg_bw075', 'percent_bw', 'fraction', 'percent_milk').required(),
     minValue: Joi.number().allow(null).optional(),
     maxValue: Joi.number().allow(null).optional(),
     unit: Joi.string().max(20).required(),

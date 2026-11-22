@@ -6,6 +6,7 @@ import { BottomSheet } from '../mobile/BottomSheet'
 import { NumberStepper, parseStepperValue } from '../mobile/NumberStepper'
 import { SaveState } from '../mobile/SaveState'
 import PlanBuilderSheet from './PlanBuilderSheet'
+import RationBuilderSheet from './RationBuilderSheet'
 import { formatKcal, type NutritionOverview } from './nutritionShared'
 
 interface Props {
@@ -31,6 +32,10 @@ export const PlanTab: React.FC<Props> = ({ data, onChanged }) => {
         </section>
       </div>
     )
+  }
+
+  if (data.model === 'ruminant_dm') {
+    return <RationPlan data={data} onChanged={onChanged} />
   }
 
   return (
@@ -88,6 +93,62 @@ export const PlanTab: React.FC<Props> = ({ data, onChanged }) => {
 
       {building && <PlanBuilderSheet data={data} onClose={() => setBuilding(false)} onSaved={() => { setBuilding(false); onChanged() }} />}
       {reviewing && plan && <ReviewSheet planId={plan.id} kcal={plan.effectiveKcal} name={data.animal.name} onClose={() => setReviewing(false)} onSaved={() => { setReviewing(false); onChanged() }} />}
+    </div>
+  )
+}
+
+/**
+ * Farm ration (cattle, buffalo, goats, sheep): what to feed per day in kg, what it costs, and the cost per litre
+ * of milk - the farmer's money question. Feeding itself is recorded in Daily records (the farm's one record of
+ * feed), so this tab never keeps a second copy.
+ */
+const RationPlan: React.FC<{ data: NutritionOverview; onChanged: () => void }> = ({ data, onChanged }) => {
+  const { t, i18n } = useTranslation()
+  const [building, setBuilding] = useState(false)
+  const plan = data.plan && data.plan.ration ? data.plan : null
+  const money = (n: number | null | undefined) => (n === null || n === undefined ? '-' : n.toLocaleString(i18n.language, { maximumFractionDigits: 2 }))
+  return (
+    <div className="nutri-tab">
+      {!plan ? (
+        <section className="nutri-card">
+          <h3 className="nutri-card-title">{t('nutrition.ration.none')}</h3>
+          <p className="nutri-hint">{data.canCalculate ? t('nutrition.ration.noneBody') : t('nutrition.plan.needsFacts')}</p>
+          {data.permissions.canWrite && data.canCalculate && (
+            <button type="button" className="btn btn-primary nutri-wide-btn" onClick={() => setBuilding(true)}>{t('nutrition.ration.make')}</button>
+          )}
+        </section>
+      ) : (
+        <section className="nutri-card" aria-label={t('nutrition.ration.currentTitle')}>
+          <div className="nutri-card-head">
+            <h3 className="nutri-card-title">{t('nutrition.ration.currentTitle')}</h3>
+            <span className={`nutri-pill ${plan.validation === 'vet_reviewed' ? 'is-reviewed' : 'is-suggested'}`}>
+              {plan.validation === 'vet_reviewed' ? t('nutrition.plan.reviewed') : t('nutrition.plan.suggested')}
+            </span>
+          </div>
+          <p className="nutri-big">
+            {t('nutrition.ration.cost', { cost: money(plan.ration?.totalCostPerDay) })}
+            {plan.ration?.costPerLitre !== null && plan.ration?.costPerLitre !== undefined ? ` · ${t('nutrition.ration.costLitre', { cost: money(plan.ration.costPerLitre) })}` : ''}
+          </p>
+          {plan.dailyDmKg !== null && plan.dailyDmKg !== undefined && <p className="nutri-hint">{t('nutrition.ration.perDay', { kg: plan.dailyDmKg })}</p>}
+          <ul className="nutri-list">
+            {plan.items.map(item => (
+              <li key={item.id} className="nutri-list-row">
+                <span className="nutri-list-main"><strong>{item.label}</strong></span>
+                <span className="nutri-list-meta">
+                  {t('nutrition.ration.itemLine', { kg: item.amountPerDay ?? '-' })}
+                  {item.costPerDay ? ` · ${t('nutrition.ration.itemCost', { cost: money(item.costPerDay) })}` : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="nutri-hint">{plan.validation === 'vet_reviewed' ? '' : t('nutrition.plan.suggestedNote')}</p>
+          <p className="nutri-hint">{t('nutrition.ration.recordHint')}</p>
+          {data.permissions.canWrite && (
+            <button type="button" className="btn btn-secondary nutri-wide-btn" onClick={() => setBuilding(true)}>{t('nutrition.ration.change')}</button>
+          )}
+        </section>
+      )}
+      {building && <RationBuilderSheet data={data} onClose={() => setBuilding(false)} onSaved={() => { setBuilding(false); onChanged() }} />}
     </div>
   )
 }
