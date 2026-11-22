@@ -15,6 +15,7 @@
 
 import { Response, NextFunction } from 'express';
 import FarmAccessService from '../services/FarmAccessService';
+import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE, ANIMAL_READ_ONLY_MESSAGE } from '../services/AnimalAccessService';
 import { ForbiddenError } from '../utils/errors';
 import { AuthRequest } from './auth';
 import database from '../utils/database';
@@ -266,6 +267,18 @@ export function requireAnimalAccess(
         code: 'HOSPITAL_DATA_ISOLATED',
         requiresConsent: true,
       });
+    }
+
+    // Non-private animals: the one platform rule (services/AnimalAccessService - owner, farm team, connected vet,
+    // enrolled network, consent, admin). Owner-approved 2026-11-22: this branch used to let every signed-in user
+    // through. The private-animal rule above is unchanged.
+    if (!decision.isPrivate) {
+      const mode = req.method === 'GET' || req.method === 'HEAD' ? 'read' : 'write';
+      const access = await AnimalAccessService.check({ userId, role: userRole, roles: req.userRoles }, animalId, mode);
+      if (access.found && !access.allowed) {
+        const message = access.via ? ANIMAL_READ_ONLY_MESSAGE : ANIMAL_NO_ACCESS_MESSAGE;
+        return res.status(403).json({ success: false, message, error: { message, code: 'ANIMAL_ACCESS_DENIED' } });
+      }
     }
 
     // Attach decision to request for downstream handlers (e.g. to filter hospital records)

@@ -234,8 +234,10 @@ router.delete('/workforce/shifts/:id', authMiddleware, asyncHandler((req: Reques
 
 // ─── Staff & Workflow Management ─────────────────────
 // Animal Search & Medical Summary (for workflow integration)
-router.get('/workflow/animals/search', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.searchAnimals(req, res)));
-router.get('/workflow/animals/:animalId/medical-summary', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getAnimalMedicalSummary(req, res)));
+// Walk-in intake search is for clinical staff only (it used to answer any signed-in user).
+router.get('/workflow/animals/search', authMiddleware, roleMiddleware(['veterinarian', 'hospital_staff', 'corporate_admin', 'admin']), asyncHandler((req: Request, res: Response) => StaffWorkflowController.searchAnimals(req, res)));
+// Owner-approved fix 2026-11-22: this had no check at all - any signed-in user could read any animal's summary.
+router.get('/workflow/animals/:animalId/medical-summary', authMiddleware, requireAnimalAccess('params:animalId', 'workflow_summary'), requireAnimal('params:animalId'), asyncHandler((req: Request, res: Response) => StaffWorkflowController.getAnimalMedicalSummary(req, res)));
 // Staff Positions
 router.get('/hospitals/:hospitalId/staff', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   if (!await checkInpatientNetworkAccess(req, res)) return;
@@ -389,7 +391,7 @@ router.put('/inpatient/:id', authMiddleware, asyncHandler(async (req: Request, r
   if (!await checkResourceNetworkAccess(req, res, 'inpatient_admissions')) return;
   await StaffWorkflowController.updateInpatientDetails(req, res)
 }));
-router.get('/animals/:animalId/hospital-visits', authMiddleware, requireAnimalAccess('params:animalId', 'hospital_visits'), asyncHandler((req: Request, res: Response) => StaffWorkflowController.getAnimalHospitalVisits(req, res)));
+router.get('/animals/:animalId/hospital-visits', authMiddleware, requireAnimalAccess('params:animalId', 'hospital_visits'), requireAnimal('params:animalId'), asyncHandler((req: Request, res: Response) => StaffWorkflowController.getAnimalHospitalVisits(req, res)));
 
 // ─── Report Builder & Export Center ──────────────────
 router.get('/enterprises/:enterpriseId/reports/templates', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listReportTemplates(req, res)));

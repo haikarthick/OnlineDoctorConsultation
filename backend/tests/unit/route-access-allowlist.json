@@ -15,10 +15,6 @@
   "GET /nutrition/animals/:animalId/feeding": "service gate NutritionAccess.forAnimal(read)",
   "POST /nutrition/animals/:animalId/feeding": "service gate NutritionAccess.forAnimal(write)",
   "POST /hospital-networks/:id/enroll-animal": "NETWORK-HOSPITAL ZONE (change-protected): service checks network membership; not modified without owner approval",
-  "GET /animals/:animalId/care-contexts": "NETWORK-HOSPITAL ZONE (change-protected): requireAnimalAccess only; tightening needs owner approval",
-  "GET /animals/:animalId/referrals": "NETWORK-HOSPITAL ZONE (change-protected): requireAnimalAccess only; tightening needs owner approval",
   "GET /patient-consent/:animalId": "NETWORK-HOSPITAL ZONE: HospitalNetworkService.listConsents scopes to the caller (owner)",
-  "POST /hospital-networks/:id/patient-transfers": "NETWORK-HOSPITAL ZONE (change-protected): service checks network role; not modified without owner approval",
-  "GET /workflow/animals/:animalId/medical-summary": "KNOWN HOLE - NETWORK-HOSPITAL ZONE: no check at all; fix awaits the owner's explicit approval for network-hospital code",
-  "GET /animals/:animalId/hospital-visits": "NETWORK-HOSPITAL ZONE (change-protected): requireAnimalAccess only; tightening needs owner approval"
+  "POST /hospital-networks/:id/patient-transfers": "NETWORK-HOSPITAL ZONE (change-protected): service checks network role; not modified without owner approval"
 }

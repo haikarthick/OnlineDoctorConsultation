@@ -1015,6 +1015,9 @@ async function http(method, url, body, token) {
             `/vaccination-passport/animal/${id}`, `/vaccine-certificate-log/animal/${id}`, `/animals/${id}/lifetime-history`,
             `/geospatial/animals/${id}/trail`, `/genetic-profiles/${id}/lineage-tree`, `/nutrition/animals/${id}`,
             `/medical-records/stats?animalId=${id}`,
+            // network-hospital routes (fixed with owner approval 2026-11-22)
+            `/animals/${id}/care-contexts`, `/animals/${id}/referrals`, `/animals/${id}/hospital-visits`,
+            `/workflow/animals/${id}/medical-summary`,
           ];
           for (const [who, tok] of [['stranger', stranger.token], ['unbooked vet', vet.token]]) {
             for (const p of reads) {

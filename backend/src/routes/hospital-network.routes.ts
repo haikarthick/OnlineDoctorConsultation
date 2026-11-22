@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authMiddleware, roleMiddleware, validateBody, AuthRequest } from '../middleware/auth';
 import { requireNetworkAccess, NetworkAccessRequest, resolveNetworkAccess } from '../middleware/networkAccess';
 import { requireAnimalAccess } from '../middleware/hospitalDataIsolation';
+import { requireAnimal } from '../middleware/recordAccess';
 import { asyncHandler } from '../utils/errorHandler';
 import database from '../utils/database';
 import logger from '../utils/logger';
@@ -358,7 +359,7 @@ router.get('/hospital-networks/:id/patients', authMiddleware, requireNetworkAcce
 }));
 
 // Get all care contexts (network enrollments) for an animal
-router.get('/animals/:animalId/care-contexts', authMiddleware, requireAnimalAccess('params:animalId', 'care_contexts'), asyncHandler(async (req: Request, res: Response) => {
+router.get('/animals/:animalId/care-contexts', authMiddleware, requireAnimalAccess('params:animalId', 'care_contexts'), requireAnimal('params:animalId'), asyncHandler(async (req: Request, res: Response) => {
   const result = await database.query(
     `SELECT acc.id, acc.network_id AS "networkId", acc.corporate_patient_id AS "networkPatientId",
             acc.platform_unique_id AS "platformUniqueId", acc.enrolled_at AS "enrolledAt",
@@ -373,7 +374,7 @@ router.get('/animals/:animalId/care-contexts', authMiddleware, requireAnimalAcce
 }));
 
 // P4-MED2: Unified referral history for an animal (merges platform referrals + network referrals)
-router.get('/animals/:animalId/referrals', authMiddleware, requireAnimalAccess('params:animalId', 'referrals'), asyncHandler(async (req: Request, res: Response) => {
+router.get('/animals/:animalId/referrals', authMiddleware, requireAnimalAccess('params:animalId', 'referrals'), requireAnimal('params:animalId'), asyncHandler(async (req: Request, res: Response) => {
   try {
     const animalId = req.params.animalId;
 
