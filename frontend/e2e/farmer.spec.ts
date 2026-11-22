@@ -83,6 +83,16 @@ test.describe('Farmer - Daily Records', () => {
   })
 })
 
+test.describe('Farmer - Nutrition', () => {
+  // Dark-launched (nutrition.enabled): the page loads either way - the animal list when switched on, a plain
+  // 'not switched on yet' page when not. Never a crash, never a redirect.
+  test('should load the nutrition page', async ({ farmerPage: page }) => {
+    await page.goto('/nutrition')
+    await page.waitForLoadState('networkidle')
+    await expect(page).toHaveURL(/\/nutrition/)
+  })
+})
+
 test.describe('Farmer - Location Management', () => {
   test('should load locations page', async ({ farmerPage: page }) => {
     await page.goto('/locations')

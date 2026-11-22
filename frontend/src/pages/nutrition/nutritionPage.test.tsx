@@ -11,7 +11,7 @@ vi.mock('../../context/MasterDataContext', () => ({ useMasterData: () => ({ spec
 const list = vi.fn()
 vi.mock('../../services/api', () => ({ default: { listNutritionAnimals: (...a: unknown[]) => list(...a) } }))
 
-beforeEach(() => vi.clearAllMocks())
+beforeEach(() => { vi.clearAllMocks() })
 
 describe('Nutrition page', () => {
   it('a failed list explains itself and never crashes', async () => {

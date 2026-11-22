@@ -180,6 +180,8 @@ test.describe('Admin - Shared Pages Access', () => {
     '/enterprises',
     '/animal-groups',
     '/farm-records',
+    '/nutrition',
+    '/admin/nutrition',
     '/admin/sms-settings',
     '/herd-medical',
     '/locations',
