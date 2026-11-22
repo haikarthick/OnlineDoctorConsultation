@@ -446,7 +446,8 @@ risk-flag precision (reviewed-true/flags), time per vet nutrition consult, consu
   body history, plan / review / feeding / alerts, shared panel in every role's animal screen, admin data screens,
   usage tracking, six languages.
 - **Phase 2 (part 1) built:** least-cost rations for cattle, buffalo, goats, sheep, camels (migration 057).
-- Next: poultry/pig feed specs, aquaculture biomass feeding, group rations, FCR tracking.
+- **Phase 2 (part 2) built:** group feeding + FCR for poultry, pigs, fish and shrimp (migration 059).
+- Next: horses/donkeys, herd-level ruminant rations, Phase 3 (prescription/pharmacy link), Phase 4 (prediction), AI layer.
 
 ### 12.3 Original wording of the four questions (kept for the record)
 1. **External AI (re-asked in plain words):** some futuristic features - explaining a plan in Tamil in simple

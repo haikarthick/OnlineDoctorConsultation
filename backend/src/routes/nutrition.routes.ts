@@ -4,9 +4,10 @@ import {
   nutritionFactsSchema, nutritionMeasurementSchema, nutritionPlanSchema, nutritionPlanReviewSchema,
   nutritionFeedingSchema, nutritionFoodSchema, nutritionFlagStatusSchema, nutritionSpeciesModelSchema,
   nutritionEnergyFactorSchema, nutritionAdminFoodSchema, nutritionUnsafeFoodSchema, nutritionRequirementSetSchema,
-  nutritionRationSchema,
+  nutritionRationSchema, nutritionCurveSchema,
 } from '../middleware/validation';
 import FarmRationService from '../services/nutrition/FarmRationService';
+import GroupFeedingService from '../services/nutrition/GroupFeedingService';
 import { asyncHandler } from '../utils/errorHandler';
 import { isNutritionEnabled } from '../services/nutrition/NutritionConfig';
 import NutritionService from '../services/nutrition/NutritionService';
@@ -76,6 +77,15 @@ router.post('/nutrition/animals/:animalId/ration/preview', ...gate, validateBody
 
 router.post('/nutrition/animals/:animalId/ration', ...gate, validateBody(nutritionRationSchema), asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json({ success: true, data: await FarmRationService.save(req.params.animalId, req.body, caller(req)) });
+}));
+
+// ─── Group feeding: flocks, pig batches, ponds (migration 059). Gate: AnimalAccessService.checkGroup in the service.
+router.get('/nutrition/groups/:groupId/feeding', ...gate, asyncHandler(async (req: Request, res: Response) => {
+  const q = req.query as Record<string, string | undefined>;
+  const n = (v?: string) => (v === undefined || v === '' ? null : Number(v));
+  res.json({ success: true, data: await GroupFeedingService.forGroup(req.params.groupId, caller(req), {
+    pricePerKg: n(q.pricePerKg), avgWeightG: n(q.avgWeightG), waterTempC: n(q.waterTempC),
+  }) });
 }));
 
 router.post('/nutrition/plans/:planId/review', ...gate, validateBody(nutritionPlanReviewSchema), asyncHandler(async (req: Request, res: Response) => {
@@ -169,6 +179,17 @@ router.post('/nutrition/admin/requirement-sets', ...admin, validateBody(nutritio
 }));
 router.put('/nutrition/admin/requirement-sets/:id', ...admin, validateBody(nutritionRequirementSetSchema), asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: await NutritionAdminService.saveRequirementSet(req.params.id, req.body, caller(req).userId) });
+}));
+
+router.get('/nutrition/admin/curves', ...admin, asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: { items: await NutritionAdminService.listCurves() } });
+}));
+router.put('/nutrition/admin/curves/:id', ...admin, validateBody(nutritionCurveSchema), asyncHandler(async (req: Request, res: Response) => {
+  await NutritionAdminService.updateCurve(req.params.id, req.body);
+  res.json({ success: true });
+}));
+router.post('/nutrition/admin/approve-pending', ...admin, asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await NutritionAdminService.approveAllPending() });
 }));
 
 router.get('/nutrition/admin/usage', ...admin, asyncHandler(async (req: Request, res: Response) => {

@@ -362,7 +362,8 @@
         "foods": "Foods",
         "unsafe": "Unsafe foods",
         "sets": "Requirements",
-        "usage": "Usage"
+        "usage": "Usage",
+        "curves": "Feeding tables"
       },
       "speciesHelp": "Which feeding model each species uses. A new species starts as guidance only.",
       "searchSpecies": "Search species",
@@ -447,7 +448,19 @@
         "food_added": "Own foods added",
         "ration_saved": "Farm rations saved"
       },
-      "activePlans": "Active plans"
+      "activePlans": "Active plans",
+      "approveHelp": "Approve every record still waiting, for use now. The vet can review them later.",
+      "approveAll": "Approve all pending",
+      "approvedCount_one": "{{count}} record approved (vet review pending).",
+      "approvedCount_other": "{{count}} records approved (vet review pending).",
+      "curvesHelp": "Feed per bird or animal by age, and % of pond biomass by fish or shrimp size. Change a value to match your feed bag.",
+      "curveAge": "day {{from}}-{{to}}",
+      "curveWeight": "{{from}}-{{to}} g",
+      "curvePerHead": "{{g}} g per head a day",
+      "curveRate": "{{pct}}% of biomass a day",
+      "gramsPerHead": "Grams per head per day",
+      "ratePct": "% of biomass per day",
+      "feedType": "Feed type"
     },
     "ration": {
       "title": "Ration for {{name}}",
@@ -491,6 +504,29 @@
       "recordHint": "Record what was fed each day in Daily records.",
       "none": "No ration yet",
       "noneBody": "Tick the feeds you have and their prices - we find the cheapest mix that meets this animal's needs."
+    },
+    "group": {
+      "title": "Today's feed",
+      "noCurve": "There is no feeding table for this kind of group yet. An admin can add one in Nutrition data.",
+      "perDay": "{{kg}} kg of feed today",
+      "perHead": "{{g}} g per bird/animal x {{count}}",
+      "biomass": "{{count}} x {{g}} g = {{kg}} kg in the pond; {{rate}}% a day",
+      "feeds_one": "feed {{count}} time a day",
+      "feeds_other": "feed {{count}} times a day",
+      "temp": "Water at {{c}} °C - feed {{pct}}% of the usual amount.",
+      "price": "Feed price (optional)",
+      "cycleFeed": "Feed this cycle: {{kg}} kg",
+      "fcr": "FCR {{fcr}} (kg feed per kg gained)",
+      "fcrEggs": "FCR {{fcr}} (kg feed per kg eggs)",
+      "fcrNeedsWeights": "Record sample weights in Daily records to see FCR.",
+      "fcrNeedsEggs": "Record eggs in Daily records to see FCR.",
+      "basedOn": "Based on: {{title}}",
+      "needs": {
+        "head_count": "Record how many are in the group (place the batch or stock the pond).",
+        "age": "Start a cycle so the age of the batch is known.",
+        "average_weight": "Record a sample weight in Daily records.",
+        "curve": "No feeding table yet."
+      }
     }
   }
 }

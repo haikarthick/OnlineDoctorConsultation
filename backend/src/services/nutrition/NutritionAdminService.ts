@@ -260,6 +260,51 @@ class NutritionAdminService {
     };
   }
 
+  // ─── Feeding curves (flocks, pig batches, ponds - migration 059) ─────────
+
+  async listCurves(): Promise<any[]> {
+    const r = await database.query(
+      `SELECT * FROM nutrition_feeding_curves ORDER BY curve_key, COALESCE(age_from_days, 0), COALESCE(weight_from_g, 0)`);
+    return r.rows.map((x: any) => ({
+      id: x.id, curveKey: x.curve_key, title: x.title, model: x.nutrition_model, speciesCodes: x.species_codes, groupTypes: x.group_types,
+      basis: x.basis, product: x.product, ageFromDays: x.age_from_days, ageToDays: x.age_to_days,
+      weightFromG: numOrNull(x.weight_from_g), weightToG: numOrNull(x.weight_to_g),
+      gramsPerHeadDay: numOrNull(x.grams_per_head_day), ratePctBiomass: numOrNull(x.rate_pct_biomass),
+      feedsPerDay: x.feeds_per_day, feedType: x.feed_type, source: x.source, status: x.status,
+    }));
+  }
+
+  async updateCurve(id: string, input: any): Promise<void> {
+    const [sets, values] = buildSets(input, {
+      gramsPerHeadDay: 'grams_per_head_day', ratePctBiomass: 'rate_pct_biomass', feedsPerDay: 'feeds_per_day',
+      feedType: 'feed_type', source: 'source', status: 'status',
+    });
+    if (sets.length === 0) throw new ValidationError('Nothing to change.');
+    const r = await database.query(`UPDATE nutrition_feeding_curves SET ${sets.join(', ')}, updated_at = NOW() WHERE id = $1`, [id, ...values]);
+    if (r.rowCount === 0) throw new NotFoundError('Feeding curve row');
+  }
+
+  /**
+   * Owner decision 2026-11-22: approve reference data for use now, vet review later. Moves every shared row still
+   * 'unvalidated' to 'owner_approved' in one step. Private foods a pet owner or farm entered are theirs - untouched.
+   */
+  async approveAllPending(): Promise<Record<string, number>> {
+    return database.transaction(async (client: any) => {
+      const out: Record<string, number> = {};
+      const run = async (table: string, extra = '') => {
+        const r = await client.query(`UPDATE ${table} SET status = 'owner_approved' WHERE status = 'unvalidated'${extra}`);
+        out[table] = r.rowCount || 0;
+      };
+      await run('nutrition_energy_factors');
+      await run('nutrition_requirement_sets');
+      await run('nutrition_unsafe_foods');
+      await run('nutrition_ingredients', ' AND owner_id IS NULL AND enterprise_id IS NULL');
+      await run('nutrition_feeding_curves');
+      await run('nutrition_temperature_factors');
+      return out;
+    });
+  }
+
   // ─── Usage (for the later, usage-based pricing decision) ─────────────────
 
   async usage(days: number): Promise<any> {

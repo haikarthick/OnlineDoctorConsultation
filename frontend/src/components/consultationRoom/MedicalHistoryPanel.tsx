@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { SubjectSummary } from '../shared/SubjectSummary'
 import { RecentFarmRecords } from '../farmRecords/RecentFarmRecords'
 import NutritionPanel from '../nutrition/NutritionPanel'
+import GroupFeedingCard from '../nutrition/GroupFeedingCard'
 import { GroupSummary, type ConsultationGroup } from '../shared/GroupSummary'
 
 interface MedicalHistoryPanelProps {
@@ -35,6 +36,8 @@ const MedicalHistoryPanel: React.FC<MedicalHistoryPanelProps> = ({
           <GroupSummary group={groupInfo} />
           {/* What the farm team recorded for the group in the last 7 days - only for the vet booked for it */}
           <RecentFarmRecords groupId={groupInfo.groupId} />
+          {/* Today's feed and this cycle's FCR for the flock / pond */}
+          <GroupFeedingCard groupId={groupInfo.groupId} />
           <div className="group-history">
             <h4>{t('consultationRoom.group.yourRecords')} ({medicalRecords.length})</h4>
             {medicalRecords.length === 0 ? (

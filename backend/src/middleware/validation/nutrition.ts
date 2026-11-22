@@ -128,6 +128,15 @@ export const nutritionUnsafeFoodSchema = Joi.object({
   isActive: Joi.boolean().optional(),
 }).min(1);
 
+export const nutritionCurveSchema = Joi.object({
+  gramsPerHeadDay: Joi.number().min(0).max(20000).allow(null).optional(),
+  ratePctBiomass: Joi.number().min(0).max(30).allow(null).optional(),
+  feedsPerDay: Joi.number().integer().min(1).max(24).allow(null).optional(),
+  feedType: Joi.string().max(40).allow('', null).optional(),
+  source: Joi.string().max(500).optional(),
+  status: status.optional(),
+}).min(1);
+
 export const nutritionRequirementSetSchema = Joi.object({
   code: Joi.string().max(60).pattern(/^[a-z0-9_]+$/).optional(),
   nutritionModel: model.optional(),

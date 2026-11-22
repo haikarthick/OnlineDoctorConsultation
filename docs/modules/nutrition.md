@@ -68,10 +68,20 @@ room (`MedicalHistoryPanel`), and the `/nutrition` page. Compact mode = one-line
 - Feed price is prefilled from the farm's `feed_inventory.cost_per_unit` when the stock row links the library feed
   (`feed_inventory.ingredient_id`).
 
+## Group feeding (Phase 2, migration 059)
+
+- Flocks, pig batches and ponds: `engine/groupFeeding.ts` (per head per day by age, or % of biomass by average weight
+  x water-temperature factor) + FCR (feed / weight gained, or feed / kg eggs). Data: `nutrition_feeding_curves` and
+  `nutrition_temperature_factors`, matched by species and optionally group type. Service `GroupFeedingService.ts`
+  reads head count (cycle / group), age (cycle start), sample weight, water temperature, feed and eggs LIVE from
+  Daily records - nothing entered twice. Route `GET /nutrition/groups/:groupId/feeding`; gate
+  `AnimalAccessService.checkGroup`. UI `GroupFeedingCard.tsx` in the group health sheet and the vet's group
+  consultation.
+- Admin -> Nutrition data: "Feeding tables" tab, and "Approve all pending" (owner decision: approve now, vet later).
+
 ## Known gaps
 
-- `monogastric_spec` (poultry, pigs), `aqua_biomass` (fish, shrimp) and `equine_dm` calculators are not built yet:
-  those species get weight/condition tracking and guidance. Group (herd/flock/pond) rations are per animal for now.
+- `equine_dm` (horses, donkeys) calculator not built; group rations for ruminant herds are per animal.
 - Risk-rule thresholds for weight-change speed and drift are conservative platform defaults pending vet
   validation (`engine/rules.ts` `RULE_LIMITS`).
 - Translations in hi/kn/ml/ta/te were written without a native-speaker review (same open item as the tab labels).

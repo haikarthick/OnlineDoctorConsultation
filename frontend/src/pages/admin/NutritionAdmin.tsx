@@ -10,7 +10,7 @@ import { BottomSheet } from '../../components/mobile/BottomSheet'
 import { ChipSelect } from '../../components/mobile/ChipSelect'
 import { SaveState } from '../../components/mobile/SaveState'
 
-type Tab = 'species' | 'factors' | 'foods' | 'unsafe' | 'sets' | 'usage'
+type Tab = 'species' | 'factors' | 'foods' | 'unsafe' | 'sets' | 'curves' | 'usage'
 const MODELS = ['companion_energy', 'ruminant_dm', 'monogastric_spec', 'aqua_biomass', 'equine_dm', 'guidance_only'] as const
 const STATUSES = ['unvalidated', 'owner_approved', 'vet_validated', 'retired'] as const
 const FOOD_KINDS = ['commercial_food', 'home_food', 'treat', 'forage', 'concentrate', 'mineral', 'supplement', 'compound_feed', 'aqua_feed'] as const
@@ -27,6 +27,7 @@ const NutritionAdmin: React.FC = () => {
   const { user } = useAuth()
   const { enabled, loading } = useNutritionEnabled(!!user)
   const [tab, setTab] = useState<Tab>('species')
+  const [refresh, setRefresh] = useState(0)
 
   if (loading) return <div className="module-page nutri-page"><div className="loading-spinner">{t('nutrition.loading')}</div></div>
   if (!enabled) {
@@ -53,14 +54,19 @@ const NutritionAdmin: React.FC = () => {
         { value: 'foods', label: t('nutrition.admin.tabs.foods') },
         { value: 'unsafe', label: t('nutrition.admin.tabs.unsafe') },
         { value: 'sets', label: t('nutrition.admin.tabs.sets') },
+        { value: 'curves', label: t('nutrition.admin.tabs.curves') },
         { value: 'usage', label: t('nutrition.admin.tabs.usage') },
       ]} />
-      {tab === 'species' && <SpeciesModels />}
-      {tab === 'factors' && <EnergyFactors />}
-      {tab === 'foods' && <Foods />}
-      {tab === 'unsafe' && <UnsafeFoods />}
-      {tab === 'sets' && <RequirementSets />}
-      {tab === 'usage' && <Usage />}
+      <ApprovePending onDone={() => setRefresh(n => n + 1)} />
+      <div key={refresh}>
+        {tab === 'species' && <SpeciesModels />}
+        {tab === 'curves' && <Curves />}
+        {tab === 'factors' && <EnergyFactors />}
+        {tab === 'foods' && <Foods />}
+        {tab === 'unsafe' && <UnsafeFoods />}
+        {tab === 'sets' && <RequirementSets />}
+        {tab === 'usage' && <Usage />}
+      </div>
     </div>
   )
 }
@@ -397,6 +403,72 @@ const RequirementSets: React.FC = () => {
             ))}
             <button type="button" className="btn btn-secondary btn-sm" onClick={() => setEditing({ ...editing, requirements: [...editing.requirements, { nutrient: '', basis: 'per_1000kcal', minValue: '', maxValue: '', unit: 'g' }] })}>{t('nutrition.admin.addRow')}</button>
           </div>
+        </EditSheet>
+      )}
+    </section>
+  )
+}
+
+// ─── Approve everything pending (owner decision 2026-11-22: approve now, vet review later) ─────
+
+const ApprovePending: React.FC<{ onDone: () => void }> = ({ onDone }) => {
+  const { t } = useTranslation()
+  const [result, setResult] = useState('')
+  const save = useSaveAction(async () => {
+    const res: any = await apiService.nutritionAdminApprovePending()
+    const total = Object.values(res?.data || {}).reduce((s: number, n: any) => s + Number(n || 0), 0)
+    setResult(t('nutrition.admin.approvedCount', { count: total }))
+    onDone()
+  }, t('nutrition.errors.adminSave'))
+  return (
+    <div className="nutri-card-head">
+      <p className="nutri-hint">{t('nutrition.admin.approveHelp')}</p>
+      <button type="button" className="btn btn-secondary btn-sm" disabled={save.status === 'saving'} onClick={() => { void save.run() }}>
+        ✅ {t('nutrition.admin.approveAll')}
+      </button>
+      {save.status === 'failed' && <p className="nutri-note is-warning" role="status">{save.error}</p>}
+      {result && save.status === 'saved' && <p className="nutri-hint" role="status">{result}</p>}
+    </div>
+  )
+}
+
+// ─── Feeding curves (flocks, pig batches, ponds) ─────────────────────────────
+
+const Curves: React.FC = () => {
+  const { t } = useTranslation()
+  const list = useList<any>(() => apiService.nutritionAdminCurves(), r => r?.data?.items || [])
+  const [editing, setEditing] = useState<any | null>(null)
+  const band = (c: any) => (c.basis === 'per_head'
+    ? t('nutrition.admin.curveAge', { from: c.ageFromDays, to: c.ageToDays })
+    : t('nutrition.admin.curveWeight', { from: c.weightFromG, to: c.weightToG }))
+  const value = (c: any) => (c.basis === 'per_head'
+    ? t('nutrition.admin.curvePerHead', { g: c.gramsPerHeadDay })
+    : t('nutrition.admin.curveRate', { pct: c.ratePctBiomass }))
+  return (
+    <section className="nutri-card">
+      <p className="nutri-hint">{t('nutrition.admin.curvesHelp')}</p>
+      {list.error && <div className="alert alert-error" role="alert">{list.error}</div>}
+      <ul className="nutri-list">
+        {list.items.map(c => (
+          <li key={c.id} className="nutri-list-row">
+            <span className="nutri-list-main"><strong>{c.title}</strong> · {band(c)}</span>
+            <span className="nutri-list-meta">{value(c)}{c.feedType ? ` · ${c.feedType}` : ''}</span>
+            <StatusPill status={c.status} />
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setEditing({ ...c })}>{t('nutrition.admin.edit')}</button>
+          </li>
+        ))}
+      </ul>
+      {editing && (
+        <EditSheet title={`${editing.title} · ${band(editing)}`} onClose={() => setEditing(null)}
+          onSave={() => apiService.nutritionAdminSaveCurve(editing.id, editing.basis === 'per_head'
+            ? { gramsPerHeadDay: Number(editing.gramsPerHeadDay), feedType: editing.feedType || null, status: editing.status }
+            : { ratePctBiomass: Number(editing.ratePctBiomass), feedType: editing.feedType || null, status: editing.status })}
+          onSaved={() => { setEditing(null); list.reload() }}>
+          {editing.basis === 'per_head'
+            ? <Field label={t('nutrition.admin.gramsPerHead')}><input className="form-input" type="number" inputMode="decimal" min="0" value={editing.gramsPerHeadDay ?? ''} onChange={e => setEditing({ ...editing, gramsPerHeadDay: e.target.value })} /></Field>
+            : <Field label={t('nutrition.admin.ratePct')}><input className="form-input" type="number" inputMode="decimal" min="0" max="30" step="0.1" value={editing.ratePctBiomass ?? ''} onChange={e => setEditing({ ...editing, ratePctBiomass: e.target.value })} /></Field>}
+          <Field label={t('nutrition.admin.feedType')}><input className="form-input" maxLength={40} value={editing.feedType || ''} onChange={e => setEditing({ ...editing, feedType: e.target.value })} /></Field>
+          <StatusChips value={editing.status} onChange={v => setEditing({ ...editing, status: v })} />
         </EditSheet>
       )}
     </section>

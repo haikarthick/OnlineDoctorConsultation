@@ -56,6 +56,23 @@ export const nutritionApi = {
     const response = await sharedClient.post(`/nutrition/animals/${animalId}/ration`, data)
     return response.data
   },
+  /** Today's feed for a flock / pig batch / pond and the cycle's FCR (migration 059). */
+  async groupFeeding(groupId: string, params: { pricePerKg?: number | null } = {}) {
+    const response = await sharedClient.get(`/nutrition/groups/${groupId}/feeding`, { params })
+    return response.data
+  },
+  async nutritionAdminCurves() {
+    const response = await sharedClient.get('/nutrition/admin/curves')
+    return response.data
+  },
+  async nutritionAdminSaveCurve(id: string, data: Record<string, unknown>) {
+    const response = await sharedClient.put(`/nutrition/admin/curves/${id}`, data)
+    return response.data
+  },
+  async nutritionAdminApprovePending() {
+    const response = await sharedClient.post('/nutrition/admin/approve-pending')
+    return response.data
+  },
   async reviewNutritionPlan(planId: string, data: { overrideKcal?: number | null; note?: string | null }) {
     const response = await sharedClient.post(`/nutrition/plans/${planId}/review`, data)
     return response.data

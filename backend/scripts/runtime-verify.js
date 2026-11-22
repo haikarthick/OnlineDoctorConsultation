@@ -955,6 +955,20 @@ async function http(method, url, body, token) {
               if (strawOnly.json?.data?.result?.status !== 'infeasible') problems.push('a straw-only ration for a 15 L cow was not reported as impossible');
             }
           }
+          // Group feeding (migration 059): a seeded farmer's own flock/pond answers; a stranger is refused.
+          const farmer = await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' });
+          const fTok = farmer.json?.data?.token;
+          let grp = [];
+          try {
+            grp = psqlJson('verifydb', `SELECT g.id FROM ${SCHEMA}.animal_groups g JOIN ${SCHEMA}.enterprises e ON e.id = g.enterprise_id
+                                         JOIN ${SCHEMA}.users u ON u.id = e.owner_id WHERE u.email = 'tom.wilson@example.com' LIMIT 1`);
+          } catch { grp = []; }
+          if (fTok && grp[0]?.id) {
+            const gf = await http('GET', `${apiBase}/nutrition/groups/${grp[0].id}/feeding?pricePerKg=30`, null, fTok);
+            if (gf.status !== 200 || !['ok', 'no_curve'].includes(gf.json?.data?.status)) problems.push(`group feeding for the farmer's own group: HTTP ${gf.status} ${JSON.stringify(gf.json || {}).slice(0, 200)}`);
+            const gs = await http('GET', `${apiBase}/nutrition/groups/${grp[0].id}/feeding`, null, stranger);
+            if (gs.status !== 403) problems.push(`a stranger read another farm's group feeding (HTTP ${gs.status})`);
+          } else problems.push('could not find a seeded farmer group to check group feeding');
           // The admin's list (all animals) binds the same parameters as everyone else's - it once did not.
           const admin = await http('POST', `${apiBase}/auth/login`, { email: 'admin@vetcare.com', password: 'Admin@123' });
           const aTok = admin.json?.data?.token;

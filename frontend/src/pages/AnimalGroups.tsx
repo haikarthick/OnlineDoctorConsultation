@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import apiService from '../services/api'
+import GroupFeedingCard from '../components/nutrition/GroupFeedingCard'
 import './ModulePage.css'
 import { Enterprise, AnimalGroup } from '../types'
 import { useTranslation } from 'react-i18next'
@@ -519,6 +520,9 @@ const AnimalGroups: React.FC = () => {
                 </p>
               </div>
             )}
+
+            {/* Today's feed and this cycle's FCR (nutrition; hidden while it is switched off) */}
+            <GroupFeedingCard groupId={healthGroup.id} />
 
             <div className="si-64c669e9">
               <button className="btn btn-secondary" onClick={() => setHealthGroup(null)}>{t('common.close')}</button>
