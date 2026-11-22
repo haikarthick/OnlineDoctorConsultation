@@ -27,6 +27,21 @@ the caller's membership in it (or platform-admin override), and only then run th
 and if they're not a member, respond **404**, not 403, so an outsider can't even confirm the
 resource exists.
 
+## Animals and their records - rule H15 (2026-11-22)
+
+An animal belongs to a person, so every animal endpoint is a tenant boundary too. The canonical gate is
+`services/AnimalAccessService.ts` (owner, farm team, connected vet, enrolled network, consent, admin), applied
+on the route with `requireAnimal('params:animalId' | 'body:animalId' | ...)`. A route that edits or deletes ONE
+record by its own id uses `requireRecordAccess('<table>')` - the record's animal decides. Traps found in the
+2026-11-22 audit, never repeat them:
+- `requireAnimalAccess` alone only guards hospital-PRIVATE animals - every other animal passed.
+- "Only vets/admins" is a role check, not an ownership check: any vet could edit any vaccination.
+- Gating `PUT /x/:id` on `body.animalId` lets a caller send their own animal's id and edit someone else's record.
+- A list that "falls back" to all rows when the caller has none (`listAllAnimals`) leaks everything to new users.
+- A lookup by a printed ID (`?uid=`) must not hand out owner contact details.
+The build enforces this (`routeAccess.guard.test.ts`, allowlist only shrinks) and runtime-verify PHASE 6f probes
+every animal endpoint as a stranger - add a new animal endpoint to that probe list.
+
 ## Don't reinvent the check — copy the canonical one for that tenant type
 
 This repo already has a guard for each tenant type. Use the existing one; don't write a new

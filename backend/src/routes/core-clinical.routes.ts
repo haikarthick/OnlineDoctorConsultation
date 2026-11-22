@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { requireAnimal, requireRecordAccess } from '../middleware/recordAccess';
 import { authMiddleware, roleMiddleware, validateBody, AuthRequest } from '../middleware/auth';
 import { checkAnimalAccess, requireAnimalAccess } from '../middleware/hospitalDataIsolation';
 import { asyncHandler } from '../utils/errorHandler';
@@ -225,7 +226,7 @@ router.post('/consultations', authMiddleware, validateBody(createConsultationSch
   await ConsultationController.createConsultation(req, res)
 }));
 router.get('/consultations', authMiddleware, asyncHandler((req: Request, res: Response) => ConsultationController.listConsultations(req, res)));
-router.get('/consultations/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'consultations'), asyncHandler((req: Request, res: Response) => MedicalRecordController.getConsultationsByAnimal(req, res)));
+router.get('/consultations/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'consultations'), requireAnimal('params:animalId'), asyncHandler((req: Request, res: Response) => MedicalRecordController.getConsultationsByAnimal(req, res)));
 router.get('/consultations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ConsultationController.getConsultation(req, res)));
 router.put('/consultations/:id', authMiddleware, validateBody(updateConsultationSchema), asyncHandler(async (req: Request, res: Response) => {
   res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'consultations'); emitRoleRefresh('admin', 'consultations') } })
@@ -374,7 +375,7 @@ router.get('/prescriptions/patients', authMiddleware, roleMiddleware(['admin', '
   res.json({ success: true, data: { users: rows } });
 }));
 router.get('/prescriptions/me', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listMyPrescriptions(req, res)));
-router.get('/prescriptions/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'prescriptions'), asyncHandler((req: Request, res: Response) => PrescriptionController.listByAnimal(req, res)));
+router.get('/prescriptions/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'prescriptions'), requireAnimal('params:animalId'), asyncHandler((req: Request, res: Response) => PrescriptionController.listByAnimal(req, res)));
 // Group-subject (batch herd/flock) prescriptions. Gated by ensureGroupAccess() so a :groupId
 // here can't be a cross-tenant read - the caller must own/member the enterprise that owns the group.
 router.get('/prescriptions/group/:groupId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
@@ -388,7 +389,7 @@ router.put('/prescriptions/:id/deactivate', authMiddleware, asyncHandler((req: R
 // ─── Veterinary Certificate routes ───────────────────────────
 router.post('/certificates', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.createCertificate(req, res)));
 router.get('/certificates/me', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.getMyCertificates(req, res)));
-router.get('/certificates/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.getCertificatesByAnimal(req, res)));
+router.get('/certificates/animal/:animalId', authMiddleware, requireAnimal('params:animalId'), asyncHandler((req: Request, res: Response) => CertificateController.getCertificatesByAnimal(req, res)));
 router.get('/certificates/:id', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.getCertificate(req, res)));
 router.put('/certificates/:id/issue', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.issueCertificate(req, res)));
 router.put('/certificates/:id/revoke', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.revokeCertificate(req, res)));
@@ -408,7 +409,7 @@ router.get('/animals/:id/access-check', authMiddleware, asyncHandler(async (req:
   const decision = await checkAnimalAccess(authReq.userId!, authReq.userRole!, req.params.id);
   res.json({ success: true, data: { allowed: decision.allowed, isPrivate: decision.isPrivate, accessType: decision.accessType, reason: decision.reason } });
 }));
-router.get('/animals/:id', authMiddleware, requireAnimalAccess('params:id', 'animal_profile'), asyncHandler((req: Request, res: Response) => AnimalController.getAnimal(req, res)));
+router.get('/animals/:id', authMiddleware, requireAnimalAccess('params:id', 'animal_profile'), requireAnimal('params:id'), asyncHandler((req: Request, res: Response) => AnimalController.getAnimal(req, res)));
 router.put('/animals/:id', authMiddleware, validateBody(updateAnimalSchema), asyncHandler(async (req: Request, res: Response) => {
   res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'animals') } })
   await AnimalController.updateAnimal(req, res)

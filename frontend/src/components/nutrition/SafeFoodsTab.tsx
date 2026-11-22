@@ -10,7 +10,7 @@ import type { NutritionOverview } from './nutritionShared'
 export const SafeFoodsTab: React.FC<{ data: NutritionOverview }> = ({ data }) => {
   const { t } = useTranslation()
   const { resolveLabel } = useMasterData()
-  const unvalidated = data.unsafeFoods.some(u => u.status !== 'vet_validated')
+  const unvalidated = data.unsafeFoods.some(u => u.status === 'unvalidated')
   return (
     <div className="nutri-tab">
       {!data.calculatorAvailable && (

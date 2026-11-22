@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import FarmAccessService from '../services/FarmAccessService';
+import AnimalAccessService from '../services/AnimalAccessService';
 import { AuthRequest } from '../middleware/auth';
 import AnimalService from '../services/AnimalService';
 import { ValidationError, ForbiddenError } from '../utils/errors';
@@ -65,7 +66,11 @@ export class AnimalController {
       // the vet of the farm it lives on, or an access path the hospital-network check already granted.
       const decision = (req as any).animalAccessDecision;
       const networkGranted = !!(decision && decision.isPrivate && decision.allowed);
-      if (req.userRole !== 'veterinarian' || !(networkGranted || await this.vetHasReasonToSee(req.userId as string, animal))) {
+      // The one platform rule (farm team, connected vet, network, consent) - so a farm's manager or worker can open
+      // the farm's animals too, not only its owner.
+      const shared = !decision?.isPrivate
+        && (await AnimalAccessService.check({ userId: req.userId!, role: req.userRole, roles: req.userRoles }, animal.id, 'read')).allowed;
+      if (!shared && (req.userRole !== 'veterinarian' || !(networkGranted || await this.vetHasReasonToSee(req.userId as string, animal)))) {
         throw new ForbiddenError('You can open this animal only if it is yours or you are booked for an appointment about it. Ask the owner to book you, or check that you opened the right animal.');
       }
     }
@@ -92,8 +97,19 @@ export class AnimalController {
     const offset = parseInt(req.query.offset as string) || 0;
     const ownerId = req.query.ownerId as string;
 
-    // Vets/admins can request animals for a specific owner (for standalone prescription)
+    // An admin, or a vet who has a booking or consultation with this owner (standalone prescription), may list the
+    // owner's animals. Any other vet used to be able to list ANY owner's animals by passing ?ownerId=.
     if (ownerId && isAdminOrVet) {
+      if (req.userRole !== 'admin') {
+        const link = await database.query(
+          `SELECT 1 WHERE EXISTS (SELECT 1 FROM bookings WHERE veterinarian_id = $1 AND pet_owner_id = $2 AND status NOT IN ('cancelled', 'missed'))
+                        OR EXISTS (SELECT 1 FROM consultations WHERE veterinarian_id = $1 AND user_id = $2 AND status <> 'cancelled')`,
+          [req.userId, ownerId]
+        );
+        if (!link.rows.length) {
+          throw new ForbiddenError("You can see a client's animals only after they have booked you. Ask them to book an appointment, or search by the animal's ID card.");
+        }
+      }
       const result = await AnimalService.listAnimalsByOwner(ownerId, limit, offset);
       res.json({ success: true, data: result });
       return;
@@ -104,10 +120,9 @@ export class AnimalController {
       const view = req.query.view as string;
       if (view === 'patients') {
         // Vets see animals they've consulted with
+        // Only animals this vet has seen. (It used to fall back to EVERY animal on the platform when the vet had
+        // none - a new vet saw all owners' animals.)
         result = await AnimalService.listAnimalsByVeterinarian(req.userId!, limit, offset);
-        if (result.total === 0) {
-          result = await AnimalService.listAllAnimals(limit, offset);
-        }
       } else {
         // Default: vet's own personal pets
         result = await AnimalService.listAnimalsByOwner(req.userId!, limit, offset);
@@ -129,11 +144,22 @@ export class AnimalController {
       res.status(400).json({ success: false, error: 'uid query parameter is required' });
       return;
     }
-    const animal = await AnimalService.searchByUniqueId(uid);
+    const animal: any = await AnimalService.searchByUniqueId(uid);
     if (!animal) {
-      res.status(404).json({ success: false, error: `No animal found with ID ${uid}` });
+      res.status(404).json({ success: false, message: `No animal has the ID ${uid}. Check the ID card and try again.` });
       return;
     }
+    // Looking an animal up by the ID on its card is how a clinic starts a walk-in visit, so vets and hospital staff
+    // may find it - but the owner's email is never handed out, and anyone else finds only animals they can reach.
+    const clinical = ['admin', 'veterinarian', 'hospital_staff', 'corporate_admin'].some(r => req.userRole === r || (req.userRoles || []).includes(r));
+    if (!clinical) {
+      const access = await AnimalAccessService.check({ userId: req.userId!, role: req.userRole, roles: req.userRoles }, animal.id, 'read');
+      if (!access.allowed) {
+        res.status(404).json({ success: false, message: `No animal you can open has the ID ${uid}. Check the ID card and try again.` });
+        return;
+      }
+    }
+    if (req.userRole !== 'admin') delete animal.ownerEmail;
     res.json({ success: true, data: animal });
   }
 

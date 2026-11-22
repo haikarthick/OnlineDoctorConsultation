@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { requireAnimal, requireRecordAccess } from '../middleware/recordAccess';
 import { authMiddleware, roleMiddleware, validateBody, AuthRequest } from '../middleware/auth';
 import { asyncHandler } from '../utils/errorHandler';
 import database from '../utils/database';
@@ -8,6 +9,8 @@ import HospitalDocumentController from '../controllers/HospitalDocumentControlle
 import VaccineProtocolService from '../services/VaccineProtocolService';
 import MasterDataService from '../services/MasterDataService';
 import VaccineScheduleService from '../services/VaccineScheduleService';
+import AnimalAccessService from '../services/AnimalAccessService';
+import FarmAccessService from '../services/FarmAccessService';
 import {
   createHospitalSchema, updateHospitalSchema, addHospitalDoctorSchema, updateHospitalDoctorSchema,
   createDepartmentSchema, updateDepartmentSchema,
@@ -273,12 +276,12 @@ router.delete('/admin/master-data/marketplace/conditions/:id', authMiddleware, r
 }));
 
 // ─── Animal vaccine assignment routes ────────────────────────
-router.get('/animals/:animalId/vaccine-assignments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/animals/:animalId/vaccine-assignments', authMiddleware, requireAnimal('params:animalId'), asyncHandler(async (req: Request, res: Response) => {
   const assignments = await VaccineProtocolService.getAnimalAssignments(req.params.animalId);
   res.json({ success: true, data: assignments });
 }));
 
-router.post('/animals/:animalId/vaccine-assignments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.post('/animals/:animalId/vaccine-assignments', authMiddleware, requireAnimal('params:animalId'), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
   const { protocolId, notes } = req.body;
   if (!protocolId) return res.status(400).json({ success: false, message: 'protocolId required' });
@@ -295,19 +298,19 @@ router.post('/animals/:animalId/vaccine-assignments', authMiddleware, asyncHandl
   res.status(201).json({ success: true, data: assignment });
 }));
 
-router.patch('/animals/:animalId/vaccine-assignments/:protocolId/waive', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.patch('/animals/:animalId/vaccine-assignments/:protocolId/waive', authMiddleware, requireAnimal('params:animalId'), asyncHandler(async (req: Request, res: Response) => {
   const { reason } = req.body;
   await VaccineProtocolService.waiverProtocol(req.params.animalId, req.params.protocolId, reason || 'Owner waiver');
   res.json({ success: true, message: 'Protocol waived' });
 }));
 
 // ─── Vaccine schedule routes ─────────────────────────────────
-router.get('/vaccine-schedule/animal/:animalId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/vaccine-schedule/animal/:animalId', authMiddleware, requireAnimal('params:animalId'), asyncHandler(async (req: Request, res: Response) => {
   const rows = await VaccineScheduleService.getAnimalSchedule(req.params.animalId);
   res.json({ success: true, data: rows });
 }));
 
-router.patch('/vaccine-schedule/:scheduleId/administer', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.patch('/vaccine-schedule/:scheduleId/administer', authMiddleware, requireRecordAccess('vaccine_schedule', 'scheduleId'), asyncHandler(async (req: Request, res: Response) => {
   const { vaccinationRecordId, administeredAt } = req.body;
   if (!vaccinationRecordId) return res.status(400).json({ success: false, message: 'vaccinationRecordId required' });
   await VaccineScheduleService.markDoseAdministered(
@@ -317,7 +320,7 @@ router.patch('/vaccine-schedule/:scheduleId/administer', authMiddleware, asyncHa
 }));
 
 // ─── Vaccination Passport routes ─────────────────────────────
-router.get('/vaccination-passport/animal/:animalId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/vaccination-passport/animal/:animalId', authMiddleware, requireAnimal('params:animalId'), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
   // Pet owners and farmers may only access their own animal's passport
   if (authReq.userRole !== 'admin' && authReq.userRole !== 'veterinarian') {
@@ -339,8 +342,14 @@ router.get('/vaccination-passport/compliance-summary', authMiddleware, asyncHand
   const authReq = req as AuthRequest;
   const { enterpriseId, species } = req.query as Record<string, string>;
   const isAdmin = authReq.userRole === 'admin';
-  const isVet = authReq.userRole === 'veterinarian';
-  const ownerId = (isAdmin || isVet) ? undefined : authReq.userId;
+  // A farm's summary only for its team (or a vet the farm has made its farm vet); otherwise the caller's own
+  // animals. A vet used to get EVERY owner's compliance figures here.
+  if (!isAdmin && enterpriseId) {
+    if (!(await FarmAccessService.can(enterpriseId, { userId: authReq.userId!, role: authReq.userRole }, 'read'))) {
+      return res.status(403).json({ success: false, message: "You can see this farm's vaccination summary only if you are on its team. Ask the farm owner to add you." });
+    }
+  }
+  const ownerId = isAdmin || enterpriseId ? undefined : authReq.userId;
   const data = await VaccineScheduleService.getComplianceSummary({
     enterpriseId: enterpriseId || undefined,
     ownerId,
@@ -353,25 +362,17 @@ router.get('/vaccination-passport/compliance-summary', authMiddleware, asyncHand
 // Farmers/vets/admins may view any group they can see; pet owners are blocked (groups are farm assets).
 router.get('/vaccination-passport/group/:groupId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
-  if (authReq.userRole === 'pet_owner') {
-    return res.status(403).json({ success: false, message: 'Access denied' });
-  }
-  if (authReq.userRole !== 'admin' && authReq.userRole !== 'veterinarian') {
-    // farmer: only their own enterprise's group
-    const { rows } = await database.query(
-      `SELECT 1 FROM animal_groups ag
-         JOIN enterprises e ON e.id = ag.enterprise_id
-        WHERE ag.id = $1 AND e.owner_id = $2`,
-      [req.params.groupId, authReq.userId]
-    );
-    if (!rows[0]) return res.status(403).json({ success: false, message: 'Access denied' });
+  // The farm's team (any farm role) or a vet with an appointment for the group; admin. A vet used to see any group.
+  const access = await AnimalAccessService.checkGroup({ userId: authReq.userId!, role: authReq.userRole, roles: authReq.userRoles }, req.params.groupId, 'read');
+  if (access.found && !access.allowed) {
+    return res.status(403).json({ success: false, message: "You can see this group's vaccinations only if you are on its farm team or have an appointment for it. Ask the farm owner." });
   }
   const passport = await VaccineProtocolService.getGroupVaccinationPassport(req.params.groupId);
   res.json({ success: true, data: passport });
 }));
 
 // ─── Certificate log routes ───────────────────────────────────
-router.post('/vaccine-certificate-log', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.post('/vaccine-certificate-log', authMiddleware, requireAnimal('body:animalId'), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
   const { animalId, vaccinationRecordId, certificateType, fileName } = req.body;
   if (!animalId) return res.status(400).json({ success: false, message: 'animalId required' });
@@ -385,7 +386,7 @@ router.post('/vaccine-certificate-log', authMiddleware, asyncHandler(async (req:
   res.status(201).json({ success: true, data: entry });
 }));
 
-router.get('/vaccine-certificate-log/animal/:animalId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/vaccine-certificate-log/animal/:animalId', authMiddleware, requireAnimal('params:animalId'), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
   // Pet owners and farmers may only view certificate logs for their own animals
   if (authReq.userRole !== 'admin' && authReq.userRole !== 'veterinarian') {

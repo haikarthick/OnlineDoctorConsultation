@@ -380,6 +380,7 @@
       "statusLabel": "ಸ್ಥಿತಿ",
       "status": {
         "unvalidated": "ಇನ್ನೂ ದೃಢೀಕರಿಸಿಲ್ಲ",
+        "owner_approved": "ಅನುಮೋದಿತ (ವೈದ್ಯರ ಪರಿಶೀಲನೆ ಬಾಕಿ)",
         "vet_validated": "ವೈದ್ಯರಿಂದ ದೃಢೀಕೃತ",
         "retired": "ನಿವೃತ್ತ"
       },

@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { requireAnimal, requireRecordAccess } from '../middleware/recordAccess';
 import { authMiddleware, validateBody } from '../middleware/auth';
 import { requireAnimalAccess } from '../middleware/hospitalDataIsolation';
 import { asyncHandler } from '../utils/errorHandler';
@@ -57,7 +58,7 @@ router.get('/animal-groups/:id', authMiddleware, asyncHandler((req: Request, res
 router.put('/animal-groups/:id', authMiddleware, validateBody(updateAnimalGroupSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.updateGroup(req, res)));
 router.delete('/animal-groups/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.deleteGroup(req, res)));
 router.get('/enterprises/:enterpriseId/groups', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listGroups(req, res)));
-router.post('/animal-groups/:id/assign', authMiddleware, validateBody(assignAnimalToGroupSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.assignAnimalToGroup(req, res)));
+router.post('/animal-groups/:id/assign', authMiddleware, requireAnimal('body:animalId'), validateBody(assignAnimalToGroupSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.assignAnimalToGroup(req, res)));
 router.delete('/animal-groups/:id/animals/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.removeAnimalFromGroup(req, res)));
 
 // ─── Batch (flock/herd) management ──────────────────────────────────────────
@@ -174,7 +175,7 @@ router.post('/animal-groups/:groupId/promote', authMiddleware, asyncHandler(asyn
 
 // An animal's FULL life story: its own records plus the group records that applied while it was
 // a member of that cycle. Composed at read time - nothing is ever copied down.
-router.get('/animals/:animalId/lifetime-history', authMiddleware, requireAnimalAccess('params:animalId', 'medical_records'), asyncHandler(async (req: Request, res: Response) => {
+router.get('/animals/:animalId/lifetime-history', authMiddleware, requireAnimalAccess('params:animalId', 'medical_records'), requireAnimal('params:animalId'), asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: await BatchManagementService.getAnimalLifetimeHistory(req.params.animalId) });
 }));
 

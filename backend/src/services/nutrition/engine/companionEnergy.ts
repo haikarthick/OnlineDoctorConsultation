@@ -135,7 +135,8 @@ export function companionEnergy(input: CompanionEnergyInput): CompanionEnergyRes
   if (!factorRow) {
     throw new EnergyInputError('no_factor', `No energy factor '${factorKey}' is set up for ${facts.speciesCode}.`);
   }
-  if (factorRow.status !== 'vet_validated') reasons.push('factor_unvalidated');
+  // 'owner_approved' (migration 058) is approved for use; only a row nobody has approved yet is flagged.
+  if (factorRow.status === 'unvalidated') reasons.push('factor_unvalidated');
 
   const rerKcal = rer(basis);
   const dailyKcal = Math.round(factorRow.factor * rerKcal);

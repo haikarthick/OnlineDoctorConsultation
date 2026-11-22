@@ -135,7 +135,7 @@ export const RationBuilderSheet: React.FC<Props> = ({ data, onClose, onSaved }) 
               ))}
             </ul>
             <p className="nutri-hint">{t('nutrition.ration.needLine', { energy: result.need.nelMcal, dmMin: result.need.dmiMinKg, dmMax: result.need.dmiMaxKg, dm: result.supplied.dmKg })}</p>
-            <p className="nutri-hint">{t('nutrition.ration.basedOn', { set: preview.requirementSet?.title || '' })}{preview.requirementSet?.status !== 'vet_validated' ? ` · ${t('nutrition.safe.unvalidated')}` : ''}</p>
+            <p className="nutri-hint">{t('nutrition.ration.basedOn', { set: preview.requirementSet?.title || '' })}{preview.requirementSet?.status === 'unvalidated' ? ` · ${t('nutrition.safe.unvalidated')}` : ''}</p>
           </div>
         )}
 

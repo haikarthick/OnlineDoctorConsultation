@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { requireAnimal, requireRecordAccess } from '../middleware/recordAccess';
 import { authMiddleware, roleMiddleware, validateBody, AuthRequest } from '../middleware/auth';
 import { requireNetworkAccess, resolveNetworkAccess } from '../middleware/networkAccess';
 import { requireAnimalAccess, requireEnterpriseAccess } from '../middleware/hospitalDataIsolation';
@@ -192,7 +193,7 @@ router.patch('/outbreak-zones/:id/resolve', authMiddleware, asyncHandler((req: R
 router.get('/enterprises/:enterpriseId/genetic-profiles', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listGeneticProfiles(req, res)));
 router.post('/enterprises/:enterpriseId/genetic-profiles', authMiddleware, validateBody(createGeneticProfileSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createGeneticProfile(req, res)));
 router.put('/genetic-profiles/:id', authMiddleware, validateBody(updateGeneticProfileSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateGeneticProfile(req, res)));
-router.get('/genetic-profiles/:animalId/lineage-tree', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getLineageTree(req, res)));
+router.get('/genetic-profiles/:animalId/lineage-tree', authMiddleware, requireAnimal('params:animalId'), asyncHandler((req: Request, res: Response) => Tier3Controller.getLineageTree(req, res)));
 router.get('/enterprises/:enterpriseId/lineage-pairs', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listPairRecommendations(req, res)));
 router.post('/enterprises/:enterpriseId/lineage-pairs', authMiddleware, validateBody(createPairRecommendationSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createPairRecommendation(req, res)));
 router.get('/enterprises/:enterpriseId/genetic-dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getGeneticDashboard(req, res)));

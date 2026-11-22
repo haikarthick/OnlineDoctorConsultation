@@ -87,7 +87,7 @@ const localeLabels = {
   labelTa: Joi.string().max(200).allow('', null).optional(),
   labelTe: Joi.string().max(200).allow('', null).optional(),
 };
-const status = Joi.string().valid('unvalidated', 'vet_validated', 'retired');
+const status = Joi.string().valid('unvalidated', 'owner_approved', 'vet_validated', 'retired');
 const model = Joi.string().valid('companion_energy', 'ruminant_dm', 'monogastric_spec', 'aqua_biomass', 'equine_dm', 'guidance_only');
 
 export const nutritionSpeciesModelSchema = Joi.object({ nutritionModel: model.required() });

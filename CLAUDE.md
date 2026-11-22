@@ -24,6 +24,15 @@ sends a user-readable `message`; the client shows it, else a translated, specifi
 needs the owner's decision (e.g. whether to reveal that a farm exists to someone with no access) must be
 raised to the owner explicitly, not decided silently.
 
+## Mandatory: no one reaches another person's data (H15)
+Every route that takes an animal id (path, query or body) names its gate ON THE ROUTE: `requireAnimal(...)`
+(the platform rule in `services/AnimalAccessService.ts`: owner, farm team, connected vet, network, consent,
+admin) or, for one record addressed by its own id, `requireRecordAccess(table)` - the record's own animal decides,
+never an id from the request body. A role check is not an ownership check; "any vet" or "any signed-in user"
+is never enough. `backend/tests/unit/routeAccess.guard.test.ts` fails the build on an ungated route (its
+allowlist may only shrink) and runtime-verify PHASE 6f probes every animal endpoint as a stranger and an
+unbooked vet. New resource types follow the same pattern: one service decides, every route names it.
+
 ## Tech stack
 Backend: Node 18 + Express + TypeScript, PostgreSQL (`gen_random_uuid()`), Redis, Socket.IO, JWT.
 Frontend: React 18 + TypeScript + Vite, CSS modules are **global** (no scoping — see

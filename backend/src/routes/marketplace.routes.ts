@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { requireAnimal, requireRecordAccess } from '../middleware/recordAccess';
 import { timingSafeEqual } from 'crypto';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
 import { asyncHandler } from '../utils/errorHandler';
@@ -129,7 +130,7 @@ router.delete('/geospatial/zones/:id', authMiddleware, asyncHandler((req: Reques
 router.get('/enterprises/:enterpriseId/geospatial/events', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listGeospatialEvents(req, res)));
 router.post('/enterprises/:enterpriseId/geospatial/events', authMiddleware, validateBody(createGeospatialEventSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createGeospatialEvent(req, res)));
 router.get('/enterprises/:enterpriseId/geospatial/heatmap', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getHeatmapData(req, res)));
-router.get('/geospatial/animals/:animalId/trail', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMovementTrail(req, res)));
+router.get('/geospatial/animals/:animalId/trail', authMiddleware, requireAnimal('params:animalId'), asyncHandler((req: Request, res: Response) => Tier4Controller.getMovementTrail(req, res)));
 
 // ═══════════════════════════════════════════════════════════════
 

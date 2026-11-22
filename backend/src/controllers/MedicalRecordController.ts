@@ -3,6 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import MedicalRecordService from '../services/MedicalRecordService';
 import { ValidationError, ForbiddenError } from '../utils/errors';
 import database from '../utils/database';
+import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE } from '../services/AnimalAccessService';
 
 export class MedicalRecordController {
   // ═══ MEDICAL RECORDS ══════════════════════════════════════
@@ -297,6 +298,27 @@ export class MedicalRecordController {
   async getAuditLog(req: AuthRequest, res: Response): Promise<void> {
     if (req.userRole !== 'admin' && req.userRole !== 'veterinarian') {
       throw new ForbiddenError('Only admins and vets can view audit logs');
+    }
+    // A vet sees the change history of ONE record, and only one they can reach - not the whole platform's log.
+    if (req.userRole !== 'admin') {
+      const recordId = String(req.query.recordId || '');
+      if (!/^[0-9a-f-]{36}$/i.test(recordId)) {
+        throw new ForbiddenError('Open the change history from a record you are treating - the full log is for admins.');
+      }
+      const owner = await database.query(
+        `SELECT animal_id FROM medical_records WHERE id = $1
+         UNION ALL SELECT animal_id FROM vaccination_records WHERE id = $1
+         UNION ALL SELECT animal_id FROM allergy_records WHERE id = $1
+         UNION ALL SELECT animal_id FROM lab_results WHERE id = $1
+         UNION ALL SELECT animal_id FROM weight_history WHERE id = $1
+         LIMIT 1`,
+        [recordId]
+      );
+      const animalId = owner.rows[0]?.animal_id;
+      const access = animalId
+        ? await AnimalAccessService.check({ userId: req.userId!, role: req.userRole, roles: req.userRoles }, animalId, 'read')
+        : { allowed: false };
+      if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
     }
     const filters: any = {
       limit: Math.min(parseInt(req.query.limit as string) || 50, 200),

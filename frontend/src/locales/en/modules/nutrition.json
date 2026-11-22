@@ -380,6 +380,7 @@
       "statusLabel": "Status",
       "status": {
         "unvalidated": "Not yet confirmed",
+        "owner_approved": "Approved (vet review pending)",
         "vet_validated": "Vet-validated",
         "retired": "Retired"
       },

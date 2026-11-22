@@ -380,6 +380,7 @@
       "statusLabel": "स्थिति",
       "status": {
         "unvalidated": "अभी पुष्टि नहीं",
+        "owner_approved": "स्वीकृत (डॉक्टर की जाँच बाकी)",
         "vet_validated": "डॉक्टर द्वारा मान्य",
         "retired": "बंद"
       },

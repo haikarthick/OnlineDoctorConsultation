@@ -974,6 +974,90 @@ async function http(method, url, body, token) {
       else ok('write-through, body history, plan maths, safety alerts and access rules verified');
     }
 
+    // ── PHASE 6f: no one reaches another person's animal (HARNESS rule H15, owner rule 2026-11-22) ──
+    // The static guard (tests/unit/routeAccess.guard.test.ts) proves every route NAMES a gate; this proves the gates
+    // actually refuse, on a real server: an owner's animal and its records, probed by a stranger and by a vet with no
+    // appointment, through every animal endpoint - including the old trick of editing a record by its id while
+    // sending one's own animal id in the body.
+    if (serverHealthy && port) {
+      step('PHASE 6f Cross-account: a stranger and an unbooked vet cannot reach another owner\'s animal');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const problems = [];
+      let seq = (Math.floor(Date.now() / 1000) % 100000000) + 9000;
+      const signUp = async (role) => {
+        const email = `verify.h15.${role}.${Date.now()}.${seq}@example.com`;
+        const body = { firstName: 'Probe', lastName: 'Verify', email, phone: `9${String(seq++).padStart(9, '0')}`,
+          password: 'Password1', confirmPassword: 'Password1', role, acceptTerms: true };
+        if (role === 'veterinarian') body.licenseNumber = 'VERIFY-LIC-3';
+        await http('POST', `${apiBase}/auth/register`, body);
+        if (role === 'veterinarian') psql('verifydb', `SET search_path TO ${SCHEMA}, public; UPDATE users SET account_status = 'active', is_active = true WHERE email = '${email}';`);
+        const login = await http('POST', `${apiBase}/auth/login`, { email, password: 'Password1' });
+        return { token: login.json?.data?.token, id: login.json?.data?.user?.id };
+      };
+      const owner = await signUp('pet_owner');
+      const stranger = await signUp('pet_owner');
+      const vet = await signUp('veterinarian');
+      if (!owner.token || !stranger.token || !vet.token) problems.push('could not create the owner / stranger / vet accounts');
+      else {
+        const mk = await http('POST', `${apiBase}/animals`, { name: 'Probe Target', species: 'Dog', gender: 'female' }, owner.token);
+        const own = await http('POST', `${apiBase}/animals`, { name: 'Probe Own', species: 'Dog', gender: 'male' }, stranger.token);
+        const id = mk.json?.data?.id;
+        const strangerAnimal = own.json?.data?.id;
+        if (!id || !strangerAnimal) problems.push(`could not create the probe animals (HTTP ${mk.status}/${own.status})`);
+        else {
+          await http('POST', `${apiBase}/weight-history`, { animalId: id, weight: 12, unit: 'kg' }, owner.token);
+          const al = await http('POST', `${apiBase}/allergies`, { animalId: id, allergen: 'Probe pollen', severity: 'mild' }, owner.token);
+          const allergyId = al.json?.data?.id;
+          const reads = [
+            `/animals/${id}`, `/weight-history/animal/${id}`, `/allergies/animal/${id}`, `/lab-results/animal/${id}`,
+            `/vaccinations/animal/${id}`, `/timeline/animal/${id}`, `/consultations/animal/${id}`, `/prescriptions/animal/${id}`,
+            `/certificates/animal/${id}`, `/animals/${id}/vaccine-assignments`, `/vaccine-schedule/animal/${id}`,
+            `/vaccination-passport/animal/${id}`, `/vaccine-certificate-log/animal/${id}`, `/animals/${id}/lifetime-history`,
+            `/geospatial/animals/${id}/trail`, `/genetic-profiles/${id}/lineage-tree`, `/nutrition/animals/${id}`,
+            `/medical-records/stats?animalId=${id}`,
+          ];
+          for (const [who, tok] of [['stranger', stranger.token], ['unbooked vet', vet.token]]) {
+            for (const p of reads) {
+              const r = await http('GET', `${apiBase}${p}`, null, tok);
+              if (r.status < 400) problems.push(`${who} could READ ${p} (HTTP ${r.status})`);
+              else if (r.status === 403 && !(r.json?.message || r.json?.error?.message || r.json?.error)) problems.push(`${who} was refused ${p} without words`);
+            }
+            const writes = [
+              ['POST', '/weight-history', { animalId: id, weight: 99, unit: 'kg' }],
+              ['POST', '/allergies', { animalId: id, allergen: 'Planted', severity: 'mild' }],
+              ['POST', '/vaccinations', { animalId: id, vaccineName: 'Planted', dateAdministered: '2026-11-01' }],
+              ['POST', `/animals/${id}/vaccine-assignments`, { protocolId: '00000000-0000-4000-8000-000000000000' }],
+              ...(allergyId ? [['PUT', `/allergies/${allergyId}`, { animalId: strangerAnimal, allergen: 'Hijacked' }]] : []),
+            ];
+            for (const [method, p, body] of writes) {
+              const r = await http(method, `${apiBase}${p}`, body, tok);
+              if (r.status < 400) problems.push(`${who} could WRITE ${method} ${p} (HTTP ${r.status})`);
+            }
+          }
+          // List and search leaks
+          const byOwner = await http('GET', `${apiBase}/animals?ownerId=${owner.id}`, null, vet.token);
+          if (byOwner.status < 400 && (byOwner.json?.data?.animals || []).some(a => a.id === id)) problems.push('an unbooked vet listed another owner\'s animals via ?ownerId=');
+          const patients = await http('GET', `${apiBase}/animals?view=patients`, null, vet.token);
+          if ((patients.json?.data?.animals || []).some(a => a.id === id)) problems.push('a vet with no patients saw other owners\' animals in "patients"');
+          const detail = await http('GET', `${apiBase}/animals/${id}`, null, owner.token);
+          const uid = detail.json?.data?.uniqueId;
+          if (uid) {
+            const s = await http('GET', `${apiBase}/animals/search/by-uid?uid=${encodeURIComponent(uid)}`, null, stranger.token);
+            if (s.status < 400) problems.push('a stranger found another owner\'s animal by its ID card number');
+            const sv = await http('GET', `${apiBase}/animals/search/by-uid?uid=${encodeURIComponent(uid)}`, null, vet.token);
+            if (sv.json?.data?.ownerEmail) problems.push('a vet\'s ID-card lookup exposed the owner\'s email');
+          }
+          // And the owner still has full access to their own animal.
+          for (const p of [`/animals/${id}`, `/weight-history/animal/${id}`, `/allergies/animal/${id}`, `/timeline/animal/${id}`]) {
+            const r = await http('GET', `${apiBase}${p}`, null, owner.token);
+            if (r.status !== 200) problems.push(`the OWNER was refused their own ${p} (HTTP ${r.status})`);
+          }
+        }
+      }
+      if (problems.length) fail('Another person\'s animal data is reachable (or the owner is locked out).', problems);
+      else ok('stranger and unbooked vet refused on every endpoint; owner keeps access');
+    }
+
     // ── PHASE 7: the browser ──
     let sweepAccounts = [];
     if (serverHealthy && port) {
