@@ -142,6 +142,7 @@ Invoke these for the workflows they cover rather than improvising each time:
   cards not tables, tap-not-type entry, never lose an entry offline
 - `tenant-isolation-review` — the cross-tenant/IDOR checklist for any route taking a
   network/enterprise/pharmacy/group id
+- `deploy-parity-and-write-paths` — any new column/migration/Save button or reported server error: the DEPLOYED database must match the code and every write path must run against it (H13)
 - `pre-ship` — what "done" actually requires, beyond a green `tsc`
 
 ## Mandatory: the harness

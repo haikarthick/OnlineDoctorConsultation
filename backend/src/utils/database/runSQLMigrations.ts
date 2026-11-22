@@ -2,11 +2,12 @@ import { Pool } from 'pg';
 import logger from '../logger';
 import * as fs from 'fs';
 import * as path from 'path';
+import { findMigrationsDir } from './schemaContract';
 
 export async function runSQLMigrations(pool: Pool): Promise<void> {
     try {
-      const migDir = path.join(__dirname, '..', '..', 'migrations');
-      if (!fs.existsSync(migDir)) {
+      const migDir = findMigrationsDir();
+      if (!migDir) {
         logger.info('No migrations directory - skipping SQL migration runner');
         return;
       }

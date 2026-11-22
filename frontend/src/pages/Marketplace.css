@@ -958,17 +958,21 @@
   background: var(--brand-soft, #eef0fe); border-radius: 14px;
 }
 :where(.mp-page) .mp-destination {
-  flex: 1 1 0; min-width: 0; min-height: var(--tap-min, 48px); padding: 8px 6px;
+  position: relative; flex: 1 1 0; min-width: 0; min-height: var(--tap-min, 48px); padding: 6px 2px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   border: 0; border-radius: 10px; background: transparent; cursor: pointer;
-  font: inherit; font-weight: 600; color: var(--brand-strong, #4c51bf);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: inherit; color: var(--brand-strong, #4c51bf);
+}
+:where(.mp-page) .mp-dest-icon { font-size: 20px; line-height: 1; }
+:where(.mp-page) .mp-dest-label { font-size: 12px; font-weight: 600; line-height: 1.15; text-align: center; overflow-wrap: anywhere; }
+:where(.mp-page) .mp-dest-badge {
+  position: absolute; top: 2px; right: calc(50% - 26px); min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 9px; background: #dc2626; color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center;
 }
 :where(.mp-page) .mp-destination.active { background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
-:where(.mp-page) .mp-sections {
-  display: flex; gap: 8px; margin: 0 0 14px; overflow-x: auto; flex-wrap: nowrap;
-  -webkit-overflow-scrolling: touch; padding-bottom: 4px;
-}
-:where(.mp-page) .mp-sections .mp-chip { flex: 0 0 auto; min-height: 40px; }
+/* Sub-sections wrap onto a second line instead of hiding behind a sideways scroll. */
+:where(.mp-page) .mp-sections { display: flex; gap: 8px; margin: 0 0 14px; flex-wrap: wrap; }
+:where(.mp-page) .mp-sections .mp-chip { flex: 0 1 auto; min-height: 40px; }
 
 /* ─── Filters sheet, active-filter chips, place line on a card ─── */
 .mp-fsheet { display: flex; flex-direction: column; gap: 18px; padding-bottom: 8px; }

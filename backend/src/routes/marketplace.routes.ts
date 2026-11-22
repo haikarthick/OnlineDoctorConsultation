@@ -11,6 +11,7 @@ import AdminService from '../services/AdminService';
 import Tier4Controller from '../controllers/Tier4Controller';
 import { FileController } from '../controllers/FileController';
 import { uploadAny, uploadImage, uploadVideo } from '../middleware/upload';
+import { getSchemaContractResult } from '../utils/database/schemaContract';
 import {
   createMarketplaceListingSchema, updateMarketplaceListingSchema, placeBidSchema, createMarketplaceOrderSchema, updateOrderStatusSchema,
   confirmDealSchema, cancelDealSchema,
@@ -177,6 +178,17 @@ router.get('/health', async (_req, res) => {
   } catch (e: any) {
     checks.usersTable = 'error: ' + e.message;
     httpStatus = 503;
+  }
+
+  // Schema contract: every column/table the migrations promise must exist (set at boot)
+  const contract = getSchemaContractResult();
+  if (contract) {
+    const missing = [...contract.missingColumns, ...contract.missingTables];
+    checks.schemaContract = missing.length === 0 ? 'ok' : 'drift';
+    if (missing.length) { checks.schemaMissing = missing.slice(0, 20); httpStatus = 503; }
+    if (contract.healed.length) checks.schemaHealed = contract.healed;
+  } else {
+    checks.schemaContract = 'pending';
   }
 
   // Cache check

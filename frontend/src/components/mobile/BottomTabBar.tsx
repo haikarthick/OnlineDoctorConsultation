@@ -89,7 +89,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ items, currentPath, 
           aria-controls="nav-sidebar"
           onClick={onMore}
         >
-          <span className="bottom-tab-icon" aria-hidden="true">☰</span>
+          <span className="bottom-tab-icon" aria-hidden="true">{moreOpen ? '✕' : '⋯'}</span>
           <span className="bottom-tab-label">{t('mobileUi.tabs.more')}</span>
         </button>
       </nav>

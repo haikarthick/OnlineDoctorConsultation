@@ -5898,3 +5898,19 @@ CREATE TABLE IF NOT EXISTS group_care_contexts (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_group_care_contexts_live
   ON group_care_contexts(group_id, network_id) WHERE status = 'active';
 CREATE INDEX IF NOT EXISTS idx_group_care_contexts_network ON group_care_contexts(network_id) WHERE status = 'active';
+
+-- Hidden technical errors, counted per distinct problem (daily email digest reads this).
+CREATE TABLE IF NOT EXISTS system_error_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  signature VARCHAR(64) NOT NULL UNIQUE,
+  reference VARCHAR(16) NOT NULL,
+  status INTEGER NOT NULL DEFAULT 500,
+  method VARCHAR(10),
+  path VARCHAR(300),
+  message TEXT NOT NULL,
+  occurrences INTEGER NOT NULL DEFAULT 1,
+  first_seen TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_seen TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  emailed_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_system_error_log_last_seen ON system_error_log (last_seen DESC);

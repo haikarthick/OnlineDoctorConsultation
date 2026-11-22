@@ -17,6 +17,7 @@ import MarketplaceService from '../services/MarketplaceService';
 import MarketplaceEngagementService from '../services/MarketplaceEngagementService';
 import FarmDueNotifier from '../services/FarmDueNotifier';
 import database from './database';
+import { runErrorDigest } from '../services/ErrorAlertService';
 import logger from './logger';
 
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
@@ -32,6 +33,9 @@ export function startScheduler(): void {
   runExpiryCheck();
   runMissedBookingsCheck();
   runPharmacyStockAlerts();
+
+  // Daily email digest of hidden technical errors (no-op unless OPS_ALERT_EMAIL is set)
+  setInterval(() => { void runErrorDigest() }, ONE_HOUR);
 
   // Then every 24 hours
   setInterval(runExpiryCheck, TWENTY_FOUR_HOURS);

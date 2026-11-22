@@ -185,15 +185,6 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
         <div className="nav-brand">
           <WayToVetLogo size={26} variant="full" onDark title={t('nav.brand')} />
         </div>
-        <button
-          className="nav-mobile-toggle"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-expanded={isMobileMenuOpen}
-          aria-controls="nav-sidebar"
-          aria-label={isMobileMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
-        >
-          {isMobileMenuOpen ? '✕' : '☰'}
-        </button>
       </div>
 
       {/* Sidebar Navigation */}
