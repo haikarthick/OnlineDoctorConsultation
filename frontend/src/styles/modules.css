@@ -3875,3 +3875,92 @@ button.record-due-row { cursor: pointer; }
 .shared-groups-add { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
 
 .rx-subject-hint { margin: 0 0 8px; font-size: 13px; color: var(--gray-600); }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   NUTRITION  (components/nutrition/*, pages/nutrition, pages/admin/NutritionAdmin)
+   One panel for every role (docs/NUTRITION_PLAN.md §5.6). Class names are nutri-* so the
+   CSS scoping gate never sees a clash. Tokens only; the progress bar width is a datum
+   passed as --fill (DESIGN_SYSTEM.md §3).
+   ═══════════════════════════════════════════════════════════════════ */
+.nutri-panel { display: flex; flex-direction: column; gap: 12px; margin: 12px 0; padding: 14px; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); background: #fff; min-width: 0; }
+.nutri-panel.is-compact { gap: 8px; background: var(--brand-soft); border-color: transparent; }
+.nutri-panel-title { margin: 0; font-size: 18px; overflow-wrap: anywhere; }
+.nutri-card { display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); background: #fff; min-width: 0; }
+.nutri-card.is-needed { border-color: var(--warning); background: var(--warning-light); }
+.nutri-card-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.nutri-card-title { margin: 0; font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+.nutri-tab { display: flex; flex-direction: column; gap: 12px; }
+.nutri-form { display: flex; flex-direction: column; gap: 14px; }
+.nutri-field { display: flex; flex-direction: column; gap: 6px; }
+.nutri-field-label { font-size: 14px; font-weight: 600; color: var(--gray-700); }
+.nutri-fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.nutri-hint { margin: 0; font-size: 13px; color: var(--gray-600); overflow-wrap: anywhere; }
+.nutri-empty { margin: 0; color: var(--gray-500); }
+.nutri-big { margin: 0; font-size: 20px; font-weight: 700; overflow-wrap: anywhere; }
+.nutri-quote { margin: 0; padding-left: 10px; border-left: 3px solid var(--gray-200); color: var(--gray-700); overflow-wrap: anywhere; }
+.nutri-note { margin: 0; padding: 8px 12px; border-radius: var(--radius); font-size: 14px; background: var(--info-light); color: var(--gray-800); }
+.nutri-note.is-warning { background: var(--warning-light); }
+.nutri-note.is-danger { background: var(--danger-light); color: var(--danger); font-weight: 600; }
+.nutri-wide-btn { width: 100%; min-height: var(--tap-min); }
+.nutri-check { display: flex; align-items: center; gap: 10px; min-height: var(--tap-min); }
+.nutri-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 14px; }
+.nutri-summary-item { white-space: nowrap; }
+.nutri-pill { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--gray-100); color: var(--gray-700); white-space: nowrap; }
+.nutri-pill.band-ideal, .nutri-pill.is-reviewed, .nutri-pill.status-vet_validated { background: var(--success-light); color: var(--success); }
+.nutri-pill.band-overweight, .nutri-pill.band-thin, .nutri-pill.is-suggested, .nutri-pill.is-watch, .nutri-pill.status-unvalidated { background: var(--warning-light); color: var(--warning); }
+.nutri-pill.band-obese, .nutri-pill.band-very_thin, .nutri-pill.is-act { background: var(--danger-light); color: var(--danger); }
+.nutri-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.nutri-list-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+.nutri-list-row:last-child { border-bottom: 0; }
+.nutri-list-main { flex: 1 1 160px; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; overflow-wrap: anywhere; }
+.nutri-list-meta { font-size: 13px; color: var(--gray-600); overflow-wrap: anywhere; }
+.nutri-bullets { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.nutri-flag { display: flex; align-items: flex-start; gap: 10px; padding: 10px; border-radius: var(--radius); background: var(--info-light); }
+.nutri-flag.is-act { background: var(--danger-light); }
+.nutri-flag.is-watch { background: var(--warning-light); }
+.nutri-flag-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; overflow-wrap: anywhere; }
+.nutri-flag-actions { flex-shrink: 0; }
+.nutri-progress { height: 12px; border-radius: 999px; background: var(--gray-100); overflow: hidden; }
+.nutri-progress-fill { display: block; height: 100%; width: var(--fill, 0%); background: var(--success); border-radius: 999px; transition: width 0.3s ease; }
+.nutri-progress-fill.is-over { background: var(--warning); }
+@media (prefers-reduced-motion: reduce) { .nutri-progress-fill { transition: none; } }
+.nutri-quick { display: flex; flex-direction: column; gap: 8px; }
+.nutri-quick-btn { min-height: var(--tap-min); text-align: left; white-space: normal; }
+.nutri-subsection { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; border-top: 1px solid var(--gray-100); }
+.nutri-sub-title { margin: 6px 0 0; font-size: 15px; }
+.nutri-food-row { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); }
+.nutri-food-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.nutri-food-name { min-width: 0; overflow-wrap: anywhere; }
+.nutri-portion { margin: 0; font-weight: 600; color: var(--success); }
+.nutri-picker { display: flex; flex-direction: column; gap: 8px; }
+.nutri-picker-list { list-style: none; margin: 0; padding: 0; max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.nutri-picker-item { width: 100%; min-height: var(--tap-min); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; padding: 8px 10px; border: 1px solid var(--gray-200); border-radius: var(--radius); background: #fff; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.nutri-picker-item:hover, .nutri-picker-item:focus-visible { border-color: var(--primary); background: var(--primary-light); }
+.nutri-new-food { display: flex; flex-direction: column; gap: 10px; padding: 10px; border-radius: var(--radius-lg); background: var(--gray-50); }
+.nutri-preview { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: var(--radius-lg); background: var(--brand-soft); }
+.nutri-preview-kcal { margin: 0; font-size: 18px; font-weight: 700; }
+.nutri-details { border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 8px 12px; }
+.nutri-details summary { cursor: pointer; min-height: var(--tap-min); display: flex; align-items: center; font-weight: 600; }
+.nutri-select { width: auto; max-width: 100%; }
+.nutri-req-row { display: grid; grid-template-columns: 2fr 2fr 1fr 1fr 1fr auto; gap: 6px; align-items: center; }
+@media (max-width: 768px) { .nutri-req-row { grid-template-columns: 1fr 1fr; } }
+
+/* The Nutrition page: list + chosen animal, side by side on wide screens, one at a time on a phone. */
+.nutri-layout { display: grid; grid-template-columns: minmax(260px, 360px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.nutri-list-pane { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.nutri-detail-pane { min-width: 0; }
+.nutri-back { display: none; }
+.nutri-animal-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.nutri-animal { width: 100%; min-height: var(--tap-min); display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); background: #fff; text-align: left; cursor: pointer; }
+.nutri-animal:hover, .nutri-animal:focus-visible { border-color: var(--primary); }
+.nutri-animal.is-selected { border-color: var(--primary); background: var(--primary-light); }
+.nutri-animal-icon { font-size: 24px; flex-shrink: 0; }
+.nutri-animal-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.nutri-animal-name { overflow-wrap: anywhere; }
+@media (max-width: 900px) {
+  .nutri-layout { grid-template-columns: minmax(0, 1fr); }
+  .nutri-layout.has-selection .nutri-list-pane { display: none; }
+  .nutri-layout:not(.has-selection) .nutri-detail-pane { display: none; }
+  .nutri-back { display: inline-flex; margin-bottom: 4px; }
+}

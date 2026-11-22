@@ -70,6 +70,9 @@ const AnimalGroups = lazy(() => import('./pages/AnimalGroups'))
 const FarmRecords = lazy(() => import('./pages/FarmRecords'))
 const JoinFarm = lazy(() => import('./pages/JoinFarm'))
 const SmsSettings = lazy(() => import('./pages/admin/SmsSettings'))
+// Animal nutrition (docs/NUTRITION_PLAN.md)
+const Nutrition = lazy(() => import('./pages/nutrition/Nutrition'))
+const NutritionAdmin = lazy(() => import('./pages/admin/NutritionAdmin'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 /** An address the app has no page for: say so (inside the app shell when signed in), never redirect silently. */
@@ -275,6 +278,7 @@ function AppRoutes() {
       <Route path="/medical-records" element={<RoleRoute path="/medical-records"><AppLayout><MedicalRecords /></AppLayout></RoleRoute>} />
       <Route path="/animals" element={<RoleRoute path="/animals"><AppLayout><Animals /></AppLayout></RoleRoute>} />
       <Route path="/animal-timeline" element={<RoleRoute path="/animal-timeline"><AppLayout><AnimalTimeline /></AppLayout></RoleRoute>} />
+      <Route path="/nutrition" element={<RoleRoute path="/nutrition"><AppLayout><Nutrition /></AppLayout></RoleRoute>} />
       <Route path="/vaccination-passport" element={<RoleRoute path="/vaccination-passport"><AppLayout><RoutedPage Component={VaccinationPassport} /></AppLayout></RoleRoute>} />
       <Route path="/vet-certificates" element={<RoleRoute path="/vet-certificates"><AppLayout><RoutedPage Component={VetCertificates} /></AppLayout></RoleRoute>} />
       <Route path="/doctor/certificates/new" element={<RoleRoute path="/doctor/certificates/new"><AppLayout><RoutedPage Component={CertificateWriter} /></AppLayout></RoleRoute>} />
@@ -367,6 +371,7 @@ function AppRoutes() {
       <Route path="/admin/finance-reports" element={<RoleRoute path="/admin/finance-reports"><AppLayout><RoutedPage Component={FinanceReportsAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/vaccine-protocols" element={<RoleRoute path="/admin/vaccine-protocols"><AppLayout><RoutedPage Component={VaccineProtocolAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/master-data" element={<RoleRoute path="/admin/master-data"><AppLayout><RoutedPage Component={MasterDataManagement} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/nutrition" element={<RoleRoute path="/admin/nutrition"><AppLayout><NutritionAdmin /></AppLayout></RoleRoute>} />
       <Route path="/admin/certificate-settings" element={<RoleRoute path="/admin/certificate-settings"><AppLayout><RoutedPage Component={CertificateSettings} /></AppLayout></RoleRoute>} />
 
       {/* ── Hospital Workflow Module ── */}

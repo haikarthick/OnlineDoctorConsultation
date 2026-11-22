@@ -1,7 +1,9 @@
 ﻿import database from '../../src/utils/database';
 import medicalRecordService from '../../src/services/MedicalRecordService';
+import BodyMeasurementService from '../../src/services/BodyMeasurementService';
 
 jest.mock('../../src/utils/database');
+jest.mock('../../src/services/BodyMeasurementService', () => ({ __esModule: true, default: { record: jest.fn() } }));
 
 describe('MedicalRecordService', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -95,13 +97,16 @@ describe('MedicalRecordService', () => {
   describe('addWeight', () => {
     it('should add a weight record', async () => {
       const weight = { id: 'w1', animal_id: 'a1', weight: 25.5 };
+      // The write goes through the one body-measurement writer (migration 056), which also updates the animal.
+      (BodyMeasurementService.record as jest.Mock).mockResolvedValueOnce({ id: 'w1' });
       (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ id: 'w1' }] })   // INSERT weight_history
-        .mockResolvedValueOnce({ rows: [] })                // UPDATE animals weight
         .mockResolvedValueOnce({ rows: [] })                // logMedicalAudit
         .mockResolvedValueOnce({ rows: [weight] });         // SELECT weight_history
       const result = await medicalRecordService.addWeight('a1', 25.5, 'kg');
       expect(result).toBeDefined();
+      expect(BodyMeasurementService.record).toHaveBeenCalledWith(expect.objectContaining({
+        animalId: 'a1', weight: 25.5, unit: 'kg', source: 'medical_record',
+      }));
     });
   });
 

@@ -19,3 +19,4 @@ export * from './validation/hospitalNetwork';
 export * from './validation/masterData';
 export * from './validation/grooming';
 export * from './validation/farmRecords';
+export * from './validation/nutrition';

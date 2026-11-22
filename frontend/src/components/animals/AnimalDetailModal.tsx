@@ -5,6 +5,7 @@ import { SectionTitle, classOrGenderLabel, calculateAge, type AnimalData } from 
 import { useFarmProfile } from '../../hooks/useFarmProfile'
 import { breedingStatusLabelKey } from '../../constants/breedingStatus'
 import { asNumber } from '../../utils/farmProfile/animalFacts'
+import NutritionPanel from '../nutrition/NutritionPanel'
 
 interface Props {
   detailAnimal: AnimalData
@@ -87,6 +88,9 @@ const AnimalDetailModal: React.FC<Props> = ({
           <div><span className="si-23033f05">{t('animals.detailModal.neutered')}</span> <strong>{detailAnimal.isNeutered ? t('animals.detailModal.yesCheck') : t('animals.detailModal.no')}</strong></div>
           {detailAnimal.ownerName && <div><span className="si-23033f05">{t('animals.detailModal.owner')}</span> <strong>{detailAnimal.ownerName}</strong></div>}
         </div>
+
+        {/* Food plan, feeding, weight and body condition - the same panel every role sees (hidden while nutrition is off) */}
+        <NutritionPanel animalId={detailAnimal.id} compact />
 
         <SectionTitle icon="🏷️" text={t('animals.detailModal.identificationSection')} />
         <div className="si-7e1e70ef">

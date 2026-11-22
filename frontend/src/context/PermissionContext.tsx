@@ -109,6 +109,9 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   admin_holidays: ['/admin/holidays'],
   // Timeline
   animal_timeline: ['/animal-timeline'],
+  // Nutrition (docs/NUTRITION_PLAN.md)
+  nutrition: ['/nutrition'],
+  admin_nutrition: ['/admin/nutrition'],
   // Vaccination
   vaccination_passport: ['/vaccination-passport'],
   admin_vaccine_protocols: ['/admin/vaccine-protocols'],
@@ -221,6 +224,8 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'admin-holidays': 'admin_holidays',
   // Timeline
   'animal-timeline': 'animal_timeline',
+  'nutrition': 'nutrition',
+  'admin-nutrition': 'admin_nutrition',
   // Vaccination
   'vaccination-passport': 'vaccination_passport',
   'admin-vaccine-protocols': 'admin_vaccine_protocols',

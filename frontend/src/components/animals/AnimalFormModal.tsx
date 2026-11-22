@@ -190,6 +190,13 @@ const AnimalFormModal: React.FC<Props> = ({
               <input type="checkbox" checked={formData.isNeutered} onChange={e => set('isNeutered', e.target.checked)} />
               {t('animals.registerModal.neutered')}
             </label>
+            {/* Used by the nutrition plan; the same values the Nutrition panel asks for when missing. */}
+            <ChipSelect label={t('nutrition.facts.activityLevel')} value={formData.activityLevel} allowClear onClear={() => set('activityLevel', '')}
+              onChange={v => set('activityLevel', v)} options={['low', 'moderate', 'high', 'working'].map(v => ({ value: v, label: t(`nutrition.activity.${v}`) }))} />
+            <ChipSelect label={t('nutrition.facts.housing')} value={formData.housing} allowClear onClear={() => set('housing', '')}
+              onChange={v => set('housing', v)} options={(formData.enterpriseId
+                ? ['stall_fed', 'grazing', 'semi_grazing', 'indoor', 'outdoor']
+                : ['indoor', 'outdoor', 'indoor_outdoor']).map(v => ({ value: v, label: t(`nutrition.housing.${v}`) }))} />
             <div>
               <label className="an-field-label" htmlFor="animal-microchip">{t('animals.registerModal.microchip')}</label>
               <input id="animal-microchip" type="text" value={formData.microchipId} onChange={e => set('microchipId', e.target.value)} className="an-field" placeholder={t('animals.form.placeholderMicrochip')} />

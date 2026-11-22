@@ -434,7 +434,20 @@ risk-flag precision (reviewed-true/flags), time per vet nutrition consult, consu
 | 7 | Access wording | (Answered with the single-source-of-truth requirement - §4a) | Wording needs no new decision: farm data already refuses with readable messages via `FarmAccessService` (`NO_ACCESS_MESSAGE`, `backend/src/services/FarmAccessService.ts:41`; vet `VET_NOT_BOOKED_MESSAGE`, :80). Nutrition reuses exactly those |
 | 8 | Network hospitals | No changes for now | Zero edits to network-hospital code; hospital users see nutrition only where existing gates already show the animal |
 
-### 12.2 Still open (needed before the Phase 1 migration is written)
+### 12.2 Decided 2026-11-22 (second round) - all four answered "yes"
+1. External AI service for explanations / label photos / voice notes: **allowed** (animal facts only, never owner
+   identity; calculations never use AI).
+2. Data-permission letters: **the owner handles them**; not drafted here.
+3. One home for body condition: **approved** - `weight_history` is the single body-measurement history (built, migration 056).
+4. Rabbits, birds, fish, reptiles: **guidance-only** until a vet validates data (built: `nutrition_model = guidance_only`).
+
+### Build status
+- **Phase 1 built** (see `docs/modules/nutrition.md`): schema for all species, engine, access gate, pet calculator,
+  body history, plan / review / feeding / alerts, shared panel in every role's animal screen, admin data screens,
+  usage tracking, six languages.
+- Next: Phase 2 farm calculators into the same tables and panel.
+
+### 12.3 Original wording of the four questions (kept for the record)
 1. **External AI (re-asked in plain words):** some futuristic features - explaining a plan in Tamil in simple
    words, reading a feed-bag label from a photo, turning a farmer's voice note into a record - need an AI service
    run by an outside company. We would send only animal facts (species, age, weight, food), never the owner's name,

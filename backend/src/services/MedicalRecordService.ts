@@ -1,8 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
-import { DatabaseError, NotFoundError } from '../utils/errors';
+import { DatabaseError, NotFoundError, ValidationError } from '../utils/errors';
 import logger from '../utils/logger';
 import VaccineProtocolService from './VaccineProtocolService';
+import BodyMeasurementService from './BodyMeasurementService';
 
 // ─── Interfaces ─────────────────────────────────────────────
 export interface MedicalRecord {
@@ -598,12 +599,12 @@ export class MedicalRecordService {
 
   async addWeight(animalId: string, weight: number, unit: string, recordedBy?: string, notes?: string): Promise<WeightRecord> {
     try {
-      const id = uuidv4();
-      await database.query(`
-        INSERT INTO weight_history (id, animal_id, weight, unit, recorded_at, recorded_by, notes, created_at)
-        VALUES ($1, $2, $3, $4, NOW(), $5, $6, NOW())
-      `, [id, animalId, weight, unit || 'kg', recordedBy || null, notes || null]);
-      await database.query(`UPDATE animals SET weight = $1, updated_at = NOW() WHERE id = $2`, [weight, animalId]);
+      // One writer for body measurements (migration 056): it also keeps BOTH cached current-weight columns
+      // on the animal in step, which this method used to do for only one of them.
+      const saved = await BodyMeasurementService.record({
+        animalId, weight, unit: unit || 'kg', notes: notes || null, source: 'medical_record', recordedBy: recordedBy || null,
+      });
+      const id = saved.id;
       await logMedicalAudit(id, 'weight', 'CREATE', recordedBy, undefined, undefined, { weight, unit, animalId });
 
       const result = await database.query(`
@@ -615,6 +616,7 @@ export class MedicalRecordService {
       `, [id]);
       return result.rows[0];
     } catch (error) {
+      if (error instanceof ValidationError || error instanceof NotFoundError) throw error;
       throw new DatabaseError('Error adding weight record', { originalError: error });
     }
   }
@@ -627,7 +629,7 @@ export class MedicalRecordService {
                wh.notes, wh.created_at as "createdAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "recordedByName"
         FROM weight_history wh LEFT JOIN users u ON u.id = wh.recorded_by
-        WHERE wh.animal_id = $1 ORDER BY wh.recorded_at DESC LIMIT $2
+        WHERE wh.animal_id = $1 AND wh.weight IS NOT NULL ORDER BY wh.recorded_at DESC LIMIT $2
       `, [animalId, limit]);
       return result.rows;
     } catch (error) {
@@ -918,7 +920,7 @@ export class MedicalRecordService {
           SELECT wh.id, wh.weight, wh.unit, wh.recorded_at as date, wh.notes,
                  COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
           FROM weight_history wh LEFT JOIN users u ON u.id = wh.recorded_by
-          WHERE wh.animal_id = $1${dateClause} ORDER BY wh.recorded_at DESC LIMIT $2
+          WHERE wh.animal_id = $1 AND wh.weight IS NOT NULL${dateClause} ORDER BY wh.recorded_at DESC LIMIT $2
         `, params));
         queryTypes.push('weight');
       }

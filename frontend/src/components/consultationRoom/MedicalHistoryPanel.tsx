@@ -2,6 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { SubjectSummary } from '../shared/SubjectSummary'
 import { RecentFarmRecords } from '../farmRecords/RecentFarmRecords'
+import NutritionPanel from '../nutrition/NutritionPanel'
 import { GroupSummary, type ConsultationGroup } from '../shared/GroupSummary'
 
 interface MedicalHistoryPanelProps {
@@ -63,6 +64,8 @@ const MedicalHistoryPanel: React.FC<MedicalHistoryPanelProps> = ({
           <SubjectSummary animal={animalInfo} emphasis showFarm />
           {/* What the farm team recorded in the last 7 days - only for the vet booked for this animal */}
           <RecentFarmRecords animalId={animalInfo.id} />
+          {/* Food plan and body condition - the vet reviews or sets the plan here, in the same panel the owner uses */}
+          <NutritionPanel animalId={animalInfo.id} compact />
 
           {/* Allergies */}
           <div className="si-bab8e8bc">

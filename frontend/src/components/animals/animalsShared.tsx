@@ -15,6 +15,8 @@ export interface AnimalData {
   // Production facts (migration 044). DECIMAL columns arrive as strings.
   avgDailyMilkLitres?: number | string | null; parity?: number | null; lastBirthDate?: string | null;
   dryOffDate?: string | null; birthWeight?: number | string | null;
+  // Owned by the animal profile, also asked by nutrition when missing (migration 056).
+  activityLevel?: string | null; housing?: string | null;
 }
 
 export interface EnterpriseOption { id: string; name: string }
@@ -28,6 +30,7 @@ export interface AnimalFormData {
   enterpriseId: string; groupId: string; animalClass: string; sireId: string; damId: string;
   breedingStatus: string; lastBreedingDate: string; expectedDueDate: string;
   avgDailyMilkLitres: string; parity: string; lastBirthDate: string; dryOffDate: string; birthWeight: string;
+  activityLevel: string; housing: string;
 }
 
 export const emptyAnimalFormData: AnimalFormData = {
@@ -37,7 +40,8 @@ export const emptyAnimalFormData: AnimalFormData = {
   medicalNotes: '', enterpriseId: '', groupId: '',
   animalClass: '', sireId: '', damId: '',
   breedingStatus: '', lastBreedingDate: '', expectedDueDate: '',
-  avgDailyMilkLitres: '', parity: '', lastBirthDate: '', dryOffDate: '', birthWeight: ''
+  avgDailyMilkLitres: '', parity: '', lastBirthDate: '', dryOffDate: '', birthWeight: '',
+  activityLevel: '', housing: '',
 }
 
 const datePart = (value?: string | null): string => (value ? value.split('T')[0] : '')
@@ -66,6 +70,7 @@ export function animalToFormData(a: AnimalData, breedList: string[]): AnimalForm
     avgDailyMilkLitres: textOf(a.avgDailyMilkLitres), parity: textOf(a.parity),
     lastBirthDate: datePart(a.lastBirthDate), dryOffDate: datePart(a.dryOffDate),
     birthWeight: textOf(a.birthWeight),
+    activityLevel: a.activityLevel || '', housing: a.housing || '',
   }
 }
 
@@ -107,6 +112,8 @@ export function buildAnimalPayload(
     animalClass: form.animalClass || undefined,
     sireId: form.sireId || undefined,
     damId: form.damId || undefined,
+    activityLevel: text(form.activityLevel),
+    housing: text(form.housing),
   }
   if (shown('earTag')) payload.earTagId = form.earTagId || undefined
   if (shown('birthWeight')) payload.birthWeight = num(form.birthWeight)

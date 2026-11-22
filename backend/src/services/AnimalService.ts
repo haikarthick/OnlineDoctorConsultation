@@ -38,6 +38,9 @@ export interface Animal {
   lastBirthDate?: string | null;
   dryOffDate?: string | null;
   birthWeight?: number | null;
+  /** Owned facts the nutrition module asks for when missing (migration 056). */
+  activityLevel?: string | null;
+  housing?: string | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -72,6 +75,8 @@ export interface AnimalCreateDTO {
   lastBirthDate?: string | null;
   dryOffDate?: string | null;
   birthWeight?: number | null;
+  activityLevel?: string | null;
+  housing?: string | null;
 }
 
 /**
@@ -218,9 +223,10 @@ export class AnimalService {
                              medical_notes, enterprise_id, group_id, animal_class, sire_id, dam_id,
                              breeding_status, last_breeding_date, expected_due_date,
                              avg_daily_milk_litres, parity, last_birth_date, dry_off_date, birth_weight,
+                             activity_level, housing,
                              is_active, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26,
-                $27, $28, $29, $30, $31, true, NOW(), NOW())
+                $27, $28, $29, $30, $31, $32, $33, true, NOW(), NOW())
         RETURNING id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
                   gender, weight, color, microchip_id as "microchipId", ear_tag_id as "earTagId",
                   registration_number as "registrationNumber", is_neutered as "isNeutered",
@@ -231,6 +237,7 @@ export class AnimalService {
                   breeding_status as "breedingStatus", last_breeding_date as "lastBreedingDate", expected_due_date as "expectedDueDate",
                   avg_daily_milk_litres as "avgDailyMilkLitres", parity, last_birth_date as "lastBirthDate",
                   dry_off_date as "dryOffDate", birth_weight as "birthWeight",
+                  activity_level as "activityLevel", housing,
                   is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [
@@ -245,7 +252,8 @@ export class AnimalService {
         isBlank(data.avgDailyMilkLitres) ? null : data.avgDailyMilkLitres,
         isBlank(data.parity) ? null : data.parity,
         data.lastBirthDate || null, data.dryOffDate || null,
-        isBlank(data.birthWeight) ? null : data.birthWeight
+        isBlank(data.birthWeight) ? null : data.birthWeight,
+        data.activityLevel || null, data.housing || null,
       ]);
       logger.info('Animal created', { id, ownerId, uniqueId });
       return result.rows[0];
@@ -292,6 +300,7 @@ export class AnimalService {
                a.expected_due_date as "expectedDueDate",
                a.avg_daily_milk_litres as "avgDailyMilkLitres", a.parity, a.last_birth_date as "lastBirthDate",
                a.dry_off_date as "dryOffDate", a.birth_weight as "birthWeight",
+               a.activity_level as "activityLevel", a.housing,
                a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                sire.name as "sireName", dam.name as "damName",
                a.enterprise_id as "enterpriseId", a.group_id as "groupId",
@@ -328,6 +337,7 @@ export class AnimalService {
                a.expected_due_date as "expectedDueDate",
                a.avg_daily_milk_litres as "avgDailyMilkLitres", a.parity, a.last_birth_date as "lastBirthDate",
                a.dry_off_date as "dryOffDate", a.birth_weight as "birthWeight",
+               a.activity_level as "activityLevel", a.housing,
                a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                (SELECT acc.network_id FROM animal_care_contexts acc
@@ -375,6 +385,7 @@ export class AnimalService {
                a.expected_due_date as "expectedDueDate",
                a.avg_daily_milk_litres as "avgDailyMilkLitres", a.parity, a.last_birth_date as "lastBirthDate",
                a.dry_off_date as "dryOffDate", a.birth_weight as "birthWeight",
+               a.activity_level as "activityLevel", a.housing,
                a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
@@ -420,6 +431,7 @@ export class AnimalService {
                a.expected_due_date as "expectedDueDate",
                a.avg_daily_milk_litres as "avgDailyMilkLitres", a.parity, a.last_birth_date as "lastBirthDate",
                a.dry_off_date as "dryOffDate", a.birth_weight as "birthWeight",
+               a.activity_level as "activityLevel", a.housing,
                a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
@@ -511,6 +523,7 @@ export class AnimalService {
         avgDailyMilkLitres: 'avg_daily_milk_litres', parity: 'parity', lastBirthDate: 'last_birth_date',
         dryOffDate: 'dry_off_date', birthWeight: 'birth_weight',
         enterpriseId: 'enterprise_id', groupId: 'group_id',
+        activityLevel: 'activity_level', housing: 'housing',
       };
       // Only these keys may name a column; anything else in the payload is ignored rather than
       // being spliced into the SQL.
@@ -540,6 +553,7 @@ export class AnimalService {
                   breeding_status as "breedingStatus", last_breeding_date as "lastBreedingDate", expected_due_date as "expectedDueDate",
                   avg_daily_milk_litres as "avgDailyMilkLitres", parity, last_birth_date as "lastBirthDate",
                   dry_off_date as "dryOffDate", birth_weight as "birthWeight",
+                  activity_level as "activityLevel", housing,
                   is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [animalId, ...values]);

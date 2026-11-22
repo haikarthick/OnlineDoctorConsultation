@@ -33,6 +33,9 @@ export const createAnimalSchema = Joi.object({
   lastBirthDate: Joi.string().optional().allow('', null),
   dryOffDate: Joi.string().optional().allow('', null),
   birthWeight: Joi.number().min(0).max(2000).optional().allow(null, ''),
+  // Owned by the animal profile, also asked by the nutrition module when missing (migration 056).
+  activityLevel: Joi.string().valid('low', 'moderate', 'high', 'working').optional().allow('', null),
+  housing: Joi.string().valid('indoor', 'outdoor', 'indoor_outdoor', 'stall_fed', 'grazing', 'semi_grazing').optional().allow('', null),
 });
 
 export const updateAnimalSchema = createAnimalSchema.fork(

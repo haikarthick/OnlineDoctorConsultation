@@ -69,6 +69,10 @@ export function buildMenuItems(t: TFunction, user: User | null): MenuItem[] {
       roles: ['veterinarian', 'pet_owner', 'farmer'], section: 'Animals & Health' },
     { id: 'animal-timeline', label: t('nav.animalTimeline'), icon: '📅', path: '/animal-timeline',
       roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Animals & Health' },
+    // Food plans, feeding, weight and body condition for every species (docs/NUTRITION_PLAN.md). Hidden until an
+    // admin switches nutrition.enabled on - see useNavMenuItems.
+    { id: 'nutrition', label: t('nav.nutrition'), icon: '🥣', path: '/nutrition',
+      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Animals & Health' },
     { id: 'vaccination-passport', label: t('nav.vaccinationPassport'), icon: '💉', path: '/vaccination-passport',
       roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Animals & Health' },
     { id: 'vet-certificates', label: t('nav.vetCertificates'), icon: '📜', path: '/vet-certificates',
@@ -209,6 +213,8 @@ export function buildMenuItems(t: TFunction, user: User | null): MenuItem[] {
     { id: 'admin-vaccine-protocols', label: t('nav.vaccineProtocols'), icon: '🧬', path: '/admin/vaccine-protocols',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-master-data', label: t('nav.masterData'), icon: '🗂️', path: '/admin/master-data',
+      roles: ['admin'], section: 'Administration' },
+    { id: 'admin-nutrition', label: t('nav.nutritionAdmin'), icon: '🥣', path: '/admin/nutrition',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-certificate-settings', label: t('nav.certificateSettings'), icon: '📋', path: '/admin/certificate-settings',
       roles: ['admin'], section: 'Administration' },

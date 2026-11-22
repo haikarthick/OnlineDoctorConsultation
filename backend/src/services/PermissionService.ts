@@ -26,6 +26,7 @@ export const PERMISSION_CATEGORIES = {
       'vaccination_passport',
       'vet_certificates',
       'vet_earnings',
+      'nutrition',
     ]
   },
   admin_pages: {
@@ -46,6 +47,7 @@ export const PERMISSION_CATEGORIES = {
       'admin_cancellation_dashboard',
       'admin_vaccine_protocols',
       'admin_master_data',
+      'admin_nutrition',
       'admin_certificates',
       'dispute_management',
       'hospital_network_subscription',
@@ -186,7 +188,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Pages
     'dashboard', 'consultations', 'medical_records', 'schedule',
     'prescriptions', 'reviews', 'video_consultation', 'settings',
-    'animals', 'animal_timeline',
+    'animals', 'animal_timeline', 'nutrition',
     // Pages
     'vaccination_passport', 'vet_certificates',
     // Hospital
@@ -227,7 +229,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
     'animals', 'medical_records', 'video_consultation',
     'prescriptions', 'settings', 'write_review',
-    'animal_timeline',
+    'animal_timeline', 'nutrition',
     // Hospital (browse only)
     'hospital_browse',
     // (user-scoped)
@@ -252,7 +254,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Pages
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
     'animals', 'medical_records', 'video_consultation', 'prescriptions', 'settings', 'write_review',
-    'animal_timeline',
+    'animal_timeline', 'nutrition',
     // Hospital (browse to find vets)
     'hospital_browse',
     // Vet Certificates
@@ -366,7 +368,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Vaccine Protocols
     'vaccination_passport', 'admin_vaccine_protocols', 'vet_certificates',
     // Master Data
-    'admin_master_data',
+    'admin_master_data', 'admin_nutrition', 'nutrition',
     // Certificates admin
     'admin_certificates',
     // Hospital Network (full access)
@@ -514,6 +516,9 @@ export const PERMISSION_LABELS: Record<string, string> = {
   pharmacy_settings_manage: 'Pharmacy Settings',
   // Timeline
   animal_timeline: 'Animal Life Timeline',
+  // Nutrition
+  nutrition: 'Animal Nutrition',
+  admin_nutrition: 'Nutrition Master Data',
   // Dispute Management
   dispute_management: 'Dispute Management',
   // Grooming & Spa

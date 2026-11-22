@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { usePermission, NAV_PERMISSION_MAP } from '../context/PermissionContext'
 import { useGroomingEnabled } from '../hooks/useGroomingEnabled'
 import { useFarmRecordsEnabled } from '../hooks/useFarmRecordsEnabled'
+import { useNutritionEnabled } from '../hooks/useNutritionEnabled'
 import { MenuItem, UserRole } from '../types'
 import { buildMenuItems } from './menuItems'
 
@@ -17,6 +18,7 @@ export function useNavMenuItems(): MenuItem[] {
   const { hasPermission, networks } = usePermission()
   const { enabled: groomingEnabled } = useGroomingEnabled()
   const { enabled: farmRecordsEnabled } = useFarmRecordsEnabled(!!user)
+  const { enabled: nutritionEnabled } = useNutritionEnabled(!!user)
   const { t } = useTranslation()
 
   return useMemo(() => {
@@ -50,7 +52,11 @@ export function useNavMenuItems(): MenuItem[] {
       if (item.id === 'farm-records' && !farmRecordsEnabled) {
         return false
       }
+      // Same for animal nutrition (nutrition.enabled).
+      if ((item.id === 'nutrition' || item.id === 'admin-nutrition') && !nutritionEnabled) {
+        return false
+      }
       return true
     })
-  }, [t, user, hasPermission, networks, groomingEnabled, farmRecordsEnabled])
+  }, [t, user, hasPermission, networks, groomingEnabled, farmRecordsEnabled, nutritionEnabled])
 }

@@ -13,5 +13,4 @@ context and vice versa.
 - Link to the relevant `backend/scripts/log-memory.js`-logged bugs/lessons if any exist
 
 ## Index
-*(empty — populate as each module gets its first doc; link it both here and from the
-"Module docs" section of `CLAUDE.md`)*
+- `nutrition.md` - animal nutrition: plans, feeding, one body-measurement history, engine rules, switch `nutrition.enabled`

@@ -1,5 +1,6 @@
 import database from '../utils/database';
 import logger from '../utils/logger';
+import BodyMeasurementService from './BodyMeasurementService';
 
 class HealthAnalyticsService {
 
@@ -42,12 +43,20 @@ class HealthAnalyticsService {
        data.symptoms || null, data.diagnosis || null, data.treatmentGiven || null, data.followUpDate || null]
     );
 
-    // Update animal weight and health score if provided
-    if (data.animalId && data.weight) {
-      await database.query(
-        `UPDATE animals SET current_weight = $1, weight_unit = $2, last_weighed_at = NOW(), updated_at = NOW() WHERE id = $3`,
-        [data.weight, data.weightUnit || 'kg', data.animalId]
-      );
+    // A weight or body condition score taken during an observation goes into the ONE body-measurement
+    // history (migration 056), which also keeps the animal's current weight up to date. Before, only
+    // animals.current_weight changed: the weight never reached the weight history and the score was
+    // invisible to every other screen.
+    if (data.animalId && (data.weight || data.bodyConditionScore)) {
+      await BodyMeasurementService.record({
+        animalId: data.animalId,
+        weight: data.weight || null,
+        unit: data.weightUnit || 'kg',
+        bodyConditionScore: data.bodyConditionScore || null,
+        source: 'health_observation',
+        sourceId: result.rows[0].id,
+        recordedBy: data.observerId || null,
+      });
     }
 
     return this.mapObservation(result.rows[0]);

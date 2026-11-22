@@ -824,6 +824,128 @@ async function http(method, url, body, token) {
       else ok('filters, search aliases, privacy and reveal verified');
     }
 
+    // ── PHASE 6e: animal nutrition, every write path on the real schema (docs/NUTRITION_PLAN.md, migration 056) ──
+    // Unit tests mock the database; only real queries prove the SQL (partial unique indexes, ON CONFLICT on an
+    // expression index, write-through to animals / weight_history) and the access rule. A fresh pet owner adds a
+    // dog, answers the missing facts, weighs and scores it, builds and saves a plan, logs a meal and an unsafe
+    // treat; a stranger and an unbooked vet are refused in words.
+    if (serverHealthy && port) {
+      step('PHASE 6e Nutrition: facts, body history, plan, feeding, safety and access');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const mark = serverLog.length;
+      const problems = [];
+      try {
+        psql('verifydb', `SET search_path TO ${SCHEMA}, public;
+          INSERT INTO system_settings (key, value, description) VALUES ('nutrition.enabled', 'true', 'enabled by runtime-verify PHASE 6e')
+          ON CONFLICT (key) DO UPDATE SET value = 'true';`);
+      } catch { problems.push('could not switch nutrition.enabled on in the verification database'); }
+      let seq = (Math.floor(Date.now() / 1000) % 100000000) + 7000;
+      const signUp = async (role) => {
+        const email = `verify.nutri.${role}.${Date.now()}.${seq}@example.com`;
+        const body = { firstName: 'Nutri', lastName: 'Verify', email, phone: `9${String(seq++).padStart(9, '0')}`,
+          password: 'Password1', confirmPassword: 'Password1', role, acceptTerms: true };
+        if (role === 'veterinarian') body.licenseNumber = 'VERIFY-LIC-2';
+        await http('POST', `${apiBase}/auth/register`, body);
+        if (role === 'veterinarian') {
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public; UPDATE users SET account_status = 'active', is_active = true WHERE email = '${email}';`);
+        }
+        const login = await http('POST', `${apiBase}/auth/login`, { email, password: 'Password1' });
+        return login.json?.data?.token;
+      };
+      const owner = await signUp('pet_owner');
+      const stranger = await signUp('pet_owner');
+      const vet = await signUp('veterinarian');
+      if (!owner || !stranger || !vet) {
+        problems.push('could not create the owner / stranger / vet accounts for the nutrition check');
+      } else {
+        const created = await http('POST', `${apiBase}/animals`, { name: 'Verify Bruno', species: 'Dog', gender: 'male' }, owner);
+        const animalId = created.json?.data?.id;
+        if (!animalId) problems.push(`create dog: HTTP ${created.status} ${JSON.stringify(created.json || {}).slice(0, 200)}`);
+        else {
+          const ov1 = await http('GET', `${apiBase}/nutrition/animals/${animalId}`, null, owner);
+          const missing = (ov1.json?.data?.missingFacts || []).map(m => m.key);
+          if (ov1.status !== 200) problems.push(`overview: HTTP ${ov1.status} ${JSON.stringify(ov1.json || {}).slice(0, 200)}`);
+          else if (!missing.includes('weight') || !missing.includes('dateOfBirth')) problems.push(`missing facts should ask for weight and date of birth, got [${missing}]`);
+          if (ov1.json?.data?.model !== 'companion_energy') problems.push(`a dog should use companion_energy, got ${ov1.json?.data?.model}`);
+
+          const facts = await http('PATCH', `${apiBase}/nutrition/animals/${animalId}/facts`, { dateOfBirth: '2021-03-01', isNeutered: true, activityLevel: 'moderate', housing: 'indoor' }, owner);
+          if (facts.status !== 200) problems.push(`save facts: HTTP ${facts.status} ${JSON.stringify(facts.json || {}).slice(0, 200)}`);
+          const animal = await http('GET', `${apiBase}/animals/${animalId}`, null, owner);
+          const a = animal.json?.data || {};
+          if (a.activityLevel !== 'moderate' || a.housing !== 'indoor') problems.push(`facts were not written through to the animal profile (activityLevel=${a.activityLevel}, housing=${a.housing})`);
+
+          const m = await http('POST', `${apiBase}/nutrition/animals/${animalId}/measurements`, { weight: 24, unit: 'kg', bodyConditionScore: 7, bcsScale: 9 }, owner);
+          if (m.status !== 201) problems.push(`add measurement: HTTP ${m.status} ${JSON.stringify(m.json || {}).slice(0, 200)}`);
+          const wh = await http('GET', `${apiBase}/weight-history/animal/${animalId}`, null, owner);
+          if (!(wh.json?.data || []).some(w => Number(w.weight) === 24)) problems.push('the nutrition weight is not in the medical weight history (single source of truth broken)');
+          const bcsOnly = await http('POST', `${apiBase}/nutrition/animals/${animalId}/measurements`, { bodyConditionScore: 7, bcsScale: 9 }, owner);
+          if (bcsOnly.status !== 201) problems.push(`a condition score without a weight: HTTP ${bcsOnly.status}`);
+          const wh2 = await http('GET', `${apiBase}/weight-history/animal/${animalId}`, null, owner);
+          if ((wh2.json?.data || []).some(w => w.weight === null)) problems.push('the weight history list shows a condition-only row with an empty weight');
+
+          const foods = await http('GET', `${apiBase}/nutrition/foods?animalId=${animalId}&search=rice`, null, owner);
+          const rice = (foods.json?.data?.items || []).find(f => f.code === 'home_rice_cooked');
+          if (!rice) problems.push(`the seeded food library is not readable (HTTP ${foods.status})`);
+          const plan = { goal: 'lose', mealsPerDay: 2, foods: [
+            ...(rice ? [{ ingredientId: rice.id, sharePct: 30 }] : []),
+            { label: 'Verify kibble', kcalPer100g: 350, sharePct: 70 },
+          ] };
+          const pre = await http('POST', `${apiBase}/nutrition/animals/${animalId}/plan/preview`, plan, owner);
+          const kcal = pre.json?.data?.energy?.dailyKcal;
+          // 24 kg at condition 7/9 -> ideal 20 kg; weight loss = 1.0 x 70 x 20^0.75 = 662 kcal
+          if (pre.status !== 200 || kcal !== 662) problems.push(`plan preview: HTTP ${pre.status}, expected 662 kcal, got ${kcal} ${JSON.stringify(pre.json?.error || {}).slice(0, 160)}`);
+          const saved = await http('POST', `${apiBase}/nutrition/animals/${animalId}/plan`, plan, owner);
+          const planId = saved.json?.data?.id;
+          if (saved.status !== 201 || !planId) problems.push(`save plan: HTTP ${saved.status} ${JSON.stringify(saved.json || {}).slice(0, 200)}`);
+          const again = await http('POST', `${apiBase}/nutrition/animals/${animalId}/plan`, plan, owner);
+          if (again.status !== 201) problems.push(`replacing the plan: HTTP ${again.status} (the old one must be superseded, not conflict)`);
+          const unsafePlan = await http('POST', `${apiBase}/nutrition/animals/${animalId}/plan`, { foods: [{ label: 'Chocolate biscuits', kcalPer100g: 480, sharePct: 100 }] }, owner);
+          if (unsafePlan.status !== 400 || !/unsafe/i.test(unsafePlan.json?.message || unsafePlan.json?.error?.message || '')) problems.push(`a plan with chocolate for a dog was not refused in words (HTTP ${unsafePlan.status})`);
+
+          const ov2 = await http('GET', `${apiBase}/nutrition/animals/${animalId}`, null, owner);
+          const item = ov2.json?.data?.plan?.items?.[0];
+          if (!item) problems.push('the saved plan has no items in the overview');
+          else {
+            const fed = await http('POST', `${apiBase}/nutrition/animals/${animalId}/feeding`, { planItemId: item.id, kind: 'meal', amountG: item.gramsPerMeal }, owner);
+            if (fed.status !== 201) problems.push(`log meal: HTTP ${fed.status} ${JSON.stringify(fed.json || {}).slice(0, 200)}`);
+          }
+          const treat = await http('POST', `${apiBase}/nutrition/animals/${animalId}/feeding`, { label: 'piece of dark chocolate', kind: 'treat', amountG: 10, kcal: 55 }, owner);
+          if (treat.status !== 201 || !(treat.json?.data?.warnings || []).length) problems.push(`an unsafe treat was not flagged (HTTP ${treat.status})`);
+          const ov3 = await http('GET', `${apiBase}/nutrition/animals/${animalId}`, null, owner);
+          const types = (ov3.json?.data?.flags || []).map(f => f.type);
+          for (const want of ['unsafe_food_logged', 'bcs_high']) if (!types.includes(want)) problems.push(`expected an open '${want}' alert, got [${types}]`);
+
+          const strangerRead = await http('GET', `${apiBase}/nutrition/animals/${animalId}`, null, stranger);
+          if (strangerRead.status !== 403 || !(strangerRead.json?.message || strangerRead.json?.error?.message)) problems.push(`a stranger read another owner's animal nutrition (HTTP ${strangerRead.status})`);
+          const strangerWrite = await http('POST', `${apiBase}/nutrition/animals/${animalId}/measurements`, { weight: 1 }, stranger);
+          if (strangerWrite.status !== 403) problems.push(`a stranger wrote a weight for another owner's animal (HTTP ${strangerWrite.status})`);
+          const vetRead = await http('GET', `${apiBase}/nutrition/animals/${animalId}`, null, vet);
+          if (vetRead.status !== 403) problems.push(`a vet with no appointment read the animal's nutrition (HTTP ${vetRead.status})`);
+          if (planId) {
+            const ownerReview = await http('POST', `${apiBase}/nutrition/plans/${planId}/review`, { note: 'x' }, owner);
+            if (ownerReview.status !== 403 && ownerReview.status !== 400) problems.push(`a pet owner could review a plan as a vet (HTTP ${ownerReview.status})`);
+          }
+          const list = await http('GET', `${apiBase}/nutrition/animals?filter=attention`, null, owner);
+          if (!(list.json?.data?.items || []).some(x => x.id === animalId)) problems.push(`the animal with open alerts is missing from the "needs attention" list (HTTP ${list.status})`);
+          // The admin's list (all animals) binds the same parameters as everyone else's - it once did not.
+          const admin = await http('POST', `${apiBase}/auth/login`, { email: 'admin@vetcare.com', password: 'Admin@123' });
+          const aTok = admin.json?.data?.token;
+          if (aTok) {
+            for (const f of ['', 'attention', 'no_plan']) {
+              const al = await http('GET', `${apiBase}/nutrition/animals?limit=5${f ? `&filter=${f}` : ''}`, null, aTok);
+              if (al.status !== 200) problems.push(`the admin's nutrition list${f ? ` (${f})` : ''}: HTTP ${al.status}`);
+            }
+          } else problems.push('could not sign in as the seeded admin to check the admin nutrition list');
+        }
+      }
+      // Only real SQL / database errors: the deliberate refusals above (400 / 403) are logged by the server too.
+      const sqlErrs = serverLog.slice(mark).split('\n')
+        .filter(l => /syntax error|does not exist|violates|invalid input syntax|there is no unique|could not determine|DATABASE_ERROR|statusCode":5\d\d/i.test(l))
+        .map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(-240));
+      if (problems.length || sqlErrs.length) fail('Nutrition misbehaves on the real schema.', [...problems, ...sqlErrs]);
+      else ok('write-through, body history, plan maths, safety alerts and access rules verified');
+    }
+
     // ── PHASE 7: the browser ──
     let sweepAccounts = [];
     if (serverHealthy && port) {
@@ -847,6 +969,11 @@ async function http(method, url, body, token) {
           psql('verifydb', `SET search_path TO ${SCHEMA}, public;
             INSERT INTO system_settings (key, value, description)
             VALUES ('farm.records.enabled', 'true', 'enabled by runtime-verify PHASE 7')
+            ON CONFLICT (key) DO UPDATE SET value = 'true';`);
+          // And animal nutrition (docs/NUTRITION_PLAN.md): the sweep opens /nutrition and /admin/nutrition flag-on.
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public;
+            INSERT INTO system_settings (key, value, description)
+            VALUES ('nutrition.enabled', 'true', 'enabled by runtime-verify PHASE 7')
             ON CONFLICT (key) DO UPDATE SET value = 'true';`);
         } catch { /* settings table shape differs - the browser pass still runs without it */ }
 

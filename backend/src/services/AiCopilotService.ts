@@ -219,7 +219,7 @@ class AiCopilotService {
           `SELECT wh.weight, wh.unit, wh.recorded_at, wh.notes, a.name AS animal_name
            FROM weight_history wh
            JOIN animals a ON wh.animal_id = a.id
-           WHERE wh.animal_id = ANY($1)
+           WHERE wh.animal_id = ANY($1) AND wh.weight IS NOT NULL
            ORDER BY wh.recorded_at DESC LIMIT 300`,
           [historyIds]
         ),

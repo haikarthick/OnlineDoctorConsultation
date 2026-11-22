@@ -158,6 +158,8 @@ its 40-item case **before** coding it (feature-delivery Phase 2).
   there says which single file to edit for any UI/UX change.
 - `docs/modules/marketplace-ux-plan.md` - marketplace UX overhaul (2026-11-18): decisions, phases done, open items.
 - `docs/modules/routing.md` - route guards, deep links, session expiry, unknown addresses; one place decides access.
+- `docs/modules/nutrition.md` - animal nutrition (plan: `docs/NUTRITION_PLAN.md`): one panel for every role,
+  engine-only numbers, `weight_history` is the one body-measurement history, flag `nutrition.enabled`.
 - `docs/modules/farm-profile.md` — farm profile engine: one resolver decides which fields, records
   and events apply per species/class/group type; never branch on a species name in code.
 - **Active initiative:** `docs/FARM_MANAGEMENT_PLAN.md` — farm management realignment (all farm
