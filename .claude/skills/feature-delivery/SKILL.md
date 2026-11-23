@@ -13,7 +13,32 @@ skip a phase because the request looks simple — "add a button that does X" sti
 phase (which existing pattern does X follow?) and a review phase (does it actually work for every
 role?), even if that phase takes thirty seconds.
 
+## Independent agents and the ledger (owner rule 2026-11-23)
+
+The phases below are no longer only a checklist this session follows for itself. Four project agents in
+`.claude/agents/` do the parts where the builder must not mark their own work, each in its own fresh context:
+
+| Agent | When | Output |
+|---|---|---|
+| `requirements-analyst` | Phase 1, before any plan is shown | grep-verified cross-module trace, use cases per role, rows in `docs/modules/<module>-ledger.md` |
+| `domain-reviewer` | Phase 1 (missing species / life stages) and Phase 4 (numbers, safety, terms) | ranked findings |
+| `journey-tester` | Phase 4, after build | journeys per ledger row in `runtime-verify.js`, run on a real DB |
+| `completeness-auditor` | Phase 4, last | DONE / NOT DONE verdict against ledger + plan + code |
+
+Spawn them with the Agent tool (`subagent_type` = the agent name). Independent ones may run in parallel. The owner
+asked for this standing process, so this skill spawning them IS the explicit request.
+
+**The ledger** (`docs/modules/<module>-ledger.md`, guard `frontend/src/guards/requirementsLedger.guard.test.ts`,
+HARNESS H16): every requirement, cross-module link and use case is a row; rows never disappear (lock file), `Built`
+needs real evidence including a test, `Deferred` needs the owner's decision and date. A feature is reported done
+only with the ledger table and the auditor's DONE verdict in the message.
+
+**"Proceed without stopping" means don't pause for questions - it never means skip Phase 1 or Phase 4.**
+
 ## Phase 1 — Requirements (BA)
+
+Run the `requirements-analyst` agent (and `domain-reviewer` for anything a farmer, pet owner or vet records) first;
+the bullets below are what it must cover and what you check its report against.
 
 Restate the request back in concrete terms before writing code: what should happen, for which
 role(s), and what does success look like. Then actively surface what the request leaves unstated
@@ -85,6 +110,9 @@ changes; no speculative abstractions; real file paths and real verification, not
 Run, in order, whichever of these actually apply to what Phase 3 touched — don't skip one because
 the change "looks small," small changes are exactly where a skipped review goes unnoticed:
 
+0. **Agents** (always, for a feature / module / gap fix): `domain-reviewer`, then `journey-tester` (journeys for
+   every ledger row delivered), then `completeness-auditor`. Fix what they find, re-run the auditor until DONE.
+
 1. **`code-review` skill** (built-in, not one of this repo's own) — correctness pass on the diff.
    Run this on every change with non-trivial logic.
 2. **`tenant-isolation-review` skill** — if Phase 1 flagged multi-tenant data.
@@ -110,8 +138,7 @@ satisfied — verification run (or explicitly not, with a reason), committed, pu
 
 ## What this pipeline is not
 
-It is not a team of independent agents working ambiently in the background — it's a checklist
-this session follows for itself, every time, so the user doesn't have to re-request each phase.
-For a genuinely large initiative with independent parallel pieces, the `Workflow` tool can spawn
-real parallel subagents — but only when the user explicitly asks for that scale in a given
-message; this skill does not invoke it on its own.
+It is not ambient: nothing runs in the background on its own. Each phase is started by the session doing the work,
+and the agents above are spawned at the phase that needs them. What makes it trustworthy is that the agents work in
+their own context, judge against the ledger rather than the builder's summary, and the ledger guard and harness
+refuse silent drops and fake "Built" rows at push and in CI.

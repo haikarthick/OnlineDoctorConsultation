@@ -135,6 +135,11 @@ deferred gap (see `codebase-audit-2026-08-03` in memory), not something to paper
 Adding a new module's translations: add a new module file per locale (don't grow an existing
 one), per the `add-module` skill.
 
+## Project agents (`.claude/agents/`) and requirement ledgers (H16)
+`requirements-analyst` (before code) → `domain-reviewer` → `journey-tester` → `completeness-auditor` (verdict) run
+inside `feature-delivery`; the builder never marks their own work done. Every planned module keeps
+`docs/modules/<module>-ledger.md`; rows never disappear (guard `frontend/src/guards/requirementsLedger.guard.test.ts`).
+
 ## Project skills (`.claude/skills/`)
 Invoke these for the workflows they cover rather than improvising each time:
 - `feature-delivery` — **the default pipeline for any new feature/enhancement/module request**:
