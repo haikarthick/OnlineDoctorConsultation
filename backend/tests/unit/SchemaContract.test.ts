@@ -15,6 +15,18 @@ describe('schema contract', () => {
       { name: '2.sql', sql: 'ALTER TABLE t DROP COLUMN IF EXISTS old_col;' }]);
     expect(columns).toHaveLength(0);
   });
+  it('a table a later migration drops is no longer promised, nor are its columns', () => {
+    const { columns, tables } = parseContract([
+      { name: '1.sql', sql: 'CREATE TABLE IF NOT EXISTS old_log (id int);\nALTER TABLE old_log ADD COLUMN IF NOT EXISTS note TEXT;\nCREATE TABLE IF NOT EXISTS keep (id int);' },
+      { name: '2.sql', sql: 'DO $$ BEGIN\n  DROP TABLE old_log;\nEND $$;' }]);
+    expect(tables).toEqual(['keep']);
+    expect(columns).toHaveLength(0);
+  });
+  it('the real migrations no longer promise feed_consumption_logs (063 moved it into Daily records)', () => {
+    const dir = findMigrationsDir()!;
+    const files = fs.readdirSync(dir).filter(f => f.endsWith('.sql')).sort().map(name => ({ name, sql: fs.readFileSync(path.join(dir, name), 'utf8') }));
+    expect(parseContract(files).tables).not.toContain('feed_consumption_logs');
+  });
   it('finds the real migrations folder and the 053 state column in it', () => {
     const dir = findMigrationsDir();
     expect(dir).toBeTruthy();

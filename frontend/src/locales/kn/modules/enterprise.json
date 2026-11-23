@@ -311,13 +311,12 @@
   },
   "feedInventory": {
     "pageTitle": "🌾 Feed & Inventory Management",
-    "subtitle": "Track feed stock levels, log consumption, and get low-stock alerts",
+    "subtitle": "ಸಂಗ್ರಹದಲ್ಲಿರುವ ಮೇವು, ಅದರ ಬೆಲೆ ಮತ್ತು ಕಡಿಮೆ ಸ್ಟಾಕ್ ಎಚ್ಚರಿಕೆ. ಪ್ರತಿದಿನ ಕೊಟ್ಟ ಮೇವನ್ನು ದೈನಂದಿನ ದಾಖಲೆಗಳಲ್ಲಿ ದಾಖಲಿಸಲಾಗುತ್ತದೆ.",
     "tabs": {
       "inventory": "📦 Inventory",
       "analytics": "📊 Analytics"
     },
     "addFeed": "+ Add Feed",
-    "logConsumption": "📝 Log Consumption",
     "inventoryTitle": "Feed Inventory",
     "emptyInventory": "No feed items in inventory.",
     "lowStock": "Low Stock",
@@ -333,31 +332,30 @@
     "form": {
       "editTitle": "ಮೇವನು ಸಂಪಾದಿಸಿ",
       "createTitle": "ಮೇವನು ಸೇರಿಸಿ",
-      "name": "ಹೆಸರು *",
+      "name": "ನೀವು ಕರೆಯುವ ಹೆಸರು",
       "feedType": "ಮೇವನ ಪ್ರಕಾರ *",
       "brand": "ಬ್ರಾಂಡ್",
       "batchNumber": "ಬ್ಯಾಚ್ ಸಂಖ್ಯೆ",
       "quantityInStock": "ದಾಸ್ತಾನಿನಲ್ಲಿರುವ ಪ್ರಮಾಣ *",
       "unit": "ಘಟಕ *",
       "minimumStockLevel": "ಕನಿಷ್ಠ ದಾಸ್ತಾನು ಮಟ್ಟ",
-      "costPerUnit": "ಪ್ರತಿ ಘಟಕ ವೆಚ್ಚ",
+      "costPerUnit": "ಪ್ರತಿ {{unit}} ಬೆಲೆ",
       "expiryDate": "ಅವಧಿ ದಿನಾಂಕ",
       "storageLocation": "ಸಂಗ್ರಹಣೆ ಸ್ಥಳ",
-      "supplier": "ಪೂರೈಕೆದಾರ"
-    },
-    "consumptionForm": {
-      "title": "ಬಳಕೆ ದಾಖಲಿಸಿ",
-      "feed": "ಮೇವನು",
-      "selectFeed": "ಮೇವನು ಆಯ್ಕೆಮಾಡಿ",
-      "quantityUsed": "ಬಳಸಿದ ಪ್ರಮಾಣ *",
-      "submitBtn": "ಬಳಕೆ ದಾಖಲಿಸಿ"
+      "supplier": "ಪೂರೈಕೆದಾರ",
+      "isWhat": "ಇದು ಯಾವ ಮೇವು?",
+      "isWhatNone": "-- ಪಟ್ಟಿಯಲ್ಲಿ ಇಲ್ಲ --",
+      "isWhatHint": "ಪಡಿತರ ನಂತರ ಈ ಮೇವು ಮತ್ತು ಅದರ ಬೆಲೆಯನ್ನು ಬಳಸುತ್ತದೆ.",
+      "kgPerUnit": "ಒಂದು {{unit}} ಎಷ್ಟು kg?",
+      "kgPerUnitHint": "ಕೊಟ್ಟ ಮೇವು kg ನಲ್ಲಿ ದಾಖಲಾಗುತ್ತದೆ; ಸ್ಟಾಕ್ {{unit}} ಗಳಲ್ಲಿ ಕಡಿಮೆಯಾಗುತ್ತದೆ."
     },
     "headers": {
       "stock": "ದಾಸ್ತಾನು",
       "minLevel": "ಕನಿಷ್ಠ ಮಟ್ಟ",
       "costPerUnit": "ಘಟಕಕ್ಕೆ ವೆಚ್ಚ",
       "expiry": "ಅವಧಿ",
-      "location": "ಸ್ಥಳ"
+      "location": "ಸ್ಥಳ",
+      "isWhat": "ಮೇವು"
     },
     "analytics": {
       "used": "ಬಳಸಿದ್ದು",
@@ -369,8 +367,6 @@
       "saveFailed": "ಮೇವನು ಉಳಿಸಲು ವಿಫಲವಾಯಿತು",
       "restocked": "ಮರುದಾಸ್ತಾನು ಯಶಸ್ವಿ!",
       "restockFailed": "ಮರುದಾಸ್ತಾನು ವಿಫಲವಾಯಿತು",
-      "consumptionLogged": "ಬಳಕೆ ದಾಖಲಾಗಿದೆ!",
-      "consumptionFailed": "ಬಳಕೆ ದಾಖಲಿಸಲು ವಿಫಲವಾಯಿತು",
       "deleteConfirm": "ಈ ಮೇವನ ವಸ್ತುವನ್ನು ಅಳಿಸಬೇಕೇ?",
       "feedDeleted": "ಮೇವನು ಅಳಿಸಲಾಗಿದೆ!",
       "deleteFailed": "ಅಳಿಸಲು ವಿಫಲವಾಯಿತು"
@@ -384,7 +380,8 @@
     "blocked": {
       "name": "ಮೊದಲು ಮೇವಿನ ಹೆಸರು ಬರೆಯಿರಿ.",
       "quantity": "ಮೊದಲು ದಾಸ್ತಾನಿನಲ್ಲಿ ಎಷ್ಟಿದೆ ಎಂದು ನಮೂದಿಸಿ.",
-      "cost": "ಮೊದಲು ಪ್ರತಿ ಯೂನಿಟ್ ಬೆಲೆ ನಮೂದಿಸಿ."
+      "cost": "ಮೊದಲು ಪ್ರತಿ ಯೂನಿಟ್ ಬೆಲೆ ನಮೂದಿಸಿ.",
+      "kgPerUnit": "ಒಂದು {{unit}} ತೂಕ kg ನಲ್ಲಿ ನಮೂದಿಸಿ."
     },
     "minHint": "ದಾಸ್ತಾನು ಈ ಮಟ್ಟಕ್ಕೆ ಇಳಿದರೆ ನಿಮಗೆ ಎಚ್ಚರಿಕೆ ಬರುತ್ತದೆ.",
     "restockTitle": "{{name}} ದಾಸ್ತಾನು ಹೆಚ್ಚಿಸಿ",
@@ -399,7 +396,8 @@
       "concentrate": "ಸಾಂದ್ರ ಮೇವು",
       "forage": "ಹಸಿರು ಮೇವು",
       "medicated": "ಔಷಧಿ ಬೆರೆತ ಮೇವು",
-      "other": "ಇತರೆ"
+      "other": "ಇತರೆ",
+      "home_grown": "ಮನೆಯಲ್ಲಿ ಬೆಳೆದ ಮೇವು"
     },
     "units": {
       "kg": "ಕೆಜಿ",
@@ -408,8 +406,17 @@
       "bag": "ಚೀಲ",
       "bale": "ಕಟ್ಟು",
       "liter": "ಲೀಟರ್",
-      "gallon": "ಗ್ಯಾಲನ್"
-    }
+      "gallon": "ಗ್ಯಾಲನ್",
+      "g": "g",
+      "pcs": "ತುಂಡು"
+    },
+    "restockPrice": "ಪ್ರತಿ {{unit}} ಕೊಟ್ಟ ಬೆಲೆ (ಐಚ್ಛಿಕ)",
+    "restockPriceHint": "ಬೆಲೆ ಕೊಟ್ಟರೆ ಖರೀದಿ ಹಣಕಾಸಿನಲ್ಲಿ ಮೇವಿನ ಖರ್ಚಾಗಿ ಸೇರುತ್ತದೆ - ಅಲ್ಲಿ ಮತ್ತೆ ನಮೂದಿಸಬೇಡಿ.",
+    "feedGivenNote": "ಪ್ರತಿದಿನ ಕೊಟ್ಟ ಮೇವನ್ನು ದೈನಂದಿನ ದಾಖಲೆಗಳಲ್ಲಿ ದಾಖಲಿಸಿ - ಅದು ಈ ಸ್ಟಾಕ್‌ನಿಂದ ತಾನಾಗಿ ಕಡಿಮೆಯಾಗುತ್ತದೆ.",
+    "goDailyRecords": "ದೈನಂದಿನ ದಾಖಲೆಗಳು ತೆರೆಯಿರಿ",
+    "aboutKg": "ಸುಮಾರು {{kg}} kg",
+    "needsKgPerUnit": "ಒಂದು {{unit}} ಎಷ್ಟು kg ಎಂದು ತಿಳಿಸಿ (ತಿದ್ದು), ಆಗ kg ನಲ್ಲಿ ದಾಖಲಿಸಿದ ಮೇವು ಸ್ಟಾಕ್‌ನಿಂದ ಕಡಿಮೆಯಾಗುತ್ತದೆ.",
+    "noFeedGiven": "ಕಳೆದ 30 ದಿನಗಳಲ್ಲಿ ಸ್ಟಾಕ್‌ನಿಂದ ಮೇವು ದಾಖಲಾಗಿಲ್ಲ."
   },
   "supplyChain": {
     "pageTitle": "🔗 Supply Chain & Traceability (Farm-to-Fork)",

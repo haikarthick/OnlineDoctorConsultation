@@ -15,7 +15,7 @@
 ALTER TABLE nutrition_requirements DROP CONSTRAINT IF EXISTS nutrition_requirements_basis_check;
 DO $$ BEGIN
   ALTER TABLE nutrition_requirements ADD CONSTRAINT nutrition_requirements_basis_check
-    CHECK (basis IN ('per_1000kcal', 'per_kg_dm', 'percent_dm', 'per_day', 'per_kg_bw075', 'percent_bw', 'fraction', 'percent_milk', 'per_kg_bw'));
+    CHECK (basis IN ('per_1000kcal', 'per_kg_dm', 'percent_dm', 'per_day', 'per_kg_bw075', 'percent_bw', 'fraction', 'percent_milk', 'per_kg_bw', 'per_kg_gain', 'age_months'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ─── Requirement sets (starting values; method in engine/ruminantRation.ts) ───────────────────────────────

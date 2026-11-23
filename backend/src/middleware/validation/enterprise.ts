@@ -177,12 +177,15 @@ export const updateBreedingRecordSchema = Joi.object({
 
 // ─── Tier 2: Feed & Inventory ────────────────────────────────
 export const createFeedSchema = Joi.object({
-  enterpriseId: requiredUuid,
+  // The farm comes from the URL (/enterprises/:enterpriseId/feed); a body value is ignored.
+  enterpriseId: uuid.optional(),
   locationId: uuid.optional(),
   feedName: shortText().required(),
   feedType: shortText(100).optional().allow('', null),
   brand: shortText().optional().allow('', null),
-  unit: shortText(20).optional(),
+  unit: Joi.string().valid('kg', 'g', 'ton', 'lb', 'bag', 'bale', 'pcs', 'liter', 'gallon').optional(),
+  // How many kg one bag / bale / piece / litre weighs (migration 063) - feed given is always recorded in kg.
+  kgPerUnit: Joi.number().positive().max(100000).optional().allow(null),
   currentStock: positiveNumber.optional(),
   minimumStock: positiveNumber.optional(),
   costPerUnit: positiveNumber.optional().allow(null),
@@ -190,27 +193,17 @@ export const createFeedSchema = Joi.object({
   batchNumber: shortText(100).optional().allow('', null),
   expiryDate: Joi.string().optional().allow('', null),
   storageLocation: shortText().optional().allow('', null),
-  nutritionalInfo: Joi.object().optional(),
+  // Which library feed this is (rations take its composition and this item's price).
+  ingredientId: uuid.optional().allow(null, ''),
 });
 
-export const updateFeedSchema = createFeedSchema.fork(
-  ['enterpriseId', 'feedName'], (schema) => schema.optional()
-).min(1);
+export const updateFeedSchema = createFeedSchema.fork(['feedName'], (schema) => schema.optional()).min(1);
 
+// A purchase: quantity, and optionally the price paid per unit (which also writes the feed expense once).
 export const restockFeedSchema = Joi.object({
   quantity: Joi.number().positive().required(),
-});
-
-export const logFeedConsumptionSchema = Joi.object({
-  enterpriseId: requiredUuid,
-  feedId: requiredUuid,
-  groupId: uuid.optional(),
-  locationId: uuid.optional(),
-  animalId: uuid.optional(),
-  quantity: Joi.number().positive().required(),
-  unit: shortText(20).optional(),
-  consumptionDate: Joi.string().optional().allow('', null),
-  notes: shortText(500).optional().allow('', null),
+  pricePerUnit: Joi.number().min(0).max(10000000).optional().allow(null),
+  supplier: shortText().optional().allow('', null),
 });
 
 // ─── Tier 2: Compliance ──────────────────────────────────────

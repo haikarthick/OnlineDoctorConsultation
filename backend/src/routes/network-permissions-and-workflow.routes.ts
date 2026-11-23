@@ -17,7 +17,7 @@ import {
   updateNetworkRolePermissionSchema, resetNetworkRolePermissionsSchema,
   createObservationSchema, resolveObservationSchema,
   createBreedingRecordSchema, updateBreedingRecordSchema,
-  createFeedSchema, updateFeedSchema, restockFeedSchema, logFeedConsumptionSchema,
+  createFeedSchema, updateFeedSchema, restockFeedSchema,
   createComplianceDocSchema, updateComplianceDocSchema,
   createFinancialRecordSchema, updateFinancialRecordSchema,
   createAlertRuleSchema, updateAlertRuleSchema, toggleAlertRuleSchema,
@@ -147,8 +147,9 @@ router.post('/enterprises/:enterpriseId/feed', authMiddleware, validateBody(crea
 router.put('/feed/:id', authMiddleware, validateBody(updateFeedSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.updateFeed(req, res)));
 router.post('/feed/:id/restock', authMiddleware, validateBody(restockFeedSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.restockFeed(req, res)));
 router.delete('/feed/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.deleteFeed(req, res)));
-router.post('/enterprises/:enterpriseId/feed/consumption', authMiddleware, validateBody(logFeedConsumptionSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.logFeedConsumption(req, res)));
-router.get('/enterprises/:enterpriseId/feed/consumption', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listConsumptionLogs(req, res)));
+// Feed given is recorded only in Daily records (migration 063, owner rule: one place). Kept so an old screen gets words, not an error code.
+router.post('/enterprises/:enterpriseId/feed/consumption', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.logFeedConsumption(req, res)));
+router.get('/enterprises/:enterpriseId/feed/library', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.feedLibrary(req, res)));
 router.get('/enterprises/:enterpriseId/feed/analytics', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getFeedAnalytics(req, res)));
 
 // ─── Compliance & Regulatory ────────────────────────

@@ -5,6 +5,7 @@ import FarmProfileService from './FarmProfileService';
 import FarmAccessService, { VET_NOT_BOOKED_MESSAGE } from './FarmAccessService';
 import { logClinicalAccess } from '../middleware/hospitalDataIsolation';
 import BatchManagementService from './BatchManagementService';
+import FeedInventoryService from './FeedInventoryService';
 
 /**
  * Farm daily records (migration 045): milk, eggs, feed, sample weight, water quality - one row per
@@ -14,6 +15,11 @@ import BatchManagementService from './BatchManagementService';
  * farm profile engine's answer (FarmProfileService.assertRecordTypeAllowed); what a record asks
  * for is the record type's own `fields` list in master data. This service only enforces the shape
  * that list describes, so a new record type or a changed rule needs no code change here.
+ *
+ * A record type with a `stock` field (feed) names the farm's stock item it used: saving takes that much out of stock
+ * and stores its cost; correcting or deleting the entry moves stock back by exactly what it had taken (migration 063).
+ * Such a record may also be for the WHOLE farm ("All my animals") - a small farm feeds from one bag without groups.
+ * Daily records is the only place feed given is recorded; Feed Inventory holds stock and price only.
  *
  * Deaths are the one exception to "store it in farm_daily_records": a death changes a group's head
  * count, and that number has exactly one owner - the population ledger - so a `mortality` record
@@ -35,13 +41,16 @@ export interface SaveRecordInput {
   quantity?: number | string | null;
   detail?: Record<string, unknown> | null;
   notes?: string | null;
+  /** The stock item used (record types with a `stock` field, i.e. feed). Empty = home-grown / not from stock. */
+  feedId?: string | null;
 }
 
 interface Caller { userId: string; role?: string }
 
 interface Subject {
   enterpriseId: string;
-  kind: 'animal' | 'group';
+  /** 'farm' = all the farm's animals (only record types with a stock field - feed). */
+  kind: 'animal' | 'group' | 'farm';
   id: string;
   speciesCode: string | null;
   animalClass: string | null;
@@ -67,9 +76,18 @@ class FarmRecordService {
   }
 
   /** Loads the animal or group a record is about, checking the caller may use its farm. */
-  async loadSubject(input: { animalId?: string | null; groupId?: string | null }, caller: Caller, write = false, skipFarmAccess = false): Promise<Subject> {
+  async loadSubject(input: { animalId?: string | null; groupId?: string | null; enterpriseId?: string | null }, caller: Caller, write = false, skipFarmAccess = false, allowFarm = false): Promise<Subject> {
+    if (allowFarm && !input.animalId && !input.groupId && input.enterpriseId) {
+      if (!skipFarmAccess) await this.assertFarmAccess(input.enterpriseId, caller, write);
+      return {
+        enterpriseId: input.enterpriseId, kind: 'farm', id: input.enterpriseId, speciesCode: null, animalClass: null,
+        gender: null, managementMode: null, groupType: null, cycleId: null,
+      };
+    }
     if (!!input.animalId === !!input.groupId) {
-      throw new ValidationError('A record is about one animal or one group - choose which.');
+      throw new ValidationError(allowFarm
+        ? 'Say who was fed: one animal, one group, or all your animals.'
+        : 'A record is about one animal or one group - choose which.');
     }
     if (input.animalId) {
       const r = await database.query(
@@ -147,6 +165,8 @@ class FarmRecordService {
         if (!Number.isFinite(n) || n < 0) throw new ValidationError(`${this.labelOf(f.key)} must be a number, zero or more.`);
         if (n > 1e9) throw new ValidationError(`${this.labelOf(f.key)} is too large. Check the number.`);
         value = n;
+      } else if (f.type === 'stock') {
+        continue; // the stock item travels as input.feedId and is checked against the farm's stock in save()
       } else if (f.type === 'choice') {
         if (!f.options || !f.options.includes(String(v))) {
           throw new ValidationError(`${this.labelOf(f.key)} must be one of: ${(f.options || []).join(', ')}.`);
@@ -207,17 +227,23 @@ class FarmRecordService {
    * (the earlier values are kept in the audit table) - it never adds a second row.
    */
   async save(input: SaveRecordInput, caller: Caller, kind: 'daily' | 'event' = 'daily'): Promise<any> {
-    const subject = await this.loadSubject(input, caller, true);
+    const rt = await this.loadRecordType(input.recordType, kind);
+    const usesStock = rt.fields.some(f => f.type === 'stock');
+    const subject = await this.loadSubject(input, caller, true, false, usesStock);
     if (input.enterpriseId && input.enterpriseId !== subject.enterpriseId) {
       throw new ValidationError('That animal or group is not on the selected farm.');
     }
     const recordDate = this.checkDate(input.recordDate);
-    const rt = await this.loadRecordType(input.recordType, kind);
 
-    await FarmProfileService.assertRecordTypeAllowed({
-      speciesCode: subject.speciesCode, animalClass: subject.animalClass, gender: subject.gender,
-      managementMode: subject.managementMode, groupType: subject.groupType,
-    }, rt.code, subject.kind);
+    // "All my animals" has no species to check: a stock record (feed) applies to every farm.
+    if (subject.kind !== 'farm') {
+      await FarmProfileService.assertRecordTypeAllowed({
+        speciesCode: subject.speciesCode, animalClass: subject.animalClass, gender: subject.gender,
+        managementMode: subject.managementMode, groupType: subject.groupType,
+      }, rt.code, subject.kind);
+    }
+    const feedId = usesStock && input.feedId ? String(input.feedId) : null;
+    if (feedId && !/^[0-9a-f-]{36}$/i.test(feedId)) throw new ValidationError('Choose the feed from the list.');
 
     const { quantity, session, detail } = this.shape(rt.fields, input);
     const notes = input.notes ? String(input.notes).trim().slice(0, 1000) : null;
@@ -240,10 +266,20 @@ class FarmRecordService {
     const row = await database.transaction(async (client: any) => {
       const existing = await client.query(
         `SELECT * FROM farm_daily_records
-          WHERE COALESCE(animal_id, group_id) = $1 AND record_type = $2 AND record_date = $3 AND session = $4
+          WHERE COALESCE(animal_id, group_id, enterprise_id) = $1 AND record_type = $2 AND record_date = $3 AND session = $4
+            AND COALESCE(feed_id, '00000000-0000-0000-0000-000000000000'::uuid) = COALESCE($5::uuid, '00000000-0000-0000-0000-000000000000'::uuid)
           FOR UPDATE`,
-        [subject.id, rt.code, recordDate, session]
+        [subject.id, rt.code, recordDate, session, feedId]
       );
+      // Stock: take out what this entry uses now, less what the same entry had already taken.
+      let cost: number | null = null;
+      let taken: number | null = null;
+      if (feedId) {
+        const prev = Number(existing.rows[0]?.stock_deducted) || 0;
+        const moved = await FeedInventoryService.takeFromStock(client, feedId, subject.enterpriseId, quantity || 0, prev);
+        cost = moved.cost;
+        taken = moved.taken;
+      }
       if (existing.rows.length) {
         await client.query(
           `INSERT INTO farm_daily_record_edits (record_id, enterprise_id, action, previous, edited_by)
@@ -253,14 +289,17 @@ class FarmRecordService {
       }
       const saved = await client.query(
         `INSERT INTO farm_daily_records
-           (enterprise_id, animal_id, group_id, cycle_id, record_type, record_date, session, quantity, unit, detail, notes, recorded_by, updated_by)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11,$12,$12)
-         ON CONFLICT ((COALESCE(animal_id, group_id)), record_type, record_date, session)
+           (enterprise_id, animal_id, group_id, cycle_id, record_type, record_date, session, quantity, unit, detail, notes, recorded_by, updated_by,
+            feed_id, cost, stock_deducted)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11,$12,$12,$13,$14,$15)
+         ON CONFLICT ((COALESCE(animal_id, group_id, enterprise_id)), record_type, record_date, session,
+                      (COALESCE(feed_id, '00000000-0000-0000-0000-000000000000'::uuid)))
          DO UPDATE SET quantity = EXCLUDED.quantity, unit = EXCLUDED.unit, detail = EXCLUDED.detail, notes = EXCLUDED.notes,
-                       cycle_id = EXCLUDED.cycle_id, updated_by = EXCLUDED.updated_by, updated_at = NOW()
+                       cycle_id = EXCLUDED.cycle_id, updated_by = EXCLUDED.updated_by, cost = EXCLUDED.cost,
+                       stock_deducted = EXCLUDED.stock_deducted, updated_at = NOW()
          RETURNING *, record_date::text AS record_date`,
         [subject.enterpriseId, animalId, groupId, subject.cycleId, rt.code, recordDate, session, quantity, rt.unit,
-         JSON.stringify(detail), notes, caller.userId]
+         JSON.stringify(detail), notes, caller.userId, feedId, cost, taken]
       );
       return { row: saved.rows[0], replaced: existing.rows.length > 0 };
     });
@@ -271,7 +310,7 @@ class FarmRecordService {
 
   async list(filter: {
     enterpriseId?: string; animalId?: string; groupId?: string; recordType?: string;
-    from?: string; to?: string; limit?: number;
+    from?: string; to?: string; limit?: number; wholeFarm?: boolean | string;
   }, caller: Caller): Promise<any[]> {
     if (!filter.enterpriseId && !filter.animalId && !filter.groupId) {
       throw new ValidationError('Say which farm, animal or group to list records for.');
@@ -299,6 +338,7 @@ class FarmRecordService {
     if (filter.animalId) add('r.animal_id = ?', filter.animalId);
     if (filter.groupId) add('r.group_id = ?', filter.groupId);
     if (filter.recordType) add('r.record_type = ?', filter.recordType);
+    if (filter.wholeFarm === true || filter.wholeFarm === 'true') where.push('r.animal_id IS NULL AND r.group_id IS NULL');
     if (filter.from) add('r.record_date >= ?::date', filter.from);
     if (filter.to) add('r.record_date <= ?::date', filter.to);
     const limit = Math.min(Math.max(Number(filter.limit) || 100, 1), 500);
@@ -350,6 +390,8 @@ class FarmRecordService {
          VALUES ($1,$2,'delete',$3::jsonb,$4)`,
         [rec.id, rec.enterprise_id, JSON.stringify(rec), caller.userId]
       );
+      // A deleted feed entry puts back the stock it had taken.
+      if (rec.feed_id && Number(rec.stock_deducted) > 0) await FeedInventoryService.returnToStock(client, rec.feed_id, Number(rec.stock_deducted));
       await client.query(`DELETE FROM farm_daily_records WHERE id = $1`, [rec.id]);
     });
   }
@@ -361,6 +403,8 @@ class FarmRecordService {
       recordType: r.record_type, recordDate: date, session: r.session,
       quantity: r.quantity === null || r.quantity === undefined ? null : Number(r.quantity),
       unit: r.unit, detail: r.detail || {}, notes: r.notes, recordedBy: r.recorded_by,
+      feedId: r.feed_id || null, cost: r.cost === null || r.cost === undefined ? null : Number(r.cost),
+      wholeFarm: !r.animal_id && !r.group_id,
       createdAt: r.created_at, updatedAt: r.updated_at,
     };
   }

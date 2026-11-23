@@ -45,12 +45,27 @@ export interface RiskFlag {
 
 export interface WeightPoint { kg: number; at: string }
 
+/**
+ * Body condition the alerts treat as ideal, on the 9-point scale, per nutrition model (a farm cow at 3 of 5 is ideal -
+ * the pet range 4-5 of 9 would call her thin). Platform defaults for the owner's vet to confirm; data, not species names.
+ */
+export const IDEAL_BCS9: Record<string, { low: number; high: number }> = {
+  companion_energy: { low: 4, high: 5 },
+  ruminant_dm: { low: 4.5, high: 6.5 },   // 2.5-3.5 of 5
+  equine_dm: { low: 4, high: 6 },         // Henneke 4-6 of 9
+  monogastric_spec: { low: 4, high: 6 },
+  guidance_only: { low: 4, high: 5 },
+  aqua_biomass: { low: 4, high: 6 },
+};
+
 export interface RiskInput {
   facts: AnimalFacts;
   /** Newest first or any order - sorted here. */
   weights: WeightPoint[];
   goal: PlanGoal | null;
   feeding7d: { mealKcal: number; treatKcal: number } | null;
+  /** False for an animal with no active plan (alerts that only make sense against a plan stay quiet). */
+  hasPlan?: boolean;
   /** Body condition history on the 9-point scale, any order. */
   conditions?: Array<{ bcs9: number; at: string }>;
   now?: Date;
@@ -64,9 +79,10 @@ export function evaluateRisks(input: RiskInput): RiskFlag[] {
   const flags: RiskFlag[] = [];
   const { facts } = input;
 
+  const ideal = IDEAL_BCS9[facts.model] || IDEAL_BCS9.guidance_only;
   if (facts.bcs9 !== null) {
-    if (facts.bcs9 > 5) flags.push({ type: 'bcs_high', severity: facts.bcs9 >= 8 ? 'act' : 'watch', params: { bcs9: facts.bcs9 } });
-    if (facts.bcs9 < 4) flags.push({ type: 'bcs_low', severity: facts.bcs9 <= 2 ? 'act' : 'watch', params: { bcs9: facts.bcs9 } });
+    if (facts.bcs9 > ideal.high) flags.push({ type: 'bcs_high', severity: facts.bcs9 >= ideal.high + 3 ? 'act' : 'watch', params: { bcs9: facts.bcs9 } });
+    if (facts.bcs9 < ideal.low) flags.push({ type: 'bcs_low', severity: facts.bcs9 <= ideal.low - 2 ? 'act' : 'watch', params: { bcs9: facts.bcs9 } });
   }
   if (facts.muscleCondition && facts.muscleCondition !== 'normal') {
     flags.push({ type: 'muscle_loss', severity: facts.muscleCondition === 'mild' ? 'watch' : 'act', params: { level: facts.muscleCondition } });
@@ -77,7 +93,8 @@ export function evaluateRisks(input: RiskInput): RiskFlag[] {
     .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
   const latest = series[series.length - 1];
 
-  if (!latest || now.getTime() - new Date(latest.at).getTime() > RULE_LIMITS.staleWeightDays * DAY) {
+  // Only an animal that is being fed to a plan needs a recent weight; a farm animal that is never weighed is not nagged.
+  if (input.hasPlan !== false && (!latest || now.getTime() - new Date(latest.at).getTime() > RULE_LIMITS.staleWeightDays * DAY)) {
     flags.push({ type: 'no_recent_weight', severity: 'info', params: { days: RULE_LIMITS.staleWeightDays } });
   }
 
@@ -95,8 +112,8 @@ export function evaluateRisks(input: RiskInput): RiskFlag[] {
         flags.push({ type: 'rapid_weight_loss', severity: 'act', params: { pctPerWeek: pct(lossPctPerWeek), weeks: pct(weeks) } });
       }
     }
-    // Drift while the goal is to hold weight steady.
-    if (!input.goal || input.goal === 'maintain') {
+    // Drift while the goal is to hold weight steady - needs a plan that says so (a growing animal with no plan gains weight).
+    if (input.goal === 'maintain') {
       const older = series.filter(w => new Date(latest.at).getTime() - new Date(w.at).getTime() >= RULE_LIMITS.driftMinDays * DAY
         && new Date(latest.at).getTime() - new Date(w.at).getTime() <= 120 * DAY);
       const ref = older[older.length - 1];
@@ -150,10 +167,11 @@ export function evaluateRisks(input: RiskInput): RiskFlag[] {
  * "grape", but "teaspoon" does not match "tea". A multi-word term ("cooked bone") must appear as a phrase.
  */
 export function matchesUnsafe(text: string, terms: string[]): boolean {
-  const words = text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  // \p{M}: vowel signs and other combining marks are part of a word in Hindi, Kannada, Malayalam, Tamil and Telugu.
+  const words = text.toLowerCase().split(/[^\p{L}\p{N}\p{M}]+/u).filter(Boolean);
   const phrase = ` ${words.join(' ')} `;
   return terms.some(term => {
-    const n = term.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean).join(' ');
+    const n = term.toLowerCase().split(/[^\p{L}\p{N}\p{M}]+/u).filter(Boolean).join(' ');
     if (n.length < 2) return false;
     if (n.includes(' ')) return phrase.includes(` ${n} `) || phrase.includes(` ${n}s `);
     return words.some(w => w === n || w === `${n}s` || w === `${n}es`);
@@ -164,9 +182,13 @@ export function matchesUnsafe(text: string, terms: string[]): boolean {
  * A flock / pig batch / pond fed well below or above its feeding table over the last week. Only judged when enough
  * days are recorded - a farmer who records twice a week is not told the animals are starving.
  */
-export function evaluateGroupFeed(input: { suggestedKgPerDay: number | null; recorded: Array<{ date: string; kg: number }>; now?: Date }): RiskFlag[] {
+export function evaluateGroupFeed(input: {
+  /** What the table said for each day (date -> kg): each recorded day is judged against ITS OWN day's table value. */
+  suggestedByDay: Map<string, number>;
+  recorded: Array<{ date: string; kg: number }>;
+  now?: Date;
+}): RiskFlag[] {
   const now = input.now ?? new Date();
-  if (!input.suggestedKgPerDay || input.suggestedKgPerDay <= 0) return [];
   const since = now.getTime() - 7 * DAY;
   const byDay = new Map<string, number>();
   for (const r of input.recorded) {
@@ -176,8 +198,18 @@ export function evaluateGroupFeed(input: { suggestedKgPerDay: number | null; rec
     byDay.set(key, (byDay.get(key) || 0) + r.kg);
   }
   if (byDay.size < RULE_LIMITS.groupFeedMinDays) return [];
-  const avg = [...byDay.values()].reduce((a, b) => a + b, 0) / byDay.size;
-  const ratio = (avg / input.suggestedKgPerDay) * 100;
+  // Fed vs the table, summed over the recorded days only: a flock fed exactly to the table is 100% on every day, also on the
+  // day it moves to the next age band (comparing with today's band for the whole week raised false alerts at band changes).
+  let fed = 0;
+  let needed = 0;
+  for (const [day, kg] of byDay) {
+    const table = input.suggestedByDay.get(day);
+    if (table === undefined || table <= 0) continue;
+    fed += kg;
+    needed += table;
+  }
+  if (needed <= 0) return [];
+  const ratio = (fed / needed) * 100;
   if (ratio < RULE_LIMITS.groupFeedLowPct) return [{ type: 'feed_below_need', severity: 'watch', params: { pct: Math.round(ratio), days: byDay.size } }];
   if (ratio > RULE_LIMITS.groupFeedHighPct) return [{ type: 'feed_above_need', severity: 'watch', params: { pct: Math.round(ratio), days: byDay.size } }];
   return [];

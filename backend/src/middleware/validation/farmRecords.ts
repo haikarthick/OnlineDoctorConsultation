@@ -13,6 +13,9 @@ export const saveFarmRecordSchema = Joi.object({
   quantity: Joi.alternatives(Joi.number(), Joi.string().allow('')).allow(null).optional(),
   detail: Joi.object().unknown(true).allow(null).optional(),
   notes: Joi.string().max(1000).allow('', null).optional(),
+  // Feed (migration 063): the stock item used; empty = home-grown. With no animal and no group, the entry is for
+  // all the farm's animals (only record types that use stock allow that - FarmRecordService decides).
+  feedId: Joi.string().uuid().allow(null, '').optional(),
 });
 
 // A batch-group event (placement, cull, sale, harvest, clear-out) - see FarmEventService.

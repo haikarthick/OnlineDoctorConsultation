@@ -72,8 +72,8 @@ export const nutritionApi = {
     return response.data
   },
   /** Today's feed for a flock / pig batch / pond and the cycle's FCR (migration 059). */
-  async groupFeeding(groupId: string, params: { pricePerKg?: number | null } = {}) {
-    const response = await sharedClient.get(`/nutrition/groups/${groupId}/feeding`, { params })
+  async groupFeeding(groupId: string) {
+    const response = await sharedClient.get(`/nutrition/groups/${groupId}/feeding`)
     return response.data
   },
   async nutritionAdminCurves() {

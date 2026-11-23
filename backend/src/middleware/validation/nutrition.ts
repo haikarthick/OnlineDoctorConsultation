@@ -164,7 +164,7 @@ export const nutritionRequirementSetSchema = Joi.object({
   status: status.optional(),
   requirements: Joi.array().items(Joi.object({
     nutrient: Joi.string().max(40).required(),
-    basis: Joi.string().valid('per_1000kcal', 'per_kg_dm', 'percent_dm', 'per_day', 'per_kg_bw075', 'percent_bw', 'fraction', 'percent_milk').required(),
+    basis: Joi.string().valid('per_1000kcal', 'per_kg_dm', 'percent_dm', 'per_day', 'per_kg_bw075', 'percent_bw', 'fraction', 'percent_milk', 'per_kg_bw', 'per_kg_gain', 'age_months').required(),
     minValue: Joi.number().allow(null).optional(),
     maxValue: Joi.number().allow(null).optional(),
     unit: Joi.string().max(20).required(),

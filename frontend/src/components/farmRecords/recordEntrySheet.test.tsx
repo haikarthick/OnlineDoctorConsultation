@@ -9,16 +9,25 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t }) }))
 const save = vi.fn()
 const saveEvent = vi.fn()
 const list = vi.fn()
+const listFeeds = vi.fn()
 vi.mock('../../services/api', () => ({
-  default: { saveFarmRecord: (...a: unknown[]) => save(...a), saveGroupEvent: (...a: unknown[]) => saveEvent(...a), listFarmRecords: (...a: unknown[]) => list(...a) },
+  default: {
+    saveFarmRecord: (...a: unknown[]) => save(...a), saveGroupEvent: (...a: unknown[]) => saveEvent(...a), listFarmRecords: (...a: unknown[]) => list(...a),
+    listFeeds: (...a: unknown[]) => listFeeds(...a),
+  },
 }))
+vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', role: 'farmer' } }) }))
+vi.mock('../../context/SettingsContext', () => ({ useSettings: () => ({ formatCurrency: (n: number) => `Rs${n}` }) }))
+vi.mock('../../hooks/useNutritionEnabled', () => ({ useNutritionEnabled: () => ({ enabled: false, loading: false }) }))
 
 const ENTRIES: Record<string, any> = {
   milk: { code: 'milk', kind: 'daily', label: 'Milk', labelKey: null, icon: 'M', unit: 'L', fields: [{ key: 'session', type: 'choice', options: ['am', 'pm'], required: true }, { key: 'quantity', type: 'number', required: true }] },
   eggs: { code: 'eggs', kind: 'daily', label: 'Eggs', labelKey: null, icon: 'E', unit: 'eggs', fields: [{ key: 'quantity', type: 'number', required: true }, { key: 'broken', type: 'number' }] },
   placement: { code: 'placement', kind: 'event', label: 'Place new batch', labelKey: null, icon: 'P', unit: 'head', fields: [{ key: 'quantity', type: 'number', required: true }, { key: 'source', type: 'text' }] },
   water_quality: { code: 'water_quality', kind: 'daily', label: 'Water quality', labelKey: null, icon: 'W', unit: null, fields: [{ key: 'ph', type: 'number' }] },
+  feed: { code: 'feed', kind: 'daily', label: 'Feed', labelKey: null, icon: 'F', unit: 'kg', fields: [{ key: 'quantity', type: 'number', required: true }, { key: 'feedId', type: 'stock' }] },
 }
+const MASTER_TYPES = Object.values(ENTRIES).map((e: any) => ({ code: e.code, kind: e.kind, unit: e.unit }))
 
 let applicable: Array<{ code: string; kind: 'daily' | 'event'; unit: string | null; subjects: Array<'animal' | 'group'> }> = []
 vi.mock('../../hooks/useFarmOutbox', () => ({ useFarmOutbox: () => ({ items: [], waiting: 0, refused: 0, flush: vi.fn(), add: vi.fn(), discard: vi.fn(), retry: vi.fn() }) }))
@@ -26,7 +35,7 @@ vi.mock('../../hooks/useFarmProfile', () => ({
   useFarmProfile: () => ({ profile: { recordTypes: applicable, waterQualityRanges: { ph: { min: 7.5, max: 8.3 } } }, ready: true }),
 }))
 vi.mock('../../context/MasterDataContext', () => ({
-  useMasterData: () => ({ recordTypeEntry: (c: string) => ENTRIES[c], resolveLabel: (e: any) => e.label }),
+  useMasterData: () => ({ recordTypeEntry: (c: string) => ENTRIES[c], resolveLabel: (e: any) => e.label, farmMaster: { recordTypes: MASTER_TYPES } }),
 }))
 
 const cow: RecordSubject = { kind: 'animal', id: 'a1', name: 'Lakshmi', enterpriseId: 'e1', speciesCode: 'Cattle', animalClass: 'cattle_cow', gender: 'female', managementMode: 'individual', groupType: null }
@@ -35,6 +44,10 @@ const pond: RecordSubject = { ...cow, kind: 'group', id: 'g1', name: 'Pond 1', s
 beforeEach(() => {
   vi.clearAllMocks()
   list.mockResolvedValue({ data: { items: [] } })
+  listFeeds.mockResolvedValue({ data: { items: [
+    { id: 'f1', feedName: 'Cattle feed', unit: 'bag', currentStock: 4, stockKg: 200, costPerKg: 25, ingredientId: null },
+  ] } })
+  try { localStorage.clear() } catch { /* jsdom */ }
   save.mockResolvedValue({ data: { id: 'r1', replaced: false } })
   applicable = [{ code: 'milk', kind: 'daily', unit: 'L', subjects: ['animal', 'group'] }, { code: 'weaning', kind: 'event', unit: null, subjects: ['animal'] }]
 })
@@ -118,5 +131,33 @@ describe('RecordEntrySheet', () => {
     applicable = []
     render(<RecordEntrySheet subject={cow} date="2026-11-10" records={[]} onClose={() => {}} onSaved={() => {}} />)
     expect(screen.getByText('farmRecords.nothingToRecord')).toBeInTheDocument()
+  })
+
+  it('feed: the farmer picks the stock item, and the entry carries it (stock is taken out by the server)', async () => {
+    applicable = [{ code: 'feed', kind: 'daily', unit: 'kg', subjects: ['animal', 'group'] }]
+    render(<RecordEntrySheet subject={cow} date="2026-11-10" records={[]} onClose={() => {}} onSaved={() => {}} />)
+    fireEvent.click(await screen.findByText('Cattle feed (4 bag)'))
+    fireEvent.change(screen.getByLabelText('Feed'), { target: { value: '12' } })
+    expect(screen.getByText(/farmRecords.feedCost/)).toBeInTheDocument()
+    fireEvent.click(screen.getByText('farmRecords.save'))
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ enterpriseId: 'e1', recordType: 'feed', recordDate: '2026-11-10', animalId: 'a1', quantity: 12, feedId: 'f1' }))
+  })
+
+  it('feed: more than is in stock is said before saving', async () => {
+    applicable = [{ code: 'feed', kind: 'daily', unit: 'kg', subjects: ['animal', 'group'] }]
+    render(<RecordEntrySheet subject={cow} date="2026-11-10" records={[]} onClose={() => {}} onSaved={() => {}} />)
+    fireEvent.click(await screen.findByText('Cattle feed (4 bag)'))
+    fireEvent.change(screen.getByLabelText('Feed'), { target: { value: '250' } })
+    expect(screen.getByText('farmRecords.moreThanStock')).toBeInTheDocument()
+  })
+
+  it('feed for "all my animals" names no animal and no group; home-grown names no feed', async () => {
+    const farm: RecordSubject = { kind: 'farm', id: 'e1', name: 'x', enterpriseId: 'e1', speciesCode: null, animalClass: null, gender: null, managementMode: null, groupType: null }
+    render(<RecordEntrySheet subject={farm} date="2026-11-10" records={[]} onClose={() => {}} onSaved={() => {}} />)
+    await screen.findByText('Cattle feed (4 bag)')
+    expect(screen.queryByText('farmRecords.whatToRecord')).toBeNull()
+    fireEvent.change(screen.getByLabelText('Feed'), { target: { value: '30' } })
+    fireEvent.click(screen.getByText('farmRecords.save'))
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ enterpriseId: 'e1', recordType: 'feed', recordDate: '2026-11-10', quantity: 30 }))
   })
 })

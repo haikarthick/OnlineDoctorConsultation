@@ -9,7 +9,7 @@
   updateMemberSchema, createAnimalGroupSchema, assignAnimalToGroupSchema, createLocationSchema,
   createMovementSchema, createCampaignSchema, createObservationSchema, resolveObservationSchema,
   createBreedingRecordSchema, updateBreedingRecordSchema, createFeedSchema, restockFeedSchema,
-  logFeedConsumptionSchema, createComplianceDocSchema, updateComplianceDocSchema,
+  createComplianceDocSchema, updateComplianceDocSchema,
   createFinancialRecordSchema, updateFinancialRecordSchema, createAlertRuleSchema, updateAlertRuleSchema,
   toggleAlertRuleSchema, createPredictionSchema, resolvePredictionSchema, createOutbreakZoneSchema,
   createGeneticProfileSchema, updateGeneticProfileSchema, createPairRecommendationSchema,
@@ -201,8 +201,13 @@ describe('Extended Validation Schemas', () => {
     it('accepts valid', () => { expect(restockFeedSchema.validate({ quantity: 100 }).error).toBeUndefined(); });
   });
 
-  describe('logFeedConsumptionSchema', () => {
-    it('accepts valid', () => { expect(logFeedConsumptionSchema.validate({ enterpriseId: u, feedId: u, quantity: 10 }).error).toBeUndefined(); });
+  // Feed given is recorded in Daily records only (migration 063); stock items carry their bag weight and the price paid.
+  describe('feed stock in bags and priced restocks', () => {
+    it('accepts kg per bag and a restock price; refuses a unit outside the list', () => {
+      expect(createFeedSchema.validate({ feedName: 'Cattle feed', unit: 'bag', kgPerUnit: 50 }).error).toBeUndefined();
+      expect(restockFeedSchema.validate({ quantity: 10, pricePerUnit: 1200 }).error).toBeUndefined();
+      expect(createFeedSchema.validate({ feedName: 'X', unit: 'sack' }).error).toBeDefined();
+    });
   });
 
   describe('createComplianceDocSchema', () => {

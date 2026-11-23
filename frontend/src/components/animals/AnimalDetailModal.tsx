@@ -85,7 +85,7 @@ const AnimalDetailModal: React.FC<Props> = ({
           {detailAnimal.dateOfBirth && <div><span className="si-23033f05">{t('animals.detailModal.age')}</span> <strong>{calculateAge(t, detailAnimal.dateOfBirth)}</strong></div>}
           {detailAnimal.weight && <div><span className="si-23033f05">{t('animals.detailModal.weight')}</span> <strong>{detailAnimal.weight} kg</strong></div>}
           {detailAnimal.color && <div><span className="si-23033f05">{t('animals.detailModal.color')}</span> <strong>{detailAnimal.color}</strong></div>}
-          <div><span className="si-23033f05">{t('animals.detailModal.neutered')}</span> <strong>{detailAnimal.isNeutered ? t('animals.detailModal.yesCheck') : t('animals.detailModal.no')}</strong></div>
+          <div><span className="si-23033f05">{t('animals.detailModal.neutered')}</span> <strong>{detailAnimal.isNeutered === null || detailAnimal.isNeutered === undefined ? '-' : detailAnimal.isNeutered ? t('animals.detailModal.yesCheck') : t('animals.detailModal.no')}</strong></div>
           {detailAnimal.ownerName && <div><span className="si-23033f05">{t('animals.detailModal.owner')}</span> <strong>{detailAnimal.ownerName}</strong></div>}
         </div>
 

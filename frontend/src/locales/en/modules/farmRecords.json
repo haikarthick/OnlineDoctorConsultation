@@ -44,7 +44,9 @@
       "buyer": "Buyer (optional)",
       "source": "Bought from (optional)",
       "seedSource": "Seed from (optional)",
-      "reason": "Reason (optional)"
+      "reason": "Reason (optional)",
+      "feedId": "Which feed?",
+      "ageAtPlacementDays": "Age when they arrived (days)"
     },
     "eventSaved_one": "Saved. The group now has {{count}} animal.",
     "eventSaved_other": "Saved. The group now has {{count}} animals.",
@@ -128,6 +130,13 @@
       "progress": "{{done}} of {{total}} done",
       "search": "Search by name",
       "noMatch": "No animal or group matches that name. Clear the search to see everything."
-    }
+    },
+    "homeGrown": "Home-grown / not from stock",
+    "noStockYet": "Add the feed you buy in Feed Inventory - then choose it here and it is taken out of stock automatically.",
+    "suggestedToday": "Suggested today: {{value}}",
+    "feedCost": "costs about {{cost}}",
+    "moreThanStock": "That is more than the {{kg}} kg of {{feed}} in stock. Check the amount, or restock in Feed Inventory first.",
+    "allAnimals": "All my animals",
+    "allAnimalsHint": "Feed given to all the animals together, from one stock"
   }
 }

@@ -385,16 +385,19 @@ class NutritionService {
     const consultationId: string | null = consult.rows[0]?.id || null;
 
     const farm = p.nutrition_model !== 'companion_energy';
+    // Amounts only, in units every language reads (g, kg, "x/day"): the owner opens this in their own language, and the
+    // food name is the feed's own name. kind 'diet' lets pharmacies and printouts tell a diet line from a medicine.
+    const amount = (kg: number | null | undefined) => (kg === null || kg === undefined ? '-' : kg < 1 ? `${Math.round(kg * 1000)} g` : `${kg} kg`);
     const medications = plan.items.map((it: any) => ({
-      name: `Diet: ${it.label}`.slice(0, 255),
-      dosage: farm ? `${it.amountPerDay ?? '-'} kg a day${plan.ration?.herd ? ' per animal' : ''}` : `${it.gramsPerDay ?? '-'} g a day`,
-      frequency: farm ? 'Every day, split into 2 feeds' : `${plan.mealsPerDay} meals a day${it.gramsPerMeal ? ` (${it.gramsPerMeal} g each)` : ''}`,
-      duration: `${days} days`,
-      instructions: 'Food, not a medicine.',
+      kind: 'diet',
+      name: String(it.label).slice(0, 255),
+      dosage: farm ? `${amount(it.amountPerDay)}/day${plan.ration?.herd ? ' /animal' : ''}` : `${it.gramsPerDay ?? '-'} g/day`,
+      frequency: `${plan.mealsPerDay} x/day${!farm && it.gramsPerMeal ? ` (${it.gramsPerMeal} g)` : ''}`,
+      duration: `${days} d`,
     }));
     const summary = farm
-      ? `Diet (ration): ${plan.dailyDmKg ?? '-'} kg dry matter a day per animal.`
-      : `Diet: ${Math.round(plan.effectiveKcal || 0)} kcal a day in ${plan.mealsPerDay} meals.`;
+      ? `${amount(plan.dailyDmKg)} DM/day${plan.ration?.herd ? ' /animal' : ''} - ${plan.mealsPerDay} x/day`
+      : `${Math.round(plan.effectiveKcal || 0)} kcal/day - ${plan.mealsPerDay} x/day`;
     const note = input.note ? String(input.note).trim().slice(0, 2000) : '';
     const PrescriptionService = (await import('../PrescriptionService')).default;
     const rx = await PrescriptionService.createPrescription(caller.userId, {
@@ -483,6 +486,11 @@ class NutritionService {
   }, caller: Caller): Promise<any> {
     await this.assertEntitled(caller, 'feeding_log');
     const access = await NutritionAccess.forAnimal(animalId, caller, 'write');
+    // This log is for pets (kcal of meals and treats). Feed for a farm animal is recorded in ONE place: Daily records.
+    const model = (await this.loadFacts(animalId)).facts.model;
+    if (['ruminant_dm', 'equine_dm', 'monogastric_spec', 'aqua_biomass'].includes(model)) {
+      throw new ValidationError('Feed for farm animals is recorded in Daily records - open Daily records, choose this animal or group, and tap Feed.');
+    }
     const kind = input.kind === 'treat' ? 'treat' : 'meal';
     const fedOn = input.fedOn || todayIso();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fedOn)) throw new ValidationError('That date is not valid.');
@@ -621,8 +629,14 @@ class NutritionService {
       where.push(`(label ILIKE $${values.length} OR label_hi ILIKE $${values.length} OR label_kn ILIKE $${values.length}
                   OR label_ml ILIKE $${values.length} OR label_ta ILIKE $${values.length} OR label_te ILIKE $${values.length})`);
     }
+    // A farm's own price for a feed comes from its stock (Feed Inventory) - the one place a price is entered.
     const r = await database.query(
-      `SELECT * FROM nutrition_ingredients WHERE ${where.join(' AND ')}
+      `SELECT nutrition_ingredients.*,
+              (SELECT fi.cost_per_unit / NULLIF(COALESCE(fi.kg_per_unit, CASE lower(fi.unit) WHEN 'kg' THEN 1 WHEN 'g' THEN 0.001 WHEN 'ton' THEN 1000 WHEN 'lb' THEN 0.45359237 END), 0)
+                 FROM feed_inventory fi
+                WHERE fi.ingredient_id = nutrition_ingredients.id AND fi.enterprise_id = $2::uuid AND fi.is_active = true AND fi.cost_per_unit > 0
+                ORDER BY fi.updated_at DESC LIMIT 1) AS stock_price_per_kg
+         FROM nutrition_ingredients WHERE ${where.join(' AND ')}
         ORDER BY (owner_id IS NOT NULL OR enterprise_id IS NOT NULL) DESC, label ASC LIMIT 200`,
       values
     );
@@ -658,6 +672,7 @@ class NutritionService {
       kind: x.kind, models: x.models || [], kcalPer100g: num(x.energy_kcal_per_100g), dryMatterPct: num(x.dry_matter_pct),
       composition: x.composition || {}, source: x.source, licence: x.licence, status: x.status,
       isOwn: !!(x.owner_id || x.enterprise_id),
+      stockPricePerKg: num(x.stock_price_per_kg) === null ? null : Math.round(Number(x.stock_price_per_kg) * 100) / 100,
     };
   }
 
@@ -705,7 +720,7 @@ class NutritionService {
     const flags = evaluateRisks({
       facts,
       weights: measurements.filter(m => m.weightKg !== null).map(m => ({ kg: m.weightKg as number, at: m.recordedAt })),
-      goal: (plan.rows[0]?.goal as PlanGoal) || null,
+      goal: (plan.rows[0]?.goal as PlanGoal) || null, hasPlan: plan.rows.length > 0,
       feeding7d: feeding.last7.days > 0 ? { mealKcal: feeding.last7.mealKcal, treatKcal: feeding.last7.treatKcal } : null,
       conditions: measurements.filter(m => m.bcs9 !== null).map(m => ({ bcs9: m.bcs9 as number, at: m.recordedAt })),
     });

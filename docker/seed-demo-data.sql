@@ -561,12 +561,14 @@ INSERT INTO feed_inventory (id, enterprise_id, feed_name, feed_type, unit, curre
   ('1f000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000002', 'Goat Dairy Ration',     'grain',   'kg', 350,  100,  0.55, 'Southern Feeds',      'GD-2026-0201', '2026-06-15', 'Goat Feed Shed',     true)
 ON CONFLICT (id) DO NOTHING;
 
--- Feed consumption logs
-INSERT INTO feed_consumption_logs (id, enterprise_id, feed_id, group_id, quantity, unit, consumption_date, recorded_by, cost, notes) VALUES
-  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000001', '1f000000-0000-0000-0000-000000000001', 'ab000000-0000-0000-0000-000000000001', 210, 'kg', '2026-02-18', 'f0000000-0000-0000-0000-000000000001', 88.20, 'Morning + evening feeding for Holstein herd'),
-  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000001', '1f000000-0000-0000-0000-000000000002', 'ab000000-0000-0000-0000-000000000001', 380, 'kg', '2026-02-18', 'f0000000-0000-0000-0000-000000000001', 106.40, 'Alfalfa hay â€” ad libitum access'),
-  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000002', '1f000000-0000-0000-0000-000000000004', 'ab000000-0000-0000-0000-000000000004', 18,  'kg', '2026-02-18', 'f0000000-0000-0000-0000-000000000002', 6.84,  'Layer mash for 150 hens'),
-  (gen_random_uuid(), 'e0000000-0000-0000-0000-000000000002', '1f000000-0000-0000-0000-000000000005', 'ab000000-0000-0000-0000-000000000005', 8,   'kg', '2026-02-18', 'f0000000-0000-0000-0000-000000000002', 4.40,  'Dairy ration for 12 Saanen does');
+-- Feed given - recorded in Daily records, the ONE place feed is recorded (migration 063): each entry names its feed,
+-- takes it out of stock and carries its cost.
+INSERT INTO farm_daily_records (enterprise_id, group_id, record_type, record_date, session, quantity, unit, feed_id, cost, stock_deducted, notes, recorded_by, updated_by) VALUES
+  ('e0000000-0000-0000-0000-000000000001', 'ab000000-0000-0000-0000-000000000001', 'feed', '2026-02-18', 'day', 210, 'kg', '1f000000-0000-0000-0000-000000000001', 88.20, 210, 'Morning + evening feeding for Holstein herd', 'f0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000001'),
+  ('e0000000-0000-0000-0000-000000000001', 'ab000000-0000-0000-0000-000000000001', 'feed', '2026-02-18', 'day', 380, 'kg', '1f000000-0000-0000-0000-000000000002', 106.40, 380, 'Alfalfa hay - ad libitum access', 'f0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000001'),
+  ('e0000000-0000-0000-0000-000000000002', 'ab000000-0000-0000-0000-000000000004', 'feed', '2026-02-18', 'day', 18,  'kg', '1f000000-0000-0000-0000-000000000004', 6.84,  18,  'Layer mash for 150 hens', 'f0000000-0000-0000-0000-000000000002', 'f0000000-0000-0000-0000-000000000002'),
+  ('e0000000-0000-0000-0000-000000000002', 'ab000000-0000-0000-0000-000000000005', 'feed', '2026-02-18', 'day', 8,   'kg', '1f000000-0000-0000-0000-000000000005', 4.40,  8,   'Dairy ration for 12 Saanen does', 'f0000000-0000-0000-0000-000000000002', 'f0000000-0000-0000-0000-000000000002')
+ON CONFLICT DO NOTHING;
 
 -- ============================================================
 -- STEP 21: COMPLIANCE DOCUMENTS

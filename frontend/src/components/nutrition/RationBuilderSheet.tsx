@@ -8,7 +8,7 @@ import { BottomSheet } from '../mobile/BottomSheet'
 import { ChipSelect } from '../mobile/ChipSelect'
 import { NumberStepper, parseStepperValue } from '../mobile/NumberStepper'
 import { SaveState } from '../mobile/SaveState'
-import type { Food, NutritionModel } from './nutritionShared'
+import { formatAmount, type Food, type NutritionModel } from './nutritionShared'
 
 interface Chosen { ingredientId: string; label: string; price: string; maxKg: string }
 
@@ -52,7 +52,8 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
   const { resolveLabel } = useMasterData()
   const equine = target.model === 'equine_dm'
   const herd = target.kind === 'group'
-  const [milk, setMilk] = useState(target.milk ? String(target.milk) : '')
+  // Blank = use the animal's recorded milk (last 7 days of Daily records, else the profile); a typed 0 means "dry".
+  const [milk, setMilk] = useState('')
   const [fat, setFat] = useState('')
   const [work, setWork] = useState<string>(WORK.includes(target.work as any) ? String(target.work) : 'low')
   const [avgWeight, setAvgWeight] = useState(target.avgWeightKg ? String(target.avgWeightKg) : '')
@@ -75,11 +76,14 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
     : [...prev, { ingredientId: f.id, label: name(f), price: '', maxKg: '' }]))
   const update = (id: string, patch: Partial<Chosen>) => setChosen(prev => prev.map(c => (c.ingredientId === id ? { ...c, ...patch } : c)))
 
+  const money = (n: number | null | undefined) => (n === null || n === undefined ? '-' : n.toLocaleString(i18n.language, { maximumFractionDigits: 2 }))
+
   const payload = useMemo(() => ({
-    ...(equine ? { work: work as typeof WORK[number] } : { milkLitresPerDay: parseStepperValue(milk) ?? 0, milkFatPct: parseStepperValue(fat) }),
+    ...(equine ? { work: work as typeof WORK[number] } : { milkLitresPerDay: parseStepperValue(milk), milkFatPct: parseStepperValue(fat) }),
     ...(herd ? { avgWeightKg: parseStepperValue(avgWeight) } : {}),
-    feeds: chosen.map(c => ({ ingredientId: c.ingredientId, pricePerKg: parseStepperValue(c.price), maxKg: parseStepperValue(c.maxKg) })),
-  }), [equine, herd, work, milk, fat, avgWeight, chosen])
+    // A feed in stock sends no price: the server takes it from the stock item (the one place a price is entered).
+    feeds: chosen.map(c => ({ ingredientId: c.ingredientId, pricePerKg: library.find(f => f.id === c.ingredientId)?.stockPricePerKg != null ? null : parseStepperValue(c.price), maxKg: parseStepperValue(c.maxKg) })),
+  }), [equine, herd, work, milk, fat, avgWeight, chosen, library])
 
   useEffect(() => {
     if (payload.feeds.length === 0) { setPreview(null); setPreviewError(''); return }
@@ -98,7 +102,6 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
     else await apiService.saveRation(target.id, payload)
   }, t('nutrition.errors.savePlan'))
   const result = preview?.result
-  const money = (n: number | null | undefined) => (n === null || n === undefined ? '-' : n.toLocaleString(i18n.language, { maximumFractionDigits: 2 }))
   const reason = (r: string) => (equine && i18n.exists(`nutrition.ration.reasonsEquine.${r}`) ? t(`nutrition.ration.reasonsEquine.${r}`) : t(`nutrition.ration.reasons.${r}`))
 
   return (
@@ -114,13 +117,15 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
         ) : (
           <>
             <NumberStepper label={t(herd ? 'nutrition.ration.milkHerd' : 'nutrition.ration.milk')} value={milk} onChange={setMilk} step={0.5} unit="L"
-              hint={t(herd ? 'nutrition.ration.milkHerdHint' : 'nutrition.ration.milkHint')} />
-            {(parseStepperValue(milk) ?? 0) > 0 && (
+              hint={preview?.milkSource === 'recorded' && milk === ''
+                ? t('nutrition.ration.milkFromRecords', { litres: preview.milkLitresPerDay })
+                : t(herd ? 'nutrition.ration.milkHerdHint' : 'nutrition.ration.milkHint')} />
+            {((parseStepperValue(milk) ?? preview?.milkLitresPerDay ?? target.milk ?? 0)) > 0 && (
               <NumberStepper label={t('nutrition.ration.fat')} value={fat} onChange={setFat} step={0.1} max={15} unit="%" hint={t('nutrition.ration.fatHint')} />
             )}
           </>
         )}
-        {equine && !herd && <p className="nutri-hint">{t('nutrition.ration.workHint')}</p>}
+        {equine && <p className="nutri-hint">{t(`nutrition.ration.workDesc.${work}`)}</p>}
 
         {GROUPS.map(g => {
           const items = library.filter(f => g.kinds.includes(f.kind))
@@ -145,13 +150,19 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
         {chosen.length > 0 && (
           <div className="nutri-subsection">
             <h4 className="nutri-sub-title">{t('nutrition.ration.pricesTitle')}</h4>
-            {chosen.map(c => (
+            {chosen.map(c => {
+              const stockPrice = library.find(f => f.id === c.ingredientId)?.stockPricePerKg ?? null
+              return (
               <div key={c.ingredientId} className="nutri-food-row">
                 <strong className="nutri-food-name">{c.label}</strong>
-                <NumberStepper label={t('nutrition.ration.price')} value={c.price} onChange={v => update(c.ingredientId, { price: v })} step={1} unit="₹/kg" hint={t('nutrition.ration.priceHint')} />
+                {/* The price is entered once, in Feed Inventory: a feed in stock shows it, only a feed with no stock item asks. */}
+                {stockPrice !== null
+                  ? <p className="nutri-hint">{t('nutrition.ration.priceFromStock', { price: money(stockPrice) })}</p>
+                  : <NumberStepper label={t('nutrition.ration.price')} value={c.price} onChange={v => update(c.ingredientId, { price: v })} step={1} unit="₹/kg" hint={t('nutrition.ration.priceHint')} />}
                 <NumberStepper label={t(herd ? 'nutrition.ration.maxKgHead' : 'nutrition.ration.maxKg')} value={c.maxKg} onChange={v => update(c.ingredientId, { maxKg: v })} step={1} unit="kg" hint={t('nutrition.ration.maxKgHint')} />
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
 
@@ -171,7 +182,7 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
               {result.lines.map((l: any) => (
                 <li key={l.key} className="nutri-list-row">
                   <span className="nutri-list-main"><strong>{l.label}</strong></span>
-                  <span className="nutri-list-meta">{t('nutrition.ration.line', { kg: l.kgAsFedPerDay, cost: money(l.costPerDay) })}</span>
+                  <span className="nutri-list-meta">{t('nutrition.ration.line', { amount: formatAmount(l.kgAsFedPerDay), cost: money(l.costPerDay) })}</span>
                 </li>
               ))}
             </ul>
@@ -182,12 +193,22 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
                   {preview.herd.lines.map((l: any) => (
                     <li key={l.key} className="nutri-list-row">
                       <span className="nutri-list-main">{l.label}</span>
-                      <span className="nutri-list-meta">{t('nutrition.ration.herdLine', { kg: l.kgAsFedPerDay })}</span>
+                      <span className="nutri-list-meta">{t('nutrition.ration.herdLine', { amount: formatAmount(l.kgAsFedPerDay) })}</span>
                     </li>
                   ))}
                 </ul>
               </>
             )}
+            {preview.stage && preview.stage.ageMonths === null && <p className="nutri-hint">{t('nutrition.ration.ageUnknown')}</p>}
+            {preview.stage?.growing && <p className="nutri-note">{t('nutrition.ration.growingNote', { months: preview.stage.ageMonths })}</p>}
+            {preview.stage?.firstLactation && <p className="nutri-hint">{t('nutrition.ration.firstLactationNote')}</p>}
+            {equine && result.supplied.feedsPerDay > 2 && <p className="nutri-note is-warning">{t('nutrition.ration.grainFeeds', { count: result.supplied.feedsPerDay })}</p>}
+            {(preview.cautions || []).map((c: any) => (
+              <p key={`${c.feed}-${c.code}`} className="nutri-note is-warning">{t('nutrition.ration.caution', { feed: c.feed, note: t(c.labelKey || `nutrition.unsafe.${c.code}`, { defaultValue: c.label }) })}</p>
+            ))}
+            {(preview.withdrawals || []).map((w: any) => (
+              <p key={w.what} className="nutri-note is-warning">{t('nutrition.ration.withdrawal', { what: t(`nutrition.ration.withdrawalWhat.${w.what}`), date: new Date(w.until).toLocaleDateString(i18n.language) })}</p>
+            ))}
             <p className="nutri-hint">{equine
               ? t('nutrition.ration.needLineEquine', { energy: result.need.deMcal, cp: result.need.cpMinG, dmMin: result.need.dmiMinKg, dmMax: result.need.dmiMaxKg, dm: result.supplied.dmKg, conc: result.supplied.concentratePct })
               : t('nutrition.ration.needLine', { energy: result.need.nelMcal, dmMin: result.need.dmiMinKg, dmMax: result.need.dmiMaxKg, dm: result.supplied.dmKg })}</p>

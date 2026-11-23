@@ -14,6 +14,14 @@ const FEED = [{ key: 'quantity', type: 'number', required: true }, { key: 'feedI
 const cow: RecordSubject = { kind: 'animal', id: 'a1', name: 'Lakshmi', enterpriseId: 'e1', speciesCode: 'Cattle', animalClass: 'cattle_cow', gender: 'female', managementMode: 'individual', groupType: null }
 const flock: RecordSubject = { ...cow, kind: 'group', id: 'g1', name: 'Layers', speciesCode: 'Chicken', animalClass: null, gender: null, managementMode: 'batch', groupType: 'layers' }
 
+describe('whole-number fields', () => {
+  it('age on arrival (days) and counts are whole numbers; a weight is not', () => {
+    expect(isWholeNumberField({ key: 'ageAtPlacementDays', type: 'number' }, null)).toBe(true)
+    expect(isWholeNumberField({ key: 'sampleCount', type: 'number' }, null)).toBe(true)
+    expect(isWholeNumberField({ key: 'averageWeight', type: 'number' }, null)).toBe(false)
+  })
+})
+
 describe('buildRecordPayload', () => {
   it('sends the quantity and session as columns and the animal as animalId', () => {
     expect(buildRecordPayload(cow, 'milk', MILK, { session: 'am', quantity: '6.5' }, '2026-11-10')).toEqual({

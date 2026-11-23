@@ -9,7 +9,8 @@ import type { RecordFieldDef } from '../../context/MasterDataContext'
  * record type or a changed rule needs no change in this file.
  */
 
-export type RecordSubjectKind = 'animal' | 'group'
+/** 'farm' = all the farm's animals - only for record types that use stock (feed): a small farm feeds from one bag. */
+export type RecordSubjectKind = 'animal' | 'group' | 'farm'
 
 /** Who a record is about, with everything the farm profile needs to say what applies. */
 export interface RecordSubject {
@@ -40,6 +41,10 @@ export interface FarmRecord {
   quantity: number | null
   unit: string | null
   detail: Record<string, unknown>
+  /** Feed: the stock item used (null = home-grown), its cost, and whether it was for all the farm's animals. */
+  feedId?: string | null
+  cost?: number | null
+  wholeFarm?: boolean
 }
 
 /** Units that only ever make sense as whole numbers (counts of animals / eggs). */
@@ -59,7 +64,7 @@ export const ANIMAL_EVENT_CODES = ['heat', 'insemination', 'pregnancy_check', 'b
 export const BATCH_START_CODES = ['placement', 'stocking']
 
 /** Daily (not event) record types that apply to this kind of subject in this profile. */
-export function dailyTypesFor(profile: FarmProfile, kind: RecordSubjectKind): ResolvedRecordType[] {
+export function dailyTypesFor(profile: FarmProfile, kind: Exclude<RecordSubjectKind, 'farm'>): ResolvedRecordType[] {
   return profile.recordTypes.filter(r => r.kind === 'daily' && r.subjects.includes(kind))
 }
 
@@ -68,7 +73,7 @@ export function dailyTypesFor(profile: FarmProfile, kind: RecordSubjectKind): Re
  * Everything the entry sheet can record for this subject: the daily records, plus - for a batch
  * group - the head-count events. A group with no animals yet is offered starting a batch first.
  */
-export function recordableTypesFor(profile: FarmProfile, kind: RecordSubjectKind, opts: { emptyGroup?: boolean } = {}): ResolvedRecordType[] {
+export function recordableTypesFor(profile: FarmProfile, kind: Exclude<RecordSubjectKind, 'farm'>, opts: { emptyGroup?: boolean } = {}): ResolvedRecordType[] {
   const daily = dailyTypesFor(profile, kind)
   const codes = kind === 'group' ? GROUP_EVENT_CODES : ANIMAL_EVENT_CODES
   const events = profile.recordTypes.filter(r => r.kind === 'event' && r.subjects.includes(kind) && codes.includes(r.code))
@@ -82,9 +87,25 @@ export function visibleFields(fields: RecordFieldDef[]): RecordFieldDef[] {
   return fields.filter(f => f.type !== 'picker')
 }
 
+/** A record type that names a stock item (feed): it takes from stock, and may be for all the farm's animals. */
+export const usesStock = (fields: RecordFieldDef[]): boolean => fields.some(f => f.type === 'stock')
+
+/**
+ * What can be recorded for "All my animals": the daily record types that use stock (feed). From master data - no
+ * record type is named here.
+ */
+export function farmWideTypes(
+  recordTypes: Array<{ code: string; kind: string; unit: string | null }>,
+  fieldsOf: (code: string) => RecordFieldDef[],
+): ResolvedRecordType[] {
+  return recordTypes
+    .filter(r => r.kind === 'daily' && usesStock(fieldsOf(r.code)))
+    .map(r => ({ code: r.code, kind: 'daily' as const, unit: r.unit, subjects: [] }))
+}
+
 export function isWholeNumberField(field: RecordFieldDef, unit: string | null): boolean {
   if (field.key === 'quantity') return !!unit && WHOLE_NUMBER_UNITS.includes(unit)
-  return /[cC]ount$/.test(field.key) || ['broken', 'liveBirths', 'stillbirths'].includes(field.key)
+  return /[cC]ount$|Days$/.test(field.key) || ['broken', 'liveBirths', 'stillbirths'].includes(field.key)
 }
 
 export function stepFor(field: RecordFieldDef, unit: string | null): number {
@@ -130,12 +151,14 @@ export function buildRecordPayload(
     enterpriseId: subject.enterpriseId,
     recordType,
     recordDate: date,
-    [subject.kind === 'animal' ? 'animalId' : 'groupId']: subject.id,
   }
+  // "All my animals" names neither an animal nor a group.
+  if (subject.kind !== 'farm') payload[subject.kind === 'animal' ? 'animalId' : 'groupId'] = subject.id
   const detail: Record<string, unknown> = {}
   for (const f of visibleFields(fields)) {
     const raw = values[f.key]
     if (raw === undefined || raw.trim() === '') continue
+    if (f.type === 'stock') { payload.feedId = raw.trim(); continue }
     const v: unknown = f.type === 'number' ? numberOf(raw) : raw.trim()
     if (v === null) continue
     if (f.key === 'quantity') payload.quantity = v
@@ -157,11 +180,19 @@ export function buildEventPayload(
 /** The record already saved for this subject, type, day and session - saving again corrects it. */
 export function findExisting(
   records: FarmRecord[], subject: Pick<RecordSubject, 'kind' | 'id'>, recordType: string, date: string, session: string | undefined,
+  feedId?: string | null,
 ): FarmRecord | undefined {
   return records.find(r =>
-    r.recordType === recordType && r.recordDate === date &&
-    (subject.kind === 'animal' ? r.animalId === subject.id : r.groupId === subject.id) &&
-    (!session || r.session === session || r.session === 'day'))
+    r.recordType === recordType && r.recordDate === date && isRecordOf(r, subject) &&
+    (!session || r.session === session || r.session === 'day') &&
+    // a feed entry is one per feed: green fodder and concentrate the same day are two entries
+    (feedId === undefined || (r.feedId || null) === (feedId || null)))
+}
+
+/** Whether a saved record belongs to this animal, this group, or "all my animals". */
+export function isRecordOf(r: FarmRecord, subject: Pick<RecordSubject, 'kind' | 'id'>): boolean {
+  if (subject.kind === 'farm') return !r.animalId && !r.groupId
+  return subject.kind === 'animal' ? r.animalId === subject.id : r.groupId === subject.id
 }
 
 /** "28 - 32", "up to 0.5", "at least 4": the usual range for a water reading, from master data. */

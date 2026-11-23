@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import healthAnalyticsService from '../services/HealthAnalyticsService';
 import breedingService from '../services/BreedingService';
-import feedInventoryService from '../services/FeedInventoryService';
+import feedInventoryService, { FEED_GIVEN_MOVED_MESSAGE } from '../services/FeedInventoryService';
 import complianceService from '../services/ComplianceService';
 import financialService from '../services/FinancialService';
 import alertService from '../services/AlertService';
@@ -116,69 +116,54 @@ class Tier2Controller {
   }
 
   // ═══════════════════════ Feed Inventory ═══════════════════════
+  // Stock and price only (migration 063). Every write checks the farm that OWNS the item - never an id from the body -
+  // and failures go to the shared error handler, which shows the person a plain message, never err.message.
 
   async listFeeds(req: Request, res: Response) {
-    try {
-      const { enterpriseId } = req.params;
-      if (!await ensureAccess(req, res, enterpriseId)) return;
-      const data = await feedInventoryService.listFeeds(enterpriseId);
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    const { enterpriseId } = req.params;
+    if (!await ensureAccess(req, res, enterpriseId)) return;
+    res.json({ data: await feedInventoryService.listFeeds(enterpriseId) });
+  }
+
+  async feedLibrary(req: Request, res: Response) {
+    const { enterpriseId } = req.params;
+    if (!await ensureAccess(req, res, enterpriseId)) return;
+    res.json({ data: await feedInventoryService.library() });
   }
 
   async createFeed(req: Request, res: Response) {
-    try {
-      const data = await feedInventoryService.createFeed(req.body);
-      res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    const { enterpriseId } = req.params;
+    if (!await ensureAccess(req, res, enterpriseId)) return;
+    res.status(201).json({ data: await feedInventoryService.createFeed(enterpriseId, req.body) });
   }
 
   async updateFeed(req: Request, res: Response) {
-    try {
-      const data = await feedInventoryService.updateFeed(req.params.id, req.body);
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    if (!await ensureAccess(req, res, await feedInventoryService.enterpriseOf(req.params.id))) return;
+    res.json({ data: await feedInventoryService.updateFeed(req.params.id, req.body) });
   }
 
   async restockFeed(req: Request, res: Response) {
-    try {
-      const data = await feedInventoryService.restock(req.params.id, req.body.quantity);
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    if (!await ensureAccess(req, res, await feedInventoryService.enterpriseOf(req.params.id))) return;
+    res.json({ data: await feedInventoryService.restock(req.params.id, req.body, (req as any).userId) });
   }
 
   async deleteFeed(req: Request, res: Response) {
-    try {
-      await feedInventoryService.deleteFeed(req.params.id);
-      res.json({ data: { success: true } });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    if (!await ensureAccess(req, res, await feedInventoryService.enterpriseOf(req.params.id))) return;
+    await feedInventoryService.deleteFeed(req.params.id);
+    res.json({ data: { success: true } });
   }
 
-  async logFeedConsumption(req: Request, res: Response) {
-    try {
-      const userId = (req as any).userId;
-      const data = await feedInventoryService.logConsumption({ ...req.body, recordedBy: userId });
-      res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
-  }
-
-  async listConsumptionLogs(req: Request, res: Response) {
-    try {
-      const { enterpriseId } = req.params;
-      if (!await ensureAccess(req, res, enterpriseId)) return;
-      const data = await feedInventoryService.listConsumptionLogs(enterpriseId, req.query);
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  /** Feed given is recorded only in Daily records now; an old screen still calling here is told where to go. */
+  async logFeedConsumption(_req: Request, res: Response) {
+    res.status(410).json({ success: false, message: FEED_GIVEN_MOVED_MESSAGE, error: { message: FEED_GIVEN_MOVED_MESSAGE } });
   }
 
   async getFeedAnalytics(req: Request, res: Response) {
-    try {
-      const { enterpriseId } = req.params;
-      if (!await ensureAccess(req, res, enterpriseId)) return;
-      const data = await feedInventoryService.getFeedAnalytics(enterpriseId);
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    const { enterpriseId } = req.params;
+    if (!await ensureAccess(req, res, enterpriseId)) return;
+    res.json({ data: await feedInventoryService.getFeedAnalytics(enterpriseId) });
   }
+
 
   // ═══════════════════════ Compliance ═══════════════════════
 

@@ -311,13 +311,12 @@
   },
   "feedInventory": {
     "pageTitle": "🌾 തീറ്റ & ഇൻവെന്ററി മാനേജ്‌മെന്റ്",
-    "subtitle": "തീറ്റ സ്റ്റോക്ക് അളവുകൾ ട്രാക്ക് ചെയ്യുക, ഉപഭോഗം ലോഗ് ചെയ്യുക, കുറഞ്ഞ സ്റ്റോക്ക് അലേർട്ടുകൾ നേടുക",
+    "subtitle": "സംഭരണത്തിലുള്ള തീറ്റ, അതിന്റെ വില, കുറഞ്ഞ സ്റ്റോക്ക് മുന്നറിയിപ്പ്. ദിവസവും നൽകുന്ന തീറ്റ ദൈനംദിന രേഖകളിൽ രേഖപ്പെടുത്തുന്നു.",
     "tabs": {
       "inventory": "📦 ഇൻവെന്ററി",
       "analytics": "📊 വിശകലനം"
     },
     "addFeed": "+ തീറ്റ ചേർക്കുക",
-    "logConsumption": "📝 ഉപഭോഗം ലോഗ് ചെയ്യുക",
     "inventoryTitle": "തീറ്റ ഇൻവെന്ററി",
     "emptyInventory": "ഇൻവെന്ററിയിൽ തീറ്റ ഇനങ്ങളൊന്നുമില്ല.",
     "lowStock": "കുറഞ്ഞ സ്റ്റോക്ക്",
@@ -333,31 +332,30 @@
     "form": {
       "editTitle": "Edit Feed Item",
       "createTitle": "Add New Feed",
-      "name": "Name *",
+      "name": "നിങ്ങൾ വിളിക്കുന്ന പേര്",
       "feedType": "Feed Type",
       "brand": "Brand",
       "batchNumber": "Batch Number",
       "quantityInStock": "Quantity in Stock *",
       "unit": "Unit",
       "minimumStockLevel": "Minimum Stock Level",
-      "costPerUnit": "Cost per Unit *",
+      "costPerUnit": "ഒരു {{unit}} വില",
       "expiryDate": "Expiry Date",
       "storageLocation": "Storage Location",
-      "supplier": "Supplier"
-    },
-    "consumptionForm": {
-      "title": "Log Feed Consumption",
-      "feed": "Feed *",
-      "selectFeed": "-- Select Feed --",
-      "quantityUsed": "Quantity Used *",
-      "submitBtn": "Log Consumption"
+      "supplier": "Supplier",
+      "isWhat": "ഇത് ഏത് തീറ്റയാണ്?",
+      "isWhatNone": "-- പട്ടികയിൽ ഇല്ല --",
+      "isWhatHint": "റേഷൻ പിന്നീട് ഈ തീറ്റയും അതിന്റെ വിലയും ഉപയോഗിക്കും.",
+      "kgPerUnit": "ഒരു {{unit}} എത്ര kg?",
+      "kgPerUnitHint": "നൽകിയ തീറ്റ kg-ൽ രേഖപ്പെടുത്തും; സ്റ്റോക്ക് {{unit}}-ൽ കുറയും."
     },
     "headers": {
       "stock": "Stock",
       "minLevel": "Min Level",
       "costPerUnit": "Cost/Unit",
       "expiry": "Expiry",
-      "location": "Location"
+      "location": "Location",
+      "isWhat": "തീറ്റ"
     },
     "analytics": {
       "used": "Used",
@@ -369,8 +367,6 @@
       "saveFailed": "Failed to save feed",
       "restocked": "Feed restocked!",
       "restockFailed": "Failed to restock",
-      "consumptionLogged": "Consumption logged!",
-      "consumptionFailed": "Failed to log consumption",
       "deleteConfirm": "Delete this feed item?",
       "feedDeleted": "Feed deleted!",
       "deleteFailed": "Failed to delete"
@@ -384,7 +380,8 @@
     "blocked": {
       "name": "ആദ്യം തീറ്റയുടെ പേര് നൽകുക.",
       "quantity": "ആദ്യം സ്റ്റോക്കിൽ എത്രയുണ്ടെന്ന് നൽകുക.",
-      "cost": "ആദ്യം ഒരു യൂണിറ്റിന്റെ വില നൽകുക."
+      "cost": "ആദ്യം ഒരു യൂണിറ്റിന്റെ വില നൽകുക.",
+      "kgPerUnit": "ഒരു {{unit}} ഭാരം kg-ൽ നൽകുക."
     },
     "minHint": "സ്റ്റോക്ക് ഈ നിലയിലേക്ക് കുറഞ്ഞാൽ നിങ്ങൾക്ക് മുന്നറിയിപ്പ് ലഭിക്കും.",
     "restockTitle": "{{name}} സ്റ്റോക്ക് കൂട്ടുക",
@@ -399,7 +396,8 @@
       "concentrate": "സാന്ദ്രീകൃത തീറ്റ",
       "forage": "പച്ചപ്പുല്ല്",
       "medicated": "മരുന്ന് ചേർത്ത തീറ്റ",
-      "other": "മറ്റുള്ളവ"
+      "other": "മറ്റുള്ളവ",
+      "home_grown": "വീട്ടിൽ വളർത്തിയ തീറ്റപ്പുല്ല്"
     },
     "units": {
       "kg": "കിലോ",
@@ -408,8 +406,17 @@
       "bag": "ചാക്ക്",
       "bale": "കെട്ട്",
       "liter": "ലിറ്റർ",
-      "gallon": "ഗാലൻ"
-    }
+      "gallon": "ഗാലൻ",
+      "g": "g",
+      "pcs": "എണ്ണം"
+    },
+    "restockPrice": "ഒരു {{unit}}ന് നൽകിയ വില (ഐച്ഛികം)",
+    "restockPriceHint": "വില നൽകിയാൽ വാങ്ങൽ ധനകാര്യത്തിൽ തീറ്റച്ചെലവായി ചേരും - അവിടെ വീണ്ടും നൽകേണ്ട.",
+    "feedGivenNote": "ദിവസവും നൽകുന്ന തീറ്റ ദൈനംദിന രേഖകളിൽ രേഖപ്പെടുത്തുക - അത് ഈ സ്റ്റോക്കിൽ നിന്ന് തനിയെ കുറയും.",
+    "goDailyRecords": "ദൈനംദിന രേഖകൾ തുറക്കുക",
+    "aboutKg": "ഏകദേശം {{kg}} kg",
+    "needsKgPerUnit": "ഒരു {{unit}} എത്ര kg എന്ന് പറയുക (തിരുത്തുക), kg-ൽ രേഖപ്പെടുത്തിയ തീറ്റ സ്റ്റോക്കിൽ നിന്ന് കുറയാൻ.",
+    "noFeedGiven": "കഴിഞ്ഞ 30 ദിവസം സ്റ്റോക്കിൽ നിന്ന് തീറ്റ രേഖപ്പെടുത്തിയിട്ടില്ല."
   },
   "supplyChain": {
     "pageTitle": "🔗 വിതരണ ശൃംഖല & ലഭ്യത ട്രാക്കിംഗ് (ഫാം-ടു-ഫോർക്ക്)",

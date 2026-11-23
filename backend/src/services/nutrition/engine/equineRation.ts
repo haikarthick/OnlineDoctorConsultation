@@ -39,6 +39,12 @@ export interface EquineRequirements {
   forageMinPctBw: number;
   /** Concentrate at most this % of the day's dry matter. */
   concentrateMaxPctDm: number;
+  /** Mare in milk: multiple of maintenance (replaces the work factor when higher). */
+  lactatingFactor?: number;
+  /** Mare in the last months of pregnancy: extra, as a fraction of maintenance. */
+  latePregnancyFraction?: number;
+  /** Most concentrate in ONE feed, % of body weight (colic risk) - default 0.5. */
+  concentrateMaxPctBwPerMeal?: number;
 }
 
 export interface EquineFeedOption {
@@ -61,6 +67,8 @@ export interface EquineFeedOption {
 export interface EquineInput {
   bodyWeightKg: number;
   work: EquineWork;
+  /** A mare in milk, or in late pregnancy. */
+  reproState?: 'lactating' | 'pregnant' | null;
   requirements: EquineRequirements;
   feeds: EquineFeedOption[];
 }
@@ -82,7 +90,7 @@ export interface EquineLine { key: string; label: string; kgAsFedPerDay: number;
 
 export type EquineResult =
   | { status: 'ok'; need: EquineNeed; lines: EquineLine[]; totalCostPerDay: number; costPerLitre: null;
-      supplied: { dmKg: number; deMcal: number; cpG: number; caG: number; pG: number; forageKg: number; concentratePct: number } }
+      supplied: { dmKg: number; deMcal: number; cpG: number; caG: number; pG: number; forageKg: number; concentratePct: number; concentrateKgAsFed: number; feedsPerDay: number } }
   | { status: 'infeasible'; need: EquineNeed; reasons: string[] };
 
 const round = (n: number, dp = 2) => Math.round(n * 10 ** dp) / 10 ** dp;
@@ -90,7 +98,9 @@ const round = (n: number, dp = 2) => Math.round(n * 10 ** dp) / 10 ** dp;
 export function equineNeed(input: Omit<EquineInput, 'feeds'>): EquineNeed {
   const r = input.requirements;
   const bw = input.bodyWeightKg;
-  const factor = r.workFactor[input.work] ?? r.workFactor.low ?? 1;
+  let factor = r.workFactor[input.work] ?? r.workFactor.low ?? 1;
+  if (input.reproState === 'lactating' && r.lactatingFactor) factor = Math.max(factor, r.lactatingFactor);
+  if (input.reproState === 'pregnant' && r.latePregnancyFraction) factor += r.latePregnancyFraction;
   const deMaintenance = r.deMaintenancePerKgBw * bw;
   const de = deMaintenance * factor;
   return {
@@ -138,17 +148,22 @@ export function balanceEquineRation(input: EquineInput): EquineResult {
   const lines: EquineLine[] = feeds.map((f, j) => {
     const dm = res.x[j];
     const asFed = dm / (f.dmPct / 100);
-    return { key: f.key, label: f.label, kgDmPerDay: round(dm), kgAsFedPerDay: round(asFed, 1), costPerDay: round(asFed * f.pricePerKgAsFed) };
-  }).filter(l => l.kgDmPerDay > 0.005);
+    return { key: f.key, label: f.label, kgDmPerDay: round(dm, 3), kgAsFedPerDay: asFed < 1 ? round(asFed, 3) : round(asFed, 1), costPerDay: round(asFed * f.pricePerKgAsFed) };
+  }).filter(l => l.kgDmPerDay > 0.0005);
   const dmKg = res.x.reduce((s, v) => s + v, 0);
   const sum = (fn: (f: EquineFeedOption) => number) => res.x.reduce((s, v, j) => s + v * fn(feeds[j]), 0);
   const forageKg = sum(f => (f.isForage ? 1 : 0));
+  // Grain is fed in several small feeds: one big feed of grain is a colic and laminitis risk.
+  const concentrateKgAsFed = lines.reduce((sum, l, i) => sum + (feeds.find(f => f.key === l.key)?.isForage ? 0 : l.kgAsFedPerDay), 0);
+  const perMealKg = (input.requirements.concentrateMaxPctBwPerMeal ?? 0.5) / 100 * input.bodyWeightKg;
+  const feedsPerDay = Math.max(2, Math.ceil(concentrateKgAsFed / Math.max(perMealKg, 0.1)));
   return {
     status: 'ok', need, lines, totalCostPerDay: round(lines.reduce((s, l) => s + l.costPerDay, 0)), costPerLitre: null,
     supplied: {
       dmKg: round(dmKg), deMcal: round(sum(f => f.deMcalPerKgDm)), cpG: round(sum(f => f.cpPctDm * 10), 0),
       caG: round(sum(f => f.caPctDm * 10), 1), pG: round(sum(f => f.pPctDm * 10), 1), forageKg: round(forageKg),
       concentratePct: dmKg > 0 ? round((dmKg - forageKg) / dmKg * 100, 1) : 0,
+      concentrateKgAsFed: round(concentrateKgAsFed, 2), feedsPerDay,
     },
   };
 }

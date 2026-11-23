@@ -13,7 +13,7 @@ export const createAnimalSchema = Joi.object({
   microchipId: shortText(50).optional().allow('', null),
   earTagId: shortText(50).optional().allow('', null),
   registrationNumber: shortText(100).optional().allow('', null),
-  isNeutered: Joi.boolean().optional(),
+  isNeutered: Joi.boolean().allow(null).optional(),
   insuranceProvider: shortText().optional().allow('', null),
   insurancePolicyNumber: shortText().optional().allow('', null),
   insuranceExpiry: Joi.string().optional().allow('', null),

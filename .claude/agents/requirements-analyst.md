@@ -19,6 +19,9 @@ connects it.
 4. No one reaches another person's data (H15). Network-hospital code is change-protected: flag, do not design.
 5. Branch on master data (nutrition_model, farm profile), never on a species name. Cover every farm type and life
    stage (young / growing / adult / breeding / lactating), not just the adult cow.
+6. **Design for a first-time farmer / pet owner with no training** (owner rule 2026-11-23): one task = one screen =
+   one table; real-world cases (e.g. feeding "all my animals" without groups) are designed in; never propose a
+   temporary fix, side archive or second way to do the same thing - recommend only the real end-state design.
 
 ## Method
 1. Read CLAUDE.md, docs/modules/<module>.md, the module's plan doc, and the existing ledger if any.

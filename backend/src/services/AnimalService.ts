@@ -19,7 +19,7 @@ export interface Animal {
   microchipId?: string;
   earTagId?: string;
   registrationNumber?: string;
-  isNeutered?: boolean;
+  isNeutered?: boolean | null;
   insuranceProvider?: string;
   insurancePolicyNumber?: string;
   insuranceExpiry?: string;
@@ -57,7 +57,7 @@ export interface AnimalCreateDTO {
   microchipId?: string;
   earTagId?: string;
   registrationNumber?: string;
-  isNeutered?: boolean;
+  isNeutered?: boolean | null;
   insuranceProvider?: string;
   insurancePolicyNumber?: string;
   insuranceExpiry?: string;
@@ -244,7 +244,7 @@ export class AnimalService {
         id, ownerId, uniqueId, data.name, data.species, data.breed || null,
         data.dateOfBirth || null, data.gender || null, data.weight || null,
         data.color || null, data.microchipId || null, data.earTagId || null, data.registrationNumber || null,
-        data.isNeutered || false, data.insuranceProvider || null, data.insurancePolicyNumber || null,
+        data.isNeutered ?? null, data.insuranceProvider || null, data.insurancePolicyNumber || null,
         data.insuranceExpiry || null, data.medicalNotes || null,
         data.enterpriseId || null, data.groupId || null,
         data.animalClass || null, data.sireId || null, data.damId || null,

@@ -1,86 +1,87 @@
 ﻿import database from '../../src/utils/database';
-import feedInventoryService from '../../src/services/FeedInventoryService';
+import feedInventoryService, { kgPerUnit } from '../../src/services/FeedInventoryService';
 
 jest.mock('../../src/utils/database');
 
+const query = database.query as jest.Mock;
+const transaction = database.transaction as jest.Mock;
+
+/**
+ * Feed Inventory = stock and price only (migration 063). Feed GIVEN is recorded in Daily records, which takes it out
+ * of stock through takeFromStock; restocking with a price writes the feed expense once.
+ */
 describe('FeedInventoryService', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => jest.resetAllMocks());
 
-  describe('createFeed', () => {
-    it('should create a feed item', async () => {
-      const feed = { id: 'f1', enterprise_id: 'e1', feed_name: 'Hay', feed_type: 'forage', current_stock: '100', minimum_stock: '20', cost_per_unit: '5.5' };
-      (database.query as jest.Mock).mockResolvedValue({ rows: [feed] });
-      const result = await feedInventoryService.createFeed({ enterprise_id: 'e1', feed_name: 'Hay', feed_type: 'forage', current_stock: 100 });
-      expect(result).toEqual(expect.objectContaining({ id: 'f1', feedName: 'Hay', feedType: 'forage' }));
-    });
+  it('kg per unit: weight units convert themselves; a bag needs the farmer\'s figure', () => {
+    expect(kgPerUnit({ unit: 'kg' })).toBe(1);
+    expect(kgPerUnit({ unit: 'ton' })).toBe(1000);
+    expect(kgPerUnit({ unit: 'bag' })).toBeNull();
+    expect(kgPerUnit({ unit: 'bag', kg_per_unit: '50' })).toBe(50);
   });
 
-  describe('updateFeed', () => {
-    it('should update a feed item', async () => {
-      const updated = { id: 'f1', feed_name: 'Updated Hay', current_stock: '150' };
-      (database.query as jest.Mock).mockResolvedValue({ rows: [updated] });
-      const result = await feedInventoryService.updateFeed('f1', { feed_name: 'Updated Hay' });
-      expect(result).toEqual(expect.objectContaining({ id: 'f1', feedName: 'Updated Hay' }));
-    });
+  it('creates an item on the farm from the URL, and refuses a bag with no weight', async () => {
+    query.mockResolvedValueOnce({ rows: [{ id: 'f1' }] }).mockResolvedValueOnce({ rows: [{ id: 'f1', feed_name: 'Hay', unit: 'kg', current_stock: '100' }] });
+    const r = await feedInventoryService.createFeed('e1', { feedName: 'Hay', unit: 'kg', currentStock: 100 });
+    expect(query.mock.calls[0][1][0]).toBe('e1');
+    expect(r).toMatchObject({ id: 'f1', feedName: 'Hay', currentStock: 100, stockKg: 100 });
+    await expect(feedInventoryService.createFeed('e1', { feedName: 'Cattle feed', unit: 'bag' })).rejects.toThrow(/how many kg one bag/);
   });
 
-  describe('listFeeds', () => {
-    it('should list feeds for an enterprise', async () => {
-      (database.query as jest.Mock).mockResolvedValue({ rows: [{ id: 'f1' }, { id: 'f2' }] });
-      const result = await feedInventoryService.listFeeds('e1');
-      expect(result.items).toHaveLength(2);
-    });
+  it('a restock with a price writes the feed expense once; without a price, none', async () => {
+    const calls: string[] = [];
+    transaction.mockImplementation(async (cb: any) => cb({
+      query: async (sql: string) => {
+        calls.push(sql);
+        if (/UPDATE feed_inventory/.test(sql)) return { rows: [{ enterprise_id: 'e1', feed_name: 'Cattle feed', unit: 'bag' }] };
+        if (/system_settings/.test(sql)) return { rows: [{ value: 'INR' }] };
+        return { rows: [] };
+      },
+    }));
+    query.mockResolvedValue({ rows: [{ id: 'f1', feed_name: 'Cattle feed', unit: 'bag', kg_per_unit: '50', current_stock: '10' }] });
+    await feedInventoryService.restock('f1', { quantity: 10, pricePerUnit: 1200 }, 'u1');
+    expect(calls.filter(s => /INSERT INTO financial_records/.test(s))).toHaveLength(1);
+    calls.length = 0;
+    await feedInventoryService.restock('f1', { quantity: 10 }, 'u1');
+    expect(calls.filter(s => /INSERT INTO financial_records/.test(s))).toHaveLength(0);
+    await expect(feedInventoryService.restock('f1', { quantity: 0 }, 'u1')).rejects.toThrow(/above zero/);
   });
 
-  describe('restock', () => {
-    it('should restock a feed item', async () => {
-      const restocked = { id: 'f1', current_stock: '200' };
-      (database.query as jest.Mock).mockResolvedValue({ rows: [restocked] });
-      const result = await feedInventoryService.restock('f1', 100);
-      expect(result).toEqual(expect.objectContaining({ id: 'f1' }));
-    });
+  it('takeFromStock converts kg to bags, moves only the difference, and prices it', async () => {
+    const client = { query: jest.fn() };
+    client.query.mockResolvedValueOnce({ rows: [{ id: 'f1', feed_name: 'Cattle feed', unit: 'bag', kg_per_unit: '50', cost_per_unit: '1200', current_stock: '10' }] });
+    const r = await feedInventoryService.takeFromStock(client, 'f1', 'e1', 100, 0);
+    expect(r).toEqual({ taken: 2, cost: 2400, unit: 'bag' });
+    expect(client.query.mock.calls[1][1]).toEqual(['f1', 8]); // 10 in store - 2 bags
+    // correcting 100 kg to 150 kg takes one more bag, not three
+    client.query.mockReset();
+    client.query.mockResolvedValueOnce({ rows: [{ id: 'f1', feed_name: 'Cattle feed', unit: 'bag', kg_per_unit: '50', cost_per_unit: '1200', current_stock: '8' }] });
+    const again = await feedInventoryService.takeFromStock(client, 'f1', 'e1', 150, 2);
+    expect(client.query.mock.calls[1][1]).toEqual(['f1', 7]); // one more bag, not three
+    expect(again.taken).toBe(3);
   });
 
-  describe('deleteFeed', () => {
-    it('should soft-delete a feed item', async () => {
-      (database.query as jest.Mock).mockResolvedValue({ rows: [] });
-      await feedInventoryService.deleteFeed('f1');
-      expect(database.query).toHaveBeenCalledWith(expect.stringContaining('is_active'), ['f1']);
-    });
+  it('takeFromStock refuses another farm\'s feed and a bag with no weight, in words', async () => {
+    const client = { query: jest.fn().mockResolvedValueOnce({ rows: [] }) };
+    await expect(feedInventoryService.takeFromStock(client, 'f9', 'e1', 10, 0)).rejects.toThrow(/not in this farm's stock/);
+    client.query.mockResolvedValueOnce({ rows: [{ id: 'f1', feed_name: 'Mineral block', unit: 'pcs', kg_per_unit: null }] });
+    await expect(feedInventoryService.takeFromStock(client, 'f1', 'e1', 10, 0)).rejects.toThrow(/how many kg one pcs/);
   });
 
-  describe('logConsumption', () => {
-    it('should log feed consumption', async () => {
-      const log = { id: 'cl1', feed_id: 'f1', quantity: '10', consumption_date: '2024-06-01' };
-      (database.query as jest.Mock).mockResolvedValue({ rows: [log] });
-      const result = await feedInventoryService.logConsumption({ feed_id: 'f1', enterprise_id: 'e1', quantity: 10 });
-      expect(result).toEqual(expect.objectContaining({ id: 'cl1', feedId: 'f1' }));
-    });
+  it('stock never goes below zero, and what is stored as taken out is what really left (a later delete cannot inflate stock)', async () => {
+    const client = { query: jest.fn() };
+    // 2 bags in store, the farm fed 5 bags' worth (250 kg of a 50 kg bag): only 2 bags can come out of stock
+    client.query.mockResolvedValueOnce({ rows: [{ id: 'f1', feed_name: 'Cattle feed', unit: 'bag', kg_per_unit: '50', cost_per_unit: '1200', current_stock: '2' }] });
+    const r = await feedInventoryService.takeFromStock(client, 'f1', 'e1', 250, 0);
+    expect(r.taken).toBe(2);
+    expect(r.cost).toBe(6000);
+    expect(client.query.mock.calls[1][1]).toEqual(['f1', 0]);
   });
 
-  describe('listConsumptionLogs', () => {
-    it('should list consumption logs', async () => {
-      (database.query as jest.Mock).mockResolvedValue({ rows: [{ id: 'cl1' }] });
-      const result = await feedInventoryService.listConsumptionLogs('e1');
-      expect(result.items).toHaveLength(1);
-    });
-
-    it('should filter by feedId', async () => {
-      (database.query as jest.Mock).mockResolvedValue({ rows: [] });
-      await feedInventoryService.listConsumptionLogs('e1', { feedId: 'f1' });
-      expect(database.query).toHaveBeenCalled();
-    });
-  });
-
-  describe('getFeedAnalytics', () => {
-    it('should return feed analytics', async () => {
-      (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [{ total: '0' }] });
-      const result = await feedInventoryService.getFeedAnalytics('e1');
-      expect(result).toBeDefined();
-    });
+  it('analytics are read from Daily records - the one place feed given is recorded', async () => {
+    query.mockResolvedValue({ rows: [] });
+    const a = await feedInventoryService.getFeedAnalytics('e1');
+    expect(query.mock.calls.some(c => /feed_consumption_logs/.test(c[0]))).toBe(false);
+    expect(a).toMatchObject({ totalInventoryValue: 0, lowStockAlerts: [], consumptionByType: [], dailyConsumptionTrend: [] });
   });
 });

@@ -13,7 +13,7 @@ import RecordEntrySheet from '../components/farmRecords/RecordEntrySheet'
 import { FarmOutboxBanner } from '../components/farmRecords/FarmOutboxBanner'
 import { useFarmOutbox } from '../hooks/useFarmOutbox'
 import {
-  recordableTypesFor, formatQuantity, totalsByType, dueTiming, type DueItem, type FarmRecord, type RecordSubject,
+  recordableTypesFor, formatQuantity, totalsByType, dueTiming, farmWideTypes, isRecordOf, type DueItem, type FarmRecord, type RecordSubject,
 } from '../components/farmRecords/recordShared'
 
 import { userMessage } from '../utils/userMessage'
@@ -109,7 +109,7 @@ const FarmRecords: React.FC = () => {
       })
       // Colour family comes from how the farm keeps records (master data), never from a species name.
       const kind: CardKind = subject.kind === 'animal' ? 'single' : profile.managementMode === 'batch' ? 'batch' : 'herd'
-      return { subject, kind, types: recordableTypesFor(profile, subject.kind, { emptyGroup: subject.headCount === 0 }) }
+      return { subject, kind, types: recordableTypesFor(profile, subject.kind as 'animal' | 'group', { emptyGroup: subject.headCount === 0 }) }
     })
     .filter(c => c.types.length > 0)
     // Herds and flocks first (one entry covers many animals), then single animals with the most to
@@ -132,7 +132,14 @@ const FarmRecords: React.FC = () => {
   }, [cards, records, search])
   const shownSections = view === 'all' ? sections : sections.filter(s => s.kind === view)
 
-  const recordsOf = (s: RecordSubject) => records.filter(r => (s.kind === 'animal' ? r.animalId === s.id : r.groupId === s.id))
+  const recordsOf = (s: RecordSubject) => records.filter(r => isRecordOf(r, s))
+
+  // "All my animals": feed given from one bag to everything on the farm - a small farm needs no groups to record it.
+  const farmTypes = useMemo(() => farmWideTypes(farmMaster.recordTypes, code => recordTypeEntry(code)?.fields || []), [farmMaster.recordTypes, recordTypeEntry])
+  const wholeFarm: RecordSubject | null = farmId && subjects.length > 0 && farmTypes.length > 0 ? {
+    kind: 'farm', id: farmId, name: t('farmRecords.allAnimals'), enterpriseId: farmId, speciesCode: null, animalClass: null,
+    gender: null, managementMode: null, groupType: null,
+  } : null
   const totals = useMemo(() => totalsByType(records), [records])
   const labelFor = (code: string): string => {
     const e = recordTypeEntry(code)
@@ -270,6 +277,35 @@ const FarmRecords: React.FC = () => {
               {cards.length > 8 && (
                 <input type="search" className="search-input record-search" value={search} onChange={e => setSearch(e.target.value)}
                   placeholder={t('farmRecords.kinds.search')} aria-label={t('farmRecords.kinds.search')} />
+              )}
+
+              {wholeFarm && view === 'all' && !search.trim() && (
+                <div className={`card record-card is-farm ${recordsOf(wholeFarm).length > 0 ? 'is-done' : ''}`}>
+                  <div className="record-card-head">
+                    <span className="record-card-icon" aria-hidden="true">🏡</span>
+                    <div className="record-card-title">
+                      <strong>{t('farmRecords.allAnimals')}</strong>
+                      <span className="record-card-sub">{t('farmRecords.allAnimalsHint')}</span>
+                    </div>
+                  </div>
+                  <div className="record-chips">
+                    {recordsOf(wholeFarm).length === 0
+                      ? <span className="record-chip is-empty">{t('farmRecords.nothingYet')}</span>
+                      : recordsOf(wholeFarm).map(r => (
+                        <span key={r.id} className="record-chip">
+                          <span aria-hidden="true">{recordTypeEntry(r.recordType)?.icon}</span> {labelFor(r.recordType)}{' '}
+                          <strong>{r.quantity !== null ? `${formatQuantity(r.quantity)}${r.unit ? ` ${r.unit}` : ''}` : '✓'}</strong>
+                        </span>
+                      ))}
+                  </div>
+                  <div className="record-card-actions">
+                    {farmTypes.map(r => (
+                      <button key={r.code} type="button" className="btn btn-secondary record-quick" onClick={() => setOpen({ subject: wholeFarm, type: r.code })}>
+                        <span aria-hidden="true">{recordTypeEntry(r.code)?.icon}</span> {labelFor(r.code)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {shownSections.length === 0 && <p className="record-note">{t('farmRecords.kinds.noMatch')}</p>}

@@ -39,6 +39,8 @@ const NEEDS: Record<NutritionModel, MissingFact[]> = {
   companion_energy: [
     { key: 'weight', owner: 'body_measurement', required: true },
     { key: 'dateOfBirth', owner: 'animal_profile', required: true },
+    // A blank "neutered" used to count as intact (+12.5% food): it is asked instead.
+    { key: 'isNeutered', owner: 'animal_profile', required: true },
     { key: 'bodyCondition', owner: 'body_measurement', required: false },
     { key: 'activityLevel', owner: 'animal_profile', required: false },
     { key: 'housing', owner: 'animal_profile', required: false },

@@ -4,7 +4,6 @@ import apiService from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { useNutritionEnabled } from '../../hooks/useNutritionEnabled'
 import { userMessage } from '../../utils/userMessage'
-import { NumberStepper, parseStepperValue } from '../mobile/NumberStepper'
 import HerdRationCard from './HerdRationCard'
 import FlagList from './FlagList'
 
@@ -22,14 +21,13 @@ export const GroupFeedingCard: React.FC<{ groupId: string }> = ({ groupId }) => 
   const [data, setData] = useState<any>(null)
   const [error, setError] = useState('')
   const [hidden, setHidden] = useState(false)
-  const [price, setPrice] = useState('')
   const [reload, setReload] = useState(0)
 
   useEffect(() => {
     if (!enabled) return
     let active = true
     const timer = window.setTimeout(() => {
-      apiService.groupFeeding(groupId, { pricePerKg: parseStepperValue(price) })
+      apiService.groupFeeding(groupId)
         .then((res: any) => { if (active) { setData(res?.data || null); setError('') } })
         .catch((err: any) => {
           if (!active) return
@@ -38,7 +36,7 @@ export const GroupFeedingCard: React.FC<{ groupId: string }> = ({ groupId }) => 
         })
     }, 300)
     return () => { active = false; window.clearTimeout(timer) }
-  }, [enabled, groupId, price, reload])
+  }, [enabled, groupId, reload])
 
   if (!enabled || hidden) return null
   if (error) return <section className="nutri-card"><p className="nutri-note is-warning" role="status">{error}</p></section>
@@ -77,7 +75,7 @@ export const GroupFeedingCard: React.FC<{ groupId: string }> = ({ groupId }) => 
           {today.basis === 'percent_biomass' && today.tempFactor !== 1 && (
             <p className="nutri-note is-warning">{t('nutrition.group.temp', { c: data.inputs.waterTempC, pct: Math.round(today.tempFactor * 100) })}</p>
           )}
-          <NumberStepper label={t('nutrition.group.price')} value={price} onChange={setPrice} step={1} unit="₹/kg" />
+          {data.inputs.pricePerKg === null && <p className="nutri-hint">{t('nutrition.group.priceFromStock')}</p>}
           {today.costPerDay !== null && <p className="nutri-hint">{t('nutrition.ration.costPerDay', { cost: money(today.costPerDay) })}</p>}
         </>
       )}

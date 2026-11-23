@@ -3553,8 +3553,9 @@ textarea.module-input {
 .record-card.is-batch { --kind: #d97706; --kind-soft: #fffbeb; }
 .record-card.is-herd { --kind: #059669; --kind-soft: #ecfdf5; }
 .record-card.is-single { --kind: #4f46e5; --kind-soft: #eef2ff; }
-.record-card.is-batch, .record-card.is-herd, .record-card.is-single { border-top: 4px solid var(--kind); }
-.record-card.is-batch .record-card-icon, .record-card.is-herd .record-card-icon, .record-card.is-single .record-card-icon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: var(--kind-soft); font-size: 26px; }
+.record-card.is-farm { --kind: #b45309; --kind-soft: #fffbeb; margin-bottom: 16px; }
+.record-card.is-batch, .record-card.is-herd, .record-card.is-single, .record-card.is-farm { border-top: 4px solid var(--kind); }
+.record-card.is-batch .record-card-icon, .record-card.is-herd .record-card-icon, .record-card.is-single .record-card-icon, .record-card.is-farm .record-card-icon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: var(--kind-soft); font-size: 26px; }
 .record-card.is-done { background: linear-gradient(var(--kind-soft), #fff 60%); }
 @media (max-width: 480px) { .record-kind-hint { display: none; } }
 .record-chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -3698,6 +3699,10 @@ button.record-due-row { cursor: pointer; }
 .feed-card-actions .btn { min-height: var(--tap-min); }
 .feed-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 .feed-field label { font-weight: 600; }
+.feed-hint { color: var(--gray-600); font-size: 13px; }
+.feed-hint.is-warning { color: #92400e; background: var(--warning-light); padding: 6px 8px; border-radius: var(--radius); }
+/* "Feed given is recorded in Daily records" - one place per task (migration 063). */
+.feed-given-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .feed-sheet-action { width: 100%; min-height: var(--tap-min); margin-top: 12px; }
 .feed-usage-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding: 6px 0; border-bottom: 1px solid var(--gray-200); font-size: 14px; }
 /* Trend bar heights, 5% steps (feed-bar-0 .. feed-bar-20) */

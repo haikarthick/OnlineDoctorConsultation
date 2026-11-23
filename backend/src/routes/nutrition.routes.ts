@@ -99,7 +99,7 @@ router.get('/nutrition/groups/:groupId/feeding', ...gate, asyncHandler(async (re
   const q = req.query as Record<string, string | undefined>;
   const n = (v?: string) => (v === undefined || v === '' ? null : Number(v));
   res.json({ success: true, data: await GroupFeedingService.forGroup(req.params.groupId, caller(req), {
-    pricePerKg: n(q.pricePerKg), avgWeightG: n(q.avgWeightG), waterTempC: n(q.waterTempC),
+    avgWeightG: n(q.avgWeightG), waterTempC: n(q.waterTempC),
   }) });
 }));
 

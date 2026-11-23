@@ -263,23 +263,20 @@ export const enterpriseApi = {
     return response.data
   },
 
-  async restockFeed(id: string, quantity: number) {
-    const response = await sharedClient.post(`/feed/${id}/restock`, { quantity })
+  /** A purchase: stock up, and - with a price - the feed expense is written once to Finance (migration 063). */
+  async restockFeed(id: string, data: { quantity: number; pricePerUnit?: number | null; supplier?: string | null }) {
+    const response = await sharedClient.post(`/feed/${id}/restock`, data)
+    return response.data
+  },
+
+  /** The shared feed library a stock item can say it is (rations then use its price and composition). */
+  async feedLibrary(enterpriseId: string) {
+    const response = await sharedClient.get(`/enterprises/${enterpriseId}/feed/library`)
     return response.data
   },
 
   async deleteFeed(id: string) {
     const response = await sharedClient.delete(`/feed/${id}`)
-    return response.data
-  },
-
-  async logFeedConsumption(enterpriseId: string, data: Record<string, unknown>) {
-    const response = await sharedClient.post(`/enterprises/${enterpriseId}/feed/consumption`, data)
-    return response.data
-  },
-
-  async listFeedConsumption(enterpriseId: string, params?: Record<string, unknown>) {
-    const response = await sharedClient.get(`/enterprises/${enterpriseId}/feed/consumption`, { params })
     return response.data
   },
 

@@ -13,7 +13,7 @@ export interface Animal {
   microchipId?: string
   earTagId?: string
   registrationNumber?: string
-  isNeutered?: boolean
+  isNeutered?: boolean | null
   insuranceProvider?: string
   insurancePolicyNumber?: string
   insuranceExpiry?: string

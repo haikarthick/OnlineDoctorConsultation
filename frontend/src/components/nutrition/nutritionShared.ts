@@ -120,6 +120,8 @@ export interface Food {
   id: string; code: string | null; label: string; labelKey: string | null
   labelHi?: string | null; labelKn?: string | null; labelMl?: string | null; labelTa?: string | null; labelTe?: string | null
   kind: string; kcalPer100g: number | null; isOwn: boolean; status: string
+  /** The farm's price per kg for this feed, from its stock (Feed Inventory); null when the feed is not in stock. */
+  stockPricePerKg?: number | null
 }
 
 /** The scale a body condition score is entered on for this animal: dogs and cats 1-9, farm species 1-5. */
@@ -147,6 +149,12 @@ export function progressPct(eaten: number, target: number | null): number {
 export function formatKcal(n: number | null | undefined, locale?: string): string {
   if (n === null || n === undefined || !Number.isFinite(n)) return '-'
   return Math.round(n).toLocaleString(locale)
+}
+
+/** A feed amount a farmer reads at a glance: grams under 1 kg ("50 g" of mineral mixture, never "0 kg"), else kg. */
+export function formatAmount(kg: number | null | undefined): string {
+  if (kg === null || kg === undefined || !Number.isFinite(kg)) return '-'
+  return kg < 1 ? `${Math.round(kg * 1000)} g` : `${Math.round(kg * 10) / 10} kg`
 }
 
 export function formatKg(n: number | null | undefined): string {

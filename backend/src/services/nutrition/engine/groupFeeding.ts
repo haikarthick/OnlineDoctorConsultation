@@ -11,6 +11,8 @@
  */
 
 export interface FeedingCurveRow {
+  /** Expected survival (%) of the animals that reach this size band (ponds: the farmer cannot count the dead). */
+  survivalPct?: number | null;
   basis: 'per_head' | 'percent_biomass';
   ageFromDays: number | null;
   ageToDays: number | null;
@@ -29,13 +31,15 @@ export interface GroupFeedInput {
   ageDays?: number | null;
   avgWeightG?: number | null;
   waterTempC?: number | null;
+  /** True when headCount is a count of live animals (not stocked), so no survival is applied. */
+  headCountIsLive?: boolean;
   curve: FeedingCurveRow[];
   temperature?: TemperatureFactor[];
   pricePerKg?: number | null;
 }
 
 export type GroupFeedResult =
-  | { status: 'ok'; basis: 'per_head' | 'percent_biomass'; kgPerDay: number; gramsPerHead: number | null; biomassKg: number | null;
+  | { status: 'ok'; basis: 'per_head' | 'percent_biomass'; survivalPct?: number | null; kgPerDay: number; gramsPerHead: number | null; biomassKg: number | null;
       ratePct: number | null; tempFactor: number; feedsPerDay: number | null; feedType: string | null; costPerDay: number | null }
   | { status: 'needs'; missing: Array<'head_count' | 'age' | 'average_weight' | 'curve'> };
 
@@ -64,7 +68,10 @@ export function groupDailyFeed(input: GroupFeedInput): GroupFeedResult {
   const w = input.avgWeightG;
   const row = input.curve.find(r => (r.weightFromG ?? 0) <= w && w < (r.weightToG ?? Infinity))
     ?? [...input.curve].sort((a, b) => (b.weightToG ?? 0) - (a.weightToG ?? 0))[0];
-  const biomassKg = (input.headCount * w) / 1000;
+  // Ponds: the count is what was STOCKED; feed what is still alive. The curve gives the survival to expect at this size,
+  // unless the farmer recorded a real count (headCountIsLive).
+  const live = input.headCountIsLive || row.survivalPct === null || row.survivalPct === undefined ? 1 : row.survivalPct / 100;
+  const biomassKg = (input.headCount * live * w) / 1000;
   let tempFactor = 1;
   if (input.waterTempC !== null && input.waterTempC !== undefined && input.temperature?.length) {
     const t = input.temperature.find(x => x.fromC <= input.waterTempC! && input.waterTempC! < x.toC);
@@ -74,6 +81,7 @@ export function groupDailyFeed(input: GroupFeedInput): GroupFeedResult {
   const kg = biomassKg * rate / 100;
   return {
     status: 'ok', basis, kgPerDay: round(kg, 1), gramsPerHead: null, biomassKg: round(biomassKg, 1), ratePct: round(rate, 2),
+    survivalPct: live < 1 ? round(live * 100, 0) : null,
     tempFactor, feedsPerDay: row.feedsPerDay, feedType: row.feedType,
     costPerDay: input.pricePerKg !== null && input.pricePerKg !== undefined ? round(kg * input.pricePerKg) : null,
   };

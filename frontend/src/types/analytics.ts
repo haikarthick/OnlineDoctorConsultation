@@ -64,50 +64,53 @@ export interface BreedingStats {
 }
 
 // ─── Feed & Inventory ───────────────────────────────
+// Exactly what backend FeedInventoryService.mapFeed returns. Feed Inventory = stock and price; feed GIVEN is recorded
+// only in Daily records (migration 063).
 export interface FeedItem {
   id: string
   enterpriseId: string
   feedType: string
-  name: string
-  brand?: string
-  batchNumber?: string
-  quantityInStock: number
+  feedName: string
+  brand?: string | null
+  batchNumber?: string | null
   unit: string
-  minimumStockLevel: number
+  /** How many kg one unit (bag, bale, litre) weighs; weight units convert themselves. */
+  kgPerUnit: number | null
+  currentStock: number
+  stockKg: number | null
+  minimumStock: number
   costPerUnit: number
-  currency: string
-  expiryDate?: string
-  storageLocation?: string
-  supplier?: string
+  costPerKg: number | null
+  expiryDate?: string | null
+  storageLocation?: string | null
+  supplier?: string | null
+  /** The library feed this is (rations use its composition and this price). */
+  ingredientId: string | null
+  ingredientLabel: string | null
+  isLow: boolean
   isActive: boolean
-  createdAt: string
-  updatedAt: string
+  lastRestockedAt?: string | null
 }
 
-export interface FeedConsumptionLog {
+/** Feed given, read from Daily records. */
+export interface FeedGivenEntry {
   id: string
-  feedId: string
-  enterpriseId: string
-  animalId?: string
-  groupId?: string
-  quantityUsed: number
+  feedId: string | null
+  feedName: string | null
+  groupName: string | null
+  animalName: string | null
+  wholeFarm: boolean
+  quantity: number | null
   unit: string
-  costAtTime: number
-  recordedBy: string
-  notes?: string
-  consumptionDate: string
-  createdAt: string
-  feedName?: string
-  animalName?: string
-  groupName?: string
-  recordedByName?: string
+  date: string
+  cost: number | null
 }
 
 export interface FeedAnalytics {
-  lowStockAlerts: FeedItem[]
-  consumptionByType: { feed_type: string; total_used: number; total_cost: number }[]
-  dailyConsumptionTrend: { day: string; total_used: number; total_cost: number }[]
   totalInventoryValue: number
+  lowStockAlerts: FeedItem[]
+  consumptionByType: { feedType: string; totalKg: number; totalCost: number }[]
+  dailyConsumptionTrend: { day: string; totalKg: number; totalCost: number }[]
 }
 
 // ─── Compliance & Regulatory ────────────────────────

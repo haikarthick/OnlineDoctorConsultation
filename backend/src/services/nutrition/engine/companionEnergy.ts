@@ -35,7 +35,7 @@ export interface CompanionEnergyInput {
 
 export type EnergyReason =
   | 'growing' | 'pregnant' | 'nursing' | 'underweight' | 'overweight' | 'very_active' | 'low_activity'
-  | 'neutered' | 'intact' | 'no_condition_score' | 'factor_unvalidated';
+  | 'neutered' | 'intact' | 'no_condition_score' | 'factor_unvalidated' | 'needs_vet_amounts';
 
 export interface CompanionEnergyResult {
   goal: PlanGoal;
@@ -62,9 +62,22 @@ export const rer = (kg: number): number => 70 * Math.pow(kg, 0.75);
 
 const NURSING_WEEKS = 8;
 
+/**
+ * Age (months) at which a dog or cat stops being fed as a growing animal. Large and giant dogs keep growing well past
+ * a year (still growing at 14-24 months on adult factors would underfeed them); the size is judged from the weight
+ * they already have - platform default, vet to confirm.
+ */
+export function growthEndMonths(facts: AnimalFacts): number {
+  if (facts.speciesCode === 'Dog' && facts.weightKg !== null) {
+    if (facts.weightKg >= 45) return 24;
+    if (facts.weightKg >= 25) return 18;
+  }
+  return 12;
+}
+
 export function suggestGoal(facts: AnimalFacts, now: Date = new Date()): PlanGoal {
   const age = ageInMonths(facts.dateOfBirth, now);
-  if (age !== null && age < 12) return 'growth';
+  if (age !== null && age < growthEndMonths(facts)) return 'growth';
   if (facts.breedingStatus === 'pregnant') return 'gestation';
   if (facts.lastBirthDate) {
     const weeks = (now.getTime() - new Date(facts.lastBirthDate).getTime()) / (7 * 86400000);
@@ -101,7 +114,7 @@ export function companionEnergy(input: CompanionEnergyInput): CompanionEnergyRes
     return 'adult_intact';
   };
 
-  if (goal === 'growth' || (age !== null && age < 12)) {
+  if (goal === 'growth' || (age !== null && age < growthEndMonths(facts))) {
     reasons.push('growing');
     factorKey = age !== null && age < 4 ? 'growth_under_4m' : 'growth_4m_to_adult';
   } else if (goal === 'lose') {
@@ -121,7 +134,9 @@ export function companionEnergy(input: CompanionEnergyInput): CompanionEnergyRes
   } else if (goal === 'gestation' || goal === 'lactation') {
     reasons.push(goal === 'gestation' ? 'pregnant' : 'nursing');
     requiresVet = true;
-    factorKey = maintenanceKey();
+    // A bitch or queen feeding a litter needs two to four times maintenance - never the maintenance amount.
+    factorKey = byKey.has(goal) ? goal : maintenanceKey();
+    if (!byKey.has(goal)) reasons.push('needs_vet_amounts');
   } else {
     factorKey = maintenanceKey();
   }

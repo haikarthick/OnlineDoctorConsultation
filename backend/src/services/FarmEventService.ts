@@ -250,6 +250,7 @@ class FarmEventService {
       } else {
         const cycle: any = await BatchManagementService.openCycle({
           groupId: subject.id, species: subject.speciesCode || undefined, placedCount: count, startedAt: eventDate, notes: reason, userId: caller.userId,
+          ageAtPlacementDays: detail.ageAtPlacementDays as number | undefined,
         });
         cycleId = cycle?.id ?? null;
         cycleOpened = true;

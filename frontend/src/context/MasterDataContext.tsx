@@ -95,7 +95,7 @@ export interface RecordTypeEntry extends LocaleLabels {
 }
 
 /** One field of a record type's entry form. */
-export interface RecordFieldDef { key: string; type: string; required?: boolean; options?: string[] }
+export interface RecordFieldDef { key: string; type: string; required?: boolean; options?: string[]; /** The unit this field is entered in (e.g. g for a sample weight). */ unit?: string }
 
 const EMPTY_FARM_MASTER: FarmMaster = { species: [], classes: [], groupTypes: [], recordTypes: [] }
 

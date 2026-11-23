@@ -311,13 +311,12 @@
   },
   "feedInventory": {
     "pageTitle": "🌾 Feed & Inventory Management",
-    "subtitle": "Track feed stock levels, log consumption, and get low-stock alerts",
+    "subtitle": "Feed in store, its price, and low-stock warnings. Feed given each day is recorded in Daily records.",
     "tabs": {
       "inventory": "📦 Inventory",
       "analytics": "📊 Analytics"
     },
     "addFeed": "+ Add Feed",
-    "logConsumption": "📝 Log Consumption",
     "inventoryTitle": "Feed Inventory",
     "emptyInventory": "No feed items in inventory.",
     "lowStock": "Low Stock",
@@ -333,31 +332,30 @@
     "form": {
       "editTitle": "Edit Feed Item",
       "createTitle": "Add New Feed",
-      "name": "Name *",
+      "name": "Name, as you call it",
       "feedType": "Feed Type",
       "brand": "Brand",
       "batchNumber": "Batch Number",
       "quantityInStock": "Quantity in Stock *",
       "unit": "Unit",
       "minimumStockLevel": "Minimum Stock Level",
-      "costPerUnit": "Cost per Unit *",
+      "costPerUnit": "Price per {{unit}}",
       "expiryDate": "Expiry Date",
       "storageLocation": "Storage Location",
-      "supplier": "Supplier"
-    },
-    "consumptionForm": {
-      "title": "Log Feed Consumption",
-      "feed": "Feed *",
-      "selectFeed": "-- Select Feed --",
-      "quantityUsed": "Quantity Used *",
-      "submitBtn": "Log Consumption"
+      "supplier": "Supplier",
+      "isWhat": "What is this feed?",
+      "isWhatNone": "-- Not in the list --",
+      "isWhatHint": "Rations then use this feed and its price.",
+      "kgPerUnit": "How many kg is one {{unit}}?",
+      "kgPerUnitHint": "Feed given is recorded in kg; stock goes down in {{unit}}s."
     },
     "headers": {
       "stock": "Stock",
       "minLevel": "Min Level",
       "costPerUnit": "Cost/Unit",
       "expiry": "Expiry",
-      "location": "Location"
+      "location": "Location",
+      "isWhat": "Feed"
     },
     "analytics": {
       "used": "Used",
@@ -369,8 +367,6 @@
       "saveFailed": "Failed to save feed",
       "restocked": "Feed restocked!",
       "restockFailed": "Failed to restock",
-      "consumptionLogged": "Consumption logged!",
-      "consumptionFailed": "Failed to log consumption",
       "deleteConfirm": "Delete this feed item?",
       "feedDeleted": "Feed deleted!",
       "deleteFailed": "Failed to delete"
@@ -384,7 +380,8 @@
     "blocked": {
       "name": "Type the name of the feed first.",
       "quantity": "Enter how much is in stock first.",
-      "cost": "Enter the cost per unit first."
+      "cost": "Enter the cost per unit first.",
+      "kgPerUnit": "Enter how many kg one {{unit}} weighs."
     },
     "minHint": "You are warned when the stock falls to this level.",
     "restockTitle": "Restock {{name}}",
@@ -399,7 +396,8 @@
       "concentrate": "Concentrate",
       "forage": "Green fodder",
       "medicated": "Medicated feed",
-      "other": "Other"
+      "other": "Other",
+      "home_grown": "Home-grown fodder"
     },
     "units": {
       "kg": "kg",
@@ -408,8 +406,17 @@
       "bag": "bag",
       "bale": "bale",
       "liter": "litre",
-      "gallon": "gallon"
-    }
+      "gallon": "gallon",
+      "g": "g",
+      "pcs": "piece"
+    },
+    "restockPrice": "Price paid per {{unit}} (optional)",
+    "restockPriceHint": "With a price, the purchase is added to Finance as a feed expense - no need to enter it there again.",
+    "feedGivenNote": "Feed given each day is recorded in Daily records - it is taken out of this stock automatically.",
+    "goDailyRecords": "Open Daily records",
+    "aboutKg": "about {{kg}} kg",
+    "needsKgPerUnit": "Say how many kg one {{unit}} weighs (Edit), so feed recorded in kg can be taken out of stock.",
+    "noFeedGiven": "No feed recorded from stock in the last 30 days."
   },
   "supplyChain": {
     "pageTitle": "🔗 Supply Chain & Traceability (Farm-to-Fork)",

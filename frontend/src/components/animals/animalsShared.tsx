@@ -7,7 +7,7 @@ export interface AnimalData {
   id: string; uniqueId?: string; name: string; species: string; breed?: string;
   dateOfBirth?: string; gender?: string; weight?: number; color?: string;
   microchipId?: string; earTagId?: string; registrationNumber?: string;
-  isNeutered?: boolean; insuranceProvider?: string; insurancePolicyNumber?: string;
+  isNeutered?: boolean | null; insuranceProvider?: string; insurancePolicyNumber?: string;
   insuranceExpiry?: string; medicalNotes?: string; ownerName?: string;
   enterpriseId?: string; groupId?: string; enterpriseName?: string; groupName?: string; groupColor?: string;
   animalClass?: string; sireId?: string; damId?: string; sireName?: string; damName?: string;
@@ -25,7 +25,7 @@ export interface GroupOption { id: string; name: string }
 export interface AnimalFormData {
   name: string; species: string; breed: string; customBreed: string; gender: string;
   weight: string; color: string; dateOfBirth: string; microchipId: string; earTagId: string;
-  registrationNumber: string; isNeutered: boolean; insuranceProvider: string;
+  registrationNumber: string; isNeutered: boolean | null; insuranceProvider: string;
   insurancePolicyNumber: string; insuranceExpiry: string; medicalNotes: string;
   enterpriseId: string; groupId: string; animalClass: string; sireId: string; damId: string;
   breedingStatus: string; lastBreedingDate: string; expectedDueDate: string;
@@ -36,7 +36,7 @@ export interface AnimalFormData {
 export const emptyAnimalFormData: AnimalFormData = {
   name: '', species: '', breed: '', customBreed: '', gender: '', weight: '', color: '',
   dateOfBirth: '', microchipId: '', earTagId: '', registrationNumber: '',
-  isNeutered: false, insuranceProvider: '', insurancePolicyNumber: '', insuranceExpiry: '',
+  isNeutered: null, insuranceProvider: '', insurancePolicyNumber: '', insuranceExpiry: '',
   medicalNotes: '', enterpriseId: '', groupId: '',
   animalClass: '', sireId: '', damId: '',
   breedingStatus: '', lastBreedingDate: '', expectedDueDate: '',
@@ -57,7 +57,8 @@ export function animalToFormData(a: AnimalData, breedList: string[]): AnimalForm
     dateOfBirth: datePart(a.dateOfBirth),
     microchipId: a.microchipId || '', earTagId: a.earTagId || '',
     registrationNumber: a.registrationNumber || '',
-    isNeutered: a.isNeutered || false,
+    // unanswered stays unanswered (null) - it is not the same as "no"
+    isNeutered: a.isNeutered ?? null,
     insuranceProvider: a.insuranceProvider || '', insurancePolicyNumber: a.insurancePolicyNumber || '',
     insuranceExpiry: datePart(a.insuranceExpiry),
     medicalNotes: a.medicalNotes || '',

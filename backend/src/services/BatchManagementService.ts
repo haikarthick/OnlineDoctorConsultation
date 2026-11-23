@@ -36,6 +36,8 @@ export class BatchManagementService {
   async openCycle(data: {
     groupId: string; name?: string; species?: string; breed?: string;
     placedCount: number; startedAt?: string; notes?: string; userId: string;
+    /** How old the animals were on arrival (pullets bought at 18 weeks, weaners at 60 days): feeding counts from birth. */
+    ageAtPlacementDays?: number | null;
   }) {
     if (!Number.isInteger(data.placedCount) || data.placedCount < 0) {
       throw new ValidationError('placedCount must be a non-negative whole number');
@@ -67,10 +69,11 @@ export class BatchManagementService {
       const cycleId = uuidv4();
       await client.query(
         `INSERT INTO group_cycles (id, group_id, cycle_number, name, species, breed,
-                                   placed_count, current_count, started_at, notes, created_by)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$7,COALESCE($8::date, CURRENT_DATE),$9,$10)`,
+                                   placed_count, current_count, started_at, notes, created_by, age_at_placement_days)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$7,COALESCE($8::date, CURRENT_DATE),$9,$10,$11)`,
         [cycleId, data.groupId, nextNumber.rows[0].n, data.name || null, data.species || null,
-         data.breed || null, data.placedCount, data.startedAt || null, data.notes || null, data.userId]
+         data.breed || null, data.placedCount, data.startedAt || null, data.notes || null, data.userId,
+         Number.isFinite(Number(data.ageAtPlacementDays)) && Number(data.ageAtPlacementDays) >= 0 ? Math.round(Number(data.ageAtPlacementDays)) : null]
       );
 
       if (data.placedCount > 0) {

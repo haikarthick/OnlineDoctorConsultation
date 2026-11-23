@@ -6,6 +6,8 @@ import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE } from '../AnimalAccessSe
 import NutritionAccess, { type Caller } from './NutritionAccess';
 import NutritionService from './NutritionService';
 import { ENGINE_VERSION, ACTIVITY_LEVELS, isNutritionModel, type NutritionModel } from './engine/models';
+import { ageInMonths } from './engine/facts';
+import { matchesUnsafe } from './engine/rules';
 import { balanceRuminantRation, type FeedOption, type RuminantRequirements, type RuminantState } from './engine/ruminantRation';
 import { balanceEquineRation, type EquineFeedOption, type EquineRequirements, type EquineWork } from './engine/equineRation';
 
@@ -55,13 +57,27 @@ interface Subject {
   activityLevel: string | null;
   expectedDueDate: string | null;
   headCount: number;
+  /** Age in months (an animal's, or the herd's average). Null = no date of birth recorded. */
+  ageMonths: number | null;
+  /** The animal was dried off on or before today (profile). */
+  driedOff: boolean;
+  /** Share of the herd within two months of calving (an animal is 1 or 0). */
+  pregnancyShare: number | null;
+  /** Reproductive state for horses and donkeys. */
+  breedingStatus: string | null;
+  /** Where the milk figure came from. */
+  milkSource: 'recorded' | 'profile' | null;
 }
+
+/** A feed on the species' caution list: allowed, but shown with the ration. */
+interface Caution { feed: string; code: string; label: string; labelKey: string | null }
 
 const RATION_MODELS: ReadonlySet<NutritionModel> = new Set<NutritionModel>(['ruminant_dm', 'equine_dm']);
 
 const RUMINANT_KEYS: Record<string, keyof RuminantRequirements | [keyof RuminantRequirements, keyof RuminantRequirements]> = {
   nel_maintenance: 'nelMaintenancePerKgBw075',
   late_pregnancy: 'latePregnancyExtraFraction',
+  target_adg: 'targetAdgKg', nel_per_kg_gain: 'nelPerKgGain', first_lactation: 'firstLactationFraction', mineral_allowance: 'mineralAllowanceG',
   dmi: ['dmiMinPctBw', 'dmiMaxPctBw'],
   cp: 'cpMinPctDm', ca: 'caMinPctDm', p: 'pMinPctDm', ndf: 'ndfMinPctDm', forage: 'forageMinPctDm',
   milk_fat: 'milkFatPct', milk_protein: 'milkProteinPct', milk_lactose: 'milkLactosePct',
@@ -89,8 +105,8 @@ class FarmRationService {
   }
 
   /** The ruminant requirement set for this species and state: its own set first, then the general one. */
-  async requirements(speciesCode: string, state: RuminantState): Promise<{ setId: string; title: string; status: string; req: RuminantRequirements }> {
-    const { setId, title, status, rows } = await this.requirementRows('ruminant_dm', speciesCode, state === 'lactating' ? 'lactating' : 'dry');
+  async requirements(speciesCode: string, state: RuminantState): Promise<{ setId: string; title: string; status: string; req: RuminantRequirements; weanMonths: number | null; adultMonths: number | null }> {
+    const { setId, title, status, rows } = await this.requirementRows('ruminant_dm', speciesCode, state === 'lactating' ? 'lactating' : state === 'growing' ? 'growing' : 'dry');
     // Lactating defaults for milk composition are needed even for a dry set (used only when milk > 0).
     const req: Partial<RuminantRequirements> = { milkFatPct: 4, milkProteinPct: 3.2, milkLactosePct: 4.8 };
     for (const x of rows) {
@@ -102,11 +118,24 @@ class FarmRationService {
     const needed: Array<keyof RuminantRequirements> = ['nelMaintenancePerKgBw075', 'dmiMinPctBw', 'dmiMaxPctBw', 'cpMinPctDm', 'caMinPctDm', 'pMinPctDm', 'forageMinPctDm'];
     const gaps = needed.filter(k => req[k] === undefined || req[k] === null);
     if (gaps.length) throw new ValidationError(`The ration requirements "${title}" are incomplete (${gaps.join(', ')}). An admin can complete them in Nutrition data.`);
-    return { setId, title, status, req: { latePregnancyExtraFraction: 0, ndfMinPctDm: 0, ...req } as RuminantRequirements };
+    if (state === 'growing' && (!req.targetAdgKg || !req.nelPerKgGain)) {
+      throw new ValidationError(`The growing-stock requirements "${title}" are incomplete (target gain / energy per kg gain). An admin can complete them in Nutrition data.`);
+    }
+    const age = (n: string): number | null => num(rows.find((x: any) => x.nutrient === n)?.min_value);
+    return { setId, title, status, req: { latePregnancyExtraFraction: 0, ndfMinPctDm: 0, ...req } as RuminantRequirements, weanMonths: age('wean_months'), adultMonths: age('adult_months') };
+  }
+
+  /** The age (months) from which a growing animal is fed a ration, and the age it counts as adult - data per species. */
+  private async growingLimits(speciesCode: string): Promise<{ weanMonths: number | null; adultMonths: number | null }> {
+    try {
+      const r = await this.requirementRows('ruminant_dm', speciesCode, 'growing');
+      const g = (n: string): number | null => num(r.rows.find((x: any) => x.nutrient === n)?.min_value);
+      return { weanMonths: g('wean_months'), adultMonths: g('adult_months') };
+    } catch { return { weanMonths: null, adultMonths: null }; }
   }
 
   /** The horse / donkey requirement set: the species' own set first (donkey), then the general horse set. */
-  async equineRequirements(speciesCode: string): Promise<{ setId: string; title: string; status: string; req: EquineRequirements }> {
+  async equineRequirements(speciesCode: string): Promise<{ setId: string; title: string; status: string; req: EquineRequirements; adultMonths: number | null }> {
     const { setId, title, status, rows } = await this.requirementRows('equine_dm', speciesCode, 'maintenance');
     const v = (nutrient: string, which: 'min' | 'max' = 'min'): number | null => {
       const row = rows.find((x: any) => x.nutrient === nutrient);
@@ -118,11 +147,13 @@ class FarmRationService {
       cpGPerMcalDe: v('cp'), caGPerKgBw: v('ca'), pGPerKgBw: v('p'),
       dmiMinPctBw: v('dmi'), dmiMaxPctBw: v('dmi', 'max'), forageMinPctBw: v('forage'),
       concentrateMaxPctDm: v('concentrate', 'max') ?? 100,
+      lactatingFactor: v('work_lactating') ?? undefined, latePregnancyFraction: v('late_pregnancy') ?? undefined,
+      concentrateMaxKgPerMeal: undefined,
     };
     const gaps = (['deMaintenancePerKgBw', 'cpGPerMcalDe', 'caGPerKgBw', 'pGPerKgBw', 'dmiMinPctBw', 'dmiMaxPctBw', 'forageMinPctBw'] as const)
       .filter(k => req[k] === null);
     if (gaps.length) throw new ValidationError(`The ration requirements "${title}" are incomplete (${gaps.join(', ')}). An admin can complete them in Nutrition data.`);
-    return { setId, title, status, req: req as EquineRequirements };
+    return { setId, title, status, req: req as EquineRequirements, adultMonths: v('adult_months') };
   }
 
   // ─── Subjects (one animal, or a herd) ────────────────────────────────────
@@ -130,12 +161,27 @@ class FarmRationService {
   private async animalSubject(animalId: string, caller: Caller, need: 'read' | 'write'): Promise<Subject> {
     const access = await NutritionAccess.forAnimal(animalId, caller, need);
     const { facts } = await NutritionService.loadFacts(animalId);
+    // Milk: what was recorded in Daily records (last 7 days) wins; the profile's typed average is the fallback.
+    const [milk, prof] = await Promise.all([
+      database.query(
+        `SELECT AVG(day_total) AS litres FROM (
+           SELECT record_date, SUM(quantity) AS day_total FROM farm_daily_records
+            WHERE animal_id = $1 AND record_type = 'milk' AND record_date >= CURRENT_DATE - 7 AND quantity IS NOT NULL
+            GROUP BY record_date) d`, [animalId]),
+      database.query(`SELECT dry_off_date::text AS dry_off FROM animals WHERE id = $1`, [animalId]),
+    ]);
+    const recorded = num(milk.rows[0]?.litres);
+    const driedOff = !!prof.rows[0]?.dry_off && prof.rows[0].dry_off <= new Date().toISOString().slice(0, 10);
+    const dueMonths = facts.expectedDueDate ? (new Date(facts.expectedDueDate).getTime() - Date.now()) / (30.4 * 86400000) : null;
     return {
       kind: 'animal', id: animalId, name: access.animal.name, model: facts.model, speciesCode: facts.speciesCode,
       ownerId: access.animal.ownerId, enterpriseId: access.animal.enterpriseId,
       weightKg: facts.weightKg, weightSource: facts.weightKg ? 'history' : null,
-      avgDailyMilkLitres: facts.avgDailyMilkLitres, activityLevel: facts.activityLevel, expectedDueDate: facts.expectedDueDate,
-      headCount: 1,
+      avgDailyMilkLitres: driedOff ? 0 : (recorded !== null ? round(recorded, 1) : facts.avgDailyMilkLitres),
+      milkSource: driedOff ? 'profile' : recorded !== null ? 'recorded' : facts.avgDailyMilkLitres ? 'profile' : null,
+      activityLevel: facts.activityLevel, expectedDueDate: facts.expectedDueDate,
+      headCount: 1, ageMonths: ageInMonths(facts.dateOfBirth), driedOff,
+      pregnancyShare: dueMonths !== null && dueMonths >= -0.5 && dueMonths <= 2 ? 1 : 0, breedingStatus: facts.breedingStatus,
     };
   }
 
@@ -151,7 +197,8 @@ class FarmRationService {
     const r = await database.query(
       `SELECT g.id, g.name, g.species, g.enterprise_id, g.current_count, e.owner_id,
               COALESCE(ms.nutrition_model, 'guidance_only') AS model,
-              m.members, m.avg_weight, m.avg_milk, m.due
+              m.members, m.avg_weight, m.avg_milk, m.due, m.avg_age_months, m.near_calving, m.dried,
+              rm.recorded_milk
          FROM animal_groups g
          LEFT JOIN enterprises e ON e.id = g.enterprise_id
          LEFT JOIN master_species ms ON ms.code = g.species
@@ -159,9 +206,21 @@ class FarmRationService {
            SELECT COUNT(*) AS members,
                   AVG(NULLIF(COALESCE(a.current_weight, CASE WHEN lower(COALESCE(a.weight_unit, 'kg')) LIKE 'lb%' THEN a.weight * 0.45359237 ELSE a.weight END), 0)) AS avg_weight,
                   AVG(a.avg_daily_milk_litres) FILTER (WHERE a.avg_daily_milk_litres > 0) AS avg_milk,
-                  MIN(a.expected_due_date)::text AS due
+                  MIN(a.expected_due_date)::text AS due,
+                  AVG(EXTRACT(EPOCH FROM (NOW() - a.date_of_birth::timestamp)) / (86400 * 30.4)) AS avg_age_months,
+                  COUNT(*) FILTER (WHERE a.expected_due_date BETWEEN CURRENT_DATE - 15 AND CURRENT_DATE + 62) AS near_calving,
+                  COUNT(*) FILTER (WHERE a.dry_off_date IS NOT NULL AND a.dry_off_date <= CURRENT_DATE) AS dried
              FROM animals a WHERE a.group_id = g.id AND a.is_active = true
          ) m ON true
+         LEFT JOIN LATERAL (
+           SELECT AVG(per_animal) AS recorded_milk FROM (
+             SELECT AVG(day_total) AS per_animal FROM (
+               SELECT animal_id, record_date, SUM(quantity) AS day_total FROM farm_daily_records
+                WHERE record_type = 'milk' AND record_date >= CURRENT_DATE - 7 AND quantity IS NOT NULL
+                  AND animal_id IN (SELECT id FROM animals WHERE group_id = g.id AND is_active = true)
+                GROUP BY animal_id, record_date) d
+             GROUP BY animal_id) p
+         ) rm ON true
         WHERE g.id = $1`,
       [groupId]
     );
@@ -169,12 +228,19 @@ class FarmRationService {
     if (!g) throw new NotFoundError('Group');
     const headCount = Math.max(num(g.current_count) || 0, Number(g.members) || 0);
     const avgWeight = num(g.avg_weight);
+    const members = Number(g.members) || 0;
+    const recordedMilk = num(g.recorded_milk);
+    const profileMilk = num(g.avg_milk);
     return {
       kind: 'group', id: g.id, name: g.name, model: isNutritionModel(g.model) ? g.model : 'guidance_only', speciesCode: g.species,
       ownerId: g.owner_id || null, enterpriseId: g.enterprise_id || null,
       weightKg: avgWeight ? round(avgWeight, 1) : null, weightSource: avgWeight ? 'members' : null,
-      avgDailyMilkLitres: num(g.avg_milk) === null ? null : round(Number(g.avg_milk), 1),
+      avgDailyMilkLitres: recordedMilk !== null ? round(recordedMilk, 1) : profileMilk === null ? null : round(profileMilk, 1),
+      milkSource: recordedMilk !== null ? 'recorded' : profileMilk !== null ? 'profile' : null,
       activityLevel: null, expectedDueDate: null, headCount,
+      ageMonths: num(g.avg_age_months) === null ? null : Math.round(Number(g.avg_age_months)), driedOff: members > 0 && Number(g.dried) === members,
+      // The herd's due dates are kept as a SHARE: the late-pregnancy allowance applies to that share of the animals.
+      pregnancyShare: members > 0 ? round(Number(g.near_calving) / members, 2) : null, breedingStatus: null,
       canWrite, canReview: isVet,
     };
   }
@@ -186,9 +252,10 @@ class FarmRationService {
     if (!Array.isArray(choices) || choices.length === 0) throw new ValidationError('Choose the feeds you have - at least one fodder and one concentrate.');
     if (choices.length > 25) throw new ValidationError('A ration can use up to 25 feeds.');
     const r = await database.query(
-      `SELECT i.id, i.label, i.dry_matter_pct, i.composition,
-              (SELECT fi.cost_per_unit FROM feed_inventory fi
-                WHERE fi.ingredient_id = i.id AND fi.enterprise_id = $3::uuid AND fi.is_active = true AND lower(fi.unit) = 'kg'
+      `SELECT i.id, i.label, i.kind, i.models, (i.owner_id IS NULL AND i.enterprise_id IS NULL) AS is_shared, i.dry_matter_pct, i.composition,
+              (SELECT fi.cost_per_unit / NULLIF(COALESCE(fi.kg_per_unit, CASE lower(fi.unit) WHEN 'kg' THEN 1 WHEN 'g' THEN 0.001 WHEN 'ton' THEN 1000 WHEN 'lb' THEN 0.45359237 END), 0)
+                 FROM feed_inventory fi
+                WHERE fi.ingredient_id = i.id AND fi.enterprise_id = $3::uuid AND fi.is_active = true
                 ORDER BY fi.updated_at DESC LIMIT 1) AS stock_price
          FROM nutrition_ingredients i
         WHERE i.id = ANY($1::uuid[]) AND i.is_active = true AND i.status <> 'retired'
@@ -196,32 +263,44 @@ class FarmRationService {
       [choices.map(c => c.ingredientId), subject.ownerId, subject.enterpriseId]
     );
     const byId = new Map(r.rows.map((x: any) => [x.id, x]));
+    const unsafeList = await NutritionService.unsafeFoods(subject.speciesCode);
     return choices.map(c => {
       const x: any = byId.get(c.ingredientId);
       if (!x) throw new ValidationError('One of the chosen feeds is no longer available. Choose it again.');
+      // A shared library feed is only offered for the kinds of animal it is listed for (no cattle mixture for a horse).
+      if (x.is_shared && Array.isArray(x.models) && x.models.length > 0 && !x.models.includes(subject.model)) {
+        throw new ValidationError(`${x.label} is not a feed for this kind of animal. Choose another feed.`);
+      }
+      // Species safety: a feed on this species' danger list is refused in words; a caution list item is shown with the ration.
+      const hit = unsafeList.filter(u => matchesUnsafe(x.label, u.matchTerms));
+      const danger = hit.find(u => u.severity === 'danger');
+      if (danger) throw new ValidationError(`${x.label} is not safe for this animal (${danger.label}). Take it out and choose another feed.`);
       const price = num(c.pricePerKg) ?? num(x.stock_price) ?? 0;
       if (price < 0 || price > 100000) throw new ValidationError(`Check the price of ${x.label}.`);
       const comp = x.composition || {};
-      return { x, comp, dm: num(comp.dm_pct) ?? num(x.dry_matter_pct), price, choice: c };
+      return { x, comp, dm: num(comp.dm_pct) ?? num(x.dry_matter_pct), price, choice: c, cautions: hit.filter(u => u.severity !== 'danger').map(u => ({ feed: x.label as string, code: u.code, label: u.label, labelKey: u.labelKey })) };
     });
   }
 
-  private async ruminantFeeds(subject: Subject, choices: RationFeedChoice[]): Promise<FeedOption[]> {
-    return (await this.feedRows(subject, choices)).map(({ x, comp, dm, price, choice }) => {
+  private async ruminantFeeds(subject: Subject, choices: RationFeedChoice[]): Promise<{ feeds: FeedOption[]; cautions: Caution[] }> {
+    const rows = await this.feedRows(subject, choices);
+    const feeds = rows.map(({ x, comp, dm, price, choice }) => {
       if (dm === null || num(comp.nel_mcal_kg_dm) === null || num(comp.cp_pct_dm) === null) {
         throw new ValidationError(`${x.label} has no feed values (dry matter, energy, protein) yet, so it cannot be used in a ration.`);
       }
       return {
-        key: x.id, label: x.label, isForage: Number(comp.is_forage) === 1, dmPct: dm,
+        key: x.id, label: x.label, isMineral: x.kind === 'mineral', isForage: Number(comp.is_forage) === 1, dmPct: dm,
         nelMcalPerKgDm: num(comp.nel_mcal_kg_dm) as number, cpPctDm: num(comp.cp_pct_dm) as number,
         caPctDm: num(comp.ca_pct_dm) ?? 0, pPctDm: num(comp.p_pct_dm) ?? 0, ndfPctDm: num(comp.ndf_pct_dm),
         pricePerKgAsFed: price, minKgAsFed: num(choice.minKg), maxKgAsFed: num(choice.maxKg),
       };
     });
+    return { feeds, cautions: rows.flatMap(r => r.cautions) };
   }
 
-  private async equineFeeds(subject: Subject, choices: RationFeedChoice[]): Promise<EquineFeedOption[]> {
-    return (await this.feedRows(subject, choices)).map(({ x, comp, dm, price, choice }) => {
+  private async equineFeeds(subject: Subject, choices: RationFeedChoice[]): Promise<{ feeds: EquineFeedOption[]; cautions: Caution[] }> {
+    const rows = await this.feedRows(subject, choices);
+    const feeds = rows.map(({ x, comp, dm, price, choice }) => {
       if (dm === null || num(comp.de_mcal_kg_dm) === null || num(comp.cp_pct_dm) === null) {
         throw new ValidationError(`${x.label} has no horse feed values (dry matter, energy, protein) yet, so it cannot be used in a horse ration.`);
       }
@@ -232,6 +311,7 @@ class FarmRationService {
         pricePerKgAsFed: price, minKgAsFed: num(choice.minKg), maxKgAsFed: num(choice.maxKg),
       };
     });
+    return { feeds, cautions: rows.flatMap(r => r.cautions) };
   }
 
   // ─── The calculation ─────────────────────────────────────────────────────
@@ -257,25 +337,47 @@ class FarmRationService {
       const work = (input.work && (ACTIVITY_LEVELS as readonly string[]).includes(input.work) ? input.work
         : (ACTIVITY_LEVELS as readonly string[]).includes(String(subject.activityLevel)) ? subject.activityLevel : 'low') as EquineWork;
       const reqs = await this.equineRequirements(subject.speciesCode);
-      const feeds = await this.equineFeeds(subject, input.feeds);
-      const result = balanceEquineRation({ bodyWeightKg: weightKg, work, requirements: reqs.req, feeds });
-      return { model: 'equine_dm' as const, weightKg, weightSource, milk: 0, fat: null, state: 'maintenance', work, monthsToCalving: null, reqs, result };
+      // A foal or yearling is growing fast and its needs are not an adult's: a vet makes that plan.
+      if (subject.ageMonths !== null && reqs.adultMonths !== null && subject.ageMonths < reqs.adultMonths) {
+        throw new ValidationError(`${subject.kind === 'group' ? 'The young horses in this group are' : 'This horse is'} still growing (under ${reqs.adultMonths} months). A growing horse needs a feeding plan from a vet - book a consultation.`);
+      }
+      const dueMonths = subject.expectedDueDate ? (new Date(subject.expectedDueDate).getTime() - Date.now()) / (30.4 * 86400000) : null;
+      const reproState = subject.breedingStatus === 'lactating' ? 'lactating' as const : (dueMonths !== null && dueMonths >= 0 && dueMonths <= 3 ? 'pregnant' as const : null);
+      const { feeds, cautions } = await this.equineFeeds(subject, input.feeds);
+      const result = balanceEquineRation({ bodyWeightKg: weightKg, work, reproState, requirements: reqs.req, feeds });
+      return { model: 'equine_dm' as const, weightKg, weightSource, milk: 0, fat: null, state: reproState === 'lactating' ? 'lactating' : 'maintenance', work, monthsToCalving: null, reqs, result, cautions, stage: { ageMonths: subject.ageMonths, growing: false, firstLactation: false }, milkSource: null as 'recorded' | 'profile' | null };
     }
 
     const milk = num(input.milkLitresPerDay) ?? subject.avgDailyMilkLitres ?? 0;
     if (milk < 0 || milk > 200) throw new ValidationError('Milk per day must be between 0 and 200 litres.');
     const fat = num(input.milkFatPct);
     if (fat !== null && (fat <= 0 || fat > 15)) throw new ValidationError('Milk fat must be between 0 and 15%.');
-    const state: RuminantState = milk > 0 ? 'lactating' : 'dry';
+    // Life stage (data per species, migration 064): a calf, kid or lamb is not fed as a dry adult. Below weaning age the
+    // young are on milk and starter feed - no fodder ration; until adult age they are GROWING (maintenance + gain).
+    const limits = await this.growingLimits(subject.speciesCode);
+    const age = subject.ageMonths;
+    if (age !== null && limits.weanMonths !== null && age < limits.weanMonths) {
+      throw new ValidationError(`${subject.kind === 'group' ? 'The young animals in this group are' : 'This animal is'} still on milk and starter feed (under ${limits.weanMonths} months). A fodder ration is not right for them yet - ask your vet for a calf feeding plan.`);
+    }
+    const isYoung = age !== null && limits.adultMonths !== null && age < limits.adultMonths;
+    const state: RuminantState = milk > 0 ? 'lactating' : isYoung ? 'growing' : 'dry';
+    // First lactation: the animal is still growing, so it needs more than an older cow giving the same milk.
+    const firstLactation = state === 'lactating' && age !== null && limits.adultMonths !== null && age < limits.adultMonths + 12;
     let monthsToCalving: number | null = null;
     if (subject.expectedDueDate) {
       const months = (new Date(subject.expectedDueDate).getTime() - Date.now()) / (30.4 * 86400000);
       if (months >= -0.5) monthsToCalving = Math.max(0, months);
     }
     const reqs = await this.requirements(subject.speciesCode, state);
-    const feeds = await this.ruminantFeeds(subject, input.feeds);
-    const result = balanceRuminantRation({ bodyWeightKg: weightKg, milkLitresPerDay: milk, milkFatPct: fat, monthsToCalving, state, requirements: reqs.req, feeds });
-    return { model: 'ruminant_dm' as const, weightKg, weightSource, milk, fat, state, work: null, monthsToCalving, reqs, result };
+    const { feeds, cautions } = await this.ruminantFeeds(subject, input.feeds);
+    const result = balanceRuminantRation({
+      bodyWeightKg: weightKg, milkLitresPerDay: state === 'growing' ? 0 : milk, milkFatPct: fat, monthsToCalving, state, firstLactation,
+      pregnancyShare: subject.pregnancyShare, requirements: reqs.req, feeds,
+    });
+    return {
+      model: 'ruminant_dm' as const, weightKg, weightSource, milk, fat, state, work: null, monthsToCalving, reqs, result, cautions,
+      stage: { ageMonths: age, growing: state === 'growing', firstLactation }, milkSource: subject.milkSource,
+    };
   }
 
   /** Whole-herd totals: the per-head ration times the head count. */
@@ -289,10 +391,29 @@ class FarmRationService {
     };
   }
 
-  private view(subject: Subject, c: Awaited<ReturnType<FarmRationService['compute']>>) {
+  /** Milk / meat withdrawal still running for this animal or herd (medical records own it): shown beside the ration. */
+  async withdrawals(subject: Subject): Promise<Array<{ what: 'milk' | 'meat'; until: string }>> {
+    const col = subject.kind === 'animal' ? 'animal_id' : 'group_id';
+    const r = await database.query(
+      `SELECT MAX(withdrawal_until_milk)::text AS milk, MAX(withdrawal_until_meat)::text AS meat FROM medical_records
+        WHERE ${col} = $1 AND (withdrawal_until_milk >= CURRENT_DATE OR withdrawal_until_meat >= CURRENT_DATE)`,
+      [subject.id]
+    );
+    const x = r.rows[0] || {};
+    const today = new Date().toISOString().slice(0, 10);
+    const out: Array<{ what: 'milk' | 'meat'; until: string }> = [];
+    if (x.milk && x.milk >= today) out.push({ what: 'milk', until: x.milk });
+    if (x.meat && x.meat >= today) out.push({ what: 'meat', until: x.meat });
+    return out;
+  }
+
+  private view(subject: Subject, c: Awaited<ReturnType<FarmRationService['compute']>>, withdrawals: Array<{ what: 'milk' | 'meat'; until: string }> = []) {
     return {
+      withdrawals,
       model: c.model, state: c.state, work: c.work, milkLitresPerDay: c.milk, monthsToCalving: c.monthsToCalving,
-      weightKg: c.weightKg, weightSource: c.weightSource,
+      weightKg: c.weightKg, weightSource: c.weightSource, stage: c.stage, milkSource: c.milkSource,
+      // Feeds on the species' caution list (e.g. groundnut cake: check it is dry and not mouldy).
+      cautions: c.cautions,
       requirementSet: { id: c.reqs.setId, title: c.reqs.title, status: c.reqs.status },
       result: c.result,
       herd: this.herd(subject, c.result as any),
@@ -303,7 +424,7 @@ class FarmRationService {
 
   async preview(animalId: string, input: RationInput, caller: Caller) {
     const subject = await this.animalSubject(animalId, caller, 'read');
-    return this.view(subject, await this.compute(subject, input));
+    return this.view(subject, await this.compute(subject, input), await this.withdrawals(subject));
   }
 
   async save(animalId: string, input: RationInput, caller: Caller) {
@@ -330,7 +451,7 @@ class FarmRationService {
 
   async groupPreview(groupId: string, input: RationInput, caller: Caller) {
     const subject = await this.groupSubject(groupId, caller, 'read');
-    return this.view(subject, await this.compute(subject, input));
+    return this.view(subject, await this.compute(subject, input), await this.withdrawals(subject));
   }
 
   async groupSave(groupId: string, input: RationInput, caller: Caller) {
@@ -368,17 +489,17 @@ class FarmRationService {
       const p = await client.query(
         `INSERT INTO nutrition_plans (${subjectCol}, enterprise_id, nutrition_model, status, validation, goal, daily_dm_kg, meals_per_day,
                                       requirement_set_id, engine_version, inputs, result, created_by)
-         VALUES ($1,$2,$3,'active','suggested',$4,$5,2,$6,$7,$8::jsonb,$9::jsonb,$10) RETURNING id`,
-        [subject.id, subject.enterpriseId, c.model, c.state === 'lactating' ? 'production' : 'maintain', ok.supplied.dmKg, c.reqs.setId, ENGINE_VERSION,
+         VALUES ($1,$2,$3,'active','suggested',$4,$5,$11,$6,$7,$8::jsonb,$9::jsonb,$10) RETURNING id`,
+        [subject.id, subject.enterpriseId, c.model, c.state === 'lactating' ? 'production' : c.state === 'growing' ? 'growth' : 'maintain', ok.supplied.dmKg, c.reqs.setId, ENGINE_VERSION,
          JSON.stringify({
            milkLitresPerDay: c.milk, milkFatPct: c.fat, monthsToCalving: c.monthsToCalving, work: c.work,
            weightKg: c.weightKg, weightSource: c.weightSource, headCount: subject.headCount, feeds: input.feeds,
          }),
          JSON.stringify({
            need: ok.need, supplied: ok.supplied, totalCostPerDay: ok.totalCostPerDay, costPerLitre: ok.costPerLitre ?? null,
-           state: c.state, work: c.work, herd,
+           state: c.state, work: c.work, herd, stage: c.stage, cautions: c.cautions,
          }),
-         caller.userId]
+         caller.userId, Math.min(Math.max(Number(ok.supplied.feedsPerDay) || 2, 1), 12)]
       );
       let i = 0;
       for (const line of ok.lines) {

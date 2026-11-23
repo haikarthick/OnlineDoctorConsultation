@@ -470,7 +470,12 @@ async function http(method, url, body, token) {
       ok();
     } catch (e) {
       fail('init.sql failed - a fresh deploy would end up with NO schema at all (atomic apply).',
-        String(e.stderr || e.message).split('\n').filter(Boolean).slice(0, 12));
+        // The real ERROR lines first: the harmless NOTICEs ("trigger ... does not exist, skipping") used to fill all 12 lines.
+        (() => {
+          const lines = String(e.stderr || e.message).split('\n').filter(Boolean);
+          const errs = lines.filter(l => /ERROR|FATAL|LINE \d|DETAIL|HINT/.test(l));
+          return (errs.length ? errs : lines).slice(0, 12);
+        })());
     }
 
     // ── PHASE 2: upgrade path ──
@@ -597,7 +602,9 @@ async function http(method, url, body, token) {
         if (!quiet) {
           fail('Server never became idle after startup.',
             ['Health stayed slow for 4 minutes - something is still saturating it.',
-             'Later phases would race it and fail misleadingly.']);
+             'Later phases would race it and fail misleadingly.',
+             '--- the last server log lines (what it was busy with) ---',
+             ...serverLog.split('\n').filter(l => l.trim()).slice(-25).map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(0, 220))]);
         }
 
         step('PHASE 5  Schema drift after startup');
@@ -625,6 +632,18 @@ async function http(method, url, body, token) {
     // Runs even if PHASE 5 failed: drift and user-facing breakage are independent diagnostics,
     // and seeing both ("the constraint was reverted" AND "so this role cannot register") makes
     // the cause-and-effect obvious instead of leaving it to be inferred.
+    // Farm records and nutrition are dark-launched flags the server caches for 60 s. Switch them on BEFORE any phase calls
+    // the API, so a probe in an earlier phase cannot leave "off" cached for the journeys that need the modules.
+    if (serverHealthy && port) {
+      try {
+        psql('verifydb', `SET search_path TO ${SCHEMA}, public;
+          INSERT INTO system_settings (key, value, description) VALUES ('farm.records.enabled', 'true', 'enabled by runtime-verify before PHASE 6')
+          ON CONFLICT (key) DO UPDATE SET value = 'true';
+          INSERT INTO system_settings (key, value, description) VALUES ('nutrition.enabled', 'true', 'enabled by runtime-verify before PHASE 6')
+          ON CONFLICT (key) DO UPDATE SET value = 'true';`);
+      } catch { /* each phase that needs a flag reports it itself */ }
+    }
+
     if (serverHealthy && port) {
       const roles = registerableRoles();
       step(`PHASE 6  Registering all ${roles.length} self-registerable role(s)`);
@@ -1210,6 +1229,213 @@ async function http(method, url, body, token) {
       }
       if (problems.length) fail('Another person\'s animal data is reachable (or the owner is locked out).', problems);
       else ok('stranger and unbooked vet refused on every endpoint; owner keeps access');
+    }
+
+    // ── PHASE 6g: farm feed has ONE place to record it, and the safety fixes (migrations 063 / 064) ──
+    // Owner rule 2026-11-23: no duplicate screens or double entry. Feed given is recorded only in Daily records; it takes
+    // the feed out of stock and carries its cost; Feed Inventory holds stock and price; old "Log use" rows were moved.
+    // Plus the domain-review SAFETY rows that need a real database: growing calves, unweaned calves, sheep copper.
+    if (serverHealthy && port) {
+      step('PHASE 6g Farm feed: one place to record it, stock and cost follow, and the safety rules hold');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const mark = serverLog.length;
+      const problems = [];
+      try {
+        psql('verifydb', `SET search_path TO ${SCHEMA}, public;
+          INSERT INTO system_settings (key, value, description) VALUES ('farm.records.enabled', 'true', 'enabled by runtime-verify PHASE 6g')
+          ON CONFLICT (key) DO UPDATE SET value = 'true';
+          INSERT INTO system_settings (key, value, description) VALUES ('nutrition.enabled', 'true', 'enabled by runtime-verify PHASE 6g')
+          ON CONFLICT (key) DO UPDATE SET value = 'true';`);
+      } catch { problems.push('could not switch farm records / nutrition on in the verification database'); }
+      // The server caches each flag for 60 s, and the previous phase's probes may have cached "off": wait until it reports
+      // both modules on (up to 90 s) instead of racing the cache.
+      {
+        const probe = await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' });
+        const tok = probe.json?.data?.token;
+        const until = Date.now() + 90000;
+        let on = false;
+        while (tok && Date.now() < until) {
+          const a = await http('GET', `${apiBase}/farm-records/enabled`, null, tok);
+          const b = await http('GET', `${apiBase}/nutrition/enabled`, null, tok);
+          if (a.json?.data?.enabled === true && b.json?.data?.enabled === true) { on = true; break; }
+          await sleep(3000);
+        }
+        if (!on) problems.push('the server still reports farm records / nutrition off 90 s after they were switched on');
+      }
+      let seq = (Math.floor(Date.now() / 1000) % 100000000) + 31000;
+      const signUp = async () => {
+        const email = `verify.feed.${Date.now()}.${seq}@example.com`;
+        await http('POST', `${apiBase}/auth/register`, { firstName: 'Feed', lastName: 'Verify', email, phone: `9${String(seq++).padStart(9, '0')}`,
+          password: 'Password1', confirmPassword: 'Password1', role: 'pet_owner', acceptTerms: true });
+        return (await http('POST', `${apiBase}/auth/login`, { email, password: 'Password1' })).json?.data?.token;
+      };
+      const msgOf = (r) => r.json?.message || r.json?.error?.message || '';
+      const login = await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' });
+      const farmer = login.json?.data?.token;
+      const stranger = await signUp();
+      let ent = null; let herd = null;
+      try {
+        ent = psqlJson('verifydb', `SELECT e.id FROM ${SCHEMA}.enterprises e JOIN ${SCHEMA}.users u ON u.id = e.owner_id WHERE u.email = 'tom.wilson@example.com' ORDER BY e.created_at LIMIT 1`)[0]?.id;
+        herd = psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.animal_groups WHERE enterprise_id = '${ent}' AND species = 'Cattle' LIMIT 1`)[0]?.id;
+      } catch { /* reported below */ }
+      if (!farmer || !stranger || !ent || !herd) {
+        problems.push('could not set up the seeded farmer, a stranger and a farm with a cattle herd for the feed journey');
+      } else {
+        // The old table is gone and the demo seed's feed rows live in Daily records, with their feed and cost.
+        try {
+          const t = psqlJson('verifydb', `SELECT to_regclass('${SCHEMA}.feed_consumption_logs')::text AS t`)[0]?.t;
+          if (t) problems.push('feed_consumption_logs still exists - feed given must be recorded in one table only');
+          const seeded = psqlJson('verifydb', `SELECT COUNT(*) AS n FROM ${SCHEMA}.farm_daily_records WHERE record_type = 'feed' AND feed_id IS NOT NULL AND cost IS NOT NULL`)[0]?.n;
+          if (Number(seeded) < 4) problems.push(`the demo feed rows are not in Daily records with their feed and cost (found ${seeded})`);
+          const unit = psqlJson('verifydb', `SELECT fields::text AS f FROM ${SCHEMA}.master_record_types WHERE code = 'sample_weight'`)[0]?.f || '';
+          if (!/"unit"\s*:\s*"g"/.test(unit)) problems.push('the sample weight field does not carry its unit (g), so the entry cannot show it');
+        } catch (e) { problems.push(`schema checks for the feed move failed: ${String(e.message).slice(0, 140)}`); }
+
+        const feedPath = `${apiBase}/enterprises/${ent}/feed`;
+        const stockOf = async (id) => ((await http('GET', feedPath, null, farmer)).json?.data?.items || []).find(f => f.id === id);
+        // A bag needs its weight in kg, said in words.
+        const noWeight = await http('POST', feedPath, { feedName: 'Verify no-weight bag', unit: 'bag', currentStock: 5, costPerUnit: 900 }, farmer);
+        if (noWeight.status !== 400 || !/how many kg/i.test(msgOf(noWeight))) problems.push(`a bag with no kg weight was not refused in words (HTTP ${noWeight.status})`);
+        const bag = await http('POST', feedPath, { feedName: 'Verify cattle feed bag', unit: 'bag', kgPerUnit: 50, currentStock: 10, minimumStock: 2, costPerUnit: 1200 }, farmer);
+        const hay = await http('POST', feedPath, { feedName: 'Verify hay', unit: 'kg', currentStock: 500, minimumStock: 50, costPerUnit: 5 }, farmer);
+        const bagId = bag.json?.data?.id; const hayId = hay.json?.data?.id;
+        if (bag.status !== 201 || !bagId || hay.status !== 201 || !hayId) problems.push(`create stock items: HTTP ${bag.status} / ${hay.status} ${JSON.stringify(bag.json || {}).slice(0, 160)}`);
+        else {
+          const first = await stockOf(bagId);
+          if (first?.stockKg !== 500) problems.push(`a bag of 50 kg x 10 should be 500 kg in store, got ${first?.stockKg}`);
+          // Link the stock item to the library feed it is.
+          const lib = (await http('GET', `${feedPath}/library`, null, farmer)).json?.data?.items || [];
+          const maize = lib.find(x => x.code === 'feed_green_maize');
+          if (!maize) problems.push('the feed library (GET .../feed/library) does not list the seeded feeds');
+          else {
+            const link = await http('PUT', `${apiBase}/feed/${bagId}`, { ingredientId: maize.id }, farmer);
+            if (link.status !== 200 || link.json?.data?.ingredientId !== maize.id) problems.push(`linking a stock item to a library feed: HTTP ${link.status} ${msgOf(link)}`);
+          }
+
+          // Feed given: ONE place. 100 kg = 2 bags, costed at the stock price.
+          const rec = (extra) => http('POST', `${apiBase}/farm-records`, { enterpriseId: ent, recordType: 'feed', ...extra }, farmer);
+          const en = await http('GET', `${apiBase}/farm-records/enabled`, null, farmer);
+          const r1 = await rec({ groupId: herd, quantity: 100, feedId: bagId });
+          const s1 = await stockOf(bagId);
+          if (r1.status >= 300 || r1.json?.data?.cost !== 2400 || s1?.currentStock !== 8) {
+            problems.push(`recording 100 kg of a 50 kg bag: HTTP ${r1.status}, cost ${r1.json?.data?.cost} (want 2400), stock ${s1?.currentStock} (want 8) ${msgOf(r1)} | module enabled: ${JSON.stringify(en.json?.data)} | answer: ${JSON.stringify(r1.json).slice(0, 200)} | herd ${herd} farm ${ent}`);
+          }
+          // A correction moves only the difference: 150 kg = 3 bags in all, so one more bag.
+          const r2 = await rec({ groupId: herd, quantity: 150, feedId: bagId });
+          const s2 = await stockOf(bagId);
+          if (r2.status >= 300 || s2?.currentStock !== 7 || r2.json?.data?.cost !== 3600) problems.push(`correcting the entry to 150 kg: stock ${s2?.currentStock} (want 7), cost ${r2.json?.data?.cost} (want 3600)`);
+          // All my animals: no animal, no group.
+          const r3 = await rec({ quantity: 50, feedId: bagId });
+          const s3 = await stockOf(bagId);
+          if (r3.status >= 300 || r3.json?.data?.wholeFarm !== true || s3?.currentStock !== 6) problems.push(`feed for all the farm's animals: HTTP ${r3.status}, wholeFarm ${r3.json?.data?.wholeFarm}, stock ${s3?.currentStock} (want 6) ${msgOf(r3)}`);
+          const milkFarm = await http('POST', `${apiBase}/farm-records`, { enterpriseId: ent, recordType: 'milk', quantity: 5, session: 'am' }, farmer);
+          if (milkFarm.status !== 400) problems.push(`milk was accepted for "all my animals" (HTTP ${milkFarm.status}) - only feed may be`);
+          // Two feeds the same day for one group are two entries; home-grown touches no stock.
+          const r4 = await rec({ groupId: herd, quantity: 20, feedId: hayId });
+          const r5 = await rec({ groupId: herd, quantity: 30 });
+          const sHay = await stockOf(hayId);
+          if (r4.status >= 300 || r5.status >= 300 || sHay?.currentStock !== 480) problems.push(`a second feed and home-grown fodder the same day: HTTP ${r4.status}/${r5.status}, hay stock ${sHay?.currentStock} (want 480)`);
+          const today = (await http('GET', `${apiBase}/farm-records?groupId=${herd}&recordType=feed&from=${new Date().toISOString().slice(0, 10)}&to=${new Date().toISOString().slice(0, 10)}`, null, farmer)).json?.data?.items || [];
+          if (today.length < 3) problems.push(`the herd's feed entries for today should be 3 (bag, hay, home-grown), got ${today.length}`);
+          // Deleting the 150 kg entry puts its 3 bags back.
+          const del = await http('DELETE', `${apiBase}/farm-records/${r2.json?.data?.id}`, null, farmer);
+          const s4 = await stockOf(bagId);
+          if (del.status >= 300 || s4?.currentStock !== 9) problems.push(`deleting a feed entry should put its stock back: HTTP ${del.status}, stock ${s4?.currentStock} (want 9)`);
+
+          // Reports read the one table; the removed "Log use" answers in words.
+          const wholeFarmRows = (await http('GET', `${apiBase}/farm-records?enterpriseId=${ent}&recordType=feed&wholeFarm=true`, null, farmer)).json?.data?.items || [];
+          if (!wholeFarmRows.some(l => l.wholeFarm === true && l.feedId === bagId)) problems.push(`the whole-farm feed entry is not listed by Daily records (got ${wholeFarmRows.length})`);
+          const an = await http('GET', `${feedPath}/analytics`, null, farmer);
+          if (an.status !== 200 || !(an.json?.data?.consumptionByType || []).length) problems.push(`feed analytics from Daily records: HTTP ${an.status}`);
+          const old = await http('POST', `${feedPath}/consumption`, { feedId: bagId, quantity: 5 }, farmer);
+          if (old.status !== 410 || !/Daily records/.test(msgOf(old))) problems.push(`the removed "Log use" should say where to go (HTTP ${old.status}: ${msgOf(old).slice(0, 80)})`);
+
+          // A purchase with a price writes the feed expense ONCE; without a price none.
+          await http('POST', `${apiBase}/feed/${bagId}/restock`, { quantity: 2, pricePerUnit: 1300 }, farmer);
+          await http('POST', `${apiBase}/feed/${bagId}/restock`, { quantity: 1 }, farmer);
+          const exp = psqlJson('verifydb', `SELECT COUNT(*) AS n, MAX(amount) AS a FROM ${SCHEMA}.financial_records WHERE reference_id = '${bagId}' AND category = 'feed'`)[0];
+          if (Number(exp?.n) !== 1 || Number(exp?.a) !== 2600) problems.push(`a priced restock should write ONE feed expense of 2600, got ${exp?.n} / ${exp?.a}`);
+
+          // Rations take the price from the linked stock item (no typed price).
+          const gf = await http('GET', `${apiBase}/nutrition/foods?groupId=${herd}`, null, farmer);
+          const codes = Object.fromEntries((gf.json?.data?.items || []).map(f => [f.code, f.id]));
+          const need = ['feed_green_maize', 'feed_wheat_straw', 'feed_cattle_feed', 'feed_groundnut_cake', 'feed_mineral_mixture'];
+          if (need.some(c => !codes[c])) problems.push(`the herd's feed library is missing ${need.filter(c => !codes[c]).join(', ')}`);
+          else {
+            const body = (maizePrice) => ({ milkLitresPerDay: 8, avgWeightKg: 400, feeds: [
+              { ingredientId: codes.feed_green_maize, ...(maizePrice === undefined ? {} : { pricePerKg: maizePrice }) }, { ingredientId: codes.feed_wheat_straw, pricePerKg: 6 },
+              { ingredientId: codes.feed_cattle_feed, pricePerKg: 25 }, { ingredientId: codes.feed_groundnut_cake, pricePerKg: 45 }, { ingredientId: codes.feed_mineral_mixture, pricePerKg: 80 } ] });
+            const typed = await http('POST', `${apiBase}/nutrition/groups/${herd}/ration/preview`, body(2), farmer);
+            const fromStock = await http('POST', `${apiBase}/nutrition/groups/${herd}/ration/preview`, body(undefined), farmer);
+            const a = typed.json?.data?.result?.totalCostPerDay; const b = fromStock.json?.data?.result?.totalCostPerDay;
+            if (typed.status !== 200 || fromStock.status !== 200 || !(b > a)) problems.push(`the maize price should come from the linked stock item (24 per kg): typed ${a}, from stock ${b}`);
+            const lines = typed.json?.data?.result?.lines || [];
+            const min = lines.find(l => l.key === codes.feed_mineral_mixture);
+            if (!min || Math.abs(min.kgAsFedPerDay - 0.05) > 0.0011) problems.push(`the mineral mixture should be the fixed 50 g a day, got ${min?.kgAsFedPerDay}`);
+          }
+        }
+
+        // Safety: a stranger cannot touch this farm's stock.
+        const fid = (await http('GET', feedPath, null, farmer)).json?.data?.items?.[0]?.id;
+        const attempts = [
+          ['POST', feedPath, { feedName: 'x', unit: 'kg' }], ['GET', feedPath], ['PUT', `${apiBase}/feed/${fid}`, { feedName: 'hacked' }],
+          ['POST', `${apiBase}/feed/${fid}/restock`, { quantity: 1 }], ['DELETE', `${apiBase}/feed/${fid}`],
+        ];
+        for (const [m, url, b] of attempts) {
+          const r = await http(m, url, b || null, stranger);
+          if (r.status !== 403) problems.push(`a stranger could ${m} ${url.replace(apiBase, '')} on another farm's feed (HTTP ${r.status})`);
+          else if (!msgOf(r) || /status code|undefined|\[object/i.test(msgOf(r))) problems.push(`the stranger's refusal on ${m} ${url.replace(apiBase, '')} has no readable message`);
+        }
+
+        // Safety: young stock, unweaned young, and sheep copper - on the real schema.
+        const owner = await signUp();
+        const mk = async (body, kg) => {
+          const a = await http('POST', `${apiBase}/animals`, body, owner);
+          const id = a.json?.data?.id;
+          if (id && kg) await http('POST', `${apiBase}/nutrition/animals/${id}/measurements`, { weight: kg, unit: 'kg' }, owner);
+          return id;
+        };
+        const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
+        const calfId = await mk({ name: 'Verify Calf', species: 'Cattle', gender: 'female', dateOfBirth: daysAgo(150) }, 100);
+        const babyId = await mk({ name: 'Verify Baby', species: 'Cattle', gender: 'female', dateOfBirth: daysAgo(30) }, 45);
+        const sheepId = await mk({ name: 'Verify Sheep', species: 'Sheep', gender: 'female' }, 40);
+        if (!calfId || !babyId || !sheepId) problems.push('could not create a calf, a baby calf and a sheep for the safety checks');
+        else {
+          const foods = async (id) => Object.fromEntries(((await http('GET', `${apiBase}/nutrition/foods?animalId=${id}`, null, owner)).json?.data?.items || []).map(f => [f.code, f.id]));
+          const cf = await foods(calfId);
+          const calfRation = await http('POST', `${apiBase}/nutrition/animals/${calfId}/ration/preview`, { feeds: [
+            { ingredientId: cf.feed_green_maize, pricePerKg: 2 }, { ingredientId: cf.feed_groundnut_cake, pricePerKg: 45 }, { ingredientId: cf.feed_berseem, pricePerKg: 3 } ] }, owner);
+          if (calfRation.status !== 200 || calfRation.json?.data?.stage?.growing !== true || calfRation.json?.data?.state !== 'growing') {
+            problems.push(`a 5-month-old calf must be rationed as GROWING (HTTP ${calfRation.status}, state ${calfRation.json?.data?.state}) ${msgOf(calfRation).slice(0, 100)}`);
+          }
+          const bf = await foods(babyId);
+          const baby = await http('POST', `${apiBase}/nutrition/animals/${babyId}/ration/preview`, { feeds: [{ ingredientId: bf.feed_green_maize, pricePerKg: 2 }] }, owner);
+          if (baby.status !== 400 || !/still on milk/i.test(msgOf(baby))) problems.push(`a 30-day-old calf was given a fodder ration instead of being sent to a vet (HTTP ${baby.status}: ${msgOf(baby).slice(0, 80)})`);
+          const sf = await foods(sheepId);
+          const sheep = await http('POST', `${apiBase}/nutrition/animals/${sheepId}/ration/preview`, { feeds: [
+            { ingredientId: sf.feed_green_maize, pricePerKg: 2 }, { ingredientId: sf.feed_cattle_feed, pricePerKg: 25 } ] }, owner);
+          if (sheep.status !== 400 || !/not safe/i.test(msgOf(sheep))) problems.push(`cattle compound feed (copper) was accepted for a sheep (HTTP ${sheep.status}: ${msgOf(sheep).slice(0, 80)})`);
+          const sheepOk = await http('POST', `${apiBase}/nutrition/animals/${sheepId}/ration/preview`, { feeds: [
+            { ingredientId: sf.feed_green_maize, pricePerKg: 2 }, { ingredientId: sf.feed_groundnut_cake, pricePerKg: 45 }, { ingredientId: sf.feed_mineral_mixture_small, pricePerKg: 90 } ] }, owner);
+          if (sheepOk.status !== 200) problems.push(`a sheep ration with the low-copper mineral was refused (HTTP ${sheepOk.status}: ${msgOf(sheepOk).slice(0, 100)})`);
+        }
+        // "Neutered?" is asked of a new pet (unanswered is NULL, not "no"), and a "no" answer is kept - the question stops.
+        const rexId = await mk({ name: 'Verify Rex', species: 'Dog', gender: 'male' }, 20);
+        if (!rexId) problems.push('could not create a dog for the neutered check');
+        else {
+          const asks = async () => ((await http('GET', `${apiBase}/nutrition/animals/${rexId}`, null, owner)).json?.data?.missingFacts || []).map(m => m.key);
+          if (!(await asks()).includes('isNeutered')) problems.push('a new dog was never asked whether it is neutered (an unanswered pet is fed as if intact)');
+          const ans = await http('PATCH', `${apiBase}/nutrition/animals/${rexId}/facts`, { isNeutered: false }, owner);
+          if (ans.status !== 200 || (await asks()).includes('isNeutered')) problems.push(`answering "not neutered" must stop the question (HTTP ${ans.status})`);
+          const dbv = psqlJson('verifydb', `SELECT is_neutered FROM ${SCHEMA}.animals WHERE id = '${rexId}'`)[0]?.is_neutered;
+          if (dbv !== false) problems.push(`the "no" answer was not kept as false (got ${dbv})`);
+        }
+      }
+      const sqlErrs = serverLog.slice(mark).split('\n')
+        .filter(l => /syntax error|does not exist|violates|invalid input syntax|there is no unique|could not determine|DATABASE_ERROR|statusCode":5\d\d/i.test(l))
+        .map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(-240));
+      if (problems.length || sqlErrs.length) fail('Farm feed or the nutrition safety rules misbehave on the real schema.', [...problems, ...sqlErrs]);
+      else ok('one place for feed; stock, cost and reports follow; strangers refused; calves, lambs and copper handled');
     }
 
     // ── PHASE 7: the browser ──

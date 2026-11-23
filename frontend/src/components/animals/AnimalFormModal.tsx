@@ -186,10 +186,11 @@ const AnimalFormModal: React.FC<Props> = ({
               <label className="an-field-label" htmlFor="animal-color">{t('animals.registerModal.color')}</label>
               <input id="animal-color" type="text" value={formData.color} onChange={e => set('color', e.target.value)} className="an-field" placeholder={t('animals.form.placeholderColor')} />
             </div>
-            <label className="checkbox-label">
-              <input type="checkbox" checked={formData.isNeutered} onChange={e => set('isNeutered', e.target.checked)} />
-              {t('animals.registerModal.neutered')}
-            </label>
+            {/* Yes / no, empty until answered: an unanswered pet used to be saved as "no" and fed as if intact. */}
+            <ChipSelect label={t('animals.registerModal.neutered')} variant="segmented" allowClear onClear={() => set('isNeutered', null)}
+              value={formData.isNeutered === null ? '' : formData.isNeutered ? 'yes' : 'no'}
+              onChange={v => set('isNeutered', v === 'yes')}
+              options={[{ value: 'yes', label: t('nutrition.options.yes') }, { value: 'no', label: t('nutrition.options.no') }]} />
             {/* Used by the nutrition plan; the same values the Nutrition panel asks for when missing. */}
             <ChipSelect label={t('nutrition.facts.activityLevel')} value={formData.activityLevel} allowClear onClear={() => set('activityLevel', '')}
               onChange={v => set('activityLevel', v)} options={['low', 'moderate', 'high', 'working'].map(v => ({ value: v, label: t(`nutrition.activity.${v}`) }))} />

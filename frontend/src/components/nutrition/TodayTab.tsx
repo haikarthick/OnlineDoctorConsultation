@@ -7,7 +7,7 @@ import { BottomSheet } from '../mobile/BottomSheet'
 import { ChipSelect } from '../mobile/ChipSelect'
 import { NumberStepper, parseStepperValue } from '../mobile/NumberStepper'
 import { SaveState } from '../mobile/SaveState'
-import { formatKcal, progressPct, type NutritionOverview } from './nutritionShared'
+import { formatAmount, formatKcal, progressPct, type NutritionOverview } from './nutritionShared'
 import FlagList from './FlagList'
 
 interface Entry { id: string; label: string; kind: 'meal' | 'treat'; amountG: number | null; kcal: number | null; fedOn: string; recordedByName: string }
@@ -60,7 +60,7 @@ export const TodayTab: React.FC<Props> = ({ data, onChanged }) => {
       {data.flags.length > 0 && <FlagList flags={data.flags} canAct={data.permissions.canWrite} onChanged={onChanged} />}
       {warning && <p className="nutri-note is-danger" role="alert">{warning}</p>}
 
-      {data.model === 'ruminant_dm' ? (
+      {['ruminant_dm', 'equine_dm', 'monogastric_spec', 'aqua_biomass'].includes(data.model) ? (
         // Farm animals: today's ration at a glance; feed given is recorded once, in Daily records.
         <section className="nutri-card" aria-label={t('nutrition.today.title')}>
           <h3 className="nutri-card-title">{t('nutrition.today.title')}</h3>
@@ -69,7 +69,7 @@ export const TodayTab: React.FC<Props> = ({ data, onChanged }) => {
               {data.plan.items.map(item => (
                 <li key={item.id} className="nutri-list-row">
                   <span className="nutri-list-main"><strong>{item.label}</strong></span>
-                  <span className="nutri-list-meta">{t('nutrition.ration.itemLine', { kg: item.amountPerDay ?? '-' })}</span>
+                  <span className="nutri-list-meta">{t('nutrition.ration.itemLine', { amount: formatAmount(item.amountPerDay) })}</span>
                 </li>
               ))}
             </ul>

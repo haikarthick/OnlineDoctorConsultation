@@ -23,6 +23,8 @@ did not build it. Judge it against how people actually keep animals, not against
    show where that person already looks?
 6. **Terms**: species-correct words (calving / kidding / farrowing / lambing; flock / herd / pond / batch), Indian
    feed and breed names (NBAGR), no "rehome" wording (use Buy & Sell).
+7. **No training assumed**: would a first-time farmer or pet owner, on a cheap phone, know where to do this and
+   do it once? Any duplicate screen, double entry or stop-gap is a finding.
 Use the farm-domain-review and mobile-farmer-ux skills' checklists (.claude/skills/) as your baseline.
 
 ## Report back

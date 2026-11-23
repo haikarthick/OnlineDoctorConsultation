@@ -39,22 +39,31 @@ describe('Phase 4 rules - condition lost after giving birth', () => {
 describe('Phase 4 rules - herd fed against its table', () => {
   const days = (kg: number, n: number) => Array.from({ length: n }, (_, i) => ({ date: `2026-11-${String(21 - i).padStart(2, '0')}`, kg }));
 
+  const table = (kg: number, n: number) => new Map(Array.from({ length: n }, (_, i) => [`2026-11-${String(21 - i).padStart(2, '0')}`, kg]));
+
   it('below 80% over a recorded week is a watch', () => {
-    expect(evaluateGroupFeed({ suggestedKgPerDay: 100, recorded: days(70, 5), now: NOW })).toEqual([{ type: 'feed_below_need', severity: 'watch', params: { pct: 70, days: 5 } }]);
+    expect(evaluateGroupFeed({ suggestedByDay: table(100, 5), recorded: days(70, 5), now: NOW })).toEqual([{ type: 'feed_below_need', severity: 'watch', params: { pct: 70, days: 5 } }]);
   });
 
   it('above 125% is a watch; within the band is fine', () => {
-    expect(evaluateGroupFeed({ suggestedKgPerDay: 100, recorded: days(130, 5), now: NOW })[0]?.type).toBe('feed_above_need');
-    expect(evaluateGroupFeed({ suggestedKgPerDay: 100, recorded: days(95, 7), now: NOW })).toEqual([]);
+    expect(evaluateGroupFeed({ suggestedByDay: table(100, 5), recorded: days(130, 5), now: NOW })[0]?.type).toBe('feed_above_need');
+    expect(evaluateGroupFeed({ suggestedByDay: table(100, 7), recorded: days(95, 7), now: NOW })).toEqual([]);
   });
 
   it('too few days recorded: no judgement (recording twice a week is not starving the flock)', () => {
-    expect(evaluateGroupFeed({ suggestedKgPerDay: 100, recorded: days(10, 3), now: NOW })).toEqual([]);
+    expect(evaluateGroupFeed({ suggestedByDay: table(100, 3), recorded: days(10, 3), now: NOW })).toEqual([]);
   });
 
   it('two feed entries on one day add up (2 x 40 kg = 80%, right at the limit, is not flagged; 2 x 35 kg is)', () => {
-    expect(evaluateGroupFeed({ suggestedKgPerDay: 100, recorded: [...days(40, 5), ...days(40, 5)], now: NOW })).toEqual([]);
-    expect(evaluateGroupFeed({ suggestedKgPerDay: 100, recorded: [...days(35, 5), ...days(35, 5)], now: NOW })[0]?.params).toEqual({ pct: 70, days: 5 });
+    expect(evaluateGroupFeed({ suggestedByDay: table(100, 5), recorded: [...days(40, 5), ...days(40, 5)], now: NOW })).toEqual([]);
+    expect(evaluateGroupFeed({ suggestedByDay: table(100, 5), recorded: [...days(35, 5), ...days(35, 5)], now: NOW })[0]?.params).toEqual({ pct: 70, days: 5 });
+  });
+
+  it('a flock fed exactly to the table is never flagged - also across an age-band change', () => {
+    // the table steps up from 45 to 85 kg mid-week; the farmer follows it day by day
+    const byDay = new Map([['2026-11-15', 45], ['2026-11-16', 45], ['2026-11-17', 45], ['2026-11-18', 85], ['2026-11-19', 85], ['2026-11-20', 85]]);
+    const recorded = [...byDay].map(([date, kg]) => ({ date, kg }));
+    expect(evaluateGroupFeed({ suggestedByDay: byDay, recorded, now: NOW })).toEqual([]);
   });
 });
 

@@ -42,6 +42,7 @@ export function findMigrationsDir(): string | null {
 const ADD_COLUMN_RE = /ALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:public\.)?"?(\w+)"?\s+ADD\s+COLUMN\s+IF\s+NOT\s+EXISTS\s+"?(\w+)"?[^;]*;/gi;
 const CREATE_TABLE_RE = /CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+(?:public\.)?"?(\w+)"?/gi;
 const DROP_COLUMN_RE = /DROP\s+COLUMN\s+(?:IF\s+EXISTS\s+)?"?(\w+)"?/gi;
+const DROP_TABLE_RE = /DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:public\.)?"?(\w+)"?/gi;
 
 export function parseContract(files: { name: string; sql: string }[]): { columns: ContractColumn[]; tables: string[] } {
   const columns = new Map<string, ContractColumn>();
@@ -50,12 +51,21 @@ export function parseContract(files: { name: string; sql: string }[]): { columns
   for (const f of files) {
     const sql = f.sql.replace(/--[^\n]*/g, '');
     let m: RegExpExecArray | null;
-    ADD_COLUMN_RE.lastIndex = 0; CREATE_TABLE_RE.lastIndex = 0; DROP_COLUMN_RE.lastIndex = 0;
+    ADD_COLUMN_RE.lastIndex = 0; CREATE_TABLE_RE.lastIndex = 0; DROP_COLUMN_RE.lastIndex = 0; DROP_TABLE_RE.lastIndex = 0;
     while ((m = ADD_COLUMN_RE.exec(sql))) {
       columns.set(`${m[1]}.${m[2]}`.toLowerCase(), { table: m[1].toLowerCase(), column: m[2].toLowerCase(), statement: m[0], file: f.name });
     }
     while ((m = CREATE_TABLE_RE.exec(sql))) tables.add(m[1].toLowerCase());
     while ((m = DROP_COLUMN_RE.exec(sql))) dropped.add(m[1].toLowerCase());
+    // A table a LATER migration drops is no longer promised (nor are its columns); one re-created after a drop is.
+    const droppedHere = new Set<string>();
+    while ((m = DROP_TABLE_RE.exec(sql))) droppedHere.add(m[1].toLowerCase());
+    for (const t of droppedHere) {
+      const recreatedAfter = new RegExp(`CREATE\\s+TABLE\\s+IF\\s+NOT\\s+EXISTS\\s+(?:public\\.)?"?${t}"?`, 'i').test(sql.slice(sql.search(new RegExp(`DROP\\s+TABLE\\s+(?:IF\\s+EXISTS\\s+)?(?:public\\.)?"?${t}"?`, 'i'))));
+      if (recreatedAfter) continue;
+      tables.delete(t);
+      for (const key of [...columns.keys()]) if (key.startsWith(`${t}.`)) columns.delete(key);
+    }
   }
   // A later migration may drop a column an earlier one added - never "heal" those back.
   const live = [...columns.values()].filter(c => !dropped.has(c.column));

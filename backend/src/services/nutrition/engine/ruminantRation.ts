@@ -8,6 +8,8 @@ import { solveLp, type LpConstraint } from './leastCost';
  *
  * Need (all per day):
  *   energy (NEL, Mcal) = maintenance x BW^0.75  +  milk litres x NEL per kg milk  (+ late-pregnancy allowance)
+ *                        +  target daily gain x NEL per kg gain   (growing young stock)
+ *                        +  a fraction of maintenance in the first lactation (the cow is still growing)
  *     NEL per kg milk  = 0.0929 x fat% + 0.0547 x protein% + 0.0395 x lactose%   (NRC 2001 dairy equation)
  *   protein, Ca, P, fibre = % of the day's dry matter, by physiological state
  *   dry matter capacity  = % of body weight (min / max)
@@ -37,6 +39,13 @@ export interface RuminantRequirements {
   milkFatPct: number;
   milkProteinPct: number;
   milkLactosePct: number;
+  /** Growing stock: target gain (kg/day) and the energy each kg of gain needs (Mcal NEL). */
+  targetAdgKg?: number;
+  nelPerKgGain?: number;
+  /** First lactation: extra energy as a fraction of maintenance. */
+  firstLactationFraction?: number;
+  /** Mineral mixture fed every day (grams) - a fixed allowance, not something the solver picks. */
+  mineralAllowanceG?: number;
 }
 
 export interface FeedOption {
@@ -56,6 +65,8 @@ export interface FeedOption {
   /** Farmer's limits, kg AS FED per day. */
   minKgAsFed?: number | null;
   maxKgAsFed?: number | null;
+  /** A mineral mixture: fed at the set's fixed daily allowance. */
+  isMineral?: boolean;
 }
 
 export interface RuminantInput {
@@ -64,6 +75,10 @@ export interface RuminantInput {
   milkFatPct?: number | null;
   /** Months to expected calving; <= 2 adds the late-pregnancy allowance. */
   monthsToCalving?: number | null;
+  /** In milk for the first time: still growing, so more energy. */
+  firstLactation?: boolean;
+  /** Share (0-1) of the animals within two months of calving; for one animal it is 0 or 1. Overrides monthsToCalving. */
+  pregnancyShare?: number | null;
   state: RuminantState;
   requirements: RuminantRequirements;
   feeds: FeedOption[];
@@ -82,6 +97,8 @@ export interface RuminantNeed {
   nelMaintenance: number;
   nelMilk: number;
   nelPregnancy: number;
+  nelGrowth: number;
+  nelFirstLactation: number;
   nelPerKgMilk: number;
   dmiMinKg: number;
   dmiMaxKg: number;
@@ -95,6 +112,8 @@ export type RuminantResult =
   | { status: 'infeasible'; need: RuminantNeed; reasons: string[] };
 
 const round = (n: number, dp = 2) => Math.round(n * 10 ** dp) / 10 ** dp;
+/** As-fed kg: grams-level precision under 1 kg so a mineral mixture never shows "0 kg a day". */
+const roundKg = (n: number) => (n < 1 ? round(n, 3) : round(n, 1));
 
 export function ruminantNeed(input: Omit<RuminantInput, 'feeds'>): RuminantNeed {
   const r = input.requirements;
@@ -104,11 +123,16 @@ export function ruminantNeed(input: Omit<RuminantInput, 'feeds'>): RuminantNeed 
   const nelPerKgMilk = 0.0929 * fat + 0.0547 * r.milkProteinPct + 0.0395 * r.milkLactosePct;
   const milk = Math.max(0, input.milkLitresPerDay || 0) * 1.03; // litres -> kg
   const nelMilk = milk * nelPerKgMilk;
-  const nelPregnancy = input.monthsToCalving !== null && input.monthsToCalving !== undefined && input.monthsToCalving >= 0 && input.monthsToCalving <= 2
-    ? nelMaintenance * r.latePregnancyExtraFraction : 0;
+  const share = input.pregnancyShare !== null && input.pregnancyShare !== undefined
+    ? Math.min(Math.max(input.pregnancyShare, 0), 1)
+    : (input.monthsToCalving !== null && input.monthsToCalving !== undefined && input.monthsToCalving >= 0 && input.monthsToCalving <= 2 ? 1 : 0);
+  const nelPregnancy = nelMaintenance * r.latePregnancyExtraFraction * share;
+  const nelGrowth = input.state === 'growing' && r.targetAdgKg && r.nelPerKgGain ? r.targetAdgKg * r.nelPerKgGain : 0;
+  const nelFirstLactation = input.firstLactation && input.state === 'lactating' ? nelMaintenance * (r.firstLactationFraction || 0) : 0;
   return {
-    nelMcal: round(nelMaintenance + nelMilk + nelPregnancy),
+    nelMcal: round(nelMaintenance + nelMilk + nelPregnancy + nelGrowth + nelFirstLactation),
     nelMaintenance: round(nelMaintenance), nelMilk: round(nelMilk), nelPregnancy: round(nelPregnancy),
+    nelGrowth: round(nelGrowth), nelFirstLactation: round(nelFirstLactation),
     nelPerKgMilk: round(nelPerKgMilk, 3),
     dmiMinKg: round(input.bodyWeightKg * r.dmiMinPctBw / 100),
     dmiMaxKg: round(input.bodyWeightKg * r.dmiMaxPctBw / 100),
@@ -140,6 +164,12 @@ export function balanceRuminantRation(input: RuminantInput): RuminantResult {
   }
   feeds.forEach((f, j) => {
     const unit = feeds.map((_, k) => (k === j ? 1 : 0));
+    // A mineral mixture is fed at the fixed daily allowance (the set's figure), whatever the solver would prefer.
+    if (f.isMineral && r.mineralAllowanceG) {
+      const kg = (r.mineralAllowanceG / 1000) * f.dmPct / 100;
+      constraints.push({ name: `min_${f.key}`, coefficients: unit, kind: '>=', rhs: kg }, { name: `max_${f.key}`, coefficients: unit, kind: '<=', rhs: kg });
+      return;
+    }
     if (f.maxKgAsFed !== null && f.maxKgAsFed !== undefined) constraints.push({ name: `max_${f.key}`, coefficients: unit, kind: '<=', rhs: f.maxKgAsFed * f.dmPct / 100 });
     if (f.minKgAsFed) constraints.push({ name: `min_${f.key}`, coefficients: unit, kind: '>=', rhs: f.minKgAsFed * f.dmPct / 100 });
   });
@@ -150,8 +180,8 @@ export function balanceRuminantRation(input: RuminantInput): RuminantResult {
   const lines: RationLine[] = feeds.map((f, j) => {
     const dm = res.x[j];
     const asFed = dm / (f.dmPct / 100);
-    return { key: f.key, label: f.label, kgDmPerDay: round(dm), kgAsFedPerDay: round(asFed, 1), costPerDay: round(asFed * f.pricePerKgAsFed) };
-  }).filter(l => l.kgDmPerDay > 0.005);
+    return { key: f.key, label: f.label, kgDmPerDay: round(dm, 3), kgAsFedPerDay: roundKg(asFed), costPerDay: round(asFed * f.pricePerKgAsFed) };
+  }).filter(l => l.kgDmPerDay > 0.0005);
   const dmKg = res.x.reduce((s, v) => s + v, 0);
   const sum = (fn: (f: FeedOption) => number) => res.x.reduce((s, v, j) => s + v * fn(feeds[j]), 0);
   const total = round(lines.reduce((s, l) => s + l.costPerDay, 0));

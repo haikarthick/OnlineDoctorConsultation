@@ -34,7 +34,7 @@ router.get('/farm-records', authMiddleware, farmRecordsEnabled, asyncHandler(asy
   const q = req.query as Record<string, string | undefined>;
   const items = await FarmRecordService.list({
     enterpriseId: q.enterpriseId, animalId: q.animalId, groupId: q.groupId, recordType: q.recordType,
-    from: q.from, to: q.to, limit: q.limit ? Number(q.limit) : undefined,
+    from: q.from, to: q.to, limit: q.limit ? Number(q.limit) : undefined, wholeFarm: q.wholeFarm,
   }, caller(req));
   res.json({ success: true, data: { items } });
 }));

@@ -7,7 +7,7 @@ export const farmRecordsApi = {
     const response = await sharedClient.get('/farm-records/enabled')
     return response.data
   },
-  async listFarmRecords(params: { enterpriseId?: string; animalId?: string; groupId?: string; recordType?: string; from?: string; to?: string; limit?: number }) {
+  async listFarmRecords(params: { enterpriseId?: string; animalId?: string; groupId?: string; recordType?: string; from?: string; to?: string; limit?: number; wholeFarm?: boolean }) {
     const response = await sharedClient.get('/farm-records', { params })
     return response.data
   },
@@ -24,6 +24,8 @@ export const farmRecordsApi = {
   async saveFarmRecord(data: {
     enterpriseId?: string; animalId?: string; groupId?: string; recordType: string; recordDate?: string
     session?: string; quantity?: number | null; detail?: Record<string, unknown>; notes?: string
+    /** Feed: the stock item used (empty = home-grown). No animal and no group = all the farm's animals. */
+    feedId?: string | null
   }) {
     const response = await sharedClient.post('/farm-records', data)
     return response.data

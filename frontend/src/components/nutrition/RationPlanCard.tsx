@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import type { NutritionPlan } from './nutritionShared'
+import { formatAmount, type NutritionPlan } from './nutritionShared'
 
 interface Props {
   plan: NutritionPlan
@@ -40,7 +40,7 @@ export const RationPlanCard: React.FC<Props> = ({ plan, herd = false, children }
           <li key={item.id} className="nutri-list-row">
             <span className="nutri-list-main"><strong>{item.label}</strong></span>
             <span className="nutri-list-meta">
-              {t('nutrition.ration.itemLine', { kg: item.amountPerDay ?? '-' })}
+              {t('nutrition.ration.itemLine', { amount: formatAmount(item.amountPerDay) })}
               {item.costPerDay ? ` · ${t('nutrition.ration.itemCost', { cost: money(item.costPerDay) })}` : ''}
             </span>
           </li>
@@ -53,7 +53,7 @@ export const RationPlanCard: React.FC<Props> = ({ plan, herd = false, children }
             {r.herd.lines.map(l => (
               <li key={l.key} className="nutri-list-row">
                 <span className="nutri-list-main">{l.label}</span>
-                <span className="nutri-list-meta">{t('nutrition.ration.herdLine', { kg: l.kgAsFedPerDay })}</span>
+                <span className="nutri-list-meta">{t('nutrition.ration.herdLine', { amount: formatAmount(l.kgAsFedPerDay) })}</span>
               </li>
             ))}
           </ul>

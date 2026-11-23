@@ -172,13 +172,14 @@
       "neutered": "Neutered.",
       "intact": "Not neutered.",
       "no_condition_score": "Add a body condition score for a better estimate.",
-      "factor_unvalidated": "Uses published figures not yet confirmed by the platform's vet."
+      "factor_unvalidated": "Uses published figures not yet confirmed by the platform's vet.",
+      "needs_vet_amounts": "A mother with young needs amounts set by a vet - ask for a feeding plan."
     },
     "models": {
       "companion_energy": "Food amounts are worked out from weight, age and activity.",
       "ruminant_dm": "Rations are worked out from the feeds you have.",
-      "monogastric_spec": "Feed planning for poultry and pigs is the next part being built.",
-      "aqua_biomass": "Pond feeding by biomass and water temperature is the next part being built.",
+      "monogastric_spec": "Feed amounts for flocks and pig batches are worked out from the group's records.",
+      "aqua_biomass": "Feed amounts for ponds are worked out from the pond's records and the water temperature.",
       "equine_dm": "Rations for horses and donkeys are worked out from the feeds you have - fodder first.",
       "guidance_only": "There is no checked feeding calculator for this kind of animal yet."
     },
@@ -263,7 +264,7 @@
       "transition_condition_loss": {
         "short": "Condition lost after birth",
         "title": "Lost about {{drop5}} body condition point since giving birth ({{days}} days ago)",
-        "next": "Give more energy (concentrate) and ask a vet - fast loss after calving can lead to ketosis and poor fertility."
+        "next": "Give more energy-rich feed and ask a vet - losing condition after giving birth can lead to ketosis and poor fertility."
       },
       "feed_below_need": {
         "short": "Fed below the table",
@@ -365,7 +366,17 @@
       "avocado": "Avocado",
       "salt": "Salty snacks",
       "ionophore": "Cattle or poultry feed with monensin",
-      "urea": "Urea or feed with urea"
+      "urea": "Urea or feed with urea",
+      "copper_cattle_mix": "Cattle mineral mixture or cattle feed (copper - fatal to sheep)",
+      "lantana": "Lantana leaves",
+      "parthenium": "Parthenium (congress grass)",
+      "young_sorghum": "Young or drought-stressed sorghum shoots (cyanide)",
+      "plastic": "Plastic bags and waste",
+      "mouldy_feed": "Mouldy or spoiled feed (aflatoxin)",
+      "groundnut_aflatoxin": "Groundnut cake - check it is dry and not mouldy",
+      "urea_free": "Urea fed loose or in excess",
+      "salt_pig": "Salty food waste",
+      "swill_raw": "Uncooked kitchen or meat waste"
     },
     "foodKinds": {
       "commercial_food": "Packaged food",
@@ -466,7 +477,9 @@
         "percent_bw": "% of body weight",
         "fraction": "fraction",
         "percent_milk": "% of milk",
-        "per_kg_bw": "per kg body weight"
+        "per_kg_bw": "per kg body weight",
+        "per_kg_gain": "per kg gained",
+        "age_months": "age in months"
       },
       "usageHelp": "How nutrition is being used - for deciding later, from real use, whether to offer paid plans.",
       "period": "Period",
@@ -537,15 +550,15 @@
       },
       "costPerDay": "₹{{cost}} a day",
       "costPerLitre": "₹{{cost}} per litre of milk",
-      "line": "{{kg}} kg a day · ₹{{cost}}",
-      "needLine": "Needs {{energy}} Mcal energy; can eat {{dmMin}}-{{dmMax}} kg dry matter; this ration gives {{dm}} kg.",
+      "line": "{{amount}} a day · ₹{{cost}}",
+      "needLine": "Can eat {{dmMin}}-{{dmMax}} kg of dry feed a day; this ration gives {{dm}} kg.",
       "basedOn": "Based on: {{set}}",
       "save": "Save ration",
       "currentTitle": "Current ration",
-      "perDay": "{{kg}} kg dry matter a day",
+      "perDay": "Dry feed without water: {{kg}} kg a day",
       "cost": "₹{{cost}} a day",
       "costLitre": "₹{{cost}} per litre",
-      "itemLine": "{{kg}} kg a day",
+      "itemLine": "{{amount}} a day (as fed)",
       "itemCost": "₹{{cost}} a day",
       "recordHint": "Record what was fed each day in Daily records.",
       "none": "No ration yet",
@@ -564,16 +577,34 @@
         "energy_too_low": "Not enough energy - add oats, gram or bran, or better hay.",
         "protein_too_low": "Not enough protein - add horse gram, Bengal gram, lucerne or berseem."
       },
-      "needLineEquine": "Needs {{energy}} Mcal energy and {{cp}} g protein; can eat {{dmMin}}-{{dmMax}} kg dry matter; this ration gives {{dm}} kg, {{conc}}% of it grain.",
+      "needLineEquine": "Can eat {{dmMin}}-{{dmMax}} kg of dry feed a day; this ration gives {{dm}} kg, {{conc}}% of it grain.",
       "perHead": "Per animal",
       "herdTotal": "Whole herd ({{count}} animals): ₹{{cost}} a day",
-      "herdLine": "{{kg}} kg a day for the herd",
+      "herdLine": "{{amount}} a day for the herd",
       "herdCurrent": "Herd ration",
       "herdNone": "No herd ration yet",
       "herdNoneBody": "Tick the feeds you have - we find the cheapest mix for the herd's average animal and show the total for all {{count}}.",
       "herdMake": "Work out a herd ration",
       "herdEmpty": "Add animals to this group first.",
-      "herdRecordHint": "Record the feed given in Daily records for this group."
+      "herdRecordHint": "Record the feed given in Daily records for this group.",
+      "milkFromRecords": "Using the last 7 days of milk records: {{litres}} L a day. Type a number to change it (0 = dry).",
+      "growingNote": "Still growing ({{months}} months old): fed for growth as well as upkeep, with more protein.",
+      "firstLactationNote": "First milking: still growing, so she gets extra energy.",
+      "grainFeeds": "Give the grain in {{count}} small feeds a day - one big feed of grain can cause colic.",
+      "caution": "{{feed}}: {{note}}",
+      "withdrawal": "Medicine withdrawal: do not use the {{what}} until {{date}}.",
+      "withdrawalWhat": {
+        "milk": "milk",
+        "meat": "meat"
+      },
+      "ageUnknown": "No date of birth is recorded, so this is worked out for a grown animal. If it is a calf, kid or lamb, add its date of birth.",
+      "workDesc": {
+        "low": "Resting or very light use.",
+        "moderate": "Light work - an hour or two a day.",
+        "high": "Moderate work - several hours a day.",
+        "working": "Heavy work - full days (cart, plough, long rides)."
+      },
+      "priceFromStock": "Price from your stock: ₹{{price}} per kg. Change it in Feed Inventory."
     },
     "group": {
       "title": "Today's feed",
@@ -596,7 +627,8 @@
         "age": "Start a cycle so the age of the batch is known.",
         "average_weight": "Record a sample weight in Daily records.",
         "curve": "No feeding table yet."
-      }
+      },
+      "priceFromStock": "The cost shows once feed for this group is recorded from stock in Daily records."
     },
     "vet": {
       "prescribe": "Prescribe as diet",

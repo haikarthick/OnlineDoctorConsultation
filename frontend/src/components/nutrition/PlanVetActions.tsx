@@ -5,7 +5,7 @@ import { useSaveAction } from '../../hooks/useSaveAction'
 import { BottomSheet } from '../mobile/BottomSheet'
 import { NumberStepper, parseStepperValue } from '../mobile/NumberStepper'
 import { SaveState } from '../mobile/SaveState'
-import { formatKcal, type NutritionPlan } from './nutritionShared'
+import { formatAmount, formatKcal, type NutritionPlan } from './nutritionShared'
 
 interface Props {
   plan: NutritionPlan
@@ -51,7 +51,7 @@ export const PlanVetActions: React.FC<Props> = ({ plan, name, canReview, onChang
   const shareText = () => {
     const lines = plan.items.map(i => (isPet
       ? `- ${i.label}: ${t('nutrition.share.gramsLine', { perDay: i.gramsPerDay ?? '-', perMeal: i.gramsPerMeal ?? '-' })}`
-      : `- ${i.label}: ${t('nutrition.ration.itemLine', { kg: i.amountPerDay ?? '-' })}`))
+      : `- ${i.label}: ${t('nutrition.ration.itemLine', { amount: formatAmount(i.amountPerDay) })}`))
     const head = isPet
       ? t('nutrition.share.petHead', { name, kcal: formatKcal(plan.effectiveKcal, i18n.language), meals: plan.mealsPerDay })
       : t('nutrition.share.rationHead', { name })

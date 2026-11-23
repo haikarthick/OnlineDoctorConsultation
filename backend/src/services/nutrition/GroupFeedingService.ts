@@ -20,14 +20,14 @@ const num = (v: unknown): number | null => (v === null || v === undefined || v =
 
 class GroupFeedingService {
 
-  async forGroup(groupId: string, caller: Caller, input: { pricePerKg?: number | null; avgWeightG?: number | null; waterTempC?: number | null } = {}) {
+  async forGroup(groupId: string, caller: Caller, input: { avgWeightG?: number | null; waterTempC?: number | null } = {}) {
     const access = await AnimalAccessService.checkGroup(caller, groupId, 'read');
     if (!access.found) throw new NotFoundError('Group');
     if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
 
     const g = await database.query(
       `SELECT g.id, g.name, g.species, g.group_type, g.current_count,
-              c.id AS cycle_id, c.started_at::text AS started_at, c.placed_count, c.current_count AS cycle_count
+              c.id AS cycle_id, c.started_at::text AS started_at, c.placed_count, c.current_count AS cycle_count, c.age_at_placement_days
          FROM animal_groups g
          LEFT JOIN group_cycles c ON c.group_id = g.id AND c.status = 'active'
         WHERE g.id = $1`,
@@ -58,21 +58,32 @@ class GroupFeedingService {
     const curve: FeedingCurveRow[] = rows.map((r: any) => ({
       basis: r.basis, ageFromDays: r.age_from_days, ageToDays: r.age_to_days, weightFromG: num(r.weight_from_g), weightToG: num(r.weight_to_g),
       gramsPerHeadDay: num(r.grams_per_head_day), ratePctBiomass: num(r.rate_pct_biomass), feedsPerDay: r.feeds_per_day, feedType: r.feed_type,
+      survivalPct: num(r.survival_pct),
     }));
     const temps = await database.query(`SELECT from_c, to_c, factor FROM nutrition_temperature_factors WHERE curve_key = $1 AND status <> 'retired'`, [key]);
     const temperature: TemperatureFactor[] = temps.rows.map((t: any) => ({ fromC: Number(t.from_c), toC: Number(t.to_c), factor: Number(t.factor) }));
 
     const headCount = num(grp.cycle_count) ?? num(grp.current_count) ?? 0;
-    const ageDays = grp.started_at ? Math.max(0, Math.floor((Date.now() - new Date(grp.started_at).getTime()) / 86400000)) : null;
+    // Age counts from hatch / birth: pullets placed at 18 weeks are not day-old chicks (age_at_placement_days).
+    const ageDays = grp.started_at ? Math.max(0, Math.floor((Date.now() - new Date(grp.started_at).getTime()) / 86400000)) + (num(grp.age_at_placement_days) || 0) : null;
+    // A pond's count is what was STOCKED; once the farmer records deaths the count is live and no survival is assumed on top.
+    const headCountIsLive = num(grp.placed_count) !== null && (num(grp.cycle_count) ?? 0) < (num(grp.placed_count) ?? 0);
 
     const since = grp.started_at || new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10);
+    // Feed given is counted in kg only (a migrated "Log use" row kept in bags has no kg figure - migration 063).
     const recs = await database.query(
-      `SELECT record_type, record_date::text AS record_date, quantity, detail
+      `SELECT record_type, record_date::text AS record_date, quantity, detail, cost
          FROM farm_daily_records
         WHERE group_id = $1 AND record_date >= $2::date AND record_type IN ('feed', 'eggs', 'sample_weight', 'water_quality')
+          AND (record_type <> 'feed' OR unit = 'kg')
         ORDER BY record_date ASC`,
       [groupId, since]
     );
+    // Price per kg: what this group's recorded feed actually cost (each entry carries its stock price) - never a
+    // second price typed here.
+    const priced = recs.rows.filter((r: any) => r.record_type === 'feed' && num(r.cost) !== null && (num(r.quantity) || 0) > 0).slice(-30);
+    const pricedKg = priced.reduce((s: number, r: any) => s + Number(r.quantity), 0);
+    const stockPricePerKg = pricedKg > 0 ? Math.round((priced.reduce((s: number, r: any) => s + Number(r.cost), 0) / pricedKg) * 100) / 100 : null;
     const samples = recs.rows.filter((r: any) => r.record_type === 'sample_weight' && num(r.detail?.averageWeight));
     const lastSample = samples[samples.length - 1];
     const firstSample = samples[0];
@@ -81,31 +92,45 @@ class GroupFeedingService {
 
     const avgWeightG = num(input.avgWeightG) ?? (lastSample ? num(lastSample.detail.averageWeight) : null);
     const waterTempC = num(input.waterTempC) ?? (lastWater ? num(lastWater.detail.temperatureC) : null);
-    if (input.pricePerKg !== undefined && input.pricePerKg !== null && (Number(input.pricePerKg) < 0 || Number(input.pricePerKg) > 100000)) {
-      throw new ValidationError('Check the feed price.');
-    }
+    const today = groupDailyFeed({ headCount, headCountIsLive, ageDays, avgWeightG, waterTempC, curve, temperature, pricePerKg: stockPricePerKg });
 
-    const today = groupDailyFeed({ headCount, ageDays, avgWeightG, waterTempC, curve, temperature, pricePerKg: num(input.pricePerKg) });
-
-    // FCR over the active cycle: feed recorded vs product made.
-    const feedKg = recs.rows.filter((r: any) => r.record_type === 'feed').reduce((s: number, r: any) => s + (num(r.quantity) || 0), 0);
+    // FCR: feed and product are counted over the SAME days. Meat: the feed between the first and the last sample weight
+    // (not the whole cycle, which would include feed that built weight before the first sample). Eggs: the feed since the
+    // first eggs were recorded (the rearing feed is not the layers' feed).
+    const sum = (list: any[]) => list.reduce((s: number, r: any) => s + (num(r.quantity) || 0), 0);
+    const feedRows = recs.rows.filter((r: any) => r.record_type === 'feed');
     const product = rows[0].product as 'meat' | 'eggs';
     let productKg: number | null = null;
+    let feedKg = sum(feedRows);
     if (product === 'eggs') {
-      const eggs = recs.rows.filter((r: any) => r.record_type === 'eggs').reduce((s: number, r: any) => s + (num(r.quantity) || 0), 0);
+      const eggRows = recs.rows.filter((r: any) => r.record_type === 'eggs');
+      const eggs = sum(eggRows);
       productKg = eggs > 0 && num(rows[0].egg_mass_g) ? (eggs * Number(rows[0].egg_mass_g)) / 1000 : null;
+      if (eggRows.length) feedKg = sum(feedRows.filter((r: any) => r.record_date >= eggRows[0].record_date));
     } else if (lastSample && firstSample && lastSample !== firstSample) {
-      const start = (num(grp.placed_count) || headCount) * (num(firstSample.detail.averageWeight) as number) / 1000;
-      const now = headCount * (num(lastSample.detail.averageWeight) as number) / 1000;
-      productKg = now - start > 0 ? now - start : null;
+      // Meat gain between the two samples, for the animals alive now (count changes between samples are not tracked here).
+      const gainKg = headCount * ((num(lastSample.detail.averageWeight) as number) - (num(firstSample.detail.averageWeight) as number)) / 1000;
+      productKg = gainKg > 0 ? gainKg : null;
+      feedKg = sum(feedRows.filter((r: any) => r.record_date >= firstSample.record_date && r.record_date <= lastSample.record_date));
     }
 
     // Fed well below / above the table this week (Phase 4 rule). Judged on the RECORDED inputs only - a "what if"
     // weight or temperature typed on the card never raises or closes an alert.
     if (input.avgWeightG === undefined || input.avgWeightG === null) {
       if (input.waterTempC === undefined || input.waterTempC === null) {
-        const feedRows = recs.rows.filter((r: any) => r.record_type === 'feed').map((r: any) => ({ date: r.record_date, kg: num(r.quantity) || 0 }));
-        const flagged = today.status === 'ok' ? evaluateGroupFeed({ suggestedKgPerDay: today.kgPerDay, recorded: feedRows }) : [];
+        const recordedFeed = feedRows.map((r: any) => ({ date: r.record_date, kg: num(r.quantity) || 0 }));
+        // What the table said on each of those days: the age (or the latest sample weight) as it was THEN.
+        const suggestedByDay = new Map<string, number>();
+        for (const d of new Set<string>(recordedFeed.map((r: { date: string }) => r.date))) {
+          const daysAgo = Math.round((Date.now() - new Date(d).getTime()) / 86400000);
+          const sampleThen = [...samples].reverse().find((x: any) => x.record_date <= d);
+          const dayResult = groupDailyFeed({
+            headCount, headCountIsLive, ageDays: ageDays === null ? null : Math.max(0, ageDays - daysAgo),
+            avgWeightG: sampleThen ? num(sampleThen.detail.averageWeight) : avgWeightG, waterTempC, curve, temperature,
+          });
+          if (dayResult.status === 'ok') suggestedByDay.set(d as string, dayResult.kgPerDay);
+        }
+        const flagged = today.status === 'ok' ? evaluateGroupFeed({ suggestedByDay, recorded: recordedFeed }) : [];
         await this.syncFeedFlags(groupId, flagged).catch(() => { /* an alert failure must not hide the feed card */ });
       }
     }
@@ -116,7 +141,7 @@ class GroupFeedingService {
       status: 'ok' as const,
       group: this.groupInfo(grp),
       curve: { key, title: rows[0].title, product, source: rows[0].source, status: rows[0].status, basis: rows[0].basis },
-      inputs: { headCount, ageDays, avgWeightG, waterTempC, avgWeightDate: lastSample?.record_date ?? null, waterDate: lastWater?.record_date ?? null },
+      inputs: { headCount, ageDays, avgWeightG, waterTempC, avgWeightDate: lastSample?.record_date ?? null, waterDate: lastWater?.record_date ?? null, pricePerKg: stockPricePerKg },
       today,
       cycle: { since, feedKg: Math.round(feedKg * 10) / 10, productKg: productKg === null ? null : Math.round(productKg * 10) / 10, fcr: fcr(feedKg, productKg) },
       flags: flags.rows.map((x: any) => ({ id: x.id, type: x.flag_type, severity: x.severity, params: x.params || {} })),

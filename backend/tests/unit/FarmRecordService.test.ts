@@ -2,22 +2,27 @@ import database from '../../src/utils/database';
 import FarmRecordService from '../../src/services/FarmRecordService';
 import FarmProfileService from '../../src/services/FarmProfileService';
 import BatchManagementService from '../../src/services/BatchManagementService';
+import FeedInventoryService from '../../src/services/FeedInventoryService';
 import { ValidationError, NotFoundError, ForbiddenError } from '../../src/utils/errors';
 
 jest.mock('../../src/utils/database');
 jest.mock('../../src/services/FarmProfileService');
 jest.mock('../../src/services/BatchManagementService');
+jest.mock('../../src/services/FeedInventoryService');
 
 const query = database.query as jest.Mock;
 const transaction = database.transaction as jest.Mock;
 const assertAllowed = FarmProfileService.assertRecordTypeAllowed as jest.Mock;
 const recordPopulationEvent = BatchManagementService.recordPopulationEvent as jest.Mock;
+const takeFromStock = FeedInventoryService.takeFromStock as jest.Mock;
 
 const caller = { userId: 'u1', role: 'farmer' };
 const MILK = { code: 'milk', kind: 'daily', unit: 'L', fields: [{ key: 'session', type: 'choice', options: ['am', 'pm'], required: true }, { key: 'quantity', type: 'number', required: true }] };
 const EGGS = { code: 'eggs', kind: 'daily', unit: 'eggs', fields: [{ key: 'quantity', type: 'number', required: true }, { key: 'broken', type: 'number' }] };
 const MORTALITY = { code: 'mortality', kind: 'daily', unit: 'head', fields: [{ key: 'quantity', type: 'number', required: true }, { key: 'cause', type: 'text' }] };
 const HEAT = { code: 'heat', kind: 'event', unit: null, fields: [] };
+const FEED = { code: 'feed', kind: 'daily', unit: 'kg', fields: [{ key: 'quantity', type: 'number', required: true }, { key: 'feedId', type: 'stock' }] };
+const FEED_ID = '11111111-1111-1111-1111-111111111111';
 
 const cow = { id: 'a1', enterprise_id: 'e1', species: 'Cattle', animal_class: 'lactating', gender: 'female', group_id: null, management_mode: null, group_type: null };
 const flock = { id: 'g1', enterprise_id: 'e1', species: 'Chicken', management_mode: 'batch', group_type: 'layers', cycle_id: 'c1' };
@@ -98,8 +103,39 @@ describe('FarmRecordService.save', () => {
     await expect(FarmRecordService.save({ animalId: 'a1', recordType: 'heat' }, caller)).rejects.toThrow(/is an event/);
     stubDb({ animal: cow, type: undefined });
     await expect(FarmRecordService.save({ animalId: 'a1', recordType: 'nope' }, caller)).rejects.toThrow(/not a record type/);
+    stubDb({ animal: cow, type: MILK });
     await expect(FarmRecordService.save({ animalId: 'a1', groupId: 'g1', recordType: 'milk' }, caller)).rejects.toThrow(/one animal or one group/);
     await expect(FarmRecordService.save({ recordType: 'milk' }, caller)).rejects.toThrow(/one animal or one group/);
+    // milk cannot be for "all my animals" - only a record that uses stock (feed) can
+    await expect(FarmRecordService.save({ enterpriseId: 'e1', recordType: 'milk' }, caller)).rejects.toThrow(/one animal or one group/);
+  });
+
+  it('feed from stock: takes it out of stock and stores its cost; a correction moves only the difference', async () => {
+    stubDb({ group: flock, type: FEED });
+    const tx = stubTx();
+    takeFromStock.mockResolvedValue({ taken: 2, cost: 2400, unit: 'bag' });
+    await FarmRecordService.save({ groupId: 'g1', recordType: 'feed', quantity: 100, feedId: FEED_ID }, caller);
+    expect(takeFromStock).toHaveBeenCalledWith(expect.anything(), FEED_ID, 'e1', 100, 0);
+    const insert = tx.find(t => /INSERT INTO farm_daily_records/.test(t.sql))!;
+    expect(insert.params.slice(12)).toEqual([FEED_ID, 2400, 2]);
+
+    stubTx([{ id: 'r1', quantity: '100', stock_deducted: '2' }]);
+    await FarmRecordService.save({ groupId: 'g1', recordType: 'feed', quantity: 150, feedId: FEED_ID }, caller);
+    expect(takeFromStock).toHaveBeenLastCalledWith(expect.anything(), FEED_ID, 'e1', 150, 2);
+  });
+
+  it('feed for "all my animals" needs no animal or group and skips the species check; home-grown touches no stock', async () => {
+    query.mockImplementation(async (sql: string) => {
+      if (/FROM master_record_types/.test(sql)) return { rows: [FEED] };
+      if (/FROM enterprises e WHERE/.test(sql)) return { rows: [{ role: 'worker' }] };
+      return { rows: [] };
+    });
+    const tx = stubTx();
+    await FarmRecordService.save({ enterpriseId: 'e1', recordType: 'feed', quantity: 40 }, caller);
+    expect(assertAllowed).not.toHaveBeenCalled();
+    expect(takeFromStock).not.toHaveBeenCalled();
+    const insert = tx.find(t => /INSERT INTO farm_daily_records/.test(t.sql))!;
+    expect(insert.params.slice(0, 3)).toEqual(['e1', null, null]);
   });
 
   it('refuses a future date, one over a year back and a malformed one', async () => {
