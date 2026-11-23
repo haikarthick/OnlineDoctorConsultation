@@ -1,5 +1,8 @@
 import database from '../../utils/database';
 import logger from '../../utils/logger';
+import NutritionNotifier from './NutritionNotifier';
+import { activityScoreFrom, nutritionScoreFrom, weightStatusFrom, type WeightStatus } from './engine/wellness';
+import { detectConditions, type FoundCondition } from './engine/conditions';
 import { ValidationError, NotFoundError, ForbiddenError } from '../../utils/errors';
 import AnimalService from '../AnimalService';
 import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE } from '../AnimalAccessService';
@@ -144,11 +147,13 @@ class NutritionService {
   async overview(animalId: string, caller: Caller): Promise<any> {
     const access = await NutritionAccess.forAnimal(animalId, caller, 'read');
     const { facts, measurements } = await this.loadFacts(animalId);
-    const [plan, feeding, flags, unsafe] = await Promise.all([
+    const [plan, pendingPlan, feeding, flags, unsafe, herd] = await Promise.all([
       this.activePlan(animalId),
+      this.pendingPlan(animalId),
       this.feedingSummary(animalId),
       this.openFlags(animalId),
       this.unsafeFoods(facts.speciesCode),
+      facts.model === 'ruminant_dm' || facts.model === 'equine_dm' ? this.herdPlanFor(animalId) : Promise.resolve(null),
     ]);
     return {
       animal: { id: access.animal.id, name: access.animal.name, species: access.animal.species, enterpriseId: access.animal.enterpriseId },
@@ -159,6 +164,9 @@ class NutritionService {
       canCalculate: canCalculate(facts),
       measurements: measurements.slice(0, 20),
       plan,
+      herdPlan: herd?.plan ?? null,
+      herdName: herd?.groupName ?? null,
+      pendingPlan,
       feeding,
       flags,
       unsafeFoods: unsafe,
@@ -217,7 +225,7 @@ class NutritionService {
   private async compute(access: AnimalAccess, input: PlanInput): Promise<{
     facts: AnimalFacts; energy: CompanionEnergyResult; portions: PortionResult; foods: Array<PortionFood & { ingredientId: string | null }>;
     unsafe: Array<{ food: string; item: string; severity: string; kind?: 'allergy' }>; mealsPerDay: number;
-    allergies: Array<{ allergen: string; severity: string }>;
+    allergies: Array<{ allergen: string; severity: string }>; conditions: FoundCondition[];
   }> {
     const { facts } = await this.loadFacts(access.animal.id);
     if (facts.model === 'ruminant_dm' || facts.model === 'equine_dm') {
@@ -252,7 +260,28 @@ class NutritionService {
         if (matchesUnsafe(f.label, [a.allergen])) unsafe.push({ food: f.label, item: a.allergen, severity: 'danger', kind: 'allergy' });
       }
     }
-    return { facts, energy, portions: portionResult, foods, unsafe, mealsPerDay, allergies };
+    const conditions = await this.activeConditions(access.animal.id, facts.breedingStatus);
+    return { facts, energy, portions: portionResult, foods, unsafe, mealsPerDay, allergies, conditions };
+  }
+
+  /**
+   * Conditions on the animal's medical record (diagnoses, abnormal lab results) that need a vet before a new plan is
+   * followed. Read live - the medical record owns them; nothing is entered a second time.
+   */
+  async activeConditions(animalId: string, breedingStatus: string | null): Promise<FoundCondition[]> {
+    const [dx, labs] = await Promise.all([
+      database.query(
+        `SELECT title, content, tags, severity FROM medical_records
+          WHERE animal_id = $1 AND record_type = 'diagnosis' AND status = 'active' ORDER BY created_at DESC LIMIT 100`, [animalId]),
+      database.query(
+        `SELECT test_name, is_abnormal FROM lab_results
+          WHERE animal_id = $1 AND is_abnormal = true AND test_date >= CURRENT_DATE - 180 ORDER BY test_date DESC LIMIT 100`, [animalId]),
+    ]);
+    return detectConditions({
+      diagnoses: dx.rows.map((r: any) => ({ title: r.title, content: r.content, tags: r.tags, severity: r.severity })),
+      labs: labs.rows.map((r: any) => ({ testName: r.test_name, isAbnormal: r.is_abnormal })),
+      breedingStatus,
+    });
   }
 
   async savePlan(animalId: string, input: PlanInput, caller: Caller): Promise<any> {
@@ -267,21 +296,28 @@ class NutritionService {
       throw new ValidationError(`This plan includes a food that is unsafe for this animal (${c.unsafe.filter(u => u.severity === 'danger').map(u => u.food).join(', ')}). Remove it and save again.`);
     }
     const reviewed = !!input.markReviewed && access.canReview;
+    // A recorded condition (kidney, diabetes, ...) means a vet looks BEFORE this plan replaces the one in use: the new
+    // plan waits as a draft, the current plan stays in force, and the vet's review is what makes it current.
+    const waitsForVet = c.conditions.length > 0 && !reviewed;
     const plan = await database.transaction(async (client: any) => {
       await client.query(
-        `UPDATE nutrition_plans SET status = 'superseded', updated_at = NOW() WHERE animal_id = $1 AND status = 'active'`, [animalId]
+        `UPDATE nutrition_plans SET status = 'superseded', updated_at = NOW() WHERE animal_id = $1 AND status = $2`, [animalId, waitsForVet ? 'draft' : 'active']
       );
+      if (!waitsForVet) {
+        await client.query(`UPDATE nutrition_plans SET status = 'superseded', updated_at = NOW() WHERE animal_id = $1 AND status = 'draft'`, [animalId]);
+      }
       const p = await client.query(
         `INSERT INTO nutrition_plans (animal_id, enterprise_id, nutrition_model, status, validation, goal, target_weight_kg,
                                       daily_energy_kcal, meals_per_day, energy_factor_key, engine_version, inputs, result,
                                       review_note, created_by, reviewed_by, reviewed_at)
-         VALUES ($1,$2,$3,'active',$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,$14,$15,$16)
+         VALUES ($1,$2,$3,$17,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,$14,$15,$16)
          RETURNING id`,
         [animalId, access.animal.enterpriseId, c.facts.model, reviewed ? 'vet_reviewed' : 'suggested', c.energy.goal,
          c.energy.idealWeightKg, c.energy.dailyKcal, c.mealsPerDay, c.energy.factorKey, ENGINE_VERSION,
          JSON.stringify({ facts: c.facts, goal: input.goal ?? null, targetWeightKg: num(input.targetWeightKg) }),
-         JSON.stringify({ energy: c.energy, portions: c.portions, conditions: { allergies: c.allergies, requiresVet: c.allergies.length > 0 } }),
-         reviewed ? (input.reviewNote || null) : null, caller.userId, reviewed ? caller.userId : null, reviewed ? new Date() : null]
+         JSON.stringify({ energy: c.energy, portions: c.portions, conditions: { allergies: c.allergies, found: c.conditions, requiresVet: c.allergies.length > 0 || c.conditions.length > 0 } }),
+         reviewed ? (input.reviewNote || null) : null, caller.userId, reviewed ? caller.userId : null, reviewed ? new Date() : null,
+         waitsForVet ? 'draft' : 'active']
       );
       const planId = p.rows[0].id;
       for (let i = 0; i < c.foods.length; i++) {
@@ -296,6 +332,7 @@ class NutritionService {
       return planId;
     });
     this.track(caller, 'plan_saved', c.facts.model).catch(() => {});
+    if (!reviewed && (waitsForVet || c.energy.requiresVet)) await NutritionNotifier.planWaitingForVet({ animalId }, plan);
     await this.evaluateFlags(animalId).catch(err => logger.error('Nutrition flag evaluation failed', { animalId, error: err.message }));
     return this.planById(plan);
   }
@@ -303,14 +340,19 @@ class NutritionService {
   async reviewPlan(planId: string, input: { overrideKcal?: number | null; note?: string | null }, caller: Caller): Promise<any> {
     const p = await this.planRow(planId);
     await this.assertMayReview(p, caller);
-    if (p.status !== 'active') throw new ValidationError('This plan has been replaced by a newer one. Review the current plan instead.');
+    if (p.status !== 'active' && p.status !== 'draft') throw new ValidationError('This plan has been replaced by a newer one. Review the current plan instead.');
     const override = num(input.overrideKcal);
     if (override !== null && p.nutrition_model !== 'companion_energy') {
       throw new ValidationError('For a farm ration, change the feeds or limits and save a new ration instead of setting the energy by hand.');
     }
     if (override !== null && (override <= 0 || override > 50000)) throw new ValidationError('The daily energy must be a number above zero.');
+    // A number far from the calculated one is allowed - but never silently: the vet says why, and it is kept with their name.
+    if (override !== null && Number(p.daily_energy_kcal) > 0 && Math.abs(override / Number(p.daily_energy_kcal) - 1) > 0.25 && !String(input.note || '').trim()) {
+      throw new ValidationError('This is more than 25% away from the calculated amount. Add a short reason so the owner and the next vet can see why.');
+    }
     const kcal = override ?? Number(p.daily_energy_kcal);
     await database.transaction(async (client: any) => {
+      await this.activateDraft(client, p);
       await client.query(
         `UPDATE nutrition_plans SET validation = 'vet_reviewed', vet_override_kcal = $2, review_note = $3,
                 reviewed_by = $4, reviewed_at = NOW(), updated_at = NOW() WHERE id = $1`,
@@ -329,6 +371,14 @@ class NutritionService {
     });
     this.track(caller, 'plan_reviewed', p.nutrition_model).catch(() => {});
     return this.planById(planId);
+  }
+
+  /** A vet's review makes a waiting draft the plan in use; the plan it replaces is kept as history. */
+  private async activateDraft(client: any, p: any): Promise<void> {
+    if (p.status !== 'draft') return;
+    const col = p.animal_id ? 'animal_id' : 'group_id';
+    await client.query(`UPDATE nutrition_plans SET status = 'superseded', updated_at = NOW() WHERE ${col} = $1 AND status = 'active'`, [p.animal_id || p.group_id]);
+    await client.query(`UPDATE nutrition_plans SET status = 'active', updated_at = NOW() WHERE id = $1`, [p.id]);
   }
 
   private async planRow(planId: string): Promise<any> {
@@ -358,7 +408,7 @@ class NutritionService {
     const isVet = caller.role === 'veterinarian' || (caller.roles || []).includes('veterinarian');
     const isAdmin = caller.role === 'admin' || (caller.roles || []).includes('admin');
     if (!isVet && !isAdmin) throw new ForbiddenError('Only a vet can prescribe a diet.');
-    if (p.status !== 'active') throw new ValidationError('This plan has been replaced by a newer one. Prescribe the current plan instead.');
+    if (p.status !== 'active' && p.status !== 'draft') throw new ValidationError('This plan has been replaced by a newer one. Prescribe the current plan instead.');
     if (p.prescription_id) {
       const existing = await database.query(`SELECT is_active FROM prescriptions WHERE id = $1`, [p.prescription_id]);
       if (existing.rows[0]?.is_active) throw new ValidationError('This plan is already prescribed. Make a new plan to prescribe a different diet.');
@@ -409,6 +459,7 @@ class NutritionService {
       instructions: note ? `${summary}\n${note}` : summary,
       validUntil: new Date(Date.now() + days * 86400000).toISOString().slice(0, 10),
     } as any, isVet ? 'veterinarian' : 'admin');
+    if (p.status === 'draft') await database.transaction(async (client: any) => this.activateDraft(client, p));
     await database.query(
       `UPDATE nutrition_plans SET prescription_id = $2,
               validation = 'vet_reviewed', reviewed_by = COALESCE(reviewed_by, $3), reviewed_at = COALESCE(reviewed_at, NOW()),
@@ -427,6 +478,63 @@ class NutritionService {
       [animalId]
     );
     return r.rows.map((x: any) => ({ allergen: String(x.allergen), severity: x.severity || 'mild' }));
+  }
+
+  /**
+   * What the AI copilot may quote about this animal's feeding (NUT-023): the plan the engine made, open alerts, recorded
+   * conditions. Plain facts only - the copilot never works out an amount itself. The caller (the copilot) has already
+   * limited this to the asking person's own animals.
+   */
+  async copilotContext(animalId: string): Promise<string | null> {
+    const [plan, herd, flags, { facts }] = await Promise.all([this.activePlan(animalId), this.herdPlanFor(animalId), this.openFlags(animalId), this.loadFacts(animalId)]);
+    const shown = plan || herd?.plan || null;
+    if (!shown && flags.length === 0) return null;
+    const lines: string[] = [];
+    if (shown) {
+      const farm = !!shown.ration;
+      const amount = (kg: number | null) => (kg === null ? '-' : kg < 1 ? `${Math.round(kg * 1000)} g` : `${kg} kg`);
+      lines.push(`Plan (${shown.validation === 'vet_reviewed' ? 'reviewed by a vet' : 'suggested, not yet reviewed by a vet'}${herd && !plan ? `, the herd "${herd.groupName}" ration, per animal` : ''}): ${
+        farm ? `${shown.dailyDmKg ?? '-'} kg dry matter per day` : `${Math.round(shown.effectiveKcal || 0)} kcal per day, ${shown.mealsPerDay} meals`}`);
+      for (const it of shown.items) lines.push(`- ${it.label}: ${farm ? amount(it.amountPerDay) : `${it.gramsPerDay ?? '-'} g`} per day`);
+    }
+    for (const f of flags.slice(0, 6)) lines.push(`Alert (${f.severity}): ${f.type.replace(/_/g, ' ')}`);
+    if (facts.weightKg) lines.push(`Latest weight: ${facts.weightKg} kg${facts.bcs9 !== null ? `, body condition ${facts.bcs9}/9` : ''}`);
+    return lines.join('\n');
+  }
+
+  /** The scorecard values that come from nutrition facts (internal: the caller has already been checked). */
+  async wellnessMetrics(animalId: string): Promise<{ nutritionScore: number | null; activityScore: number | null; weightStatus: WeightStatus }> {
+    const { facts, measurements } = await this.loadFacts(animalId);
+    const [flags, plan] = await Promise.all([this.openFlags(animalId), this.activePlan(animalId)]);
+    return {
+      nutritionScore: nutritionScoreFrom({
+        actFlags: flags.filter(f => f.severity === 'act').length, watchFlags: flags.filter(f => f.severity === 'watch').length,
+        hasPlan: !!plan, needsPlan: CALCULATOR_MODELS.has(facts.model), hasWeight: facts.weightKg !== null, hasBcs: measurements.some(m => m.bcs9 !== null),
+      }),
+      activityScore: activityScoreFrom(facts.activityLevel),
+      weightStatus: weightStatusFrom(facts.bcs9),
+    };
+  }
+
+  /** A plan saved for an animal with a recorded condition, waiting for a vet (the plan in use is unchanged meanwhile). */
+  async pendingPlan(animalId: string): Promise<any | null> {
+    const r = await database.query(`SELECT id FROM nutrition_plans WHERE animal_id = $1 AND status = 'draft' ORDER BY created_at DESC LIMIT 1`, [animalId]);
+    return r.rows[0] ? this.planById(r.rows[0].id) : null;
+  }
+
+  /**
+   * The ration of the herd this animal belongs to, shown read-only on the animal's own panel (NUT-171) so a farmer
+   * opening one cow sees what she is fed. It is the herd's plan, never a copy: change it on the herd.
+   */
+  async herdPlanFor(animalId: string): Promise<{ groupName: string; plan: any } | null> {
+    const r = await database.query(
+      `SELECT p.id, g.name AS group_name
+         FROM animal_group_memberships m
+         JOIN animal_groups g ON g.id = m.group_id
+         JOIN nutrition_plans p ON p.group_id = g.id AND p.status = 'active' AND p.nutrition_model IN ('ruminant_dm', 'equine_dm')
+        WHERE m.animal_id = $1 AND m.left_at IS NULL
+        ORDER BY p.created_at DESC LIMIT 1`, [animalId]);
+    return r.rows[0] ? { groupName: String(r.rows[0].group_name), plan: await this.planById(r.rows[0].id) } : null;
   }
 
   async activePlan(animalId: string): Promise<any | null> {
@@ -457,6 +565,7 @@ class NutritionService {
       // A vet should look before the plan is followed: the energy rules said so, or the animal has a recorded allergy.
       requiresVet: !!(p.result?.energy?.requiresVet || p.result?.conditions?.requiresVet),
       allergies: (p.result?.conditions?.allergies || []).map((a: any) => a.allergen),
+      conditions: (p.result?.conditions?.found || []).map((c: any) => c.key),
       prescriptionId: p.prescription_id || null,
       // Farm rations (ruminant_dm): dry matter, need vs supplied, cost per day / per litre.
       dailyDmKg: num(p.daily_dm_kg),
@@ -701,17 +810,27 @@ class NutritionService {
   }
 
   private async upsertFlag(animalId: string, flag: RiskFlag): Promise<void> {
-    await database.query(
+    const r = await database.query(
       `INSERT INTO nutrition_risk_flags (animal_id, flag_type, severity, params, rule_version)
        VALUES ($1, $2, $3, $4::jsonb, $5)
        ON CONFLICT ((COALESCE(animal_id, group_id)), flag_type) WHERE status = 'open'
-       DO UPDATE SET severity = EXCLUDED.severity, params = EXCLUDED.params, rule_version = EXCLUDED.rule_version, updated_at = NOW()`,
+       DO UPDATE SET severity = EXCLUDED.severity, params = EXCLUDED.params, rule_version = EXCLUDED.rule_version, updated_at = NOW()
+       RETURNING id, (xmax = 0) AS inserted`,
       [animalId, flag.type, flag.severity, JSON.stringify(flag.params), RULE_VERSION]
     );
+    // Only a NEW alert tells people (a refresh of an open one is not news).
+    if (r.rows[0]?.inserted) await NutritionNotifier.flagRaised({ animalId }, { id: r.rows[0].id, type: flag.type, severity: flag.severity });
   }
 
   /** Re-runs the rules for one animal: refreshes what still applies, closes what no longer does. */
   async evaluateFlags(animalId: string): Promise<RiskFlag[]> {
+    // An animal that is sold, has died, was transferred, lost or retired has no food plan to follow and raises no alerts.
+    const state = await database.query(`SELECT status, is_active FROM animals WHERE id = $1`, [animalId]);
+    if (state.rows[0] && (state.rows[0].is_active === false || (state.rows[0].status && state.rows[0].status !== 'active' && state.rows[0].status !== 'quarantined'))) {
+      await database.query(`UPDATE nutrition_plans SET status = 'archived', updated_at = NOW() WHERE animal_id = $1 AND status IN ('active', 'draft')`, [animalId]);
+      await database.query(`UPDATE nutrition_risk_flags SET status = 'resolved', updated_at = NOW() WHERE animal_id = $1 AND status = 'open'`, [animalId]);
+      return [];
+    }
     const { facts, measurements } = await this.loadFacts(animalId);
     const [plan, feeding] = await Promise.all([
       database.query(`SELECT goal FROM nutrition_plans WHERE animal_id = $1 AND status = 'active' LIMIT 1`, [animalId]),
@@ -761,6 +880,28 @@ class NutritionService {
 
   // ─── Animal list (the Nutrition page) ───────────────────────────────────
 
+  /**
+   * The few numbers a dashboard shows (NUT-175/121). Counts come from listAnimals itself, so who is counted follows the
+   * one access rule - no second scope. Feed cost today is the cost stored on today's feed records of the caller's farms.
+   */
+  async summary(caller: Caller): Promise<{ total: number; attention: number; toReview: number; noPlan: number; feedCostToday: number | null }> {
+    const [all, attention, toReview, noPlan, cost] = await Promise.all([
+      this.listAnimals(caller, { limit: 1 }),
+      this.listAnimals(caller, { filter: 'attention', limit: 1 }),
+      this.listAnimals(caller, { filter: 'to_review', limit: 1 }),
+      this.listAnimals(caller, { filter: 'no_plan', limit: 1 }),
+      database.query(
+        `SELECT SUM(r.cost) AS cost, COUNT(*) AS n FROM farm_daily_records r
+          WHERE r.record_type = 'feed' AND r.record_date = CURRENT_DATE
+            AND r.enterprise_id IN (SELECT id FROM enterprises WHERE owner_id = $1
+                                    UNION SELECT enterprise_id FROM enterprise_members WHERE user_id = $1 AND is_active = true)`, [caller.userId]),
+    ]);
+    return {
+      total: all.total, attention: attention.total, toReview: toReview.total, noPlan: noPlan.total,
+      feedCostToday: Number(cost.rows[0]?.n) > 0 ? Math.round(Number(cost.rows[0].cost || 0) * 100) / 100 : null,
+    };
+  }
+
   async listAnimals(caller: Caller, params: { search?: string; filter?: string; limit?: number; offset?: number }): Promise<{ items: any[]; total: number }> {
     const limit = Math.min(Math.max(Number(params.limit) || 20, 1), 100);
     const offset = Math.max(Number(params.offset) || 0, 0);
@@ -790,9 +931,9 @@ class NutritionService {
       where.push(`EXISTS (SELECT 1 FROM nutrition_risk_flags f WHERE f.animal_id = a.id AND f.status = 'open' AND f.severity IN ('act', 'watch'))`);
     } else if (params.filter === 'to_review') {
       // The vet's review queue: a plan or ration is in use but no vet has looked at it yet.
-      where.push(`EXISTS (SELECT 1 FROM nutrition_plans p WHERE p.animal_id = a.id AND p.status = 'active' AND p.validation = 'suggested')`);
+      where.push(`EXISTS (SELECT 1 FROM nutrition_plans p WHERE p.animal_id = a.id AND p.status IN ('active', 'draft') AND p.validation = 'suggested')`);
     } else if (params.filter === 'no_plan') {
-      where.push(`NOT EXISTS (SELECT 1 FROM nutrition_plans p WHERE p.animal_id = a.id AND p.status = 'active')`);
+      where.push(`NOT EXISTS (SELECT 1 FROM nutrition_plans p WHERE p.animal_id = a.id AND p.status IN ('active', 'draft'))`);
     }
     const base = `FROM animals a
                   LEFT JOIN master_species ms ON ms.code = a.species
@@ -803,8 +944,8 @@ class NutritionService {
       database.query(
         `SELECT a.id, a.name, a.species, a.unique_id, a.enterprise_id, e.name AS enterprise_name, a.owner_id,
                 COALESCE(mc.nutrition_model, ms.nutrition_model, 'guidance_only') AS model,
-                (SELECT jsonb_build_object('id', p.id, 'validation', p.validation, 'kcal', COALESCE(p.vet_override_kcal, p.daily_energy_kcal), 'goal', p.goal)
-                   FROM nutrition_plans p WHERE p.animal_id = a.id AND p.status = 'active' LIMIT 1) AS plan,
+                (SELECT jsonb_build_object('id', p.id, 'validation', p.validation, 'kcal', COALESCE(p.vet_override_kcal, p.daily_energy_kcal), 'goal', p.goal, 'waitingForVet', p.status = 'draft')
+                   FROM nutrition_plans p WHERE p.animal_id = a.id AND p.status IN ('active', 'draft') ORDER BY (p.status = 'active') DESC, p.created_at DESC LIMIT 1) AS plan,
                 (SELECT COUNT(*) FROM nutrition_risk_flags f WHERE f.animal_id = a.id AND f.status = 'open' AND f.severity = 'act') AS act_flags,
                 (SELECT COUNT(*) FROM nutrition_risk_flags f WHERE f.animal_id = a.id AND f.status = 'open' AND f.severity = 'watch') AS watch_flags
            ${base}

@@ -584,6 +584,15 @@
     },
     "addAnimal": "Register an Animal",
     "noAnimalsTitle": "No Animals Registered",
-    "noAnimalsHint": "Add your pets or animals to track their wellness and set reminders."
+    "noAnimalsHint": "Add your pets or animals to track their wellness and set reminders.",
+    "fromRecords": "Nutrition, activity and weight are worked out from this animal's own records - nothing to type here.",
+    "notEnoughRecords": "Not enough records yet",
+    "weightStatuses": {
+      "underweight": "Underweight",
+      "normal": "Normal",
+      "overweight": "Overweight",
+      "obese": "Obese",
+      "unknown": "Not weighed yet"
+    }
   }
 }

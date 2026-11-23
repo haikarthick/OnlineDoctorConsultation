@@ -86,6 +86,8 @@ export const PlanTab: React.FC<Props> = ({ data, onChanged }) => {
         </section>
       )}
 
+      <PendingPlan data={data} onChanged={onChanged} />
+
       {building && <PlanBuilderSheet data={data} onClose={() => setBuilding(false)} onSaved={() => { setBuilding(false); onChanged() }} />}
     </div>
   )
@@ -105,7 +107,16 @@ const RationPlan: React.FC<{ data: NutritionOverview; onChanged: () => void }> =
   }
   return (
     <div className="nutri-tab">
-      {!plan ? (
+      {!plan && data.herdPlan ? (
+        <>
+          <p className="nutri-hint">{t('nutrition.ration.fromHerd', { name: data.herdName })}</p>
+          <RationPlanCard plan={data.herdPlan} herd>
+            {data.permissions.canWrite && (
+              <button type="button" className="btn btn-secondary nutri-wide-btn" onClick={() => setBuilding(true)}>{t('nutrition.ration.ownInstead')}</button>
+            )}
+          </RationPlanCard>
+        </>
+      ) : !plan ? (
         <section className="nutri-card">
           <h3 className="nutri-card-title">{t('nutrition.ration.none')}</h3>
           <p className="nutri-hint">{data.canCalculate ? t('nutrition.ration.noneBody') : t('nutrition.plan.needsFacts')}</p>
@@ -121,8 +132,43 @@ const RationPlan: React.FC<{ data: NutritionOverview; onChanged: () => void }> =
           <PlanVetActions plan={plan} name={data.animal.name} canReview={data.permissions.canReview} onChanged={onChanged} />
         </RationPlanCard>
       )}
+      <PendingPlan data={data} onChanged={onChanged} />
       {building && <RationBuilderSheet target={target} onClose={() => setBuilding(false)} onSaved={() => { setBuilding(false); onChanged() }} />}
     </div>
+  )
+}
+
+/** A plan or ration saved for an animal with a recorded condition: it waits for a vet and the plan in use stays unchanged. */
+const PendingPlan: React.FC<{ data: NutritionOverview; onChanged: () => void }> = ({ data, onChanged }) => {
+  const { t, i18n } = useTranslation()
+  const pending = data.pendingPlan
+  if (!pending) return null
+  return (
+    <section className="nutri-card" aria-label={t('nutrition.plan.pendingTitle')}>
+      <div className="nutri-card-head">
+        <h3 className="nutri-card-title">{t('nutrition.plan.pendingTitle')}</h3>
+        <span className="nutri-pill is-suggested">{t('nutrition.plan.pendingPill')}</span>
+      </div>
+      <p className="nutri-note is-warning">
+        {t('nutrition.plan.pendingBody', { conditions: (pending.conditions || []).map(c => t(`nutrition.conditions.${c}`)).join(', ') })}
+      </p>
+      {pending.ration
+        ? <RationPlanCard plan={pending} />
+        : (
+          <>
+            <p className="nutri-big">{t('nutrition.plan.perDay', { kcal: formatKcal(pending.effectiveKcal, i18n.language) })}</p>
+            <ul className="nutri-list">
+              {pending.items.map(item => (
+                <li key={item.id} className="nutri-list-row">
+                  <span className="nutri-list-main"><strong>{item.label}</strong></span>
+                  <span className="nutri-list-meta">{item.gramsPerDay === null ? '' : t('nutrition.plan.portion', { perDay: item.gramsPerDay, perMeal: item.gramsPerMeal, kcal: formatKcal(item.kcalPerDay, i18n.language) })}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      <PlanVetActions plan={pending} name={data.animal.name} canReview={data.permissions.canReview} onChanged={onChanged} />
+    </section>
   )
 }
 

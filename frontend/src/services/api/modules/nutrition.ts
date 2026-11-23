@@ -20,6 +20,11 @@ export const nutritionApi = {
     const response = await sharedClient.get('/nutrition/enabled')
     return response.data
   },
+  /** Counts for the dashboard card: animals needing attention, plans waiting for a vet, animals with no plan, feed cost today. */
+  async nutritionSummary() {
+    const response = await sharedClient.get('/nutrition/summary')
+    return response.data
+  },
   async listNutritionAnimals(params: { search?: string; filter?: 'attention' | 'no_plan' | 'to_review'; limit?: number; offset?: number } = {}) {
     const response = await sharedClient.get('/nutrition/animals', { params })
     return response.data

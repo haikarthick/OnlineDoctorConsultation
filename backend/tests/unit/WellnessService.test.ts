@@ -1,11 +1,13 @@
 ﻿import database from '../../src/utils/database';
+import NutritionService from '../../src/services/nutrition/NutritionService';
+jest.mock('../../src/services/nutrition/NutritionService', () => ({ __esModule: true, default: { wellnessMetrics: jest.fn() } }));
 jest.mock('../../src/utils/database');
 const pool = database;
 
 import wellnessService from '../../src/services/WellnessService';
 
 describe('WellnessService', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => { jest.clearAllMocks(); (NutritionService.wellnessMetrics as jest.Mock).mockResolvedValue({ nutritionScore: null, activityScore: 70, weightStatus: 'unknown' }); });
 
   describe('createScorecard', () => {
     it('should create a wellness scorecard', async () => {
@@ -13,7 +15,9 @@ describe('WellnessService', () => {
       (pool.query as jest.Mock)
         .mockResolvedValueOnce({ rows: [{ id: 'sc1' }] })
         .mockResolvedValueOnce({ rows: [sc] });
-      const result = await wellnessService.createScorecard({ owner_id: 'u1', animal_id: 'a1', nutrition_score: 8 });
+      const result = await wellnessService.createScorecard({ ownerId: 'u1', animalId: 'a1', dentalScore: 80 });
+      // the nutrition, activity and weight values come from the nutrition module, not from the request
+      expect((pool.query as jest.Mock).mock.calls[0][1].slice(5, 9)).toEqual([null, 70, 0, 80]);
       expect(result).toBeDefined();
     });
   });
@@ -36,10 +40,10 @@ describe('WellnessService', () => {
   describe('updateScorecard', () => {
     it('should update a scorecard', async () => {
       (pool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ id: 'sc1', nutrition_score: 7, activity_score: 6, vaccination_score: 8, dental_score: 7 }] })  // SELECT current
+        .mockResolvedValueOnce({ rows: [{ id: 'sc1', animal_id: 'a1', nutrition_score: 7, activity_score: 6, vaccination_score: 8, dental_score: 7 }] })  // SELECT current
         .mockResolvedValueOnce({ rows: [] })                      // UPDATE
         .mockResolvedValueOnce({ rows: [{ id: 'sc1' }] });        // SELECT result
-      const result = await wellnessService.updateScorecard('sc1', { nutritionScore: 9 });
+      const result = await wellnessService.updateScorecard('sc1', { dentalScore: 9 });
       expect(result).toBeDefined();
     });
   });

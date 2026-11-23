@@ -37,8 +37,8 @@ const WellnessPortal: React.FC = () => {
   const [animals, setAnimals] = useState<any[]>([])
 
   const [scorecardForm, setScorecardForm] = useState({
-    animalId: '', nutritionScore: '75', activityScore: '75', vaccinationScore: '75',
-    dentalScore: '75', weightStatus: 'normal', nextCheckup: '', recommendations: '', riskFlags: '',
+    animalId: '', vaccinationScore: '75',
+    dentalScore: '75', nextCheckup: '', recommendations: '', riskFlags: '',
   })
   const [reminderForm, setReminderForm] = useState({
     animalId: '', reminderType: 'vaccination', title: '', description: '', dueDate: '',
@@ -70,7 +70,6 @@ const WellnessPortal: React.FC = () => {
     try {
       await apiService.createWellnessScorecard({
         ...scorecardForm,
-        nutritionScore: +scorecardForm.nutritionScore, activityScore: +scorecardForm.activityScore,
         vaccinationScore: +scorecardForm.vaccinationScore, dentalScore: +scorecardForm.dentalScore,
         recommendations: scorecardForm.recommendations.split(',').map(r => r.trim()).filter(Boolean),
         riskFlags: scorecardForm.riskFlags.split(',').map(r => r.trim()).filter(Boolean),
@@ -105,7 +104,21 @@ const WellnessPortal: React.FC = () => {
     try { await apiService.snoozeReminder(id, until.toISOString().split('T')[0]); setSuccessMsg(t('wellnessPortal.toasts.snoozed')); fetchAll() } catch (e: any) { setError(userMessage(e)) }
   }
 
-  const renderScoreGauge = (label: string, score: number, emoji: string) => (
+  const weightWord = (s: string | null | undefined) => t(`wellnessPortal.weightStatuses.${s || 'unknown'}`)
+  /** A score with no records behind it is null: shown as "not enough records yet", never as a made-up number. */
+  const renderScoreGauge = (label: string, raw: number | string | null | undefined, emoji: string) => {
+    if (raw === null || raw === undefined) {
+      return (
+        <div className="si-70983a36">
+          <div className="si-3540f604">{emoji}</div>
+          <div className="si-8a19fc04" title={t('wellnessPortal.notEnoughRecords')}>—</div>
+          <div className="si-5e4162e0">{label}</div>
+        </div>
+      )
+    }
+    return renderGaugeValue(label, +raw, emoji)
+  }
+  const renderGaugeValue = (label: string, score: number, emoji: string) => (
     <div className="si-70983a36">
       <div className="si-3540f604">{emoji}</div>
       <div className="si-8a19fc04">
@@ -162,10 +175,10 @@ const WellnessPortal: React.FC = () => {
                       <h4 className="si-44087c4b">{sc.animal_name}</h4>
                       <span style={{ fontSize: 24, fontWeight: 700, color: SCORE_COLORS(+sc.overall_score) }}>{(+sc.overall_score).toFixed(0)}</span>
                     </div>
-                    <div className="si-fb366e09">{speciesLabel(sc.species, t)} · {t('wellnessPortal.weight')} {sc.weight_status}</div>
+                    <div className="si-fb366e09">{speciesLabel(sc.species, t)} · {t('wellnessPortal.weight')} {weightWord(sc.weight_status)}</div>
                     <div className="si-319b7b12">
-                      {renderScoreGauge(t('wellnessPortal.scoreLabels.nutrition'), +sc.nutrition_score, '🥩')}
-                      {renderScoreGauge(t('wellnessPortal.scoreLabels.activity'), +sc.activity_score, '🏃')}
+                      {renderScoreGauge(t('wellnessPortal.scoreLabels.nutrition'), sc.nutrition_score, '🥩')}
+                      {renderScoreGauge(t('wellnessPortal.scoreLabels.activity'), sc.activity_score, '🏃')}
                       {renderScoreGauge(t('wellnessPortal.scoreLabels.vaccines'), +sc.vaccination_score, '💉')}
                       {renderScoreGauge(t('wellnessPortal.scoreLabels.dental'), +sc.dental_score, '🦷')}
                     </div>
@@ -211,7 +224,7 @@ const WellnessPortal: React.FC = () => {
                     {animals.map((a: any) => <option key={a.id} value={a.id}>{a.name} ({speciesLabel(a.species, t)})</option>)}
                   </select></div>
                 <div className="si-7e460960">
-                  {[[t('wellnessPortal.scoreLabels.nutrition'), 'nutritionScore'], [t('wellnessPortal.scoreLabels.activity'), 'activityScore'], [t('wellnessPortal.scoreLabels.vaccines'), 'vaccinationScore'], [t('wellnessPortal.scoreLabels.dental'), 'dentalScore']].map(([label, field]) => (
+                  {[[t('wellnessPortal.scoreLabels.vaccines'), 'vaccinationScore'], [t('wellnessPortal.scoreLabels.dental'), 'dentalScore']].map(([label, field]) => (
                     <div key={field} className="si-42eae7d1">
                       <label className="module-label">{label} {t('wellnessPortal.scoreInputSuffix')}</label>
                       <input className="module-input" type="number" inputMode="decimal" min="0" max="100"
@@ -221,10 +234,7 @@ const WellnessPortal: React.FC = () => {
                   ))}
                 </div>
                 <div className="si-c3866b40">
-                  <div className="si-6acd75e8"><label className="module-label">{t('wellnessPortal.labelWeightStatus')}</label>
-                    <select className="module-input" value={scorecardForm.weightStatus} onChange={e => setScorecardForm(f => ({ ...f, weightStatus: e.target.value }))}>
-                      {['underweight', 'normal', 'overweight', 'obese'].map(w => <option key={w} value={w}>{w}</option>)}
-                    </select></div>
+                  <p className="module-hint">{t('wellnessPortal.fromRecords')}</p>
                   <div className="si-6acd75e8"><label className="module-label">{t('wellnessPortal.labelNextCheckup')}</label>
                     <input className="module-input" type="date" value={scorecardForm.nextCheckup} onChange={e => setScorecardForm(f => ({ ...f, nextCheckup: e.target.value }))} /></div>
                 </div>
@@ -244,12 +254,12 @@ const WellnessPortal: React.FC = () => {
                 <div className="si-eab13361">
                   <div>
                     <h4 className="si-44087c4b">{sc.animalName}</h4>
-                    <div className="si-a3f3564c">{speciesLabel(sc.species, t)} · {sc.weightStatus}</div>
+                    <div className="si-a3f3564c">{speciesLabel(sc.species, t)} · {weightWord(sc.weightStatus)}</div>
                   </div>
                 </div>
                 <div className="si-d4b9ebb0">
-                  {renderScoreGauge(t('wellnessPortal.scoreLabels.nutrition'), +sc.nutritionScore, '🥩')}
-                  {renderScoreGauge(t('wellnessPortal.scoreLabels.activity'), +sc.activityScore, '🏃')}
+                  {renderScoreGauge(t('wellnessPortal.scoreLabels.nutrition'), sc.nutritionScore, '🥩')}
+                  {renderScoreGauge(t('wellnessPortal.scoreLabels.activity'), sc.activityScore, '🏃')}
                   {renderScoreGauge(t('wellnessPortal.scoreLabels.vaccines'), +sc.vaccinationScore, '💉')}
                   {renderScoreGauge(t('wellnessPortal.scoreLabels.dental'), +sc.dentalScore, '🦷')}
                 </div>

@@ -9,10 +9,12 @@ describe('HealthAnalyticsService', () => {
   describe('createObservation', () => {
     it('should create a health observation', async () => {
       const obs = { id: 'o1', enterprise_id: 'e1', animal_id: 'a1', observation_type: 'symptom', description: 'Limping', severity: 'moderate' };
-      (database.query as jest.Mock).mockResolvedValue({ rows: [obs] });
+      // the note and its weight are saved in ONE transaction
+      const client = { query: jest.fn().mockResolvedValue({ rows: [obs] }) };
+      (database.transaction as jest.Mock).mockImplementation(async (cb: any) => cb(client));
       const result = await healthAnalyticsService.createObservation({ enterprise_id: 'e1', animal_id: 'a1', observation_type: 'symptom', description: 'Limping', severity: 'moderate' });
       expect(result).toEqual(expect.objectContaining({ id: 'o1', observationType: 'symptom', severity: 'moderate' }));
-      expect(database.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO health_observations'), expect.any(Array));
+      expect(client.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO health_observations'), expect.any(Array));
     });
   });
 

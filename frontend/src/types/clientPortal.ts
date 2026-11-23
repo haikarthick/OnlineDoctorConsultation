@@ -49,11 +49,11 @@ export interface WellnessScorecard {
   enterpriseId?: string
   ownerId: string
   overallScore: number
-  nutritionScore: number
+  nutritionScore: number | null
   activityScore: number
   vaccinationScore: number
   dentalScore: number
-  weightStatus: 'underweight' | 'normal' | 'overweight' | 'obese'
+  weightStatus: 'underweight' | 'normal' | 'overweight' | 'obese' | 'unknown'
   nextCheckup?: string
   recommendations: string[]
   riskFlags: string[]

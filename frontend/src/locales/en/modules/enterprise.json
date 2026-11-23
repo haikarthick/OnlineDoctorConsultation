@@ -359,7 +359,8 @@
     },
     "analytics": {
       "used": "Used",
-      "cost": "Cost"
+      "cost": "Cost",
+      "otherUnits": "Also given, but not counted in kg because the weight of one unit is not known: {{list}}. Set the kg per bag in Feed Inventory."
     },
     "toasts": {
       "feedUpdated": "Feed updated!",

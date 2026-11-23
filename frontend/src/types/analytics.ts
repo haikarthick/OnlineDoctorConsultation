@@ -110,6 +110,8 @@ export interface FeedAnalytics {
   totalInventoryValue: number
   lowStockAlerts: FeedItem[]
   consumptionByType: { feedType: string; totalKg: number; totalCost: number }[]
+  /** Feed recorded in a unit that is not a weight; listed by its own unit so nothing is left out of the report. */
+  otherUnits?: { unit: string; quantity: number }[]
   dailyConsumptionTrend: { day: string; totalKg: number; totalCost: number }[]
 }
 

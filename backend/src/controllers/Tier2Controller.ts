@@ -7,8 +7,9 @@ import financialService from '../services/FinancialService';
 import alertService from '../services/AlertService';
 import enterpriseService from '../services/EnterpriseService';
 import FarmAccessService from '../services/FarmAccessService';
-import { ForbiddenError } from '../utils/errors';
+import { ForbiddenError, NotFoundError } from '../utils/errors';
 import logger from '../utils/logger';
+import database from '../utils/database';
 
 // Helper to check enterprise access
 async function ensureAccess(req: Request, res: Response, enterpriseId: string): Promise<boolean> {
@@ -23,6 +24,26 @@ async function ensureAccess(req: Request, res: Response, enterpriseId: string): 
     }
     throw err;
   }
+}
+
+const FEED_NOT_AVAILABLE_MESSAGE = "We could not find this feed item in your farm's stock. It may have been removed, or it may belong to another farm. Open Feed Inventory to see the feeds you can use.";
+
+/** A feed id that does not exist and one that belongs to a farm the person cannot reach get the SAME answer, so the screen never confirms another farm's stock exists. */
+async function ensureFeedAccess(req: Request, res: Response, feedId: string): Promise<boolean> {
+  let enterpriseId: string | null = null;
+  try { enterpriseId = await feedInventoryService.enterpriseOf(feedId); } catch (err: any) { if (!(err instanceof NotFoundError)) throw err; }
+  let canSee = false;
+  if (enterpriseId) {
+    try {
+      await FarmAccessService.assert(enterpriseId, { userId: (req as any).userId, role: (req as any).userRole }, 'read');
+      canSee = true;
+    } catch (err: any) {
+      if (!(err instanceof ForbiddenError)) throw err;
+    }
+  }
+  if (!canSee || !enterpriseId) { res.status(404).json({ success: false, message: FEED_NOT_AVAILABLE_MESSAGE, error: { message: FEED_NOT_AVAILABLE_MESSAGE } }); return false; }
+  // The person can see this farm: now the normal rule (a viewer only looks) answers in its own words.
+  return ensureAccess(req, res, enterpriseId);
 }
 
 class Tier2Controller {
@@ -47,19 +68,41 @@ class Tier2Controller {
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
 
+  /** The farm is the one in the address and the person must be on its team; the animal or herd named must belong to it. */
   async createObservation(req: Request, res: Response) {
-    try {
-      const userId = (req as any).userId;
-      const data = await healthAnalyticsService.createObservation({ ...req.body, observerId: userId });
-      res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    const userId = (req as any).userId;
+    const { enterpriseId } = req.params;
+    if (!await ensureAccess(req, res, enterpriseId)) return;
+    const { animalId, groupId } = req.body;
+    const belongs = (await Promise.all([
+      animalId ? database.query(`SELECT 1 FROM animals WHERE id = $1 AND enterprise_id = $2`, [animalId, enterpriseId]) : null,
+      groupId ? database.query(`SELECT 1 FROM animal_groups WHERE id = $1 AND enterprise_id = $2`, [groupId, enterpriseId]) : null,
+    ])).every(r => r === null || r.rows.length > 0);
+    if (!belongs) {
+      const message = "That animal or herd is not part of this farm, so a health note cannot be added for it. Choose one of this farm's animals.";
+      res.status(400).json({ success: false, message, error: { message } });
+      return;
+    }
+    res.status(201).json({ data: await healthAnalyticsService.createObservation({ ...req.body, enterpriseId, observerId: userId }) });
   }
 
   async resolveObservation(req: Request, res: Response) {
-    try {
-      await healthAnalyticsService.resolveObservation(req.params.id);
-      res.json({ data: { success: true } });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    const farm = await database.query(`SELECT enterprise_id FROM health_observations WHERE id = $1`, [req.params.id]);
+    // Unknown note and a note of a farm the person cannot reach get the same answer.
+    const enterpriseId: string | null = farm.rows[0]?.enterprise_id || null;
+    let canSee = false;
+    if (enterpriseId) {
+      try { await FarmAccessService.assert(enterpriseId, { userId: (req as any).userId, role: (req as any).userRole }, 'read'); canSee = true; }
+      catch (err: any) { if (!(err instanceof ForbiddenError)) throw err; }
+    }
+    if (!canSee || !enterpriseId) {
+      const message = 'We could not find this health note on your farm. It may have been removed, or it may belong to another farm.';
+      res.status(404).json({ success: false, message, error: { message } });
+      return;
+    }
+    if (!await ensureAccess(req, res, enterpriseId)) return;
+    await healthAnalyticsService.resolveObservation(req.params.id);
+    res.json({ data: { success: true } });
   }
 
   // ═══════════════════════ Breeding ═══════════════════════
@@ -138,17 +181,17 @@ class Tier2Controller {
   }
 
   async updateFeed(req: Request, res: Response) {
-    if (!await ensureAccess(req, res, await feedInventoryService.enterpriseOf(req.params.id))) return;
+    if (!await ensureFeedAccess(req, res, req.params.id)) return;
     res.json({ data: await feedInventoryService.updateFeed(req.params.id, req.body) });
   }
 
   async restockFeed(req: Request, res: Response) {
-    if (!await ensureAccess(req, res, await feedInventoryService.enterpriseOf(req.params.id))) return;
+    if (!await ensureFeedAccess(req, res, req.params.id)) return;
     res.json({ data: await feedInventoryService.restock(req.params.id, req.body, (req as any).userId) });
   }
 
   async deleteFeed(req: Request, res: Response) {
-    if (!await ensureAccess(req, res, await feedInventoryService.enterpriseOf(req.params.id))) return;
+    if (!await ensureFeedAccess(req, res, req.params.id)) return;
     await feedInventoryService.deleteFeed(req.params.id);
     res.json({ data: { success: true } });
   }

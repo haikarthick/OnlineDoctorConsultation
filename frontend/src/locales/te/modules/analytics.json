@@ -588,6 +588,15 @@
     "unifiedReferrals": "Referral History",
     "platformReferral": "Platform Referral",
     "networkReferral": "Network Referral",
-    "referralLinked": "Linked referral"
+    "referralLinked": "Linked referral",
+    "fromRecords": "పోషణ, చురుకుదనం, బరువు ఈ జంతువు సొంత రికార్డుల నుండి లెక్కించబడతాయి - ఇక్కడ ఏమీ టైప్ చేయక్కర్లేదు.",
+    "notEnoughRecords": "ఇంకా తగినన్ని రికార్డులు లేవు",
+    "weightStatuses": {
+      "underweight": "తక్కువ బరువు",
+      "normal": "సాధారణం",
+      "overweight": "ఎక్కువ బరువు",
+      "obese": "స్థూలకాయం",
+      "unknown": "ఇంకా బరువు చూడలేదు"
+    }
   }
 }

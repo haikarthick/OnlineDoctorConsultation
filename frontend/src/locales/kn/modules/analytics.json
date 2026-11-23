@@ -588,6 +588,15 @@
     "unifiedReferrals": "Referral History",
     "platformReferral": "Platform Referral",
     "networkReferral": "Network Referral",
-    "referralLinked": "Linked referral"
+    "referralLinked": "Linked referral",
+    "fromRecords": "ಪೋಷಣೆ, ಚಟುವಟಿಕೆ ಮತ್ತು ತೂಕ ಈ ಪ್ರಾಣಿಯ ಸ್ವಂತ ದಾಖಲೆಗಳಿಂದ ಲೆಕ್ಕಹಾಕಲಾಗುತ್ತದೆ - ಇಲ್ಲಿ ಏನನ್ನೂ ಬರೆಯಬೇಕಿಲ್ಲ.",
+    "notEnoughRecords": "ಇನ್ನೂ ಸಾಕಷ್ಟು ದಾಖಲೆಗಳಿಲ್ಲ",
+    "weightStatuses": {
+      "underweight": "ಕಡಿಮೆ ತೂಕ",
+      "normal": "ಸಾಮಾನ್ಯ",
+      "overweight": "ಹೆಚ್ಚು ತೂಕ",
+      "obese": "ಸ್ಥೂಲಕಾಯ",
+      "unknown": "ಇನ್ನೂ ತೂಕ ಮಾಡಿಲ್ಲ"
+    }
   }
 }

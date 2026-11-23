@@ -309,7 +309,7 @@ import { getNetworkMember } from './members';
     animalName: string; animalSpecies: string; animalBreed?: string;
     animalGender?: string; animalClass?: string; animalDob?: string; animalWeight?: number;
     animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
-    animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
+    animalIsNeutered?: boolean | null; animalMedicalNotes?: string; animalAvatarUrl?: string;
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;
     animalEarTagId?: string;
     reasonForVisit?: string;
@@ -366,7 +366,7 @@ import { getNetworkMember } from './members';
           data.animalColor || null,
           data.animalMicrochipId || null,
           data.animalRegistrationNumber || null,
-          data.animalIsNeutered ?? false,
+          data.animalIsNeutered ?? null,
           data.animalMedicalNotes || null,
           data.animalAvatarUrl || null,
           data.animalInsuranceProvider || null,

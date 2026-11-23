@@ -48,22 +48,16 @@ export const updateSustainabilityGoalSchema = Joi.object({
 export const createWellnessScorecardSchema = Joi.object({
   animalId: requiredUuid,
   enterpriseId: uuid.optional(),
-  nutritionScore: Joi.number().min(0).max(100).optional(),
-  activityScore: Joi.number().min(0).max(100).optional(),
   vaccinationScore: Joi.number().min(0).max(100).optional(),
   dentalScore: Joi.number().min(0).max(100).optional(),
-  weightStatus: Joi.string().valid('underweight', 'normal', 'overweight', 'obese').optional(),
   nextCheckup: Joi.string().optional().allow('', null),
   recommendations: Joi.array().items(Joi.any()).optional(),
   riskFlags: Joi.array().items(Joi.any()).optional(),
 });
 
 export const updateWellnessScorecardSchema = Joi.object({
-  nutritionScore: Joi.number().min(0).max(100).optional(),
-  activityScore: Joi.number().min(0).max(100).optional(),
   vaccinationScore: Joi.number().min(0).max(100).optional(),
   dentalScore: Joi.number().min(0).max(100).optional(),
-  weightStatus: Joi.string().valid('underweight', 'normal', 'overweight', 'obese').optional(),
   nextCheckup: Joi.string().optional().allow('', null),
   recommendations: Joi.array().items(Joi.any()).optional(),
   riskFlags: Joi.array().items(Joi.any()).optional(),

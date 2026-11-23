@@ -588,6 +588,15 @@
     "unifiedReferrals": "Referral History",
     "platformReferral": "Platform Referral",
     "networkReferral": "Network Referral",
-    "referralLinked": "Linked referral"
+    "referralLinked": "Linked referral",
+    "fromRecords": "ஊட்டச்சத்து, செயல்பாடு, எடை ஆகியவை இந்த விலங்கின் சொந்த பதிவுகளிலிருந்து கணக்கிடப்படுகின்றன - இங்கே எதுவும் உள்ளிட வேண்டியதில்லை.",
+    "notEnoughRecords": "இன்னும் போதுமான பதிவுகள் இல்லை",
+    "weightStatuses": {
+      "underweight": "எடை குறைவு",
+      "normal": "இயல்பு",
+      "overweight": "எடை அதிகம்",
+      "obese": "உடல் பருமன்",
+      "unknown": "இன்னும் எடை பார்க்கவில்லை"
+    }
   }
 }

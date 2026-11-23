@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { useSettings, getCurrencySymbol } from '../../context/SettingsContext'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { useMasterData } from '../../context/MasterDataContext'
@@ -50,6 +51,7 @@ const GROUPS: Array<{ key: string; kinds: string[] }> = [
 export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }) => {
   const { t, i18n } = useTranslation()
   const { resolveLabel } = useMasterData()
+  const { settings } = useSettings()
   const equine = target.model === 'equine_dm'
   const herd = target.kind === 'group'
   // Blank = use the animal's recorded milk (last 7 days of Daily records, else the profile); a typed 0 means "dry".
@@ -158,7 +160,7 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
                 {/* The price is entered once, in Feed Inventory: a feed in stock shows it, only a feed with no stock item asks. */}
                 {stockPrice !== null
                   ? <p className="nutri-hint">{t('nutrition.ration.priceFromStock', { price: money(stockPrice) })}</p>
-                  : <NumberStepper label={t('nutrition.ration.price')} value={c.price} onChange={v => update(c.ingredientId, { price: v })} step={1} unit="₹/kg" hint={t('nutrition.ration.priceHint')} />}
+                  : <NumberStepper label={t('nutrition.ration.price')} value={c.price} onChange={v => update(c.ingredientId, { price: v })} step={1} unit={`${getCurrencySymbol(settings.currency)}/kg`} hint={t('nutrition.ration.priceHint')} />}
                 <NumberStepper label={t(herd ? 'nutrition.ration.maxKgHead' : 'nutrition.ration.maxKg')} value={c.maxKg} onChange={v => update(c.ingredientId, { maxKg: v })} step={1} unit="kg" hint={t('nutrition.ration.maxKgHint')} />
               </div>
               )

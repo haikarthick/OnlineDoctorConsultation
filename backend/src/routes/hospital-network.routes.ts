@@ -661,7 +661,7 @@ router.post('/hospital-networks/:id/register-walkin', authMiddleware, requireNet
       patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed,
       animalGender, animalClass, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
       animalColor, animalMicrochipId, animalRegistrationNumber,
-      animalIsNeutered: animalIsNeutered === true || animalIsNeutered === 'true',
+      animalIsNeutered: animalIsNeutered === true || animalIsNeutered === 'true' ? true : animalIsNeutered === false || animalIsNeutered === 'false' ? false : null, // unanswered stays unanswered
       animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit,
       consentCollected: consentCollected === true || consentCollected === 'true',
       consentMethod: consentMethod || 'verbal',
@@ -696,7 +696,7 @@ router.post('/hospitals/:hospitalId/register-walkin', authMiddleware, asyncHandl
       patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed,
       animalGender, animalClass, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
       animalColor, animalMicrochipId, animalRegistrationNumber,
-      animalIsNeutered: animalIsNeutered === true || animalIsNeutered === 'true',
+      animalIsNeutered: animalIsNeutered === true || animalIsNeutered === 'true' ? true : animalIsNeutered === false || animalIsNeutered === 'false' ? false : null, // unanswered stays unanswered
       animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId,
     });
     res.json({ success: true, data: result });

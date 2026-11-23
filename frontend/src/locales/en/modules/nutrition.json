@@ -150,7 +150,10 @@
       "reviewKcalHint": "Change it only if this animal needs a different amount. The grams are worked out again.",
       "reviewNote": "Note for the owner (optional)",
       "confirmReview": "Confirm review",
-      "allergyFood": "{{food}} - this animal is recorded as allergic to {{allergen}}. Remove it or ask the vet."
+      "allergyFood": "{{food}} - this animal is recorded as allergic to {{allergen}}. Remove it or ask the vet.",
+      "pendingTitle": "Plan waiting for a vet",
+      "pendingPill": "Waiting for a vet",
+      "pendingBody": "This animal has {{conditions}} on its record, so a vet must check this plan before it replaces the one now in use. Keep feeding the current plan until then."
     },
     "goals": {
       "maintain": "Keep weight",
@@ -604,7 +607,9 @@
         "high": "Moderate work - several hours a day.",
         "working": "Heavy work - full days (cart, plough, long rides)."
       },
-      "priceFromStock": "Price from your stock: ₹{{price}} per kg. Change it in Feed Inventory."
+      "priceFromStock": "Price from your stock: ₹{{price}} per kg. Change it in Feed Inventory.",
+      "fromHerd": "This animal is in the herd \"{{name}}\". Every animal in the herd gets this ration; change it on the herd.",
+      "ownInstead": "Make a ration for this animal only"
     },
     "group": {
       "title": "Today's feed",
@@ -656,6 +661,22 @@
       "builtInNote": "A short summary of this plan.",
       "fallbackPet": "This plan gives about {{kcal}} kcal a day in {{meals}} meals, worked out from the animal's weight, age and activity for the goal \"{{goal}}\". Weigh it every 2-4 weeks - the plan is adjusted from the weight trend.",
       "fallbackRation": "This ration gives {{dm}} kg of dry matter a day for ₹{{cost}}. It is the cheapest mix of your feeds that meets the animal's need for energy, protein and minerals. Change the prices or feeds and it is worked out again."
+    },
+    "conditions": {
+      "kidney": "kidney disease",
+      "diabetes": "diabetes",
+      "pancreatitis": "pancreatitis",
+      "urinary": "urinary stones",
+      "liver": "liver disease",
+      "heart": "heart disease",
+      "pregnant_and_ill": "pregnancy or nursing while unwell"
+    },
+    "dashboard": {
+      "title": "Feeding at a glance",
+      "attention": "Need attention",
+      "toReview": "Plans to check",
+      "noPlan": "No food plan",
+      "feedCostToday": "Feed cost today: {{cost}}"
     }
   }
 }

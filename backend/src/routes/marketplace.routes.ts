@@ -112,9 +112,9 @@ router.get('/enterprises/:enterpriseId/sustainability/carbon-footprint', authMid
 // ─── Client Portal & Wellness ───────────────────────
 router.get('/wellness/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getWellnessDashboard(req, res)));
 router.get('/wellness/scorecards', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listWellnessScorecards(req, res)));
-router.post('/wellness/scorecards', authMiddleware, validateBody(createWellnessScorecardSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createWellnessScorecard(req, res)));
-router.put('/wellness/scorecards/:id', authMiddleware, validateBody(updateWellnessScorecardSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateWellnessScorecard(req, res)));
-router.delete('/wellness/scorecards/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteWellnessScorecard(req, res)));
+router.post('/wellness/scorecards', authMiddleware, requireAnimal('body:animalId'), validateBody(createWellnessScorecardSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createWellnessScorecard(req, res)));
+router.put('/wellness/scorecards/:id', authMiddleware, requireRecordAccess('wellness_scorecards'), validateBody(updateWellnessScorecardSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateWellnessScorecard(req, res)));
+router.delete('/wellness/scorecards/:id', authMiddleware, requireRecordAccess('wellness_scorecards'), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteWellnessScorecard(req, res)));
 router.get('/wellness/reminders', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listWellnessReminders(req, res)));
 router.post('/wellness/reminders', authMiddleware, validateBody(createWellnessReminderSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createWellnessReminder(req, res)));
 router.patch('/wellness/reminders/:id/complete', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.completeReminder(req, res)));

@@ -18,8 +18,12 @@ class HealthAnalyticsService {
     params.push(Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200));
     params.push(Math.max(parseInt(filters.offset) || 0, 0));
     const result = await database.query(
-      `SELECT ho.*, a.name as animal_name, u.first_name || ' ' || u.last_name as observer_name
+      `SELECT ho.*, a.name as animal_name, u.first_name || ' ' || u.last_name as observer_name,
+              -- an animal's weight and body condition live in ONE place (its body-measurement history); older rows keep their own copy
+              COALESCE(wh.weight, ho.weight) AS obs_weight, COALESCE(wh.unit, ho.weight_unit) AS obs_weight_unit,
+              COALESCE(wh.body_condition_score, ho.body_condition_score) AS obs_bcs
        FROM health_observations ho
+       LEFT JOIN weight_history wh ON wh.source = 'health_observation' AND wh.source_id::text = ho.id::text
        LEFT JOIN animals a ON a.id = ho.animal_id
        LEFT JOIN users u ON u.id = ho.observer_id
        WHERE ${conditions.join(' AND ')}
@@ -32,14 +36,17 @@ class HealthAnalyticsService {
 
   /** Create a health observation */
   async createObservation(data: any): Promise<any> {
-    const result = await database.query(
+    return database.transaction(async (client: any) => {
+    const result = await client.query(
       `INSERT INTO health_observations (enterprise_id, animal_id, group_id, observer_id, observation_type, severity, title, description,
         body_temperature, weight, weight_unit, heart_rate, respiratory_rate, body_condition_score, symptoms, diagnosis, treatment_given, follow_up_date)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING *`,
       [data.enterpriseId, data.animalId || null, data.groupId || null, data.observerId,
        data.observationType || 'general', data.severity || 'normal', data.title, data.description || null,
-       data.bodyTemperature || null, data.weight || null, data.weightUnit || 'kg',
-       data.heartRate || null, data.respiratoryRate || null, data.bodyConditionScore || null,
+       // An animal's weight and body condition go ONLY to its body-measurement history (below); a herd or farm-wide
+       // observation has no animal there, so those keep the figure on the observation itself.
+       data.bodyTemperature || null, data.animalId ? null : (data.weight || null), data.weightUnit || 'kg',
+       data.heartRate || null, data.respiratoryRate || null, data.animalId ? null : (data.bodyConditionScore || null),
        data.symptoms || null, data.diagnosis || null, data.treatmentGiven || null, data.followUpDate || null]
     );
 
@@ -56,10 +63,11 @@ class HealthAnalyticsService {
         source: 'health_observation',
         sourceId: result.rows[0].id,
         recordedBy: data.observerId || null,
-      });
+      }, client);
     }
 
-    return this.mapObservation(result.rows[0]);
+    return this.mapObservation({ ...result.rows[0], obs_weight: data.weight || null, obs_weight_unit: data.weightUnit || 'kg', obs_bcs: data.bodyConditionScore || null });
+    });
   }
 
   /** Resolve an observation */
@@ -146,9 +154,9 @@ class HealthAnalyticsService {
       observationType: row.observation_type, severity: row.severity,
       title: row.title, description: row.description,
       bodyTemperature: row.body_temperature ? parseFloat(row.body_temperature) : null,
-      weight: row.weight ? parseFloat(row.weight) : null, weightUnit: row.weight_unit,
+      weight: (row.obs_weight ?? row.weight) ? parseFloat(row.obs_weight ?? row.weight) : null, weightUnit: row.obs_weight_unit ?? row.weight_unit,
       heartRate: row.heart_rate, respiratoryRate: row.respiratory_rate,
-      bodyConditionScore: row.body_condition_score,
+      bodyConditionScore: row.obs_bcs ?? row.body_condition_score,
       symptoms: row.symptoms, diagnosis: row.diagnosis,
       treatmentGiven: row.treatment_given, followUpDate: row.follow_up_date,
       isResolved: row.is_resolved, resolvedAt: row.resolved_at,

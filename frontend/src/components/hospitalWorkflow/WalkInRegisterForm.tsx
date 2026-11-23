@@ -1,12 +1,13 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
+import { ChipSelect } from '../mobile/ChipSelect'
 
 export interface WalkInForm {
   ownerName: string; ownerPhone: string; ownerEmail: string; ownerAddress: string
   animalName: string; animalSpecies: string; animalBreed: string
   animalGender: string; animalClass: string; animalDob: string; animalWeight: string
   animalColor: string; animalMicrochipId: string; animalRegistrationNumber: string
-  animalIsNeutered: boolean; animalMedicalNotes: string
+  animalIsNeutered: boolean | null; animalMedicalNotes: string
   animalInsuranceProvider: string; animalInsurancePolicyNumber: string; animalInsuranceExpiry: string
   animalEarTagId: string; animalCustomBreed: string
 }
@@ -181,10 +182,11 @@ export default function WalkInRegisterForm({
               <input placeholder={t('hospitalWorkflow.walkIn.animalColorPlaceholder')} value={walkInForm.animalColor} onChange={e => setWalkInForm(f => ({ ...f, animalColor: e.target.value }))} className="si-d0e0df59" />
             </div>
           </div>
-          <div className="si-a8fa078e">
-            <input type="checkbox" id="walkInNeutered" checked={walkInForm.animalIsNeutered} onChange={e => setWalkInForm(f => ({ ...f, animalIsNeutered: e.target.checked }))} className="si-f9badade" />
-            <label htmlFor="walkInNeutered" className="si-e6d76076">{t('hospitalWorkflow.walkIn.animalIsNeutered')}</label>
-          </div>
+          {/* Yes / no, empty until answered - same as the animal form: an unanswered pet is not "no". */}
+          <ChipSelect label={t('hospitalWorkflow.walkIn.animalIsNeutered')} variant="segmented" allowClear onClear={() => setWalkInForm(f => ({ ...f, animalIsNeutered: null }))}
+            value={walkInForm.animalIsNeutered === null ? '' : walkInForm.animalIsNeutered ? 'yes' : 'no'}
+            onChange={v => setWalkInForm(f => ({ ...f, animalIsNeutered: v === 'yes' }))}
+            options={[{ value: 'yes', label: t('nutrition.options.yes') }, { value: 'no', label: t('nutrition.options.no') }]} />
         </div>
       </div>
 

@@ -17,6 +17,8 @@ import pool from '../utils/database';
 import logger from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 import OpenAI from 'openai';
+import NutritionService from './nutrition/NutritionService';
+import { isNutritionEnabled } from './nutrition/NutritionConfig';
 import { matchKnowledgeTopic, AI_UNAVAILABLE_MESSAGE, AI_BUSY_MESSAGE } from './aiCopilot/offlineAnswers';
 
 interface AiClient {
@@ -73,6 +75,8 @@ Always:
 - Recommend consulting a licensed veterinarian for any diagnosis or treatment decision
 - Mention when symptoms warrant emergency care
 - Cite relevant guidelines (AVMA, AAHA, WSAVA, Merck Veterinary Manual) where appropriate
+
+Feeding amounts, calories and rations: use only the "Feeding Plan and Alerts" section when it is present and quote it as it is; never calculate an amount yourself. When there is no such section, say the Nutrition screen can build a plan for the animal.
 
 Respond in a structured, easy-to-read format. Never give harmful advice or encourage bypassing professional veterinary care.`;
 
@@ -286,6 +290,16 @@ class AiCopilotService {
           `- **${al.animal_name}**: ${al.allergen} (${al.severity})${al.reaction ? ` - ${al.reaction}` : ''}${al.is_active === false ? ' [resolved]' : ' [ACTIVE]'}${al.identified_date ? ` since ${new Date(al.identified_date).toLocaleDateString()}` : ''}`
         );
         sections.push(`## Known Allergies (${allergyRes.rows.length})\n${alLines.join('\n')}`);
+      }
+
+      // 7b. Feeding plan from the nutrition engine - for the animal(s) the question names. The assistant quotes it; it never works out amounts.
+      if (focus.length > 0 && await isNutritionEnabled()) {
+        const parts: string[] = [];
+        for (const a of focus.slice(0, 3)) {
+          const text = await NutritionService.copilotContext(a.id).catch(() => null);
+          if (text) parts.push(`**${a.name}**\n${text}`);
+        }
+        if (parts.length > 0) sections.push(`## Feeding Plan and Alerts (from the platform's nutrition engine - quote these numbers; never calculate feeding amounts yourself)\n${parts.join('\n')}`);
       }
 
       // 8. Weight history (show trend per animal)

@@ -20,6 +20,7 @@ import UpcomingBookingsPanel from '../components/dashboard/UpcomingBookingsPanel
 import RecentConsultationsPanel from '../components/dashboard/RecentConsultationsPanel'
 import FarmerEnterpriseOverviewPanel from '../components/dashboard/FarmerEnterpriseOverviewPanel'
 import FeatureCardGrid from '../components/dashboard/FeatureCardGrid'
+import NutritionSummaryPanel from '../components/dashboard/NutritionSummaryPanel'
 import ProTipsPanel from '../components/dashboard/ProTipsPanel'
 
 import { userMessage } from '../utils/userMessage'
@@ -341,6 +342,8 @@ const Dashboard: React.FC = () => {
       {isPetOwner && <FeatureCardGrid features={PET_OWNER_FEATURES} />}
 
       {isVeterinarian && <FeatureCardGrid features={VETERINARIAN_FEATURES} />}
+
+      {(isFarmer || isPetOwner || isVeterinarian || isAdmin) && <NutritionSummaryPanel />}
 
       {/* ── Pro Tips (all roles) ── */}
       {hasPermission('dashboard_tips') && (

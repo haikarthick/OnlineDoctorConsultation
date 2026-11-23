@@ -43,6 +43,11 @@ router.get('/nutrition/enabled', authMiddleware, asyncHandler(async (_req: Reque
 
 const gate = [authMiddleware, nutritionEnabled];
 
+// ─── Dashboard numbers (counts follow the same access as the animal list) ───
+router.get('/nutrition/summary', ...gate, asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await NutritionService.summary(caller(req)) });
+}));
+
 // ─── Animals ───
 router.get('/nutrition/animals', ...gate, asyncHandler(async (req: Request, res: Response) => {
   const q = req.query as Record<string, string | undefined>;

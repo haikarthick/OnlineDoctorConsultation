@@ -28,7 +28,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   THB: '฿', PHP: '₱', IDR: 'Rp', NZD: 'NZ$', CHF: 'CHF',
 }
 
-function getCurrencySymbol(code: string): string {
+export function getCurrencySymbol(code: string): string {
   return CURRENCY_SYMBOLS[code.toUpperCase()] || code
 }
 

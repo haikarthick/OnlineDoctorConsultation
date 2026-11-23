@@ -5,6 +5,13 @@
  */
 import pool from '../utils/database';
 import { v4 as uuidv4 } from 'uuid';
+import NutritionService from './nutrition/NutritionService';
+
+/** Overall = the average of the scores that exist; a score with no records behind it is left out, not counted as zero. */
+function overallOf(scores: Array<number | null | undefined>): string {
+  const have = scores.filter((x): x is number => x !== null && x !== undefined && Number.isFinite(+x)).map(Number);
+  return (have.length ? have.reduce((a, b) => a + b, 0) / have.length : 0).toFixed(2);
+}
 
 class WellnessService {
 
@@ -29,10 +36,16 @@ class WellnessService {
     params.push(limit, offset);
     const result = await pool.query(query, params);
     // Parse JSON-string fields into actual arrays
-    const items = result.rows.map((row: any) => ({
-      ...row,
-      recommendations: this.parseJsonArray(row.recommendations),
-      riskFlags: this.parseJsonArray(row.riskFlagsRaw),
+    // Nutrition, activity and weight are read from the records NOW, not from the figure saved with the scorecard.
+    const items = await Promise.all(result.rows.map(async (row: any) => {
+      const live = await NutritionService.wellnessMetrics(row.animalId).catch(() => null);
+      return {
+        ...row,
+        ...(live ? { nutritionScore: live.nutritionScore, activityScore: live.activityScore, weightStatus: live.weightStatus,
+          overallScore: overallOf([live.nutritionScore, live.activityScore, row.vaccinationScore, row.dentalScore]) } : {}),
+        recommendations: this.parseJsonArray(row.recommendations),
+        riskFlags: this.parseJsonArray(row.riskFlagsRaw),
+      };
     }));
     return { items, total: items.length };
   }
@@ -46,14 +59,16 @@ class WellnessService {
 
   async createScorecard(data: any) {
     const id = uuidv4();
-    const overall = ((+(data.nutritionScore || 0) + +(data.activityScore || 0) + +(data.vaccinationScore || 0) + +(data.dentalScore || 0)) / 4).toFixed(2);
+    // Nutrition, activity and weight are worked out from the animal's own records (nutrition module) - never typed here.
+    const derived = await NutritionService.wellnessMetrics(data.animalId);
+    const overall = overallOf([derived.nutritionScore, derived.activityScore, data.vaccinationScore || 0, data.dentalScore || 0]);
 
     await pool.query(
       `INSERT INTO wellness_scorecards (id, animal_id, enterprise_id, owner_id, overall_score, nutrition_score, activity_score, vaccination_score, dental_score, weight_status, next_checkup, recommendations, risk_flags, assessed_by)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
       [id, data.animalId, data.enterpriseId || null, data.ownerId, overall,
-       data.nutritionScore || 0, data.activityScore || 0, data.vaccinationScore || 0,
-       data.dentalScore || 0, data.weightStatus || 'normal', data.nextCheckup || null,
+       derived.nutritionScore, derived.activityScore, data.vaccinationScore || 0,
+       data.dentalScore || 0, derived.weightStatus, data.nextCheckup || null,
        JSON.stringify(data.recommendations || []), JSON.stringify(data.riskFlags || []),
        data.assessedBy || null]
     );
@@ -67,7 +82,7 @@ class WellnessService {
 
   async updateScorecard(id: string, data: any) {
     const sets: string[] = []; const vals: any[] = []; let idx = 1;
-    for (const field of ['nutrition_score', 'activity_score', 'vaccination_score', 'dental_score', 'weight_status', 'next_checkup']) {
+    for (const field of ['vaccination_score', 'dental_score', 'next_checkup']) {
       const camel = field.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
       if (data[camel] !== undefined) { sets.push(`${field} = $${idx++}`); vals.push(data[camel]); }
     }
@@ -77,11 +92,14 @@ class WellnessService {
     // Recalculate overall
     const current = await pool.query('SELECT * FROM wellness_scorecards WHERE id = $1', [id]);
     if (current.rows[0]) {
-      const n = data.nutritionScore ?? current.rows[0].nutrition_score;
-      const a = data.activityScore ?? current.rows[0].activity_score;
+      // Re-read nutrition, activity and weight from the records, so an edit never freezes an old figure.
+      const derived = await NutritionService.wellnessMetrics(current.rows[0].animal_id);
+      sets.push(`nutrition_score = $${idx++}`); vals.push(derived.nutritionScore);
+      sets.push(`activity_score = $${idx++}`); vals.push(derived.activityScore);
+      sets.push(`weight_status = $${idx++}`); vals.push(derived.weightStatus);
       const v = data.vaccinationScore ?? current.rows[0].vaccination_score;
       const d = data.dentalScore ?? current.rows[0].dental_score;
-      sets.push(`overall_score = $${idx++}`); vals.push(((+n + +a + +v + +d) / 4).toFixed(2));
+      sets.push(`overall_score = $${idx++}`); vals.push(overallOf([derived.nutritionScore, derived.activityScore, v, d]));
     }
 
     sets.push('updated_at = NOW()'); vals.push(id);
@@ -171,6 +189,13 @@ class WellnessService {
                   WHERE a.owner_id = $1 GROUP BY a.species`, [ownerId]),
     ]);
 
+    // Latest scorecards show nutrition, activity and weight as the records say NOW, and the overall follows them.
+    for (const sc of scorecards.rows) {
+      const live = await NutritionService.wellnessMetrics(sc.animal_id).catch(() => null);
+      if (!live) continue;
+      sc.nutrition_score = live.nutritionScore; sc.activity_score = live.activityScore; sc.weight_status = live.weightStatus;
+      sc.overall_score = overallOf([live.nutritionScore, live.activityScore, sc.vaccination_score, sc.dental_score]);
+    }
     const allScores = scorecards.rows.map((s: any) => +s.overall_score);
     const avgScore = allScores.length > 0 ? allScores.reduce((s: number, v: number) => s + v, 0) / allScores.length : 0;
 

@@ -68,6 +68,8 @@ export interface NutritionPlan {
   requiresVet?: boolean
   /** Active allergies from the medical record at the time the plan was made. */
   allergies?: string[]
+  /** Recorded conditions (kidney, diabetes, ...) that sent this plan to a vet first. */
+  conditions?: string[]
   /** Set once a vet prescribed this plan as a diet (an ordinary prescription). */
   prescriptionId?: string | null
   dailyDmKg?: number | null
@@ -110,6 +112,11 @@ export interface NutritionOverview {
   canCalculate: boolean
   measurements: Measurement[]
   plan: NutritionPlan | null
+  /** A plan saved for an animal with a recorded condition: it waits for a vet and the plan in use stays unchanged. */
+  pendingPlan?: NutritionPlan | null
+  /** The ration of the herd this animal belongs to (read-only here; change it on the herd), and the herd's name. */
+  herdPlan?: NutritionPlan | null
+  herdName?: string | null
   feeding: { today: { mealKcal: number; treatKcal: number; entries: number }; last7: { mealKcal: number; treatKcal: number; days: number } }
   flags: RiskFlag[]
   unsafeFoods: UnsafeFood[]

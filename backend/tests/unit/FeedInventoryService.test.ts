@@ -82,6 +82,6 @@ describe('FeedInventoryService', () => {
     query.mockResolvedValue({ rows: [] });
     const a = await feedInventoryService.getFeedAnalytics('e1');
     expect(query.mock.calls.some(c => /feed_consumption_logs/.test(c[0]))).toBe(false);
-    expect(a).toMatchObject({ totalInventoryValue: 0, lowStockAlerts: [], consumptionByType: [], dailyConsumptionTrend: [] });
+    expect(a).toMatchObject({ totalInventoryValue: 0, lowStockAlerts: [], consumptionByType: [], otherUnits: [], dailyConsumptionTrend: [] });
   });
 });

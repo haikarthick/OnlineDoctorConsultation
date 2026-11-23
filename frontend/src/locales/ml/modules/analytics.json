@@ -584,6 +584,15 @@
     "recurrenceNone": "None",
     "addAnimal": "Register an Animal",
     "noAnimalsTitle": "No Animals Registered",
-    "noAnimalsHint": "Add your pets or animals to track their wellness and set reminders."
+    "noAnimalsHint": "Add your pets or animals to track their wellness and set reminders.",
+    "fromRecords": "പോഷണം, പ്രവർത്തനം, തൂക്കം എന്നിവ ഈ മൃഗത്തിന്റെ സ്വന്തം രേഖകളിൽ നിന്ന് കണക്കാക്കുന്നു - ഇവിടെ ഒന്നും ടൈപ്പ് ചെയ്യേണ്ട.",
+    "notEnoughRecords": "ഇതുവരെ മതിയായ രേഖകളില്ല",
+    "weightStatuses": {
+      "underweight": "തൂക്കം കുറവ്",
+      "normal": "സാധാരണ",
+      "overweight": "തൂക്കം കൂടുതൽ",
+      "obese": "അമിതവണ്ണം",
+      "unknown": "ഇതുവരെ തൂക്കിയിട്ടില്ല"
+    }
   }
 }

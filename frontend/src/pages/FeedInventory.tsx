@@ -358,7 +358,7 @@ const FeedInventory: React.FC = () => {
 
               <div className="card">
                 <h3>{t('feedInventory.consumptionByType')}</h3>
-                {(analytics.consumptionByType || []).length === 0 ? <p className="empty-text">{t('feedInventory.noFeedGiven')}</p> : (
+                {(analytics.consumptionByType || []).length === 0 && !(analytics.otherUnits || []).length ? <p className="empty-text">{t('feedInventory.noFeedGiven')}</p> : (
                   <ul className="feed-list">
                     {analytics.consumptionByType.map(c => (
                       <li key={c.feedType} className="feed-usage-row">
@@ -368,6 +368,9 @@ const FeedInventory: React.FC = () => {
                       </li>
                     ))}
                   </ul>
+                )}
+                {(analytics.otherUnits || []).length > 0 && (
+                  <p className="empty-text">{t('feedInventory.analytics.otherUnits', { list: analytics.otherUnits!.map(o => `${o.quantity} ${o.unit}`).join(', ') })}</p>
                 )}
               </div>
 

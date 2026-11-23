@@ -384,13 +384,18 @@ describe('Extended Validation Schemas', () => {
   });
 
   describe('createWellnessScorecardSchema', () => {
-    it('accepts valid', () => { expect(createWellnessScorecardSchema.validate({ animalId: u, nutritionScore: 85, activityScore: 90 }).error).toBeUndefined(); });
-    it('rejects score > 100', () => { expect(createWellnessScorecardSchema.validate({ animalId: u, nutritionScore: 150 }).error).toBeDefined(); });
-    it('rejects invalid weightStatus', () => { expect(createWellnessScorecardSchema.validate({ animalId: u, weightStatus: 'unknown' }).error).toBeDefined(); });
+    it('accepts valid', () => { expect(createWellnessScorecardSchema.validate({ animalId: u, vaccinationScore: 85, dentalScore: 90 }).error).toBeUndefined(); });
+    it('rejects score > 100', () => { expect(createWellnessScorecardSchema.validate({ animalId: u, dentalScore: 150 }).error).toBeDefined(); });
+    // nutrition, activity and weight come from the animal's records (NUT-172/184): a typed value is refused, not silently kept
+    it('rejects typed nutrition, activity and weight values', () => {
+      expect(createWellnessScorecardSchema.validate({ animalId: u, nutritionScore: 85 }).error).toBeDefined();
+      expect(createWellnessScorecardSchema.validate({ animalId: u, activityScore: 85 }).error).toBeDefined();
+      expect(createWellnessScorecardSchema.validate({ animalId: u, weightStatus: 'normal' }).error).toBeDefined();
+    });
   });
 
   describe('updateWellnessScorecardSchema', () => {
-    it('accepts partial', () => { expect(updateWellnessScorecardSchema.validate({ activityScore: 70 }).error).toBeUndefined(); });
+    it('accepts partial', () => { expect(updateWellnessScorecardSchema.validate({ dentalScore: 70 }).error).toBeUndefined(); });
   });
 
   describe('createWellnessReminderSchema', () => {

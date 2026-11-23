@@ -1,3 +1,4 @@
+import NutritionNotifier from './NutritionNotifier';
 import database from '../../utils/database';
 import logger from '../../utils/logger';
 import { ForbiddenError, NotFoundError, ValidationError } from '../../utils/errors';
@@ -255,7 +256,7 @@ class FarmRationService {
       `SELECT i.id, i.label, i.kind, i.models, (i.owner_id IS NULL AND i.enterprise_id IS NULL) AS is_shared, i.dry_matter_pct, i.composition,
               (SELECT fi.cost_per_unit / NULLIF(COALESCE(fi.kg_per_unit, CASE lower(fi.unit) WHEN 'kg' THEN 1 WHEN 'g' THEN 0.001 WHEN 'ton' THEN 1000 WHEN 'lb' THEN 0.45359237 END), 0)
                  FROM feed_inventory fi
-                WHERE fi.ingredient_id = i.id AND fi.enterprise_id = $3::uuid AND fi.is_active = true
+                WHERE fi.ingredient_id = i.id AND fi.enterprise_id = $3::uuid AND fi.is_active = true AND fi.cost_per_unit > 0
                 ORDER BY fi.updated_at DESC LIMIT 1) AS stock_price
          FROM nutrition_ingredients i
         WHERE i.id = ANY($1::uuid[]) AND i.is_active = true AND i.status <> 'retired'
@@ -267,18 +268,28 @@ class FarmRationService {
     return choices.map(c => {
       const x: any = byId.get(c.ingredientId);
       if (!x) throw new ValidationError('One of the chosen feeds is no longer available. Choose it again.');
-      // A shared library feed is only offered for the kinds of animal it is listed for (no cattle mixture for a horse).
-      if (x.is_shared && Array.isArray(x.models) && x.models.length > 0 && !x.models.includes(subject.model)) {
+      // A feed is only offered for the kinds of animal it is listed for (no cattle mixture for a horse) - shared or the farm's own.
+      if (Array.isArray(x.models) && x.models.length > 0 && !x.models.includes(subject.model)) {
         throw new ValidationError(`${x.label} is not a feed for this kind of animal. Choose another feed.`);
       }
       // Species safety: a feed on this species' danger list is refused in words; a caution list item is shown with the ration.
       const hit = unsafeList.filter(u => matchesUnsafe(x.label, u.matchTerms));
       const danger = hit.find(u => u.severity === 'danger');
       if (danger) throw new ValidationError(`${x.label} is not safe for this animal (${danger.label}). Take it out and choose another feed.`);
-      const price = num(c.pricePerKg) ?? num(x.stock_price) ?? 0;
+      // One place for a feed's price: the stock item (Feed Inventory). A typed price is only for a feed with no stock item.
+      const price = num(x.stock_price) ?? num(c.pricePerKg) ?? 0;
       if (price < 0 || price > 100000) throw new ValidationError(`Check the price of ${x.label}.`);
       const comp = x.composition || {};
-      return { x, comp, dm: num(comp.dm_pct) ?? num(x.dry_matter_pct), price, choice: c, cautions: hit.filter(u => u.severity !== 'danger').map(u => ({ feed: x.label as string, code: u.code, label: u.label, labelKey: u.labelKey })) };
+      // Copper: a feed named anything can still carry copper. Where the species has the copper rule, the feed's own
+      // composition decides (over 15 mg/kg DM is refused); a farm's own feed with no copper figure is shown as a caution.
+      const copperRule = unsafeList.find(u => u.code === 'copper_cattle_mix');
+      const cu = num(comp.cu_mg_kg_dm);
+      const extraCautions: Caution[] = [];
+      if (copperRule) {
+        if (cu !== null && cu > 15) throw new ValidationError(`${x.label} has too much copper for this animal (${cu} mg per kg). Take it out and choose another feed.`);
+        if (cu === null && !x.is_shared && !hit.includes(copperRule)) extraCautions.push({ feed: x.label as string, code: copperRule.code, label: copperRule.label, labelKey: copperRule.labelKey });
+      }
+      return { x, comp, dm: num(comp.dm_pct) ?? num(x.dry_matter_pct), price, choice: c, cautions: [...hit.filter(u => u.severity !== 'danger').map(u => ({ feed: x.label as string, code: u.code, label: u.label, labelKey: u.labelKey })), ...extraCautions] };
     });
   }
 
@@ -484,12 +495,16 @@ class FarmRationService {
     const ok = c.result as any;
     const herd = this.herd(subject, ok);
     const subjectCol = subject.kind === 'group' ? 'group_id' : 'animal_id';
-    return database.transaction(async (client: any) => {
-      await client.query(`UPDATE nutrition_plans SET status = 'superseded', updated_at = NOW() WHERE ${subjectCol} = $1 AND status = 'active'`, [subject.id]);
+    // A recorded condition (kidney, liver, heart ...) or pregnant-and-unwell: the new ration waits as a draft for a vet and the one in use stays.
+    const conditions = subject.kind === 'animal' ? await NutritionService.activeConditions(subject.id, subject.breedingStatus ?? null) : [];
+    const waitsForVet = conditions.length > 0;
+    const planId = await database.transaction(async (client: any) => {
+      await client.query(`UPDATE nutrition_plans SET status = 'superseded', updated_at = NOW() WHERE ${subjectCol} = $1 AND status = $2`, [subject.id, waitsForVet ? 'draft' : 'active']);
+      if (!waitsForVet) await client.query(`UPDATE nutrition_plans SET status = 'superseded', updated_at = NOW() WHERE ${subjectCol} = $1 AND status = 'draft'`, [subject.id]);
       const p = await client.query(
         `INSERT INTO nutrition_plans (${subjectCol}, enterprise_id, nutrition_model, status, validation, goal, daily_dm_kg, meals_per_day,
                                       requirement_set_id, engine_version, inputs, result, created_by)
-         VALUES ($1,$2,$3,'active','suggested',$4,$5,$11,$6,$7,$8::jsonb,$9::jsonb,$10) RETURNING id`,
+         VALUES ($1,$2,$3,$12,'suggested',$4,$5,$11,$6,$7,$8::jsonb,$9::jsonb,$10) RETURNING id`,
         [subject.id, subject.enterpriseId, c.model, c.state === 'lactating' ? 'production' : c.state === 'growing' ? 'growth' : 'maintain', ok.supplied.dmKg, c.reqs.setId, ENGINE_VERSION,
          JSON.stringify({
            milkLitresPerDay: c.milk, milkFatPct: c.fat, monthsToCalving: c.monthsToCalving, work: c.work,
@@ -498,8 +513,9 @@ class FarmRationService {
          JSON.stringify({
            need: ok.need, supplied: ok.supplied, totalCostPerDay: ok.totalCostPerDay, costPerLitre: ok.costPerLitre ?? null,
            state: c.state, work: c.work, herd, stage: c.stage, cautions: c.cautions,
+           conditions: { found: conditions, requiresVet: waitsForVet },
          }),
-         caller.userId, Math.min(Math.max(Number(ok.supplied.feedsPerDay) || 2, 1), 12)]
+         caller.userId, Math.min(Math.max(Number(ok.supplied.feedsPerDay) || 2, 1), 12), waitsForVet ? 'draft' : 'active']
       );
       let i = 0;
       for (const line of ok.lines) {
@@ -511,6 +527,8 @@ class FarmRationService {
       }
       return p.rows[0].id;
     });
+    if (waitsForVet) await NutritionNotifier.planWaitingForVet({ animalId: subject.id }, planId);
+    return planId;
   }
 }
 

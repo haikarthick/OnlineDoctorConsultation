@@ -205,27 +205,33 @@ class FeedInventoryService {
   // ── Feed given (read from Daily records - the one place it is recorded) ──
   /** Stock value, low stock, and feed given over the last 30 days by type and by day - all from the one record. */
   async getFeedAnalytics(enterpriseId: string): Promise<any> {
-    const [lowStock, byType, byDay, value] = await Promise.all([
+    const [lowStock, byType, byDay, value, otherUnits] = await Promise.all([
       database.query(
         `SELECT fi.*, ni.label AS ingredient_label FROM feed_inventory fi LEFT JOIN nutrition_ingredients ni ON ni.id = fi.ingredient_id
           WHERE fi.enterprise_id = $1 AND fi.is_active = true AND fi.current_stock <= fi.minimum_stock`, [enterpriseId]),
       database.query(
-        `SELECT COALESCE(fi.feed_type, 'home_grown') AS feed_type, SUM(r.quantity) AS total_kg, SUM(COALESCE(r.cost, 0)) AS total_cost
+        `SELECT COALESCE(fi.feed_type, 'home_grown') AS feed_type, SUM(CASE WHEN r.unit = 'kg' THEN r.quantity ELSE 0 END) AS total_kg, SUM(COALESCE(r.cost, 0)) AS total_cost
            FROM farm_daily_records r LEFT JOIN feed_inventory fi ON fi.id = r.feed_id
-          WHERE r.enterprise_id = $1 AND r.record_type = 'feed' AND r.unit = 'kg' AND r.record_date > CURRENT_DATE - 30
+          WHERE r.enterprise_id = $1 AND r.record_type = 'feed' AND r.record_date > CURRENT_DATE - 30
           GROUP BY 1 ORDER BY total_cost DESC, total_kg DESC`, [enterpriseId]),
       database.query(
-        `SELECT r.record_date::text AS day, SUM(r.quantity) AS total_kg, SUM(COALESCE(r.cost, 0)) AS total_cost
+        `SELECT r.record_date::text AS day, SUM(CASE WHEN r.unit = 'kg' THEN r.quantity ELSE 0 END) AS total_kg, SUM(COALESCE(r.cost, 0)) AS total_cost
            FROM farm_daily_records r
-          WHERE r.enterprise_id = $1 AND r.record_type = 'feed' AND r.unit = 'kg' AND r.record_date > CURRENT_DATE - 30
+          WHERE r.enterprise_id = $1 AND r.record_type = 'feed' AND r.record_date > CURRENT_DATE - 30
           GROUP BY r.record_date ORDER BY r.record_date`, [enterpriseId]),
       database.query(
         `SELECT COALESCE(SUM(current_stock * cost_per_unit), 0) AS total_value FROM feed_inventory WHERE enterprise_id = $1 AND is_active = true`, [enterpriseId]),
+      // Feed recorded in a unit that is not a weight (an old log in bags with no kg per bag): never dropped from the report, listed by its own unit.
+      database.query(
+        `SELECT r.unit, SUM(r.quantity) AS quantity FROM farm_daily_records r
+          WHERE r.enterprise_id = $1 AND r.record_type = 'feed' AND r.unit IS NOT NULL AND r.unit <> 'kg' AND r.record_date > CURRENT_DATE - 30
+          GROUP BY r.unit ORDER BY r.unit`, [enterpriseId]),
     ]);
     return {
       totalInventoryValue: num(value.rows[0]?.total_value) || 0,
       lowStockAlerts: lowStock.rows.map((r: any) => this.mapFeed(r)),
       consumptionByType: byType.rows.map((r: any) => ({ feedType: r.feed_type, totalKg: num(r.total_kg) || 0, totalCost: num(r.total_cost) || 0 })),
+      otherUnits: (otherUnits?.rows || []).map((r: any) => ({ unit: r.unit, quantity: num(r.quantity) || 0 })),
       dailyConsumptionTrend: byDay.rows.map((r: any) => ({ day: r.day, totalKg: num(r.total_kg) || 0, totalCost: num(r.total_cost) || 0 })),
     };
   }

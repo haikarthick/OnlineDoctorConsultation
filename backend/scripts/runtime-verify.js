@@ -1368,7 +1368,7 @@ async function http(method, url, body, token) {
             const typed = await http('POST', `${apiBase}/nutrition/groups/${herd}/ration/preview`, body(2), farmer);
             const fromStock = await http('POST', `${apiBase}/nutrition/groups/${herd}/ration/preview`, body(undefined), farmer);
             const a = typed.json?.data?.result?.totalCostPerDay; const b = fromStock.json?.data?.result?.totalCostPerDay;
-            if (typed.status !== 200 || fromStock.status !== 200 || !(b > a)) problems.push(`the maize price should come from the linked stock item (24 per kg): typed ${a}, from stock ${b}`);
+            if (typed.status !== 200 || fromStock.status !== 200 || !(a > 0) || a !== b) problems.push(`the maize price must come from the linked stock item (24 per kg) and a typed price must not override it: typed ${a}, from stock ${b}`);
             const lines = typed.json?.data?.result?.lines || [];
             const min = lines.find(l => l.key === codes.feed_mineral_mixture);
             if (!min || Math.abs(min.kgAsFedPerDay - 0.05) > 0.0011) problems.push(`the mineral mixture should be the fixed 50 g a day, got ${min?.kgAsFedPerDay}`);
@@ -1381,10 +1381,14 @@ async function http(method, url, body, token) {
           ['POST', feedPath, { feedName: 'x', unit: 'kg' }], ['GET', feedPath], ['PUT', `${apiBase}/feed/${fid}`, { feedName: 'hacked' }],
           ['POST', `${apiBase}/feed/${fid}/restock`, { quantity: 1 }], ['DELETE', `${apiBase}/feed/${fid}`],
         ];
+        const noSuchFeed = await http('PUT', `${apiBase}/feed/00000000-0000-4000-8000-000000000000`, { feedName: 'x' }, stranger);
         for (const [m, url, b] of attempts) {
           const r = await http(m, url, b || null, stranger);
-          if (r.status !== 403) problems.push(`a stranger could ${m} ${url.replace(apiBase, '')} on another farm's feed (HTTP ${r.status})`);
+          // The farm's own address answers 403; a feed id answers exactly as an id that does not exist (never confirms another farm's stock).
+          const byFeedId = url.includes('/feed/');
+          if (r.status !== (byFeedId ? 404 : 403)) problems.push(`a stranger could ${m} ${url.replace(apiBase, '')} on another farm's feed (HTTP ${r.status})`);
           else if (!msgOf(r) || /status code|undefined|\[object/i.test(msgOf(r))) problems.push(`the stranger's refusal on ${m} ${url.replace(apiBase, '')} has no readable message`);
+          else if (byFeedId && (r.status !== noSuchFeed.status || msgOf(r) !== msgOf(noSuchFeed))) problems.push(`a real feed id and a made-up one must get the same answer (${m} ${url.replace(apiBase, '')})`);
         }
 
         // Safety: young stock, unweaned young, and sheep copper - on the real schema.
@@ -1436,6 +1440,176 @@ async function http(method, url, body, token) {
         .map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(-240));
       if (problems.length || sqlErrs.length) fail('Farm feed or the nutrition safety rules misbehave on the real schema.', [...problems, ...sqlErrs]);
       else ok('one place for feed; stock, cost and reports follow; strangers refused; calves, lambs and copper handled');
+    }
+
+
+    // ── PHASE 6h: a recorded condition needs a vet first; alerts reach people; the herd ration shows on a member;
+    //    wellness values come from records; dashboard numbers; neutral refusals; observation weight kept once ──
+    if (serverHealthy && port) {
+      step('PHASE 6h Nutrition connections: condition gate, alerts to people, herd ration on a member, wellness from records');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const mark = serverLog.length;
+      const problems = [];
+      let seq = (Math.floor(Date.now() / 1000) % 100000000) + 52000;
+      const signUp = async (role) => {
+        const email = `verify.conn.${role}.${Date.now()}.${seq}@example.com`;
+        await http('POST', `${apiBase}/auth/register`, { firstName: 'Conn', lastName: 'Verify', email, phone: `9${String(seq++).padStart(9, '0')}`,
+          password: 'Password1', confirmPassword: 'Password1', role: 'pet_owner', acceptTerms: true });
+        if (role === 'admin') psql('verifydb', `SET search_path TO ${SCHEMA}, public; UPDATE users SET role = 'admin', account_status = 'active', is_active = true WHERE email = '${email}';`);
+        return (await http('POST', `${apiBase}/auth/login`, { email, password: 'Password1' })).json?.data?.token;
+      };
+      const msgOf = (r) => r.json?.message || r.json?.error?.message || '';
+      const owner = await signUp('pet_owner');
+      const stranger = await signUp('pet_owner');
+      const admin = await signUp('admin');
+      const farmer = (await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' })).json?.data?.token;
+      if (!owner || !stranger || !admin || !farmer) problems.push('could not create the owner / stranger / admin accounts or sign in the seeded farmer');
+      else {
+        // 1. A recorded condition: the new plan waits for a vet, the plan in use does not change.
+        const dog = (await http('POST', `${apiBase}/animals`, { name: 'Verify Kidney Dog', species: 'Dog', gender: 'male' }, owner)).json?.data?.id;
+        if (!dog) problems.push('could not create a dog for the condition check');
+        else {
+          await http('PATCH', `${apiBase}/nutrition/animals/${dog}/facts`, { dateOfBirth: '2019-03-01', isNeutered: true, activityLevel: 'moderate', housing: 'indoor' }, owner);
+          await http('POST', `${apiBase}/nutrition/animals/${dog}/measurements`, { weight: 30, unit: 'kg', bodyConditionScore: 8, bcsScale: 9 }, owner);
+          const plan = { goal: 'lose', mealsPerDay: 2, foods: [{ label: 'Verify kibble', kcalPer100g: 350, sharePct: 100 }] };
+          const first = await http('POST', `${apiBase}/nutrition/animals/${dog}/plan`, plan, owner);
+          if (first.status !== 201 || first.json?.data?.status !== 'active') problems.push(`a healthy dog's plan should be active at once (HTTP ${first.status}, ${first.json?.data?.status}) ${msgOf(first).slice(0, 100)}`);
+          const ownerId = psqlJson('verifydb', `SELECT owner_id FROM ${SCHEMA}.animals WHERE id = '${dog}'`)[0]?.owner_id;
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public; INSERT INTO medical_records (user_id, animal_id, record_type, title, content, status) VALUES ('${ownerId}', '${dog}', 'diagnosis', 'Chronic kidney disease', 'stage 2', 'active');`);
+          const second = await http('POST', `${apiBase}/nutrition/animals/${dog}/plan`, { ...plan, mealsPerDay: 3 }, owner);
+          const draftId = second.json?.data?.id;
+          if (second.status !== 201 || second.json?.data?.status !== 'draft' || !(second.json?.data?.conditions || []).includes('kidney')) {
+            problems.push(`a plan for a dog with kidney disease on record must wait for a vet (HTTP ${second.status}, status ${second.json?.data?.status}, conditions ${JSON.stringify(second.json?.data?.conditions)})`);
+          }
+          const ov = await http('GET', `${apiBase}/nutrition/animals/${dog}`, null, owner);
+          if (ov.json?.data?.plan?.id !== first.json?.data?.id) problems.push('the plan in use changed before any vet looked at the new plan');
+          if (!draftId || ov.json?.data?.pendingPlan?.id !== draftId) problems.push('the waiting plan is not shown as pending on the animal');
+          const ownerReview = await http('POST', `${apiBase}/nutrition/plans/${draftId}/review`, { note: 'x' }, owner);
+          if (ownerReview.status < 400) problems.push(`the owner could review a waiting plan as a vet (HTTP ${ownerReview.status})`);
+          const big = await http('POST', `${apiBase}/nutrition/plans/${draftId}/review`, { overrideKcal: 3000 }, admin);
+          if (big.status !== 400 || !/reason/i.test(msgOf(big))) problems.push(`a number far from the calculated one with no reason must be refused in words (HTTP ${big.status}: ${msgOf(big).slice(0, 80)})`);
+          const rev = await http('POST', `${apiBase}/nutrition/plans/${draftId}/review`, { note: 'Checked with the owner' }, admin);
+          if (rev.status >= 300) problems.push(`a vet's review of the waiting plan: HTTP ${rev.status} ${msgOf(rev).slice(0, 100)}`);
+          const ov2 = await http('GET', `${apiBase}/nutrition/animals/${dog}`, null, owner);
+          if (ov2.json?.data?.plan?.id !== draftId || ov2.json?.data?.pendingPlan) problems.push('after the vet review the waiting plan must be the plan in use and nothing must be pending');
+
+          // 2. The alert reached the owner (one note, in the ordinary notifications list).
+          const nn = psqlJson('verifydb', `SELECT COUNT(*) AS n FROM ${SCHEMA}.notifications WHERE user_id = '${ownerId}' AND metadata->>'type' = 'nutrition_flag'`)[0]?.n;
+          if (Number(nn) < 1) problems.push('a new feeding alert sent the owner no notification');
+          else if (Number(nn) > 3) problems.push(`one alert must not notify again and again (got ${nn} notes)`);
+
+          // 3. Dashboard numbers follow the same access as the animal list.
+          const sum = await http('GET', `${apiBase}/nutrition/summary`, null, owner);
+          if (sum.status !== 200 || !(sum.json?.data?.total >= 1) || !(sum.json?.data?.attention >= 1)) problems.push(`dashboard summary: HTTP ${sum.status} ${JSON.stringify(sum.json?.data || {})}`);
+          const sumOther = await http('GET', `${apiBase}/nutrition/summary`, null, stranger);
+          if (sumOther.json?.data?.total !== 0) problems.push(`a stranger's dashboard counts another owner's animals (total ${sumOther.json?.data?.total})`);
+
+          // 4. Wellness: nutrition, activity and weight come from records; typed ones are refused; strangers are refused.
+          const typed = await http('POST', `${apiBase}/wellness/scorecards`, { animalId: dog, nutritionScore: 99 }, owner);
+          // The request validator drops fields it does not know, so a typed value is ignored rather than refused - it must never be kept.
+          if (typed.status === 201 && Number(typed.json?.data?.nutrition_score) === 99) problems.push('a typed nutrition score was stored - it must come from the records');
+          else if (typed.status !== 201 && typed.status !== 400) problems.push(`a typed nutrition score: unexpected HTTP ${typed.status}`);
+          const sc = await http('POST', `${apiBase}/wellness/scorecards`, { animalId: dog, vaccinationScore: 80, dentalScore: 70 }, owner);
+          const row = sc.json?.data;
+          if (sc.status !== 201 || Number(row?.activity_score) !== 70 || row?.weight_status !== 'obese' || row?.nutrition_score === null || row?.nutrition_score === undefined) {
+            problems.push(`the scorecard must take nutrition, activity (moderate = 70) and weight (body condition 8 = obese) from records: HTTP ${sc.status} ${JSON.stringify(row || {}).slice(0, 200)}`);
+          }
+          const scStranger = await http('POST', `${apiBase}/wellness/scorecards`, { animalId: dog, vaccinationScore: 80 }, stranger);
+          if (scStranger.status !== 403) problems.push(`a stranger created a scorecard for another owner's animal (HTTP ${scStranger.status})`);
+          if (row?.id) {
+            const up = await http('PUT', `${apiBase}/wellness/scorecards/${row.id}`, { dentalScore: 1 }, stranger);
+            const del = await http('DELETE', `${apiBase}/wellness/scorecards/${row.id}`, null, stranger);
+            if (up.status !== 403 || del.status !== 403) problems.push(`a stranger could change or delete another owner's scorecard (HTTP ${up.status} / ${del.status})`);
+          }
+        }
+
+        // 4b. A cow with a condition on record: the ration waits for a vet too.
+        {
+          const cowC = (await http('POST', `${apiBase}/animals`, { name: 'Verify Kidney Cow', species: 'Cattle', gender: 'female' }, owner)).json?.data?.id;
+          if (cowC) {
+            await http('POST', `${apiBase}/nutrition/animals/${cowC}/measurements`, { weight: 400, unit: 'kg' }, owner);
+            const fl = Object.fromEntries(((await http('GET', `${apiBase}/nutrition/foods?animalId=${cowC}`, null, owner)).json?.data?.items || []).map(f => [f.code, f.id]));
+            const need = ['feed_green_maize', 'feed_wheat_straw', 'feed_cattle_feed', 'feed_groundnut_cake', 'feed_mineral_mixture'];
+            if (need.every(c => fl[c])) {
+              const body = { milkLitresPerDay: 10, feeds: need.map((c, i) => ({ ingredientId: fl[c], pricePerKg: [2, 6, 25, 45, 80][i] })) };
+              const own = psqlJson('verifydb', `SELECT owner_id FROM ${SCHEMA}.animals WHERE id = '${cowC}'`)[0]?.owner_id;
+              const plain = await http('POST', `${apiBase}/nutrition/animals/${cowC}/ration`, body, owner);
+              if (plain.status !== 201 || plain.json?.data?.status !== 'active') problems.push(`a healthy cow's ration should be active at once (HTTP ${plain.status}, ${plain.json?.data?.status})`);
+              psql('verifydb', `SET search_path TO ${SCHEMA}, public; INSERT INTO medical_records (user_id, animal_id, record_type, title, content, status) VALUES ('${own}', '${cowC}', 'diagnosis', 'Liver disease', 'chronic', 'active');`);
+              const waiting = await http('POST', `${apiBase}/nutrition/animals/${cowC}/ration`, body, owner);
+              const ovC = await http('GET', `${apiBase}/nutrition/animals/${cowC}`, null, owner);
+              if (waiting.status !== 201 || waiting.json?.data?.status !== 'draft' || ovC.json?.data?.plan?.id !== plain.json?.data?.id || ovC.json?.data?.pendingPlan?.id !== waiting.json?.data?.id) {
+                problems.push(`a ration for a cow with liver disease on record must wait for a vet and leave the one in use alone (HTTP ${waiting.status}, ${waiting.json?.data?.status})`);
+              }
+              const listC = await http('GET', `${apiBase}/nutrition/animals?search=Verify%20Kidney%20Cow`, null, owner);
+              if (!(listC.json?.data?.items || []).some(x => x.id === cowC && x.plan)) problems.push('the animal list does not show the plan of the cow');
+            }
+          }
+        }
+
+        // 5. A herd's ration shows on each member animal, read-only.
+        let ent = null; let herd = null; let cow = null;
+        try {
+          ent = psqlJson('verifydb', `SELECT e.id FROM ${SCHEMA}.enterprises e JOIN ${SCHEMA}.users u ON u.id = e.owner_id WHERE u.email = 'tom.wilson@example.com' ORDER BY e.created_at LIMIT 1`)[0]?.id;
+          herd = psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.animal_groups WHERE enterprise_id = '${ent}' AND species = 'Cattle' LIMIT 1`)[0]?.id;
+          cow = psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.animals WHERE enterprise_id = '${ent}' AND species = 'Cattle' AND is_active = true LIMIT 1`)[0]?.id;
+        } catch { /* reported below */ }
+        if (!ent || !herd || !cow) problems.push('could not find the seeded farm, its cattle herd and a cow for the herd-ration check');
+        else {
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public; INSERT INTO animal_group_memberships (animal_id, group_id) SELECT '${cow}', '${herd}' WHERE NOT EXISTS (SELECT 1 FROM animal_group_memberships WHERE animal_id = '${cow}' AND group_id = '${herd}' AND left_at IS NULL);`);
+          const items = (await http('GET', `${apiBase}/nutrition/foods?groupId=${herd}`, null, farmer)).json?.data?.items || [];
+          const code = Object.fromEntries(items.map(f => [f.code, f.id]));
+          const feeds = ['feed_green_maize', 'feed_wheat_straw', 'feed_cattle_feed', 'feed_groundnut_cake', 'feed_mineral_mixture'];
+          if (feeds.some(c => !code[c])) problems.push('the herd feed library is missing feeds for the herd-ration check');
+          else {
+            const saved = await http('POST', `${apiBase}/nutrition/groups/${herd}/ration`, { milkLitresPerDay: 8, avgWeightKg: 400,
+              feeds: feeds.map((c, i) => ({ ingredientId: code[c], pricePerKg: [2, 6, 25, 45, 80][i] })) }, farmer);
+            if (saved.status >= 300) problems.push(`save the herd ration: HTTP ${saved.status} ${msgOf(saved).slice(0, 100)}`);
+            const member = await http('GET', `${apiBase}/nutrition/animals/${cow}`, null, farmer);
+            if (!member.json?.data?.herdPlan?.id || !member.json?.data?.herdName) problems.push(`the herd's ration is not shown on a member animal (HTTP ${member.status})`);
+          }
+        }
+
+        // 6. Neutral refusals and the observation weight kept in one place.
+        try {
+          const feedId = psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.feed_inventory WHERE is_active = true LIMIT 1`)[0]?.id;
+          if (feedId) {
+            const real = await http('PUT', `${apiBase}/feed/${feedId}`, { feedName: 'hacked' }, stranger);
+            const fake = await http('PUT', `${apiBase}/feed/00000000-0000-4000-8000-000000000001`, { feedName: 'hacked' }, stranger);
+            if (real.status !== fake.status || msgOf(real) !== msgOf(fake) || !msgOf(real)) problems.push(`a real feed id and a made-up one must get the same answer (HTTP ${real.status} vs ${fake.status})`);
+          }
+        } catch { /* no feed rows to probe */ }
+        if (ent) {
+          const strangerObs = await http('POST', `${apiBase}/enterprises/${ent}/health/observations`, { enterpriseId: ent, title: 'x', weight: 1 }, stranger);
+          if (strangerObs.status !== 403) problems.push(`a stranger could add a health note to another farm (HTTP ${strangerObs.status})`);
+          const cow2 = psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.animals WHERE enterprise_id = '${ent}' AND is_active = true LIMIT 1`)[0]?.id;
+          const foreignAnimal = psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.animals WHERE enterprise_id IS DISTINCT FROM '${ent}' AND is_active = true LIMIT 1`)[0]?.id;
+          if (foreignAnimal) {
+            const cross = await http('POST', `${apiBase}/enterprises/${ent}/health/observations`, { enterpriseId: ent, animalId: foreignAnimal, title: 'x', weight: 1 }, farmer);
+            if (cross.status !== 400) problems.push(`a health note naming an animal from another farm must be refused (HTTP ${cross.status})`);
+          }
+          if (cow2) {
+            const obs = await http('POST', `${apiBase}/enterprises/${ent}/health/observations`, { enterpriseId: ent, animalId: cow2, title: 'Verify weigh-in', severity: 'low', weight: 411, weightUnit: 'kg' }, farmer);
+            const obsId = obs.json?.data?.id;
+            if (obs.status !== 201 || !obsId) problems.push(`add a health note with a weight: HTTP ${obs.status} ${msgOf(obs).slice(0, 100)}`);
+            else {
+              const copy = psqlJson('verifydb', `SELECT weight FROM ${SCHEMA}.health_observations WHERE id = '${obsId}'`)[0]?.weight;
+              const hist = psqlJson('verifydb', `SELECT COUNT(*) AS n FROM ${SCHEMA}.weight_history WHERE source = 'health_observation' AND source_id = '${obsId}' AND weight = 411`)[0]?.n;
+              if (copy !== null) problems.push(`the observation kept its own copy of the weight (${copy}) - weight lives in the body-measurement history only`);
+              if (Number(hist) !== 1) problems.push(`the observation's weight is not in the weight history (found ${hist})`);
+              const listed = (await http('GET', `${apiBase}/enterprises/${ent}/health/observations?animalId=${cow2}`, null, farmer)).json?.data?.items || [];
+              if (!listed.some(o => o.id === obsId && Number(o.weight) === 411)) problems.push('the health note list does not show the weight read from the weight history');
+              const strangerResolve = await http('PATCH', `${apiBase}/health/observations/${obsId}/resolve`, {}, stranger);
+              if (strangerResolve.status !== 404) problems.push(`a stranger resolved another farm's health note (HTTP ${strangerResolve.status})`);
+            }
+          }
+        }
+      }
+      const sqlErrs = serverLog.slice(mark).split('\n')
+        .filter(l => /syntax error|does not exist|violates|invalid input syntax|there is no unique|could not determine|DATABASE_ERROR|statusCode":5\d\d/i.test(l))
+        .map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(-240));
+      if (problems.length || sqlErrs.length) fail('The nutrition connections misbehave on the real schema.', [...problems, ...sqlErrs]);
+      else ok('conditions wait for a vet; alerts notify once; herd ration on members; wellness from records; strangers refused; weight kept once');
     }
 
     // ── PHASE 7: the browser ──

@@ -588,6 +588,15 @@
     "unifiedReferrals": "Referral History",
     "platformReferral": "Platform Referral",
     "networkReferral": "Network Referral",
-    "referralLinked": "Linked referral"
+    "referralLinked": "Linked referral",
+    "fromRecords": "पोषण, गतिविधि और वज़न इस पशु के अपने रिकॉर्ड से निकलते हैं - यहाँ कुछ भरना नहीं है।",
+    "notEnoughRecords": "अभी पर्याप्त रिकॉर्ड नहीं",
+    "weightStatuses": {
+      "underweight": "कम वज़न",
+      "normal": "सामान्य",
+      "overweight": "ज़्यादा वज़न",
+      "obese": "मोटापा",
+      "unknown": "अभी वज़न नहीं लिया"
+    }
   }
 }

@@ -7,6 +7,7 @@ import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useMasterData } from '../context/MasterDataContext'
 import { useSpeciesCategories } from '../hooks/useFarmProfile'
 import { TRIAGE_LEVELS } from '../components/hospitalWorkflow/hospitalWorkflowShared'
+import type { WalkInForm } from '../components/hospitalWorkflow/WalkInRegisterForm'
 import QueueStatsTiles from '../components/hospitalWorkflow/QueueStatsTiles'
 import QueueList from '../components/hospitalWorkflow/QueueList'
 import CheckInModal from '../components/hospitalWorkflow/CheckInModal'
@@ -74,12 +75,12 @@ export default function HospitalWorkflow() {
 
   // Walk-in patient registration (within check-in modal)
   const [checkInMode, setCheckInMode] = useState<'search' | 'register'>('search')
-  const [walkInForm, setWalkInForm] = useState({
+  const [walkInForm, setWalkInForm] = useState<WalkInForm>({
     ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '',
     animalName: '', animalSpecies: '', animalBreed: '',
     animalGender: '', animalClass: '', animalDob: '', animalWeight: '',
     animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '',
-    animalIsNeutered: false, animalMedicalNotes: '',
+    animalIsNeutered: null, animalMedicalNotes: '',
     animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '',
     animalEarTagId: '', animalCustomBreed: '',
   })
@@ -166,7 +167,7 @@ export default function HospitalWorkflow() {
     setCheckInAnimal(null)
     setCheckInError('')
     setCheckInMode('search')
-    setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalCustomBreed: '', animalGender: '', animalClass: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '', animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '', animalEarTagId: '' })
+    setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalCustomBreed: '', animalGender: '', animalClass: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: null, animalMedicalNotes: '', animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '', animalEarTagId: '' })
     setWalkInPhotoFile(null)
     setWalkInPhotoPreview('')
     setWalkInError('')
@@ -269,7 +270,7 @@ export default function HospitalWorkflow() {
         avatar_url: animalAvatarUrl,
       })
       setCheckInMode('search')
-      setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalCustomBreed: '', animalGender: '', animalClass: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '', animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '', animalEarTagId: '' })
+      setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalCustomBreed: '', animalGender: '', animalClass: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: null, animalMedicalNotes: '', animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '', animalEarTagId: '' })
       setWalkInPhotoFile(null)
       setWalkInPhotoPreview('')
     } catch (err: any) {

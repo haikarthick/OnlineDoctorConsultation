@@ -1,3 +1,4 @@
+import NutritionNotifier from './NutritionNotifier';
 import database from '../../utils/database';
 import { ForbiddenError, NotFoundError, ValidationError } from '../../utils/errors';
 import AnimalAccessService from '../AnimalAccessService';
@@ -152,13 +153,15 @@ class GroupFeedingService {
   /** Raise / refresh the herd feed alerts that apply now and close the ones that no longer do (with an outcome label). */
   private async syncFeedFlags(groupId: string, flagged: RiskFlag[]): Promise<void> {
     for (const f of flagged) {
-      await database.query(
+      const r = await database.query(
         `INSERT INTO nutrition_risk_flags (group_id, flag_type, severity, params, rule_version)
          VALUES ($1, $2, $3, $4::jsonb, $5)
          ON CONFLICT ((COALESCE(animal_id, group_id)), flag_type) WHERE status = 'open'
-         DO UPDATE SET severity = EXCLUDED.severity, params = EXCLUDED.params, rule_version = EXCLUDED.rule_version, updated_at = NOW()`,
+         DO UPDATE SET severity = EXCLUDED.severity, params = EXCLUDED.params, rule_version = EXCLUDED.rule_version, updated_at = NOW()
+         RETURNING id, (xmax = 0) AS inserted`,
         [groupId, f.type, f.severity, JSON.stringify(f.params), RULE_VERSION]
       );
+      if (r.rows[0]?.inserted) await NutritionNotifier.flagRaised({ groupId }, { id: r.rows[0].id, type: f.type, severity: f.severity });
     }
     const closed = await database.query(
       `UPDATE nutrition_risk_flags SET status = 'resolved', updated_at = NOW()
