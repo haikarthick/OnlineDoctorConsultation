@@ -149,7 +149,8 @@
       "reviewKcal": "Daily energy",
       "reviewKcalHint": "Change it only if this animal needs a different amount. The grams are worked out again.",
       "reviewNote": "Note for the owner (optional)",
-      "confirmReview": "Confirm review"
+      "confirmReview": "Confirm review",
+      "allergyFood": "{{food}} - this animal is recorded as allergic to {{allergen}}. Remove it or ask the vet."
     },
     "goals": {
       "maintain": "Keep weight",
@@ -175,10 +176,10 @@
     },
     "models": {
       "companion_energy": "Food amounts are worked out from weight, age and activity.",
-      "ruminant_dm": "Ration balancing for cattle, buffalo, goats and sheep is the next part being built.",
+      "ruminant_dm": "Rations are worked out from the feeds you have.",
       "monogastric_spec": "Feed planning for poultry and pigs is the next part being built.",
       "aqua_biomass": "Pond feeding by biomass and water temperature is the next part being built.",
-      "equine_dm": "Feeding plans for horses and donkeys are being built.",
+      "equine_dm": "Rations for horses and donkeys are worked out from the feeds you have - fodder first.",
       "guidance_only": "There is no checked feeding calculator for this kind of animal yet."
     },
     "modelNames": {
@@ -220,35 +221,59 @@
       "seen": "Seen",
       "bcs_high": {
         "title": "Body condition is above ideal",
-        "next": "Plan slow weight loss and keep treats small. Ask a vet if it keeps rising."
+        "next": "Plan slow weight loss and keep treats small. Ask a vet if it keeps rising.",
+        "short": "Condition above ideal"
       },
       "bcs_low": {
         "title": "Body condition is below ideal",
-        "next": "Ask a vet - being thin can be a sign of illness."
+        "next": "Ask a vet - being thin can be a sign of illness.",
+        "short": "Condition below ideal"
       },
       "muscle_loss": {
         "title": "Muscle loss noted",
-        "next": "Ask a vet to check - muscle loss can happen even when the weight looks normal."
+        "next": "Ask a vet to check - muscle loss can happen even when the weight looks normal.",
+        "short": "Muscle loss"
       },
       "rapid_weight_loss": {
         "title": "Losing weight fast: about {{pctPerWeek}}% a week",
-        "next": "Faster than is safe. Check the food amounts and ask a vet."
+        "next": "Faster than is safe. Check the food amounts and ask a vet.",
+        "short": "Fast weight loss"
       },
       "weight_drift": {
         "title": "Weight changed by {{pct}}% while the goal is to keep it steady",
-        "next": "Weigh again in a week. If it keeps changing, adjust the plan."
+        "next": "Weigh again in a week. If it keeps changing, adjust the plan.",
+        "short": "Weight drift"
       },
       "no_recent_weight": {
         "title": "No weight in the last {{days}} days",
-        "next": "Weigh now - plans work best with a recent weight."
+        "next": "Weigh now - plans work best with a recent weight.",
+        "short": "No recent weight"
       },
       "treats_over_limit": {
         "title": "Treats were {{pct}}% of the energy this week",
-        "next": "Keep treats under 10% of the day's food."
+        "next": "Keep treats under 10% of the day's food.",
+        "short": "Too many treats"
       },
       "unsafe_food_logged": {
         "title": "Unsafe food given: {{food}} ({{date}})",
-        "next": "If it ate a lot or seems unwell, call a vet now."
+        "next": "If it ate a lot or seems unwell, call a vet now.",
+        "short": "Unsafe food given"
+      },
+      "notRight": "Not right",
+      "transition_condition_loss": {
+        "short": "Condition lost after birth",
+        "title": "Lost about {{drop5}} body condition point since giving birth ({{days}} days ago)",
+        "next": "Give more energy (concentrate) and ask a vet - fast loss after calving can lead to ketosis and poor fertility."
+      },
+      "feed_below_need": {
+        "short": "Fed below the table",
+        "title": "Fed {{pct}}% of the table amount this week ({{days}} days recorded)",
+        "next": "Check the feeder and the feed records. Feeding too little slows growth."
+      },
+      "feed_above_need": {
+        "short": "Fed above the table",
+        "title": "Fed {{pct}}% of the table amount this week ({{days}} days recorded)",
+        "next": "Check for spilt or wasted feed - it raises FCR and cost."
       }
     },
     "safe": {
@@ -279,7 +304,8 @@
       "addAnimal": "Add an animal",
       "more": "Show more ({{shown}} of {{total}})",
       "back": "All animals",
-      "pick": "Choose an animal to see its food plan."
+      "pick": "Choose an animal to see its food plan.",
+      "toReview": "Not checked by a vet"
     },
     "errors": {
       "load": "Could not load nutrition for this animal. Check your connection and try again.",
@@ -295,7 +321,8 @@
       "deleteFeeding": "Could not delete the entry. Try again.",
       "flag": "Could not update the alert. Try again.",
       "adminLoad": "Could not load this list. Check your connection and try again.",
-      "adminSave": "Could not save. Your changes are still here - try again."
+      "adminSave": "Could not save. Your changes are still here - try again.",
+      "prescribe": "Could not prescribe the diet right now. Try again in a moment."
     },
     "foods": {
       "home_rice_cooked": "Rice, cooked",
@@ -318,7 +345,13 @@
       "feed_groundnut_cake": "Groundnut cake",
       "feed_mustard_cake": "Mustard cake",
       "feed_cattle_feed": "Compound cattle feed (BIS type II)",
-      "feed_mineral_mixture": "Mineral mixture"
+      "feed_mineral_mixture": "Mineral mixture",
+      "feed_grass_hay": "Grass hay (dry grass)",
+      "feed_green_grass": "Green grass (doob / hariyali)",
+      "feed_lucerne_hay": "Lucerne (alfalfa) hay",
+      "feed_oats": "Oats",
+      "feed_horse_gram": "Horse gram (kulthi)",
+      "feed_bengal_gram": "Bengal gram (chana)"
     },
     "unsafe": {
       "chocolate": "Chocolate and cocoa",
@@ -330,7 +363,9 @@
       "caffeine": "Coffee, tea and caffeine",
       "cooked_bones": "Cooked bones",
       "avocado": "Avocado",
-      "salt": "Salty snacks"
+      "salt": "Salty snacks",
+      "ionophore": "Cattle or poultry feed with monensin",
+      "urea": "Urea or feed with urea"
     },
     "foodKinds": {
       "commercial_food": "Packaged food",
@@ -430,7 +465,8 @@
         "per_kg_bw075": "per kg^0.75 body weight",
         "percent_bw": "% of body weight",
         "fraction": "fraction",
-        "percent_milk": "% of milk"
+        "percent_milk": "% of milk",
+        "per_kg_bw": "per kg body weight"
       },
       "usageHelp": "How nutrition is being used - for deciding later, from real use, whether to offer paid plans.",
       "period": "Period",
@@ -446,7 +482,10 @@
         "measurement_added": "Weights / conditions recorded",
         "facts_saved": "Missing details filled in",
         "food_added": "Own foods added",
-        "ration_saved": "Farm rations saved"
+        "ration_saved": "Farm rations saved",
+        "herd_ration_saved": "Herd rations saved",
+        "diet_prescribed": "Diets prescribed by a vet",
+        "plan_explained": "Plans explained in simple words"
       },
       "activePlans": "Active plans",
       "approveHelp": "Approve every record still waiting, for use now. The vet can review them later.",
@@ -460,7 +499,11 @@
       "curveRate": "{{pct}}% of biomass a day",
       "gramsPerHead": "Grams per head per day",
       "ratePct": "% of biomass per day",
-      "feedType": "Feed type"
+      "feedType": "Feed type",
+      "alertQuality": "Alert quality",
+      "noAlerts": "No alerts yet in this period.",
+      "alertQualityHelp": "For each kind of alert: how many are open, and how people answered - \"Seen\" (right) or \"Not right\". The % is how often it was right.",
+      "alertCounts": "{{open}} open · {{confirmed}} right · {{falseAlarm}} not right · {{resolved}} cleared"
     },
     "ration": {
       "title": "Ration for {{name}}",
@@ -473,7 +516,9 @@
       "groups": {
         "fodder": "Green fodder and straw you have",
         "concentrate": "Concentrates and cattle feed you have",
-        "mineral": "Mineral mixture"
+        "mineral": "Mineral mixture",
+        "fodderEquine": "Hay and green grass you have",
+        "concentrateEquine": "Grain, gram and bran you have"
       },
       "pricesTitle": "Your prices",
       "price": "Price per kg",
@@ -487,7 +532,8 @@
         "minerals_missing": "Minerals are short - add mineral mixture.",
         "no_forage": "Add green fodder or straw - the rumen needs it.",
         "limits_too_tight": "Your limits leave too little room - raise a \"most you can give\" limit.",
-        "no_feeds": "Choose the feeds you have."
+        "no_feeds": "Choose the feeds you have.",
+        "grain_capped": "Too little energy from fodder, and more grain would be unsafe - give better hay, lucerne or more green grass."
       },
       "costPerDay": "₹{{cost}} a day",
       "costPerLitre": "₹{{cost}} per litre of milk",
@@ -503,7 +549,31 @@
       "itemCost": "₹{{cost}} a day",
       "recordHint": "Record what was fed each day in Daily records.",
       "none": "No ration yet",
-      "noneBody": "Tick the feeds you have and their prices - we find the cheapest mix that meets this animal's needs."
+      "noneBody": "Tick the feeds you have and their prices - we find the cheapest mix that meets this animal's needs.",
+      "herdTitle": "Herd ration for {{name}}",
+      "work": "How hard it works",
+      "workHint": "Saved on the animal's profile too.",
+      "workLine": "Work: {{work}}",
+      "avgWeight": "Average weight per animal",
+      "avgWeightHint": "From the weights recorded for the {{count}} animals. Change it if you know better - a weighing band estimate is fine.",
+      "milkHerd": "Milk per animal per day",
+      "milkHerdHint": "Average for the animals in milk. 0 for a dry herd.",
+      "maxKgHead": "Most you can give per animal a day (optional)",
+      "reasonsEquine": {
+        "no_forage": "Add hay or green grass - a horse's gut needs fodder first.",
+        "energy_too_low": "Not enough energy - add oats, gram or bran, or better hay.",
+        "protein_too_low": "Not enough protein - add horse gram, Bengal gram, lucerne or berseem."
+      },
+      "needLineEquine": "Needs {{energy}} Mcal energy and {{cp}} g protein; can eat {{dmMin}}-{{dmMax}} kg dry matter; this ration gives {{dm}} kg, {{conc}}% of it grain.",
+      "perHead": "Per animal",
+      "herdTotal": "Whole herd ({{count}} animals): ₹{{cost}} a day",
+      "herdLine": "{{kg}} kg a day for the herd",
+      "herdCurrent": "Herd ration",
+      "herdNone": "No herd ration yet",
+      "herdNoneBody": "Tick the feeds you have - we find the cheapest mix for the herd's average animal and show the total for all {{count}}.",
+      "herdMake": "Work out a herd ration",
+      "herdEmpty": "Add animals to this group first.",
+      "herdRecordHint": "Record the feed given in Daily records for this group."
     },
     "group": {
       "title": "Today's feed",
@@ -527,6 +597,33 @@
         "average_weight": "Record a sample weight in Daily records.",
         "curve": "No feeding table yet."
       }
+    },
+    "vet": {
+      "prescribe": "Prescribe as diet",
+      "prescribeTitle": "Prescribe diet for {{name}}",
+      "prescribeHelp": "The plan becomes a prescription: the owner sees it with their prescriptions, and it can be printed like any other.",
+      "days": "For how many days",
+      "daysUnit": "days",
+      "confirmPrescribe": "Prescribe",
+      "prescribed": "Prescribed as a diet",
+      "allergies": "Recorded allergies: {{list}}"
+    },
+    "share": {
+      "button": "Share",
+      "title": "Food plan for {{name}}",
+      "copied": "Plan copied - paste it in WhatsApp or a message.",
+      "failed": "Could not share from this phone. Take a screenshot instead.",
+      "petHead": "{{name}} - {{kcal}} kcal a day, {{meals}} meals",
+      "rationHead": "{{name}} - daily ration",
+      "gramsLine": "{{perDay}} g a day ({{perMeal}} g a meal)"
+    },
+    "explain": {
+      "button": "Explain in simple words",
+      "working": "Writing...",
+      "aiNote": "Written by AI from this plan's own numbers. The amounts above are the plan.",
+      "builtInNote": "A short summary of this plan.",
+      "fallbackPet": "This plan gives about {{kcal}} kcal a day in {{meals}} meals, worked out from the animal's weight, age and activity for the goal \"{{goal}}\". Weigh it every 2-4 weeks - the plan is adjusted from the weight trend.",
+      "fallbackRation": "This ration gives {{dm}} kg of dry matter a day for ₹{{cost}}. It is the cheapest mix of your feeds that meets the animal's need for energy, protein and minerals. Change the prices or feeds and it is worked out again."
     }
   }
 }

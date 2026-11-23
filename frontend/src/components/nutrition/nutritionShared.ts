@@ -64,15 +64,28 @@ export interface NutritionPlan {
   mealsPerDay: number
   energy: { reasons?: string[]; requiresVet?: boolean; factorSource?: string; idealWeightKg?: number | null; suggestedGoal?: string } | null
   reviewNote: string | null
+  /** A vet should look before the plan is followed (energy rules, or a recorded allergy). */
+  requiresVet?: boolean
+  /** Active allergies from the medical record at the time the plan was made. */
+  allergies?: string[]
+  /** Set once a vet prescribed this plan as a diet (an ordinary prescription). */
+  prescriptionId?: string | null
   dailyDmKg?: number | null
   ration?: {
-    need: { nelMcal: number; dmiMinKg: number; dmiMaxKg: number } | null
-    supplied: { dmKg: number; nelMcal: number } | null
-    state: 'lactating' | 'dry' | null
+    /** Ruminants: nelMcal. Horses / donkeys: deMcal, cpMinG. */
+    need: { nelMcal?: number; deMcal?: number; cpMinG?: number; dmiMinKg: number; dmiMaxKg: number } | null
+    supplied: { dmKg: number; nelMcal?: number; deMcal?: number; concentratePct?: number } | null
+    state: 'lactating' | 'dry' | 'maintenance' | null
     totalCostPerDay: number | null
     costPerLitre: number | null
     milkLitresPerDay: number | null
+    work?: string | null
+    weightKg?: number | null
+    /** Herd rations: the per-head plan times the head count. */
+    herd?: { headCount: number; totalCostPerDay: number; lines: Array<{ key: string; label: string; kgAsFedPerDay: number; costPerDay: number }> } | null
   } | null
+  model?: NutritionModel
+  groupId?: string | null
   createdByName: string
   createdAt: string
   reviewedByName: string

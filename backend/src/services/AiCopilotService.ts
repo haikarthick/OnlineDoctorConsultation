@@ -334,6 +334,37 @@ class AiCopilotService {
     }
   }
 
+  /** Whether an AI provider key is configured (GROQ_API_KEY or OPENAI_API_KEY). */
+  isConfigured(): boolean {
+    return !!getAI();
+  }
+
+  /**
+   * One short completion through the platform's provider, for other modules (nutrition "explain this plan").
+   * Same provider and model fallback as the copilot. Returns null when there is no provider or the call fails -
+   * the caller always has its own non-AI answer. The caller decides what is sent (no personal data here).
+   */
+  async completeOnce(system: string, user: string, opts: { maxTokens?: number; temperature?: number } = {}): Promise<string | null> {
+    const ai = getAI();
+    if (!ai) return null;
+    for (const model of this.modelChain(ai)) {
+      try {
+        const completion = await ai.client.chat.completions.create({
+          model,
+          messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+          max_tokens: opts.maxTokens ?? 500,
+          temperature: opts.temperature ?? 0.2,
+        }, { timeout: 20000 });
+        if (model !== ai.model) ai.model = model;
+        return completion.choices[0]?.message?.content?.trim() || null;
+      } catch (e: any) {
+        const gone = e?.status === 404 || e?.code === 'model_not_found' || e?.code === 'model_decommissioned';
+        if (!gone) { logger.warn('AI completion failed', { provider: ai.provider, status: e?.status, error: e?.message }); return null; }
+      }
+    }
+    return null;
+  }
+
   // Models to try, best first: the one in use, then GROQ_MODEL (set on Render to switch without a deploy),
   // then known Groq text models.
   private modelChain(ai: AiClient): string[] {

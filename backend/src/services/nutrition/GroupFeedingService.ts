@@ -3,6 +3,9 @@ import { ForbiddenError, NotFoundError, ValidationError } from '../../utils/erro
 import AnimalAccessService from '../AnimalAccessService';
 import { ANIMAL_NO_ACCESS_MESSAGE } from '../AnimalAccessService';
 import { groupDailyFeed, fcr, type FeedingCurveRow, type TemperatureFactor } from './engine/groupFeeding';
+import { evaluateGroupFeed, type RiskFlag } from './engine/rules';
+import { RULE_VERSION } from './engine/models';
+import { recordOutcome } from './NutritionService';
 
 /**
  * Daily feed and FCR for a flock, pig batch or pond (docs/NUTRITION_PLAN.md Phase 2). Everything it reads is OWNED
@@ -32,6 +35,13 @@ class GroupFeedingService {
     );
     const grp = g.rows[0];
     if (!grp) throw new NotFoundError('Group');
+
+    // Herds of cattle, buffalo, goats, sheep, horses: their feeding is a balanced ration (FarmRationService), not a
+    // per-head table - the card hands over to the herd ration instead of saying "no table".
+    const m = await database.query(`SELECT nutrition_model FROM master_species WHERE code = $1`, [grp.species]);
+    if (['ruminant_dm', 'equine_dm'].includes(m.rows[0]?.nutrition_model)) {
+      return { status: 'herd_ration' as const, group: this.groupInfo(grp), model: m.rows[0].nutrition_model as string };
+    }
 
     const curves = await database.query(
       `SELECT * FROM nutrition_feeding_curves
@@ -90,6 +100,18 @@ class GroupFeedingService {
       productKg = now - start > 0 ? now - start : null;
     }
 
+    // Fed well below / above the table this week (Phase 4 rule). Judged on the RECORDED inputs only - a "what if"
+    // weight or temperature typed on the card never raises or closes an alert.
+    if (input.avgWeightG === undefined || input.avgWeightG === null) {
+      if (input.waterTempC === undefined || input.waterTempC === null) {
+        const feedRows = recs.rows.filter((r: any) => r.record_type === 'feed').map((r: any) => ({ date: r.record_date, kg: num(r.quantity) || 0 }));
+        const flagged = today.status === 'ok' ? evaluateGroupFeed({ suggestedKgPerDay: today.kgPerDay, recorded: feedRows }) : [];
+        await this.syncFeedFlags(groupId, flagged).catch(() => { /* an alert failure must not hide the feed card */ });
+      }
+    }
+    const flags = await database.query(
+      `SELECT id, flag_type, severity, params FROM nutrition_risk_flags WHERE group_id = $1 AND status = 'open' ORDER BY updated_at DESC`, [groupId]);
+
     return {
       status: 'ok' as const,
       group: this.groupInfo(grp),
@@ -97,7 +119,29 @@ class GroupFeedingService {
       inputs: { headCount, ageDays, avgWeightG, waterTempC, avgWeightDate: lastSample?.record_date ?? null, waterDate: lastWater?.record_date ?? null },
       today,
       cycle: { since, feedKg: Math.round(feedKg * 10) / 10, productKg: productKg === null ? null : Math.round(productKg * 10) / 10, fcr: fcr(feedKg, productKg) },
+      flags: flags.rows.map((x: any) => ({ id: x.id, type: x.flag_type, severity: x.severity, params: x.params || {} })),
+      canAct: access.via === 'admin' || (await AnimalAccessService.checkGroup(caller, groupId, 'write')).allowed,
     };
+  }
+
+  /** Raise / refresh the herd feed alerts that apply now and close the ones that no longer do (with an outcome label). */
+  private async syncFeedFlags(groupId: string, flagged: RiskFlag[]): Promise<void> {
+    for (const f of flagged) {
+      await database.query(
+        `INSERT INTO nutrition_risk_flags (group_id, flag_type, severity, params, rule_version)
+         VALUES ($1, $2, $3, $4::jsonb, $5)
+         ON CONFLICT ((COALESCE(animal_id, group_id)), flag_type) WHERE status = 'open'
+         DO UPDATE SET severity = EXCLUDED.severity, params = EXCLUDED.params, rule_version = EXCLUDED.rule_version, updated_at = NOW()`,
+        [groupId, f.type, f.severity, JSON.stringify(f.params), RULE_VERSION]
+      );
+    }
+    const closed = await database.query(
+      `UPDATE nutrition_risk_flags SET status = 'resolved', updated_at = NOW()
+        WHERE group_id = $1 AND status = 'open' AND flag_type IN ('feed_below_need', 'feed_above_need') AND NOT (flag_type = ANY($2::text[]))
+        RETURNING id, animal_id, group_id, flag_type, severity, rule_version, params`,
+      [groupId, flagged.map(f => f.type)]
+    );
+    for (const row of closed.rows) await recordOutcome(row, 'resolved', null);
   }
 
   private groupInfo(g: any) {

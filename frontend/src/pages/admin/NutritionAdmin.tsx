@@ -517,6 +517,19 @@ const Usage: React.FC = () => {
               </li>
             ))}
           </ul>
+          <h4 className="nutri-sub-title">{t('nutrition.admin.alertQuality')}</h4>
+          <p className="nutri-hint">{t('nutrition.admin.alertQualityHelp')}</p>
+          {(data.alerts || []).length === 0 ? <p className="nutri-empty">{t('nutrition.admin.noAlerts')}</p> : (
+            <ul className="nutri-list">
+              {data.alerts.map((a: any) => (
+                <li key={a.type} className="nutri-list-row">
+                  <span className="nutri-list-main">{t(`nutrition.flags.${a.type}.short`, { defaultValue: a.type })}</span>
+                  <span className="nutri-list-meta">{t('nutrition.admin.alertCounts', { open: a.open, confirmed: a.confirmed, falseAlarm: a.falseAlarm, resolved: a.resolved })}</span>
+                  <strong>{a.hitRatePct === null ? '-' : `${a.hitRatePct}%`}</strong>
+                </li>
+              ))}
+            </ul>
+          )}
         </>
       )}
     </section>

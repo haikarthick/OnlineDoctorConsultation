@@ -21,7 +21,22 @@ export async function isNutritionEnabled(): Promise<boolean> {
   }
 }
 
-export function invalidateNutritionConfig(): void { cached = null; }
+export function invalidateNutritionConfig(): void { cached = null; aiCached = null; }
+
+/** `nutrition.ai_assist.enabled` (migration 062, default on): plain-language plan explanations through the AI provider. */
+let aiCached: { value: boolean; at: number } | null = null;
+export async function isAiAssistEnabled(): Promise<boolean> {
+  if (aiCached && Date.now() - aiCached.at < CACHE_TTL_MS) return aiCached.value;
+  try {
+    const r = await database.query(`SELECT value FROM system_settings WHERE key = 'nutrition.ai_assist.enabled'`);
+    const v = String(r.rows[0]?.value ?? '').trim().toLowerCase();
+    aiCached = { value: v === 'true' || v === '1', at: Date.now() };
+    return aiCached.value;
+  } catch (err: any) {
+    logger.warn('nutrition.ai_assist.enabled read failed - treating as off', { error: err.message });
+    return aiCached?.value ?? false;
+  }
+}
 
 /**
  * Entitlement seam (docs/NUTRITION_PLAN.md §5.6). Owner decision 2026-11-22: the module is free for everyone

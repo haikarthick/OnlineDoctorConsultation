@@ -309,7 +309,7 @@ class NutritionAdminService {
 
   async usage(days: number): Promise<any> {
     const span = Math.min(Math.max(Math.floor(days) || 30, 1), 365);
-    const [byEvent, users, plans] = await Promise.all([
+    const [byEvent, users, plans, alerts] = await Promise.all([
       database.query(
         `SELECT event, COALESCE(user_role, 'unknown') AS role, COUNT(*) AS n FROM nutrition_usage_events
           WHERE created_at >= NOW() - ($1::int * INTERVAL '1 day') GROUP BY event, role ORDER BY event, role`, [span]),
@@ -317,12 +317,35 @@ class NutritionAdminService {
         `SELECT COUNT(DISTINCT user_id) AS n FROM nutrition_usage_events WHERE created_at >= NOW() - ($1::int * INTERVAL '1 day')`, [span]),
       database.query(
         `SELECT nutrition_model, validation, COUNT(*) AS n FROM nutrition_plans WHERE status = 'active' GROUP BY 1, 2 ORDER BY 1, 2`),
+      // Alert quality (Phase 4): per rule, how people answered its alerts in the period, and how many are open now.
+      database.query(
+        `SELECT t.flag_type,
+                COALESCE(o.confirmed, 0) AS confirmed, COALESCE(o.false_alarm, 0) AS false_alarm, COALESCE(o.resolved, 0) AS resolved,
+                COALESCE(f.open, 0) AS open
+           FROM (SELECT flag_type FROM nutrition_outcomes WHERE created_at >= NOW() - ($1::int * INTERVAL '1 day')
+                 UNION SELECT flag_type FROM nutrition_risk_flags WHERE status = 'open') t
+           LEFT JOIN (SELECT flag_type,
+                             COUNT(*) FILTER (WHERE outcome = 'confirmed') AS confirmed,
+                             COUNT(*) FILTER (WHERE outcome = 'false_alarm') AS false_alarm,
+                             COUNT(*) FILTER (WHERE outcome = 'resolved') AS resolved
+                        FROM nutrition_outcomes WHERE created_at >= NOW() - ($1::int * INTERVAL '1 day') GROUP BY flag_type) o ON o.flag_type = t.flag_type
+           LEFT JOIN (SELECT flag_type, COUNT(*) AS open FROM nutrition_risk_flags WHERE status = 'open' GROUP BY flag_type) f ON f.flag_type = t.flag_type
+          ORDER BY t.flag_type`, [span]),
     ]);
     return {
       days: span,
       activeUsers: Number(users.rows[0]?.n) || 0,
       events: byEvent.rows.map((x: any) => ({ event: x.event, role: x.role, count: Number(x.n) })),
       activePlans: plans.rows.map((x: any) => ({ model: x.nutrition_model, validation: x.validation, count: Number(x.n) })),
+      alerts: alerts.rows.map((x: any) => {
+        const confirmed = Number(x.confirmed) || 0;
+        const falseAlarm = Number(x.false_alarm) || 0;
+        return {
+          type: x.flag_type, confirmed, falseAlarm, resolved: Number(x.resolved) || 0, open: Number(x.open) || 0,
+          // Share of answered alerts people said were right; null until someone has answered one.
+          hitRatePct: confirmed + falseAlarm > 0 ? Math.round((confirmed / (confirmed + falseAlarm)) * 100) : null,
+        };
+      }),
     };
   }
 }

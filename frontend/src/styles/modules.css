@@ -3903,6 +3903,9 @@ button.record-due-row { cursor: pointer; }
 .nutri-note.is-warning { background: var(--warning-light); }
 .nutri-note.is-danger { background: var(--danger-light); color: var(--danger); font-weight: 600; }
 .nutri-wide-btn { width: 100%; min-height: var(--tap-min); }
+/* Plan actions (explain / share / review / prescribe): wrap onto a second line on a phone instead of overflowing. */
+.nutri-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.nutri-actions .btn { flex: 1 1 140px; min-height: var(--tap-min); overflow-wrap: anywhere; }
 .nutri-check { display: flex; align-items: center; gap: 10px; min-height: var(--tap-min); }
 .nutri-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 14px; }
 .nutri-summary-item { white-space: nowrap; }
@@ -3920,7 +3923,7 @@ button.record-due-row { cursor: pointer; }
 .nutri-flag.is-act { background: var(--danger-light); }
 .nutri-flag.is-watch { background: var(--warning-light); }
 .nutri-flag-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; overflow-wrap: anywhere; }
-.nutri-flag-actions { flex-shrink: 0; }
+.nutri-flag-actions { flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; }
 .nutri-progress { height: 12px; border-radius: 999px; background: var(--gray-100); overflow: hidden; }
 .nutri-progress-fill { display: block; height: 100%; width: var(--fill, 0%); background: var(--success); border-radius: 999px; transition: width 0.3s ease; }
 .nutri-progress-fill.is-over { background: var(--warning); }

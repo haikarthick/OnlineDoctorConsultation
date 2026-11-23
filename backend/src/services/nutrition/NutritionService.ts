@@ -2,8 +2,9 @@ import database from '../../utils/database';
 import logger from '../../utils/logger';
 import { ValidationError, NotFoundError, ForbiddenError } from '../../utils/errors';
 import AnimalService from '../AnimalService';
+import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE } from '../AnimalAccessService';
 import BodyMeasurementService, { type MeasurementRow } from '../BodyMeasurementService';
-import NutritionAccess, { type Caller, type AnimalAccess } from './NutritionAccess';
+import NutritionAccess, { type Caller, type AnimalAccess, REVIEW_ONLY_VET_MESSAGE } from './NutritionAccess';
 import { isEntitled, type NutritionFeature } from './NutritionConfig';
 import {
   CALCULATOR_MODELS, ENGINE_VERSION, RULE_VERSION, PLAN_GOALS, ACTIVITY_LEVELS, HOUSING_TYPES,
@@ -215,11 +216,12 @@ class NutritionService {
 
   private async compute(access: AnimalAccess, input: PlanInput): Promise<{
     facts: AnimalFacts; energy: CompanionEnergyResult; portions: PortionResult; foods: Array<PortionFood & { ingredientId: string | null }>;
-    unsafe: Array<{ food: string; item: string; severity: string }>; mealsPerDay: number;
+    unsafe: Array<{ food: string; item: string; severity: string; kind?: 'allergy' }>; mealsPerDay: number;
+    allergies: Array<{ allergen: string; severity: string }>;
   }> {
     const { facts } = await this.loadFacts(access.animal.id);
-    if (facts.model === 'ruminant_dm') {
-      throw new ValidationError('For cattle, buffalo, goats and sheep, use "Work out a ration" - it balances the feeds you have.');
+    if (facts.model === 'ruminant_dm' || facts.model === 'equine_dm') {
+      throw new ValidationError('For cattle, buffalo, goats, sheep, horses and donkeys, use "Work out a ration" - it balances the feeds you have.');
     }
     if (facts.model !== 'companion_energy' || !CALCULATOR_MODELS.has(facts.model)) {
       throw new ValidationError('A food calculator for this kind of animal is not available yet. The safe-food guide, weight and body condition tracking work now.');
@@ -240,14 +242,27 @@ class NutritionService {
     const foods = await this.resolveFoods(access, input.foods);
     const portionResult = portions(energy.dailyKcal, foods, mealsPerDay);
     const unsafeList = await this.unsafeFoods(facts.speciesCode);
-    const unsafe = foods.flatMap(f => unsafeList.filter(u => matchesUnsafe(f.label, u.matchTerms)).map(u => ({ food: f.label, item: u.label, severity: u.severity })));
-    return { facts, energy, portions: portionResult, foods, unsafe, mealsPerDay };
+    const unsafe: Array<{ food: string; item: string; severity: string; kind?: 'allergy' }> =
+      foods.flatMap(f => unsafeList.filter(u => matchesUnsafe(f.label, u.matchTerms)).map(u => ({ food: f.label, item: u.label, severity: u.severity })));
+    // Condition override (Phase 3): the animal's recorded allergies (medical records own them) are checked against
+    // every food, and any active allergy means a vet should look at the plan before it is followed.
+    const allergies = await this.activeAllergies(access.animal.id);
+    for (const f of foods) {
+      for (const a of allergies) {
+        if (matchesUnsafe(f.label, [a.allergen])) unsafe.push({ food: f.label, item: a.allergen, severity: 'danger', kind: 'allergy' });
+      }
+    }
+    return { facts, energy, portions: portionResult, foods, unsafe, mealsPerDay, allergies };
   }
 
   async savePlan(animalId: string, input: PlanInput, caller: Caller): Promise<any> {
     await this.assertEntitled(caller, 'plans');
     const access = await NutritionAccess.forAnimal(animalId, caller, 'write');
     const c = await this.compute(access, input);
+    const allergyHits = c.unsafe.filter(u => u.kind === 'allergy');
+    if (allergyHits.length) {
+      throw new ValidationError(`This plan includes a food this animal is recorded as allergic to (${allergyHits.map(u => `${u.food}: ${u.item}`).join(', ')}). Remove it and save again, or ask the vet.`);
+    }
     if (c.unsafe.some(u => u.severity === 'danger')) {
       throw new ValidationError(`This plan includes a food that is unsafe for this animal (${c.unsafe.filter(u => u.severity === 'danger').map(u => u.food).join(', ')}). Remove it and save again.`);
     }
@@ -265,7 +280,7 @@ class NutritionService {
         [animalId, access.animal.enterpriseId, c.facts.model, reviewed ? 'vet_reviewed' : 'suggested', c.energy.goal,
          c.energy.idealWeightKg, c.energy.dailyKcal, c.mealsPerDay, c.energy.factorKey, ENGINE_VERSION,
          JSON.stringify({ facts: c.facts, goal: input.goal ?? null, targetWeightKg: num(input.targetWeightKg) }),
-         JSON.stringify({ energy: c.energy, portions: c.portions }),
+         JSON.stringify({ energy: c.energy, portions: c.portions, conditions: { allergies: c.allergies, requiresVet: c.allergies.length > 0 } }),
          reviewed ? (input.reviewNote || null) : null, caller.userId, reviewed ? caller.userId : null, reviewed ? new Date() : null]
       );
       const planId = p.rows[0].id;
@@ -286,13 +301,13 @@ class NutritionService {
   }
 
   async reviewPlan(planId: string, input: { overrideKcal?: number | null; note?: string | null }, caller: Caller): Promise<any> {
-    const r = await database.query(`SELECT * FROM nutrition_plans WHERE id = $1`, [planId]);
-    const p = r.rows[0];
-    if (!p) throw new NotFoundError('Food plan');
-    if (!p.animal_id) throw new ValidationError('Group plans are reviewed from the farm ration screen.');
-    await NutritionAccess.forAnimal(p.animal_id, caller, 'review');
+    const p = await this.planRow(planId);
+    await this.assertMayReview(p, caller);
     if (p.status !== 'active') throw new ValidationError('This plan has been replaced by a newer one. Review the current plan instead.');
     const override = num(input.overrideKcal);
+    if (override !== null && p.nutrition_model !== 'companion_energy') {
+      throw new ValidationError('For a farm ration, change the feeds or limits and save a new ration instead of setting the energy by hand.');
+    }
     if (override !== null && (override <= 0 || override > 50000)) throw new ValidationError('The daily energy must be a number above zero.');
     const kcal = override ?? Number(p.daily_energy_kcal);
     await database.transaction(async (client: any) => {
@@ -314,6 +329,101 @@ class NutritionService {
     });
     this.track(caller, 'plan_reviewed', p.nutrition_model).catch(() => {});
     return this.planById(planId);
+  }
+
+  private async planRow(planId: string): Promise<any> {
+    const r = await database.query(`SELECT * FROM nutrition_plans WHERE id = $1`, [planId]);
+    if (!r.rows[0]) throw new NotFoundError('Food plan');
+    return r.rows[0];
+  }
+
+  /** Only a vet (or admin) who may see this animal / herd reviews or prescribes its plan. */
+  private async assertMayReview(p: any, caller: Caller): Promise<void> {
+    if (p.animal_id) { await NutritionAccess.forAnimal(p.animal_id, caller, 'review'); return; }
+    const access = await AnimalAccessService.checkGroup(caller, p.group_id, 'read');
+    if (!access.found) throw new NotFoundError('Group');
+    if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
+    const isVetOrAdmin = ['veterinarian', 'admin'].some(r => caller.role === r || (caller.roles || []).includes(r));
+    if (!isVetOrAdmin) throw new ForbiddenError(REVIEW_ONLY_VET_MESSAGE);
+  }
+
+  /**
+   * A vet turns the plan into a prescribed diet (Phase 3). It becomes an ordinary prescription through
+   * PrescriptionService - the same rules decide who it may be written for, and the owner, the vet, print and (for
+   * network prescriptions) the pharmacy see it where they see every prescription. The plan counts as reviewed.
+   */
+  async prescribePlan(planId: string, input: { consultationId?: string | null; durationDays?: number | null; note?: string | null }, caller: Caller): Promise<any> {
+    const p = await this.planRow(planId);
+    await this.assertMayReview(p, caller);
+    const isVet = caller.role === 'veterinarian' || (caller.roles || []).includes('veterinarian');
+    const isAdmin = caller.role === 'admin' || (caller.roles || []).includes('admin');
+    if (!isVet && !isAdmin) throw new ForbiddenError('Only a vet can prescribe a diet.');
+    if (p.status !== 'active') throw new ValidationError('This plan has been replaced by a newer one. Prescribe the current plan instead.');
+    if (p.prescription_id) {
+      const existing = await database.query(`SELECT is_active FROM prescriptions WHERE id = $1`, [p.prescription_id]);
+      if (existing.rows[0]?.is_active) throw new ValidationError('This plan is already prescribed. Make a new plan to prescribe a different diet.');
+    }
+    const plan = await this.planById(planId);
+    if (!plan.items.length) throw new ValidationError('This plan has no foods to prescribe.');
+    const days = Math.min(Math.max(Math.round(num(input.durationDays) ?? 30), 1), 365);
+
+    // Subject and owner come from the plan, never from the request.
+    const ownerRow = p.animal_id
+      ? await database.query(`SELECT owner_id FROM animals WHERE id = $1`, [p.animal_id])
+      : await database.query(`SELECT e.owner_id FROM animal_groups g JOIN enterprises e ON e.id = g.enterprise_id WHERE g.id = $1`, [p.group_id]);
+    const ownerId: string | null = ownerRow.rows[0]?.owner_id || null;
+    if (!ownerId) throw new ValidationError('This animal has no owner on record, so a prescription cannot be written for it.');
+    // Link to the vet's own consultation for this animal / herd when there is one (the given one, else the latest).
+    const subjectSql = p.animal_id ? 'animal_id = $3' : 'group_id = $3';
+    const subjectId = p.animal_id || p.group_id;
+    const consult = input.consultationId
+      ? await database.query(`SELECT id FROM consultations WHERE id = $1 AND veterinarian_id = $2 AND ${subjectSql}`, [input.consultationId, caller.userId, subjectId])
+      : await database.query(`SELECT id FROM consultations WHERE veterinarian_id = $1 AND ${subjectSql.replace('$3', '$2')} ORDER BY created_at DESC LIMIT 1`, [caller.userId, subjectId]);
+    if (input.consultationId && !consult.rows[0]) {
+      throw new ValidationError("That appointment is not yours or is for another animal. Prescribe the diet from this animal's own consultation.");
+    }
+    const consultationId: string | null = consult.rows[0]?.id || null;
+
+    const farm = p.nutrition_model !== 'companion_energy';
+    const medications = plan.items.map((it: any) => ({
+      name: `Diet: ${it.label}`.slice(0, 255),
+      dosage: farm ? `${it.amountPerDay ?? '-'} kg a day${plan.ration?.herd ? ' per animal' : ''}` : `${it.gramsPerDay ?? '-'} g a day`,
+      frequency: farm ? 'Every day, split into 2 feeds' : `${plan.mealsPerDay} meals a day${it.gramsPerMeal ? ` (${it.gramsPerMeal} g each)` : ''}`,
+      duration: `${days} days`,
+      instructions: 'Food, not a medicine.',
+    }));
+    const summary = farm
+      ? `Diet (ration): ${plan.dailyDmKg ?? '-'} kg dry matter a day per animal.`
+      : `Diet: ${Math.round(plan.effectiveKcal || 0)} kcal a day in ${plan.mealsPerDay} meals.`;
+    const note = input.note ? String(input.note).trim().slice(0, 2000) : '';
+    const PrescriptionService = (await import('../PrescriptionService')).default;
+    const rx = await PrescriptionService.createPrescription(caller.userId, {
+      consultationId: consultationId || undefined,
+      petOwnerId: ownerId,
+      animalId: p.animal_id || undefined,
+      groupId: p.group_id || undefined,
+      medications,
+      instructions: note ? `${summary}\n${note}` : summary,
+      validUntil: new Date(Date.now() + days * 86400000).toISOString().slice(0, 10),
+    } as any, isVet ? 'veterinarian' : 'admin');
+    await database.query(
+      `UPDATE nutrition_plans SET prescription_id = $2,
+              validation = 'vet_reviewed', reviewed_by = COALESCE(reviewed_by, $3), reviewed_at = COALESCE(reviewed_at, NOW()),
+              review_note = COALESCE(review_note, NULLIF($4, '')), updated_at = NOW()
+        WHERE id = $1`,
+      [planId, rx.id, caller.userId, note]
+    );
+    this.track(caller, 'diet_prescribed', p.nutrition_model).catch(() => {});
+    return { prescriptionId: rx.id, plan: await this.planById(planId) };
+  }
+
+  /** Active allergies the medical record holds for this animal (read live - medical records own them). */
+  async activeAllergies(animalId: string): Promise<Array<{ allergen: string; severity: string }>> {
+    const r = await database.query(
+      `SELECT allergen, severity FROM allergy_records WHERE animal_id = $1 AND is_active = true ORDER BY created_at DESC LIMIT 50`,
+      [animalId]
+    );
+    return r.rows.map((x: any) => ({ allergen: String(x.allergen), severity: x.severity || 'mild' }));
   }
 
   async activePlan(animalId: string): Promise<any | null> {
@@ -341,12 +451,17 @@ class NutritionService {
       vetOverrideKcal: num(p.vet_override_kcal), effectiveKcal: num(p.vet_override_kcal) ?? num(p.daily_energy_kcal),
       mealsPerDay: meals, energyFactorKey: p.energy_factor_key, engineVersion: p.engine_version,
       energy: p.result?.energy || null, reviewNote: p.review_note,
+      // A vet should look before the plan is followed: the energy rules said so, or the animal has a recorded allergy.
+      requiresVet: !!(p.result?.energy?.requiresVet || p.result?.conditions?.requiresVet),
+      allergies: (p.result?.conditions?.allergies || []).map((a: any) => a.allergen),
+      prescriptionId: p.prescription_id || null,
       // Farm rations (ruminant_dm): dry matter, need vs supplied, cost per day / per litre.
       dailyDmKg: num(p.daily_dm_kg),
-      ration: p.nutrition_model === 'ruminant_dm' ? {
+      ration: p.nutrition_model === 'ruminant_dm' || p.nutrition_model === 'equine_dm' ? {
         need: p.result?.need || null, supplied: p.result?.supplied || null, state: p.result?.state || null,
         totalCostPerDay: p.result?.totalCostPerDay ?? null, costPerLitre: p.result?.costPerLitre ?? null,
-        milkLitresPerDay: p.inputs?.milkLitresPerDay ?? null,
+        milkLitresPerDay: p.inputs?.milkLitresPerDay ?? null, work: p.result?.work ?? p.inputs?.work ?? null,
+        weightKg: p.inputs?.weightKg ?? null, herd: p.result?.herd ?? null,
       } : null,
       createdBy: p.created_by, createdByName: p.created_by_name, createdAt: p.created_at,
       reviewedBy: p.reviewed_by, reviewedByName: p.reviewed_by_name, reviewedAt: p.reviewed_at,
@@ -473,11 +588,24 @@ class NutritionService {
 
   // ─── Foods ──────────────────────────────────────────────────────────────
 
-  async foods(params: { animalId?: string; search?: string; kind?: string }, caller: Caller): Promise<any[]> {
+  async foods(params: { animalId?: string; groupId?: string; search?: string; kind?: string }, caller: Caller): Promise<any[]> {
     let ownerId: string | null = caller.userId;
     let enterpriseId: string | null = null;
     let model: string | null = null;
-    if (params.animalId) {
+    if (params.groupId) {
+      // A herd's feeds: the shared library for its species' model plus the farm's own feeds.
+      const access = await AnimalAccessService.checkGroup(caller, params.groupId, 'read');
+      if (!access.found) throw new NotFoundError('Group');
+      if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
+      const g = await database.query(
+        `SELECT g.enterprise_id, e.owner_id, ms.nutrition_model FROM animal_groups g
+           LEFT JOIN enterprises e ON e.id = g.enterprise_id LEFT JOIN master_species ms ON ms.code = g.species WHERE g.id = $1`,
+        [params.groupId]
+      );
+      ownerId = g.rows[0]?.owner_id || null;
+      enterpriseId = g.rows[0]?.enterprise_id || null;
+      model = g.rows[0]?.nutrition_model || null;
+    } else if (params.animalId) {
       const access = await NutritionAccess.forAnimal(params.animalId, caller, 'read');
       ownerId = access.animal.ownerId;
       enterpriseId = access.animal.enterpriseId;
@@ -579,26 +707,41 @@ class NutritionService {
       weights: measurements.filter(m => m.weightKg !== null).map(m => ({ kg: m.weightKg as number, at: m.recordedAt })),
       goal: (plan.rows[0]?.goal as PlanGoal) || null,
       feeding7d: feeding.last7.days > 0 ? { mealKcal: feeding.last7.mealKcal, treatKcal: feeding.last7.treatKcal } : null,
+      conditions: measurements.filter(m => m.bcs9 !== null).map(m => ({ bcs9: m.bcs9 as number, at: m.recordedAt })),
     });
     for (const f of flags) await this.upsertFlag(animalId, f);
     const keep = flags.map(f => f.type);
-    await database.query(
+    const closed = await database.query(
       `UPDATE nutrition_risk_flags SET status = 'resolved', updated_at = NOW()
-        WHERE animal_id = $1 AND status = 'open' AND flag_type <> 'unsafe_food_logged' AND NOT (flag_type = ANY($2::text[]))`,
+        WHERE animal_id = $1 AND status = 'open' AND flag_type <> 'unsafe_food_logged' AND NOT (flag_type = ANY($2::text[]))
+        RETURNING id, animal_id, group_id, flag_type, severity, rule_version, params`,
       [animalId, keep]
     );
+    for (const row of closed.rows) await recordOutcome(row, 'resolved', null);
     return flags;
   }
 
+  /**
+   * "Seen" (the alert was right) or "Not right" (a false alarm) - for an animal's or a herd's alert. The answer is
+   * kept as a labelled outcome (Phase 4): it is what each rule's hit rate, and any later prediction model, rest on.
+   */
   async setFlagStatus(flagId: string, status: 'reviewed' | 'dismissed', caller: Caller): Promise<void> {
-    const r = await database.query(`SELECT id, animal_id FROM nutrition_risk_flags WHERE id = $1`, [flagId]);
+    const r = await database.query(
+      `SELECT id, animal_id, group_id, flag_type, severity, rule_version, params, status FROM nutrition_risk_flags WHERE id = $1`, [flagId]);
     const f = r.rows[0];
-    if (!f || !f.animal_id) throw new NotFoundError('Alert');
-    await NutritionAccess.forAnimal(f.animal_id, caller, 'write');
+    if (!f) throw new NotFoundError('Alert');
+    if (f.animal_id) {
+      await NutritionAccess.forAnimal(f.animal_id, caller, 'write');
+    } else {
+      const access = await AnimalAccessService.checkGroup(caller, f.group_id, 'write');
+      if (!access.found) throw new NotFoundError('Alert');
+      if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
+    }
     await database.query(
       `UPDATE nutrition_risk_flags SET status = $2, reviewed_by = $3, reviewed_at = NOW(), updated_at = NOW() WHERE id = $1`,
       [flagId, status, caller.userId]
     );
+    if (f.status === 'open') await recordOutcome(f, status === 'reviewed' ? 'confirmed' : 'false_alarm', caller);
   }
 
   // ─── Animal list (the Nutrition page) ───────────────────────────────────
@@ -630,6 +773,9 @@ class NutritionService {
     // A herd of thousands is narrowed by design, not scrolled: what needs attention, what has no plan yet.
     if (params.filter === 'attention') {
       where.push(`EXISTS (SELECT 1 FROM nutrition_risk_flags f WHERE f.animal_id = a.id AND f.status = 'open' AND f.severity IN ('act', 'watch'))`);
+    } else if (params.filter === 'to_review') {
+      // The vet's review queue: a plan or ration is in use but no vet has looked at it yet.
+      where.push(`EXISTS (SELECT 1 FROM nutrition_plans p WHERE p.animal_id = a.id AND p.status = 'active' AND p.validation = 'suggested')`);
     } else if (params.filter === 'no_plan') {
       where.push(`NOT EXISTS (SELECT 1 FROM nutrition_plans p WHERE p.animal_id = a.id AND p.status = 'active')`);
     }
@@ -677,6 +823,20 @@ class NutritionService {
       [caller.userId, caller.role || null, event.slice(0, 40), model || null]
     ).catch((err: any) => logger.error('nutrition usage event failed', { error: err.message }));
   }
+}
+
+/** One labelled outcome per alert closure (migration 062). Never blocks the action that closed the alert. */
+export async function recordOutcome(
+  flag: { id: string; animal_id: string | null; group_id: string | null; flag_type: string; severity: string; rule_version: string; params: any },
+  outcome: 'confirmed' | 'false_alarm' | 'resolved',
+  caller: Caller | null,
+): Promise<void> {
+  await database.query(
+    `INSERT INTO nutrition_outcomes (flag_id, animal_id, group_id, flag_type, severity, rule_version, outcome, features, labelled_by, labelled_role)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10)`,
+    [flag.id, flag.animal_id, flag.group_id, flag.flag_type, flag.severity, flag.rule_version, outcome,
+     JSON.stringify(flag.params || {}), caller?.userId || null, caller?.role || null]
+  ).catch((err: any) => logger.error('nutrition outcome not recorded', { flagId: flag.id, error: err.message }));
 }
 
 const FACT_WORDS: Record<string, string> = {

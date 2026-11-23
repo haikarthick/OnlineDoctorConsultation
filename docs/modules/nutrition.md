@@ -79,9 +79,58 @@ room (`MedicalHistoryPanel`), and the `/nutrition` page. Compact mode = one-line
   consultation.
 - Admin -> Nutrition data: "Feeding tables" tab, and "Approve all pending" (owner decision: approve now, vet later).
 
+## Horses, donkeys and herd rations (Phase 2, migration 060)
+
+- `equine_dm` (horses, ponies, mules; donkeys have their own set): `engine/equineRation.ts` - DE = maintenance x body
+  weight x work factor (the animal's `activity_level`), protein per Mcal DE, Ca / P per kg body weight, FORAGE FIRST
+  (forage DM >= % of body weight) and a cap on concentrate % of DM (colic / laminitis). Same least-cost solver.
+  Feeds need `de_mcal_kg_dm` in their composition; only feeds listed for `equine_dm` are offered (compound cattle
+  feed is not - it may carry urea / ionophores, which are on the horse unsafe list).
+- Herd rations: `FarmRationService.groupSubject` - one solve for the herd's AVERAGE animal (members' recorded weights and
+  milk, or an average weight typed on the sheet), shown per animal and x head count. Plan row has `group_id`. Routes
+  `GET /nutrition/groups/:groupId/ration`, `POST .../ration[/preview]`; gate `AnimalAccessService.checkGroup`.
+  The group feed card (`GroupFeedingCard`) hands over to `HerdRationCard` when the group's species is
+  `ruminant_dm` / `equine_dm` (`status: 'herd_ration'`), so farmer and vet see it in the same places as flocks.
+- One sheet for all of it: `RationBuilderSheet` takes a `RationTarget` (animal or group); `RationPlanCard` shows a saved
+  ration for both.
+
+## Vet workflow (Phase 3, migration 061)
+
+- Review works for every plan (pet, animal ration, herd ration); a kcal override only for pet plans.
+- "Prescribe as diet": `POST /nutrition/plans/:planId/prescribe` - the plan becomes an ORDINARY prescription through
+  `PrescriptionService.createPrescription` (its own who-may-prescribe rule applies; linked to the vet's latest
+  consultation for that animal / herd). Owner, vet, print and network pharmacy see it with other prescriptions;
+  `nutrition_plans.prescription_id` stops a second prescription. The plan counts as vet-reviewed.
+- Allergy override: active `allergy_records` (medical records own them) are matched against every food; a plan with
+  such a food is refused in words, and any active allergy marks the plan "a vet should check this".
+- Review queue: `/nutrition` filter "Not checked by a vet" (`filter=to_review`).
+- Share: plain-text plan via the phone share sheet (WhatsApp / SMS), else copied (`PlanVetActions`).
+
+## Alerts and outcome labels (Phase 4, migration 062)
+
+- New rules (`RULE_VERSION` 1.1.0): `transition_condition_loss` (body condition lost since giving birth, the negative
+  energy balance sign), `feed_below_need` / `feed_above_need` for flocks / batches / ponds (recorded feed vs the
+  feeding table over a week, >= 4 days recorded; raised by `GroupFeedingService`, only from recorded inputs).
+- Every alert closure is a label in `nutrition_outcomes`: "Seen" = confirmed, "Not right" = false alarm, rules closing
+  it = resolved. Admin -> Usage -> Alert quality shows each rule's hit rate. These labels are what any later
+  prediction model must be trained and judged on; no model is built until enough exist.
+
+## Explain in simple words (AI, migration 062)
+
+- `POST /nutrition/plans/:planId/explain` -> `NutritionExplainService`. Sends ANIMAL FACTS ONLY (species, age, weight,
+  condition, goal, the plan's lines and numbers) - never owner, place, animal name or the vet's free-text note.
+  Provider: `AiCopilotService.completeOnce` (Groq / OpenAI keys, same model fallback).
+- Output guard `engine/explainGuard.ts`: every number in the text (any of the six scripts' digits) must be one of the
+  plan's numbers, else the text is discarded. The screen then shows its own translated summary - never an error.
+- Switch `nutrition.ai_assist.enabled` (default on; does nothing without a key). runtime-verify turns it OFF.
+
 ## Known gaps
 
-- `equine_dm` (horses, donkeys) calculator not built; group rations for ruminant herds are per animal.
+- Herd rations use the average animal; a herd with very different animals (fresh and late-lactation cows) is better
+  split into groups.
+- Voice / label-photo entry (AI draft that the user confirms) and trained prediction models are not built; the
+  outcome labels they need are being collected.
+- Horse / donkey starting values (migration 060) and the new alert thresholds await the owner's vet.
 - Risk-rule thresholds for weight-change speed and drift are conservative platform defaults pending vet
   validation (`engine/rules.ts` `RULE_LIMITS`).
 - Translations in hi/kn/ml/ta/te were written without a native-speaker review (same open item as the tab labels).

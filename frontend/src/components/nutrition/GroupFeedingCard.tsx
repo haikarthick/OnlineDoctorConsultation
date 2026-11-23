@@ -5,9 +5,12 @@ import { useAuth } from '../../context/AuthContext'
 import { useNutritionEnabled } from '../../hooks/useNutritionEnabled'
 import { userMessage } from '../../utils/userMessage'
 import { NumberStepper, parseStepperValue } from '../mobile/NumberStepper'
+import HerdRationCard from './HerdRationCard'
+import FlagList from './FlagList'
 
 /**
- * Today's feed for a flock, pig batch or pond, and how well feed is turning into meat or eggs this cycle (FCR) -
+ * Today's feed for a flock, pig batch or pond (or, for a herd of cattle / buffalo / goats / sheep / horses, its
+ * balanced ration - HerdRationCard), and how well feed is turning into meat or eggs this cycle (FCR) -
  * one card for the farmer (group health sheet) and the vet (group consultation). It reads what the farm already
  * records in Daily records (sample weight, water temperature, feed, eggs) - nothing is entered twice. Renders
  * nothing while nutrition is switched off, or for someone the server says may not see the group.
@@ -20,6 +23,7 @@ export const GroupFeedingCard: React.FC<{ groupId: string }> = ({ groupId }) => 
   const [error, setError] = useState('')
   const [hidden, setHidden] = useState(false)
   const [price, setPrice] = useState('')
+  const [reload, setReload] = useState(0)
 
   useEffect(() => {
     if (!enabled) return
@@ -34,12 +38,15 @@ export const GroupFeedingCard: React.FC<{ groupId: string }> = ({ groupId }) => 
         })
     }, 300)
     return () => { active = false; window.clearTimeout(timer) }
-  }, [enabled, groupId, price])
+  }, [enabled, groupId, price, reload])
 
   if (!enabled || hidden) return null
   if (error) return <section className="nutri-card"><p className="nutri-note is-warning" role="status">{error}</p></section>
   if (!data) return null
   const money = (n: number | null | undefined) => (n === null || n === undefined ? '-' : n.toLocaleString(i18n.language, { maximumFractionDigits: 2 }))
+
+  // Cattle, buffalo, goats, sheep, horses: a herd's feeding is a balanced ration, not a per-head table.
+  if (data.status === 'herd_ration') return <HerdRationCard groupId={groupId} />
 
   if (data.status === 'no_curve') {
     return (
@@ -80,6 +87,7 @@ export const GroupFeedingCard: React.FC<{ groupId: string }> = ({ groupId }) => 
           ? <span className="nutri-pill is-reviewed">{t(data.curve.product === 'eggs' ? 'nutrition.group.fcrEggs' : 'nutrition.group.fcr', { fcr: data.cycle.fcr })}</span>
           : <span className="nutri-hint">{t(data.curve.product === 'eggs' ? 'nutrition.group.fcrNeedsEggs' : 'nutrition.group.fcrNeedsWeights')}</span>}
       </div>
+      <FlagList flags={data.flags || []} canAct={!!data.canAct} onChanged={() => setReload(n => n + 1)} />
       <p className="nutri-list-meta">{t('nutrition.group.basedOn', { title: data.curve.title })}{data.curve.status === 'unvalidated' ? ` · ${t('nutrition.safe.unvalidated')}` : ''}</p>
     </section>
   )

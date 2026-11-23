@@ -965,7 +965,8 @@ async function http(method, url, body, token) {
           } catch { grp = []; }
           if (fTok && grp[0]?.id) {
             const gf = await http('GET', `${apiBase}/nutrition/groups/${grp[0].id}/feeding?pricePerKg=30`, null, fTok);
-            if (gf.status !== 200 || !['ok', 'no_curve'].includes(gf.json?.data?.status)) problems.push(`group feeding for the farmer's own group: HTTP ${gf.status} ${JSON.stringify(gf.json || {}).slice(0, 200)}`);
+            // 'herd_ration': a cattle / buffalo / goat / sheep / horse group hands over to the herd ration (migration 060).
+            if (gf.status !== 200 || !['ok', 'no_curve', 'herd_ration'].includes(gf.json?.data?.status)) problems.push(`group feeding for the farmer's own group: HTTP ${gf.status} ${JSON.stringify(gf.json || {}).slice(0, 200)}`);
             const gs = await http('GET', `${apiBase}/nutrition/groups/${grp[0].id}/feeding`, null, stranger);
             if (gs.status !== 403) problems.push(`a stranger read another farm's group feeding (HTTP ${gs.status})`);
           } else problems.push('could not find a seeded farmer group to check group feeding');
@@ -978,6 +979,142 @@ async function http(method, url, body, token) {
               if (al.status !== 200) problems.push(`the admin's nutrition list${f ? ` (${f})` : ''}: HTTP ${al.status}`);
             }
           } else problems.push('could not sign in as the seeded admin to check the admin nutrition list');
+
+          // ── Migrations 060-062: horse rations, herd rations, allergy override, prescribed diets, alert outcomes,
+          // the AI explanation route. The AI switch is turned OFF here: verification must never call an outside service.
+          try {
+            psql('verifydb', `SET search_path TO ${SCHEMA}, public;
+              INSERT INTO system_settings (key, value, description) VALUES ('nutrition.ai_assist.enabled', 'false', 'off in runtime-verify: no outside AI calls')
+              ON CONFLICT (key) DO UPDATE SET value = 'false';`);
+          } catch { problems.push('could not switch the AI explanation off for verification'); }
+
+          // Horse (equine_dm): forage-first least-cost ration; the work level typed is saved on the profile.
+          const horse = await http('POST', `${apiBase}/animals`, { name: 'Verify Chetak', species: 'Horse', gender: 'male' }, owner);
+          const horseId = horse.json?.data?.id;
+          if (!horseId) problems.push(`create horse: HTTP ${horse.status} ${JSON.stringify(horse.json || {}).slice(0, 160)}`);
+          else {
+            await http('POST', `${apiBase}/nutrition/animals/${horseId}/measurements`, { weight: 450, unit: 'kg' }, owner);
+            const hf = await http('GET', `${apiBase}/nutrition/foods?animalId=${horseId}`, null, owner);
+            const hc = Object.fromEntries((hf.json?.data?.items || []).map(f => [f.code, f.id]));
+            const need = ['feed_grass_hay', 'feed_lucerne_hay', 'feed_oats', 'feed_mineral_mixture'];
+            if (need.some(c => !hc[c])) problems.push(`the horse feed library is missing ${need.filter(c => !hc[c]).join(', ')}`);
+            if (hc.feed_cattle_feed) problems.push('compound cattle feed (may carry urea / ionophores) is offered for a horse');
+            if (need.every(c => hc[c])) {
+              const hr = { work: 'moderate', feeds: [
+                { ingredientId: hc.feed_grass_hay, pricePerKg: 8 }, { ingredientId: hc.feed_lucerne_hay, pricePerKg: 18 },
+                { ingredientId: hc.feed_oats, pricePerKg: 30 }, { ingredientId: hc.feed_mineral_mixture, pricePerKg: 80 },
+              ] };
+              const hp = await http('POST', `${apiBase}/nutrition/animals/${horseId}/ration/preview`, hr, owner);
+              const hres = hp.json?.data?.result;
+              // 450 kg x 0.0333 x 1.2 (light work) = 17.98 Mcal DE
+              if (hp.status !== 200 || hres?.status !== 'ok' || Math.abs((hres?.need?.deMcal || 0) - 17.98) > 0.05) {
+                problems.push(`horse ration preview: HTTP ${hp.status} ${JSON.stringify(hres?.reasons || hres?.need || hp.json?.error || {}).slice(0, 200)}`);
+              }
+              const hs = await http('POST', `${apiBase}/nutrition/animals/${horseId}/ration`, hr, owner);
+              if (hs.status !== 201 || hs.json?.data?.model !== 'equine_dm') problems.push(`save horse ration: HTTP ${hs.status} ${JSON.stringify(hs.json || {}).slice(0, 200)}`);
+              const hNow = await http('GET', `${apiBase}/animals/${horseId}`, null, owner);
+              if (hNow.json?.data?.activityLevel !== 'moderate') problems.push(`the work level typed in the horse ration was not saved on the profile (got ${hNow.json?.data?.activityLevel})`);
+              const grainOnly = await http('POST', `${apiBase}/nutrition/animals/${horseId}/ration/preview`, { feeds: [{ ingredientId: hc.feed_oats, pricePerKg: 30 }] }, owner);
+              if (!(grainOnly.json?.data?.result?.reasons || []).includes('no_forage')) problems.push('a grain-only horse ration was not refused for lack of forage');
+            }
+          }
+
+          // Allergy override: a food the medical record says the animal is allergic to is refused in words.
+          const allergy = await http('POST', `${apiBase}/allergies`, { animalId, allergen: 'Chicken', severity: 'moderate' }, owner);
+          if (allergy.status !== 201 && allergy.status !== 200) problems.push(`add allergy: HTTP ${allergy.status} ${JSON.stringify(allergy.json || {}).slice(0, 160)}`);
+          else {
+            const chickenFood = (await http('GET', `${apiBase}/nutrition/foods?animalId=${animalId}&search=chicken`, null, owner)).json?.data?.items?.find(f => f.code === 'home_chicken_boiled');
+            if (chickenFood) {
+              const allergicPlan = await http('POST', `${apiBase}/nutrition/animals/${animalId}/plan`, { foods: [{ ingredientId: chickenFood.id, sharePct: 100 }] }, owner);
+              if (allergicPlan.status !== 400 || !/allergic/i.test(allergicPlan.json?.message || allergicPlan.json?.error?.message || '')) {
+                problems.push(`a plan with a food the animal is allergic to was not refused in words (HTTP ${allergicPlan.status})`);
+              }
+            } else problems.push('the seeded chicken food is missing from the food library');
+          }
+
+          // Review queue: the dog's plan is still "suggested", so it is in "not checked by a vet".
+          const queue = await http('GET', `${apiBase}/nutrition/animals?filter=to_review`, null, owner);
+          if (!(queue.json?.data?.items || []).some(x => x.id === animalId)) problems.push(`the dog with an unreviewed plan is missing from the review queue (HTTP ${queue.status})`);
+
+          // Prescribed diet: the cow's ration becomes an ordinary prescription the owner sees; never twice.
+          const cowPlan = cowId ? (await http('GET', `${apiBase}/nutrition/animals/${cowId}`, null, owner)).json?.data?.plan : null;
+          if (aTok && cowPlan?.id) {
+            const ownerRx = await http('POST', `${apiBase}/nutrition/plans/${cowPlan.id}/prescribe`, { durationDays: 30 }, owner);
+            if (ownerRx.status !== 403) problems.push(`a pet owner could prescribe a diet (HTTP ${ownerRx.status})`);
+            const rx = await http('POST', `${apiBase}/nutrition/plans/${cowPlan.id}/prescribe`, { durationDays: 30, note: 'Verify diet' }, aTok);
+            const rxId = rx.json?.data?.prescriptionId;
+            if (rx.status !== 201 || !rxId || rx.json?.data?.plan?.validation !== 'vet_reviewed') problems.push(`prescribe the ration: HTTP ${rx.status} ${JSON.stringify(rx.json || {}).slice(0, 200)}`);
+            else {
+              const ownerList = await http('GET', `${apiBase}/prescriptions/animal/${cowId}`, null, owner);
+              const listed = JSON.stringify(ownerList.json?.data || {});
+              if (!listed.includes(rxId)) problems.push(`the prescribed diet is not in the owner's prescriptions for the animal (HTTP ${ownerList.status})`);
+              const again = await http('POST', `${apiBase}/nutrition/plans/${cowPlan.id}/prescribe`, {}, aTok);
+              if (again.status !== 400) problems.push(`the same plan was prescribed twice (HTTP ${again.status})`);
+            }
+          } else problems.push('could not find the cow ration (or the admin) to check the prescribed diet');
+
+          // Alert outcomes: "Not right" on an open alert is kept as a labelled outcome; the admin sees the hit rate.
+          const openFlags = (await http('GET', `${apiBase}/nutrition/animals/${animalId}`, null, owner)).json?.data?.flags || [];
+          const toDismiss = openFlags.find(f => f.type === 'bcs_high') || openFlags[0];
+          if (toDismiss) {
+            const d = await http('PATCH', `${apiBase}/nutrition/flags/${toDismiss.id}`, { status: 'dismissed' }, owner);
+            if (d.status !== 200) problems.push(`dismiss an alert: HTTP ${d.status}`);
+            let labelled = [];
+            try { labelled = psqlJson('verifydb', `SELECT outcome FROM ${SCHEMA}.nutrition_outcomes WHERE flag_id = '${toDismiss.id}'`); } catch { labelled = []; }
+            if (!labelled.some(o => o.outcome === 'false_alarm')) problems.push('a "Not right" answer was not kept as an outcome label');
+            const strangerFlag = await http('PATCH', `${apiBase}/nutrition/flags/${openFlags[1]?.id || toDismiss.id}`, { status: 'reviewed' }, stranger);
+            if (strangerFlag.status !== 403) problems.push(`a stranger answered another owner's alert (HTTP ${strangerFlag.status})`);
+          } else problems.push('no open alert to check outcome labelling');
+          if (aTok) {
+            const usage = await http('GET', `${apiBase}/nutrition/admin/usage?days=30`, null, aTok);
+            if (usage.status !== 200 || !Array.isArray(usage.json?.data?.alerts)) problems.push(`admin usage with alert quality: HTTP ${usage.status}`);
+          }
+
+          // Explain: gated like the plan; with AI off it answers "unavailable" (the screen shows its own summary).
+          if (planId) {
+            const ex = await http('POST', `${apiBase}/nutrition/plans/${planId}/explain`, { language: 'hi' }, owner);
+            if (ex.status !== 200 || ex.json?.data?.source !== 'unavailable') problems.push(`explain with AI off: HTTP ${ex.status} ${JSON.stringify(ex.json?.data || ex.json?.error || {}).slice(0, 160)}`);
+            const exS = await http('POST', `${apiBase}/nutrition/plans/${planId}/explain`, { language: 'en' }, stranger);
+            if (exS.status !== 403) problems.push(`a stranger had another owner's plan explained (HTTP ${exS.status})`);
+          }
+
+          // Herd ration: a 4-head cattle group on the seeded farmer's farm - one solve, totals x 4; a stranger is refused.
+          const herdId = require('crypto').randomUUID();
+          let herdOk = false;
+          try {
+            psql('verifydb', `SET search_path TO ${SCHEMA}, public;
+              INSERT INTO animal_groups (id, enterprise_id, name, species, current_count)
+              SELECT '${herdId}', e.id, 'Verify milking herd', 'Cattle', 4 FROM enterprises e JOIN users u ON u.id = e.owner_id
+               WHERE u.email = 'tom.wilson@example.com' LIMIT 1;`);
+            herdOk = psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.animal_groups WHERE id = '${herdId}'`).length === 1;
+          } catch (e) { problems.push(`could not create a cattle herd for the herd-ration check: ${String(e.message).slice(0, 160)}`); }
+          if (herdOk && fTok) {
+            const card = await http('GET', `${apiBase}/nutrition/groups/${herdId}/feeding`, null, fTok);
+            if (card.json?.data?.status !== 'herd_ration') problems.push(`a cattle group's feed card did not hand over to the herd ration (got ${card.json?.data?.status})`);
+            const ov = await http('GET', `${apiBase}/nutrition/groups/${herdId}/ration`, null, fTok);
+            if (ov.status !== 200 || !ov.json?.data?.rationAvailable || ov.json?.data?.group?.headCount !== 4) problems.push(`herd ration overview: HTTP ${ov.status} ${JSON.stringify(ov.json?.data || ov.json?.error || {}).slice(0, 200)}`);
+            const gfoods = await http('GET', `${apiBase}/nutrition/foods?groupId=${herdId}`, null, fTok);
+            const gc = Object.fromEntries((gfoods.json?.data?.items || []).map(f => [f.code, f.id]));
+            const herdRation = { milkLitresPerDay: 8, avgWeightKg: 350, feeds: [
+              { ingredientId: gc.feed_green_maize, pricePerKg: 2 }, { ingredientId: gc.feed_wheat_straw, pricePerKg: 6 },
+              { ingredientId: gc.feed_cattle_feed, pricePerKg: 25 }, { ingredientId: gc.feed_mineral_mixture, pricePerKg: 80 },
+            ] };
+            if (herdRation.feeds.some(f => !f.ingredientId)) problems.push('the herd feed library (by group) is missing a common cattle feed');
+            else {
+              const hp = await http('POST', `${apiBase}/nutrition/groups/${herdId}/ration/preview`, herdRation, fTok);
+              const herd = hp.json?.data?.herd;
+              if (hp.status !== 200 || hp.json?.data?.result?.status !== 'ok' || herd?.headCount !== 4
+                  || Math.abs(herd.totalCostPerDay - hp.json.data.result.totalCostPerDay * 4) > 0.05) {
+                problems.push(`herd ration preview: HTTP ${hp.status} ${JSON.stringify(hp.json?.data?.result?.reasons || hp.json?.error || herd || {}).slice(0, 200)}`);
+              }
+              const hs = await http('POST', `${apiBase}/nutrition/groups/${herdId}/ration`, herdRation, fTok);
+              if (hs.status !== 201 || hs.json?.data?.groupId !== herdId || !hs.json?.data?.ration?.herd) problems.push(`save herd ration: HTTP ${hs.status} ${JSON.stringify(hs.json || {}).slice(0, 200)}`);
+              const again = await http('POST', `${apiBase}/nutrition/groups/${herdId}/ration`, herdRation, fTok);
+              if (again.status !== 201) problems.push(`replacing the herd ration: HTTP ${again.status} (the old one must be superseded)`);
+              const sv = await http('POST', `${apiBase}/nutrition/groups/${herdId}/ration/preview`, herdRation, stranger);
+              if (sv.status !== 403) problems.push(`a stranger worked out another farm's herd ration (HTTP ${sv.status})`);
+            }
+          }
         }
       }
       // Only real SQL / database errors: the deliberate refusals above (400 / 403) are logged by the server too.

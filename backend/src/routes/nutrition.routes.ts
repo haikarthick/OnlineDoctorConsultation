@@ -4,8 +4,9 @@ import {
   nutritionFactsSchema, nutritionMeasurementSchema, nutritionPlanSchema, nutritionPlanReviewSchema,
   nutritionFeedingSchema, nutritionFoodSchema, nutritionFlagStatusSchema, nutritionSpeciesModelSchema,
   nutritionEnergyFactorSchema, nutritionAdminFoodSchema, nutritionUnsafeFoodSchema, nutritionRequirementSetSchema,
-  nutritionRationSchema, nutritionCurveSchema,
+  nutritionRationSchema, nutritionCurveSchema, nutritionPrescribeSchema, nutritionExplainSchema,
 } from '../middleware/validation';
+import NutritionExplainService from '../services/nutrition/NutritionExplainService';
 import FarmRationService from '../services/nutrition/FarmRationService';
 import GroupFeedingService from '../services/nutrition/GroupFeedingService';
 import { asyncHandler } from '../utils/errorHandler';
@@ -70,13 +71,27 @@ router.post('/nutrition/animals/:animalId/plan', ...gate, validateBody(nutrition
   res.status(201).json({ success: true, data: await NutritionService.savePlan(req.params.animalId, req.body, caller(req)) });
 }));
 
-// ─── Farm rations (cattle, buffalo, goats, sheep, camels - migration 057) ───
+// ─── Farm rations (cattle, buffalo, goats, sheep, camels - 057; horses, donkeys - 060) ───
 router.post('/nutrition/animals/:animalId/ration/preview', ...gate, validateBody(nutritionRationSchema), asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: await FarmRationService.preview(req.params.animalId, req.body, caller(req)) });
 }));
 
 router.post('/nutrition/animals/:animalId/ration', ...gate, validateBody(nutritionRationSchema), asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json({ success: true, data: await FarmRationService.save(req.params.animalId, req.body, caller(req)) });
+}));
+
+// ─── Herd rations: one least-cost solve for a cattle / buffalo / goat / sheep / horse group (migration 060).
+// Gate: AnimalAccessService.checkGroup in FarmRationService.groupSubject (farm team, vet with an appointment, admin).
+router.get('/nutrition/groups/:groupId/ration', ...gate, asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await FarmRationService.groupOverview(req.params.groupId, caller(req)) });
+}));
+
+router.post('/nutrition/groups/:groupId/ration/preview', ...gate, validateBody(nutritionRationSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await FarmRationService.groupPreview(req.params.groupId, req.body, caller(req)) });
+}));
+
+router.post('/nutrition/groups/:groupId/ration', ...gate, validateBody(nutritionRationSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await FarmRationService.groupSave(req.params.groupId, req.body, caller(req)) });
 }));
 
 // ─── Group feeding: flocks, pig batches, ponds (migration 059). Gate: AnimalAccessService.checkGroup in the service.
@@ -90,6 +105,17 @@ router.get('/nutrition/groups/:groupId/feeding', ...gate, asyncHandler(async (re
 
 router.post('/nutrition/plans/:planId/review', ...gate, validateBody(nutritionPlanReviewSchema), asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: await NutritionService.reviewPlan(req.params.planId, req.body, caller(req)) });
+}));
+
+// A vet turns a plan into a prescribed diet (Phase 3). Gate: the plan's own animal / herd (NutritionAccess 'review'
+// or AnimalAccessService.checkGroup + vet), then PrescriptionService's own who-may-prescribe rule.
+router.post('/nutrition/plans/:planId/prescribe', ...gate, validateBody(nutritionPrescribeSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await NutritionService.prescribePlan(req.params.planId, req.body, caller(req)) });
+}));
+
+// Plain-language explanation (AI, animal facts only, numbers checked). Gate: the plan's own animal / herd, read.
+router.post('/nutrition/plans/:planId/explain', ...gate, validateBody(nutritionExplainSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await NutritionExplainService.explain(req.params.planId, req.body.language || 'en', caller(req)) });
 }));
 
 // ─── Feeding log ───
@@ -109,7 +135,7 @@ router.delete('/nutrition/feeding/:id', ...gate, asyncHandler(async (req: Reques
 // ─── Foods ───
 router.get('/nutrition/foods', ...gate, asyncHandler(async (req: Request, res: Response) => {
   const q = req.query as Record<string, string | undefined>;
-  res.json({ success: true, data: { items: await NutritionService.foods({ animalId: q.animalId, search: q.search, kind: q.kind }, caller(req)) } });
+  res.json({ success: true, data: { items: await NutritionService.foods({ animalId: q.animalId, groupId: q.groupId, search: q.search, kind: q.kind }, caller(req)) } });
 }));
 
 router.post('/nutrition/foods', ...gate, validateBody(nutritionFoodSchema), asyncHandler(async (req: Request, res: Response) => {

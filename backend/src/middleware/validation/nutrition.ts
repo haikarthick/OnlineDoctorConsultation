@@ -63,16 +63,31 @@ export const nutritionFoodSchema = Joi.object({
   kind: Joi.string().valid('commercial_food', 'home_food', 'treat').optional(),
 });
 
-// Farm ration (ruminant_dm): the feeds the farmer has, their prices and limits (migration 057).
+// Farm ration (ruminant_dm, equine_dm; one animal or a herd): the feeds the farmer has, their prices and limits (migration 057).
 export const nutritionRationSchema = Joi.object({
   milkLitresPerDay: Joi.number().min(0).max(200).allow(null, '').optional(),
   milkFatPct: Joi.number().greater(0).max(15).allow(null, '').optional(),
+  // Horses / donkeys (migration 060): how hard the animal works; herd rations: average weight when none is recorded.
+  work: Joi.string().valid('low', 'moderate', 'high', 'working').allow(null, '').optional(),
+  avgWeightKg: Joi.number().greater(0).max(2000).allow(null, '').optional(),
   feeds: Joi.array().items(Joi.object({
     ingredientId: Joi.string().uuid().required(),
     pricePerKg: Joi.number().min(0).max(100000).allow(null, '').optional(),
     minKg: Joi.number().min(0).max(500).allow(null, '').optional(),
     maxKg: Joi.number().min(0).max(500).allow(null, '').optional(),
   })).min(1).max(25).required(),
+});
+
+// A vet prescribes a plan as a diet (Phase 3, migration 061). Subject and owner come from the plan, never from here.
+export const nutritionPrescribeSchema = Joi.object({
+  consultationId: Joi.string().uuid().allow(null, '').optional(),
+  durationDays: Joi.number().integer().min(1).max(365).allow(null, '').optional(),
+  note: Joi.string().max(2000).allow('', null).optional(),
+});
+
+// "Explain this plan" (migration 062): the reader's language.
+export const nutritionExplainSchema = Joi.object({
+  language: Joi.string().valid('en', 'hi', 'kn', 'ml', 'ta', 'te').optional(),
 });
 
 export const nutritionFlagStatusSchema = Joi.object({

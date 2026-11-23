@@ -447,7 +447,16 @@ risk-flag precision (reviewed-true/flags), time per vet nutrition consult, consu
   usage tracking, six languages.
 - **Phase 2 (part 1) built:** least-cost rations for cattle, buffalo, goats, sheep, camels (migration 057).
 - **Phase 2 (part 2) built:** group feeding + FCR for poultry, pigs, fish and shrimp (migration 059).
-- Next: horses/donkeys, herd-level ruminant rations, Phase 3 (prescription/pharmacy link), Phase 4 (prediction), AI layer.
+- **Phase 2 (part 3) built:** horses / donkeys (`equine_dm`) and herd-level rations for cattle, buffalo, goats, sheep,
+  horses - one solve per herd (migration 060).
+- **Phase 3 built (core):** review for every plan, prescribe-as-diet through the prescriptions module, allergy override,
+  review queue, share (migration 061). Not built: home-made diet complete-and-balanced gate (needs licensed nutrient
+  tables, §12.1 row 4), PDF beyond the existing prescription print.
+- **Phase 4 built (rules + labels):** calving condition-loss and herd feed-vs-table alerts; every alert answer is a
+  labelled outcome with per-rule hit rate (migration 062). ML scorers wait for enough labels - by design (§9).
+- **AI layer built (explain):** plain-language explanation in six languages, animal facts only, numbers checked.
+  Not built: label-photo and voice entry.
+- Next: home-made diet gate (after data permission), label photo / voice drafts, ML scorers once labels suffice.
 
 ### 12.3 Original wording of the four questions (kept for the record)
 1. **External AI (re-asked in plain words):** some futuristic features - explaining a plan in Tamil in simple

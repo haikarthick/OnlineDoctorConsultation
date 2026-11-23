@@ -10,10 +10,12 @@
 --
 -- Idempotent, never hardcodes a schema name. Mirrored at the end of docker/init.sql.
 
+-- The list includes every basis used by LATER migrations too (per_kg_bw, 060): a fresh install runs init.sql (which
+-- already holds 060's rows) and then every migration in order, so this re-add must accept them.
 ALTER TABLE nutrition_requirements DROP CONSTRAINT IF EXISTS nutrition_requirements_basis_check;
 DO $$ BEGIN
   ALTER TABLE nutrition_requirements ADD CONSTRAINT nutrition_requirements_basis_check
-    CHECK (basis IN ('per_1000kcal', 'per_kg_dm', 'percent_dm', 'per_day', 'per_kg_bw075', 'percent_bw', 'fraction', 'percent_milk'));
+    CHECK (basis IN ('per_1000kcal', 'per_kg_dm', 'percent_dm', 'per_day', 'per_kg_bw075', 'percent_bw', 'fraction', 'percent_milk', 'per_kg_bw'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ─── Requirement sets (starting values; method in engine/ruminantRation.ts) ───────────────────────────────

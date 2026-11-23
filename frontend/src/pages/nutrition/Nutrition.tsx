@@ -15,7 +15,7 @@ interface Row {
   model: string; plan: { id: string; validation: string; kcal: number | null; goal: string } | null; actFlags: number; watchFlags: number
 }
 
-type Filter = 'all' | 'attention' | 'no_plan'
+type Filter = 'all' | 'attention' | 'no_plan' | 'to_review'
 const PAGE = 20
 
 /**
@@ -93,6 +93,7 @@ const Nutrition: React.FC = () => {
         { value: 'all', label: t('nutrition.page.all') },
         { value: 'attention', label: t('nutrition.page.attention') },
         { value: 'no_plan', label: t('nutrition.page.noPlan') },
+        { value: 'to_review', label: t('nutrition.page.toReview') },
       ]} />
       {error && <div className="alert alert-error" role="alert">{error}</div>}
       {!loading && rows.length === 0 && !error && (

@@ -9,6 +9,8 @@ export interface NutritionPlanPayload {
 
 export interface RationPayload {
   milkLitresPerDay?: number | null; milkFatPct?: number | null
+  /** Horses / donkeys: work level. Herds: average weight when none is recorded. */
+  work?: 'low' | 'moderate' | 'high' | 'working' | null; avgWeightKg?: number | null
   feeds: Array<{ ingredientId: string; pricePerKg?: number | null; minKg?: number | null; maxKg?: number | null }>
 }
 
@@ -18,7 +20,7 @@ export const nutritionApi = {
     const response = await sharedClient.get('/nutrition/enabled')
     return response.data
   },
-  async listNutritionAnimals(params: { search?: string; filter?: 'attention' | 'no_plan'; limit?: number; offset?: number } = {}) {
+  async listNutritionAnimals(params: { search?: string; filter?: 'attention' | 'no_plan' | 'to_review'; limit?: number; offset?: number } = {}) {
     const response = await sharedClient.get('/nutrition/animals', { params })
     return response.data
   },
@@ -56,6 +58,19 @@ export const nutritionApi = {
     const response = await sharedClient.post(`/nutrition/animals/${animalId}/ration`, data)
     return response.data
   },
+  /** A herd's ration (cattle, buffalo, goats, sheep, horses - one solve for the whole group, migration 060). */
+  async groupRation(groupId: string) {
+    const response = await sharedClient.get(`/nutrition/groups/${groupId}/ration`)
+    return response.data
+  },
+  async previewGroupRation(groupId: string, data: RationPayload) {
+    const response = await sharedClient.post(`/nutrition/groups/${groupId}/ration/preview`, data)
+    return response.data
+  },
+  async saveGroupRation(groupId: string, data: RationPayload) {
+    const response = await sharedClient.post(`/nutrition/groups/${groupId}/ration`, data)
+    return response.data
+  },
   /** Today's feed for a flock / pig batch / pond and the cycle's FCR (migration 059). */
   async groupFeeding(groupId: string, params: { pricePerKg?: number | null } = {}) {
     const response = await sharedClient.get(`/nutrition/groups/${groupId}/feeding`, { params })
@@ -77,6 +92,16 @@ export const nutritionApi = {
     const response = await sharedClient.post(`/nutrition/plans/${planId}/review`, data)
     return response.data
   },
+  /** A vet prescribes a plan or ration as a diet - it becomes an ordinary prescription (migration 061). */
+  async prescribeNutritionPlan(planId: string, data: { consultationId?: string | null; durationDays?: number | null; note?: string | null }) {
+    const response = await sharedClient.post(`/nutrition/plans/${planId}/prescribe`, data)
+    return response.data
+  },
+  /** Plain-language explanation of a plan (AI, animal facts only, numbers checked; source 'ai' or none). */
+  async explainNutritionPlan(planId: string, language: string) {
+    const response = await sharedClient.post(`/nutrition/plans/${planId}/explain`, { language })
+    return response.data
+  },
   async listFeeding(animalId: string, days = 7) {
     const response = await sharedClient.get(`/nutrition/animals/${animalId}/feeding`, { params: { days } })
     return response.data
@@ -92,7 +117,7 @@ export const nutritionApi = {
     const response = await sharedClient.delete(`/nutrition/feeding/${id}`)
     return response.data
   },
-  async listNutritionFoods(params: { animalId?: string; search?: string; kind?: string } = {}) {
+  async listNutritionFoods(params: { animalId?: string; groupId?: string; search?: string; kind?: string } = {}) {
     const response = await sharedClient.get('/nutrition/foods', { params })
     return response.data
   },

@@ -7,7 +7,8 @@ import { BottomSheet } from '../mobile/BottomSheet'
 import { ChipSelect } from '../mobile/ChipSelect'
 import { NumberStepper, parseStepperValue } from '../mobile/NumberStepper'
 import { SaveState } from '../mobile/SaveState'
-import { FLAG_ICON, formatKcal, progressPct, type NutritionOverview, type RiskFlag } from './nutritionShared'
+import { formatKcal, progressPct, type NutritionOverview } from './nutritionShared'
+import FlagList from './FlagList'
 
 interface Entry { id: string; label: string; kind: 'meal' | 'treat'; amountG: number | null; kcal: number | null; fedOn: string; recordedByName: string }
 
@@ -145,37 +146,6 @@ export const TodayTab: React.FC<Props> = ({ data, onChanged }) => {
           onSaved={(w) => { setLogging(null); setWarning(w); load(); onChanged() }} />
       )}
     </div>
-  )
-}
-
-/** Open alerts, most urgent first. The owner may dismiss; anyone who can write may mark one as looked at. */
-const FlagList: React.FC<{ flags: RiskFlag[]; canAct: boolean; onChanged: () => void }> = ({ flags, canAct, onChanged }) => {
-  const { t } = useTranslation()
-  const [error, setError] = useState('')
-  const act = async (id: string, status: 'reviewed' | 'dismissed') => {
-    try { await apiService.setNutritionFlagStatus(id, status); setError(''); onChanged() } catch (err) { setError(userMessage(err, 'nutrition.errors.flag')) }
-  }
-  return (
-    <section className="nutri-card nutri-flags" aria-label={t('nutrition.flags.title')}>
-      <h3 className="nutri-card-title">{t('nutrition.flags.title')}</h3>
-      {error && <p className="nutri-note is-warning" role="status">{error}</p>}
-      <ul className="nutri-list">
-        {flags.map(f => (
-          <li key={f.id} className={`nutri-flag is-${f.severity}`}>
-            <span aria-hidden="true">{FLAG_ICON[f.severity]}</span>
-            <span className="nutri-flag-text">
-              <strong>{t(`nutrition.flags.${f.type}.title`, f.params)}</strong>
-              <span className="nutri-hint">{t(`nutrition.flags.${f.type}.next`, f.params)}</span>
-            </span>
-            {canAct && (
-              <span className="nutri-flag-actions">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => { void act(f.id, 'reviewed') }}>{t('nutrition.flags.seen')}</button>
-              </span>
-            )}
-          </li>
-        ))}
-      </ul>
-    </section>
   )
 }
 
