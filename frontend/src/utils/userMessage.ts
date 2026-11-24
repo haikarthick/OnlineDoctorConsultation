@@ -48,6 +48,12 @@ interface ErrorLike {
   code?: string
 }
 
+/** The server's short error code (e.g. NEEDS_VET), for a screen that offers a next step; never shown to people. */
+export function serverErrorCode(err: unknown): string | null {
+  const code = (err as any)?.response?.data?.error?.code
+  return typeof code === 'string' ? code : null
+}
+
 export function userMessage(err: unknown, fallbackKey?: string, defaultText?: string): string {
   const e = (err || {}) as ErrorLike
   const data = e.response?.data

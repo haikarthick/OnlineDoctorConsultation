@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { useMasterData } from '../../context/MasterDataContext'
 import { useSaveAction } from '../../hooks/useSaveAction'
-import { userMessage } from '../../utils/userMessage'
+import { serverErrorCode, userMessage } from '../../utils/userMessage'
 import { BottomSheet } from '../mobile/BottomSheet'
 import { ChipSelect } from '../mobile/ChipSelect'
 import { NumberStepper, parseStepperValue } from '../mobile/NumberStepper'
@@ -96,7 +96,7 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
       const call = herd ? apiService.previewGroupRation(target.id, payload) : apiService.previewRation(target.id, payload)
       call
         .then((res: any) => { if (active) { setPreview(res?.data || null); setPreviewError(''); setNeedsVet(false) } })
-        .catch((err: unknown) => { if (active) { setPreview(null); setPreviewError(userMessage(err, 'nutrition.errors.preview')); setNeedsVet((err as any)?.response?.data?.error?.code === 'NEEDS_VET') } })
+        .catch((err: unknown) => { if (active) { setPreview(null); setPreviewError(userMessage(err, 'nutrition.errors.preview')); setNeedsVet(serverErrorCode(err) === 'NEEDS_VET') } })
     }, 400)
     return () => { active = false; window.clearTimeout(timer) }
   }, [payload, target.id, herd])
