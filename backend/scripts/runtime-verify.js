@@ -243,6 +243,16 @@ function stopEverything() {
     return;
   }
   killTree(serverProc);
+  // Ask postgres to stop ITSELF first: the postmaster then ends its own workers (io_worker,
+  // autovacuum, checkpointer...). A bare `taskkill /T` only sees the children that exist at that
+  // instant, and on a busy PC it left io_worker processes alive after every run - orphaned, holding
+  // memory, and the cause of stray console windows. taskkill stays as the backstop.
+  if (DATA_DIR && pgProc && !pgProc.killed) {
+    try {
+      pgRun('pg_ctl', ['stop', '-D', path.join(DATA_DIR, 'pgdata'), '-m', 'immediate', '-w', '-t', '20'],
+        { stdio: 'ignore', timeout: 30000 });
+    } catch { /* already stopped, or never fully started */ }
+  }
   killTree(pgProc);
   // Release our own handle on postgres.log before trying to delete the directory that holds it.
   if (PG_LOG_FD !== null) {
