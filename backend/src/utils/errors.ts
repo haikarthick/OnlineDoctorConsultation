@@ -3,7 +3,9 @@ export class AppError extends Error {
     public statusCode: number,
     public message: string,
     public errorCode: string = 'INTERNAL_ERROR',
-    public details?: Record<string, any>
+    public details?: Record<string, any>,
+    /** Plain values (names, dates) a screen can put into its own translated sentence. Always sent; never internals. */
+    public params?: Record<string, string | number | boolean | null>
   ) {
     super(message);
     Object.setPrototypeOf(this, AppError.prototype);
@@ -37,8 +39,8 @@ export class NeedsVetError extends AppError {
 
 /** Withdrawal warning: the action is allowed once the person confirms (the request is sent again with confirmWithdrawal: true). */
 export class WithdrawalConfirmError extends AppError {
-  constructor(message: string) {
-    super(409, message, 'WITHDRAWAL_CONFIRM');
+  constructor(message: string, params?: Record<string, string | number | boolean | null>) {
+    super(409, message, 'WITHDRAWAL_CONFIRM', undefined, params);
     Object.setPrototypeOf(this, WithdrawalConfirmError.prototype);
   }
 }

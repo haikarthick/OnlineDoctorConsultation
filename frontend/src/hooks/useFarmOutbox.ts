@@ -13,7 +13,14 @@ const EMPTY: OutboxItem[] = []
 async function sendItem(item: OutboxItem): Promise<SendResult> {
   try {
     if (item.kind === 'event') await apiService.saveGroupEvent(item.payload as any, item.id) // id = the Idempotency-Key
-    else await apiService.saveFarmRecord(item.payload as any)
+    else if (item.kind === 'treatment') {
+      const { farmId, ...body } = item.payload as { farmId: string } & Record<string, unknown>
+      await apiService.addSelfTreatment(farmId, { ...(body as any), id: item.id }) // id = the row id, so a replay makes no second row
+    } else if (item.kind === 'correction') {
+      const c = item.payload as { source: 'prescription' | 'self'; sourceId: string; lastDoseOn: string | null }
+      if (c.source === 'prescription') await apiService.correctTreatmentCourse(c.sourceId, c.lastDoseOn)
+      else await apiService.correctSelfTreatmentCourse(c.sourceId, c.lastDoseOn)
+    } else await apiService.saveFarmRecord(item.payload as any)
     return { ok: true }
   } catch (err: any) {
     return { ok: false, reached: !!err?.response, reason: userMessage(err) }

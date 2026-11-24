@@ -1,3 +1,4 @@
+import WithdrawalConfirmHost from './components/treatments/WithdrawalConfirmHost'
 import React, { Suspense, lazy, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom'
@@ -163,6 +164,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <Layout currentPath={location.pathname} onNavigate={handleNavigate}>
       <ErrorAutoScroll />
+      <WithdrawalConfirmHost />
       <Suspense fallback={null}>
         <PendingPolicyModal />
       </Suspense>

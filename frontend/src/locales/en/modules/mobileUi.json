@@ -15,7 +15,8 @@
     "date": {
       "today": "Today",
       "yesterday": "Yesterday",
-      "other": "Other date"
+      "other": "Other date",
+      "tomorrow": "Tomorrow"
     },
     "save": {
       "saving": "Saving...",

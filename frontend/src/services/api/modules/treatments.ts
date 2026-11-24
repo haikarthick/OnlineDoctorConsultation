@@ -3,6 +3,8 @@ import { sharedClient } from '../core'
 // Treatments and withdrawal - backend routes/treatments.routes.ts (docs/modules/withdrawal-ledger.md).
 // A treatment is written once, on the vet's prescription; the farm's "under withdrawal" and "my medicines" come from it.
 export interface SelfTreatmentPayload {
+  /** The outbox id of a queued entry (a replay never makes a second row). */
+  id?: string
   animalId?: string | null; groupId?: string | null; medicineName: string; treatmentDays: number
   withdrawalMilkDays: number; withdrawalMeatDays: number; startedOn?: string | null; note?: string | null
 }

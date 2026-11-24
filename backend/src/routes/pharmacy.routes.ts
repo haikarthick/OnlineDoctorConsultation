@@ -38,6 +38,60 @@ async function guardNetworkPharmacy(req: Request, res: Response, networkId: stri
   return true;
 }
 
+// ── Product kind, label withdrawal days, and the remembered "this prescription line is that stock item" link ──
+// (ledger WDR-051..053). The platform is neutral: the pharmacy types what is printed on ITS OWN product label; nothing here
+// is a medicine list, and the vet's prescription line - not the pharmacy's figure - is what the farmer is held to.
+const PRODUCT_KINDS = ['medicine', 'diet', 'supplement'];
+
+function readLabelFields(body: any): { error?: string; kind?: string; milk?: number | null; meat?: number | null; hasMilk: boolean; hasMeat: boolean } {
+  const out: any = { hasMilk: 'withdrawal_milk_days' in (body || {}), hasMeat: 'withdrawal_meat_days' in (body || {}) };
+  if (body?.product_kind !== undefined && body.product_kind !== null) {
+    if (!PRODUCT_KINDS.includes(body.product_kind)) { out.error = 'Choose medicine, diet or supplement as the product kind.'; return out; }
+    out.kind = body.product_kind;
+  }
+  for (const [key, field] of [['withdrawal_milk_days', 'milk'], ['withdrawal_meat_days', 'meat']] as const) {
+    if (!(key in (body || {}))) continue;
+    const v = body[key];
+    if (v === null || v === '') { out[field] = null; continue; }
+    const n = Number(v);
+    if (!Number.isInteger(n) || n < 0 || n > 365) {
+      out.error = 'Withdrawal days must be a whole number from 0 to 365, as printed on the product label. Leave it empty if you do not know.';
+      return out;
+    }
+    out[field] = n;
+  }
+  return out;
+}
+
+const lineKey = (name: unknown) => String(name || '').trim().toLowerCase().slice(0, 255);
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Attaches the pharmacy's remembered stock-item match (and whether its label days differ) to each prescription line. */
+async function withLineMatches(pharmacyId: string, rows: any[]): Promise<any[]> {
+  if (!rows.length) return rows;
+  const m = await database.query(
+    `SELECT lm.line_key, pm.id, pm.name, pm.product_kind, pm.withdrawal_milk_days, pm.withdrawal_meat_days
+       FROM pharmacy_line_matches lm JOIN pharmacy_medications pm ON pm.id = lm.med_id
+      WHERE lm.pharmacy_id = $1`, [pharmacyId]);
+  const byKey = new Map<string, any>(m.rows.map((r: any) => [r.line_key, r]));
+  const differ = (a: unknown, b: unknown) => a != null && b != null && Number(a) !== Number(b);
+  return rows.map(r => ({
+    ...r,
+    medications: (Array.isArray(r.medications) ? r.medications : []).map((l: any) => {
+      const hit = byKey.get(lineKey(l?.name));
+      if (!hit) return l;
+      return {
+        ...l,
+        stockMatch: {
+          medId: hit.id, name: hit.name, kind: hit.product_kind,
+          withdrawalMilkDays: hit.withdrawal_milk_days, withdrawalMeatDays: hit.withdrawal_meat_days,
+          differs: differ(hit.withdrawal_milk_days, l?.withdrawalMilkDays) || differ(hit.withdrawal_meat_days, l?.withdrawalMeatDays),
+        },
+      };
+    }),
+  }));
+}
+
 // Auto-discover pharmacies for the current user based on network membership
 router.get('/pharmacy/my-pharmacies', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
@@ -238,10 +292,12 @@ router.post('/networks/:networkId/medications', authMiddleware, asyncHandler(asy
   const authReq = req as any;
   const { name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, contraindications, side_effects, common_interactions } = req.body;
   if (!name) return res.status(400).json({ error: 'name is required' });
+  const label = readLabelFields(req.body);
+  if (label.error) return res.status(400).json({ success: false, message: label.error });
   const result = await database.query(
-    `INSERT INTO pharmacy_medications (network_id, name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, contraindications, side_effects, common_interactions, created_by)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) RETURNING *`,
-    [req.params.networkId, name, generic_name || null, form || 'tablet', strength || null, unit || 'unit', supplier_id || null, unit_cost || 0, selling_price || 0, min_stock_level || 10, max_stock_level || 500, reorder_point || 20, reorder_quantity || 100, manufacturer || null, registration_number || null, is_controlled || false, contraindications || [], side_effects || [], common_interactions || [], authReq.userId]
+    `INSERT INTO pharmacy_medications (network_id, name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, contraindications, side_effects, common_interactions, created_by, product_kind, withdrawal_milk_days, withdrawal_meat_days)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23) RETURNING *`,
+    [req.params.networkId, name, generic_name || null, form || 'tablet', strength || null, unit || 'unit', supplier_id || null, unit_cost || 0, selling_price || 0, min_stock_level || 10, max_stock_level || 500, reorder_point || 20, reorder_quantity || 100, manufacturer || null, registration_number || null, is_controlled || false, contraindications || [], side_effects || [], common_interactions || [], authReq.userId, label.kind || 'medicine', label.milk ?? null, label.meat ?? null]
   );
   res.status(201).json(result.rows[0]);
 }));
@@ -249,6 +305,8 @@ router.post('/networks/:networkId/medications', authMiddleware, asyncHandler(asy
 router.patch('/networks/:networkId/medications/:medId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const { name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, is_active } = req.body;
+  const label = readLabelFields(req.body);
+  if (label.error) return res.status(400).json({ success: false, message: label.error });
   const result = await database.query(
     `UPDATE pharmacy_medications SET
        name = COALESCE($1, name), generic_name = COALESCE($2, generic_name),
@@ -259,9 +317,12 @@ router.patch('/networks/:networkId/medications/:medId', authMiddleware, asyncHan
        reorder_point = COALESCE($11, reorder_point), reorder_quantity = COALESCE($12, reorder_quantity),
        manufacturer = COALESCE($13, manufacturer), registration_number = COALESCE($14, registration_number),
        is_controlled = COALESCE($15, is_controlled), is_active = COALESCE($16, is_active),
+       product_kind = COALESCE($19, product_kind),
+       withdrawal_milk_days = CASE WHEN $20::boolean THEN $21::int ELSE withdrawal_milk_days END,
+       withdrawal_meat_days = CASE WHEN $22::boolean THEN $23::int ELSE withdrawal_meat_days END,
        updated_at = NOW()
      WHERE id = $17 AND network_id = $18 RETURNING *`,
-    [name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, is_active, req.params.medId, req.params.networkId]
+    [name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, is_active, req.params.medId, req.params.networkId, label.kind ?? null, label.hasMilk, label.milk ?? null, label.hasMeat, label.meat ?? null]
   );
   if (!result.rows[0]) return res.status(404).json({ error: 'Medication not found' });
   res.json(result.rows[0]);
@@ -475,7 +536,42 @@ router.get('/pharmacies/:pharmacyId/pending-prescriptions', authMiddleware, asyn
      ORDER BY p.created_at ASC`,
     [networkId]
   );
+  res.json(await withLineMatches(req.params.pharmacyId, result.rows));
+}));
+
+// The products a prescription line can be matched to: this pharmacy's network catalogue, active items only.
+router.get('/pharmacies/:pharmacyId/medications', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const networkId = await guardPharmacy(req, res, req.params.pharmacyId);
+  if (!networkId) return;
+  const result = await database.query(
+    `SELECT id, name, strength, form, product_kind, withdrawal_milk_days, withdrawal_meat_days
+       FROM pharmacy_medications WHERE network_id = $1 AND is_active = true ORDER BY name ASC`,
+    [networkId]
+  );
   res.json(result.rows);
+}));
+
+// Remember (or forget) which of the pharmacy's own products a prescription line is. The next prescription of the same
+// medicine name shows that match at once. The pharmacist's own act; the network's catalogue is the only list it can point at.
+router.put('/pharmacies/:pharmacyId/line-matches', authMiddleware, roleMiddleware(['pharmacist', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+  const networkId = await guardPharmacy(req, res, req.params.pharmacyId);
+  if (!networkId) return;
+  const key = lineKey(req.body?.lineName);
+  if (!key) return res.status(400).json({ success: false, message: 'Say which prescription line this is.' });
+  const medId = req.body?.medId;
+  if (!medId) {
+    await database.query(`DELETE FROM pharmacy_line_matches WHERE pharmacy_id = $1 AND line_key = $2`, [req.params.pharmacyId, key]);
+    return res.json({ success: true, data: { lineKey: key, medId: null } });
+  }
+  if (typeof medId !== 'string' || !UUID_RE.test(medId)) return res.status(400).json({ success: false, message: 'Choose one of the products in your catalogue.' });
+  const med = await database.query(`SELECT 1 FROM pharmacy_medications WHERE id = $1 AND network_id = $2 AND is_active = true`, [medId, networkId]);
+  if (!med.rows[0]) return res.status(404).json({ success: false, message: 'That product is not in your network\'s catalogue. Add it in the Catalogue tab first.' });
+  await database.query(
+    `INSERT INTO pharmacy_line_matches (pharmacy_id, line_key, med_id, created_by) VALUES ($1, $2, $3, $4)
+     ON CONFLICT (pharmacy_id, line_key) DO UPDATE SET med_id = EXCLUDED.med_id, created_by = EXCLUDED.created_by, updated_at = NOW()`,
+    [req.params.pharmacyId, key, medId, (req as any).userId]
+  );
+  res.json({ success: true, data: { lineKey: key, medId } });
 }));
 
 // Submit prescription review - pharmacist or admin only, scoped to their network
@@ -588,7 +684,7 @@ router.get('/pharmacies/:pharmacyId/ready-for-dispensing', authMiddleware, async
      ORDER BY p.created_at ASC`,
     [req.params.pharmacyId, networkId]
   );
-  res.json(result.rows);
+  res.json(await withLineMatches(req.params.pharmacyId, result.rows));
 }));
 
 // Create dispensing record

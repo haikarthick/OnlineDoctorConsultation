@@ -163,7 +163,7 @@ class AiCopilotService {
       const perAnimal = focus.length > 0 ? 12 : 3; // rows kept per animal in each history section
 
       // Run all history queries in parallel for speed
-      const [medRes, vaccRes, rxRes, consultRes, allergyRes, weightRes, labRes, bookingRes] = await Promise.all([
+      const [medRes, vaccRes, rxRes, consultRes, allergyRes, weightRes, labRes, bookingRes, selfRxRes] = await Promise.all([
         // 3. ALL medical records (complete life history)
         pool.query(
           `SELECT mr.title, mr.record_type, mr.content, mr.created_at, a.name AS animal_name
@@ -250,6 +250,15 @@ class AiCopilotService {
            ORDER BY b.scheduled_date DESC LIMIT 300`,
           [userId]
         ),
+        // 11. What the farm gave on its own, without a vet (with the label's withdrawal days)
+        pool.query(
+          `SELECT s.medicine_name, s.treatment_days, s.withdrawal_milk_days, s.withdrawal_meat_days, s.started_on, s.is_active, a.name AS animal_name
+           FROM self_treatments s
+           JOIN animals a ON a.id = s.animal_id
+           WHERE s.animal_id = ANY($1)
+           ORDER BY s.started_on DESC LIMIT 300`,
+          [historyIds]
+        ),
       ]);
 
       // 3. Medical records - group by animal, show all with year headers
@@ -274,6 +283,14 @@ class AiCopilotService {
           `[${new Date(p.created_at).toLocaleDateString()}] ${(Array.isArray(p.medications) ? p.medications : []).map((m: any) => [m.name, m.dosage, m.frequency, m.duration && `for ${m.duration}`].filter(Boolean).join(' ')).join('; ') || 'medication'} (${p.is_active ? 'active' : 'ended'})${p.instructions ? ` - ${p.instructions.substring(0, 100)}` : ''}`
         );
         sections.push(`## Complete Prescription History (${rxRes.rows.length} records)\n${grouped}`);
+      }
+
+      // 5b. Treatments the farm gave without a vet
+      if (selfRxRes.rows.length > 0) {
+        const grouped = this.groupByAnimal(this.capPerAnimal(selfRxRes.rows, perAnimal), (p: any) =>
+          `[${new Date(p.started_on).toLocaleDateString()}] ${p.medicine_name} for ${p.treatment_days} day(s), given by the farm (label withdrawal: milk ${p.withdrawal_milk_days} d, meat ${p.withdrawal_meat_days} d)`
+        );
+        sections.push(`## Treatments Given By The Farm Without A Vet (${selfRxRes.rows.length} records)\n${grouped}`);
       }
 
       // 6. Consultations - full history

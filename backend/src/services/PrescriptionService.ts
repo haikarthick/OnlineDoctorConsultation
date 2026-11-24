@@ -85,6 +85,16 @@ class PrescriptionService {
       throw new NotFoundError('petOwnerId is required for prescriptions not linked to a consultation', data.consultationId || 'standalone');
     }
 
+    // The vet may start the course on another day (a course that began yesterday, or starts tomorrow) - within reason.
+    let courseStartOn: string | null = null;
+    if (data.courseStartOn) {
+      const t = Date.parse(data.courseStartOn);
+      if (Number.isNaN(t)) throw new ValidationError('The course start day is not a valid date.');
+      const days = Math.round((t - Date.parse(new Date().toISOString().slice(0, 10))) / 86400000);
+      if (days < -30 || days > 14) throw new ValidationError('The course start day must be within the last 30 days or the next 14 days.');
+      courseStartOn = data.courseStartOn;
+    }
+
     // Default validUntil to 30 days from now if not provided
     const validUntil = data.validUntil || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
@@ -125,8 +135,8 @@ class PrescriptionService {
     const result = await database.query(
       `INSERT INTO prescriptions (id, consultation_id, veterinarian_id, pet_owner_id, animal_id,
        group_id, cycle_id, head_count_treated,
-       medications, instructions, valid_until, is_active, network_id, is_network_coordinated, target_pharmacy_id, review_status, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+       medications, instructions, valid_until, is_active, network_id, is_network_coordinated, target_pharmacy_id, review_status, created_at, updated_at, course_start_on)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
        RETURNING id, consultation_id as "consultationId", veterinarian_id as "veterinarianId",
        pet_owner_id as "petOwnerId", animal_id as "animalId", group_id as "groupId",
        cycle_id as "cycleId", head_count_treated as "headCountTreated", medications, instructions,
@@ -136,7 +146,7 @@ class PrescriptionService {
        JSON.stringify(data.medications), data.instructions, validUntil, true,
        networkId, isNetworkCoordinated, targetPharmacyId,
        isNetworkCoordinated ? 'pending_review' : null,
-       now, now]
+       now, now, courseStartOn]
     );
 
     logger.info('Prescription created', { prescriptionId: id, consultationId: data.consultationId });

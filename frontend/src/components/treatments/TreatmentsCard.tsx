@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { BottomSheet } from '../mobile/BottomSheet'
@@ -6,14 +6,18 @@ import { DateQuick, localIsoDate } from '../mobile/DateQuick'
 import { userMessage } from '../../utils/userMessage'
 import type { RecordSubject } from '../farmRecords/recordShared'
 import { shortDate } from './WithdrawalBanner'
+import { useFarmOutbox } from '../../hooks/useFarmOutbox'
+import type { SelfTreatmentPayload } from '../../services/api/modules/treatments'
 
 interface UnderRow { animalId: string | null; groupId: string | null; name: string; what: 'milk' | 'meat'; until: string; inDays: number; medicine: string; source: 'prescription' | 'self'; sourceId: string }
-interface HistoryRow { source: 'prescription' | 'self'; sourceId: string; medicine: string; kind: string; startedOn: string; lastDose: string; milkUntil: string | null; meatUntil: string | null; name: string; treatmentDays: number }
+interface HistoryRow { source: 'prescription' | 'self'; sourceId: string; medicine: string; kind: string; startedOn: string; lastDose: string; milkUntil: string | null; meatUntil: string | null; name: string; treatmentDays: number; boughtOn?: string | null }
 
 interface Props {
   farmId: string
   /** Every animal and herd of the farm (the picker for "I treated an animal myself"). */
   subjects: RecordSubject[]
+  /** Called after something was saved on the phone for later (the page says so in words). */
+  onQueued?: () => void
 }
 
 /**
@@ -21,7 +25,7 @@ interface Props {
  * course stopped early), the farm's treatment history built from the vet's prescriptions, and a short entry for a farmer who
  * treated without a vet. Nothing is typed twice: the vet's prescription already carries the medicine and the label days.
  */
-export const TreatmentsCard: React.FC<Props> = ({ farmId, subjects }) => {
+export const TreatmentsCard: React.FC<Props> = ({ farmId, subjects, onQueued }) => {
   const { t, i18n } = useTranslation()
   const [under, setUnder] = useState<UnderRow[]>([])
   const [history, setHistory] = useState<HistoryRow[]>([])
@@ -39,6 +43,17 @@ export const TreatmentsCard: React.FC<Props> = ({ farmId, subjects }) => {
       .catch(() => { setUnder([]); setHistory([]); setLoadError(true); setLoaded(true) })
   }, [farmId])
   useEffect(() => { setLoaded(false); load() }, [load])
+
+  // No signal: the entry waits on the phone (the farm outbox) and the list reloads when one has been sent.
+  const outbox = useFarmOutbox()
+  const waitingNow = outbox.items.filter(i => i.kind === 'treatment' || i.kind === 'correction').length
+  const before = useRef(waitingNow)
+  useEffect(() => { if (waitingNow < before.current) load(); before.current = waitingNow }, [waitingNow, load])
+  const saveFixLater = (lastDoseOn: string | null) => {
+    if (!fix) return
+    outbox.add({ kind: 'correction', payload: { source: fix.source, sourceId: fix.sourceId, lastDoseOn }, label: `${fix.name} - ${t('withdrawal.stoppedEarly')}` })
+    setFix(null); onQueued?.()
+  }
 
   const saveFix = async (lastDoseOn: string | null) => {
     if (!fix) return
@@ -91,6 +106,7 @@ export const TreatmentsCard: React.FC<Props> = ({ farmId, subjects }) => {
                     {t('withdrawal.course', { count: h.treatmentDays, date: date(h.startedOn) })} · {t(h.source === 'prescription' ? 'withdrawal.byVet' : 'withdrawal.byYou')}
                     {h.milkUntil ? ` · ${t('withdrawal.milkThrough', { date: date(h.milkUntil) })}` : ''}
                     {h.meatUntil ? ` · ${t('withdrawal.meatThrough', { date: date(h.meatUntil) })}` : ''}
+                    {h.boughtOn ? ` · ${t('withdrawal.boughtOn', { date: date(h.boughtOn) })}` : ''}
                   </p>
                 </div>
               </li>
@@ -105,16 +121,18 @@ export const TreatmentsCard: React.FC<Props> = ({ farmId, subjects }) => {
         {error && <p className="wd-error" role="alert">{error}</p>}
         <button type="button" className="btn btn-primary nutri-wide-btn" disabled={busy} onClick={() => void saveFix(fixDate)}>{t('withdrawal.save')}</button>
         <button type="button" className="btn btn-outline nutri-wide-btn" disabled={busy} onClick={() => void saveFix(null)}>{t('withdrawal.backAsPrescribed')}</button>
+        <button type="button" className="btn btn-secondary nutri-wide-btn" disabled={busy} onClick={() => saveFixLater(fixDate)}>📤 {t('farmRecords.outbox.saveLater')}</button>
       </BottomSheet>
 
-      {adding && <SelfTreatmentSheet farmId={farmId} subjects={subjects} onClose={() => setAdding(false)} onSaved={() => { setAdding(false); load() }} />}
+      {adding && <SelfTreatmentSheet farmId={farmId} subjects={subjects} onClose={() => setAdding(false)} onSaved={() => { setAdding(false); load() }} onQueued={() => { setAdding(false); onQueued?.() }} />}
     </section>
   )
 }
 
 /** A farmer who treated without a vet: the medicine as written on the label, the days, and the label's withdrawal days. */
-const SelfTreatmentSheet: React.FC<{ farmId: string; subjects: RecordSubject[]; onClose: () => void; onSaved: () => void }> = ({ farmId, subjects, onClose, onSaved }) => {
+const SelfTreatmentSheet: React.FC<{ farmId: string; subjects: RecordSubject[]; onClose: () => void; onSaved: () => void; onQueued: () => void }> = ({ farmId, subjects, onClose, onSaved, onQueued }) => {
   const { t } = useTranslation()
+  const outbox = useFarmOutbox()
   const [subjectKey, setSubjectKey] = useState('')
   const [name, setName] = useState('')
   const [days, setDays] = useState('')
@@ -126,19 +144,35 @@ const SelfTreatmentSheet: React.FC<{ farmId: string; subjects: RecordSubject[]; 
   const [busy, setBusy] = useState(false)
   const digits = (v: string) => v.replace(/\D/g, '').slice(0, 3)
 
-  const save = async () => {
+  /** The same checks for saving now and for saving on the phone for later. */
+  const build = (): { label: string; body: SelfTreatmentPayload } | null => {
     const subject = subjects.find(s => `${s.kind}:${s.id}` === subjectKey)
-    if (!subject) { setError(t('withdrawal.errorSubject')); return }
-    if (!name.trim()) { setError(t('withdrawal.errorName')); return }
-    if (!days || Number(days) < 1) { setError(t('withdrawal.errorDays')); return }
-    if (!none && (milk === '' || meat === '')) { setError(t('withdrawal.errorWithdrawal')); return }
-    setBusy(true); setError('')
-    try {
-      await apiService.addSelfTreatment(farmId, {
+    if (!subject) { setError(t('withdrawal.errorSubject')); return null }
+    if (!name.trim()) { setError(t('withdrawal.errorName')); return null }
+    if (!days || Number(days) < 1) { setError(t('withdrawal.errorDays')); return null }
+    if (!none && (milk === '' || meat === '')) { setError(t('withdrawal.errorWithdrawal')); return null }
+    return {
+      label: `${subject.name} - ${name.trim()}`,
+      body: {
         ...(subject.kind === 'group' ? { groupId: subject.id } : { animalId: subject.id }),
         medicineName: name.trim(), treatmentDays: Number(days),
         withdrawalMilkDays: none ? 0 : Number(milk), withdrawalMeatDays: none ? 0 : Number(meat), startedOn: started,
-      })
+      },
+    }
+  }
+  const saveLater = () => {
+    const b = build()
+    if (!b) return
+    outbox.add({ kind: 'treatment', payload: { farmId, ...b.body }, label: b.label })
+    onQueued()
+  }
+
+  const save = async () => {
+    const b = build()
+    if (!b) return
+    setBusy(true); setError('')
+    try {
+      await apiService.addSelfTreatment(farmId, b.body)
       onSaved()
     } catch (err) { setError(userMessage(err, 'withdrawal.saveFailed')) } finally { setBusy(false) }
   }
@@ -173,6 +207,7 @@ const SelfTreatmentSheet: React.FC<{ farmId: string; subjects: RecordSubject[]; 
       </fieldset>
       {error && <p className="wd-error" role="alert">{error}</p>}
       <button type="button" className="btn btn-primary nutri-wide-btn" disabled={busy} onClick={() => void save()}>{t('withdrawal.save')}</button>
+      <button type="button" className="btn btn-secondary nutri-wide-btn" disabled={busy} onClick={saveLater}>📤 {t('farmRecords.outbox.saveLater')}</button>
     </BottomSheet>
   )
 }

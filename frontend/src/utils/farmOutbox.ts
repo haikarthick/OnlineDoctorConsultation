@@ -13,7 +13,8 @@
  */
 export interface OutboxItem {
   id: string
-  kind: 'record' | 'event'
+  /** record / event: a farm entry; treatment: "I treated an animal myself"; correction: "stopped early" on a course. */
+  kind: 'record' | 'event' | 'treatment' | 'correction'
   payload: Record<string, unknown>
   /** What the farmer sees: "Lakshmi - Milk". */
   label: string

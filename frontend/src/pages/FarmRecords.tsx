@@ -237,7 +237,7 @@ const FarmRecords: React.FC = () => {
             </section>
           )}
 
-          <TreatmentsCard farmId={farmId} subjects={subjects} />
+          <TreatmentsCard farmId={farmId} subjects={subjects} onQueued={() => setMessage(t('farmRecords.outbox.queued'))} />
 
           {totals.length > 0 && (
             <div className="record-totals" aria-label={t('farmRecords.totalsLabel')}>

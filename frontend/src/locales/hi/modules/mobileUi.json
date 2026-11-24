@@ -15,7 +15,8 @@
     "date": {
       "today": "आज",
       "yesterday": "कल",
-      "other": "दूसरी तारीख"
+      "other": "दूसरी तारीख",
+      "tomorrow": "कल"
     },
     "save": {
       "saving": "सहेज रहे हैं...",

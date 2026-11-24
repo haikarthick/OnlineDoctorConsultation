@@ -182,7 +182,17 @@
         "allergy_ok": "Check patient allergy records",
         "interaction_ok": "Check for concurrent medications",
         "stock_ok": "Sufficient inventory for all line items"
-      }
+      },
+      "lineTreatment": "ಚಿಕಿತ್ಸೆ: {{count}} ದಿನ",
+      "lineVetNone": "ಪಶುವೈದ್ಯ: ತಡೆ ಅವಧಿ ಇಲ್ಲ",
+      "lineVetLabel": "ಪಶುವೈದ್ಯರ ಲೇಬಲ್ ದಿನಗಳು: ಹಾಲು/ಮೊಟ್ಟೆ {{milk}}, ಮಾಂಸ {{meat}}",
+      "lineNotGiven": "ಈ ಸಾಲಿನಲ್ಲಿ ಲೇಬಲ್ ದಿನಗಳನ್ನು ನೀಡಿಲ್ಲ",
+      "matchedTo": "ನಿಮ್ಮ ಉತ್ಪನ್ನ: {{name}}",
+      "matchPick": "ಇದು ನಿಮ್ಮ ಯಾವ ಉತ್ಪನ್ನ?",
+      "matchNone": "ಇನ್ನೂ ಜೋಡಿಸಿಲ್ಲ",
+      "matchedLabel": "ಇದರ ಲೇಬಲ್: ಹಾಲು/ಮೊಟ್ಟೆ {{milk}} ದಿನ, ಮಾಂಸ {{meat}} ದಿನ",
+      "matchDiffers": "ಈ ಲೇಬಲ್ ದಿನಗಳು ಪಶುವೈದ್ಯರ ಸಾಲಿಗಿಂತ ಬೇರೆಯಾಗಿವೆ. ಫಾರ್ಮ್ ಪಶುವೈದ್ಯರ ಚೀಟಿಯನ್ನು ಅನುಸರಿಸುತ್ತದೆ.",
+      "matchFailed": "ಈ ಉತ್ಪನ್ನವನ್ನು ಉಳಿಸಲಾಗಲಿಲ್ಲ. ಸಿಗ್ನಲ್ ನೋಡಿ ಮತ್ತೆ ಆರಿಸಿ."
     },
     "dispense": {
       "title": "Dispense",
@@ -249,15 +259,22 @@
       "reorderQty": "Reorder Quantity",
       "manufacturer": "Manufacturer",
       "registrationNumber": "Reg / License Number",
-      "withdrawalDays": "Withdrawal Period (days)",
-      "withdrawalNote": "For livestock: days before animal can be slaughtered / milk used. Set 0 if not applicable.",
+      "withdrawalNote": "ಈ ಉತ್ಪನ್ನದ ಲೇಬಲ್‌ನಲ್ಲಿ ಮುದ್ರಿಸಿರುವುದನ್ನೇ ಬರೆಯಿರಿ. ಗೊತ್ತಿಲ್ಲದಿದ್ದರೆ ಖಾಲಿ ಬಿಡಿ. ಇದು ನಿಮ್ಮ ಉಲ್ಲೇಖಕ್ಕಾಗಿ; ಫಾರ್ಮ್ ಪಶುವೈದ್ಯರ ಚೀಟಿಯನ್ನು ಅನುಸರಿಸುತ್ತದೆ.",
       "isControlled": "Controlled Substance / Scheduled Drug",
       "medications": "medications",
       "searchPlaceholder": "Search by name, generic, manufacturer...",
       "empty": "No medications in catalog yet",
       "noResults": "No medications match your search",
       "controlled": "Controlled",
-      "confirmDeactivate": "Deactivate {{name}}?"
+      "confirmDeactivate": "Deactivate {{name}}?",
+      "productKind": "ಉತ್ಪನ್ನದ ಬಗೆ",
+      "kind_medicine": "ಔಷಧಿ",
+      "kind_diet": "ಆಹಾರ",
+      "kind_supplement": "ಪೂರಕ",
+      "withdrawalMilk": "ಲೇಬಲ್‌ನಲ್ಲಿರುವ ಹಾಲು / ಮೊಟ್ಟೆ ತಡೆ ಅವಧಿ (ದಿನ)",
+      "withdrawalMeat": "ಲೇಬಲ್‌ನಲ್ಲಿರುವ ಮಾಂಸ ತಡೆ ಅವಧಿ (ದಿನ)",
+      "badgeMilk": "ಹಾಲು {{count}} ದಿನ",
+      "badgeMeat": "ಮಾಂಸ {{count}} ದಿನ"
     },
     "history": {
       "title": "Dispensing History",

@@ -50,6 +50,15 @@
     "recentTitle": "Your recent medicines - tap to fill in",
     "lineSummary": "Withdrawal: milk / eggs {{milk}} days, meat {{meat}} days",
     "feedCourse": "Prescribed medicated feed: {{name}} {{dosage}} - days left: {{count}}",
-    "loadFailed": "We could not load your treatments just now, so do not take it that nothing is held back. Check the signal and open this screen again."
+    "loadFailed": "We could not load your treatments just now, so do not take it that nothing is held back. Check the signal and open this screen again.",
+    "confirmTitle": "Hold on before you go ahead",
+    "nameAnimal": "This animal",
+    "nameGroup": "This herd",
+    "warnWho": "{{name}} was treated with a medicine.",
+    "warnWhyMilk": "Milk and eggs from it are not safe to sell or use before then.",
+    "warnWhyMeat": "Its meat is not safe to sell or eat before then.",
+    "goBack": "Go back",
+    "goAhead": "Go ahead anyway",
+    "boughtOn": "Bought on {{date}}"
   }
 }

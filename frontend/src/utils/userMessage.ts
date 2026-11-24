@@ -54,6 +54,12 @@ export function serverErrorCode(err: unknown): string | null {
   return typeof code === 'string' ? code : null
 }
 
+/** The plain values (names, dates) the server sent so the screen can say the same thing in the person's language. */
+export function serverErrorParams(err: unknown): Record<string, string | number | boolean | null> | null {
+  const p = (err as any)?.response?.data?.error?.params
+  return p && typeof p === 'object' ? p : null
+}
+
 export function userMessage(err: unknown, fallbackKey?: string, defaultText?: string): string {
   const e = (err || {}) as ErrorLike
   const data = e.response?.data

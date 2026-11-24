@@ -23,7 +23,10 @@ interface Medication {
   registration_number: string
   is_controlled: boolean
   is_active: boolean
-  withdrawal_period_days?: number
+  product_kind?: 'medicine' | 'diet' | 'supplement'
+  /** As printed on the product label; null = not known. Information for the pharmacist: the vet's line is what the farm follows. */
+  withdrawal_milk_days?: number | null
+  withdrawal_meat_days?: number | null
 }
 
 interface Supplier { id: string; name: string }
@@ -39,7 +42,9 @@ const emptyForm = () => ({
   name: '', generic_name: '', form: 'tablet', strength: '', unit: 'unit',
   supplier_id: '', unit_cost: 0, selling_price: 0, min_stock_level: 10,
   reorder_point: 20, reorder_quantity: 100, manufacturer: '',
-  registration_number: '', is_controlled: false, withdrawal_period_days: 0
+  registration_number: '', is_controlled: false,
+  product_kind: 'medicine' as 'medicine' | 'diet' | 'supplement',
+  withdrawal_milk_days: '' as string, withdrawal_meat_days: '' as string,
 })
 
 export default function MedicationCatalog({ networkId }: Props) {
@@ -111,7 +116,9 @@ export default function MedicationCatalog({ networkId }: Props) {
       manufacturer: med.manufacturer || '',
       registration_number: med.registration_number || '',
       is_controlled: med.is_controlled || false,
-      withdrawal_period_days: med.withdrawal_period_days || 0,
+      product_kind: med.product_kind || 'medicine',
+      withdrawal_milk_days: med.withdrawal_milk_days == null ? '' : String(med.withdrawal_milk_days),
+      withdrawal_meat_days: med.withdrawal_meat_days == null ? '' : String(med.withdrawal_meat_days),
     })
     setModalError('')
     setShowModal(true)
@@ -131,7 +138,9 @@ export default function MedicationCatalog({ networkId }: Props) {
         min_stock_level: parseInt(String(form.min_stock_level)) || 10,
         reorder_point: parseInt(String(form.reorder_point)) || 20,
         reorder_quantity: parseInt(String(form.reorder_quantity)) || 100,
-        withdrawal_period_days: parseInt(String(form.withdrawal_period_days)) || 0,
+        // Label days only mean something for a medicine; empty = the label was not read (never 0 by default).
+        withdrawal_milk_days: form.product_kind === 'medicine' && form.withdrawal_milk_days !== '' ? Number(form.withdrawal_milk_days) : null,
+        withdrawal_meat_days: form.product_kind === 'medicine' && form.withdrawal_meat_days !== '' ? Number(form.withdrawal_meat_days) : null,
       }
       if (editing) {
         await client.patch(`/networks/${networkId}/medications/${editing.id}`, payload)
@@ -220,10 +229,14 @@ export default function MedicationCatalog({ networkId }: Props) {
                           {t('pharmacy.catalog.controlled')}
                         </span>
                       )}
-                      {(med.withdrawal_period_days ?? 0) > 0 && (
-                        <span className="pharm-badge si-61bfaf4d">
-                          WP {med.withdrawal_period_days}d
-                        </span>
+                      {med.product_kind && med.product_kind !== 'medicine' && (
+                        <span className="pharm-badge si-61bfaf4d">{t(`pharmacy.catalog.kind_${med.product_kind}`)}</span>
+                      )}
+                      {med.withdrawal_milk_days != null && (
+                        <span className="pharm-badge si-61bfaf4d">{t('pharmacy.catalog.badgeMilk', { count: med.withdrawal_milk_days })}</span>
+                      )}
+                      {med.withdrawal_meat_days != null && (
+                        <span className="pharm-badge si-61bfaf4d">{t('pharmacy.catalog.badgeMeat', { count: med.withdrawal_meat_days })}</span>
                       )}
                     </td>
                     <td>
@@ -368,11 +381,28 @@ export default function MedicationCatalog({ networkId }: Props) {
               {/* Livestock + controlled */}
               <div className="pharm-form-row">
                 <div className="pharm-form-group">
-                  <label>{t('pharmacy.catalog.withdrawalDays')}</label>
-                  <input type="number" inputMode="decimal" min="0" value={form.withdrawal_period_days}
-                    onChange={e => setForm(f => ({ ...f, withdrawal_period_days: parseInt(e.target.value) || 0 }))} />
-                  <small className="si-66fcce46">{t('pharmacy.catalog.withdrawalNote')}</small>
+                  <label>{t('pharmacy.catalog.productKind')}</label>
+                  <select value={form.product_kind} onChange={e => setForm(f => ({ ...f, product_kind: e.target.value as 'medicine' | 'diet' | 'supplement' }))}>
+                    <option value="medicine">{t('pharmacy.catalog.kind_medicine')}</option>
+                    <option value="diet">{t('pharmacy.catalog.kind_diet')}</option>
+                    <option value="supplement">{t('pharmacy.catalog.kind_supplement')}</option>
+                  </select>
                 </div>
+                {form.product_kind === 'medicine' && (
+                  <>
+                    <div className="pharm-form-group">
+                      <label>{t('pharmacy.catalog.withdrawalMilk')}</label>
+                      <input type="number" inputMode="numeric" min="0" max="365" value={form.withdrawal_milk_days}
+                        onChange={e => setForm(f => ({ ...f, withdrawal_milk_days: e.target.value.replace(/\D/g, '').slice(0, 3) }))} />
+                    </div>
+                    <div className="pharm-form-group">
+                      <label>{t('pharmacy.catalog.withdrawalMeat')}</label>
+                      <input type="number" inputMode="numeric" min="0" max="365" value={form.withdrawal_meat_days}
+                        onChange={e => setForm(f => ({ ...f, withdrawal_meat_days: e.target.value.replace(/\D/g, '').slice(0, 3) }))} />
+                      <small className="si-66fcce46">{t('pharmacy.catalog.withdrawalNote')}</small>
+                    </div>
+                  </>
+                )}
                 <div className="pharm-form-group si-86b7241a">
                   <label className="si-6fb0823b">
                     <input type="checkbox" checked={form.is_controlled}

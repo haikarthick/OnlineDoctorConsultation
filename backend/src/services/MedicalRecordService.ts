@@ -911,6 +911,21 @@ export class MedicalRecordService {
         queryTypes.push('prescription');
       }
 
+      // What the farm gave on its own (no vet): a vet reading the history must see it beside the prescriptions.
+      if (shouldInclude('prescription') || shouldInclude('self_treatment')) {
+        let dateClause = '';
+        const params: any[] = [animalId, limit];
+        if (filters?.dateFrom) { params.push(filters.dateFrom); dateClause += ` AND s.started_on >= $${params.length}`; }
+        if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND s.started_on <= $${params.length}`; }
+        queries.push(database.query(`
+          SELECT s.id, s.medicine_name, s.treatment_days, s.started_on as date, s.is_active,
+                 COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
+          FROM self_treatments s LEFT JOIN users u ON u.id = s.entered_by
+          WHERE s.animal_id = $1${dateClause} ORDER BY s.started_on DESC LIMIT $2
+        `, params));
+        queryTypes.push('self_treatment');
+      }
+
       if (shouldInclude('weight')) {
         let dateClause = '';
         const params: any[] = [animalId, limit];
@@ -1006,6 +1021,13 @@ export class MedicalRecordService {
               });
               break;
             }
+            case 'self_treatment':
+              timeline.push({
+                id: r.id, type: 'self_treatment', title: `Treated by the farm: ${r.medicine_name}`,
+                description: `${r.treatment_days} day${Number(r.treatment_days) === 1 ? '' : 's'}`, date: r.date,
+                status: r.is_active ? 'active' : 'expired', createdByName: r.createdByName
+              });
+              break;
             case 'weight':
               timeline.push({
                 id: r.id, type: 'weight', title: `Weight: ${r.weight} ${r.unit}`,

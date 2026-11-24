@@ -372,6 +372,8 @@ export interface CreatePrescriptionDTO {
   headCountTreated?: number;
   medications: Medication[];
   instructions: string;
+  /** The day the course starts, when the vet says so ("start tomorrow"); default is the prescription date. */
+  courseStartOn?: string;
   validUntil?: string;
   diagnosis?: string;
   followUpDate?: string;

@@ -3977,6 +3977,7 @@ button.record-due-row { cursor: pointer; }
 .wd-banner p { margin: 4px 0 0; }
 .wd-hint { color: var(--text-secondary, #6b7280); font-size: 0.85rem; margin: 2px 0; }
 .wd-error { color: var(--danger, #b91c1c); font-size: 0.9rem; margin: 6px 0; }
+.wd-confirm p { margin: 0 0 10px; }
 .wd-card { background: var(--card-bg, #fff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 12px; padding: 14px; margin: 0 0 14px; }
 .wd-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .wd-card-title { font-size: 1.05rem; margin: 0; }

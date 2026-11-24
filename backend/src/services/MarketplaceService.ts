@@ -304,7 +304,7 @@ class MarketplaceService {
       const owned = await pool.query('SELECT 1 FROM animals WHERE id = $1 AND owner_id = $2', [data.linkedAnimalId, data.sellerId]);
       if (!owned.rows[0]) throw new Error('Linked animal not found in your animals');
       // Offering an animal for sale while it is under a meat withdrawal: say so, and list it only when the seller confirms.
-      await WithdrawalService.guard({ animalId: data.linkedAnimalId }, 'meat', (data as any).confirmWithdrawal);
+      await WithdrawalService.guard({ animalId: data.linkedAnimalId }, 'meat', (data as any).confirmWithdrawal, { userId: data.sellerId, action: 'listing' });
     }
 
     // Animal-category listings require admin review before going public

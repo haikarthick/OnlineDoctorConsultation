@@ -126,6 +126,7 @@ export const createPrescriptionSchema = Joi.object({
   medications: Joi.array().items(medicationSchema).min(1).required(),
   instructions: Joi.string().max(5000).optional().allow('', null),
   validUntil: Joi.string().optional().allow('', null),
+  courseStartOn: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional().allow('', null),
   diagnosis: longText().optional().allow('', null),
   followUpDate: Joi.string().optional().allow('', null),
   // At most one: a prescription written from a consultation names neither - the server takes the subject from the

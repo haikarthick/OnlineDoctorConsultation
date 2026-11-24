@@ -1,4 +1,5 @@
 import database from '../../utils/database';
+import logger from '../../utils/logger';
 import { NotFoundError, ValidationError, WithdrawalConfirmError } from '../../utils/errors';
 import {
   CourseLine, WithdrawalItem, WithdrawalSummary, addDays, daysBetween, itemFor, summarise, wholeDays,
@@ -23,7 +24,7 @@ function linesSql(where: { rx: string; self: string }): string {
   return `
     SELECT 'prescription'::text AS source, p.id AS source_id, p.animal_id, p.group_id,
            COALESCE(m->>'name', '') AS medicine, COALESCE(m->>'kind', 'medicine') AS kind,
-           p.created_at::date::text AS started_on,
+           COALESCE(p.course_start_on, p.created_at::date)::text AS started_on,
            GREATEST(${DAYS("m->>'treatmentDays'")}, 1) AS treatment_days,
            p.last_dose_on::text AS last_dose_on,
            ${DAYS("m->>'withdrawalMilkDays'")} AS milk_days, ${DAYS("m->>'withdrawalMeatDays'")} AS meat_days,
@@ -91,7 +92,7 @@ class WithdrawalService {
   }
 
   /** The farm's treatment history ("my medicines"): the vet's prescription lines and the farmer's own, newest first. */
-  async history(enterpriseId: string, limit = 60): Promise<Array<WithdrawalItem & { animalId: string | null; groupId: string | null; name: string; treatmentDays: number }>> {
+  async history(enterpriseId: string, limit = 60): Promise<Array<WithdrawalItem & { animalId: string | null; groupId: string | null; name: string; treatmentDays: number; boughtOn: string | null }>> {
     const r = await database.query(`SELECT * FROM (${linesSql({
       rx: `(p.animal_id IN (SELECT id FROM animals WHERE enterprise_id = $1) OR p.group_id IN (SELECT id FROM animal_groups WHERE enterprise_id = $1))`,
       self: `s.enterprise_id = $1`,
@@ -99,9 +100,17 @@ class WithdrawalService {
     const names = await database.query(
       `SELECT id, name FROM animals WHERE enterprise_id = $1 UNION ALL SELECT id, name FROM animal_groups WHERE enterprise_id = $1`, [enterpriseId]);
     const nameOf = new Map<string, string>(names.rows.map((n: any) => [n.id, n.name]));
+    // When the pharmacy handed the medicine over: information only, it never restarts or shortens the withdrawal.
+    const rxIds = [...new Set<string>(r.rows.filter((x: any) => x.source === 'prescription').map((x: any) => x.source_id))];
+    const bought = rxIds.length
+      ? await database.query(
+          `SELECT prescription_id, MAX(COALESCE(handed_over_at, prepared_at, created_at))::date::text AS on_day
+             FROM dispensing_records WHERE prescription_id = ANY($1::uuid[]) AND dispensing_status IN ('handed_over', 'delivered') GROUP BY prescription_id`, [rxIds])
+      : { rows: [] as any[] };
+    const boughtOn = new Map<string, string>(bought.rows.map((b: any) => [b.prescription_id, b.on_day]));
     return r.rows
       .filter((x: any) => x.kind !== 'diet' && x.kind !== 'supplement')
-      .map((x: any) => ({ ...itemFor(toLine(x)), animalId: x.animal_id, groupId: x.group_id, name: nameOf.get(x.animal_id || x.group_id) || '', treatmentDays: Number(x.treatment_days) || 1 }));
+      .map((x: any) => ({ ...itemFor(toLine(x)), animalId: x.animal_id, groupId: x.group_id, name: nameOf.get(x.animal_id || x.group_id) || '', treatmentDays: Number(x.treatment_days) || 1, boughtOn: x.source === 'prescription' ? (boughtOn.get(x.source_id) || null) : null }));
   }
 
   /** Medicated-feed courses still running for this subject (shown on the Daily records feed entry). */
@@ -110,7 +119,7 @@ class WithdrawalService {
     if (!id) return [];
     const col = subject.groupId ? 'p.group_id' : 'p.animal_id';
     const r = await database.query(
-      `SELECT m->>'name' AS medicine, m->>'dosage' AS dosage, p.created_at::date::text AS started_on, p.last_dose_on::text AS last_dose_on,
+      `SELECT m->>'name' AS medicine, m->>'dosage' AS dosage, COALESCE(p.course_start_on, p.created_at::date)::text AS started_on, p.last_dose_on::text AS last_dose_on,
               GREATEST(${DAYS("m->>'treatmentDays'")}, 1) AS treatment_days
          FROM prescriptions p
          CROSS JOIN LATERAL jsonb_array_elements(CASE WHEN jsonb_typeof(p.medications) = 'array' THEN p.medications ELSE '[]'::jsonb END) m
@@ -125,7 +134,7 @@ class WithdrawalService {
   /** The farmer's correction on a prescription's course: "stopped early" / "last dose on". null puts it back as prescribed. */
   async correctCourse(prescriptionId: string, lastDoseOn: string | null, userId: string): Promise<void> {
     if (lastDoseOn !== null && (!/^\d{4}-\d{2}-\d{2}$/.test(lastDoseOn) || Number.isNaN(Date.parse(lastDoseOn)))) throw new ValidationError('That date is not valid.');
-    const rx = await database.query(`SELECT created_at::date::text AS started FROM prescriptions WHERE id = $1`, [prescriptionId]);
+    const rx = await database.query(`SELECT COALESCE(course_start_on, created_at::date)::text AS started FROM prescriptions WHERE id = $1`, [prescriptionId]);
     if (!rx.rows[0]) throw new NotFoundError('Prescription');
     if (lastDoseOn !== null && lastDoseOn < rx.rows[0].started) throw new ValidationError('The last dose cannot be before the treatment started.');
     if (lastDoseOn !== null && lastDoseOn > addDays(todayIso(), 1)) throw new ValidationError('That last dose date is too far ahead. Choose today or an earlier day.');
@@ -168,7 +177,7 @@ class WithdrawalService {
 
   /** A farmer who treated an animal or herd without a vet: same facts as a prescription line, entered once. */
   async addSelfTreatment(enterpriseId: string, input: {
-    animalId?: string | null; groupId?: string | null; medicineName: string; treatmentDays: number;
+    id?: string; animalId?: string | null; groupId?: string | null; medicineName: string; treatmentDays: number;
     withdrawalMilkDays: number; withdrawalMeatDays: number; startedOn?: string | null; note?: string | null;
   }, userId: string): Promise<{ id: string }> {
     const name = String(input.medicineName || '').trim().slice(0, 255);
@@ -188,11 +197,13 @@ class WithdrawalService {
     if (!Number.isFinite(milk) || !Number.isFinite(meat) || milk < 0 || meat < 0 || milk > 365 || meat > 365) {
       throw new ValidationError('Enter the milk / egg and the meat withdrawal days from the label. Enter 0 if the label says none.');
     }
+    // A phone that was offline sends the entry again with the same id: the first row stands, no second one is made.
     const r = await database.query(
-      `INSERT INTO self_treatments (enterprise_id, animal_id, group_id, medicine_name, treatment_days, withdrawal_milk_days, withdrawal_meat_days, started_on, note, entered_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
-      [enterpriseId, input.animalId || null, input.groupId || null, name, days, Math.round(milk), Math.round(meat), started, input.note ? String(input.note).slice(0, 500) : null, userId]);
-    return { id: r.rows[0].id };
+      `INSERT INTO self_treatments (id, enterprise_id, animal_id, group_id, medicine_name, treatment_days, withdrawal_milk_days, withdrawal_meat_days, started_on, note, entered_by)
+       VALUES (COALESCE($11::uuid, gen_random_uuid()),$1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+       ON CONFLICT (id) DO NOTHING RETURNING id`,
+      [enterpriseId, input.animalId || null, input.groupId || null, name, days, Math.round(milk), Math.round(meat), started, input.note ? String(input.note).slice(0, 500) : null, userId, input.id || null]);
+    return { id: r.rows[0]?.id || String(input.id) };
   }
 
   /** The farm owner and the managers are told when a prescription holds milk / eggs or meat back, and until when. */
@@ -238,19 +249,31 @@ class WithdrawalService {
    * Warn-and-confirm (not a block): when milk / eggs or meat must be withheld, the action says so in words and goes ahead only
    * when the person confirms (the client sends the request again with confirmWithdrawal). `what` is the thing about to leave.
    */
-  async guard(subject: Subject, what: 'milk' | 'meat', confirmed: boolean | undefined): Promise<void> {
-    if (confirmed === true || (!subject.animalId && !subject.groupId)) return;
+  async guard(subject: Subject, what: 'milk' | 'meat', confirmed: boolean | undefined, ctx: { userId: string; action: string }): Promise<void> {
+    if (!subject.animalId && !subject.groupId) return;
     const s = await this.status(subject);
     const until = what === 'milk' ? s.milkUntil : s.meatUntil;
     if (!until) return;
     const item = s.items.find(i => (what === 'milk' ? i.milkUntil : i.meatUntil) === until);
-    const name = subject.animalId
-      ? (await database.query(`SELECT name FROM animals WHERE id = $1`, [subject.animalId])).rows[0]?.name
-      : (await database.query(`SELECT name FROM animal_groups WHERE id = $1`, [subject.groupId])).rows[0]?.name;
+    const row = subject.animalId
+      ? (await database.query(`SELECT name, enterprise_id FROM animals WHERE id = $1`, [subject.animalId])).rows[0]
+      : (await database.query(`SELECT name, enterprise_id FROM animal_groups WHERE id = $1`, [subject.groupId])).rows[0];
+    const name = row?.name;
+    // "Record anyway": the person has read the warning and confirmed. Keep who, when, what and until when - for a buyer or inspector.
+    if (confirmed === true) {
+      await database.query(
+        `INSERT INTO withdrawal_overrides (user_id, enterprise_id, animal_id, group_id, action, withheld, until_date, medicine)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [ctx.userId || null, row?.enterprise_id || null, subject.animalId || null, subject.groupId || null, ctx.action, what, until, item?.medicine || null]
+      ).catch((e: any) => logger.warn('Could not record a withdrawal confirmation', { error: e?.message }));
+      return;
+    }
     const thing = what === 'milk' ? 'Milk and eggs' : 'Meat';
     throw new WithdrawalConfirmError(
       `${name || (subject.groupId ? 'This group' : 'This animal')} is under a ${what === 'milk' ? 'milk / egg' : 'meat'} withdrawal until ${until}${item?.medicine ? ` because of ${item.medicine}` : ''}. ` +
-      `${thing} from ${subject.groupId ? 'this group' : 'this animal'} must not be sold or eaten before then. Save anyway only if you are sure.`
+      `${thing} from ${subject.groupId ? 'this group' : 'this animal'} must not be sold or eaten before then. Save anyway only if you are sure.`,
+      // The screen builds the same warning in the person's own language from these values.
+      { what, name: name || null, group: !!subject.groupId, until, medicine: item?.medicine || null, action: ctx.action }
     );
   }
 }

@@ -183,7 +183,17 @@
         "allergy_ok": "Check patient allergy records",
         "interaction_ok": "Check for concurrent medications",
         "stock_ok": "Sufficient inventory for all line items"
-      }
+      },
+      "lineTreatment": "Treatment: {{count}} days",
+      "lineVetNone": "Vet: no withdrawal",
+      "lineVetLabel": "Vet's label days: milk/eggs {{milk}}, meat {{meat}}",
+      "lineNotGiven": "Label days not given on this line",
+      "matchedTo": "Your product: {{name}}",
+      "matchPick": "Which of your products is this?",
+      "matchNone": "Not matched yet",
+      "matchedLabel": "Its label: milk/eggs {{milk}} d, meat {{meat}} d",
+      "matchDiffers": "These label days differ from the vet's line. The farm follows the vet's prescription.",
+      "matchFailed": "Could not save which product this is. Check your signal and choose it again."
     },
     "dispense": {
       "title": "Dispense Medication",
@@ -249,15 +259,22 @@
       "reorderQty": "Reorder Quantity",
       "manufacturer": "Manufacturer",
       "registrationNumber": "Reg / License Number",
-      "withdrawalDays": "Withdrawal Period (days)",
-      "withdrawalNote": "For livestock: days before animal can be slaughtered / milk used. Set 0 if not applicable.",
+      "withdrawalNote": "Type what is printed on this product's label. Leave empty if you do not know. This is for your reference; the farm follows the vet's prescription.",
       "isControlled": "Controlled Substance / Scheduled Drug",
       "medications": "medications",
       "searchPlaceholder": "Search by name, generic, manufacturer...",
       "empty": "No medications in catalog yet",
       "noResults": "No medications match your search",
       "controlled": "Controlled",
-      "confirmDeactivate": "Deactivate {{name}}?"
+      "confirmDeactivate": "Deactivate {{name}}?",
+      "productKind": "Product kind",
+      "kind_medicine": "Medicine",
+      "kind_diet": "Diet",
+      "kind_supplement": "Supplement",
+      "withdrawalMilk": "Milk / egg withdrawal on the label (days)",
+      "withdrawalMeat": "Meat withdrawal on the label (days)",
+      "badgeMilk": "Milk {{count}}d",
+      "badgeMeat": "Meat {{count}}d"
     },
     "history": {
       "title": "Dispensing History",

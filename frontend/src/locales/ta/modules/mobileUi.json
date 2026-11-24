@@ -15,7 +15,8 @@
     "date": {
       "today": "இன்று",
       "yesterday": "நேற்று",
-      "other": "வேறு தேதி"
+      "other": "வேறு தேதி",
+      "tomorrow": "நாளை"
     },
     "save": {
       "saving": "சேமிக்கிறது...",

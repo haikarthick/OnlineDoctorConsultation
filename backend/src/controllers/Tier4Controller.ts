@@ -242,7 +242,7 @@ class Tier4Controller {
       res.status(201).json({ data });
     } catch (err: any) {
       // A withdrawal warning is answered in words (the screen asks the seller to confirm), not as a server error.
-      if (err instanceof WithdrawalConfirmError) { res.status(409).json({ success: false, message: err.message, error: { message: err.message, code: err.errorCode } }); return; }
+      if (err instanceof WithdrawalConfirmError) { res.status(409).json({ success: false, message: err.message, error: { message: err.message, code: err.errorCode, params: err.params } }); return; }
       res.status(500).json({ error: { message: err.message } });
     }
   }

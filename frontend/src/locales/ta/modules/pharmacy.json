@@ -182,7 +182,17 @@
         "allergy_ok": "Check patient allergy records",
         "interaction_ok": "Check for concurrent medications",
         "stock_ok": "Sufficient inventory for all line items"
-      }
+      },
+      "lineTreatment": "சிகிச்சை: {{count}} நாட்கள்",
+      "lineVetNone": "மருத்துவர்: தடை காலம் இல்லை",
+      "lineVetLabel": "மருத்துவரின் லேபிள் நாட்கள்: பால்/முட்டை {{milk}}, இறைச்சி {{meat}}",
+      "lineNotGiven": "இந்த வரியில் லேபிள் நாட்கள் தரப்படவில்லை",
+      "matchedTo": "உங்கள் பொருள்: {{name}}",
+      "matchPick": "இது உங்கள் எந்தப் பொருள்?",
+      "matchNone": "இன்னும் இணைக்கப்படவில்லை",
+      "matchedLabel": "இதன் லேபிள்: பால்/முட்டை {{milk}} நாள், இறைச்சி {{meat}} நாள்",
+      "matchDiffers": "இந்த லேபிள் நாட்கள் மருத்துவரின் வரியிலிருந்து வேறுபடுகின்றன. பண்ணை மருத்துவரின் சீட்டைப் பின்பற்றும்.",
+      "matchFailed": "இந்தப் பொருளைச் சேமிக்க முடியவில்லை. சிக்னலைப் பார்த்து மீண்டும் தேர்ந்தெடுக்கவும்."
     },
     "dispense": {
       "title": "Dispense",
@@ -249,15 +259,22 @@
       "reorderQty": "Reorder Quantity",
       "manufacturer": "Manufacturer",
       "registrationNumber": "Reg / License Number",
-      "withdrawalDays": "Withdrawal Period (days)",
-      "withdrawalNote": "For livestock: days before animal can be slaughtered / milk used. Set 0 if not applicable.",
+      "withdrawalNote": "இந்தப் பொருளின் லேபிளில் அச்சிடப்பட்டதையே எழுதுங்கள். தெரியாவிட்டால் காலியாக விடுங்கள். இது உங்கள் குறிப்புக்காக; பண்ணை கால்நடை மருத்துவரின் சீட்டைப் பின்பற்றும்.",
       "isControlled": "Controlled Substance / Scheduled Drug",
       "medications": "medications",
       "searchPlaceholder": "Search by name, generic, manufacturer...",
       "empty": "No medications in catalog yet",
       "noResults": "No medications match your search",
       "controlled": "Controlled",
-      "confirmDeactivate": "Deactivate {{name}}?"
+      "confirmDeactivate": "Deactivate {{name}}?",
+      "productKind": "பொருளின் வகை",
+      "kind_medicine": "மருந்து",
+      "kind_diet": "உணவுமுறை",
+      "kind_supplement": "துணை உணவு",
+      "withdrawalMilk": "லேபிளில் உள்ள பால் / முட்டை தடை காலம் (நாட்கள்)",
+      "withdrawalMeat": "லேபிளில் உள்ள இறைச்சி தடை காலம் (நாட்கள்)",
+      "badgeMilk": "பால் {{count}} நாள்",
+      "badgeMeat": "இறைச்சி {{count}} நாள்"
     },
     "history": {
       "title": "Dispensing History",

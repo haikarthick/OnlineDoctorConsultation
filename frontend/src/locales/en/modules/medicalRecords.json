@@ -694,7 +694,9 @@
     "chooseSubjectTitle": "Which animal is this prescription for?",
     "chooseSubjectHint": "This appointment was booked without an animal. Choose one of the owner's animals.",
     "errorAnimalRequired": "Choose the animal this prescription is for first.",
-    "ownerHasNoAnimals": "This owner has no animal on the platform yet. Ask them to add the animal first, then write the prescription."
+    "ownerHasNoAnimals": "This owner has no animal on the platform yet. Ask them to add the animal first, then write the prescription.",
+    "courseStart": "The course starts on",
+    "courseStartHint": "Starts today unless you choose another day. It decides when milk and meat can go again."
   },
   "prescriptionPrint": {
     "previewTitle": "Prescription Preview",

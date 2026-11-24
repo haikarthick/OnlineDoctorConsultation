@@ -182,7 +182,17 @@
         "allergy_ok": "Check patient allergy records",
         "interaction_ok": "Check for concurrent medications",
         "stock_ok": "Sufficient inventory for all line items"
-      }
+      },
+      "lineTreatment": "ചികിത്സ: {{count}} ദിവസം",
+      "lineVetNone": "ഡോക്ടർ: വിലക്ക് കാലം ഇല്ല",
+      "lineVetLabel": "ഡോക്ടറുടെ ലേബൽ ദിവസങ്ങൾ: പാൽ/മുട്ട {{milk}}, മാംസം {{meat}}",
+      "lineNotGiven": "ഈ വരിയിൽ ലേബൽ ദിവസങ്ങൾ നൽകിയിട്ടില്ല",
+      "matchedTo": "നിങ്ങളുടെ ഉൽപ്പന്നം: {{name}}",
+      "matchPick": "ഇത് നിങ്ങളുടെ ഏത് ഉൽപ്പന്നമാണ്?",
+      "matchNone": "ഇതുവരെ ചേർത്തിട്ടില്ല",
+      "matchedLabel": "ഇതിന്റെ ലേബൽ: പാൽ/മുട്ട {{milk}} ദിവസം, മാംസം {{meat}} ദിവസം",
+      "matchDiffers": "ഈ ലേബൽ ദിവസങ്ങൾ ഡോക്ടറുടെ വരിയിൽ നിന്ന് വ്യത്യസ്തമാണ്. ഫാം ഡോക്ടറുടെ കുറിപ്പടി പാലിക്കുന്നു.",
+      "matchFailed": "ഈ ഉൽപ്പന്നം സേവ് ചെയ്യാനായില്ല. സിഗ്നൽ നോക്കി വീണ്ടും തിരഞ്ഞെടുക്കുക."
     },
     "dispense": {
       "title": "Dispense",
@@ -249,15 +259,22 @@
       "reorderQty": "Reorder Quantity",
       "manufacturer": "Manufacturer",
       "registrationNumber": "Reg / License Number",
-      "withdrawalDays": "Withdrawal Period (days)",
-      "withdrawalNote": "For livestock: days before animal can be slaughtered / milk used. Set 0 if not applicable.",
+      "withdrawalNote": "ഈ ഉൽപ്പന്നത്തിന്റെ ലേബലിൽ അച്ചടിച്ചിരിക്കുന്നത് എഴുതുക. അറിയില്ലെങ്കിൽ ഒഴിച്ചിടുക. ഇത് നിങ്ങളുടെ അറിവിനാണ്; ഫാം മൃഗഡോക്ടറുടെ കുറിപ്പടി പാലിക്കുന്നു.",
       "isControlled": "Controlled Substance / Scheduled Drug",
       "medications": "medications",
       "searchPlaceholder": "Search by name, generic, manufacturer...",
       "empty": "No medications in catalog yet",
       "noResults": "No medications match your search",
       "controlled": "Controlled",
-      "confirmDeactivate": "Deactivate {{name}}?"
+      "confirmDeactivate": "Deactivate {{name}}?",
+      "productKind": "ഉൽപ്പന്നത്തിന്റെ തരം",
+      "kind_medicine": "മരുന്ന്",
+      "kind_diet": "തീറ്റക്രമം",
+      "kind_supplement": "സപ്ലിമെന്റ്",
+      "withdrawalMilk": "ലേബലിലെ പാൽ / മുട്ട വിലക്ക് കാലം (ദിവസം)",
+      "withdrawalMeat": "ലേബലിലെ മാംസ വിലക്ക് കാലം (ദിവസം)",
+      "badgeMilk": "പാൽ {{count}} ദിവസം",
+      "badgeMeat": "മാംസം {{count}} ദിവസം"
     },
     "history": {
       "title": "Dispensing History",

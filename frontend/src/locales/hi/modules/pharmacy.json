@@ -182,7 +182,17 @@
         "allergy_ok": "Check patient allergy records",
         "interaction_ok": "Check for concurrent medications",
         "stock_ok": "Sufficient inventory for all line items"
-      }
+      },
+      "lineTreatment": "इलाज: {{count}} दिन",
+      "lineVetNone": "पशु-चिकित्सक: कोई प्रतीक्षा नहीं",
+      "lineVetLabel": "पशु-चिकित्सक के लेबल के दिन: दूध/अंडे {{milk}}, मांस {{meat}}",
+      "lineNotGiven": "इस पंक्ति में लेबल के दिन नहीं दिए गए",
+      "matchedTo": "आपका उत्पाद: {{name}}",
+      "matchPick": "यह आपका कौन सा उत्पाद है?",
+      "matchNone": "अभी जोड़ा नहीं गया",
+      "matchedLabel": "इसके लेबल पर: दूध/अंडे {{milk}} दिन, मांस {{meat}} दिन",
+      "matchDiffers": "ये लेबल के दिन पशु-चिकित्सक की पंक्ति से अलग हैं। फार्म पशु-चिकित्सक की पर्ची का पालन करता है।",
+      "matchFailed": "यह उत्पाद सहेजा नहीं जा सका। सिग्नल देखकर फिर चुनें।"
     },
     "dispense": {
       "title": "वितरण",
@@ -249,15 +259,22 @@
       "reorderQty": "Reorder Quantity",
       "manufacturer": "Manufacturer",
       "registrationNumber": "Reg / License Number",
-      "withdrawalDays": "Withdrawal Period (days)",
-      "withdrawalNote": "For livestock: days before animal can be slaughtered / milk used. Set 0 if not applicable.",
+      "withdrawalNote": "इस उत्पाद के लेबल पर जो छपा है वही लिखें। पता न हो तो खाली छोड़ें। यह आपकी जानकारी के लिए है; फार्म पशु-चिकित्सक की पर्ची का पालन करता है।",
       "isControlled": "Controlled Substance / Scheduled Drug",
       "medications": "medications",
       "searchPlaceholder": "Search by name, generic, manufacturer...",
       "empty": "No medications in catalog yet",
       "noResults": "No medications match your search",
       "controlled": "Controlled",
-      "confirmDeactivate": "Deactivate {{name}}?"
+      "confirmDeactivate": "Deactivate {{name}}?",
+      "productKind": "उत्पाद का प्रकार",
+      "kind_medicine": "दवा",
+      "kind_diet": "आहार",
+      "kind_supplement": "पूरक",
+      "withdrawalMilk": "लेबल पर दूध / अंडे की प्रतीक्षा अवधि (दिन)",
+      "withdrawalMeat": "लेबल पर मांस की प्रतीक्षा अवधि (दिन)",
+      "badgeMilk": "दूध {{count}} दिन",
+      "badgeMeat": "मांस {{count}} दिन"
     },
     "history": {
       "title": "Dispensing History",

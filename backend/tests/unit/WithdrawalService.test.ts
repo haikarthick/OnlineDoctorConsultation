@@ -7,6 +7,7 @@ const query = database.query as jest.Mock;
 
 const today = new Date().toISOString().slice(0, 10);
 const plus = (n: number) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
+const ctx = { userId: 'u1', action: 'milk_entry' };
 const rxRow = (over: Record<string, unknown> = {}) => ({
   source: 'prescription', source_id: 'p1', animal_id: 'a1', group_id: null, medicine: 'Product A', kind: 'medicine',
   started_on: today, treatment_days: 1, last_dose_on: null, milk_days: 5, meat_days: 0, ...over,
@@ -17,28 +18,44 @@ beforeEach(() => jest.resetAllMocks());
 describe('WithdrawalService.guard (warn and confirm, never a silent block)', () => {
   it('lets the action through when nothing holds milk back', async () => {
     query.mockResolvedValueOnce({ rows: [] });
-    await expect(WithdrawalService.guard({ animalId: 'a1' }, 'milk', undefined)).resolves.toBeUndefined();
+    await expect(WithdrawalService.guard({ animalId: 'a1' }, 'milk', undefined, ctx)).resolves.toBeUndefined();
   });
 
   it('says what is held back, until when and because of what - and asks for confirmation', async () => {
-    query.mockResolvedValueOnce({ rows: [rxRow()] }).mockResolvedValueOnce({ rows: [{ name: 'Lakshmi' }] });
-    const err = await WithdrawalService.guard({ animalId: 'a1' }, 'milk', undefined).catch(e => e);
+    query.mockResolvedValueOnce({ rows: [rxRow()] }).mockResolvedValueOnce({ rows: [{ name: 'Lakshmi', enterprise_id: 'e1' }] });
+    const err = await WithdrawalService.guard({ animalId: 'a1' }, 'milk', undefined, ctx).catch(e => e);
     expect(err).toBeInstanceOf(WithdrawalConfirmError);
     expect(err.errorCode).toBe('WITHDRAWAL_CONFIRM');
     expect(err.statusCode).toBe(409);
     expect(err.message).toMatch(/Lakshmi is under a milk \/ egg withdrawal until/);
     expect(err.message).toContain(plus(5));
     expect(err.message).toContain('Product A');
+    // the screen builds the same warning in the person's language from these values
+    expect(err.params).toEqual({ what: 'milk', name: 'Lakshmi', group: false, until: plus(5), medicine: 'Product A', action: 'milk_entry' });
   });
 
-  it('goes ahead when the person has confirmed, and asks nothing', async () => {
-    await expect(WithdrawalService.guard({ animalId: 'a1' }, 'milk', true)).resolves.toBeUndefined();
-    expect(query).not.toHaveBeenCalled();
+  it('goes ahead when the person has confirmed, and keeps who confirmed what', async () => {
+    query.mockResolvedValueOnce({ rows: [rxRow()] }).mockResolvedValueOnce({ rows: [{ name: 'Lakshmi', enterprise_id: 'e1' }] }).mockResolvedValueOnce({ rows: [] });
+    await expect(WithdrawalService.guard({ animalId: 'a1' }, 'milk', true, ctx)).resolves.toBeUndefined();
+    const [sql, args] = query.mock.calls[2];
+    expect(sql).toMatch(/INSERT INTO withdrawal_overrides/);
+    expect(args).toEqual(['u1', 'e1', 'a1', null, 'milk_entry', 'milk', plus(5), 'Product A']);
+  });
+
+  it('confirming when nothing is held back records nothing', async () => {
+    query.mockResolvedValueOnce({ rows: [] });
+    await expect(WithdrawalService.guard({ animalId: 'a1' }, 'milk', true, ctx)).resolves.toBeUndefined();
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+
+  it('a failed log never blocks the confirmed action', async () => {
+    query.mockResolvedValueOnce({ rows: [rxRow()] }).mockResolvedValueOnce({ rows: [{ name: 'L', enterprise_id: 'e1' }] }).mockRejectedValueOnce(new Error('db down'));
+    await expect(WithdrawalService.guard({ animalId: 'a1' }, 'milk', true, ctx)).resolves.toBeUndefined();
   });
 
   it('milk held back does not stop a meat sale', async () => {
     query.mockResolvedValueOnce({ rows: [rxRow({ meat_days: 0 })] });
-    await expect(WithdrawalService.guard({ animalId: 'a1' }, 'meat', undefined)).resolves.toBeUndefined();
+    await expect(WithdrawalService.guard({ animalId: 'a1' }, 'meat', undefined, ctx)).resolves.toBeUndefined();
   });
 });
 

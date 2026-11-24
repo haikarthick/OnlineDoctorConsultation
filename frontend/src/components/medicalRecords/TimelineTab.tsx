@@ -21,10 +21,10 @@ const TimelineTab: React.FC<Props> = ({ t, selectedAnimal, timeline, fmtDate }) 
         {timeline.map((item: any, i: number) => {
           const typeIcon = item.type.startsWith('record_') ? getRecordTypeInfo(item.type.replace('record_', '')).icon
             : item.type === 'vaccination' ? '💉' : item.type === 'lab_result' ? '🔬'
-            : item.type === 'prescription' ? '💊' : item.type === 'weight' ? '⚖️' : '📋'
+            : item.type === 'prescription' || item.type === 'self_treatment' ? '💊' : item.type === 'weight' ? '⚖️' : '📋'
           const typeClass = item.type.startsWith('record_') ? `rt-${item.type.replace('record_', '')}`
             : item.type === 'vaccination' ? 'rt-vaccination' : item.type === 'lab_result' ? 'rt-lab_report'
-            : item.type === 'prescription' ? 'rt-prescription' : ''
+            : item.type === 'prescription' || item.type === 'self_treatment' ? 'rt-prescription' : ''
           return (
             <div key={`${item.id}-${i}`} className="si-312d4e03">
               <div className={`mr-timeline-dot ${typeClass}`}>{typeIcon}</div>

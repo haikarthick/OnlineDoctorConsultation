@@ -32,6 +32,7 @@ export const errorHandler = (
         message: err.message,
         code: err.errorCode,
         statusCode: err.statusCode,
+        ...(err.params && { params: err.params }),
         ...(process.env.NODE_ENV === 'development' && { details: err.details }),
         timestamp,
         requestId

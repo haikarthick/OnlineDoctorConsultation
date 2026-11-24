@@ -73,7 +73,12 @@ export const roleMiddleware = (allowedRoles: string[]) => {
       allowedRoles.includes(req.userRole) || grantedRoles.some(r => allowedRoles.includes(r))
     );
     if (!hasAccess) {
-      return res.status(403).json({ error: 'Insufficient permissions' });
+      // Said in words, not a bare code: what happened, why, and what to do (the screen shows this sentence as it is).
+      return res.status(403).json({
+        success: false,
+        message: 'Your account does not have access to this action. If you need it, ask the owner or an administrator to give you the right role.',
+        error: { message: 'Your account does not have access to this action. If you need it, ask the owner or an administrator to give you the right role.', code: 'FORBIDDEN_ROLE' },
+      });
     }
     next();
   };

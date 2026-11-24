@@ -247,7 +247,7 @@ class FarmRecordService {
     }
     // Milk and eggs from an animal or herd under a withdrawal: say so, and save only when the person confirms.
     if (subject.kind !== 'farm' && (rt.code === 'milk' || rt.code === 'eggs')) {
-      await WithdrawalService.guard(subject.kind === 'group' ? { groupId: subject.id } : { animalId: subject.id }, 'milk', input.confirmWithdrawal);
+      await WithdrawalService.guard(subject.kind === 'group' ? { groupId: subject.id } : { animalId: subject.id }, 'milk', input.confirmWithdrawal, { userId: caller.userId, action: rt.code === 'eggs' ? 'egg_entry' : 'milk_entry' });
     }
     const feedId = usesStock && input.feedId ? String(input.feedId) : null;
     if (feedId && !/^[0-9a-f-]{36}$/i.test(feedId)) throw new ValidationError('Choose the feed from the list.');

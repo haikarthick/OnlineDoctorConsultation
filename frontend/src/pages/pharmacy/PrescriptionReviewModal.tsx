@@ -5,8 +5,8 @@ import { useSettings } from '../../context/SettingsContext'
 import { useMasterData } from '../../context/MasterDataContext'
 
 import { userMessage } from '../../utils/userMessage'
-interface Medication {
-  name: string
+import PrescriptionLineMatch, { type ReviewLine } from './PrescriptionLineMatch'
+interface Medication extends ReviewLine {
   dosage: string
   frequency: string
   duration: string
@@ -41,7 +41,7 @@ function parseMeds(raw: Medication[] | string | undefined): Medication[] {
 
 type Decision = 'approved' | 'rejected' | 'needs_clarification'
 
-export default function PrescriptionReviewModal({ prescription, onClose, onDone }: Props) {
+export default function PrescriptionReviewModal({ prescription, pharmacyId, onClose, onDone }: Props) {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
   const { speciesLabel } = useMasterData()
@@ -132,6 +132,7 @@ export default function PrescriptionReviewModal({ prescription, onClose, onDone 
                       {med.instructions}
                     </div>
                   )}
+                  <PrescriptionLineMatch line={med} pharmacyId={pharmacyId || undefined} />
                 </div>
               ))}
             </div>

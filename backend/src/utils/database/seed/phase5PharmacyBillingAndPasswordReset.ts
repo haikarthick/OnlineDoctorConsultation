@@ -34,8 +34,6 @@ export async function phase5PharmacyBillingAndPasswordReset(pool: Pool): Promise
         CHECK (invoice_type IN (${INVOICE_TYPES_SQL}))
     `).catch(() => {});
 
-    // Add withdrawal_period_days to pharmacy_medications (for livestock)
-    await pool.query(`ALTER TABLE pharmacy_medications ADD COLUMN IF NOT EXISTS withdrawal_period_days INTEGER DEFAULT 0`).catch(() => {});
     await pool.query(`ALTER TABLE pharmacy_medications ADD COLUMN IF NOT EXISTS is_refrigerated BOOLEAN DEFAULT false`).catch(() => {});
 
     // review_status CHECK was missing 'needs_clarification', so the pharmacist-review route

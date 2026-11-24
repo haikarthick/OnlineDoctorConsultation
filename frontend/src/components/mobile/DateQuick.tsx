@@ -8,6 +8,8 @@ interface DateQuickProps {
   onChange: (isoDate: string) => void
   /** Latest date allowed; defaults to today (records are about what already happened). */
   max?: string
+  /** Adds a Tomorrow chip (a vet starting a course tomorrow). Raise `max` too. */
+  allowTomorrow?: boolean
   disabled?: boolean
 }
 
@@ -22,13 +24,14 @@ export function localIsoDate(offsetDays = 0, from: Date = new Date()): string {
  * A date that is almost always today: one tap for Today, one for Yesterday, and a calendar only
  * when it is neither. Never make someone open a calendar for the common case.
  */
-export const DateQuick: React.FC<DateQuickProps> = ({ label, value, onChange, max, disabled }) => {
+export const DateQuick: React.FC<DateQuickProps> = ({ label, value, onChange, max, allowTomorrow, disabled }) => {
   const { t } = useTranslation()
   const id = useId()
   const inputRef = useRef<HTMLInputElement>(null)
   const today = localIsoDate(0)
   const yesterday = localIsoDate(-1)
-  const isOther = value !== today && value !== yesterday
+  const tomorrow = localIsoDate(1)
+  const isOther = value !== today && value !== yesterday && !(allowTomorrow && value === tomorrow)
 
   return (
     <fieldset className="date-quick" disabled={disabled}>
@@ -40,6 +43,11 @@ export const DateQuick: React.FC<DateQuickProps> = ({ label, value, onChange, ma
         <button type="button" className={`choice-chip ${value === yesterday ? 'is-selected' : ''}`} aria-pressed={value === yesterday} onClick={() => onChange(yesterday)}>
           {t('mobileUi.date.yesterday')}
         </button>
+        {allowTomorrow && (
+          <button type="button" className={`choice-chip ${value === tomorrow ? 'is-selected' : ''}`} aria-pressed={value === tomorrow} onClick={() => onChange(tomorrow)}>
+            {t('mobileUi.date.tomorrow')}
+          </button>
+        )}
         <label htmlFor={id} className={`choice-chip date-quick-other ${isOther ? 'is-selected' : ''}`}>
           <span>{isOther && value ? value : t('mobileUi.date.other')}</span>
           <input

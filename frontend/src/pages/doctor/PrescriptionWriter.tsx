@@ -9,6 +9,7 @@ import { GroupSummary, groupFromConsultation, type ConsultationGroup } from '../
 import { Medication } from '../../types'
 import PrescriptionLineForm, { type RecentLine } from '../../components/prescription/PrescriptionLineForm'
 import { isFoodSegment } from '../../utils/withdrawal'
+import { DateQuick, localIsoDate } from '../../components/mobile/DateQuick'
 import '../../styles/modules.css'
 
 import { userMessage } from '../../utils/userMessage'
@@ -28,6 +29,8 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
   const [diagnosis, setDiagnosis] = useState('')
   const [instructions, setInstructions] = useState('')
   const [followUpDate, setFollowUpDate] = useState('')
+  // The day the course starts: today unless the vet says otherwise (food animals only - it decides when milk / meat can go again).
+  const [courseStart, setCourseStart] = useState(localIsoDate())
   const [medications, setMedications] = useState<Medication[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -187,6 +190,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
         medications,
         instructions: instructions || '',
         followUpDate: followUpDate || undefined,
+        ...(foodProducing && courseStart !== localIsoDate() ? { courseStartOn: courseStart } : {}),
         networkId: selectedNetworkId || undefined,
       } as any)
       setSubmitted(true)
@@ -395,6 +399,12 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
                     onChange={e => setInstructions(e.target.value)}
                   />
                 </div>
+                {foodProducing && (
+                  <div className="form-group">
+                    <DateQuick label={t('prescriptionWriter.courseStart')} value={courseStart} onChange={setCourseStart} max={localIsoDate(14)} allowTomorrow />
+                    <p className="wd-hint">{t('prescriptionWriter.courseStartHint')}</p>
+                  </div>
+                )}
                 <div className="form-group">
                   <label className="form-label">{t('prescriptionWriter.followUpDate')}</label>
                   <input

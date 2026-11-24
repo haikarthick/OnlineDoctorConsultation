@@ -20,6 +20,8 @@ const router = Router();
 const who = (req: Request) => ({ userId: (req as any).userId as string, role: (req as any).userRole as string | undefined });
 
 const selfTreatmentSchema = Joi.object({
+  /** The phone's outbox id: sending the same entry again (the first answer was lost) never makes a second row. */
+  id: Joi.string().uuid().optional(),
   animalId: Joi.string().uuid().allow(null, '').optional(),
   groupId: Joi.string().uuid().allow(null, '').optional(),
   medicineName: Joi.string().trim().max(255).required(),

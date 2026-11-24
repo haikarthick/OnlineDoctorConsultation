@@ -1775,6 +1775,315 @@ async function http(method, url, body, token) {
       else ok('label days on the prescription; one withdrawal answer for banner, due list, herd and movement; warn-and-confirm; strangers refused');
     }
 
+    // ── PHASE 6j: withdrawal follow-ups (migration 068): course start day, "record anyway" log, own-treatment idempotency,
+    // farm treatments on the animal's timeline, "bought on", and the pharmacy's product kind / label days / line matches ──
+    if (serverHealthy && port) {
+      step('PHASE 6j Withdrawal follow-ups: course start, override log, idempotent own treatment, timeline, bought-on, pharmacy line matches');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const mark = serverLog.length;
+      const problems = [];
+      const iso = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
+      let seq = (Math.floor(Date.now() / 1000) % 100000000) + 71000;
+      const msgOf = (r) => r.json?.message || r.json?.error?.message || '';
+      const codeOf = (r) => r.json?.error?.code || '';
+      // A refusal must say what happened in words: no HTTP code, no stack, no raw error text.
+      const plain = (r) => { const m = msgOf(r); return m.length >= 12 && !/status code|\bHTTP\b|\b[45]\d\d\b|\bat .+\(|undefined|\[object|Error:|violates|syntax/i.test(m); };
+      const sql = (q) => psql('verifydb', `SET search_path TO ${SCHEMA}, public; ${q}`);
+      const rows = (q) => psqlJson('verifydb', q);
+      const S = SCHEMA;
+      const uuid = () => require('crypto').randomUUID();
+      const signUp = async (role, dbRole) => {
+        const email = `verify.wf.${role}.${Date.now()}.${seq}@example.com`;
+        const body = { firstName: 'Wf', lastName: 'Verify', email, phone: `9${String(seq++).padStart(9, '0')}`, password: 'Password1', confirmPassword: 'Password1', role, acceptTerms: true };
+        if (role === 'veterinarian') body.licenseNumber = 'VERIFY-LIC-6J';
+        await http('POST', `${apiBase}/auth/register`, body);
+        if (dbRole || role === 'veterinarian') sql(`UPDATE users SET ${dbRole ? `role = '${dbRole}', ` : ''}account_status = 'active', is_active = true WHERE email = '${email}';`);
+        const login = await http('POST', `${apiBase}/auth/login`, { email, password: 'Password1' });
+        return { token: login.json?.data?.token, id: login.json?.data?.user?.id };
+      };
+      const admin = await signUp('pet_owner', 'admin');
+      const stranger = await signUp('pet_owner');
+      const worker = await signUp('pet_owner');
+      const viewer = await signUp('pet_owner');
+      const unbookedVet = await signUp('veterinarian');
+      const bookedVet = await signUp('veterinarian');
+      const pharmacist = await signUp('pet_owner', 'pharmacist');
+      const otherPharmacist = await signUp('pet_owner', 'pharmacist'); // a pharmacist of ANOTHER network
+      const farmerLogin = await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' });
+      const farmer = farmerLogin.json?.data?.token;
+      const tomId = farmerLogin.json?.data?.user?.id;
+      let ent = null;
+      try { ent = rows(`SELECT e.id FROM ${S}.enterprises e JOIN ${S}.users u ON u.id = e.owner_id WHERE u.email = 'tom.wilson@example.com' ORDER BY e.created_at LIMIT 1`)[0]?.id; } catch { /* reported below */ }
+      const everyone = [admin, stranger, worker, viewer, unbookedVet, bookedVet, pharmacist, otherPharmacist];
+      if (everyone.some(u => !u.token || !u.id) || !farmer || !tomId || !ent) problems.push('could not set up the accounts and the seeded farm for the withdrawal follow-ups');
+      else {
+        const rx = (body, tok = admin.token) => http('POST', `${apiBase}/prescriptions`, { petOwnerId: tomId, diagnosis: 'Verify', instructions: '', ...body }, tok);
+        const line = (extra) => ({ name: 'Verify Wf Product', dosage: '5 ml', frequency: 'Once daily', treatmentDays: 2, withdrawalMilkDays: 3, withdrawalMeatDays: 10, ...extra });
+        const newCow = async (name) => (await http('POST', `${apiBase}/animals`, { name, species: 'Cattle', gender: 'female', enterpriseId: ent }, farmer)).json?.data?.id;
+        const wd = (id, tok) => http('GET', `${apiBase}/animals/${id}/withdrawal`, null, tok);
+        sql(`INSERT INTO enterprise_members (enterprise_id, user_id, role) VALUES ('${ent}', '${worker.id}', 'worker'), ('${ent}', '${viewer.id}', 'viewer') ON CONFLICT DO NOTHING;`);
+
+        // ── 1. Migration 068 / init.sql ──
+        const cols = rows(`SELECT table_name, column_name FROM information_schema.columns WHERE table_schema = '${S}' AND table_name IN ('prescriptions','medical_records','pharmacy_medications')`);
+        const has = (t, c) => cols.some(x => x.table_name === t && x.column_name === c);
+        const tbl = rows(`SELECT table_name FROM information_schema.tables WHERE table_schema = '${S}' AND table_name = 'withdrawal_overrides'`);
+        if (!has('prescriptions', 'course_start_on')) problems.push('prescriptions.course_start_on is missing after boot');
+        if (!tbl.length) problems.push('table withdrawal_overrides is missing after boot');
+        for (const [t, c] of [['medical_records', 'withdrawal_until_milk'], ['medical_records', 'withdrawal_until_meat'], ['pharmacy_medications', 'withdrawal_days_milk'], ['pharmacy_medications', 'withdrawal_days_meat'], ['pharmacy_medications', 'withdrawal_period_days']]) {
+          if (has(t, c)) problems.push(`${t}.${c} should have been dropped but still exists`);
+        }
+        for (const c of ['withdrawal_milk_days', 'withdrawal_meat_days', 'product_kind']) if (!has('pharmacy_medications', c)) problems.push(`pharmacy_medications.${c} is missing`);
+
+        // ── 2. The vet picks the course start ──
+        const cowToday = await newCow('Verify Wf Today');
+        const cowTomorrow = await newCow('Verify Wf Tomorrow');
+        if (!cowToday || !cowTomorrow) problems.push('could not add the cows for the course-start check');
+        else {
+          sql(`INSERT INTO bookings (pet_owner_id, veterinarian_id, animal_id, enterprise_id, scheduled_date, time_slot_start, time_slot_end, status) VALUES ('${tomId}', '${bookedVet.id}', '${cowToday}', '${ent}', CURRENT_DATE, '10:00', '10:30', 'confirmed');`);
+          const same = await rx({ animalId: cowToday, medications: [line()] });
+          const later = await rx({ animalId: cowTomorrow, courseStartOn: iso(1), medications: [line()] });
+          if (same.status !== 201) problems.push(`a same-day cow prescription: HTTP ${same.status} ${msgOf(same).slice(0, 100)}`);
+          if (later.status !== 201) problems.push(`a cow prescription starting tomorrow: HTTP ${later.status} ${msgOf(later).slice(0, 100)}`);
+          const a = (await wd(cowToday, farmer)).json?.data; const b = (await wd(cowTomorrow, farmer)).json?.data;
+          if (a?.milkUntil !== iso(4) || b?.milkUntil !== iso(5) || a?.meatUntil !== iso(11) || b?.meatUntil !== iso(12)) {
+            problems.push(`starting tomorrow must move the withdrawal one day later: same-day milk ${a?.milkUntil} meat ${a?.meatUntil}, tomorrow milk ${b?.milkUntil} meat ${b?.meatUntil} (expected ${iso(4)}/${iso(11)} and ${iso(5)}/${iso(12)})`);
+          }
+          const old = await rx({ animalId: cowToday, courseStartOn: iso(-60), medications: [line()] });
+          const far = await rx({ animalId: cowToday, courseStartOn: iso(30), medications: [line()] });
+          const junk = await rx({ animalId: cowToday, courseStartOn: '2026-13-45', medications: [line()] });
+          for (const [what, r] of [['60 days ago', old], ['30 days ahead', far], ['not a real date', junk]]) {
+            if (r.status !== 400 || !plain(r)) problems.push(`a course start of ${what} must be refused in plain words (HTTP ${r.status}: ${msgOf(r).slice(0, 120)})`);
+          }
+          const after = (await wd(cowToday, farmer)).json?.data;
+          if (after?.milkUntil !== iso(4)) problems.push('a refused prescription changed the animal\'s withdrawal');
+          // a pet: harmless
+          const dog = (await http('POST', `${apiBase}/animals`, { name: 'Verify Wf Dog', species: 'Dog', gender: 'male' }, stranger.token)).json?.data?.id;
+          if (dog) {
+            const pet = await http('POST', `${apiBase}/prescriptions`, { petOwnerId: stranger.id, animalId: dog, diagnosis: 'Verify', courseStartOn: iso(1), medications: [{ name: 'Verify Pet Product', dosage: '1', frequency: 'Daily' }] }, admin.token);
+            if (pet.status !== 201) problems.push(`a pet prescription with a course start day: HTTP ${pet.status} ${msgOf(pet).slice(0, 100)}`);
+          } else problems.push('could not add the pet for the course-start check');
+          // every persona sees the same answer; a stranger and the unbooked vet are refused in words
+          for (const [who, tok] of [['farm owner', farmer], ['farm worker', worker.token], ['farm viewer', viewer.token], ['admin', admin.token], ['booked vet', bookedVet.token]]) {
+            const r = await wd(cowToday, tok);
+            if (r.status !== 200 || r.json?.data?.milkUntil !== iso(4)) problems.push(`${who} reading the withdrawal: HTTP ${r.status} milk ${r.json?.data?.milkUntil} (expected ${iso(4)})`);
+          }
+          for (const [who, tok] of [['stranger', stranger.token], ['unbooked vet', unbookedVet.token]]) {
+            const r = await wd(cowToday, tok);
+            if (r.status !== 403 || !plain(r)) problems.push(`${who} reading another farm's withdrawal must be refused in words (HTTP ${r.status}: ${msgOf(r).slice(0, 100)})`);
+          }
+        }
+
+        // ── 3. Warn-and-confirm: translatable params + one override row per confirmation ──
+        const overrides = (animal) => rows(`SELECT * FROM ${S}.withdrawal_overrides WHERE animal_id = '${animal}'`);
+        const cowMilk = await newCow('Verify Wf Milk'); const cowSale = await newCow('Verify Wf Sale');
+        const cowList = await newCow('Verify Wf Listing'); const cowFree = await newCow('Verify Wf Free');
+        if (![cowMilk, cowSale, cowList, cowFree].every(Boolean)) problems.push('could not add the cows for the warn-and-confirm check');
+        else {
+          for (const c of [cowMilk, cowSale, cowList]) {
+            const r = await rx({ animalId: c, medications: [line({ name: 'Verify Wf Override Drug' })] });
+            if (r.status !== 201) problems.push(`prescription for the confirm check: HTTP ${r.status} ${msgOf(r).slice(0, 100)}`);
+          }
+          const checkParams = (r, action, what, label) => {
+            const p = r.json?.error?.params;
+            if (r.status !== 409 || codeOf(r) !== 'WITHDRAWAL_CONFIRM') { problems.push(`${label} under withdrawal must ask first (HTTP ${r.status}, code ${codeOf(r)}: ${msgOf(r).slice(0, 100)})`); return; }
+            if (!plain(r)) problems.push(`${label}: the warning is not plain words: ${msgOf(r).slice(0, 100)}`);
+            const keys = ['what', 'name', 'group', 'until', 'medicine', 'action'];
+            if (!p || keys.some(k => !(k in p))) problems.push(`${label}: error.params must carry ${keys.join(', ')} but is ${JSON.stringify(p)}`);
+            else if (p.what !== what || p.action !== action || p.medicine !== 'Verify Wf Override Drug' || p.group !== false || !/^\d{4}-\d{2}-\d{2}$/.test(p.until) || !p.name) problems.push(`${label}: params wrong: ${JSON.stringify(p)}`);
+          };
+          const checkRow = (animal, action, what, label) => {
+            const o = overrides(animal);
+            const untilExpect = what === 'milk' ? iso(4) : iso(11);
+            if (o.length !== 1) problems.push(`${label}: confirming must write exactly one withdrawal_overrides row, found ${o.length}`);
+            else {
+              const x = o[0];
+              if (x.user_id !== tomId || x.enterprise_id !== ent || x.action !== action || x.withheld !== what || String(x.until_date).slice(0, 10) !== untilExpect || x.medicine !== 'Verify Wf Override Drug') {
+                problems.push(`${label}: override row wrong: ${JSON.stringify({ user: x.user_id === tomId, farm: x.enterprise_id === ent, action: x.action, withheld: x.withheld, until: x.until_date, medicine: x.medicine })} (expected ${action}/${what}/${untilExpect})`);
+              }
+            }
+          };
+          const milk = { enterpriseId: ent, animalId: cowMilk, recordType: 'milk', session: 'am', quantity: 6 };
+          checkParams(await http('POST', `${apiBase}/farm-records`, milk, farmer), 'milk_entry', 'milk', 'milk entry');
+          if (overrides(cowMilk).length) problems.push('asking (without confirming) wrote an override row');
+          const m2 = await http('POST', `${apiBase}/farm-records`, { ...milk, confirmWithdrawal: true }, farmer);
+          if (m2.status >= 300) problems.push(`milk saved after confirming: HTTP ${m2.status} ${msgOf(m2).slice(0, 100)}`); else checkRow(cowMilk, 'milk_entry', 'milk', 'milk entry');
+          checkParams(await http('POST', `${apiBase}/farm-records/events`, { animalId: cowSale, eventType: 'sale' }, farmer), 'animal_sale', 'meat', 'animal sale');
+          const s2 = await http('POST', `${apiBase}/farm-records/events`, { animalId: cowSale, eventType: 'sale', confirmWithdrawal: true }, farmer);
+          if (s2.status >= 300) problems.push(`sale saved after confirming: HTTP ${s2.status} ${msgOf(s2).slice(0, 100)}`); else checkRow(cowSale, 'animal_sale', 'meat', 'animal sale');
+          const listing = { title: 'Verify Wf cow for sale', description: 'runtime verification', category: 'animal', listingType: 'fixed_price', price: 5000, quantity: 1, unit: 'head', species: 'cattle', contactPhone: '9876543210', state: 'Kerala', district: 'Thrissur', pincode: '680001', linkedAnimalId: cowList };
+          const l1 = await http('POST', `${apiBase}/marketplace/listings`, listing, farmer);
+          if (l1.status === 409 && codeOf(l1) === 'WITHDRAWAL_CONFIRM') {
+            if (!plain(l1) || l1.json?.error?.params?.action !== 'listing' || l1.json?.error?.params?.what !== 'meat') problems.push(`listing warning params wrong: ${JSON.stringify(l1.json?.error?.params)}`);
+            const l2 = await http('POST', `${apiBase}/marketplace/listings`, { ...listing, confirmWithdrawal: true }, farmer);
+            if (l2.status >= 300) problems.push(`listing after confirming: HTTP ${l2.status} ${msgOf(l2).slice(0, 120)}`); else checkRow(cowList, 'listing', 'meat', 'marketplace listing');
+          } else problems.push(`listing an animal under a meat withdrawal must ask first (HTTP ${l1.status}, code ${codeOf(l1)}: ${msgOf(l1).slice(0, 120)})`);
+          const free = await http('POST', `${apiBase}/farm-records`, { enterpriseId: ent, animalId: cowFree, recordType: 'milk', session: 'am', quantity: 4, confirmWithdrawal: true }, farmer);
+          if (free.status >= 300) problems.push(`milk from an animal with no withdrawal: HTTP ${free.status} ${msgOf(free).slice(0, 100)}`);
+          if (overrides(cowFree).length) problems.push('confirming when nothing is held back wrote an override row');
+        }
+
+        // ── 4. Own treatment is idempotent; who may add one ──
+        const cowSelf = await newCow('Verify Wf Self');
+        const tid = uuid();
+        const own = { id: tid, animalId: cowSelf, medicineName: 'Verify Wf Own', treatmentDays: 2, withdrawalMilkDays: 1, withdrawalMeatDays: 4 };
+        const t1 = await http('POST', `${apiBase}/enterprises/${ent}/treatments`, own, farmer);
+        const t2 = await http('POST', `${apiBase}/enterprises/${ent}/treatments`, own, farmer);
+        const nRows = Number(rows(`SELECT COUNT(*) AS n FROM ${S}.self_treatments WHERE id = '${tid}'`)[0]?.n);
+        if (t1.status !== 201 || t2.status !== 201) problems.push(`sending the same own treatment twice: HTTP ${t1.status} then ${t2.status} ${msgOf(t2).slice(0, 100)}`);
+        if (nRows !== 1) problems.push(`the same client id sent twice must leave ONE self_treatments row, found ${nRows}`);
+        if (t2.json?.data?.id !== tid) problems.push(`the repeat should answer with the first row's id, got ${t2.json?.data?.id}`);
+        const dupHist = ((await http('GET', `${apiBase}/enterprises/${ent}/treatments`, null, farmer)).json?.data?.history || []).filter(h => h.medicine === 'Verify Wf Own');
+        if (dupHist.length !== 1) problems.push(`the farm history shows the own treatment ${dupHist.length} times, expected once`);
+        const w1 = await http('POST', `${apiBase}/enterprises/${ent}/treatments`, { animalId: cowSelf, medicineName: 'Verify Wf Worker', treatmentDays: 1, withdrawalMilkDays: 0, withdrawalMeatDays: 0 }, worker.token);
+        if (w1.status !== 201) problems.push(`a farm worker entering a treatment: HTTP ${w1.status} ${msgOf(w1).slice(0, 100)}`);
+        for (const [who, tok] of [['farm viewer (no record right)', viewer.token], ['stranger', stranger.token], ['unbooked vet', unbookedVet.token]]) {
+          const r = await http('POST', `${apiBase}/enterprises/${ent}/treatments`, { animalId: cowSelf, medicineName: 'Verify Wf Nope', treatmentDays: 1, withdrawalMilkDays: 0, withdrawalMeatDays: 0 }, tok);
+          if (r.status !== 403 || !plain(r)) problems.push(`${who} adding a treatment must be refused in words (HTTP ${r.status}: ${msgOf(r).slice(0, 100)})`);
+          if (!who.startsWith('farm viewer')) {
+            const h = await http('GET', `${apiBase}/enterprises/${ent}/treatments`, null, tok);
+            if (h.status !== 403 || !plain(h)) problems.push(`${who} reading the farm's treatments must be refused in words (HTTP ${h.status}: ${msgOf(h).slice(0, 100)})`);
+          }
+        }
+        if (Number(rows(`SELECT COUNT(*) AS n FROM ${S}.self_treatments WHERE medicine_name = 'Verify Wf Nope'`)[0]?.n) !== 0) problems.push('a refused person still created a treatment row');
+
+        // ── 5. The animal's timeline carries the farm's own treatment ──
+        sql(`INSERT INTO bookings (pet_owner_id, veterinarian_id, animal_id, enterprise_id, scheduled_date, time_slot_start, time_slot_end, status) VALUES ('${tomId}', '${bookedVet.id}', '${cowSelf}', '${ent}', CURRENT_DATE, '11:00', '11:30', 'confirmed');`);
+        await rx({ animalId: cowSelf, medications: [line({ name: 'Verify Wf Timeline Rx' })] });
+        for (const [who, tok] of [['farm owner', farmer], ['farm worker', worker.token], ['admin', admin.token], ['booked vet', bookedVet.token]]) {
+          const all = await http('GET', `${apiBase}/timeline/animal/${cowSelf}`, null, tok);
+          const hit = (all.json?.data || []).find(i => i.type === 'self_treatment');
+          if (all.status !== 200 || !hit || !/^Treated by the farm: Verify Wf Own/.test(hit.title || '')) problems.push(`${who}: the timeline should list "Treated by the farm: Verify Wf Own" (HTTP ${all.status}, types ${JSON.stringify((all.json?.data || []).map(i => i.type))})`);
+          const onlyRx = await http('GET', `${apiBase}/timeline/animal/${cowSelf}?types=prescription`, null, tok);
+          const types = (onlyRx.json?.data || []).map(i => i.type);
+          if (!types.includes('self_treatment') || !types.includes('prescription')) problems.push(`${who}: types=prescription must return prescriptions AND the farm's own treatment, got ${JSON.stringify(types)}`);
+        }
+        const onlyWeight = await http('GET', `${apiBase}/timeline/animal/${cowSelf}?types=weight`, null, farmer);
+        if ((onlyWeight.json?.data || []).some(i => i.type === 'self_treatment')) problems.push('types=weight must not return the farm\'s own treatment');
+        for (const [who, tok] of [['stranger', stranger.token], ['unbooked vet', unbookedVet.token]]) {
+          const r = await http('GET', `${apiBase}/timeline/animal/${cowSelf}`, null, tok);
+          if (r.status !== 403 || !plain(r)) problems.push(`${who} reading another farm's timeline must be refused in words (HTTP ${r.status}: ${msgOf(r).slice(0, 100)})`);
+        }
+
+        // ── pharmacy fixtures: two networks, two pharmacies in the first, a pharmacist for each network ──
+        const net1 = uuid(); const net2 = uuid(); const phA = uuid(); const phB = uuid(); const phC = uuid();
+        sql(`INSERT INTO hospital_networks (id, name) VALUES ('${net1}', 'Verify Wf Network One'), ('${net2}', 'Verify Wf Network Two');
+             INSERT INTO hospital_pharmacies (id, network_id, pharmacy_name) VALUES ('${phA}', '${net1}', 'Verify Wf Pharmacy A'), ('${phB}', '${net1}', 'Verify Wf Pharmacy B'), ('${phC}', '${net2}', 'Verify Wf Pharmacy C');
+             INSERT INTO hospital_network_members (network_id, user_id, network_role) VALUES ('${net1}', '${pharmacist.id}', 'hospital_staff'), ('${net2}', '${otherPharmacist.id}', 'hospital_staff');`);
+
+        // ── 6. Farmer history: "bought on" once the pharmacy has handed the medicine over ──
+        const cowBuy = await newCow('Verify Wf Bought');
+        const buyRx = await rx({ animalId: cowBuy, medications: [line({ name: 'Verify Wf Bought Drug' })] });
+        const buyId = buyRx.json?.data?.id;
+        const boughtOf = async (tok) => ((await http('GET', `${apiBase}/enterprises/${ent}/treatments`, null, tok)).json?.data?.history || []).find(h => h.medicine === 'Verify Wf Bought Drug');
+        if (!buyId) problems.push(`prescription for the bought-on check: HTTP ${buyRx.status} ${msgOf(buyRx).slice(0, 100)}`);
+        else {
+          const before = await boughtOf(farmer);
+          if (!before || before.boughtOn !== null) problems.push(`before any dispensing the history row must carry boughtOn: null, got ${JSON.stringify(before?.boughtOn)}`);
+          sql(`INSERT INTO dispensing_records (prescription_id, pharmacy_id, pharmacist_id, dispensing_status) VALUES ('${buyId}', '${phA}', '${pharmacist.id}', 'prepared');`);
+          const prepared = await boughtOf(farmer);
+          if (prepared?.boughtOn) problems.push(`a prepared (not handed over) dispensing must not set boughtOn, got ${prepared.boughtOn}`);
+          sql(`INSERT INTO dispensing_records (prescription_id, pharmacy_id, pharmacist_id, dispensing_status, handed_over_at) VALUES ('${buyId}', '${phA}', '${pharmacist.id}', 'handed_over', NOW());`);
+          for (const [who, tok] of [['farm owner', farmer], ['farm worker', worker.token], ['farm viewer', viewer.token], ['admin', admin.token]]) {
+            const h = await boughtOf(tok);
+            const ok1 = h && [iso(-1), iso(0), iso(1)].includes(h.boughtOn);
+            if (!ok1) problems.push(`${who}: after hand-over the history row must carry boughtOn = today, got ${JSON.stringify(h?.boughtOn)}`);
+            else if (h.milkUntil !== iso(3) && h.milkUntil !== iso(4)) problems.push(`${who}: buying the medicine must not change the withdrawal, milkUntil is ${h.milkUntil}`);
+          }
+        }
+
+        // ── 7. Pharmacy: product kind, label days, matches (network zone fixtures built above) ──
+        const med = await http('POST', `${apiBase}/networks/${net1}/medications`, { name: 'Verify Wf Stock Item', product_kind: 'diet', withdrawal_milk_days: 3, withdrawal_meat_days: 7 }, pharmacist.token);
+        const medId = med.json?.id;
+        if (med.status !== 201 || !medId || med.json?.product_kind !== 'diet' || med.json?.withdrawal_milk_days !== 3 || med.json?.withdrawal_meat_days !== 7) problems.push(`adding a diet product with label days: HTTP ${med.status} ${JSON.stringify(med.json || {}).slice(0, 200)}`);
+        const badKind = await http('POST', `${apiBase}/networks/${net1}/medications`, { name: 'Verify Wf Bad Kind', product_kind: 'potion' }, pharmacist.token);
+        if (badKind.status !== 400 || !plain(badKind)) problems.push(`an unknown product kind must be refused in words (HTTP ${badKind.status}: ${msgOf(badKind).slice(0, 100)})`);
+        for (const bad of [-1, 400, 2.5, 'abc']) {
+          const r = await http('POST', `${apiBase}/networks/${net1}/medications`, { name: 'Verify Wf Bad Days', withdrawal_meat_days: bad }, pharmacist.token);
+          if (r.status !== 400 || !plain(r)) problems.push(`withdrawal days of ${JSON.stringify(bad)} must be refused in words (HTTP ${r.status}: ${msgOf(r).slice(0, 100)})`);
+        }
+        if (Number(rows(`SELECT COUNT(*) AS n FROM ${S}.pharmacy_medications WHERE name LIKE 'Verify Wf Bad%'`)[0]?.n) !== 0) problems.push('a refused product was still saved');
+        const notMember = await http('POST', `${apiBase}/networks/${net1}/medications`, { name: 'Verify Wf Intruder' }, otherPharmacist.token);
+        if (notMember.status !== 403 || !plain(notMember)) problems.push(`a pharmacist of another network adding a product must be refused in words (HTTP ${notMember.status}: ${msgOf(notMember).slice(0, 100)})`);
+        const noClear = await http('PATCH', `${apiBase}/networks/${net1}/medications/${medId}`, { unit_cost: 5 }, pharmacist.token);
+        if (noClear.json?.withdrawal_milk_days !== 3 || noClear.json?.withdrawal_meat_days !== 7 || noClear.json?.product_kind !== 'diet') problems.push(`an edit that leaves the label days out must keep them: ${JSON.stringify({ k: noClear.json?.product_kind, m: noClear.json?.withdrawal_milk_days, e: noClear.json?.withdrawal_meat_days })} (HTTP ${noClear.status})`);
+        const clear = await http('PATCH', `${apiBase}/networks/${net1}/medications/${medId}`, { withdrawal_milk_days: null }, pharmacist.token);
+        if (clear.status !== 200 || clear.json?.withdrawal_milk_days !== null || clear.json?.withdrawal_meat_days !== 7) problems.push(`withdrawal_milk_days:null must clear milk and keep meat: HTTP ${clear.status} ${JSON.stringify({ m: clear.json?.withdrawal_milk_days, e: clear.json?.withdrawal_meat_days })}`);
+        const badPatch = await http('PATCH', `${apiBase}/networks/${net1}/medications/${medId}`, { product_kind: 'potion' }, pharmacist.token);
+        if (badPatch.status !== 400 || !plain(badPatch)) problems.push(`an edit with an unknown kind must be refused in words (HTTP ${badPatch.status})`);
+        // a second, switched-off item must not be offered; one product of the other network must not be reachable
+        const off = await http('POST', `${apiBase}/networks/${net1}/medications`, { name: 'Verify Wf Switched Off' }, pharmacist.token);
+        if (off.json?.id) await http('PATCH', `${apiBase}/networks/${net1}/medications/${off.json.id}`, { is_active: false }, pharmacist.token);
+        const foreign = await http('POST', `${apiBase}/networks/${net2}/medications`, { name: 'Verify Wf Foreign Item', product_kind: 'medicine' }, otherPharmacist.token);
+        const foreignId = foreign.json?.id;
+        if (!foreignId) problems.push(`the other network's pharmacist adding a product: HTTP ${foreign.status} ${JSON.stringify(foreign.json || {}).slice(0, 120)}`);
+
+        for (const [who, tok] of [['pharmacist', pharmacist.token], ['admin', admin.token]]) {
+          const r = await http('GET', `${apiBase}/pharmacies/${phA}/medications`, null, tok);
+          const names = (Array.isArray(r.json) ? r.json : []).map(x => x.name);
+          if (r.status !== 200 || !names.includes('Verify Wf Stock Item') || names.includes('Verify Wf Switched Off') || names.includes('Verify Wf Foreign Item')) problems.push(`${who}: the pharmacy's product list must hold the active items of its own network only: HTTP ${r.status} ${JSON.stringify(names)}`);
+        }
+        for (const [who, tok] of [['pharmacist of another network', otherPharmacist.token], ['stranger', stranger.token], ['unbooked vet', unbookedVet.token], ['farmer', farmer]]) {
+          const r = await http('GET', `${apiBase}/pharmacies/${phA}/medications`, null, tok);
+          if (r.status !== 403 || !plain(r)) problems.push(`${who} reading a pharmacy's product list must be refused in words (HTTP ${r.status}: ${msgOf(r).slice(0, 100)})`);
+        }
+
+        // the prescription the pharmacy sees
+        const cowPh = await newCow('Verify Wf Pharmacy Cow');
+        const phRx = await rx({ animalId: cowPh, medications: [line({ name: 'Verify Wf Match Me', withdrawalMilkDays: 3, withdrawalMeatDays: 10 })] });
+        const phRxId = phRx.json?.data?.id;
+        if (!phRxId) problems.push(`prescription for the pharmacy check: HTTP ${phRx.status} ${msgOf(phRx).slice(0, 100)}`);
+        else sql(`UPDATE prescriptions SET network_id = '${net1}', review_status = 'pending_review' WHERE id = '${phRxId}';`);
+        const lineOf = async (pharmacy, tok) => {
+          const r = await http('GET', `${apiBase}/pharmacies/${pharmacy}/pending-prescriptions`, null, tok);
+          const p = (Array.isArray(r.json) ? r.json : []).find(x => x.id === phRxId);
+          return { r, line: (p?.medications || []).find(l => l.name === 'Verify Wf Match Me') };
+        };
+        const before = await lineOf(phA, pharmacist.token);
+        if (before.r.status !== 200 || !before.line) problems.push(`the pharmacy queue must show the prescription (HTTP ${before.r.status})`);
+        else if (before.line.stockMatch) problems.push('a line with no saved match must carry no stockMatch');
+
+        const put = (pharmacy, body, tok) => http('PUT', `${apiBase}/pharmacies/${pharmacy}/line-matches`, body, tok);
+        const m1 = await put(phA, { lineName: '  Verify Wf MATCH me ', medId }, pharmacist.token);
+        if (m1.status !== 200) problems.push(`a pharmacist saving a match: HTTP ${m1.status} ${msgOf(m1).slice(0, 100)}`);
+        const noRole = await put(phA, { lineName: 'Verify Wf Match Me', medId }, farmer);
+        if (noRole.status !== 403 || !plain(noRole)) problems.push(`a farmer saving a pharmacy match must be refused in words (HTTP ${noRole.status}: ${msgOf(noRole).slice(0, 100)})`);
+        const otherNet = await put(phA, { lineName: 'Verify Wf Match Me', medId }, otherPharmacist.token);
+        if (otherNet.status !== 403 || !plain(otherNet)) problems.push(`a pharmacist of another network saving a match must be refused in words (HTTP ${otherNet.status}: ${msgOf(otherNet).slice(0, 100)})`);
+        const foreignMed = await put(phA, { lineName: 'Verify Wf Match Me', medId: foreignId || uuid() }, pharmacist.token);
+        if (foreignMed.status !== 404 || !plain(foreignMed)) problems.push(`a product of another network must be refused with 404 in words (HTTP ${foreignMed.status}: ${msgOf(foreignMed).slice(0, 120)})`);
+        const notUuid = await put(phA, { lineName: 'Verify Wf Match Me', medId: 'not-a-uuid' }, pharmacist.token);
+        if (notUuid.status !== 400 || !plain(notUuid)) problems.push(`a medId that is not an id must be refused with 400 in words (HTTP ${notUuid.status}: ${msgOf(notUuid).slice(0, 100)})`);
+        const noName = await put(phA, { medId }, pharmacist.token);
+        if (noName.status !== 400 || !plain(noName)) problems.push(`a match with no line name must be refused in words (HTTP ${noName.status})`);
+        const nMatch = Number(rows(`SELECT COUNT(*) AS n FROM ${S}.pharmacy_line_matches WHERE pharmacy_id = '${phA}'`)[0]?.n);
+        if (nMatch !== 1) problems.push(`exactly one saved match expected after the refusals, found ${nMatch}`);
+
+        const after = await lineOf(phA, pharmacist.token);
+        const sm = after.line?.stockMatch;
+        if (!sm || sm.medId !== medId || sm.name !== 'Verify Wf Stock Item') problems.push(`the queue line must carry the saved match: ${JSON.stringify(sm)}`);
+        else if (sm.differs !== true) problems.push(`label days differ (meat 7 vs the vet's 10) so differs must be true: ${JSON.stringify(sm)}`);
+        const adminSees = await lineOf(phA, admin.token);
+        if (!adminSees.line?.stockMatch) problems.push('admin does not see the same saved match');
+        const sameLine = await lineOf(phB, pharmacist.token);
+        if (sameLine.r.status !== 200 || sameLine.line?.stockMatch) problems.push(`another pharmacy of the same network must not see pharmacy A's match: HTTP ${sameLine.r.status} ${JSON.stringify(sameLine.line?.stockMatch)}`);
+        const outsiderQueue = await http('GET', `${apiBase}/pharmacies/${phA}/pending-prescriptions`, null, otherPharmacist.token);
+        if (outsiderQueue.status !== 403 || !plain(outsiderQueue)) problems.push(`a pharmacist of another network reading the queue must be refused in words (HTTP ${outsiderQueue.status})`);
+        // same days -> differs false
+        await http('PATCH', `${apiBase}/networks/${net1}/medications/${medId}`, { withdrawal_meat_days: 10 }, pharmacist.token);
+        const same = (await lineOf(phA, pharmacist.token)).line?.stockMatch;
+        if (!same || same.differs !== false) problems.push(`with the same label days differs must be false: ${JSON.stringify(same)}`);
+        // forget the match
+        const del = await put(phA, { lineName: 'Verify Wf Match Me', medId: null }, pharmacist.token);
+        if (del.status !== 200 || (await lineOf(phA, pharmacist.token)).line?.stockMatch) problems.push(`forgetting a match: HTTP ${del.status}, the line still carries it`);
+      }
+
+      const sqlErrs = serverLog.slice(mark).split('\n')
+        .filter(l => /syntax error|does not exist|violates|invalid input syntax|there is no unique|could not determine|DATABASE_ERROR|statusCode":5\d\d/i.test(l))
+        .map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(-240));
+      if (problems.length || sqlErrs.length) fail('The withdrawal follow-ups misbehave on the real schema.', [...problems, ...sqlErrs]);
+      else ok('068 schema; course start day; one override row per confirmation; idempotent own treatment; timeline; bought-on; pharmacy kind, label days and line matches');
+    }
+
     // ── PHASE 7: the browser ──
     let sweepAccounts = [];
     if (serverHealthy && port) {

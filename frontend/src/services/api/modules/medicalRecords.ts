@@ -5,7 +5,7 @@ export const medicalRecordsApi = {
   async createPrescription(data: {
     consultationId?: string; petOwnerId?: string; animalId?: string;
     medications: { name: string; dosage: string; frequency: string; duration: string; instructions?: string }[];
-    instructions: string; validUntil?: string; diagnosis?: string; followUpDate?: string
+    instructions: string; validUntil?: string; diagnosis?: string; followUpDate?: string; courseStartOn?: string
   }) {
     const response = await sharedClient.post('/prescriptions', data)
     return response.data

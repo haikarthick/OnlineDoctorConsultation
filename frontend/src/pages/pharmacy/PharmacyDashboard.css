@@ -386,3 +386,11 @@
   gap: 10px;
   margin-top: 18px;
 }
+
+/* A prescription line in the review: what the vet wrote and which of the pharmacy's own products it is. */
+.pharm-line-match { margin-top: 6px; }
+.pharm-line-facts { display: flex; flex-wrap: wrap; gap: 6px; }
+.pharm-line-pick { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; font-size: 0.9rem; }
+.pharm-line-pick select { min-height: 40px; }
+.pharm-line-note { margin: 6px 0 0; font-size: 0.85rem; opacity: 0.85; }
+.pharm-line-warn { margin: 6px 0 0; padding: 8px 10px; border-radius: 8px; background: #fff8e1; color: #6d4c00; font-size: 0.9rem; }

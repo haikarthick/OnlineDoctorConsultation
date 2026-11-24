@@ -182,7 +182,17 @@
         "allergy_ok": "Check patient allergy records",
         "interaction_ok": "Check for concurrent medications",
         "stock_ok": "Sufficient inventory for all line items"
-      }
+      },
+      "lineTreatment": "చికిత్స: {{count}} రోజులు",
+      "lineVetNone": "వైద్యుడు: నిషేధ కాలం లేదు",
+      "lineVetLabel": "వైద్యుని లేబుల్ రోజులు: పాలు/గుడ్లు {{milk}}, మాంసం {{meat}}",
+      "lineNotGiven": "ఈ వరుసలో లేబుల్ రోజులు ఇవ్వలేదు",
+      "matchedTo": "మీ ఉత్పత్తి: {{name}}",
+      "matchPick": "ఇది మీ ఏ ఉత్పత్తి?",
+      "matchNone": "ఇంకా జోడించలేదు",
+      "matchedLabel": "దీని లేబుల్: పాలు/గుడ్లు {{milk}} రోజులు, మాంసం {{meat}} రోజులు",
+      "matchDiffers": "ఈ లేబుల్ రోజులు వైద్యుని వరుసకు భిన్నంగా ఉన్నాయి. ఫారం వైద్యుని చీటీని అనుసరిస్తుంది.",
+      "matchFailed": "ఈ ఉత్పత్తిని సేవ్ చేయలేకపోయాం. సిగ్నల్ చూసి మళ్లీ ఎంచుకోండి."
     },
     "dispense": {
       "title": "Dispense",
@@ -249,15 +259,22 @@
       "reorderQty": "Reorder Quantity",
       "manufacturer": "Manufacturer",
       "registrationNumber": "Reg / License Number",
-      "withdrawalDays": "Withdrawal Period (days)",
-      "withdrawalNote": "For livestock: days before animal can be slaughtered / milk used. Set 0 if not applicable.",
+      "withdrawalNote": "ఈ ఉత్పత్తి లేబుల్‌పై ముద్రించినదే రాయండి. తెలియకపోతే ఖాళీగా వదలండి. ఇది మీ సూచన కోసం; ఫారం పశువైద్యుని చీటీని అనుసరిస్తుంది.",
       "isControlled": "Controlled Substance / Scheduled Drug",
       "medications": "medications",
       "searchPlaceholder": "Search by name, generic, manufacturer...",
       "empty": "No medications in catalog yet",
       "noResults": "No medications match your search",
       "controlled": "Controlled",
-      "confirmDeactivate": "Deactivate {{name}}?"
+      "confirmDeactivate": "Deactivate {{name}}?",
+      "productKind": "ఉత్పత్తి రకం",
+      "kind_medicine": "మందు",
+      "kind_diet": "ఆహారం",
+      "kind_supplement": "సప్లిమెంట్",
+      "withdrawalMilk": "లేబుల్‌పై పాలు / గుడ్ల నిషేధ కాలం (రోజులు)",
+      "withdrawalMeat": "లేబుల్‌పై మాంసం నిషేధ కాలం (రోజులు)",
+      "badgeMilk": "పాలు {{count}} రోజులు",
+      "badgeMeat": "మాంసం {{count}} రోజులు"
     },
     "history": {
       "title": "Dispensing History",

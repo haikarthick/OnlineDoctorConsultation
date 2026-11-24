@@ -91,7 +91,7 @@ class FarmEventService {
     }, rt.code, 'animal');
     const { quantity, detail } = FarmRecordService.shape(rt.fields, { recordType: rt.code, quantity: input.quantity, detail: input.detail });
     // A sale or a death of an animal still under a meat withdrawal: say so, and record it only when the person confirms.
-    if (rt.code === 'sale' || rt.code === 'death') await WithdrawalService.guard({ animalId: subject.id }, 'meat', input.confirmWithdrawal);
+    if (rt.code === 'sale' || rt.code === 'death') await WithdrawalService.guard({ animalId: subject.id }, 'meat', input.confirmWithdrawal, { userId: caller.userId, action: rt.code === 'sale' ? 'animal_sale' : 'animal_death' });
 
     const st = await database.query(`SELECT status, group_id FROM animals WHERE id = $1`, [subject.id]);
     const status: string = st.rows[0]?.status || 'active';
@@ -223,7 +223,7 @@ class FarmEventService {
       throw new ValidationError('This group is kept animal by animal, so it has no head count to change. Use the animal records instead.');
     }
     // Animals leaving a herd for sale or cull while the herd is under a meat withdrawal: warn and confirm.
-    if (action.ledger === 'sale' || action.ledger === 'cull') await WithdrawalService.guard({ groupId: subject.id }, 'meat', input.confirmWithdrawal);
+    if (action.ledger === 'sale' || action.ledger === 'cull') await WithdrawalService.guard({ groupId: subject.id }, 'meat', input.confirmWithdrawal, { userId: caller.userId, action: action.ledger === 'sale' ? 'herd_sale' : 'herd_cull' });
     const eventDate = FarmRecordService.checkDate(input.eventDate);
     const rt = await FarmRecordService.loadRecordType(input.eventType, 'event');
     await FarmProfileService.assertRecordTypeAllowed({
