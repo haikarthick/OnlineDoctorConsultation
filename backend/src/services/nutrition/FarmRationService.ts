@@ -1,7 +1,7 @@
 import NutritionNotifier from './NutritionNotifier';
 import database from '../../utils/database';
 import logger from '../../utils/logger';
-import { ForbiddenError, NotFoundError, ValidationError } from '../../utils/errors';
+import { ForbiddenError, NeedsVetError, NotFoundError, ValidationError } from '../../utils/errors';
 import AnimalService from '../AnimalService';
 import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE } from '../AnimalAccessService';
 import NutritionAccess, { type Caller } from './NutritionAccess';
@@ -350,7 +350,7 @@ class FarmRationService {
       const reqs = await this.equineRequirements(subject.speciesCode);
       // A foal or yearling is growing fast and its needs are not an adult's: a vet makes that plan.
       if (subject.ageMonths !== null && reqs.adultMonths !== null && subject.ageMonths < reqs.adultMonths) {
-        throw new ValidationError(`${subject.kind === 'group' ? 'The young horses in this group are' : 'This horse is'} still growing (under ${reqs.adultMonths} months). A growing horse needs a feeding plan from a vet - book a consultation.`);
+        throw new NeedsVetError(`${subject.kind === 'group' ? 'The young horses in this group are' : 'This horse is'} still growing (under ${reqs.adultMonths} months). A growing horse needs a feeding plan from a vet - book a consultation.`);
       }
       const dueMonths = subject.expectedDueDate ? (new Date(subject.expectedDueDate).getTime() - Date.now()) / (30.4 * 86400000) : null;
       const reproState = subject.breedingStatus === 'lactating' ? 'lactating' as const : (dueMonths !== null && dueMonths >= 0 && dueMonths <= 3 ? 'pregnant' as const : null);
@@ -368,7 +368,7 @@ class FarmRationService {
     const limits = await this.growingLimits(subject.speciesCode);
     const age = subject.ageMonths;
     if (age !== null && limits.weanMonths !== null && age < limits.weanMonths) {
-      throw new ValidationError(`${subject.kind === 'group' ? 'The young animals in this group are' : 'This animal is'} still on milk and starter feed (under ${limits.weanMonths} months). A fodder ration is not right for them yet - ask your vet for a calf feeding plan.`);
+      throw new NeedsVetError(`${subject.kind === 'group' ? 'The young animals in this group are' : 'This animal is'} still on milk and starter feed (under ${limits.weanMonths} months). A fodder ration is not right for them yet - ask your vet for a calf feeding plan.`);
     }
     const isYoung = age !== null && limits.adultMonths !== null && age < limits.adultMonths;
     const state: RuminantState = milk > 0 ? 'lactating' : isYoung ? 'growing' : 'dry';

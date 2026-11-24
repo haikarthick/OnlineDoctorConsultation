@@ -1415,6 +1415,7 @@ async function http(method, url, body, token) {
           const bf = await foods(babyId);
           const baby = await http('POST', `${apiBase}/nutrition/animals/${babyId}/ration/preview`, { feeds: [{ ingredientId: bf.feed_green_maize, pricePerKg: 2 }] }, owner);
           if (baby.status !== 400 || !/still on milk/i.test(msgOf(baby))) problems.push(`a 30-day-old calf was given a fodder ration instead of being sent to a vet (HTTP ${baby.status}: ${msgOf(baby).slice(0, 80)})`);
+          else if (baby.json?.error?.code !== 'NEEDS_VET') problems.push(`the young-calf refusal must carry the NEEDS_VET code so the screen can offer a vet (got ${baby.json?.error?.code})`);
           const sf = await foods(sheepId);
           const sheep = await http('POST', `${apiBase}/nutrition/animals/${sheepId}/ration/preview`, { feeds: [
             { ingredientId: sf.feed_green_maize, pricePerKg: 2 }, { ingredientId: sf.feed_cattle_feed, pricePerKg: 25 } ] }, owner);
@@ -1568,6 +1569,23 @@ async function http(method, url, body, token) {
             const member = await http('GET', `${apiBase}/nutrition/animals/${cow}`, null, farmer);
             if (!member.json?.data?.herdPlan?.id || !member.json?.data?.herdName) problems.push(`the herd's ration is not shown on a member animal (HTTP ${member.status})`);
           }
+        }
+
+        // 5b. Finance: feed cost is entered once (Feed Inventory restock), and finance / compliance rows belong to their farm.
+        if (ent) {
+          const typedFeed = await http('POST', `${apiBase}/enterprises/${ent}/financial`, { enterpriseId: ent, recordType: 'expense', category: 'feed', amount: 100, transactionDate: new Date().toISOString().slice(0, 10) }, farmer);
+          if (typedFeed.status !== 400 || !/Feed Inventory/.test(msgOf(typedFeed))) problems.push(`a hand-typed feed expense must be refused with a pointer to Feed Inventory (HTTP ${typedFeed.status}: ${msgOf(typedFeed).slice(0, 80)})`);
+          const vet = await http('POST', `${apiBase}/enterprises/${ent}/financial`, { enterpriseId: ent, recordType: 'expense', category: 'veterinary', amount: 250, transactionDate: new Date().toISOString().slice(0, 10) }, farmer);
+          const finId = vet.json?.data?.id;
+          if (vet.status !== 201 || !finId) problems.push(`a veterinary expense on the farm's own finance: HTTP ${vet.status} ${msgOf(vet).slice(0, 100)}`);
+          else {
+            const strangerPut = await http('PUT', `${apiBase}/financial/${finId}`, { amount: 1 }, stranger);
+            const strangerDel = await http('DELETE', `${apiBase}/financial/${finId}`, null, stranger);
+            const fakeDel = await http('DELETE', `${apiBase}/financial/00000000-0000-4000-8000-000000000002`, null, stranger);
+            if (strangerPut.status !== 404 || strangerDel.status !== 404 || msgOf(strangerDel) !== msgOf(fakeDel)) problems.push(`a stranger could change another farm's finance entry, or got a different answer than for a made-up id (HTTP ${strangerPut.status} / ${strangerDel.status})`);
+          }
+          const strangerFin = await http('POST', `${apiBase}/enterprises/${ent}/financial`, { enterpriseId: ent, recordType: 'expense', category: 'veterinary', amount: 1, transactionDate: new Date().toISOString().slice(0, 10) }, stranger);
+          if (strangerFin.status !== 403) problems.push(`a stranger added a finance entry to another farm (HTTP ${strangerFin.status})`);
         }
 
         // 6. Neutral refusals and the observation weight kept in one place.

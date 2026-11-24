@@ -274,7 +274,8 @@
       "date": "Transaction Date *",
       "description": "Description",
       "reference": "Reference #",
-      "notes": "Notes"
+      "notes": "Notes",
+      "feedHint": "ಖರೀದಿಸಿದ ಮೇವನ್ನು ಫೀಡ್ ಇನ್ವೆಂಟರಿಯಲ್ಲಿ ದಾಖಲಿಸಿ (ಬೆಲೆಯೊಂದಿಗೆ ರೀಸ್ಟಾಕ್) - ವೆಚ್ಚ ಇಲ್ಲಿ ತಾನಾಗಿ ಸೇರುತ್ತದೆ."
     },
     "dashboard": {
       "totalIncome": "Total Income",

@@ -609,7 +609,8 @@
       },
       "priceFromStock": "Price from your stock: ₹{{price}} per kg. Change it in Feed Inventory.",
       "fromHerd": "This animal is in the herd \"{{name}}\". Every animal in the herd gets this ration; change it on the herd.",
-      "ownInstead": "Make a ration for this animal only"
+      "ownInstead": "Make a ration for this animal only",
+      "findVet": "Find a vet"
     },
     "group": {
       "title": "Today's feed",

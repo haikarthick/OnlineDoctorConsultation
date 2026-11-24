@@ -274,7 +274,8 @@
       "reference": "Reference #",
       "notes": "Notes",
       "editTitle": "Edit Financial Record",
-      "createTitle": "Add Financial Record"
+      "createTitle": "Add Financial Record",
+      "feedHint": "Feed you buy is recorded in Feed Inventory (Restock with a price) - it adds the expense here for you."
     },
     "dashboard": {
       "totalIncome": "Total Income",

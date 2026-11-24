@@ -46,6 +46,29 @@ async function ensureFeedAccess(req: Request, res: Response, feedId: string): Pr
   return ensureAccess(req, res, enterpriseId);
 }
 
+/** Feed bought for the farm is recorded ONCE, in Feed Inventory (restock with a price), which writes the expense itself. */
+export const FEED_EXPENSE_IN_INVENTORY_MESSAGE = 'Feed you buy is recorded in Feed Inventory: open the feed, tap Restock and enter the price. That adds the expense here for you, so it is not counted twice. Choose another category for other costs.';
+
+/** Tables whose rows belong to a farm and are addressed by their own id (names are fixed here, never taken from the request). */
+const FARM_RECORD_TABLES = { financial_records: 'finance entry', compliance_documents: 'document' } as const;
+
+/** One record addressed by its own id: the farm that owns it decides. Unknown and another farm's record get the same plain answer. */
+async function ensureFarmRecordAccess(req: Request, res: Response, table: keyof typeof FARM_RECORD_TABLES, id: string): Promise<boolean> {
+  const found = /^[0-9a-f-]{36}$/i.test(id) ? await database.query(`SELECT enterprise_id FROM ${table} WHERE id = $1`, [id]) : { rows: [] as any[] };
+  const enterpriseId: string | null = found.rows[0]?.enterprise_id || null;
+  let canSee = false;
+  if (enterpriseId) {
+    try { await FarmAccessService.assert(enterpriseId, { userId: (req as any).userId, role: (req as any).userRole }, 'read'); canSee = true; }
+    catch (err: any) { if (!(err instanceof ForbiddenError)) throw err; }
+  }
+  if (!canSee || !enterpriseId) {
+    const message = `We could not find this ${FARM_RECORD_TABLES[table]} on your farm. It may have been removed, or it may belong to another farm.`;
+    res.status(404).json({ success: false, message, error: { message } });
+    return false;
+  }
+  return ensureAccess(req, res, enterpriseId);
+}
+
 class Tier2Controller {
 
   // ═══════════════════════ Health Analytics ═══════════════════════
@@ -219,33 +242,27 @@ class Tier2Controller {
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
 
+  // The farm is the one in the address; a document is changed only by someone on that farm's team.
   async createComplianceDoc(req: Request, res: Response) {
-    try {
-      const data = await complianceService.create(req.body);
-      res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    const { enterpriseId } = req.params;
+    if (!await ensureAccess(req, res, enterpriseId)) return;
+    res.status(201).json({ data: await complianceService.create({ ...req.body, enterpriseId }) });
   }
 
   async updateComplianceDoc(req: Request, res: Response) {
-    try {
-      const data = await complianceService.update(req.params.id, req.body);
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    if (!await ensureFarmRecordAccess(req, res, 'compliance_documents', req.params.id)) return;
+    res.json({ data: await complianceService.update(req.params.id, req.body) });
   }
 
   async verifyComplianceDoc(req: Request, res: Response) {
-    try {
-      const userId = (req as any).userId;
-      const data = await complianceService.verify(req.params.id, userId);
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    if (!await ensureFarmRecordAccess(req, res, 'compliance_documents', req.params.id)) return;
+    res.json({ data: await complianceService.verify(req.params.id, (req as any).userId) });
   }
 
   async deleteComplianceDoc(req: Request, res: Response) {
-    try {
-      await complianceService.delete(req.params.id);
-      res.json({ data: { success: true } });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    if (!await ensureFarmRecordAccess(req, res, 'compliance_documents', req.params.id)) return;
+    await complianceService.delete(req.params.id);
+    res.json({ data: { success: true } });
   }
 
   async getComplianceSummary(req: Request, res: Response) {
@@ -269,25 +286,28 @@ class Tier2Controller {
   }
 
   async createFinancialRecord(req: Request, res: Response) {
-    try {
-      const userId = (req as any).userId;
-      const data = await financialService.create({ ...req.body, recordedBy: userId });
-      res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    const { enterpriseId } = req.params;
+    if (!await ensureAccess(req, res, enterpriseId)) return;
+    if (req.body?.recordType === 'expense' && req.body?.category === 'feed') {
+      res.status(400).json({ success: false, message: FEED_EXPENSE_IN_INVENTORY_MESSAGE, error: { message: FEED_EXPENSE_IN_INVENTORY_MESSAGE, code: 'FEED_EXPENSE_IN_INVENTORY' } });
+      return;
+    }
+    res.status(201).json({ data: await financialService.create({ ...req.body, enterpriseId, recordedBy: (req as any).userId }) });
   }
 
   async updateFinancialRecord(req: Request, res: Response) {
-    try {
-      const data = await financialService.update(req.params.id, req.body);
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    if (!await ensureFarmRecordAccess(req, res, 'financial_records', req.params.id)) return;
+    if (req.body?.category === 'feed') {
+      res.status(400).json({ success: false, message: FEED_EXPENSE_IN_INVENTORY_MESSAGE, error: { message: FEED_EXPENSE_IN_INVENTORY_MESSAGE, code: 'FEED_EXPENSE_IN_INVENTORY' } });
+      return;
+    }
+    res.json({ data: await financialService.update(req.params.id, req.body) });
   }
 
   async deleteFinancialRecord(req: Request, res: Response) {
-    try {
-      await financialService.delete(req.params.id);
-      res.json({ data: { success: true } });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    if (!await ensureFarmRecordAccess(req, res, 'financial_records', req.params.id)) return;
+    await financialService.delete(req.params.id);
+    res.json({ data: { success: true } });
   }
 
   async getFinancialDashboard(req: Request, res: Response) {

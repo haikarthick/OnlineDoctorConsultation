@@ -7,6 +7,7 @@ import BreedingService from './BreedingService';
 import AnimalService from './AnimalService';
 import AnimalGroupService from './AnimalGroupService';
 import MedicalRecordService from './MedicalRecordService';
+import NutritionService from './nutrition/NutritionService';
 
 /**
  * Farm EVENTS on a batch group - placing a flock, stocking a pond, culling, a partial sale or
@@ -166,6 +167,8 @@ class FarmEventService {
         );
         // It leaves its group, which keeps the group's head count honest.
         if (groupId) await AnimalGroupService.removeAnimal(groupId, subject.id);
+        // A sold or dead animal has no feeding plan to follow and raises no alerts: close them now, not at the next check.
+        await NutritionService.evaluateFlags(subject.id).catch(() => undefined);
         return { ...base, status: newStatus };
       }
     }

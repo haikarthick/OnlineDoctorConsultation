@@ -63,6 +63,8 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
   const [chosen, setChosen] = useState<Chosen[]>([])
   const [preview, setPreview] = useState<any>(null)
   const [previewError, setPreviewError] = useState('')
+  /** The server said the next step is a vet (a young animal): offer to find one. */
+  const [needsVet, setNeedsVet] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -93,8 +95,8 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
     const timer = window.setTimeout(() => {
       const call = herd ? apiService.previewGroupRation(target.id, payload) : apiService.previewRation(target.id, payload)
       call
-        .then((res: any) => { if (active) { setPreview(res?.data || null); setPreviewError('') } })
-        .catch((err: unknown) => { if (active) { setPreview(null); setPreviewError(userMessage(err, 'nutrition.errors.preview')) } })
+        .then((res: any) => { if (active) { setPreview(res?.data || null); setPreviewError(''); setNeedsVet(false) } })
+        .catch((err: unknown) => { if (active) { setPreview(null); setPreviewError(userMessage(err, 'nutrition.errors.preview')); setNeedsVet((err as any)?.response?.data?.error?.code === 'NEEDS_VET') } })
     }, 400)
     return () => { active = false; window.clearTimeout(timer) }
   }, [payload, target.id, herd])
@@ -169,6 +171,7 @@ export const RationBuilderSheet: React.FC<Props> = ({ target, onClose, onSaved }
         )}
 
         {previewError && <p className="nutri-note is-warning" role="status">{previewError}</p>}
+        {needsVet && <a className="btn btn-primary nutri-wide-btn" href="/find-doctor">{t('nutrition.ration.findVet')}</a>}
         {result?.status === 'infeasible' && (
           <div className="nutri-note is-warning" role="status">
             <strong>{t('nutrition.ration.cannotBalance')}</strong>

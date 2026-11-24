@@ -27,6 +27,14 @@ export class ValidationError extends AppError {
   }
 }
 
+/** A refusal whose next step is a vet (a young animal that needs a feeding plan made by one); the screen offers to find one. */
+export class NeedsVetError extends AppError {
+  constructor(message: string) {
+    super(400, message, 'NEEDS_VET');
+    Object.setPrototypeOf(this, NeedsVetError.prototype);
+  }
+}
+
 export class NotFoundError extends AppError {
   constructor(resource: string, id?: string | number) {
     const message = id ? `${resource} with id ${id} not found` : `${resource} not found`;

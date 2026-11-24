@@ -274,7 +274,8 @@
       "date": "Transaction Date *",
       "description": "Description",
       "reference": "Reference #",
-      "notes": "Notes"
+      "notes": "Notes",
+      "feedHint": "కొన్న మేతను ఫీడ్ ఇన్వెంటరీలో నమోదు చేయండి (ధరతో రీస్టాక్) - ఖర్చు ఇక్కడ దానంతట అదే చేరుతుంది."
     },
     "dashboard": {
       "totalIncome": "మొత్తం ఆదాయం",

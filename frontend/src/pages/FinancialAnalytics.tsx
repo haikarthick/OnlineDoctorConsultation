@@ -11,7 +11,8 @@ const TYPE_COLORS: Record<string, string> = { income: '#22c55e', expense: '#ef44
 
 const CATEGORIES = {
   income: ['animal_sales', 'milk_sales', 'egg_sales', 'meat_sales', 'breeding_fees', 'consultation_fees', 'grants', 'subsidies', 'other_income'],
-  expense: ['feed', 'veterinary', 'medication', 'equipment', 'labor', 'utilities', 'transport', 'insurance', 'maintenance', 'rent', 'taxes', 'marketing', 'other_expense']
+  // Feed bought is recorded in Feed Inventory (restock with a price), which adds the expense itself - never typed twice.
+  expense: ['veterinary', 'medication', 'equipment', 'labor', 'utilities', 'transport', 'insurance', 'maintenance', 'rent', 'taxes', 'marketing', 'other_expense']
 }
 
 const FinancialAnalytics: React.FC = () => {
@@ -28,7 +29,7 @@ const FinancialAnalytics: React.FC = () => {
   const formRef = useScrollToForm(showForm)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
-    recordType: 'expense' as 'income' | 'expense', category: 'feed',
+    recordType: 'expense' as 'income' | 'expense', category: 'veterinary',
     amount: '', description: '', referenceNumber: '',
     transactionDate: new Date().toISOString().split('T')[0], notes: ''
   })
@@ -87,7 +88,7 @@ const FinancialAnalytics: React.FC = () => {
     }
   }
 
-  const resetForm = () => setFormData({ recordType: 'expense', category: 'feed', amount: '', description: '', referenceNumber: '', transactionDate: new Date().toISOString().split('T')[0], notes: '' })
+  const resetForm = () => setFormData({ recordType: 'expense', category: 'veterinary', amount: '', description: '', referenceNumber: '', transactionDate: new Date().toISOString().split('T')[0], notes: '' })
 
   const handleDelete = async (id: string) => {
     if (!window.confirm(t('financialAnalytics.deleteConfirm'))) return
@@ -153,6 +154,7 @@ const FinancialAnalytics: React.FC = () => {
                   <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
                     {CATEGORIES[formData.recordType].map(c => <option key={c} value={c}>{c.replace(/_/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase())}</option>)}
                   </select>
+                  {formData.recordType === 'expense' && <p className="module-hint">{t('financialAnalytics.form.feedHint')}</p>}
                 </div>
                 <div className="form-group">
                   <label>{t('financialAnalytics.form.amount')}</label>

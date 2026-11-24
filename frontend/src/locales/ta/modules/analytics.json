@@ -274,7 +274,8 @@
       "date": "Transaction Date *",
       "description": "Description",
       "reference": "Reference #",
-      "notes": "Notes"
+      "notes": "Notes",
+      "feedHint": "வாங்கிய தீவனத்தை தீவன இருப்பில் பதிவு செய்யுங்கள் (விலையுடன் மீண்டும் நிரப்புதல்) - செலவு இங்கே தானாகச் சேரும்."
     },
     "dashboard": {
       "totalIncome": "மொத்த வருமானம்",

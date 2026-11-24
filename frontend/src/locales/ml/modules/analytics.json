@@ -274,7 +274,8 @@
       "reference": "റഫറൻസ് #",
       "notes": "കുറിപ്പുകൾ",
       "editTitle": "Edit Financial Record",
-      "createTitle": "Add Financial Record"
+      "createTitle": "Add Financial Record",
+      "feedHint": "വാങ്ങിയ തീറ്റ ഫീഡ് ഇൻവെന്ററിയിൽ രേഖപ്പെടുത്തുക (വിലയോടെ റീസ്റ്റോക്ക്) - ചെലവ് ഇവിടെ തനിയെ ചേരും."
     },
     "dashboard": {
       "totalIncome": "ആകെ വരുമാനം",
