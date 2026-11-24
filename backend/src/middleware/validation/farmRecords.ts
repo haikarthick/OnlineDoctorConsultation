@@ -16,6 +16,8 @@ export const saveFarmRecordSchema = Joi.object({
   // Feed (migration 063): the stock item used; empty = home-grown. With no animal and no group, the entry is for
   // all the farm's animals (only record types that use stock allow that - FarmRecordService decides).
   feedId: Joi.string().uuid().allow(null, '').optional(),
+  // Sent again after the person confirmed the withdrawal warning (milk / eggs from a treated animal).
+  confirmWithdrawal: Joi.boolean().optional(),
 });
 
 // A batch-group event (placement, cull, sale, harvest, clear-out) - see FarmEventService.
@@ -23,6 +25,7 @@ export const groupEventSchema = Joi.object({
   groupId: Joi.string().uuid().optional(),
   animalId: Joi.string().uuid().optional(),
   eventType: Joi.string().max(40).required(),
+  confirmWithdrawal: Joi.boolean().optional(),
   eventDate: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional(),
   quantity: Joi.alternatives(Joi.number(), Joi.string().allow('')).allow(null).optional(),
   detail: Joi.object().unknown(true).allow(null).optional(),

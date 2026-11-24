@@ -1,3 +1,4 @@
+import TreatmentsCard from '../components/treatments/TreatmentsCard'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -235,6 +236,8 @@ const FarmRecords: React.FC = () => {
               </ul>
             </section>
           )}
+
+          <TreatmentsCard farmId={farmId} subjects={subjects} />
 
           {totals.length > 0 && (
             <div className="record-totals" aria-label={t('farmRecords.totalsLabel')}>

@@ -1,3 +1,4 @@
+import { sendWithWithdrawalConfirm } from '../utils/withdrawal'
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -499,7 +500,8 @@ const Marketplace: React.FC = () => {
       // Normalize enum fields to lowercase to match Joi schema
       if (payload.gender) payload.gender = (payload.gender as string).toLowerCase()
       if (payload.species) payload.species = (payload.species as string).toLowerCase()
-      await apiService.createMarketplaceListing(payload)
+      // An animal still under a meat withdrawal: the server warns, the seller confirms or stops.
+      await sendWithWithdrawalConfirm(confirmWithdrawal => apiService.createMarketplaceListing(confirmWithdrawal ? { ...payload, confirmWithdrawal } : payload), t)
       // Animal-category listings go through admin review before appearing publicly
       const needsReview = ['animal', 'semen_embryo'].includes(payload.category)
       setSuccessMsg(needsReview ? t('marketplace.deal.submittedForReview') : t('marketplace.listingCreated'))

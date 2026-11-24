@@ -1,4 +1,5 @@
 import database from '../utils/database';
+import WithdrawalService from './withdrawal/WithdrawalService';
 import logger from '../utils/logger';
 import { DatabaseError, ValidationError, NotFoundError } from '../utils/errors';
 import { v4 as uuidv4 } from 'uuid';
@@ -299,37 +300,16 @@ export class BatchManagementService {
    * Consulted before movement and before issuing slaughter/export certificates (Phase 2).
    */
   async getWithdrawalStatus(subject: { animalId?: string; groupId?: string }) {
-    const col = subject.groupId ? 'group_id' : 'animal_id';
-    const id = subject.groupId || subject.animalId;
-    if (!id) throw new ValidationError('An animalId or groupId is required');
-
-    const r = await database.query(
-      `SELECT MAX(withdrawal_until_milk) AS milk, MAX(withdrawal_until_meat) AS meat
-         FROM medical_records
-        WHERE ${col} = $1
-          AND (withdrawal_until_milk >= CURRENT_DATE OR withdrawal_until_meat >= CURRENT_DATE)`,
-      [id]
-    );
-    const milk = r.rows[0]?.milk || null;
-    const meat = r.rows[0]?.meat || null;
-    return {
-      milkUntil: milk, meatUntil: meat,
-      milkActive: !!milk, meatActive: !!meat,
-      active: !!milk || !!meat,
-    };
+    if (!subject.animalId && !subject.groupId) throw new ValidationError('An animalId or groupId is required');
+    // One answer for every screen: WithdrawalService (prescriptions + the farmer's own treatments).
+    return WithdrawalService.status(subject);
   }
 
   /**
-   * Refuse an action that would put treated animals into the food chain before their withdrawal
-   * period has run.
-   *
-   * `kind` picks which withdrawal applies: slaughter and meat export are governed by the MEAT
-   * period, milk collection by the MILK period, and a general movement by either - an animal
-   * still under any withdrawal should not leave the holding unannounced.
-   *
-   * This is the point of Phase 1 recording the dates: without an interlock the obligation is
-   * merely written down, and a batch treatment that never reaches the movement and certificate
-   * paths is a food-safety hole rather than a feature.
+   * Refuse an action that would put treated animals into the food chain before their withdrawal has run (slaughter and meat
+   * export: the MEAT period; milk collection: the MILK period; any other movement: either). A legal interlock on movement and
+   * certificates, so it blocks - the warn-and-confirm rule is for the farmer's own milk entry and sale. Reads the one
+   * withdrawal service.
    */
   async assertNotUnderWithdrawal(
     subject: { animalId?: string; groupId?: string },
@@ -337,30 +317,15 @@ export class BatchManagementService {
   ): Promise<void> {
     if (!subject.animalId && !subject.groupId) return;
     const status = await this.getWithdrawalStatus(subject);
-
     const blockingMeat = (kind === 'meat' || kind === 'any') && status.meatActive;
     const blockingMilk = (kind === 'milk' || kind === 'any') && status.milkActive;
     if (!blockingMeat && !blockingMilk) return;
-
+    const what = blockingMeat ? 'meat' : 'milk or eggs';
     const until = blockingMeat ? status.meatUntil : status.milkUntil;
-    const what = blockingMeat ? 'meat' : 'milk';
-    const on = until ? new Date(until).toISOString().slice(0, 10) : 'an unknown date';
     throw new ValidationError(
-      `Blocked: this ${subject.groupId ? 'group' : 'animal'} is under a ${what} withdrawal period until ${on}. ` +
-      `Treated animals must not enter the food chain before it ends.`
+      `This ${subject.groupId ? 'group' : 'animal'} is under a ${what} withdrawal until ${until}, so this cannot go ahead yet. ` +
+      `Treated animals must not enter the food chain before the withdrawal ends. Try again after that date, or ask your vet.`
     );
-  }
-
-  /** treatment date + withdrawal days, or null when the medication declares none. */
-  computeWithdrawalDates(eventDate: string, milkDays?: number | null, meatDays?: number | null) {
-    const base = new Date(eventDate);
-    const add = (days?: number | null) => {
-      if (days == null || days <= 0) return null;
-      const d = new Date(base);
-      d.setDate(d.getDate() + days);
-      return d.toISOString().slice(0, 10);
-    };
-    return { withdrawalUntilMilk: add(milkDays), withdrawalUntilMeat: add(meatDays) };
   }
 
   // ═══ FLOCK HEALTH METRICS ══════════════════════════════════════════════════

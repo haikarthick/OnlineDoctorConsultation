@@ -1,4 +1,5 @@
 import NutritionNotifier from './NutritionNotifier';
+import WithdrawalService from '../withdrawal/WithdrawalService';
 import database from '../../utils/database';
 import logger from '../../utils/logger';
 import { ForbiddenError, NeedsVetError, NotFoundError, ValidationError } from '../../utils/errors';
@@ -402,19 +403,12 @@ class FarmRationService {
     };
   }
 
-  /** Milk / meat withdrawal still running for this animal or herd (medical records own it): shown beside the ration. */
+  /** Milk / meat withdrawal still running for this animal or herd (the withdrawal service owns it): shown beside the ration. */
   async withdrawals(subject: Subject): Promise<Array<{ what: 'milk' | 'meat'; until: string }>> {
-    const col = subject.kind === 'animal' ? 'animal_id' : 'group_id';
-    const r = await database.query(
-      `SELECT MAX(withdrawal_until_milk)::text AS milk, MAX(withdrawal_until_meat)::text AS meat FROM medical_records
-        WHERE ${col} = $1 AND (withdrawal_until_milk >= CURRENT_DATE OR withdrawal_until_meat >= CURRENT_DATE)`,
-      [subject.id]
-    );
-    const x = r.rows[0] || {};
-    const today = new Date().toISOString().slice(0, 10);
+    const st = await WithdrawalService.status(subject.kind === 'animal' ? { animalId: subject.id } : { groupId: subject.id });
     const out: Array<{ what: 'milk' | 'meat'; until: string }> = [];
-    if (x.milk && x.milk >= today) out.push({ what: 'milk', until: x.milk });
-    if (x.meat && x.meat >= today) out.push({ what: 'meat', until: x.meat });
+    if (st.milkUntil) out.push({ what: 'milk', until: st.milkUntil });
+    if (st.meatUntil) out.push({ what: 'meat', until: st.meatUntil });
     return out;
   }
 

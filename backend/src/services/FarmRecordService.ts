@@ -1,3 +1,4 @@
+import WithdrawalService from './withdrawal/WithdrawalService';
 import database from '../utils/database';
 import logger from '../utils/logger';
 import { ValidationError, NotFoundError, ForbiddenError } from '../utils/errors';
@@ -43,6 +44,8 @@ export interface SaveRecordInput {
   notes?: string | null;
   /** The stock item used (record types with a `stock` field, i.e. feed). Empty = home-grown / not from stock. */
   feedId?: string | null;
+  /** The person saw the withdrawal warning and chose to save anyway. */
+  confirmWithdrawal?: boolean;
 }
 
 interface Caller { userId: string; role?: string }
@@ -241,6 +244,10 @@ class FarmRecordService {
         speciesCode: subject.speciesCode, animalClass: subject.animalClass, gender: subject.gender,
         managementMode: subject.managementMode, groupType: subject.groupType,
       }, rt.code, subject.kind);
+    }
+    // Milk and eggs from an animal or herd under a withdrawal: say so, and save only when the person confirms.
+    if (subject.kind !== 'farm' && (rt.code === 'milk' || rt.code === 'eggs')) {
+      await WithdrawalService.guard(subject.kind === 'group' ? { groupId: subject.id } : { animalId: subject.id }, 'milk', input.confirmWithdrawal);
     }
     const feedId = usesStock && input.feedId ? String(input.feedId) : null;
     if (feedId && !/^[0-9a-f-]{36}$/i.test(feedId)) throw new ValidationError('Choose the feed from the list.');

@@ -7,6 +7,8 @@ import client from '../../services/api/client'
 import { SubjectSummary } from '../../components/shared/SubjectSummary'
 import { GroupSummary, groupFromConsultation, type ConsultationGroup } from '../../components/shared/GroupSummary'
 import { Medication } from '../../types'
+import PrescriptionLineForm, { type RecentLine } from '../../components/prescription/PrescriptionLineForm'
+import { isFoodSegment } from '../../utils/withdrawal'
 import '../../styles/modules.css'
 
 import { userMessage } from '../../utils/userMessage'
@@ -18,24 +20,15 @@ interface PrescriptionWriterProps {
 const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId, onNavigate }) => {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { speciesLabel } = useMasterData()
+  const { speciesLabel, farmMaster } = useMasterData()
   const params = new URLSearchParams(window.location.search)
   const conId = consultationId || params.get('consultationId') || ''
   const urlAnimalId = params.get('animalId') || ''
 
-  // Pre-populate medications from query param (Common Prescriptions templates)
-  const getInitialMeds = (): Medication[] => {
-    try {
-      const medsParam = params.get('meds')
-      if (medsParam) return JSON.parse(decodeURIComponent(medsParam))
-    } catch { /* ignore parse errors */ }
-    return []
-  }
-
   const [diagnosis, setDiagnosis] = useState('')
   const [instructions, setInstructions] = useState('')
   const [followUpDate, setFollowUpDate] = useState('')
-  const [medications, setMedications] = useState<Medication[]>(getInitialMeds)
+  const [medications, setMedications] = useState<Medication[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
@@ -154,20 +147,19 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
       .catch(() => { setNetworkOptions([]); setSelectedNetworkId(null) })
   }, [selectedAnimalId, urlAnimalId])
 
-  // New med form
-  const [newMed, setNewMed] = useState<Medication>({
-    name: '', dosage: '', frequency: '', duration: '', instructions: ''
-  })
+  // The vet's OWN recent medicines (with the label days they typed) fill a line in one tap; the platform lists no medicine.
+  const [recentLines, setRecentLines] = useState<RecentLine[]>([])
+  useEffect(() => {
+    if (!isVet && !isAdmin) return
+    apiService.myRecentPrescriptionLines().then((res: any) => setRecentLines(res?.data || [])).catch(() => setRecentLines([]))
+  }, [isVet, isAdmin])
 
-  const addMedication = () => {
-    if (!newMed.name || !newMed.dosage || !newMed.frequency) {
-      setError(t('prescriptionWriter.errorNameDosageFrequency'))
-      return
-    }
-    setMedications([...medications, { ...newMed }])
-    setNewMed({ name: '', dosage: '', frequency: '', duration: '', instructions: '' })
-    setError('')
-  }
+  // A food-producing animal or herd (master data: the species' farm segment) needs the label's withdrawal days on each medicine line.
+  const subjectSpecies: string | null = consultationGroup?.groupSpecies
+    || summaryAnimal?.species
+    || [...animals, ...ownerAnimals].find(a => a.id === (selectedAnimalId || consultationAnimalId || urlAnimalId))?.species
+    || null
+  const foodProducing = isFoodSegment(farmMaster.species.find(sp => sp.code === subjectSpecies)?.farmSegment)
 
   const removeMedication = (index: number) => {
     setMedications(medications.filter((_, i) => i !== index))
@@ -436,6 +428,9 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
                     <p className="si-65fb0667">
                       {med.dosage} • {med.frequency} • {med.duration || 'As needed'}
                     </p>
+                    {(med.withdrawalMilkDays !== undefined || med.withdrawalNone) && (
+                      <p className="wd-hint">{t('withdrawal.lineSummary', { milk: med.withdrawalMilkDays ?? 0, meat: med.withdrawalMeatDays ?? 0 })}</p>
+                    )}
                     {med.instructions && (
                       <p className="si-4debe0bb">
                         📝 {med.instructions}
@@ -444,51 +439,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
                   </div>
                 ))}
 
-                {/* Add Medication Form */}
-                <div className="si-bd899740">
-                  <h4 className="si-ba62460d">+ {t('prescriptionWriter.addMedication')}</h4>
-                  <div className="form-group">
-                    <input className="form-input" placeholder={t('prescriptionWriter.medicationName')} value={newMed.name}
-                      onChange={e => setNewMed({ ...newMed, name: e.target.value })} />
-                  </div>
-                  <div className="si-1327446f">
-                    <input className="form-input" placeholder={t('prescriptionWriter.dosage')} value={newMed.dosage}
-                      onChange={e => setNewMed({ ...newMed, dosage: e.target.value })} />
-                    <input className="form-input" placeholder={t('prescriptionWriter.frequency')} value={newMed.frequency}
-                      onChange={e => setNewMed({ ...newMed, frequency: e.target.value })} />
-                  </div>
-                  <div className="si-ec98b0e0">
-                    <input className="form-input" placeholder={t('prescriptionWriter.duration')} value={newMed.duration}
-                      onChange={e => setNewMed({ ...newMed, duration: e.target.value })} />
-                    <input className="form-input" placeholder={t('prescriptionWriter.instructions')} value={newMed.instructions}
-                      onChange={e => setNewMed({ ...newMed, instructions: e.target.value })} />
-                  </div>
-                  <button type="button" className="btn btn-outline si-37f17fee" onClick={addMedication}>
-                    + {t('prescriptionWriter.addMedication')}
-                  </button>
-                </div>
-
-                {/* Quick Add Templates */}
-                <div className="si-66faea9d">
-                  <p className="si-8183ab9c">{t('prescriptionWriter.quickAdd')}</p>
-                  <div className="si-50c82988">
-                    {[
-                      { name: 'Amoxicillin', dosage: '250mg', frequency: 'Twice daily', duration: '7 days' },
-                      { name: 'Meloxicam', dosage: '0.1mg/kg', frequency: 'Once daily', duration: '5 days' },
-                      { name: 'Metronidazole', dosage: '15mg/kg', frequency: 'Twice daily', duration: '10 days' }
-                    ].map(template => (
-                      <button
-                        key={template.name}
-                        type="button"
-                        className="btn btn-outline si-82a7d299"
-                       
-                        onClick={() => setMedications([...medications, { ...template, instructions: '' }])}
-                      >
-                        + {template.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <PrescriptionLineForm foodProducing={foodProducing} recent={recentLines} onAdd={line => setMedications(m => [...m, line as Medication])} />
               </div>
             </div>
           </div>

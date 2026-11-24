@@ -18,6 +18,8 @@ const livestockFields = {
   // listingTier / isHotDeal are admin-granted promotion flags - sellers cannot
   // set them, so they are intentionally absent (stripUnknown drops them)
   linkedAnimalId: Joi.string().uuid().optional().allow('', null),
+  // Sent again after the seller confirmed the meat-withdrawal warning for the linked animal.
+  confirmWithdrawal: Joi.boolean().optional(),
   auctionEndTime: Joi.string().optional().allow('', null),
   reservePrice: Joi.number().min(0).optional().allow(null),
   contactPhone: Joi.string().max(20).optional().allow('', null),

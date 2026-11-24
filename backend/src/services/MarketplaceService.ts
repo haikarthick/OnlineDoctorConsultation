@@ -5,6 +5,7 @@
  * Compliant with PCA Act 1960, Dog Breeding Rules 2017, Pet Shop Rules 2018.
  * Enhanced with livestock-specific fields, admin controls, and market intelligence.
  */
+import WithdrawalService from './withdrawal/WithdrawalService';
 import pool from '../utils/database';
 import { v4 as uuidv4 } from 'uuid';
 import NotificationService from './NotificationService';
@@ -302,6 +303,8 @@ class MarketplaceService {
     if (data.linkedAnimalId) {
       const owned = await pool.query('SELECT 1 FROM animals WHERE id = $1 AND owner_id = $2', [data.linkedAnimalId, data.sellerId]);
       if (!owned.rows[0]) throw new Error('Linked animal not found in your animals');
+      // Offering an animal for sale while it is under a meat withdrawal: say so, and list it only when the seller confirms.
+      await WithdrawalService.guard({ animalId: data.linkedAnimalId }, 'meat', (data as any).confirmWithdrawal);
     }
 
     // Animal-category listings require admin review before going public

@@ -74,6 +74,11 @@ export function clearError(userId: string, id: string): void {
   write(userId, getOutbox(userId).map(i => (i.id === id ? { ...i, error: undefined } : i)))
 }
 
+/** The farmer read why an entry was refused and chose to send it again: a withdrawal warning counts as confirmed. */
+export function retryConfirmed(userId: string, id: string): void {
+  write(userId, getOutbox(userId).map(i => (i.id === id ? { ...i, error: undefined, payload: { ...i.payload, confirmWithdrawal: true } } : i)))
+}
+
 let flushing = false
 
 /**

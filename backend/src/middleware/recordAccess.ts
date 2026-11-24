@@ -23,6 +23,8 @@ const RECORD_TABLES = {
   weight_history: { animal: 'animal_id', group: null },
   vaccine_schedule: { animal: 'animal_id', group: null },
   wellness_scorecards: { animal: 'animal_id', group: null },
+  prescriptions: { animal: 'animal_id', group: 'group_id' },
+  self_treatments: { animal: 'animal_id', group: 'group_id' },
 } as const;
 
 export type RecordTable = keyof typeof RECORD_TABLES;

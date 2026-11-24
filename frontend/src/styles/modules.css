@@ -3972,3 +3972,24 @@ button.record-due-row { cursor: pointer; }
   .nutri-layout:not(.has-selection) .nutri-detail-pane { display: none; }
   .nutri-back { display: inline-flex; margin-bottom: 4px; }
 }
+/* ── Treatments and withdrawal (prescription line form, withdrawal banner, "Medicines and withdrawal" card) ── */
+.wd-banner { margin: 0 0 12px; }
+.wd-banner p { margin: 4px 0 0; }
+.wd-hint { color: var(--text-secondary, #6b7280); font-size: 0.85rem; margin: 2px 0; }
+.wd-error { color: var(--danger, #b91c1c); font-size: 0.9rem; margin: 6px 0; }
+.wd-card { background: var(--card-bg, #fff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 12px; padding: 14px; margin: 0 0 14px; }
+.wd-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.wd-card-title { font-size: 1.05rem; margin: 0; }
+.wd-sub { font-size: 0.95rem; margin: 12px 0 6px; }
+.wd-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.wd-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border-color, #e5e7eb); }
+.wd-row p { margin: 2px 0 0; overflow-wrap: anywhere; }
+.wd-line-form { display: grid; gap: 10px; }
+.wd-recent { display: grid; gap: 6px; }
+.wd-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.wd-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.wd-field { display: grid; gap: 4px; font-size: 0.9rem; }
+.wd-label-box { border: 1px solid var(--border-color, #e5e7eb); border-radius: 10px; padding: 10px; margin: 0; }
+.wd-label-box legend { font-weight: 600; padding: 0 6px; }
+.wd-none { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 0.9rem; }
+@media (max-width: 480px) { .wd-two { grid-template-columns: 1fr; } }

@@ -20,6 +20,7 @@ import smsSettingsRoutes from './sms-settings.routes';
 import farmInvitationsRoutes from './farm-invitations.routes';
 import groupNetworkSharingRoutes from './group-network-sharing.routes';
 import nutritionRoutes from './nutrition.routes';
+import treatmentsRoutes from './treatments.routes';
 
 const router = Router();
 
@@ -44,5 +45,6 @@ router.use(smsSettingsRoutes);
 router.use(farmInvitationsRoutes);
 router.use(groupNetworkSharingRoutes);
 router.use(nutritionRoutes);
+router.use(treatmentsRoutes);
 
 export default router;

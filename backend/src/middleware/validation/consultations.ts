@@ -104,6 +104,13 @@ const medicationSchema = Joi.object({
   frequency: Joi.string().max(255).required(),
   duration: Joi.string().max(255).optional().allow('', null),
   instructions: shortText(500).optional().allow('', null),
+  // What kind of line this is, and (for a medicine or medicated feed given to a food-producing animal) the product label's
+  // treatment days and milk / egg and meat withdrawal days, typed by the vet. The platform stores them and does the date sums.
+  kind: Joi.string().valid('medicine', 'medicated_feed', 'diet', 'supplement').optional(),
+  treatmentDays: Joi.number().integer().min(1).max(365).optional(),
+  withdrawalMilkDays: Joi.number().integer().min(0).max(365).optional(),
+  withdrawalMeatDays: Joi.number().integer().min(0).max(365).optional(),
+  withdrawalNone: Joi.boolean().optional(),
 });
 
 export const createPrescriptionSchema = Joi.object({

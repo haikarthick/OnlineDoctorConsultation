@@ -23,7 +23,7 @@ describe('MovementService', () => {
     it('should create a movement record', async () => {
       const movement = { id: 'mock-uuid', enterprise_id: 'e1', animal_id: 'a1', from_location_id: 'l1', to_location_id: 'l2', movement_type: 'transfer', reason: 'Rotation', recorded_by: 'u1' };
       (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ milk: null, meat: null }] }) // withdrawal status check
+        .mockResolvedValueOnce({ rows: [] }) // withdrawal status check (no treatment holds anything back)
         .mockResolvedValueOnce({ rows: [{}] })          // animal is on the farm
         .mockResolvedValueOnce({ rows: [{}] })          // from-place is on the farm
         .mockResolvedValueOnce({ rows: [{}] })          // to-place is on the farm
@@ -38,7 +38,7 @@ describe('MovementService', () => {
   describe('farm boundaries and decisions', () => {
     it('refuses an animal that is not on the farm, in words, and writes nothing', async () => {
       (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ milk: null, meat: null }] }) // withdrawal status check
+        .mockResolvedValueOnce({ rows: [] }) // withdrawal status check (no treatment holds anything back)
         .mockResolvedValueOnce({ rows: [] });                           // animal is NOT on the farm
       await expect(movementService.createMovement('u1', { enterpriseId: 'e1', animalId: 'other', toLocationId: 'l2', movementType: 'transfer' }))
         .rejects.toThrow(/not on this farm/);

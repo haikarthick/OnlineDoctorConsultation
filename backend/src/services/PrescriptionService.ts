@@ -1,3 +1,5 @@
+import WithdrawalService from './withdrawal/WithdrawalService';
+import { needsWithdrawalChoice, withdrawalAnswered, wholeDays } from './withdrawal/withdrawalMath';
 import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
 import { Prescription, CreatePrescriptionDTO, Medication } from '../models/types';
@@ -63,6 +65,21 @@ class PrescriptionService {
       }
     }
 
+    // A food-producing animal or herd: every medicine / medicated-feed line carries the label's treatment days and its milk / egg
+    // and meat withdrawal days (or an explicit "none"), so the farmer's side is automatic. A pet, a diet or a supplement is exempt.
+    if (await WithdrawalService.isFoodProducing({ animalId, groupId })) {
+      for (const line of data.medications as any[]) {
+        if (!needsWithdrawalChoice(line)) continue;
+        const label = String(line.name || 'This medicine');
+        if (wholeDays(line.treatmentDays) < 1) throw new ValidationError(`${label}: enter how many days the treatment lasts.`);
+        if (!withdrawalAnswered(line)) {
+          throw new ValidationError(`${label}: enter the milk / egg and the meat withdrawal days from the product label, or choose "None". The farm needs this to know when milk and meat are safe.`);
+        }
+      }
+    }
+    // A "none" answer is stored as 0 days, so a reader never has to guess.
+    (data as any).medications = (data.medications as any[]).map(l => (l.withdrawalNone === true ? { ...l, withdrawalMilkDays: 0, withdrawalMeatDays: 0 } : l));
+
     // For standalone prescriptions (no consultation), petOwnerId must be supplied directly
     if (!petOwnerId && !data.petOwnerId) {
       throw new NotFoundError('petOwnerId is required for prescriptions not linked to a consultation', data.consultationId || 'standalone');
@@ -123,6 +140,8 @@ class PrescriptionService {
     );
 
     logger.info('Prescription created', { prescriptionId: id, consultationId: data.consultationId });
+    // Tell the farm that milk / meat must be held back (the same dates the banner and the due list will show).
+    await WithdrawalService.notifyStarted({ id, animalId, groupId, medications: data.medications as any[] }).catch(() => undefined);
 
     // Notify the network's pharmacists that a new prescription is awaiting review
     if (isNetworkCoordinated && targetPharmacyId) {

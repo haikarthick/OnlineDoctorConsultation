@@ -31,6 +31,7 @@ import { smsSettingsApi } from './api/modules/smsSettings'
 import { farmInvitationsApi } from './api/modules/farmInvitations'
 import { groupSharingApi } from './api/modules/groupSharing'
 import { nutritionApi } from './api/modules/nutrition'
+import { treatmentsApi } from './api/modules/treatments'
 
 export { sharedClient, fetchCsrfToken }
 export { extractArrayFromResponse, extractTotalFromResponse } from './api/utils'
@@ -57,5 +58,6 @@ export const apiService = {
   ...farmInvitationsApi,
   ...groupSharingApi,
   ...nutritionApi,
+  ...treatmentsApi,
 }
 export default apiService

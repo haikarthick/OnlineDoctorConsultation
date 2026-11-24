@@ -35,6 +35,14 @@ export class NeedsVetError extends AppError {
   }
 }
 
+/** Withdrawal warning: the action is allowed once the person confirms (the request is sent again with confirmWithdrawal: true). */
+export class WithdrawalConfirmError extends AppError {
+  constructor(message: string) {
+    super(409, message, 'WITHDRAWAL_CONFIRM');
+    Object.setPrototypeOf(this, WithdrawalConfirmError.prototype);
+  }
+}
+
 export class NotFoundError extends AppError {
   constructor(resource: string, id?: string | number) {
     const message = id ? `${resource} with id ${id} not found` : `${resource} not found`;

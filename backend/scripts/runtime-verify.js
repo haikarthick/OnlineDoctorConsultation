@@ -1630,6 +1630,141 @@ async function http(method, url, body, token) {
       else ok('conditions wait for a vet; alerts notify once; herd ration on members; wellness from records; strangers refused; weight kept once');
     }
 
+
+    // ── PHASE 6i: treatment and withdrawal - one prescription feeds the whole farm (migration 067) ──
+    // A vet types the label's days on the prescription; the farm's banner, due list, warnings and "my medicines" are worked out
+    // from it. The platform ships no medicine list: every name below is made up for this check.
+    if (serverHealthy && port) {
+      step('PHASE 6i Treatment and withdrawal: label days on the prescription, one answer everywhere, warn-and-confirm');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const mark = serverLog.length;
+      const problems = [];
+      const iso = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
+      let seq = (Math.floor(Date.now() / 1000) % 100000000) + 61000;
+      const signUp = async (role) => {
+        const email = `verify.wd.${role}.${Date.now()}.${seq}@example.com`;
+        await http('POST', `${apiBase}/auth/register`, { firstName: 'Wd', lastName: 'Verify', email, phone: `9${String(seq++).padStart(9, '0')}`,
+          password: 'Password1', confirmPassword: 'Password1', role: 'pet_owner', acceptTerms: true });
+        if (role === 'admin') psql('verifydb', `SET search_path TO ${SCHEMA}, public; UPDATE users SET role = 'admin', account_status = 'active', is_active = true WHERE email = '${email}';`);
+        return (await http('POST', `${apiBase}/auth/login`, { email, password: 'Password1' })).json?.data?.token;
+      };
+      const msgOf = (r) => r.json?.message || r.json?.error?.message || '';
+      const codeOf = (r) => r.json?.error?.code || '';
+      const admin = await signUp('admin');
+      const stranger = await signUp('pet_owner');
+      const petOwner = await signUp('pet_owner');
+      const farmer = (await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' })).json?.data?.token;
+      let ent = null; let herd = null; let cow = null; let cow2 = null; let tomId = null;
+      try {
+        ent = psqlJson('verifydb', `SELECT e.id FROM ${SCHEMA}.enterprises e JOIN ${SCHEMA}.users u ON u.id = e.owner_id WHERE u.email = 'tom.wilson@example.com' ORDER BY e.created_at LIMIT 1`)[0]?.id;
+        tomId = psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.users WHERE email = 'tom.wilson@example.com'`)[0]?.id;
+        herd = psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.animal_groups WHERE enterprise_id = '${ent}' AND species = 'Cattle' LIMIT 1`)[0]?.id;
+        const cows = psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.animals WHERE enterprise_id = '${ent}' AND species = 'Cattle' AND is_active = true ORDER BY created_at LIMIT 2`);
+        cow = cows[0]?.id; cow2 = cows[1]?.id;
+      } catch { /* reported below */ }
+      if (!admin || !stranger || !petOwner || !farmer || !ent || !herd || !cow || !tomId) problems.push('could not set up the accounts, the seeded farm, its cattle herd and a cow for the withdrawal journey');
+      else {
+        const rx = (body) => http('POST', `${apiBase}/prescriptions`, { petOwnerId: tomId, diagnosis: 'Verify', instructions: '', ...body }, admin);
+        const line = (extra) => ({ name: 'Verify Product', dosage: '5 ml', frequency: 'Once daily', ...extra });
+
+        // 1. A food-producing animal: the label days are required, in words.
+        const bare = await rx({ animalId: cow, medications: [line({ treatmentDays: 2 })] });
+        if (bare.status !== 400 || !/withdrawal days from the product label/.test(msgOf(bare))) problems.push(`a medicine for a cow with no label days must be refused in words (HTTP ${bare.status}: ${msgOf(bare).slice(0, 100)})`);
+        const noDays = await rx({ animalId: cow, medications: [line({ withdrawalMilkDays: 3, withdrawalMeatDays: 10 })] });
+        if (noDays.status !== 400 || !/how many days the treatment lasts/.test(msgOf(noDays))) problems.push(`a medicine with no treatment days must be refused in words (HTTP ${noDays.status})`);
+        // A diet line is exempt.
+        const diet = await rx({ animalId: cow2 || cow, medications: [{ name: 'Verify diet', dosage: '2 kg', frequency: 'Daily', kind: 'diet' }] });
+        if (diet.status !== 201) problems.push(`a diet line for a cow must not ask for withdrawal days (HTTP ${diet.status}: ${msgOf(diet).slice(0, 100)})`);
+
+        // 2. The vet's answer is stored, and the withdrawal is worked out from it.
+        const good = await rx({ animalId: cow, medications: [line({ treatmentDays: 2, withdrawalMilkDays: 3, withdrawalMeatDays: 10 })] });
+        const rxId = good.json?.data?.id;
+        if (good.status !== 201 || !rxId) problems.push(`a cow prescription with label days: HTTP ${good.status} ${msgOf(good).slice(0, 120)}`);
+        else {
+          const st = await http('GET', `${apiBase}/animals/${cow}/withdrawal`, null, farmer);
+          // start day = day 1: a 2-day course from today has its last dose tomorrow; milk +3, meat +10.
+          if (st.status !== 200 || st.json?.data?.milkUntil !== iso(4) || st.json?.data?.meatUntil !== iso(11) || st.json?.data?.foodProducing !== true) {
+            problems.push(`the cow's withdrawal should be milk ${iso(4)} / meat ${iso(11)} (HTTP ${st.status}: ${JSON.stringify(st.json?.data || {}).slice(0, 220)})`);
+          }
+          // 3. Warn and confirm: milk, then a sale. Not a silent block.
+          const milkBody = { enterpriseId: ent, animalId: cow, recordType: 'milk', session: 'am', quantity: 6 };
+          const warn = await http('POST', `${apiBase}/farm-records`, milkBody, farmer);
+          if (warn.status !== 409 || codeOf(warn) !== 'WITHDRAWAL_CONFIRM' || !/withdrawal until/.test(msgOf(warn))) problems.push(`milk from a cow under withdrawal must ask first, in words (HTTP ${warn.status}, ${codeOf(warn)}: ${msgOf(warn).slice(0, 100)})`);
+          const sure = await http('POST', `${apiBase}/farm-records`, { ...milkBody, confirmWithdrawal: true }, farmer);
+          if (sure.status >= 300) problems.push(`milk saved after the person confirmed: HTTP ${sure.status} ${msgOf(sure).slice(0, 100)}`);
+          const sale = await http('POST', `${apiBase}/farm-records/events`, { animalId: cow, eventType: 'sale' }, farmer);
+          if (sale.status !== 409 || codeOf(sale) !== 'WITHDRAWAL_CONFIRM') problems.push(`selling a cow under a meat withdrawal must ask first (HTTP ${sale.status}, ${codeOf(sale)}: ${msgOf(sale).slice(0, 100)})`);
+
+          // 4. The due list (reminders) comes from the same answer.
+          const due = (await http('GET', `${apiBase}/farm-records/due?enterpriseId=${ent}`, null, farmer)).json?.data?.items || [];
+          if (!due.some(d => d.kind === 'withdrawal_ending' && d.animalId === cow && d.detail === 'milk')) problems.push('the due list does not show the cow\'s milk withdrawal ending');
+
+          // 5. "Stopped early": the farm corrects the course; a stranger cannot.
+          const fixed = await http('PATCH', `${apiBase}/treatments/prescriptions/${rxId}/course`, { lastDoseOn: iso(0) }, farmer);
+          if (fixed.status !== 200 || fixed.json?.data?.milkUntil !== iso(3)) problems.push(`"stopped early" should move milk to ${iso(3)} (HTTP ${fixed.status}: ${JSON.stringify(fixed.json?.data || {}).slice(0, 160)})`);
+          const bad = await http('PATCH', `${apiBase}/treatments/prescriptions/${rxId}/course`, { lastDoseOn: iso(-30) }, farmer);
+          if (bad.status !== 400) problems.push(`a last dose before the treatment started must be refused (HTTP ${bad.status})`);
+          const strangerFix = await http('PATCH', `${apiBase}/treatments/prescriptions/${rxId}/course`, { lastDoseOn: iso(0) }, stranger);
+          const strangerRead = await http('GET', `${apiBase}/animals/${cow}/withdrawal`, null, stranger);
+          if (strangerFix.status !== 403 || strangerRead.status !== 403) problems.push(`a stranger could change or read another farm's withdrawal (HTTP ${strangerFix.status} / ${strangerRead.status})`);
+          const back = await http('PATCH', `${apiBase}/treatments/prescriptions/${rxId}/course`, { lastDoseOn: null }, farmer);
+          if (back.json?.data?.milkUntil !== iso(4)) problems.push('"back to as prescribed" did not restore the dates');
+        }
+
+        // 6. The farm's history, and the farmer's own treatment (same facts, one history).
+        const selfBad = await http('POST', `${apiBase}/enterprises/${ent}/treatments`, { animalId: cow2 || cow, medicineName: 'Verify Own', treatmentDays: 1, withdrawalMeatDays: 5 }, farmer);
+        if (selfBad.status !== 400) problems.push(`a treatment with a missing label figure must be refused (HTTP ${selfBad.status})`);
+        const self = await http('POST', `${apiBase}/enterprises/${ent}/treatments`, { animalId: cow2 || cow, medicineName: 'Verify Own', treatmentDays: 1, withdrawalMilkDays: 0, withdrawalMeatDays: 5 }, farmer);
+        if (self.status !== 201) problems.push(`the farmer's own treatment: HTTP ${self.status} ${msgOf(self).slice(0, 100)}`);
+        const hist = (await http('GET', `${apiBase}/enterprises/${ent}/treatments`, null, farmer)).json?.data || {};
+        if (!(hist.history || []).some(h => h.medicine === 'Verify Product' && h.source === 'prescription') || !(hist.history || []).some(h => h.medicine === 'Verify Own' && h.source === 'self')) problems.push('the treatment history must hold the vet\'s prescription and the farmer\'s own entry');
+        if (!(hist.history || []).every(h => h.medicine !== 'Verify diet')) problems.push('a diet line must not appear as a medicine in the history');
+        if (!(hist.underWithdrawal || []).some(u => u.what === 'meat' && u.medicine === 'Verify Own')) problems.push('the farmer\'s own treatment does not hold meat back');
+        const strangerSelf = await http('POST', `${apiBase}/enterprises/${ent}/treatments`, { animalId: cow, medicineName: 'x', treatmentDays: 1, withdrawalMilkDays: 0, withdrawalMeatDays: 0 }, stranger);
+        const strangerHist = await http('GET', `${apiBase}/enterprises/${ent}/treatments`, null, stranger);
+        if (strangerSelf.status !== 403 || strangerHist.status !== 403) problems.push(`a stranger could add to or read another farm's treatments (HTTP ${strangerSelf.status} / ${strangerHist.status})`);
+
+        // 7. A herd: medicated feed with its label days; the herd and its members are under withdrawal.
+        const herdRx = await rx({ groupId: herd, medications: [line({ name: 'Verify Medicated Feed', kind: 'medicated_feed', dosage: '100 g/head', treatmentDays: 5, withdrawalMilkDays: 2, withdrawalMeatDays: 7 })] });
+        if (herdRx.status !== 201) problems.push(`a herd prescription with a medicated-feed line: HTTP ${herdRx.status} ${msgOf(herdRx).slice(0, 120)}`);
+        else {
+          const hst = await http('GET', `${apiBase}/animal-groups/${herd}/withdrawal`, null, farmer);
+          if (hst.json?.data?.meatActive !== true || hst.json?.data?.meatUntil !== iso(11)) problems.push(`the herd's meat withdrawal should run to ${iso(11)} (${JSON.stringify(hst.json?.data || {}).slice(0, 160)})`);
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public; INSERT INTO animal_group_memberships (animal_id, group_id) SELECT '${cow2 || cow}', '${herd}' WHERE NOT EXISTS (SELECT 1 FROM animal_group_memberships WHERE animal_id = '${cow2 || cow}' AND group_id = '${herd}' AND left_at IS NULL);`);
+          const member = await http('GET', `${apiBase}/animals/${cow2 || cow}/withdrawal`, null, farmer);
+          if (member.json?.data?.meatActive !== true) problems.push('an animal in a treated herd must carry the herd\'s withdrawal');
+          const courses = await http('GET', `${apiBase}/treatments/groups/${herd}/feed-courses`, null, farmer);
+          if (courses.status !== 200 || !(courses.json?.data || []).some(c => c.medicine === 'Verify Medicated Feed' && c.daysLeft >= 1)) problems.push(`the running medicated-feed course is not offered on the feed entry (HTTP ${courses.status}: ${JSON.stringify(courses.json?.data || {}).slice(0, 140)})`);
+          const strangerCourses = await http('GET', `${apiBase}/treatments/groups/${herd}/feed-courses`, null, stranger);
+          if (strangerCourses.status !== 403) problems.push(`a stranger read a herd's medicated-feed course (HTTP ${strangerCourses.status})`);
+          const note = psqlJson('verifydb', `SELECT COUNT(*) AS n FROM ${SCHEMA}.notifications WHERE user_id = '${tomId}' AND metadata->>'type' = 'withdrawal_started'`)[0]?.n;
+          if (Number(note) < 1) problems.push('the farm owner was not told that a prescription holds milk and meat back');
+        }
+
+        // 8. A pet needs no label days; the vet's own recent medicines are offered back (and only to a vet).
+        const dog = (await http('POST', `${apiBase}/animals`, { name: 'Verify Wd Dog', species: 'Dog', gender: 'male' }, petOwner)).json?.data?.id;
+        const dogOwner = dog ? psqlJson('verifydb', `SELECT owner_id FROM ${SCHEMA}.animals WHERE id = '${dog}'`)[0]?.owner_id : null;
+        if (dog && dogOwner) {
+          const pet = await http('POST', `${apiBase}/prescriptions`, { petOwnerId: dogOwner, animalId: dog, diagnosis: 'Verify', medications: [line({ name: 'Verify Pet Product' })] }, admin);
+          if (pet.status !== 201) problems.push(`a pet prescription must not ask for withdrawal days (HTTP ${pet.status}: ${msgOf(pet).slice(0, 100)})`);
+        }
+        const recent = await http('GET', `${apiBase}/treatments/my-recent-lines`, null, admin);
+        const mine = (recent.json?.data || []).find(l => l.name === 'Verify Product');
+        if (recent.status !== 200 || mine?.withdrawalMilkDays !== 3 || mine?.withdrawalMeatDays !== 10 || mine?.treatmentDays !== 2) problems.push(`the vet's recent medicines must bring back the label days they typed (HTTP ${recent.status}: ${JSON.stringify(mine || {}).slice(0, 140)})`);
+        const notVet = await http('GET', `${apiBase}/treatments/my-recent-lines`, null, farmer);
+        if (notVet.status !== 403) problems.push(`the recent-medicines list must be for vets only (HTTP ${notVet.status})`);
+
+        // 9. The movement interlock (slaughter / export) reads the same answer: it blocks, in words.
+        const certBlocked = await http('POST', `${apiBase}/movements`, { enterpriseId: ent, animalId: cow, movementType: 'slaughter', reason: 'Verify' }, farmer);
+        if (certBlocked.status !== 400 || !/withdrawal until/.test(msgOf(certBlocked))) problems.push(`a slaughter movement during a meat withdrawal must be refused in words (HTTP ${certBlocked.status}: ${msgOf(certBlocked).slice(0, 100)})`);
+      }
+      const sqlErrs = serverLog.slice(mark).split('\n')
+        .filter(l => /syntax error|does not exist|violates|invalid input syntax|there is no unique|could not determine|DATABASE_ERROR|statusCode":5\d\d/i.test(l))
+        .map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(-240));
+      if (problems.length || sqlErrs.length) fail('Treatment and withdrawal misbehave on the real schema.', [...problems, ...sqlErrs]);
+      else ok('label days on the prescription; one withdrawal answer for banner, due list, herd and movement; warn-and-confirm; strangers refused');
+    }
+
     // ── PHASE 7: the browser ──
     let sweepAccounts = [];
     if (serverHealthy && port) {

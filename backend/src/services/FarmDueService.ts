@@ -1,5 +1,6 @@
 import database from '../utils/database';
 import FarmRecordService from './FarmRecordService';
+import WithdrawalService from './withdrawal/WithdrawalService';
 
 /**
  * What is coming up on a farm - the "due list" on the Daily records screen.
@@ -64,27 +65,13 @@ class FarmDueService {
       [enterpriseId, VACCINATION_WINDOW_DAYS]
     );
 
-    const withdrawals = await database.query(
-      `SELECT m.animal_id, m.group_id, COALESCE(a.name, g.name) AS name,
-              CASE WHEN m.withdrawal_until_milk >= CURRENT_DATE AND m.withdrawal_until_milk <= CURRENT_DATE + $2::int THEN 'milk' ELSE 'meat' END AS what,
-              CASE WHEN m.withdrawal_until_milk >= CURRENT_DATE AND m.withdrawal_until_milk <= CURRENT_DATE + $2::int
-                   THEN m.withdrawal_until_milk::text ELSE m.withdrawal_until_meat::text END AS due,
-              CASE WHEN m.withdrawal_until_milk >= CURRENT_DATE AND m.withdrawal_until_milk <= CURRENT_DATE + $2::int
-                   THEN (m.withdrawal_until_milk - CURRENT_DATE) ELSE (m.withdrawal_until_meat - CURRENT_DATE) END AS in_days
-         FROM medical_records m
-         LEFT JOIN animals a ON a.id = m.animal_id
-         LEFT JOIN animal_groups g ON g.id = m.group_id
-        WHERE COALESCE(a.enterprise_id, g.enterprise_id) = $1
-          AND ((m.withdrawal_until_milk >= CURRENT_DATE AND m.withdrawal_until_milk <= CURRENT_DATE + $2::int)
-            OR (m.withdrawal_until_meat >= CURRENT_DATE AND m.withdrawal_until_meat <= CURRENT_DATE + $2::int))
-        ORDER BY 5`,
-      [enterpriseId, WITHDRAWAL_WINDOW_DAYS]
-    );
+    // Withdrawal ends come from the ONE withdrawal service (prescriptions + the farmer's own treatments).
+    const withdrawals = await WithdrawalService.listForFarm(enterpriseId, { endingWithinDays: WITHDRAWAL_WINDOW_DAYS });
 
     const items: DueItem[] = [
       ...births.rows.map((r: any): DueItem => ({ kind: 'birth_expected', date: r.due, inDays: Number(r.in_days), animalId: r.id, groupId: null, name: r.name, detail: null })),
       ...vaccinations.rows.map((r: any): DueItem => ({ kind: 'vaccination_due', date: r.due, inDays: Number(r.in_days), animalId: r.id, groupId: null, name: r.name, detail: r.vaccine_name })),
-      ...withdrawals.rows.map((r: any): DueItem => ({ kind: 'withdrawal_ending', date: r.due, inDays: Number(r.in_days), animalId: r.animal_id, groupId: r.group_id, name: r.name, detail: r.what })),
+      ...withdrawals.map((r): DueItem => ({ kind: 'withdrawal_ending', date: r.until, inDays: r.inDays, animalId: r.animalId, groupId: r.groupId, name: r.name, detail: r.what })),
     ];
     // Overdue first, then soonest.
     return items.sort((a, b) => a.inDays - b.inDays || a.name.localeCompare(b.name));

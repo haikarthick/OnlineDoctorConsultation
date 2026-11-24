@@ -1,3 +1,4 @@
+import WithdrawalService from './withdrawal/WithdrawalService';
 import database from '../utils/database';
 import { ValidationError } from '../utils/errors';
 import FarmProfileService from './FarmProfileService';
@@ -65,6 +66,8 @@ export interface GroupEventInput {
   notes?: string | null;
   /** Birth only: the newborns to add to the herd as animals (the farmer chose to). */
   offspring?: Array<{ name?: string; gender?: string }> | null;
+  /** The person saw the withdrawal warning and chose to record it anyway. */
+  confirmWithdrawal?: boolean;
 }
 
 class FarmEventService {
@@ -87,6 +90,8 @@ class FarmEventService {
       managementMode: 'individual', groupType: subject.groupType,
     }, rt.code, 'animal');
     const { quantity, detail } = FarmRecordService.shape(rt.fields, { recordType: rt.code, quantity: input.quantity, detail: input.detail });
+    // A sale or a death of an animal still under a meat withdrawal: say so, and record it only when the person confirms.
+    if (rt.code === 'sale' || rt.code === 'death') await WithdrawalService.guard({ animalId: subject.id }, 'meat', input.confirmWithdrawal);
 
     const st = await database.query(`SELECT status, group_id FROM animals WHERE id = $1`, [subject.id]);
     const status: string = st.rows[0]?.status || 'active';
@@ -217,6 +222,8 @@ class FarmEventService {
     if (subject.managementMode !== 'batch') {
       throw new ValidationError('This group is kept animal by animal, so it has no head count to change. Use the animal records instead.');
     }
+    // Animals leaving a herd for sale or cull while the herd is under a meat withdrawal: warn and confirm.
+    if (action.ledger === 'sale' || action.ledger === 'cull') await WithdrawalService.guard({ groupId: subject.id }, 'meat', input.confirmWithdrawal);
     const eventDate = FarmRecordService.checkDate(input.eventDate);
     const rt = await FarmRecordService.loadRecordType(input.eventType, 'event');
     await FarmProfileService.assertRecordTypeAllowed({

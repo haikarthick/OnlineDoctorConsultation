@@ -1272,8 +1272,6 @@ export class MedicalRecordService {
                mr.affected_count as "affectedCount",
                mr.mortality_count as "mortalityCount",
                mr.event_date as "eventDate",
-               mr.withdrawal_until_milk as "withdrawalUntilMilk",
-               mr.withdrawal_until_meat as "withdrawalUntilMeat",
                mr.campaign_id as "campaignId",
                COALESCE(vet.first_name || ' ' || vet.last_name, '') as "veterinarianName"
         FROM medical_records mr

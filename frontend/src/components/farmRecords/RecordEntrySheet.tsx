@@ -1,3 +1,5 @@
+import WithdrawalBanner from '../treatments/WithdrawalBanner'
+import { sendWithWithdrawalConfirm } from '../../utils/withdrawal'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
@@ -111,6 +113,16 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
   // Today's suggested amount from the nutrition engine (feeding table, herd ration or the animal's ration) - shown and
   // one tap away, never filled in silently.
   const [suggested, setSuggested] = useState<number | null>(null)
+  // Medicated feed the vet prescribed that is still running for this animal or herd (shown beside the feed entry).
+  const [feedCourses, setFeedCourses] = useState<Array<{ medicine: string; dosage: string | null; startedOn: string; daysLeft: number }>>([])
+  useEffect(() => {
+    setFeedCourses([])
+    if (!stockField || subject.kind === 'farm') return
+    let active = true
+    apiService.feedCourses(subject.kind === 'group' ? { groupId: subject.id } : { animalId: subject.id })
+      .then((res: any) => { if (active) setFeedCourses(res?.data || []) }).catch(() => { /* optional hint */ })
+    return () => { active = false }
+  }, [stockField, subject.kind, subject.id])
   useEffect(() => {
     setSuggested(null)
     if (!stockField || !nutritionOn || subject.kind === 'farm') return
@@ -157,7 +169,10 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
   const answer = useRef<any>(null)
   const save = useSaveAction(
     async (payload: Record<string, unknown>) => {
-      const res = 'eventType' in payload ? await apiService.saveGroupEvent(payload as any) : await apiService.saveFarmRecord(payload as any)
+      // A sale, death or milk / egg entry for an animal under a withdrawal asks first (the server warns, the person confirms).
+      const res = await sendWithWithdrawalConfirm(confirmWithdrawal => ('eventType' in payload
+        ? apiService.saveGroupEvent((confirmWithdrawal ? { ...payload, confirmWithdrawal } : payload) as any)
+        : apiService.saveFarmRecord((confirmWithdrawal ? { ...payload, confirmWithdrawal } : payload) as any)), t)
       answer.current = res?.data ?? null
       return res
     },
@@ -199,6 +214,10 @@ export const RecordEntrySheet: React.FC<RecordEntrySheetProps> = ({ subject, dat
   return (
     <BottomSheet open title={t('farmRecords.sheetTitle', { name: subject.kind === 'farm' ? t('farmRecords.allAnimals') : subject.name })} onClose={onClose}>
       <div className="record-sheet">
+        {subject.kind !== 'farm' && <WithdrawalBanner {...(subject.kind === 'group' ? { groupId: subject.id } : { animalId: subject.id })} />}
+        {feedCourses.map(c => (
+          <p key={`${c.medicine}:${c.startedOn}`} className="record-note">💊 {t('withdrawal.feedCourse', { name: c.medicine, dosage: c.dosage || '', count: c.daysLeft })}</p>
+        ))}
         {types.length === 0 ? (
           <p className="record-note">{t('farmRecords.nothingToRecord')}</p>
         ) : (

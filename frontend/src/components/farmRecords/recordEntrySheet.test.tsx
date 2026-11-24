@@ -14,6 +14,8 @@ vi.mock('../../services/api', () => ({
   default: {
     saveFarmRecord: (...a: unknown[]) => save(...a), saveGroupEvent: (...a: unknown[]) => saveEvent(...a), listFarmRecords: (...a: unknown[]) => list(...a),
     listFeeds: (...a: unknown[]) => listFeeds(...a),
+    // the withdrawal banner and the medicated-feed hint: nothing held back, no course running
+    animalWithdrawal: () => Promise.resolve({ data: null }), getGroupWithdrawal: () => Promise.resolve({ data: null }), feedCourses: () => Promise.resolve({ data: [] }),
   },
 }))
 vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', role: 'farmer' } }) }))

@@ -33,6 +33,12 @@ export interface Medication {
   frequency: string
   duration: string
   instructions?: string
+  /** medicine | medicated_feed | diet | supplement; the label's treatment and withdrawal days are typed by the vet (food-producing animals). */
+  kind?: 'medicine' | 'medicated_feed' | 'diet' | 'supplement'
+  treatmentDays?: number
+  withdrawalMilkDays?: number
+  withdrawalMeatDays?: number
+  withdrawalNone?: boolean
 }
 
 export interface Prescription {

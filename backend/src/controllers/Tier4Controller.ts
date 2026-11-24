@@ -2,6 +2,7 @@
  * Controller: Next-Generation Innovative Modules
  * AI Vet Copilot, Digital Twin, Marketplace, Sustainability, Wellness, Geospatial
  */
+import { WithdrawalConfirmError } from '../utils/errors';
 import { Request, Response } from 'express';
 import aiCopilotService from '../services/AiCopilotService';
 import digitalTwinService from '../services/DigitalTwinService';
@@ -239,7 +240,11 @@ class Tier4Controller {
       const userId = (req as any).userId;
       const data = await marketplaceService.createListing({ ...req.body, sellerId: userId });
       res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) {
+      // A withdrawal warning is answered in words (the screen asks the seller to confirm), not as a server error.
+      if (err instanceof WithdrawalConfirmError) { res.status(409).json({ success: false, message: err.message, error: { message: err.message, code: err.errorCode } }); return; }
+      res.status(500).json({ error: { message: err.message } });
+    }
   }
 
   async updateMarketplaceListing(req: Request, res: Response) {

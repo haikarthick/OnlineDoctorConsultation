@@ -1,3 +1,4 @@
+import WithdrawalBanner from '../treatments/WithdrawalBanner'
 import React from 'react'
 import type { TFunction } from 'i18next'
 import type { AnimalClassTerm } from '../../constants/speciesBreeds'
@@ -90,6 +91,7 @@ const AnimalDetailModal: React.FC<Props> = ({
         </div>
 
         {/* Food plan, feeding, weight and body condition - the same panel every role sees (hidden while nutrition is off) */}
+        <WithdrawalBanner animalId={detailAnimal.id} />
         <NutritionPanel animalId={detailAnimal.id} compact />
 
         <SectionTitle icon="🏷️" text={t('animals.detailModal.identificationSection')} />

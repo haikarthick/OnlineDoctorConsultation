@@ -9,6 +9,7 @@ jest.mock('../../src/utils/database');
 jest.mock('../../src/services/FarmRecordService');
 jest.mock('../../src/services/FarmProfileService');
 jest.mock('../../src/services/BatchManagementService');
+jest.mock('../../src/services/withdrawal/WithdrawalService', () => ({ __esModule: true, default: { guard: jest.fn().mockResolvedValue(undefined) } }));
 
 const query = database.query as jest.Mock;
 const loadSubject = FarmRecordService.loadSubject as jest.Mock;

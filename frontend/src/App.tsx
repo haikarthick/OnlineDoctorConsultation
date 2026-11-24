@@ -16,7 +16,6 @@ import ErrorAutoScroll from './components/ErrorAutoScroll'
 // Eagerly loaded public pages (needed at first paint)
 import Home from './pages/Home'
 import Login from './pages/Login'
-import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import './App.css'
@@ -24,6 +23,8 @@ import './styles/modules.css'
 import './styles/extracted-inline-styles.css'
 
 // ── Lazy-loaded protected pages ─────────────────────────────
+// Registration is a long form, needed only on /register: loaded on demand so the entry chunk stays within its budget.
+const Register = lazy(() => import('./pages/Register'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Consultations = lazy(() => import('./pages/Consultations'))
 const MedicalRecords = lazy(() => import('./pages/MedicalRecords'))

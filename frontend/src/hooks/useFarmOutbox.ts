@@ -3,7 +3,7 @@ import apiService from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { userMessage } from '../utils/userMessage'
 import {
-  clearError, discard, enqueue, flushOutbox, getOutbox, subscribeOutbox,
+  retryConfirmed, discard, enqueue, flushOutbox, getOutbox, subscribeOutbox,
   type OutboxItem, type SendResult,
 } from '../utils/farmOutbox'
 
@@ -54,6 +54,6 @@ export function useFarmOutbox(onSent?: () => void) {
     flush,
     add: (entry: Omit<OutboxItem, 'id' | 'createdAt'>) => (userId ? enqueue(userId, entry) : null),
     discard: (id: string) => { if (userId) discard(userId, id) },
-    retry: (id: string) => { if (userId) { clearError(userId, id); void flush() } },
+    retry: (id: string) => { if (userId) { retryConfirmed(userId, id); void flush() } },
   }
 }
