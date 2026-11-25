@@ -87,7 +87,6 @@
     "payments.ts:createPayment",
     "payments.ts:getLegalDocuments",
     "payments.ts:getPaymentByBooking",
-    "payments.ts:getRefundPreview",
     "payments.ts:markReviewHelpful",
     "payments.ts:reportReview"
   ]

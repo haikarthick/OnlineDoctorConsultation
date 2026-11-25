@@ -5,6 +5,7 @@ import { payGroomingOrderFlow, payGroomingBalanceFlow } from '../../utils/groomi
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
+import { RefundPreview, toRefundPreview } from '../../components/shared/RefundPreview'
 import { userMessage } from '../../utils/userMessage'
 interface Props { onNavigate: (path: string) => void }
 
@@ -155,26 +156,7 @@ const MyGroomingOrders: React.FC<Props> = ({ onNavigate }) => {
             <h3>{t('groomingOrders.cancelTitle')}</h3>
             <p className="slot-hint">{cancelFor.providerName} · {cancelFor.orderNumber}</p>
 
-            {previewLoading ? <div className="loading-container"><div className="loading-spinner" /></div>
-              : preview?.hasPayment ? (
-                <div className="module-card refund-preview">
-                  <div className="refund-preview-row">
-                    <span>{t('groomingOrders.amountPaid')}</span><strong>{formatCurrency(Number(preview.amountPaid))}</strong>
-                  </div>
-                  {Number(preview.processingCharge) > 0 && (
-                    <div className="refund-preview-row">
-                      <span>{t('groomingOrders.processingCharge')}</span><span>− {formatCurrency(Number(preview.processingCharge))}</span>
-                    </div>
-                  )}
-                  <div className="refund-preview-row is-total">
-                    <strong>{t('groomingOrders.youGetBack')}</strong>
-                    <strong>{formatCurrency(Number(preview.refundAmount))}</strong>
-                  </div>
-                  <div className="slot-hint">
-                    {t(`groomingOrders.policy.${preview.policy}`, { defaultValue: String(preview.policy || '').replace(/_/g, ' ') })}
-                  </div>
-                </div>
-              ) : <p className="slot-hint">{t('groomingOrders.noPaymentToRefund')}</p>}
+            <RefundPreview loading={previewLoading} preview={toRefundPreview(preview)} />
 
             <label className="module-label slot-label">{t('groomingOrders.cancelReason')}</label>
             <textarea className="module-input" rows={2} value={cancelReason} onChange={e => setCancelReason(e.target.value)} />

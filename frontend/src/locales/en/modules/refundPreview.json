@@ -1,0 +1,24 @@
+{
+  "refundPreview": {
+    "loading": "Checking what you would get back...",
+    "loadFailed": "We could not check the refund right now. You can still cancel; the refund is worked out under the cancellation policy when you confirm.",
+    "noPayment": "Nothing was paid for this booking, so there is nothing to refund.",
+    "amountPaid": "Amount paid",
+    "processingCharge": "Processing charge",
+    "youGetBack": "You get back",
+    "patientGetsBack": "The patient gets back",
+    "bonus": "Goodwill bonus added to your wallet",
+    "policy": {
+      "patient_free_window": "Cancelled well before the appointment: full refund less the processing charge.",
+      "patient_partial_window": "Cancelled close to the appointment: part of the amount comes back, less the processing charge.",
+      "patient_no_refund_window": "Cancelled too close to the appointment: no refund is due.",
+      "doctor_cancel_full_refund": "Cancelled by the doctor: the patient is refunded in full.",
+      "customer_free_window": "Cancelled well before the appointment: full refund less the processing charge.",
+      "customer_partial_window": "Cancelled close to the appointment: partial refund under the cancellation policy.",
+      "customer_no_refund_window": "Cancelled too close to the appointment: no refund is due.",
+      "customer_no_show": "Marked as a no-show: no refund is due.",
+      "provider_cancel_full_refund": "Cancelled by the groomer: full refund plus a goodwill bonus.",
+      "unknown": "The refund follows the cancellation policy."
+    }
+  }
+}

@@ -13,13 +13,14 @@ import HistoryCard from '../components/consultations/HistoryCard'
 import RescheduleModal from '../components/consultations/RescheduleModal'
 import ActionLogModal from '../components/consultations/ActionLogModal'
 import CancelBookingModal from '../components/consultations/CancelBookingModal'
+import { toRefundPreview, type RefundPreviewData } from '../components/shared/RefundPreview'
 import NoShowModal from '../components/consultations/NoShowModal'
 
 import { userMessage } from '../utils/userMessage'
 const Consultations: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { formatDate, isJoinable, formatSlotTime, settings: appSettings, estimateRefund } = useSettings()
+  const { formatDate, isJoinable, formatSlotTime, settings: appSettings } = useSettings()
   const { maxReschedules, patientNoShowRescheduleLimit } = appSettings
   const navigate = useNavigate()
   const [bookings, setBookings] = useState<BookingRow[]>([])
@@ -73,6 +74,8 @@ const Consultations: React.FC = () => {
     show: false, bookingId: '', reason: ''
   })
   const [cancelError, setCancelError] = useState('')
+  const [refundPreview, setRefundPreview] = useState<RefundPreviewData | null>(null)
+  const [refundLoading, setRefundLoading] = useState(false)
   const [noShowModal, setNoShowModal] = useState<BookingRow | null>(null)
   const [noShowError, setNoShowError] = useState('')
   const [noShowSaving, setNoShowSaving] = useState(false)
@@ -164,6 +167,19 @@ const Consultations: React.FC = () => {
       )
     } finally { setNoShowSaving(false) }
   }
+
+  // The cancel dialog shows what the server's refund engine will really pay back, never a guess.
+  const cancelBookingId = cancelModal.show ? cancelModal.bookingId : ''
+  useEffect(() => {
+    if (!cancelBookingId) { setRefundPreview(null); return }
+    let live = true
+    setRefundLoading(true); setRefundPreview(null)
+    apiService.getRefundPreview(cancelBookingId)
+      .then(res => { if (live) setRefundPreview(toRefundPreview(res?.data)) })
+      .catch(() => { if (live) setRefundPreview(null) })
+      .finally(() => { if (live) setRefundLoading(false) })
+    return () => { live = false }
+  }, [cancelBookingId])
 
   const handleCancelBooking = async (id?: string) => {
     const bookingId = id || cancelModal.bookingId
@@ -333,8 +349,6 @@ const Consultations: React.FC = () => {
     </div>
   )
 
-  const cancelBooking = cancelModal.show ? bookings.find(b => b.id === cancelModal.bookingId) : undefined
-  const refundEstimate = cancelBooking ? estimateRefund(cancelBooking.scheduledDate, cancelBooking.timeSlotStart, 500) : null
 
   return (
     <div className="module-page">
@@ -496,7 +510,8 @@ const Consultations: React.FC = () => {
           cancelError={cancelError}
           isVet={isVet}
           isPetOwner={isPetOwner}
-          refundEstimate={refundEstimate}
+          refundLoading={refundLoading}
+          refundPreview={refundPreview}
           onClose={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
           onReasonChange={(reason) => setCancelModal({ ...cancelModal, reason })}
           onConfirm={() => handleCancelBooking()}

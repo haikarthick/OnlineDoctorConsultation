@@ -1,6 +1,5 @@
 import type { TFunction } from 'i18next'
-
-interface RefundEstimate { percent: number; reason: string }
+import { RefundPreview, type RefundPreviewData } from '../shared/RefundPreview'
 
 interface Props {
   t: TFunction
@@ -8,14 +7,15 @@ interface Props {
   cancelError: string
   isVet: boolean
   isPetOwner: boolean
-  refundEstimate: RefundEstimate | null
+  refundLoading: boolean
+  refundPreview: RefundPreviewData | null
   onClose: () => void
   onReasonChange: (reason: string) => void
   onConfirm: () => void
 }
 
 const CancelBookingModal = ({
-  t, reason, cancelError, isVet, isPetOwner, refundEstimate, onClose, onReasonChange, onConfirm,
+  t, reason, cancelError, isVet, isPetOwner, refundLoading, refundPreview, onClose, onReasonChange, onConfirm,
 }: Props) => {
   const reasonPresets = isVet
     ? (t('consultations.cancelModal.reasonPresetsVet', { returnObjects: true }) as string[])
@@ -32,13 +32,8 @@ const CancelBookingModal = ({
           {t('consultations.cancelModal.warning')}
         </div>
 
-        {/* Refund Policy Preview (for patients) */}
-        {isPetOwner && refundEstimate && (
-          <div className={`consult-refund-banner${refundEstimate.percent === 100 ? ' refund-full' : refundEstimate.percent > 0 ? ' refund-partial' : ' refund-none'}`}>
-            <strong>{refundEstimate.percent === 100 ? '✅' : refundEstimate.percent > 0 ? '⚠️' : '❌'} {t('consultations.cancelModal.refundPolicy')}:</strong>
-            <div className="si-f48bb60f">{refundEstimate.reason}</div>
-          </div>
-        )}
+        {/* What comes back: the same block the grooming cancel dialog uses, numbers from the server */}
+        {(isPetOwner || isVet) && <RefundPreview loading={refundLoading} preview={refundPreview} who={isVet ? 'patient' : 'self'} />}
 
         {/* Quick reason presets */}
         <div className="si-bab8e8bc">
