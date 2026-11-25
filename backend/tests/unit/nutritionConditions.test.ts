@@ -34,3 +34,14 @@ describe('detectConditions', () => {
     expect(detectConditions({ diagnoses: [{ title: 'Ear infection', content: 'Normal delivery, no complications' }], labs: [] })).toEqual([]);
   });
 });
+
+describe('detectConditions - farm and horse illnesses linked to feeding (domain review 2026-11-25)', () => {
+  it.each(['Ketosis in early lactation', 'Milk fever after calving', 'Bloat', 'Laminitis, both fore feet', 'Equine metabolic syndrome', 'Cushing disease (PPID)', 'Recurrent colic', 'Rumen acidosis'])(
+    '%s sends a new ration to a vet first', title => {
+      expect(detectConditions({ diagnoses: [{ title }], labs: [] })).toEqual([{ key: 'metabolic', source: 'diagnosis' }]);
+    });
+  it('an abnormal BHB or ACTH result points to the same condition', () => {
+    expect(detectConditions({ diagnoses: [], labs: [{ testName: 'Beta-hydroxybutyrate (BHB)', isAbnormal: true }] })).toEqual([{ key: 'metabolic', source: 'lab' }]);
+    expect(detectConditions({ diagnoses: [], labs: [{ testName: 'ACTH', isAbnormal: false }] })).toEqual([]);
+  });
+});

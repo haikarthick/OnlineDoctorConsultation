@@ -105,8 +105,11 @@ router.post('/hospital-networks/:id/patient-transfers/:transferId/complete', aut
 router.get('/hospital-networks/:id/patient-transfers', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   const userId = (req as any).userId;
-  const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
-  if (!member) return res.status(403).json({ success: false, error: 'Not a member' });
+  // Platform admins read every network (as on every other network route); anyone else must belong to it.
+  if ((req as any).userRole !== 'admin') {
+    const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
+    if (!member) throw new CodedError(403, 'HN_NOT_MEMBER', 'You are not a member of this network, so you cannot see its transfers. Ask the network admin to add you.');
+  }
 
   const result = await database.query(
     `SELECT nr.*,

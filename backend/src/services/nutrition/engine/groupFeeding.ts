@@ -22,6 +22,8 @@ export interface FeedingCurveRow {
   ratePctBiomass: number | null;
   feedsPerDay: number | null;
   feedType: string | null;
+  /** A caution the band carries (data, e.g. breeding pigs need more than this table says); shown to the farmer in words. */
+  cautionKey?: string | null;
 }
 
 export interface TemperatureFactor { fromC: number; toC: number; factor: number }
@@ -40,7 +42,7 @@ export interface GroupFeedInput {
 
 export type GroupFeedResult =
   | { status: 'ok'; basis: 'per_head' | 'percent_biomass'; survivalPct?: number | null; kgPerDay: number; gramsPerHead: number | null; biomassKg: number | null;
-      ratePct: number | null; tempFactor: number; feedsPerDay: number | null; feedType: string | null; costPerDay: number | null }
+      ratePct: number | null; tempFactor: number; feedsPerDay: number | null; feedType: string | null; costPerDay: number | null; cautionKey: string | null }
   | { status: 'needs'; missing: Array<'head_count' | 'age' | 'average_weight' | 'curve'> };
 
 const round = (n: number, dp = 2) => Math.round(n * 10 ** dp) / 10 ** dp;
@@ -59,7 +61,7 @@ export function groupDailyFeed(input: GroupFeedInput): GroupFeedResult {
     const kg = (g * input.headCount) / 1000;
     return {
       status: 'ok', basis, kgPerDay: round(kg, 1), gramsPerHead: g, biomassKg: null, ratePct: null, tempFactor: 1,
-      feedsPerDay: row.feedsPerDay, feedType: row.feedType,
+      feedsPerDay: row.feedsPerDay, feedType: row.feedType, cautionKey: row.cautionKey ?? null,
       costPerDay: input.pricePerKg !== null && input.pricePerKg !== undefined ? round(kg * input.pricePerKg) : null,
     };
   }
@@ -82,7 +84,7 @@ export function groupDailyFeed(input: GroupFeedInput): GroupFeedResult {
   return {
     status: 'ok', basis, kgPerDay: round(kg, 1), gramsPerHead: null, biomassKg: round(biomassKg, 1), ratePct: round(rate, 2),
     survivalPct: live < 1 ? round(live * 100, 0) : null,
-    tempFactor, feedsPerDay: row.feedsPerDay, feedType: row.feedType,
+    tempFactor, feedsPerDay: row.feedsPerDay, feedType: row.feedType, cautionKey: row.cautionKey ?? null,
     costPerDay: input.pricePerKg !== null && input.pricePerKg !== undefined ? round(kg * input.pricePerKg) : null,
   };
 }

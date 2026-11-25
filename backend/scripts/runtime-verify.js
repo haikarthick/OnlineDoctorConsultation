@@ -2338,6 +2338,280 @@ async function http(method, url, body, token) {
       else ok('herd prescription reaches the pharmacy queue, review, dispensing, history and the farm\'s bought-on; every refusal carries its code and plain words');
     }
 
+    // ── PHASE 6l: hospital-network follow-ups - walk-in invite acceptance, patient transfers, pharmacist review shown to the vet,
+    //    seat limit + removed routes, my plan and plan removal (owner-approved network zone, 2026-11-25) ──
+    if (serverHealthy && port) {
+      step('PHASE 6l Hospital network: walk-in invite, patient transfer, pharmacist review, seat limit, my plan');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const mark = serverLog.length;
+      const problems = [];
+      let seq = (Math.floor(Date.now() / 1000) % 100000000) + 82000;
+      const msgOf = (r) => r.json?.message || r.json?.error?.message || (typeof r.json?.error === 'string' ? r.json.error : '') || '';
+      const codeOf = (r) => r.json?.error?.code || '';
+      const plain = (r) => { const m = msgOf(r); return m.length >= 12 && !/status code|\bHTTP\b|\b[45]\d\d\b|\bat .+\(|undefined|\[object|Error:|violates|syntax/i.test(m); };
+      const sql = (q) => psql('verifydb', `SET search_path TO ${SCHEMA}, public; ${q}`);
+      const rows = (q) => psqlJson('verifydb', q);
+      const S = SCHEMA;
+      const uuid = () => require('crypto').randomUUID();
+      const n = (q) => Number(rows(q)[0]?.n);
+      const notes = [];
+      const signUp = async (role, dbRole) => {
+        const email = `verify.hn.${role}.${Date.now()}.${seq}@example.com`;
+        const body = { firstName: 'Hn', lastName: 'Verify', email, phone: `9${String(seq++).padStart(9, '0')}`, password: 'Password1', confirmPassword: 'Password1', role, acceptTerms: true };
+        if (role === 'veterinarian') body.licenseNumber = 'VERIFY-LIC-6L';
+        await http('POST', `${apiBase}/auth/register`, body);
+        if (dbRole || role === 'veterinarian') sql(`UPDATE users SET ${dbRole ? `role = '${dbRole}', ` : ''}account_status = 'active', is_active = true WHERE email = '${email}';`);
+        const login = await http('POST', `${apiBase}/auth/login`, { email, password: 'Password1' });
+        return { token: login.json?.data?.token, id: login.json?.data?.user?.id, email };
+      };
+      // one refusal: HTTP status, stable code, plain words, optional params
+      const coded = (label, r, status, code, params) => {
+        if (r.status !== status || codeOf(r) !== code) { problems.push(`${label}: expected HTTP ${status} with code ${code}, got HTTP ${r.status} with code '${codeOf(r)}' (${msgOf(r).slice(0, 110)})`); return; }
+        if (!plain(r)) problems.push(`${label}: code ${code} came back without plain words: '${msgOf(r).slice(0, 110)}'`);
+        for (const [k, v] of Object.entries(params || {})) if (r.json?.error?.params?.[k] !== v) problems.push(`${label}: error.params.${k} should be '${v}', got ${JSON.stringify(r.json?.error?.params)}`);
+      };
+      // a refusal in words with only the status asserted (older routes with no code)
+      const refused = (label, r, statuses) => {
+        if (!statuses.includes(r.status)) { problems.push(`${label}: expected HTTP ${statuses.join(' or ')}, got HTTP ${r.status} (${msgOf(r).slice(0, 110)})`); return; }
+        if (!plain(r)) problems.push(`${label}: refused (HTTP ${r.status}) without plain words: '${msgOf(r).slice(0, 110)}'`);
+        else if (msgOf(r).length < 25) notes.push(`${label}: wording is very short ('${msgOf(r)}')`);
+      };
+      const notifOf = (userId, type, extra = '') => rows(`SELECT id FROM ${S}.notifications WHERE user_id = '${userId}' AND (type = '${type}' OR metadata->>'type' = '${type}') ${extra}`);
+
+      const admin = await signUp('pet_owner', 'admin');
+      const corp = await signUp('pet_owner', 'corporate_admin');
+      const corp2 = await signUp('pet_owner', 'corporate_admin');
+      const director = await signUp('pet_owner', 'hospital_staff');
+      const auditor = await signUp('pet_owner', 'hospital_staff');
+      const pharmacist = await signUp('pet_owner', 'pharmacist');
+      const ownerP = await signUp('pet_owner');
+      const stranger = await signUp('pet_owner');
+      const rxVet = await signUp('veterinarian');
+      const otherVet = await signUp('veterinarian');
+      const who = { admin, corp, corp2, director, auditor, pharmacist, ownerP, stranger, rxVet, otherVet };
+      if (Object.values(who).some(u => !u.token || !u.id)) problems.push(`could not set up the accounts for the hospital-network journeys (missing: ${Object.entries(who).filter(([, u]) => !u.token || !u.id).map(([k]) => k).join(', ')})`);
+      else {
+        // fixtures: two networks, hospitals A and B (net1), D (net2), X (in no network); members; a plan and a subscription
+        const net1 = uuid(); const net2 = uuid(); const hA = uuid(); const hB = uuid(); const hD = uuid(); const hX = uuid();
+        const planUsed = uuid(); const planFree = uuid();
+        const planUsedName = `Verify Hn Plan In Use ${Date.now()}`; const planFreeName = `Verify Hn Plan Unused ${Date.now()}`;
+        sql(`INSERT INTO hospital_networks (id, name) VALUES ('${net1}', 'Verify Hn Network One'), ('${net2}', 'Verify Hn Network Two');
+             INSERT INTO vet_hospitals (id, name, owner_id) VALUES ('${hA}', 'Verify Hn Hospital A', '${admin.id}'), ('${hB}', 'Verify Hn Hospital B', '${admin.id}'),
+                 ('${hD}', 'Verify Hn Hospital D', '${admin.id}'), ('${hX}', 'Verify Hn Hospital X', '${admin.id}');
+             INSERT INTO hospital_network_hospitals (network_id, hospital_id) VALUES ('${net1}', '${hA}'), ('${net1}', '${hB}'), ('${net2}', '${hD}');
+             INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id) VALUES
+                 ('${net1}', '${corp.id}', 'corporate_admin', NULL), ('${net1}', '${director.id}', 'hospital_director', '${hA}'),
+                 ('${net1}', '${auditor.id}', 'auditor', NULL), ('${net1}', '${pharmacist.id}', 'hospital_staff', '${hA}'),
+                 ('${net1}', '${rxVet.id}', 'hospital_staff', '${hA}'), ('${net2}', '${corp2.id}', 'corporate_admin', NULL);
+             INSERT INTO network_subscription_plans (id, name, max_seats, price_monthly, price_annually, is_published, is_active) VALUES
+                 ('${planUsed}', '${planUsedName}', 20, 99.00, 990.00, true, true), ('${planFree}', '${planFreeName}', 10, 49.00, 490.00, true, true);
+             INSERT INTO network_subscriptions (network_id, plan_id, seat_limit, status) VALUES ('${net1}', '${planUsed}', 50, 'active');`);
+        const memberCount = () => n(`SELECT COUNT(*) AS n FROM ${S}.hospital_network_members WHERE network_id = '${net1}' AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`);
+
+        // ── 1. Walk-in invite ──
+        const ctxBefore = n(`SELECT COUNT(*) AS n FROM ${S}.animal_care_contexts`);
+        const consentBefore = n(`SELECT COUNT(*) AS n FROM ${S}.patient_data_consent`);
+        const invite = async (extra = {}, tok = corp.token) => http('POST', `${apiBase}/hospital-networks/${net1}/invite-walkin`,
+          { patientName: 'Hn Verify', patientEmail: ownerP.email, animalName: 'Verify Hn Walkin Dog', animalSpecies: 'Dog', hospitalId: hA, ...extra }, tok);
+        const inv = await invite();
+        const tok1 = inv.json?.data?.inviteToken;
+        if (inv.status !== 200 || !tok1) problems.push(`a network member creating a walk-in invitation: HTTP ${inv.status} ${msgOf(inv).slice(0, 120)}`);
+        else {
+          if (!String(inv.json.data.inviteUrl || '').endsWith(`/accept-walkin-invite?token=${tok1}`)) problems.push(`the invitation link must end in /accept-walkin-invite?token=<token>, got '${inv.json.data.inviteUrl}'`);
+          refused('a network auditor (no walk-in registration right) creating an invitation', await invite({}, auditor.token), [403]);
+          refused('a stranger creating an invitation for a network they are not in', await invite({}, stranger.token), [403, 404]);
+          const mine = await http('GET', `${apiBase}/hospital-networks/walkin-invites/mine`, null, ownerP.token);
+          const mi = (mine.json?.data?.items || []).find(i => i.token === tok1);
+          if (mine.status !== 200 || !mi) problems.push(`the invited pet owner's own list must hold the invitation: HTTP ${mine.status} ${JSON.stringify(mine.json || {}).slice(0, 120)}`);
+          else {
+            if (mi.networkName !== 'Verify Hn Network One') problems.push(`the invitation must name the network, got '${mi.networkName}'`);
+            if (mi.animalName !== 'Verify Hn Walkin Dog') problems.push(`the invitation must name the pet, got '${mi.animalName}'`);
+            if (mi.inviterName !== 'Hn Verify') problems.push(`the invitation must name who invited, got '${mi.inviterName}'`);
+          }
+          const other = await http('GET', `${apiBase}/hospital-networks/walkin-invites/mine`, null, stranger.token);
+          if (other.status !== 200 || (other.json?.data?.items || []).length !== 0) problems.push(`a different signed-in user must see no invitations, got HTTP ${other.status} ${JSON.stringify(other.json || {}).slice(0, 120)}`);
+          const prev = await http('GET', `${apiBase}/hospital-networks/walkin-invites/by-token/${tok1}`, null, stranger.token);
+          if (prev.status !== 200 || prev.json?.data?.networkName !== 'Verify Hn Network One') problems.push(`the invitation behind its link must open for any signed-in user: HTTP ${prev.status}`);
+          coded('opening an invitation link with an unknown token', await http('GET', `${apiBase}/hospital-networks/walkin-invites/by-token/${'0'.repeat(40)}`, null, ownerP.token), 404, 'WI_NOT_FOUND');
+          coded('accepting with an unknown token', await http('POST', `${apiBase}/hospital-networks/walkin-invites/accept`, { token: '1'.repeat(40) }, ownerP.token), 404, 'WI_NOT_FOUND');
+          const acc = await http('POST', `${apiBase}/hospital-networks/walkin-invites/accept`, { token: tok1 }, ownerP.token);
+          if (acc.status !== 200) problems.push(`accepting a walk-in invitation: HTTP ${acc.status} ${msgOf(acc).slice(0, 120)}`);
+          const row = rows(`SELECT status, accepted_by FROM ${S}.hospital_patient_invites WHERE invite_token = '${tok1}'`)[0] || {};
+          if (row.status !== 'accepted' || row.accepted_by !== ownerP.id) problems.push(`after accepting, the invitation row must be accepted by the pet owner, got ${JSON.stringify(row)}`);
+          if (n(`SELECT COUNT(*) AS n FROM ${S}.animal_care_contexts`) !== ctxBefore) problems.push('accepting a walk-in invitation created an enrolment (animal_care_contexts row); acceptance must share nothing');
+          if (n(`SELECT COUNT(*) AS n FROM ${S}.patient_data_consent`) !== consentBefore) problems.push('accepting a walk-in invitation created a consent record; consent must be asked separately');
+          if (notifOf(corp.id, 'walkin_invite_accepted').length < 1) problems.push('the inviter got no notification of type walkin_invite_accepted (checked the type column and metadata.type)');
+          else if (rows(`SELECT type FROM ${S}.notifications WHERE user_id = '${corp.id}' AND metadata->>'type' = 'walkin_invite_accepted' LIMIT 1`)[0]?.type !== 'walkin_invite_accepted') notes.push("walkin_invite_accepted is stored in notifications.metadata.type; the notifications.type column holds 'system'");
+          coded('accepting the same invitation again', await http('POST', `${apiBase}/hospital-networks/walkin-invites/accept`, { token: tok1 }, ownerP.token), 409, 'WI_USED');
+          coded('opening an already accepted invitation', await http('GET', `${apiBase}/hospital-networks/walkin-invites/by-token/${tok1}`, null, ownerP.token), 409, 'WI_USED');
+          const mineAfter = await http('GET', `${apiBase}/hospital-networks/walkin-invites/mine`, null, ownerP.token);
+          if ((mineAfter.json?.data?.items || []).some(i => i.token === tok1)) problems.push('an accepted invitation still shows in the invited person\'s waiting list');
+        }
+        // expired
+        const invE = await invite({ animalName: 'Verify Hn Expired Dog' });
+        const tokE = invE.json?.data?.inviteToken;
+        if (!tokE) problems.push(`creating the invitation to expire: HTTP ${invE.status}`);
+        else {
+          sql(`UPDATE hospital_patient_invites SET expires_at = NOW() - INTERVAL '1 hour' WHERE invite_token = '${tokE}';`);
+          coded('opening an expired invitation', await http('GET', `${apiBase}/hospital-networks/walkin-invites/by-token/${tokE}`, null, ownerP.token), 410, 'WI_EXPIRED');
+          coded('accepting an expired invitation', await http('POST', `${apiBase}/hospital-networks/walkin-invites/accept`, { token: tokE }, ownerP.token), 410, 'WI_EXPIRED');
+          if (rows(`SELECT status FROM ${S}.hospital_patient_invites WHERE invite_token = '${tokE}'`)[0]?.status !== 'pending') problems.push('a refused expired acceptance changed the invitation status');
+          if (((await http('GET', `${apiBase}/hospital-networks/walkin-invites/mine`, null, ownerP.token)).json?.data?.items || []).some(i => i.token === tokE)) problems.push('an expired invitation still shows in the waiting list');
+        }
+        // two taps at once: exactly one winner
+        const invP = await invite({ animalName: 'Verify Hn Parallel Dog' });
+        const tokP = invP.json?.data?.inviteToken;
+        if (!tokP) problems.push(`creating the invitation for the parallel accept: HTTP ${invP.status}`);
+        else {
+          const both = await Promise.all([ownerP.token, stranger.token].map(t => http('POST', `${apiBase}/hospital-networks/walkin-invites/accept`, { token: tokP }, t)));
+          const wins = both.filter(r => r.status === 200).length;
+          if (wins !== 1) problems.push(`two parallel accepts of one invitation must give exactly one success, got statuses ${both.map(r => r.status).join(' and ')}`);
+          const loser = both.find(r => r.status !== 200);
+          if (loser && (loser.status !== 409 || codeOf(loser) !== 'WI_USED')) problems.push(`the losing parallel accept must be 409 WI_USED, got HTTP ${loser.status} '${codeOf(loser)}'`);
+        }
+
+        // ── 2. Patient transfer ──
+        const dogA = (await http('POST', `${apiBase}/animals`, { name: 'Verify Hn Patient A', species: 'Dog', gender: 'male' }, ownerP.token)).json?.data?.id;
+        const dogN2 = (await http('POST', `${apiBase}/animals`, { name: 'Verify Hn Other Net Dog', species: 'Dog', gender: 'male' }, ownerP.token)).json?.data?.id;
+        const dogNone = (await http('POST', `${apiBase}/animals`, { name: 'Verify Hn Unenrolled Dog', species: 'Dog', gender: 'male' }, ownerP.token)).json?.data?.id;
+        if (!dogA || !dogN2 || !dogNone) problems.push('could not add the three animals for the transfer journey');
+        else {
+          const ctx = (animal, net, hosp) => sql(`INSERT INTO animal_care_contexts (animal_id, network_id, hospital_id, is_active, enrollment_status, visibility) VALUES ('${animal}', '${net}', '${hosp}', true, 'active', 'network_only');`);
+          ctx(dogA, net1, hA); ctx(dogN2, net2, hD);
+          const post = (b, tok = director.token) => http('POST', `${apiBase}/hospital-networks/${net1}/patient-transfers`, { fromHospitalId: hA, toHospitalId: hB, animalId: dogA, reason: 'Verify Hn needs surgery at B', ...b }, tok);
+          const refCount = () => n(`SELECT COUNT(*) AS n FROM ${S}.network_referrals WHERE network_id = '${net1}' AND referral_type = 'transfer'`);
+          const r0 = refCount();
+          coded('a network auditor (no transfer right) starting a transfer', await post({}, auditor.token), 403, 'HN_TRANSFER_FORBIDDEN');
+          refused('a stranger starting a transfer in a network they are not in', await post({}, stranger.token), [403, 404]);
+          coded('a transfer to the same hospital', await post({ toHospitalId: hA }), 400, 'HN_SAME_HOSPITAL');
+          coded('a transfer to a hospital outside the network', await post({ toHospitalId: hX }), 400, 'HN_HOSPITAL_NOT_IN_NETWORK');
+          coded('a transfer of an animal enrolled only in another network', await post({ animalId: dogN2 }), 400, 'HN_ANIMAL_NOT_PATIENT');
+          coded('a transfer of an animal with no enrolment', await post({ animalId: dogNone }), 400, 'HN_ANIMAL_NOT_PATIENT');
+          coded('a transfer from a hospital the patient is not at', await post({ fromHospitalId: hB, toHospitalId: hA }), 400, 'HN_NOT_AT_HOSPITAL');
+          coded('a transfer with no reason', await post({ reason: '' }), 400, 'HN_TRANSFER_FIELDS');
+          if (refCount() !== r0) problems.push('a refused transfer still created a network_referrals row');
+          const listBad = await http('GET', `${apiBase}/hospital-networks/${net1}/patient-transfers`, null, director.token);
+          const txt = JSON.stringify(listBad.json || {});
+          if (txt.includes('Verify Hn Other Net Dog') || txt.includes('Verify Hn Unenrolled Dog')) problems.push('the transfer list showed the name of an animal that is not a patient of this network');
+          refused('a non-member reading the transfer list', await http('GET', `${apiBase}/hospital-networks/${net1}/patient-transfers`, null, stranger.token), [403, 404]);
+
+          const ok1 = await post({});
+          const tid = ok1.json?.data?.id;
+          if (ok1.status !== 200 || !tid) problems.push(`a member with the transfer right starting a transfer: HTTP ${ok1.status} ${msgOf(ok1).slice(0, 120)}`);
+          else {
+            const tr = rows(`SELECT referral_type, status, animal_id, from_hospital_id, to_hospital_id, network_id FROM ${S}.network_referrals WHERE id = '${tid}'`)[0] || {};
+            if (tr.referral_type !== 'transfer' || tr.status !== 'pending' || tr.animal_id !== dogA || tr.from_hospital_id !== hA || tr.to_hospital_id !== hB || tr.network_id !== net1) problems.push(`the transfer row is wrong: ${JSON.stringify(tr)}`);
+            for (const [who2, tok] of [['director', director.token], ['network admin', corp.token], ['auditor (member, read only)', auditor.token], ['platform admin', admin.token]]) {
+              const l = await http('GET', `${apiBase}/hospital-networks/${net1}/patient-transfers`, null, tok);
+              const t = (l.json?.data || []).find(x => x.id === tid);
+              if (l.status !== 200 || !t || t.animalName !== 'Verify Hn Patient A' || t.fromHospitalName !== 'Verify Hn Hospital A' || t.toHospitalName !== 'Verify Hn Hospital B') problems.push(`${who2}: the transfer list must name the patient and both hospitals: HTTP ${l.status} ${JSON.stringify(t && { a: t.animalName, f: t.fromHospitalName, t: t.toHospitalName })}`);
+            }
+            coded('a second open transfer for the same patient', await post({}), 409, 'HN_TRANSFER_OPEN');
+            coded('a member of another network completing the transfer', await http('POST', `${apiBase}/hospital-networks/${net1}/patient-transfers/${tid}/complete`, null, corp2.token), 403, 'HN_TRANSFER_FORBIDDEN');
+            coded('a network auditor completing the transfer', await http('POST', `${apiBase}/hospital-networks/${net1}/patient-transfers/${tid}/complete`, null, auditor.token), 403, 'HN_TRANSFER_FORBIDDEN');
+            const still = rows(`SELECT r.status, c.hospital_id FROM ${S}.network_referrals r JOIN ${S}.animal_care_contexts c ON c.animal_id = r.animal_id AND c.network_id = r.network_id WHERE r.id = '${tid}'`)[0] || {};
+            if (still.status !== 'pending' || still.hospital_id !== hA) problems.push(`a refused completion changed things: ${JSON.stringify(still)}`);
+            coded('completing a transfer that does not exist', await http('POST', `${apiBase}/hospital-networks/${net1}/patient-transfers/${uuid()}/complete`, null, director.token), 404, 'HN_TRANSFER_NOT_FOUND');
+            const done = await http('POST', `${apiBase}/hospital-networks/${net1}/patient-transfers/${tid}/complete`, null, director.token);
+            if (done.status !== 200) problems.push(`the right member completing the transfer: HTTP ${done.status} ${msgOf(done).slice(0, 120)}`);
+            const after = rows(`SELECT r.status, c.hospital_id FROM ${S}.network_referrals r JOIN ${S}.animal_care_contexts c ON c.animal_id = r.animal_id AND c.network_id = r.network_id WHERE r.id = '${tid}'`)[0] || {};
+            if (after.status !== 'completed' || after.hospital_id !== hB) problems.push(`after completing, the transfer must be completed and the care context at hospital B, got ${JSON.stringify(after)}`);
+            const ownerNote = notifOf(ownerP.id, 'patient_transferred', `AND metadata->>'transferId' = '${tid}'`);
+            if (ownerNote.length !== 1) problems.push(`the animal's owner must get exactly one patient_transferred notification, got ${ownerNote.length}`);
+            if (notifOf(stranger.id, 'patient_transferred').length) problems.push('a person who does not own the animal was told about the transfer');
+            coded('completing the same transfer again', await http('POST', `${apiBase}/hospital-networks/${net1}/patient-transfers/${tid}/complete`, null, director.token), 409, 'HN_TRANSFER_CLOSED');
+            if (ownerNote.length && notifOf(ownerP.id, 'patient_transferred').length !== 1) problems.push('completing a second time sent the owner another notification');
+          }
+        }
+
+        // ── 3. Pharmacist review shown to the prescribing vet ──
+        if (dogA) {
+          sql(`INSERT INTO bookings (pet_owner_id, veterinarian_id, animal_id, scheduled_date, time_slot_start, time_slot_end, status) VALUES ('${ownerP.id}', '${rxVet.id}', '${dogA}', CURRENT_DATE, '08:05', '23:59', 'confirmed');`);
+          const rx = await http('POST', `${apiBase}/prescriptions`, { petOwnerId: ownerP.id, animalId: dogA, networkId: net1, diagnosis: 'Verify', instructions: '',
+            medications: [{ name: 'Verify Hn Drug', dosage: '5 ml', frequency: 'Once daily', treatmentDays: 2, withdrawalMilkDays: 0, withdrawalMeatDays: 0 }] }, rxVet.token);
+          const rid = rx.json?.data?.id;
+          if (!rid) problems.push(`the vet's network prescription for the review journey: HTTP ${rx.status} ${msgOf(rx).slice(0, 140)}`);
+          else {
+            const rej = await http('POST', `${apiBase}/prescriptions/${rid}/review`, { review_status: 'rejected', rejection_reason: 'Verify Hn dose too high for this dog' }, pharmacist.token);
+            const clar = await http('POST', `${apiBase}/prescriptions/${rid}/review`, { review_status: 'needs_clarification', suggested_modifications: 'Verify Hn halve the dose' }, pharmacist.token);
+            if (rej.status !== 200 || clar.status !== 200) problems.push(`the pharmacist's two reviews: HTTP ${rej.status} and ${clar.status}`);
+            for (const [who2, tok] of [['prescribing vet', rxVet.token], ['pet owner', ownerP.token], ['platform admin', admin.token]]) {
+              const r = await http('GET', `${apiBase}/prescriptions/${rid}/reviews`, null, tok);
+              const list = Array.isArray(r.json) ? r.json : [];
+              const a = list.find(x => x.review_status === 'rejected'); const b = list.find(x => x.review_status === 'needs_clarification');
+              if (r.status !== 200 || list.length !== 2 || !a || !b) problems.push(`${who2} reading the pharmacist's reviews: HTTP ${r.status}, ${list.length} found, expected the rejection and the clarification`);
+              else {
+                if (a.rejection_reason !== 'Verify Hn dose too high for this dog') problems.push(`${who2}: the rejection reason is '${a.rejection_reason}'`);
+                if (b.suggested_modifications !== 'Verify Hn halve the dose') problems.push(`${who2}: the requested change is '${b.suggested_modifications}'`);
+                if (a.pharmacist_name !== 'Hn Verify' || b.pharmacist_name !== 'Hn Verify') problems.push(`${who2}: pharmacist_name must be the pharmacist's name, got '${a.pharmacist_name}'`);
+              }
+            }
+            refused('a vet unrelated to the prescription reading its reviews', await http('GET', `${apiBase}/prescriptions/${rid}/reviews`, null, otherVet.token), [403]);
+            refused('a stranger reading the prescription reviews', await http('GET', `${apiBase}/prescriptions/${rid}/reviews`, null, stranger.token), [403]);
+            if (notifOf(rxVet.id, 'prescription').length < 2) problems.push('the prescribing vet was not notified of both the rejection and the clarification request');
+          }
+        }
+
+        // ── 4. Staff invite seat limit, suspension, removed routes ──
+        const si = (email, tok = corp.token) => http('POST', `${apiBase}/hospital-networks/${net1}/staff-invites`, { inviteeEmail: email, inviteeName: 'Verify Hn Nurse', staffPosition: 'nurse', hospitalId: hA }, tok);
+        sql(`UPDATE network_subscriptions SET seat_limit = ${memberCount() + 5}, status = 'active' WHERE network_id = '${net1}';`);
+        const roomEmail = `verify.hn.room.${Date.now()}@example.com`;
+        const room = await si(roomEmail);
+        if (![200, 201].includes(room.status)) problems.push(`inviting staff with seats to spare: HTTP ${room.status} ${msgOf(room).slice(0, 120)}`);
+        else if (n(`SELECT COUNT(*) AS n FROM ${S}.hospital_staff_invites WHERE network_id = '${net1}' AND invitee_email = '${roomEmail}'`) !== 1) problems.push('the staff invite with room did not create exactly one invite row');
+        sql(`UPDATE network_subscriptions SET seat_limit = ${memberCount()} WHERE network_id = '${net1}';`);
+        const used = memberCount();
+        const invBefore = n(`SELECT COUNT(*) AS n FROM ${S}.hospital_staff_invites WHERE network_id = '${net1}'`);
+        coded('inviting staff when the seat limit is reached (network admin)', await si(`verify.hn.full.${Date.now()}@example.com`), 403, 'HN_SEAT_LIMIT', { used, limit: used });
+        coded('inviting staff when the seat limit is reached (director)', await si(`verify.hn.full2.${Date.now()}@example.com`, director.token), 403, 'HN_SEAT_LIMIT');
+        sql(`UPDATE network_subscriptions SET status = 'suspended', seat_limit = 500 WHERE network_id = '${net1}';`);
+        coded('inviting staff into a suspended network', await si(`verify.hn.susp.${Date.now()}@example.com`), 403, 'HN_NETWORK_SUSPENDED');
+        if (n(`SELECT COUNT(*) AS n FROM ${S}.hospital_staff_invites WHERE network_id = '${net1}'`) !== invBefore) problems.push('a refused staff invite (seat limit / suspended) still created an invite row');
+        sql(`UPDATE network_subscriptions SET status = 'active' WHERE network_id = '${net1}';`);
+        const gone1 = await http('POST', `${apiBase}/hospital-networks/${net1}/invite-staff`, { invitee_email: `verify.hn.old.${Date.now()}@example.com`, staff_position: 'nurse' }, corp.token);
+        const gone2 = await http('GET', `${apiBase}/hospital-networks/${net1}/patients`, null, corp.token);
+        for (const [label, r] of [['the removed invite-staff route', gone1], ['the removed list-patients route', gone2]]) {
+          if (r.status !== 404) problems.push(`${label} must answer 404, got HTTP ${r.status} ${msgOf(r).slice(0, 100)}`);
+          else notes.push(`${label} answers 404 with '${msgOf(r).slice(0, 60)}'`);
+        }
+
+        // ── 5. Plans ──
+        const priorVis = rows(`SELECT value FROM ${S}.system_settings WHERE key = 'pricing.visibility.corp_dashboard'`)[0]?.value;
+        const setVis = (v) => sql(`INSERT INTO system_settings (key, value) VALUES ('pricing.visibility.corp_dashboard', '${v}') ON CONFLICT (key) DO UPDATE SET value = '${v}';`);
+        setVis('false');
+        const mp = await http('GET', `${apiBase}/my-network-subscription`, null, corp.token);
+        const d = mp.json?.data || {};
+        if (mp.status !== 200 || d.planName !== planUsedName) problems.push(`the corporate admin's plan must name the plan '${planUsedName}': HTTP ${mp.status} ${JSON.stringify(d).slice(0, 140)}`);
+        if (Number(d.seatsUsed) !== memberCount()) problems.push(`seatsUsed must equal the real member count ${memberCount()}, got ${d.seatsUsed}`);
+        if (Number(d.seat_limit) !== 500) problems.push(`seat_limit must be the subscription's seat limit (500), got ${d.seat_limit}`);
+        if (d.priceMonthly !== undefined || d.priceAnnually !== undefined) problems.push(`the price must be hidden while pricing.visibility.corp_dashboard is false, got ${d.priceMonthly}/${d.priceAnnually}`);
+        setVis('true');
+        const mp2 = (await http('GET', `${apiBase}/my-network-subscription`, null, corp.token)).json?.data || {};
+        if (Number(mp2.priceMonthly) !== 99) problems.push(`the price must show when pricing.visibility.corp_dashboard is true, got ${mp2.priceMonthly}`);
+        if (priorVis === undefined) sql(`DELETE FROM system_settings WHERE key = 'pricing.visibility.corp_dashboard';`); else setVis(priorVis);
+        const mpOther = (await http('GET', `${apiBase}/my-network-subscription`, null, corp2.token)).json?.data || {};
+        if (mpOther.planName === planUsedName) problems.push("another network's corporate admin was shown this network's plan");
+        refused('a pet owner reading my-network-subscription', await http('GET', `${apiBase}/my-network-subscription`, null, stranger.token), [403]);
+
+        const listFor = async (tok) => ((await http('GET', `${apiBase}/network-subscription-plans`, null, tok)).json?.data || []).map(p => p.name);
+        if (!(await listFor(corp.token)).includes(planFreeName)) problems.push('the unused published plan must list for a corporate admin before it is removed');
+        refused('a corporate admin removing a plan', await http('DELETE', `${apiBase}/admin/network-subscription-plans/${planFree}`, null, corp.token), [403]);
+        coded('removing a plan that a network uses', await http('DELETE', `${apiBase}/admin/network-subscription-plans/${planUsed}`, null, admin.token), 409, 'HN_PLAN_IN_USE');
+        if (rows(`SELECT is_active FROM ${S}.network_subscription_plans WHERE id = '${planUsed}'`)[0]?.is_active !== true) problems.push('a plan in use was deactivated by a refused removal');
+        const delOk = await http('DELETE', `${apiBase}/admin/network-subscription-plans/${planFree}`, null, admin.token);
+        if (delOk.status !== 200) problems.push(`removing an unused plan: HTTP ${delOk.status} ${msgOf(delOk).slice(0, 100)}`);
+        const names = await listFor(corp.token);
+        if (names.includes(planFreeName)) problems.push('a removed plan still lists for a corporate admin');
+        if (!names.includes(planUsedName)) problems.push('the plan in use disappeared from the corporate admin\'s plan list');
+      }
+      const sqlErrs = serverLog.slice(mark).split('\n')
+        .filter(l => /syntax error|does not exist|violates|invalid input syntax|there is no unique|could not determine|DATABASE_ERROR|statusCode":5\d\d/i.test(l))
+        .map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(-240));
+      if (notes.length) log(`   PHASE 6l notes: ${notes.join(' | ')}`);
+      if (problems.length || sqlErrs.length) fail('A hospital-network follow-up journey (walk-in invite, transfer, pharmacist review, seat limit, plans) misbehaves.', [...problems, ...sqlErrs]);
+      else ok('walk-in invite accept/refuse paths, patient transfer start/complete/refusals, pharmacist review for the vet, seat limit, removed routes and plans all behave');
+    }
+
     // ── PHASE 7: the browser ──
     let sweepAccounts = [];
     if (serverHealthy && port) {

@@ -58,7 +58,7 @@ class GroupFeedingService {
     const rows = curves.rows.filter((r: any) => r.curve_key === key);
     const curve: FeedingCurveRow[] = rows.map((r: any) => ({
       basis: r.basis, ageFromDays: r.age_from_days, ageToDays: r.age_to_days, weightFromG: num(r.weight_from_g), weightToG: num(r.weight_to_g),
-      gramsPerHeadDay: num(r.grams_per_head_day), ratePctBiomass: num(r.rate_pct_biomass), feedsPerDay: r.feeds_per_day, feedType: r.feed_type,
+      gramsPerHeadDay: num(r.grams_per_head_day), ratePctBiomass: num(r.rate_pct_biomass), feedsPerDay: r.feeds_per_day, feedType: r.feed_type, cautionKey: r.caution_key || null,
       survivalPct: num(r.survival_pct),
     }));
     const temps = await database.query(`SELECT from_c, to_c, factor FROM nutrition_temperature_factors WHERE curve_key = $1 AND status <> 'retired'`, [key]);

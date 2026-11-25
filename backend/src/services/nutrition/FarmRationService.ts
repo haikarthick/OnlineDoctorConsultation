@@ -2,7 +2,7 @@ import NutritionNotifier from './NutritionNotifier';
 import WithdrawalService from '../withdrawal/WithdrawalService';
 import database from '../../utils/database';
 import logger from '../../utils/logger';
-import { ForbiddenError, NeedsVetError, NotFoundError, ValidationError } from '../../utils/errors';
+import { CodedError, ForbiddenError, NeedsVetError, NotFoundError, ValidationError } from '../../utils/errors';
 import AnimalService from '../AnimalService';
 import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE } from '../AnimalAccessService';
 import NutritionAccess, { type Caller } from './NutritionAccess';
@@ -349,6 +349,8 @@ class FarmRationService {
       const work = (input.work && (ACTIVITY_LEVELS as readonly string[]).includes(input.work) ? input.work
         : (ACTIVITY_LEVELS as readonly string[]).includes(String(subject.activityLevel)) ? subject.activityLevel : 'low') as EquineWork;
       const reqs = await this.equineRequirements(subject.speciesCode);
+      // No date of birth: a foal would be fed as an adult. Ask for the date first (a herd of mixed ages is judged by its average).
+      if (subject.kind === 'animal' && subject.ageMonths === null) throw new CodedError(400, 'NUT_AGE_REQUIRED', 'Add this animal\'s date of birth first (an estimate is fine). A ration depends on its age, and a young animal must not be fed like an adult.');
       // A foal or yearling is growing fast and its needs are not an adult's: a vet makes that plan.
       if (subject.ageMonths !== null && reqs.adultMonths !== null && subject.ageMonths < reqs.adultMonths) {
         throw new NeedsVetError(`${subject.kind === 'group' ? 'The young horses in this group are' : 'This horse is'} still growing (under ${reqs.adultMonths} months). A growing horse needs a feeding plan from a vet - book a consultation.`);
@@ -368,6 +370,8 @@ class FarmRationService {
     // young are on milk and starter feed - no fodder ration; until adult age they are GROWING (maintenance + gain).
     const limits = await this.growingLimits(subject.speciesCode);
     const age = subject.ageMonths;
+    // No date of birth: a calf, kid or lamb would be fed as an adult and judged against adult limits. Ask for the date first.
+    if (subject.kind === 'animal' && age === null) throw new CodedError(400, 'NUT_AGE_REQUIRED', 'Add this animal\'s date of birth first (an estimate is fine). A ration depends on its age, and a young animal must not be fed like an adult.');
     if (age !== null && limits.weanMonths !== null && age < limits.weanMonths) {
       throw new NeedsVetError(`${subject.kind === 'group' ? 'The young animals in this group are' : 'This animal is'} still on milk and starter feed (under ${limits.weanMonths} months). A fodder ration is not right for them yet - ask your vet for a calf feeding plan.`);
     }

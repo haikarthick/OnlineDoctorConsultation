@@ -72,6 +72,7 @@ export const GroupFeedingCard: React.FC<{ groupId: string }> = ({ groupId }) => 
             {today.feedType ? ` · ${today.feedType}` : ''}
             {today.feedsPerDay ? ` · ${t('nutrition.group.feeds', { count: today.feedsPerDay })}` : ''}
           </p>
+          {today.cautionKey && <p className="nutri-note is-warning">{t(`nutrition.group.cautions.${today.cautionKey}`, { defaultValue: '' })}</p>}
           {today.basis === 'percent_biomass' && today.tempFactor !== 1 && (
             <p className="nutri-note is-warning">{t('nutrition.group.temp', { c: data.inputs.waterTempC, pct: Math.round(today.tempFactor * 100) })}</p>
           )}

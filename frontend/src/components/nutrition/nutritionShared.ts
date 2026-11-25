@@ -64,6 +64,8 @@ export interface NutritionPlan {
   mealsPerDay: number
   energy: { reasons?: string[]; requiresVet?: boolean; factorSource?: string; idealWeightKg?: number | null; suggestedGoal?: string } | null
   reviewNote: string | null
+  /** Home-cooked food only: not a complete diet (shown as a warning). */
+  incompleteDiet?: boolean
   /** A vet should look before the plan is followed (energy rules, or a recorded allergy). */
   requiresVet?: boolean
   /** Active allergies from the medical record at the time the plan was made. */

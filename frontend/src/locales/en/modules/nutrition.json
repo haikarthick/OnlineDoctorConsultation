@@ -153,7 +153,8 @@
       "allergyFood": "{{food}} - this animal is recorded as allergic to {{allergen}}. Remove it or ask the vet.",
       "pendingTitle": "Plan waiting for a vet",
       "pendingPill": "Waiting for a vet",
-      "pendingBody": "This animal has {{conditions}} on its record, so a vet must check this plan before it replaces the one now in use. Keep feeding the current plan until then."
+      "pendingBody": "This animal has {{conditions}} on its record, so a vet must check this plan before it replaces the one now in use. Keep feeding the current plan until then.",
+      "incompleteDiet": "This plan is made only of home-cooked food or treats, so it is not a complete diet. It can lack calcium, vitamins and, for cats, taurine. Use it for a short time only, and add a complete food or a supplement your vet advises."
     },
     "goals": {
       "maintain": "Keep weight",
@@ -379,7 +380,14 @@
       "groundnut_aflatoxin": "Groundnut cake - check it is dry and not mouldy",
       "urea_free": "Urea fed loose or in excess",
       "salt_pig": "Salty food waste",
-      "swill_raw": "Uncooked kitchen or meat waste"
+      "swill_raw": "Uncooked kitchen or meat waste",
+      "urea_nonruminant": "Urea (pigs and poultry cannot use it)",
+      "oleander": "Oleander (kaner) leaves or clippings",
+      "lawn_clippings": "Lawn clippings and garden waste",
+      "cottonseed_cake": "Cottonseed cake - not for young calves or breeding bulls (gossypol)",
+      "mustard_cake": "Mustard cake in large amounts (glucosinolates)",
+      "dough_raw": "Raw bread or yeast dough",
+      "mushrooms_wild": "Wild mushrooms"
     },
     "foodKinds": {
       "commercial_food": "Packaged food",
@@ -634,7 +642,10 @@
         "average_weight": "Record a sample weight in Daily records.",
         "curve": "No feeding table yet."
       },
-      "priceFromStock": "The cost shows once feed for this group is recorded from stock in Daily records."
+      "priceFromStock": "The cost shows once feed for this group is recorded from stock in Daily records.",
+      "cautions": {
+        "breeders_need_vet": "This is a feed guide for a dry adult pig. A sow in pregnancy or nursing piglets, and a breeding boar, need much more and a different diet. Ask your vet for a breeding-pig plan."
+      }
     },
     "vet": {
       "prescribe": "Prescribe as diet",
@@ -670,7 +681,8 @@
       "urinary": "urinary stones",
       "liver": "liver disease",
       "heart": "heart disease",
-      "pregnant_and_ill": "pregnancy or nursing while unwell"
+      "pregnant_and_ill": "pregnancy or nursing while unwell",
+      "metabolic": "a metabolic or digestive illness (such as ketosis, milk fever, bloat, laminitis or colic)"
     },
     "dashboard": {
       "title": "Feeding at a glance",

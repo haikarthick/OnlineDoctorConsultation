@@ -53,6 +53,7 @@ export const PlanTab: React.FC<Props> = ({ data, onChanged }) => {
             </span>
           </div>
           <p className="nutri-big">{t('nutrition.plan.perDay', { kcal: formatKcal(plan.effectiveKcal, i18n.language) })}</p>
+          {plan.incompleteDiet && <p className="nutri-note is-warning">{t('nutrition.plan.incompleteDiet')}</p>}
           <p className="nutri-hint">
             {t(`nutrition.goals.${plan.goal}`)} · {t('nutrition.plan.mealsCount', { count: plan.mealsPerDay })}
             {plan.targetWeightKg ? ` · ${t('nutrition.plan.target', { kg: plan.targetWeightKg })}` : ''}
@@ -157,6 +158,7 @@ const PendingPlan: React.FC<{ data: NutritionOverview; onChanged: () => void }> 
         : (
           <>
             <p className="nutri-big">{t('nutrition.plan.perDay', { kcal: formatKcal(pending.effectiveKcal, i18n.language) })}</p>
+            {pending.incompleteDiet && <p className="nutri-note is-warning">{t('nutrition.plan.incompleteDiet')}</p>}
             <ul className="nutri-list">
               {pending.items.map(item => (
                 <li key={item.id} className="nutri-list-row">

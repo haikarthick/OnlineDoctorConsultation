@@ -52,3 +52,19 @@ describe('group feeding (flocks, pig batches, ponds)', () => {
     expect(fcr(10, null)).toBeNull();
   });
 });
+
+describe('a band can carry a caution (breeding pigs need more than the adult table)', () => {
+  const curve = [
+    { basis: 'per_head' as const, ageFromDays: 0, ageToDays: 220, weightFromG: null, weightToG: null, gramsPerHeadDay: 2500, ratePctBiomass: null, feedsPerDay: 2, feedType: 'finisher', cautionKey: null },
+    { basis: 'per_head' as const, ageFromDays: 221, ageToDays: 9000, weightFromG: null, weightToG: null, gramsPerHeadDay: 2800, ratePctBiomass: null, feedsPerDay: 2, feedType: 'adult / sow', cautionKey: 'breeders_need_vet' },
+  ];
+  it('the adult band hands its caution to the feed card', () => {
+    const r: any = groupDailyFeed({ headCount: 10, ageDays: 400, curve });
+    expect(r.status).toBe('ok');
+    expect(r.cautionKey).toBe('breeders_need_vet');
+  });
+  it('a band without one carries none', () => {
+    const r: any = groupDailyFeed({ headCount: 10, ageDays: 150, curve });
+    expect(r.cautionKey).toBeNull();
+  });
+});

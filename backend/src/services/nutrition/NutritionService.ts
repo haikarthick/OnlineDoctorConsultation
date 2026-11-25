@@ -3,7 +3,7 @@ import logger from '../../utils/logger';
 import NutritionNotifier from './NutritionNotifier';
 import { activityScoreFrom, nutritionScoreFrom, weightStatusFrom, type WeightStatus } from './engine/wellness';
 import { detectConditions, type FoundCondition } from './engine/conditions';
-import { ValidationError, NotFoundError, ForbiddenError } from '../../utils/errors';
+import { ValidationError, NotFoundError, ForbiddenError, CodedError } from '../../utils/errors';
 import AnimalService from '../AnimalService';
 import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE } from '../AnimalAccessService';
 import BodyMeasurementService, { type MeasurementRow } from '../BodyMeasurementService';
@@ -186,14 +186,14 @@ class NutritionService {
   }
 
   /** Loads chosen foods the caller may use for this animal: shared library rows, or the household's / farm's own. */
-  private async resolveFoods(access: AnimalAccess, foods: FoodChoice[]): Promise<Array<PortionFood & { ingredientId: string | null }>> {
+  private async resolveFoods(access: AnimalAccess, foods: FoodChoice[]): Promise<Array<PortionFood & { ingredientId: string | null; kind: string | null }>> {
     if (!Array.isArray(foods) || foods.length === 0) throw new ValidationError('Choose at least one food.');
     if (foods.length > 12) throw new ValidationError('A plan can have up to 12 foods.');
     const ids = foods.map(f => f.ingredientId).filter(Boolean) as string[];
     const rows = new Map<string, any>();
     if (ids.length) {
       const r = await database.query(
-        `SELECT id, label, energy_kcal_per_100g FROM nutrition_ingredients
+        `SELECT id, label, kind, energy_kcal_per_100g FROM nutrition_ingredients
           WHERE id = ANY($1::uuid[]) AND is_active = true AND status <> 'retired'
             AND ((owner_id IS NULL AND enterprise_id IS NULL) OR owner_id = $2 OR ($3::uuid IS NOT NULL AND enterprise_id = $3::uuid))`,
         [ids, access.animal.ownerId, access.animal.enterpriseId]
@@ -207,13 +207,13 @@ class NutritionService {
         const row = rows.get(f.ingredientId);
         if (!row) throw new ValidationError('One of the chosen foods is no longer available. Choose it again.');
         const ownKcal = num(f.kcalPer100g);
-        return { key: `f${i}`, ingredientId: row.id, label: row.label, kcalPer100g: ownKcal ?? num(row.energy_kcal_per_100g), sharePct: share };
+        return { key: `f${i}`, ingredientId: row.id, label: row.label, kind: row.kind || null, kcalPer100g: ownKcal ?? num(row.energy_kcal_per_100g), sharePct: share };
       }
       const label = String(f.label || '').trim();
       if (!label) throw new ValidationError('Give each food a name.');
       const kcal = num(f.kcalPer100g);
       if (kcal !== null && (kcal <= 0 || kcal > 1000)) throw new ValidationError('Energy per 100 g must be between 1 and 1000 kcal. Check the food label.');
-      return { key: `f${i}`, ingredientId: null, label: label.slice(0, 200), kcalPer100g: kcal, sharePct: share };
+      return { key: `f${i}`, ingredientId: null, kind: null, label: label.slice(0, 200), kcalPer100g: kcal, sharePct: share };
     });
   }
 
@@ -223,7 +223,9 @@ class NutritionService {
   }
 
   private async compute(access: AnimalAccess, input: PlanInput): Promise<{
-    facts: AnimalFacts; energy: CompanionEnergyResult; portions: PortionResult; foods: Array<PortionFood & { ingredientId: string | null }>;
+    facts: AnimalFacts; energy: CompanionEnergyResult; portions: PortionResult; foods: Array<PortionFood & { ingredientId: string | null; kind: string | null }>;
+    /** Every food is home-cooked, a treat or unnamed: no complete-and-balanced food in the plan. */
+    incompleteDiet: boolean;
     unsafe: Array<{ food: string; item: string; severity: string; kind?: 'allergy' }>; mealsPerDay: number;
     allergies: Array<{ allergen: string; severity: string }>; conditions: FoundCondition[];
   }> {
@@ -261,7 +263,16 @@ class NutritionService {
       }
     }
     const conditions = await this.activeConditions(access.animal.id, facts.breedingStatus);
-    return { facts, energy, portions: portionResult, foods, unsafe, mealsPerDay, allergies, conditions };
+    // Home-cooked food alone is not complete (calcium, vitamins, and for some species taurine are easy to miss). It is allowed for
+    // a short time with a clear warning - but never as the whole diet of a young animal, which is growing and cannot miss them.
+    const incompleteDiet = foods.length > 0 && !foods.some(f => f.kind === 'commercial_food');
+    if (incompleteDiet && facts.dateOfBirth) {
+      const months = (Date.now() - new Date(facts.dateOfBirth).getTime()) / (30.4 * 86400000);
+      if (months >= 0 && months < 12) {
+        throw new CodedError(400, 'NUT_HOME_DIET_YOUNG', 'A growing animal under a year old cannot be fed home-cooked food alone: it needs a complete food made for its age. Add a complete food to the plan, or ask a vet for a diet.');
+      }
+    }
+    return { facts, energy, portions: portionResult, foods, unsafe, mealsPerDay, allergies, conditions, incompleteDiet };
   }
 
   /**
@@ -315,7 +326,7 @@ class NutritionService {
         [animalId, access.animal.enterpriseId, c.facts.model, reviewed ? 'vet_reviewed' : 'suggested', c.energy.goal,
          c.energy.idealWeightKg, c.energy.dailyKcal, c.mealsPerDay, c.energy.factorKey, ENGINE_VERSION,
          JSON.stringify({ facts: c.facts, goal: input.goal ?? null, targetWeightKg: num(input.targetWeightKg) }),
-         JSON.stringify({ energy: c.energy, portions: c.portions, conditions: { allergies: c.allergies, found: c.conditions, requiresVet: c.allergies.length > 0 || c.conditions.length > 0 } }),
+         JSON.stringify({ energy: c.energy, portions: c.portions, conditions: { allergies: c.allergies, found: c.conditions, requiresVet: c.allergies.length > 0 || c.conditions.length > 0 }, incompleteDiet: c.incompleteDiet }),
          reviewed ? (input.reviewNote || null) : null, caller.userId, reviewed ? caller.userId : null, reviewed ? new Date() : null,
          waitsForVet ? 'draft' : 'active']
       );
@@ -567,6 +578,7 @@ class NutritionService {
       allergies: (p.result?.conditions?.allergies || []).map((a: any) => a.allergen),
       conditions: (p.result?.conditions?.found || []).map((c: any) => c.key),
       prescriptionId: p.prescription_id || null,
+      incompleteDiet: p.result?.incompleteDiet === true,
       // Farm rations (ruminant_dm): dry matter, need vs supplied, cost per day / per litre.
       dailyDmKg: num(p.daily_dm_kg),
       ration: p.nutrition_model === 'ruminant_dm' || p.nutrition_model === 'equine_dm' ? {

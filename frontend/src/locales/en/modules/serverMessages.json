@@ -45,6 +45,9 @@
     "HN_TRANSFER_FIELDS": "Choose the patient, the hospital they move from, the hospital they move to, and give the reason for the move.",
     "HN_NETWORK_SUSPENDED": "This network has been suspended, so no one new can be added. Contact platform support.",
     "HN_SEAT_LIMIT": "Your plan allows {{limit}} people and {{used}} are already in this network. Ask the platform admin to upgrade the plan, or remove someone first.",
-    "HN_PLAN_IN_USE": "This plan is in use by one or more networks. Move them to another plan first, or hide the plan instead."
+    "HN_PLAN_IN_USE": "This plan is in use by one or more networks. Move them to another plan first, or hide the plan instead.",
+    "HN_NOT_MEMBER": "You are not a member of this network, so you cannot see its transfers. Ask the network admin to add you.",
+    "NUT_AGE_REQUIRED": "Add this animal's date of birth first (an estimate is fine). A ration depends on its age, and a young animal must not be fed like an adult.",
+    "NUT_HOME_DIET_YOUNG": "A growing animal under a year old cannot be fed home-cooked food alone: it needs a complete food made for its age. Add a complete food to the plan, or ask a vet for a diet."
   }
 }

@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
 import { DatabaseError, NotFoundError, ValidationError } from '../utils/errors';
 import FarmProfileService from './FarmProfileService';
+import BodyMeasurementService from './BodyMeasurementService';
 import { ANIMAL_BREEDING_STATUSES } from '../utils/breedingStatus';
 import logger from '../utils/logger';
 
@@ -256,6 +257,12 @@ export class AnimalService {
         data.activityLevel || null, data.housing || null,
       ]);
       logger.info('Animal created', { id, ownerId, uniqueId });
+      // The first weight enters the ONE weight history (nutrition, wellness and the vet's chart read it), not only the cached column.
+      const first = Number(data.weight);
+      if (Number.isFinite(first) && first > 0) {
+        await BodyMeasurementService.record({ animalId: id, weight: first, unit: 'kg', source: 'medical_record', recordedBy: ownerId })
+          .catch((e: any) => logger.warn('Could not record the first weight of a new animal', { id, error: e?.message }));
+      }
       return result.rows[0];
     } catch (error) {
       if (error instanceof ValidationError) throw error;
@@ -527,16 +534,28 @@ export class AnimalService {
       };
       // Only these keys may name a column; anything else in the payload is ignored rather than
       // being spliced into the SQL.
+      // A weight typed on the edit form is a WEIGHING: it goes through the one weight writer (history + cached current weight),
+      // never straight into animals.weight, so every module reads the same number. A cleared weight is left alone.
+      const typedWeight = updates.weight === undefined || updates.weight === null || (updates.weight as unknown) === '' ? null : Number(updates.weight);
       const entries = Object.entries(updates)
-        .filter(([key, v]) => v !== undefined && key in fieldMap)
+        .filter(([key, v]) => v !== undefined && key in fieldMap && key !== 'weight')
         // A cleared field arrives as '' - store NULL (a DATE or number column rejects '').
         .map(([key, v]) => [key, v === '' ? null : v] as [string, unknown]);
-      if (entries.length === 0) return this.getAnimal(animalId);
+      if (typedWeight !== null && (!Number.isFinite(typedWeight) || typedWeight <= 0 || typedWeight > 20000)) {
+        throw new ValidationError('Weight must be a number above zero.');
+      }
 
       // Validate against what the animal is NOW merged with what is being changed.
-      const current = await database.query('SELECT species, animal_class as "animalClass", gender FROM animals WHERE id = $1', [animalId]);
+      const current = await database.query('SELECT species, animal_class as "animalClass", gender, weight, weight_unit FROM animals WHERE id = $1', [animalId]);
       if (current.rows.length === 0) throw new NotFoundError('Animal', animalId);
       await this.assertFarmFieldsAllowed(updates, current.rows[0]);
+
+      // Same number as now = not a new weighing (saving the form again must not stack identical history rows).
+      const isNewWeighing = typedWeight !== null && Number(current.rows[0].weight) !== typedWeight;
+      if (entries.length === 0) {
+        if (isNewWeighing) await BodyMeasurementService.record({ animalId, weight: typedWeight, unit: current.rows[0].weight_unit || 'kg', source: 'medical_record' });
+        return this.getAnimal(animalId);
+      }
 
       const sets = entries.map(([key], i) => `${fieldMap[key] || key} = $${i + 2}`);
       const values = entries.map(([_, v]) => v);
@@ -558,6 +577,10 @@ export class AnimalService {
       `;
       const result = await database.query(query, [animalId, ...values]);
       if (result.rows.length === 0) throw new NotFoundError('Animal', animalId);
+      if (isNewWeighing) {
+        await BodyMeasurementService.record({ animalId, weight: typedWeight, unit: current.rows[0].weight_unit || 'kg', source: 'medical_record' });
+        return this.getAnimal(animalId);
+      }
       return result.rows[0];
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof ValidationError) throw error;

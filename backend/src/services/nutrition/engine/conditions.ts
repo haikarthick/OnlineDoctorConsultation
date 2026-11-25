@@ -5,9 +5,9 @@
  * one question - "is there anything on record a vet must see before this diet is followed?" It never computes an
  * amount and never decides a diet. A false hit only sends the plan to a vet, so the list is deliberately wide.
  */
-export type ConditionKey = 'kidney' | 'diabetes' | 'pancreatitis' | 'urinary' | 'liver' | 'heart' | 'pregnant_and_ill';
+export type ConditionKey = 'kidney' | 'diabetes' | 'pancreatitis' | 'urinary' | 'liver' | 'heart' | 'metabolic' | 'pregnant_and_ill';
 
-export const CONDITION_KEYS: readonly ConditionKey[] = ['kidney', 'diabetes', 'pancreatitis', 'urinary', 'liver', 'heart', 'pregnant_and_ill'];
+export const CONDITION_KEYS: readonly ConditionKey[] = ['kidney', 'diabetes', 'pancreatitis', 'urinary', 'liver', 'heart', 'metabolic', 'pregnant_and_ill'];
 
 /** Words in a diagnosis title, notes or tags (lower case). Whole-word starts, so "renal" matches "renal failure". */
 const DIAGNOSIS_TERMS: Record<Exclude<ConditionKey, 'pregnant_and_ill'>, RegExp> = {
@@ -17,6 +17,9 @@ const DIAGNOSIS_TERMS: Record<Exclude<ConditionKey, 'pregnant_and_ill'>, RegExp>
   urinary: /\b(urolith|urinary (stone|calcul|crystal)|struvite|oxalate|bladder stone|calculi)/,
   liver: /\b(liver|hepat|cholang|portosystemic)/,
   heart: /\b(heart|cardiac|cardiomyopath|murmur|congestive)/,
+  // Farm and horse diet-linked illnesses: ketosis, rumen acidosis, milk fever, bloat, laminitis / founder, equine metabolic syndrome,
+  // Cushing's (PPID), colic. A cow or horse with one of these must not simply be moved to a new ration.
+  metabolic: /\b(ketosis|ketotic|acidosis|milk fever|hypocalc|parturient|bloat|tympany|laminitis|founder|cushing|ppid|equine metabolic|\bems\b|insulin dysregulation|colic|fatty liver|pregnancy toxaemia|pregnancy toxemia)/,
 };
 
 /** A lab test that is outside its range points to the same conditions. */
@@ -27,6 +30,7 @@ const LAB_TERMS: Record<Exclude<ConditionKey, 'pregnant_and_ill'>, RegExp> = {
   urinary: /\b(urinalysis|specific gravity|crystal)/,
   liver: /\b(alt|alp|bile acid|bilirubin|ggt|ast)\b/,
   heart: /\b(nt-?probnp|troponin)/,
+  metabolic: /\b(bhb|beta-?hydroxybutyrate|ketone|acth|ionised calcium|ionized calcium)/,
 };
 
 export interface DiagnosisRow { title?: string | null; content?: string | null; tags?: string[] | null; severity?: string | null }

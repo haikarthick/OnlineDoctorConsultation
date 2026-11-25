@@ -192,6 +192,7 @@ export const PlanBuilderSheet: React.FC<Props> = ({ data, onClose, onSaved }) =>
               <p key={r} className="nutri-hint">{t(`nutrition.reasons.${r}`)}</p>
             ))}
             {preview.energy?.requiresVet && <p className="nutri-note is-warning">{t('nutrition.plan.requiresVet')}</p>}
+            {preview.incompleteDiet && <p className="nutri-note is-warning">{t('nutrition.plan.incompleteDiet')}</p>}
             {(preview.unsafe || []).map((u: any) => (
               <p key={`${u.food}-${u.item}`} className={`nutri-note ${u.severity === 'danger' ? 'is-danger' : 'is-warning'}`}>
                 {u.kind === 'allergy' ? t('nutrition.plan.allergyFood', { food: u.food, allergen: u.item }) : t('nutrition.plan.unsafeFood', { food: u.food })}
