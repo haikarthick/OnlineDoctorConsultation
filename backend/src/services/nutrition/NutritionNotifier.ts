@@ -95,11 +95,17 @@ class NutritionNotifier {
     } catch (err: any) { logger.warn('Nutrition alert notification failed', { error: err.message }); }
   }
 
-  /** A plan that needs a vet before it is followed: the connected vets are told once. */
+  /** A plan that needs a vet before it is followed: the connected vets are asked to check it, and the owner / farm team are told it is waiting. Each once. */
   async planWaitingForVet(subject: Subject, planId: string): Promise<void> {
     try {
       const info = await this.subjectInfo(subject);
       if (!info) return;
+      // The people who run the animal are told too, so they know why the new plan is not in use yet (and that they may need a vet).
+      await this.send([...(info.ownerId ? [info.ownerId] : []), ...(await this.farmPeople(info.enterpriseId))], `nutrition-plan-owner:${planId}`,
+        `Feeding plan waiting for a vet: ${info.name}`,
+        `The new feeding plan for ${info.name} is waiting for a vet to approve it. The plan already in use stays as it is until then. If you have no vet yet, book one.`,
+        { type: 'nutrition_plan_waiting', animalId: subject.animalId || null, groupId: subject.groupId || null, planId,
+          i18n: { title: { code: 'NOTIF_NUT_PLAN_OWNER_TITLE', params: { name: info.name } }, body: { code: 'NOTIF_NUT_PLAN_OWNER_BODY', params: { name: info.name } } } });
       await this.send(await this.vets(subject), `nutrition-plan:${planId}`,
         `Feeding plan to check: ${info.name}`,
         `A new feeding plan for ${info.name} is waiting for a vet to check it. Open Nutrition and use Review.`,

@@ -48,13 +48,13 @@ describe('nutrition lifecycle', () => {
     expect(NotificationService.createNotification).not.toHaveBeenCalled();
   });
 
-  it('a plan waiting for a vet tells only the connected vets', async () => {
+  it('a plan waiting for a vet asks the connected vet to check it and tells the owner it is waiting', async () => {
     query.mockImplementation(async (sql: string) => {
       if (/FROM animals WHERE id/.test(sql)) return { rows: [{ name: 'Rex', owner_id: 'owner', enterprise_id: null }] };
       if (/FROM consultations/.test(sql)) return { rows: [{ id: 'vet1' }] };
       return { rows: [] };
     });
     await NutritionNotifier.planWaitingForVet({ animalId: 'a1' }, 'p1');
-    expect((NotificationService.createNotification as jest.Mock).mock.calls.map(c => c[0])).toEqual(['vet1']);
+    expect((NotificationService.createNotification as jest.Mock).mock.calls.map(c => c[0])).toEqual(['owner', 'vet1']);
   });
 });

@@ -145,7 +145,10 @@ export class FileController {
    */
   static async list(req: Request, res: Response) {
     const folder = req.query.folder as string | undefined;
-    let files = Array.from(fileRegistry.values());
+    // A person lists only what they uploaded themselves; an admin sees all.
+    const me = (req as any).userId as string | undefined;
+    const isAdmin = (req as any).userRole === 'admin' || ((req as any).userRoles || []).includes('admin');
+    let files = Array.from(fileRegistry.values()).filter(f => isAdmin || (!!me && f.uploadedBy === me));
     if (folder) {
       files = files.filter(f => f.key.startsWith(`${folder}/`));
     }
@@ -162,8 +165,17 @@ export class FileController {
       return res.status(400).json({ error: 'File key is required.' });
     }
 
-    if (!fileRegistry.has(key)) {
-      return res.status(404).json({ error: 'File not found.' });
+    // Only the person who uploaded a file (or an admin) may delete it. A file that does not exist and one that belongs to someone else
+    // get the SAME answer, so file keys cannot be probed.
+    const rec = fileRegistry.get(key);
+    const me = (req as any).userId as string | undefined;
+    const isAdmin = (req as any).userRole === 'admin' || ((req as any).userRoles || []).includes('admin');
+    if (!rec || (!isAdmin && rec.uploadedBy !== me)) {
+      return res.status(isAdmin ? 404 : 403).json({
+        success: false,
+        message: 'You can delete only files you uploaded yourself. Check you chose the right file, or ask the person who added it.',
+        error: { code: 'FILE_NOT_YOURS', message: 'You can delete only files you uploaded yourself. Check you chose the right file, or ask the person who added it.' },
+      });
     }
 
     await storage.delete(key);

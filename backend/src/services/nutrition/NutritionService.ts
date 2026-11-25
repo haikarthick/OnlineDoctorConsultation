@@ -565,7 +565,7 @@ class NutritionService {
     );
     const p = r.rows[0];
     if (!p) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
-    const items = await database.query(`SELECT * FROM nutrition_plan_items WHERE plan_id = $1 ORDER BY sort_order`, [planId]);
+    const items = await database.query(`SELECT i.*, ing.label_key AS ingredient_label_key FROM nutrition_plan_items i LEFT JOIN nutrition_ingredients ing ON ing.id = i.ingredient_id WHERE i.plan_id = $1 ORDER BY i.sort_order`, [planId]);
     const meals = Number(p.meals_per_day) || 2;
     return {
       id: p.id, animalId: p.animal_id, groupId: p.group_id, model: p.nutrition_model, status: p.status, validation: p.validation,
@@ -590,7 +590,7 @@ class NutritionService {
       createdBy: p.created_by, createdByName: p.created_by_name, createdAt: p.created_at,
       reviewedBy: p.reviewed_by, reviewedByName: p.reviewed_by_name, reviewedAt: p.reviewed_at,
       items: items.rows.map((x: any) => ({
-        id: x.id, ingredientId: x.ingredient_id, label: x.label, sharePct: num(x.share_pct), unit: x.unit || 'g',
+        id: x.id, ingredientId: x.ingredient_id, label: x.label, labelKey: x.ingredient_label_key || null, sharePct: num(x.share_pct), unit: x.unit || 'g',
         amountPerDay: num(x.amount_per_day), costPerDay: num(x.cost_per_day),
         gramsPerDay: x.unit === 'kg' ? null : num(x.amount_per_day),
         gramsPerMeal: x.unit === 'kg' || num(x.amount_per_day) === null ? null : Math.round(Number(x.amount_per_day) / meals),

@@ -149,15 +149,12 @@ export class AnimalController {
       res.status(404).json({ success: false, message: `No animal has the ID ${uid}. Check the ID card and try again.` });
       return;
     }
-    // Looking an animal up by the ID on its card is how a clinic starts a walk-in visit, so vets and hospital staff
-    // may find it - but the owner's email is never handed out, and anyone else finds only animals they can reach.
-    const clinical = ['admin', 'veterinarian', 'hospital_staff', 'corporate_admin'].some(r => req.userRole === r || (req.userRoles || []).includes(r));
-    if (!clinical) {
-      const access = await AnimalAccessService.check({ userId: req.userId!, role: req.userRole, roles: req.userRoles }, animal.id, 'read');
-      if (!access.allowed) {
-        res.status(404).json({ success: false, message: `No animal you can open has the ID ${uid}. Check the ID card and try again.` });
-        return;
-      }
+    // H15: the one platform rule decides, for every role including vets and hospital staff - "any vet" is never enough. A clinic reaches
+    // an animal by its card only when the owner booked it, shared it with the hospital, or enrolled it. The owner's email is never handed out.
+    const access = await AnimalAccessService.check({ userId: req.userId!, role: req.userRole, roles: req.userRoles }, animal.id, 'read');
+    if (!access.allowed) {
+      res.status(404).json({ success: false, message: `No animal you can open has the ID ${uid}. Check the ID card and try again, or ask the owner to share the animal with you.` });
+      return;
     }
     if (req.userRole !== 'admin') delete animal.ownerEmail;
     res.json({ success: true, data: animal });

@@ -154,6 +154,8 @@
     "NOTIF_WI_TITLE": "{{patient}} accepted your invitation",
     "NOTIF_WI_BODY": "{{patient}} accepted the invitation to {{network}}. You can now ask to enrol {{pet}}; they will be asked to approve sharing.",
     "NOTIF_TRANSFER_TITLE": "{{name}} moved to {{to}}",
-    "NOTIF_TRANSFER_BODY": "{{name}}'s care has moved to {{to}} in the same network. Your consent and records stay as they were."
+    "NOTIF_TRANSFER_BODY": "{{name}}'s care has moved to {{to}} in the same network. Your consent and records stay as they were.",
+    "NOTIF_NUT_PLAN_OWNER_TITLE": "Feeding plan waiting for a vet: {{name}}",
+    "NOTIF_NUT_PLAN_OWNER_BODY": "The new feeding plan for {{name}} is waiting for a vet to approve it. The plan already in use stays as it is until then. If you have no vet yet, book one."
   }
 }
