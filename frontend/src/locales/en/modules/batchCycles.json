@@ -1,0 +1,43 @@
+{
+  "batchCycles": {
+    "button": "Batches",
+    "title": "Batches of {{name}}",
+    "loading": "Loading batches...",
+    "loadFailed": "We could not load the batches. Check your connection and try again.",
+    "saveFailed": "This could not be saved, so nothing was changed. Please try again.",
+    "active": "Running batch",
+    "none": "No batch is running. Start one when you place a new lot of birds, fish or animals.",
+    "batchN": "Batch {{n}}",
+    "startedOn": "Started {{date}}",
+    "placed": "{{count}} placed",
+    "current": "{{count}} now",
+    "reconcileOk": "The count of {{count}} matches every entry in the ledger below.",
+    "reconcileOff": "The count ({{stored}}) and the ledger ({{ledger}}) do not match. Ask your vet or support to check before you close this batch.",
+    "mortalityHint": "Record deaths and sales in Daily records. They appear in the ledger below by themselves.",
+    "close": "Close this batch",
+    "closeConfirm": "Closing ends the batch with {{count}} still counted. You can start a new batch afterwards.",
+    "closeReason": "Why is it closing? (optional)",
+    "closeNow": "Close batch",
+    "closedMsg": "The batch is closed.",
+    "start": "Start a new batch",
+    "nameLabel": "Name (optional)",
+    "placedLabel": "How many were placed",
+    "startDate": "Start date",
+    "startNow": "Start batch",
+    "startedMsg": "The new batch has started.",
+    "past": "Earlier batches",
+    "ledgerTitle": "Every head in and out",
+    "ledgerEmpty": "Nothing has been recorded yet.",
+    "event": {
+      "placement": "Placed",
+      "hatch": "Hatched",
+      "mortality": "Died",
+      "cull": "Culled",
+      "sale": "Sold",
+      "transfer_in": "Moved in",
+      "transfer_out": "Moved out",
+      "promotion": "Kept as a single animal",
+      "adjustment": "Count corrected"
+    }
+  }
+}

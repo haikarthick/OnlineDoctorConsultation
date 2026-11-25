@@ -1,0 +1,13 @@
+:where(.gc-sheet) { display: flex; flex-direction: column; gap: 12px; }
+:where(.gc-card) { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; overflow-wrap: anywhere; }
+:where(.gc-card) h4 { margin: 0; font-size: 15px; }
+:where(.gc-list) { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+:where(.gc-form) { display: flex; flex-direction: column; gap: 10px; }
+:where(.gc-form) label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+:where(.gc-muted) { color: #6b7280; font-size: 13px; }
+:where(.gc-good) { color: #15803d; font-size: 13px; }
+:where(.gc-warn) { color: #b45309; font-size: 13px; }
+:where(.gc-in) { color: #15803d; font-weight: 700; }
+:where(.gc-out) { color: #b91c1c; font-weight: 700; }
+:where(.gc-ok) { padding: 8px 12px; border-radius: 10px; background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+:where(.gc-error) { padding: 8px 12px; border-radius: 10px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
