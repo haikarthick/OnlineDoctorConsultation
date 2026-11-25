@@ -42,7 +42,7 @@ const RecentActivityPanel: React.FC<Props> = ({ activities, loading }) => {
               <div className="activity-description">{activity.description}</div>
             </div>
             <div className="activity-meta">
-              <span className={`activity-status status-${activity.status}`}>{t(`common.${activity.status}`) || activity.status}</span>
+              <span className={`activity-status status-${activity.status}`}>{t(activity.status === 'in_progress' ? 'common.inProgress' : `common.${activity.status}`) || activity.status}</span>
               <span className="activity-time">{activity.time}</span>
             </div>
           </div>

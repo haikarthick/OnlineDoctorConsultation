@@ -47,19 +47,21 @@ const hasRole = (c: Caller, role: string): boolean => c.role === role || (c.role
 
 class NutritionAccess {
 
-  async loadAnimal(animalId: string): Promise<AnimalRef> {
+  async loadAnimal(animalId: string, caller: Caller): Promise<AnimalRef> {
     const r = await database.query(
       `SELECT id, name, owner_id, enterprise_id, species, animal_class FROM animals WHERE id = $1 AND is_active = true`,
       [animalId]
     );
     const a = r.rows[0];
+    // Not found looks exactly like not yours for everyone but an admin, so an id cannot be probed for existence.
+    if (!a && !hasRole(caller, 'admin')) throw new CodedError(403, 'NUT_NO_ACCESS', NO_NUTRITION_ACCESS_MESSAGE);
     if (!a) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
     return { id: a.id, name: a.name, ownerId: a.owner_id, enterpriseId: a.enterprise_id || null, species: a.species, animalClass: a.animal_class || null };
   }
 
   /** Resolves the caller's access, or throws a readable refusal. `need` is what this request does. */
   async forAnimal(animalId: string, caller: Caller, need: 'read' | 'write' | 'review' = 'read'): Promise<AnimalAccess> {
-    const animal = await this.loadAnimal(animalId);
+    const animal = await this.loadAnimal(animalId, caller);
     const isVet = hasRole(caller, 'veterinarian');
     let access: AnimalAccess | null = null;
 

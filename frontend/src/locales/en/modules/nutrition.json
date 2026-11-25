@@ -646,7 +646,8 @@
       },
       "priceFromStock": "The cost shows once feed for this group is recorded from stock in Daily records.",
       "cautions": {
-        "breeders_need_vet": "This is a feed guide for a dry adult pig. A sow in pregnancy or nursing piglets, and a breeding boar, need much more and a different diet. Ask your vet for a breeding-pig plan."
+        "breeders_need_vet": "This is a feed guide for a dry adult pig. A sow in pregnancy or nursing piglets, and a breeding boar, need much more and a different diet. Ask your vet for a breeding-pig plan.",
+        "sow_nursing_more": "This table is for a pregnant or dry sow. While she is nursing piglets she needs much more, about 6 kg a day, and more with a big litter. Raise the amount then and ask your vet for a plan."
       }
     },
     "vet": {

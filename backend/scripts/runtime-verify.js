@@ -957,7 +957,7 @@ async function http(method, url, body, token) {
           const list = await http('GET', `${apiBase}/nutrition/animals?filter=attention`, null, owner);
           if (!(list.json?.data?.items || []).some(x => x.id === animalId)) problems.push(`the animal with open alerts is missing from the "needs attention" list (HTTP ${list.status})`);
           // Farm ration (Phase 2, migration 057): a 400 kg cow giving 10 L, balanced from the seeded feed library.
-          const cow = await http('POST', `${apiBase}/animals`, { name: 'Verify Lakshmi', species: 'Cattle', gender: 'female' }, owner);
+          const cow = await http('POST', `${apiBase}/animals`, { name: 'Verify Lakshmi', species: 'Cattle', gender: 'female', dateOfBirth: '2020-03-01' }, owner);
           const cowId = cow.json?.data?.id;
           if (!cowId) problems.push(`create cow: HTTP ${cow.status} ${JSON.stringify(cow.json || {}).slice(0, 160)}`);
           else {
@@ -1018,7 +1018,7 @@ async function http(method, url, body, token) {
           } catch { problems.push('could not switch the AI explanation off for verification'); }
 
           // Horse (equine_dm): forage-first least-cost ration; the work level typed is saved on the profile.
-          const horse = await http('POST', `${apiBase}/animals`, { name: 'Verify Chetak', species: 'Horse', gender: 'male' }, owner);
+          const horse = await http('POST', `${apiBase}/animals`, { name: 'Verify Chetak', species: 'Horse', gender: 'male', dateOfBirth: '2018-03-01' }, owner);
           const horseId = horse.json?.data?.id;
           if (!horseId) problems.push(`create horse: HTTP ${horse.status} ${JSON.stringify(horse.json || {}).slice(0, 160)}`);
           else {
@@ -1412,7 +1412,7 @@ async function http(method, url, body, token) {
         const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
         const calfId = await mk({ name: 'Verify Calf', species: 'Cattle', gender: 'female', dateOfBirth: daysAgo(150) }, 100);
         const babyId = await mk({ name: 'Verify Baby', species: 'Cattle', gender: 'female', dateOfBirth: daysAgo(30) }, 45);
-        const sheepId = await mk({ name: 'Verify Sheep', species: 'Sheep', gender: 'female' }, 40);
+        const sheepId = await mk({ name: 'Verify Sheep', species: 'Sheep', gender: 'female', dateOfBirth: '2022-03-01' }, 40);
         if (!calfId || !babyId || !sheepId) problems.push('could not create a calf, a baby calf and a sheep for the safety checks');
         else {
           const foods = async (id) => Object.fromEntries(((await http('GET', `${apiBase}/nutrition/foods?animalId=${id}`, null, owner)).json?.data?.items || []).map(f => [f.code, f.id]));
@@ -1536,7 +1536,7 @@ async function http(method, url, body, token) {
 
         // 4b. A cow with a condition on record: the ration waits for a vet too.
         {
-          const cowC = (await http('POST', `${apiBase}/animals`, { name: 'Verify Kidney Cow', species: 'Cattle', gender: 'female' }, owner)).json?.data?.id;
+          const cowC = (await http('POST', `${apiBase}/animals`, { name: 'Verify Kidney Cow', species: 'Cattle', gender: 'female', dateOfBirth: '2020-03-01' }, owner)).json?.data?.id;
           if (cowC) {
             await http('POST', `${apiBase}/nutrition/animals/${cowC}/measurements`, { weight: 400, unit: 'kg' }, owner);
             const fl = Object.fromEntries(((await http('GET', `${apiBase}/nutrition/foods?animalId=${cowC}`, null, owner)).json?.data?.items || []).map(f => [f.code, f.id]));
@@ -2300,7 +2300,8 @@ async function http(method, url, body, token) {
           const saved = await own({ id: tid, startedOn: iso(-2) });
           if (saved.status !== 201) problems.push(`the farmer's own treatment for the course checks: HTTP ${saved.status} ${msgOf(saved).slice(0, 100)}`);
           else coded('a last dose before the treatment started', await http('PATCH', `${apiBase}/treatments/self/${tid}/course`, { lastDoseOn: iso(-10) }, farmer), 400, 'WD_LAST_DOSE_BEFORE_START');
-          coded('correcting a treatment that does not exist', await http('PATCH', `${apiBase}/treatments/self/${uuid()}/course`, { lastDoseOn: iso(0) }, farmer), 404, 'WD_NOT_FOUND');
+          // a missing id gets the SAME refusal as someone else's record, so ids cannot be probed (see recordAccess.ts)
+          coded('correcting a treatment that does not exist', await http('PATCH', `${apiBase}/treatments/self/${uuid()}/course`, { lastDoseOn: iso(0) }, farmer), 403, 'RECORD_ACCESS_DENIED');
 
           const courseRx = await rx({ animalId: cowA, medications: [line({ name: 'Verify Hd Course' })] });
           if (!courseRx.json?.data?.id) problems.push(`the prescription for the booked-vet check: HTTP ${courseRx.status} ${msgOf(courseRx).slice(0, 100)}`);
@@ -2963,12 +2964,19 @@ async function http(method, url, body, token) {
             for (const c of codes) {
               const row = list.find(u => u.code === c);
               if (!row) problems.push(`[6 safe foods] the ${sp} safe-food list is missing '${c}' (has ${list.map(u => u.code).join(', ')})`);
-              else if (row.status !== 'unvalidated') problems.push(`[6 safe foods] '${c}' for ${sp} should be status 'unvalidated' (not yet signed off by a vet), got '${row.status}'`);
+              else if (row.status !== 'owner_approved') problems.push(`[6 safe foods] '${c}' for ${sp} should be 'owner_approved' (owner decision 2026-11-25: seed data goes live, vet sign-off comes later from Admin), got '${row.status}'`);
             }
           }
           const dbRows = rows(`SELECT code, species_code, status FROM ${S}.nutrition_unsafe_foods WHERE code IN ('urea_nonruminant','oleander','lawn_clippings','chocolate_bird','dough_raw','mushrooms_wild','onion_bird','cottonseed_cake','mustard_cake')`);
-          const notUnvalidated = dbRows.filter(r => r.status !== 'unvalidated');
-          if (notUnvalidated.length) problems.push(`[6 safe foods] new migration-070 rows that are not 'unvalidated': ${notUnvalidated.map(r => `${r.code}/${r.species_code}=${r.status}`).join(', ')}`);
+          const notUnvalidated = dbRows.filter(r => r.status !== 'owner_approved');
+          if (notUnvalidated.length) problems.push(`[6 safe foods] migration-070 rows that are not 'owner_approved': ${notUnvalidated.map(r => `${r.code}/${r.species_code}=${r.status}`).join(', ')}`);
+          // Migration 071: sows and boars have their own curve (NRC figures), and no seed row is left 'unvalidated'.
+          const curves = rows(`SELECT curve_key, group_types::text AS gt, grams_per_head_day, status, caution_key FROM ${S}.nutrition_feeding_curves WHERE curve_key IN ('pig_sow','pig_boar')`);
+          const sowC = curves.find(r => r.curve_key === 'pig_sow'), boarC = curves.find(r => r.curve_key === 'pig_boar');
+          if (!sowC || Number(sowC.grams_per_head_day) !== 2300 || sowC.caution_key !== 'sow_nursing_more') problems.push('[6 breeding pigs] the sow curve is missing or wrong: ' + JSON.stringify(sowC));
+          if (!boarC || Number(boarC.grams_per_head_day) !== 2700) problems.push('[6 breeding pigs] the boar curve is missing or wrong: ' + JSON.stringify(boarC));
+          const stillUnvalidated = rows(`SELECT count(*) AS n FROM ${S}.nutrition_unsafe_foods WHERE status = 'unvalidated'`)[0];
+          if (Number(stillUnvalidated.n) !== 0) problems.push(`[6 seed status] ${stillUnvalidated.n} unsafe-food rows are still 'unvalidated'`);
           // Farm species (pig, chicken, horse) cannot take a pet plan (no calculator) or a nutrition-route meal (feed is recorded in Daily records):
           // the danger match is therefore checked on the data - the term a farmer would type must be in the row's match_terms.
           for (const [code, sp, term] of [['urea_nonruminant', 'Pig', 'urea'], ['chocolate_bird', 'Chicken', 'chocolate'], ['oleander', 'Horse', 'oleander'], ['lawn_clippings', 'Horse', 'lawn clippings']]) {

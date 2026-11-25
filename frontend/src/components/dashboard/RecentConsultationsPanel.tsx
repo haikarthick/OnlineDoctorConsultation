@@ -39,7 +39,7 @@ const RecentConsultationsPanel: React.FC<Props> = ({ recentConsultations }) => {
                   {formatDate(consultation.createdAt || '')}
                 </span>
               </div>
-              <span className={`status-pill status-${consultation.status}`}>{t(`common.${consultation.status}`) || consultation.status}</span>
+              <span className={`status-pill status-${consultation.status}`}>{t(consultation.status === 'in_progress' ? 'common.inProgress' : `common.${consultation.status}`) || consultation.status}</span>
             </div>
           ))}
         </div>

@@ -615,6 +615,7 @@
 .search-input {
   flex: 1;
   min-width: 250px;
+  min-height: var(--tap-min, 44px);
   padding: 10px 14px 10px 36px;
   border: 1px solid var(--gray-300);
   border-radius: var(--radius);
@@ -3240,7 +3241,8 @@ textarea.module-input {
   flex: none;
 }
 .bottom-sheet-close:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
-.bottom-sheet-body { overflow-y: auto; overscroll-behavior: contain; }
+/* min-height: 0 lets the body shrink inside the sheet's max-height and scroll, instead of pushing the sheet (and its Save button) off the screen. */
+.bottom-sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 
 /* On wide screens the same sheet is a centred dialog. */
 @media (min-width: 769px) {
@@ -3288,6 +3290,7 @@ textarea.module-input {
   box-sizing: border-box;
   cursor: pointer;
   min-height: var(--tap-min);
+  min-width: var(--tap-min);
   padding: 0 16px;
   border-radius: var(--chip-radius);
   border: 1px solid var(--gray-300);
@@ -3348,6 +3351,7 @@ textarea.module-input {
   box-sizing: border-box;
 }
 .num-stepper-input:focus { outline: none; border-bottom-color: var(--brand-strong); }
+.num-stepper-input:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
 .num-stepper-unit { font-size: 20px; font-weight: 600; color: var(--gray-600); }
 .num-stepper-hint { margin: 0; font-size: 14px; color: var(--gray-600); text-align: center; }
 .num-stepper-quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -3574,7 +3578,8 @@ button.record-due-row { cursor: pointer; }
 .record-due-when.is-overdue { color: var(--danger); }
 .record-due-text { min-width: 0; overflow-wrap: anywhere; }
 .record-sheet { display: flex; flex-direction: column; gap: 16px; }
-.record-sheet-actions { display: flex; gap: 12px; }
+/* Pinned to the bottom of the scrolling sheet body so the main button is always in reach, whatever the form's length. */
+.record-sheet-actions { display: flex; gap: 12px; position: sticky; bottom: 0; padding-top: 10px; background: #fff; }
 .record-sheet-actions .btn { flex: 1; min-height: var(--tap-min); }
 .record-note { margin: 0; padding: 10px 12px; border-radius: var(--radius-lg); background: var(--gray-100); color: var(--gray-700); font-size: 15px; }
 .record-note.is-update { background: var(--warning-light); color: #92400e; }

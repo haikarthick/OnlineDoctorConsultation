@@ -62,12 +62,16 @@ export function requireRecordAccess(table: RecordTable, idParam = 'id') {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ success: false, message: 'Please sign in again.' });
     const id = req.params[idParam];
-    if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return next(); // the handler answers "not found"
+    const isAdmin = req.userRole === 'admin' || (req.userRoles || []).includes('admin');
+    // A missing record gets the SAME refusal as one that is not yours (never a different answer that reveals which ids exist);
+    // only an admin is passed on so the handler can say "not found".
+    const refuse = (res2: Response) => res2.status(403).json({ success: false, message: ANIMAL_NO_ACCESS_MESSAGE, error: { message: ANIMAL_NO_ACCESS_MESSAGE, code: 'RECORD_ACCESS_DENIED' } });
+    if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return isAdmin ? next() : refuse(res);
     const r = await database.query(
       `SELECT ${cols.animal} AS animal_id${cols.group ? `, ${cols.group} AS group_id` : ''} FROM ${table} WHERE id = $1`, [id]
     );
     const row = r.rows[0];
-    if (!row) return next();
+    if (!row) return isAdmin ? next() : refuse(res);
     const mode = req.method === 'GET' || req.method === 'HEAD' ? 'read' : 'write';
     const user = { userId, role: req.userRole, roles: req.userRoles };
 

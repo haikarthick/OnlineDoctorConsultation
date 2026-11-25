@@ -39,10 +39,13 @@ const hasRole = (role: string | undefined, roles: string[] | undefined, want: st
 class AnimalAccessService {
 
   async check(user: { userId: string; role?: string; roles?: string[] }, animalId: string, mode: AccessMode = 'read'): Promise<AnimalAccessResult> {
-    if (!animalId || !/^[0-9a-f-]{36}$/i.test(animalId)) return { found: false, allowed: false };
+    // ONE answer for "no such animal" and "not yours": to anyone but an admin both are `found + refused`, so no route can tell a
+    // stranger which ids exist. (Before 2026-11-25 a missing id fell through to the handler's 404 while a real one got 403.)
+    const isAdmin = hasRole(user.role, user.roles, 'admin');
+    if (!animalId || !/^[0-9a-f-]{36}$/i.test(animalId)) return { found: !isAdmin, allowed: false };
     const r = await database.query(`SELECT id, owner_id, enterprise_id, group_id FROM animals WHERE id = $1`, [animalId]);
     const a = r.rows[0];
-    if (!a) return { found: false, allowed: false };
+    if (!a) return { found: !isAdmin, allowed: false };
     if (hasRole(user.role, user.roles, 'admin')) return { found: true, allowed: true, via: 'admin' };
     if (a.owner_id === user.userId) return { found: true, allowed: true, via: 'owner' };
 
@@ -100,9 +103,10 @@ class AnimalAccessService {
 
   /** May this person see / change a farm group (batch herd, flock, pond)? Farm team, booked vet, admin. */
   async checkGroup(user: { userId: string; role?: string; roles?: string[] }, groupId: string, mode: AccessMode = 'read'): Promise<AnimalAccessResult> {
-    if (!groupId || !/^[0-9a-f-]{36}$/i.test(groupId)) return { found: false, allowed: false };
+    const isAdmin = hasRole(user.role, user.roles, 'admin'); // same rule as check(): a missing group looks exactly like one that is not yours
+    if (!groupId || !/^[0-9a-f-]{36}$/i.test(groupId)) return { found: !isAdmin, allowed: false };
     const r = await database.query(`SELECT enterprise_id FROM animal_groups WHERE id = $1`, [groupId]);
-    if (!r.rows[0]) return { found: false, allowed: false };
+    if (!r.rows[0]) return { found: !isAdmin, allowed: false };
     if (hasRole(user.role, user.roles, 'admin')) return { found: true, allowed: true, via: 'admin' };
     const farmRole = r.rows[0].enterprise_id ? await FarmAccessService.roleOf(r.rows[0].enterprise_id, user.userId) : null;
     if (farmRole) return { found: true, allowed: mode === 'read' || roleCan(farmRole, 'clinical'), via: 'farm' };
