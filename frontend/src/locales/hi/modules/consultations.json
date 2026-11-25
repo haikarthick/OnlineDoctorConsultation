@@ -109,7 +109,7 @@
       "doctorNoConfirm": "🩺 Doctor did not confirm in time. you may reschedule with any available doctor. No reschedule limit applies.",
       "patientNoShowNoLimit": "🙋 Patient no-show. you may reschedule (no limit configured).",
       "patientNoShowLimit": "🙋 Patient no-show. reschedule {{current}} of {{max}} allowed.",
-      "expiredPendingNotice": "⚠️ The original appointment time has passed without doctor confirmation. You may select a different doctor for faster availability."
+      "expiredPendingNotice": "⚠️ अपॉइंटमेंट का मूल समय डॉक्टर की पुष्टि के बिना निकल गया है। जल्दी समय पाने के लिए आप कोई दूसरा डॉक्टर चुन सकते हैं।"
     },
     "noMatchAppointments": "इस फ़िल्टर से कोई अपॉइंटमेंट मेल नहीं खाती",
     "cancelledByYou": "🙋 आपके द्वारा रद्द",
@@ -127,7 +127,7 @@
       "cancelledBy": "द्वारा रद्द {{role}}।",
       "reason": "कारण: {{reason}}",
       "by": "by",
-      "system": "System"
+      "system": "सिस्टम"
     },
     "herdLevel": "झुंड-स्तर",
     "missedMessages": {
@@ -139,38 +139,38 @@
       "patientNoJoin": "🙋 मरीज़ सत्र में शामिल नहीं हुआ। वे पुनर्निर्धारित कर सकते हैं।",
       "neitherJoined": "❌ कोई भी पक्ष सत्र में शामिल नहीं हुआ। मरीज़ पुनर्निर्धारित कर सकता है।"
     },
-    "filterLabel": "Filter",
+    "filterLabel": "फ़िल्टर",
     "pendingMessages": {
-      "petOwner": "Your appointment request is awaiting vet confirmation.",
-      "vet": "A patient has requested an appointment. Please confirm or suggest a new time.",
-      "admin": "Pending appointment awaiting veterinarian confirmation."
+      "petOwner": "आपका अपॉइंटमेंट अनुरोध पशु चिकित्सक की पुष्टि की प्रतीक्षा में है।",
+      "vet": "एक मरीज़ ने अपॉइंटमेंट का अनुरोध किया है। कृपया पुष्टि करें या नया समय सुझाएँ।",
+      "admin": "अपॉइंटमेंट पशु चिकित्सक की पुष्टि की प्रतीक्षा में है।"
     },
     "expiredPendingMessages": {
-      "petOwner": "This appointment slot has passed without confirmation. Please reschedule.",
-      "general": "This booking expired without vet confirmation."
+      "petOwner": "इस अपॉइंटमेंट का समय पुष्टि के बिना निकल गया। कृपया दोबारा तय करें।",
+      "general": "यह बुकिंग पशु चिकित्सक की पुष्टि के बिना समाप्त हो गई।"
     },
     "confirmedMessages": {
-      "petOwner": "Your appointment is confirmed. Please join at the scheduled time.",
-      "vet": "Appointment confirmed. Please be ready at the scheduled time.",
-      "admin": "This appointment has been confirmed by the veterinarian."
+      "petOwner": "आपका अपॉइंटमेंट पक्का हो गया है। कृपया तय समय पर शामिल हों।",
+      "vet": "अपॉइंटमेंट पक्का हो गया है। कृपया तय समय पर तैयार रहें।",
+      "admin": "इस अपॉइंटमेंट की पुष्टि पशु चिकित्सक ने कर दी है।"
     },
     "doctorMissedPending": {
-      "petOwner": "The vet did not respond in time. You can reschedule at no penalty.",
-      "vet": "You did not confirm this appointment request before it expired.",
-      "admin": "Veterinarian did not respond to this pending request."
+      "petOwner": "पशु चिकित्सक ने समय पर जवाब नहीं दिया। आप बिना किसी शुल्क के दोबारा तय कर सकते हैं।",
+      "vet": "आपने समाप्त होने से पहले इस अपॉइंटमेंट अनुरोध की पुष्टि नहीं की।",
+      "admin": "पशु चिकित्सक ने इस लंबित अनुरोध पर जवाब नहीं दिया।"
     },
     "doctorMissedConfirmed": {
-      "petOwner": "Your vet did not join the confirmed appointment. You can reschedule for free.",
-      "vet": "You missed this confirmed appointment.",
-      "admin": "Veterinarian missed this confirmed appointment."
+      "petOwner": "आपके पशु चिकित्सक पक्के अपॉइंटमेंट में शामिल नहीं हुए। आप मुफ़्त में दोबारा तय कर सकते हैं।",
+      "vet": "आपने यह पक्का अपॉइंटमेंट छोड़ दिया।",
+      "admin": "पशु चिकित्सक यह पक्का अपॉइंटमेंट चूक गए।"
     },
     "adminMissed": {
-      "patientNoShow": "Patient did not join the appointment.",
-      "bothMissed": "Both the vet and patient missed this appointment."
+      "patientNoShow": "मरीज़ अपॉइंटमेंट में शामिल नहीं हुआ।",
+      "bothMissed": "पशु चिकित्सक और मरीज़ दोनों यह अपॉइंटमेंट चूक गए।"
     },
-    "joinWindowTooltip": "Available {{minutes}} minutes before the appointment.",
-    "viewActionHistory": "View action history",
-    "viewCancellationDetails": "View cancellation details",
+    "joinWindowTooltip": "अपॉइंटमेंट से {{minutes}} मिनट पहले उपलब्ध।",
+    "viewActionHistory": "कार्रवाई इतिहास देखें",
+    "viewCancellationDetails": "रद्द करने का विवरण देखें",
     "failedToMarkNoShow": "इस बुकिंग को अनुपस्थित के रूप में चिह्नित नहीं किया जा सका।",
     "noShow": {
       "title": "रोगी को अनुपस्थित चिह्नित करें?",
@@ -499,20 +499,20 @@
     "lateCancelWarning": "देर से रद्दीकरण पर शुल्क लग सकता है",
     "tabs": {
       "all": "All",
-      "pending": "Pending",
-      "confirmed": "Confirmed",
-      "missed": "Missed",
-      "rescheduled": "Rescheduled",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
+      "pending": "लंबित",
+      "confirmed": "पुष्ट",
+      "missed": "छूटे हुए",
+      "rescheduled": "दोबारा तय",
+      "completed": "पूर्ण",
+      "cancelled": "रद्द"
     },
-    "actionLogNewSlot": "New slot:",
-    "actionLogApproved": "(approved ✓)",
-    "actionLogAwaiting": "(awaiting doctor approval)",
-    "actionLogAutoConfirmed": "(auto-confirmed)",
-    "actionLogReason": "Reason: {{reason}}",
+    "actionLogNewSlot": "नया समय:",
+    "actionLogApproved": "(स्वीकृत ✓)",
+    "actionLogAwaiting": "(डॉक्टर की स्वीकृति की प्रतीक्षा में)",
+    "actionLogAutoConfirmed": "(अपने आप पुष्ट)",
+    "actionLogReason": "कारण: {{reason}}",
     "actionLogBy": "by",
-    "actionLogSystem": "System"
+    "actionLogSystem": "सिस्टम"
   },
   "findDoctor": {
     "title": "पशु चिकित्सक खोजें",
@@ -539,9 +539,9 @@
     "clearFiltersBtn": "फ़िल्टर हटाएं",
     "previous": "पिछला",
     "next": "अगला",
-    "certificateFilter": "Certificate Services",
-    "allCertificates": "All Certificate Types",
-    "failedToLoad": "Failed to load veterinarians. Please try again.",
+    "certificateFilter": "प्रमाणपत्र सेवाएँ",
+    "allCertificates": "सभी प्रमाणपत्र प्रकार",
+    "failedToLoad": "पशु चिकित्सक लोड नहीं हो सके। कृपया फिर से प्रयास करें।",
     "filterOptionsLoadFailed": "फ़िल्टर विकल्प लोड करने में विफल (विशेषज्ञता/भाषाएँ)"
   },
   "doctorReviews": {

@@ -4,14 +4,14 @@
       "petOwner": "🐾 എന്റെ മൃഗങ്ങൾ",
       "vet": "🐾 രോഗി മൃഗങ്ങൾ",
       "admin": "🐾 മൃഗ രജിസ്ട്രി",
-      "farmer": "🐄 My Animals"
+      "farmer": "🐄 എന്റെ മൃഗങ്ങൾ"
     },
     "subtitles": {
       "petOwner": "നിങ്ങളുടെ വളർത്തുമൃഗങ്ങളെയും കൃഷി മൃഗങ്ങളെയും നിയന്ത്രിക്കുക",
       "vet": "നിങ്ങളുടെ കൺസൾട്ടേഷനുകളിൽ നിന്നുള്ള മൃഗങ്ങൾ",
       "vetMyPets": "നിങ്ങളുടെ സ്വന്തം വളർത്തുമൃഗങ്ങളെയും മൃഗങ്ങളെയും നിയന്ത്രിക്കുക",
       "admin": "സിസ്റ്റത്തിൽ രജിസ്റ്റർ ചെയ്ത എല്ലാ മൃഗങ്ങളും",
-      "farmer": "Manage your livestock and farm animals"
+      "farmer": "നിങ്ങളുടെ കന്നുകാലികളെയും ഫാമിലെ മൃഗങ്ങളെയും നിയന്ത്രിക്കുക"
     },
     "vetTabs": {
       "myPets": "എന്റെ വളർത്തുമൃഗങ്ങൾ",
@@ -52,7 +52,7 @@
       "policyExpired": "⚠️ പോളിസി കാലഹരണപ്പെട്ടു",
       "updateBtn": "💾 മൃഗം അപ്‌ഡേറ്റ് ചെയ്യുക",
       "registerBtn": "✅ മൃഗം രജിസ്റ്റർ ചെയ്യുക",
-      "editingMode": "✏️ Editing Mode"
+      "editingMode": "✏️ തിരുത്തൽ മോഡ്"
     },
     "emptySearch": "നിങ്ങളുടെ തിരയലുമായി പൊരുത്തപ്പെടുന്ന മൃഗങ്ങൾ ഇല്ല",
     "emptyAnimals": "ഇതുവരെ മൃഗങ്ങൾ രജിസ്റ്റർ ചെയ്തിട്ടില്ല",
@@ -159,40 +159,40 @@
       "noGroup": "-- ഗ്രൂപ്പ് ഇല്ല --",
       "noGroupsFound": "ഈ എന്റർപ്രൈസിന് ഗ്രൂപ്പുകൾ ഇല്ല.",
       "createOne": "ഒന്ന് സൃഷ്ടിക്കുക",
-      "enterprise": "Enterprise",
-      "group": "Group",
-      "enterpriseAnimals": "Enterprise Animals",
-      "filterByEnterprise": "Filter by Enterprise",
-      "filterByGroup": "Filter by Group"
+      "enterprise": "എന്റർപ്രൈസ്",
+      "group": "ഗ്രൂപ്പ്",
+      "enterpriseAnimals": "എന്റർപ്രൈസിലെ മൃഗങ്ങൾ",
+      "filterByEnterprise": "എന്റർപ്രൈസ് അനുസരിച്ച് ഫിൽട്ടർ ചെയ്യുക",
+      "filterByGroup": "ഗ്രൂപ്പ് അനുസരിച്ച് ഫിൽട്ടർ ചെയ്യുക"
     },
     "actions": {
       "cancel": "റദ്ദാക്കുക",
       "bookConsultation": "📅 കൺസൾട്ടേഷൻ ബുക്ക് ചെയ്യുക"
     },
-    "importCSV": "Import CSV",
-    "downloadTemplate": "Download Template",
-    "bulkImport": "Bulk Import Animals",
-    "importPreview": "Preview",
-    "importResults": "Import Results",
-    "animalsCreated": "Animals Created",
-    "animalsFailed": "Failed",
-    "importErrors": "Errors",
-    "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, animalClass, dateOfBirth, weight, color, microchipId, earTagId, breedingStatus (not_bred, bred, pregnant, not_pregnant), parity, lastBirthDate, avgDailyMilkLitres",
+    "importCSV": "CSV ഇമ്പോർട്ട് ചെയ്യുക",
+    "downloadTemplate": "ടെംപ്ലേറ്റ് ഡൗൺലോഡ് ചെയ്യുക",
+    "bulkImport": "മൃഗങ്ങളെ ഒന്നിച്ച് ഇമ്പോർട്ട് ചെയ്യുക",
+    "importPreview": "പ്രിവ്യൂ",
+    "importResults": "ഇമ്പോർട്ട് ഫലങ്ങൾ",
+    "animalsCreated": "സൃഷ്ടിച്ച മൃഗങ്ങൾ",
+    "animalsFailed": "പരാജയപ്പെട്ടവ",
+    "importErrors": "പിശകുകൾ",
+    "maxAnimals": "ഒരു ഇമ്പോർട്ടിൽ പരമാവധി 500 മൃഗങ്ങൾ",
+    "csvHeaders": "നിർബന്ധം: name, species. ഓപ്ഷണൽ: breed, gender, animalClass, dateOfBirth, weight, color, microchipId, earTagId, breedingStatus (not_bred, bred, pregnant, not_pregnant), parity, lastBirthDate, avgDailyMilkLitres",
     "healthPassport": "ആരോഗ്യ പാസ്‌പോർട്ട്",
     "downloadPassport": "ആരോഗ്യ പാസ്‌പോർട്ട് ഡൗൺലോഡ്",
     "generatingPassport": "ജനറേറ്റ് ചെയ്യുന്നു...",
     "speciesCategories": {
-      "commonPets": "Common Pets",
-      "smallPets": "Small Pets",
-      "birds": "Birds",
-      "reptiles": "Reptiles",
-      "amphibians": "Amphibians",
-      "ornamentalFish": "Ornamental Fish",
-      "livestock": "Livestock / Farm",
-      "poultry": "Poultry",
-      "exoticLarge": "Exotic Large",
-      "other": "Other"
+      "commonPets": "സാധാരണ വളർത്തുമൃഗങ്ങൾ",
+      "smallPets": "ചെറിയ വളർത്തുമൃഗങ്ങൾ",
+      "birds": "പക്ഷികൾ",
+      "reptiles": "ഇഴജന്തുക്കൾ",
+      "amphibians": "ഉഭയജീവികൾ",
+      "ornamentalFish": "അലങ്കാര മത്സ്യങ്ങൾ",
+      "livestock": "കന്നുകാലികൾ / ഫാം",
+      "poultry": "കോഴി, താറാവ് വളർത്തൽ",
+      "exoticLarge": "വലിയ വിദേശ മൃഗങ്ങൾ",
+      "other": "മറ്റുള്ളവ"
     }
   },
   "animalGroups": {
@@ -247,8 +247,8 @@
       "deleted": "ഗ്രൂപ്പ് ഇല്ലാതാക്കി",
       "deleteConfirm": "ഈ ഗ്രൂപ്പ് ഇല്ലാതാക്കണോ? മൃഗങ്ങൾ അൺലിങ്ക് ചെയ്യപ്പെടും."
     },
-    "manageAnimals": "🐾 Manage Animals",
-    "bookConsultation": "📅 Book Consultation",
+    "manageAnimals": "🐾 മൃഗങ്ങളെ നിയന്ത്രിക്കുക",
+    "bookConsultation": "📅 കൺസൾട്ടേഷൻ ബുക്ക് ചെയ്യുക",
     "health": {
       "view": "ആരോഗ്യം",
       "title": "കൂട്ടം ആരോഗ്യം, {{name}}",
@@ -269,30 +269,30 @@
       "noData": "ഇതുവരെ സൈക്കിൾ രേഖപ്പെടുത്തിയിട്ടില്ല — മരണനിരക്ക്, രോഗം, ചികിത്സാ നിരക്കുകൾ കാണാൻ സൈക്കിൾ തുറക്കുക."
     },
     "manage": {
-      "title": "🐾 Manage Animals, {{name}}",
-      "inGroup": "✅ Animals in this group ({{count}})",
-      "emptyGroup": "No animals in this group yet. Assign animals from your registered list below, or",
-      "registerAnimal": "register a new animal",
-      "first": "first.",
-      "available": "📋 Available Animals to Assign ({{count}})",
-      "searchPlaceholder": "Search animals by name, ID, or species...",
-      "noAnimals": "No animals registered yet.",
-      "registerFirst": "Register your first animal",
-      "toGetStarted": "to get started.",
-      "noMatch": "No matching animals found.",
-      "allAssigned": "All your animals are already assigned to this group.",
-      "assign": "+ Assign",
-      "assignSuccess": "Animal assigned to group",
-      "assignFailed": "Failed to assign animal",
-      "removeSuccess": "Animal removed from group",
-      "removeFailed": "Failed to remove animal",
-      "loadFailed": "Failed to load animals"
+      "title": "🐾 മൃഗങ്ങളെ നിയന്ത്രിക്കുക, {{name}}",
+      "inGroup": "✅ ഈ ഗ്രൂപ്പിലെ മൃഗങ്ങൾ ({{count}})",
+      "emptyGroup": "ഈ ഗ്രൂപ്പിൽ ഇതുവരെ മൃഗങ്ങളൊന്നുമില്ല. താഴെ നിങ്ങൾ രജിസ്റ്റർ ചെയ്ത പട്ടികയിൽ നിന്ന് മൃഗങ്ങളെ ചേർക്കുക, അല്ലെങ്കിൽ ആദ്യം",
+      "registerAnimal": "ഒരു പുതിയ മൃഗത്തെ രജിസ്റ്റർ ചെയ്യുക",
+      "first": ".",
+      "available": "📋 ചേർക്കാൻ കഴിയുന്ന മൃഗങ്ങൾ ({{count}})",
+      "searchPlaceholder": "പേര്, ID അല്ലെങ്കിൽ ഇനം ഉപയോഗിച്ച് മൃഗങ്ങളെ തിരയുക...",
+      "noAnimals": "ഇതുവരെ മൃഗങ്ങളൊന്നും രജിസ്റ്റർ ചെയ്തിട്ടില്ല.",
+      "registerFirst": "നിങ്ങളുടെ ആദ്യ മൃഗത്തെ രജിസ്റ്റർ ചെയ്യുക",
+      "toGetStarted": "തുടങ്ങാൻ.",
+      "noMatch": "പൊരുത്തപ്പെടുന്ന മൃഗങ്ങളെ കണ്ടെത്തിയില്ല.",
+      "allAssigned": "നിങ്ങളുടെ എല്ലാ മൃഗങ്ങളും ഇതിനകം ഈ ഗ്രൂപ്പിൽ ചേർത്തിട്ടുണ്ട്.",
+      "assign": "+ ചേർക്കുക",
+      "assignSuccess": "മൃഗത്തെ ഗ്രൂപ്പിൽ ചേർത്തു",
+      "assignFailed": "മൃഗത്തെ ചേർക്കാൻ കഴിഞ്ഞില്ല",
+      "removeSuccess": "മൃഗത്തെ ഗ്രൂപ്പിൽ നിന്ന് നീക്കി",
+      "removeFailed": "മൃഗത്തെ നീക്കം ചെയ്യാൻ കഴിഞ്ഞില്ല",
+      "loadFailed": "മൃഗങ്ങളെ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല"
     },
     "reassign": {
-      "title": "Move Animal to Another Group?",
-      "currentGroup": "another group",
-      "moveMessage": "Moving it to {{targetGroup}} will automatically remove it from the previous group.",
-      "confirmBtn": "Yes, Move Animal"
+      "title": "മൃഗത്തെ മറ്റൊരു ഗ്രൂപ്പിലേക്ക് മാറ്റണോ?",
+      "currentGroup": "മറ്റൊരു ഗ്രൂപ്പ്",
+      "moveMessage": "{{targetGroup}}-ലേക്ക് മാറ്റുമ്പോൾ മുൻപത്തെ ഗ്രൂപ്പിൽ നിന്ന് സ്വയമേവ നീക്കം ചെയ്യപ്പെടും.",
+      "confirmBtn": "അതെ, മൃഗത്തെ മാറ്റുക"
     }
   },
   "animalClass": {
@@ -403,13 +403,13 @@
     "other": "മറ്റുള്ളവ"
   },
   "movements": {
-    "pendingApproval": "Pending Approval",
-    "approved": "Approved",
-    "rejected": "Rejected",
-    "completed": "Completed",
-    "approve": "Approve",
-    "reject": "Reject",
-    "approvalRequired": "This movement requires manager approval",
+    "pendingApproval": "അംഗീകാരം തീർപ്പാക്കാത്തത്",
+    "approved": "അംഗീകരിച്ചത്",
+    "rejected": "നിരസിച്ചത്",
+    "completed": "പൂർത്തിയായത്",
+    "approve": "അംഗീകരിക്കുക",
+    "reject": "നിരസിക്കുക",
+    "approvalRequired": "ഈ നീക്കത്തിന് മാനേജരുടെ അംഗീകാരം ആവശ്യമാണ്",
     "pending": "അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു"
   },
   "movementLog": {
