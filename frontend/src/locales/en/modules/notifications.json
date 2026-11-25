@@ -1,0 +1,24 @@
+{
+  "notifications": {
+    "title": "Notifications",
+    "unreadCount": "{{count}} unread",
+    "allRead": "You are all caught up.",
+    "showUnread": "Show only unread",
+    "showAll": "Show all",
+    "markAllRead": "Mark all as read",
+    "retry": "Try again",
+    "loading": "Loading your notifications...",
+    "noneUnread": "You have no unread notifications.",
+    "none": "You have no notifications yet.",
+    "noneHint": "When something needs your attention, it will appear here.",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "earlier": "Earlier",
+    "new": "New",
+    "loadMore": "Load more",
+    "bell": "Notifications",
+    "bellUnread": "Notifications, {{count}} unread",
+    "loadFailed": "We could not load your notifications. Check your connection and try again.",
+    "markFailed": "We could not mark them as read. Please try again."
+  }
+}

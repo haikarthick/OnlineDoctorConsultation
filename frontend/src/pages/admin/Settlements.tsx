@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
+import { WalletWithdrawalsQueue } from '../../components/admin/WalletWithdrawalsQueue'
 
 import { userMessage } from '../../utils/userMessage'
 interface SettlementsProps {
@@ -228,6 +229,8 @@ const Settlements: React.FC<SettlementsProps> = () => {
           </div>
         </div>
       )}
+
+      <WalletWithdrawalsQueue />
     </div>
   )
 }

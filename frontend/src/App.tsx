@@ -9,6 +9,7 @@ import { PermissionProvider } from './context/PermissionContext'
 import { PageLoader, ProtectedRoute, RoleRoute, PublicOnlyRoute } from './components/routing/RouteGuards'
 import { PendingFarmInvitations } from './components/enterprise/PendingFarmInvitations'
 import { PendingWalkInInvites } from './components/hospitalNetwork/PendingWalkInInvites'
+import { NotificationBell } from './components/notifications/NotificationBell'
 import { OfflineBanner } from './components/OfflineBanner'
 import { SocketProvider } from './context/SocketContext'
 import { Layout } from './components/Layout'
@@ -154,6 +155,7 @@ const GroomingSchedule = React.lazy(() => import('./pages/grooming/GroomingSched
 const GroomingOrderDetail = React.lazy(() => import('./pages/grooming/GroomingOrderDetail'))
 const GroomingEarnings = React.lazy(() => import('./pages/grooming/GroomingEarnings'))
 const GroomingPassport = React.lazy(() => import('./pages/grooming/GroomingPassport'))
+const Notifications = React.lazy(() => import('./pages/Notifications'))
 
 /** Layout wrapper that injects react-router navigation */
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -172,6 +174,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
         <PendingPolicyModal />
       </Suspense>
       <div className="layout-content">
+        <div className="notification-bar"><NotificationBell /></div>
         <OfflineBanner />
         <PendingFarmInvitations />
         <PendingWalkInInvites />
@@ -297,6 +300,7 @@ function AppRoutes() {
       <Route path="/find-doctor" element={<RoleRoute path="/find-doctor"><AppLayout><RoutedPage Component={FindDoctor} /></AppLayout></RoleRoute>} />
       <Route path="/book-consultation" element={<RoleRoute path="/book-consultation"><AppLayout><RoutedPage Component={BookConsultation} /></AppLayout></RoleRoute>} />
       <Route path="/my-bookings" element={<Navigate to="/consultations" replace />} />
+      <Route path="/notifications" element={<ProtectedRoute><AppLayout><Notifications /></AppLayout></ProtectedRoute>} />
       <Route path="/payments" element={<ProtectedRoute><AppLayout><PaymentsHistory /></AppLayout></ProtectedRoute>} />
       <Route path="/referrals" element={<ProtectedRoute><AppLayout><RoutedPage Component={Referrals} /></AppLayout></ProtectedRoute>} />
       <Route path="/video-consultation/:consultationId" element={<ProtectedRoute><AppLayout><RoutedPage Component={VideoConsultation} paramKey="consultationId" /></AppLayout></ProtectedRoute>} />

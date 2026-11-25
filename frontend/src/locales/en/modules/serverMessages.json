@@ -156,6 +156,14 @@
     "NOTIF_TRANSFER_TITLE": "{{name}} moved to {{to}}",
     "NOTIF_TRANSFER_BODY": "{{name}}'s care has moved to {{to}} in the same network. Your consent and records stay as they were.",
     "NOTIF_NUT_PLAN_OWNER_TITLE": "Feeding plan waiting for a vet: {{name}}",
-    "NOTIF_NUT_PLAN_OWNER_BODY": "The new feeding plan for {{name}} is waiting for a vet to approve it. The plan already in use stays as it is until then. If you have no vet yet, book one."
+    "NOTIF_NUT_PLAN_OWNER_BODY": "The new feeding plan for {{name}} is waiting for a vet to approve it. The plan already in use stays as it is until then. If you have no vet yet, book one.",
+    "NOTIF_WD_APPROVED_TITLE": "Withdrawal approved",
+    "NOTIF_WD_APPROVED_BODY": "Your withdrawal of {{amount}} has been approved and will be paid shortly.",
+    "NOTIF_WD_REJECTED_TITLE": "Withdrawal not approved",
+    "NOTIF_WD_REJECTED_BODY": "Your withdrawal request was not approved: {{reason}}. The full amount is back in your wallet balance.",
+    "NOTIF_WD_PAID_TITLE": "Withdrawal paid",
+    "NOTIF_WD_PAID_BODY": "{{amount}} has been sent to your {{where}}. Reference: {{ref}}. It can take a few hours to appear.",
+    "NOTIF_WD_WHERE_UPI": "UPI ID",
+    "NOTIF_WD_WHERE_BANK": "bank account"
   }
 }

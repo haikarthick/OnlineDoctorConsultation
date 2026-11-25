@@ -343,5 +343,30 @@
       "grievance_policy": "Grievance Redressal Policy",
       "disclaimer": "Service Disclaimer"
     }
+  },
+  "walletWithdrawalsAdmin": {
+    "title": "Customer wallet withdrawals",
+    "subtitle": "Pet owners and farmers asking to move their wallet balance to their bank or UPI. The amount left their wallet when they asked; rejecting returns it.",
+    "filterLabel": "Filter by status",
+    "empty": "No customer withdrawal requests.",
+    "payUpi": "Pay to UPI: {{upi}}",
+    "payBank": "Pay to bank: {{name}} · {{number}} · {{ifsc}}",
+    "reference": "Reference: {{ref}}",
+    "reason": "Reason: {{reason}}",
+    "approvedDone": "Request approved. The customer has been told.",
+    "settledDone": "Payment recorded. The customer has been told.",
+    "rejectedDone": "Request rejected. The amount is back in the customer's wallet and they have been told why.",
+    "rejectTitle": "Reject withdrawal",
+    "rejectHint": "Say why in plain words. The customer will read it, and the full amount returns to their wallet.",
+    "reasonLabel": "Reason shown to the customer",
+    "loadFailed": "We could not load the customer withdrawals. Check your connection and try again.",
+    "actionFailed": "That did not go through, so nothing was changed. Please try again.",
+    "statuses": {
+      "requested": "Requested",
+      "approved": "Approved",
+      "settled": "Paid",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    }
   }
 }

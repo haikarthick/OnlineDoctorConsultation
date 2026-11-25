@@ -157,8 +157,10 @@ class WalletWithdrawalService {
        WHERE id = $3 AND status = 'requested' RETURNING user_id, amount`,
       [adminId, note || null, id]);
     if (r.rows.length === 0) throw new ValidationError('Only a pending request can be approved.');
+    const amount = Number(r.rows[0].amount).toFixed(2);
     await this.notify(r.rows[0].user_id, 'Withdrawal approved',
-      `Your withdrawal of ${Number(r.rows[0].amount).toFixed(2)} has been approved and will be paid shortly.`);
+      `Your withdrawal of ${amount} has been approved and will be paid shortly.`,
+      { code: 'NOTIF_WD_APPROVED_TITLE' }, { code: 'NOTIF_WD_APPROVED_BODY', params: { amount } }, id);
   }
 
   async adminReject(id: string, adminId: string, reason: string): Promise<void> {
@@ -181,7 +183,8 @@ class WalletWithdrawalService {
 
       await this.notify(req.user_id, 'Withdrawal not approved',
         `Your withdrawal request was not approved: ${reason.trim()}. `
-        + `The full amount is back in your wallet balance.`);
+        + `The full amount is back in your wallet balance.`,
+        { code: 'NOTIF_WD_REJECTED_TITLE' }, { code: 'NOTIF_WD_REJECTED_BODY', params: { reason: reason.trim() } }, id);
     });
   }
 
@@ -200,13 +203,17 @@ class WalletWithdrawalService {
     // debiting again would double-count the payout.
     await this.notify(row.user_id, 'Withdrawal paid',
       `${Number(row.amount).toFixed(2)} has been sent to your ${row.method === 'upi' ? 'UPI ID' : 'bank account'}. `
-      + `Reference: ${utrReference.trim()}. It can take a few hours to appear.`);
+      + `Reference: ${utrReference.trim()}. It can take a few hours to appear.`,
+      { code: 'NOTIF_WD_PAID_TITLE' }, { code: 'NOTIF_WD_PAID_BODY', params: { amount: Number(row.amount).toFixed(2), where: row.method === 'upi' ? 'NOTIF_WD_WHERE_UPI' : 'NOTIF_WD_WHERE_BANK', ref: utrReference.trim() } }, id);
     logger.info('Wallet withdrawal settled', { id, adminId, utrReference: utrReference.trim() });
   }
 
-  private async notify(userId: string, title: string, message: string): Promise<void> {
+  /** The English sentence is the fallback; metadata.i18n lets the inbox say the same thing in the person's own language. */
+  private async notify(userId: string, title: string, message: string,
+    titleCode?: { code: string }, bodyCode?: { code: string; params?: Record<string, string | number> }, withdrawalId?: string): Promise<void> {
     try {
-      await NotificationService.createNotification(userId, 'payment', title, message, 'all', {});
+      await NotificationService.createNotification(userId, 'payment', title, message, 'all',
+        { withdrawalId, i18n: titleCode && bodyCode ? { title: titleCode, body: bodyCode } : undefined });
     } catch { /* non-blocking */ }
   }
 }
