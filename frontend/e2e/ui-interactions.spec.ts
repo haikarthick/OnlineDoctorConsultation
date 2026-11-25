@@ -36,7 +36,7 @@ test.describe('Sidebar - Toggle & State', () => {
     await page.goto('/consultations')
     await page.waitForLoadState('networkidle')
     // The consultations menu item should have an active class
-    const activeItem = page.locator('nav .active, .sidebar .active, .nav-sidebar .active, [class*="menu-item"][class*="active"]')
+    const activeItem = page.locator('[aria-current="page"], .nav-menu-active, nav .active, .sidebar .active, .nav-sidebar .active, [class*="menu-item"][class*="active"]')
     await expect(activeItem.first()).toBeVisible({ timeout: 10_000 })
   })
 
@@ -58,7 +58,7 @@ test.describe('Consultations - Tabs & Filters', () => {
     await page.waitForLoadState('networkidle')
 
     // Find tab buttons
-    const tabs = page.locator('.module-tab, [class*="tab"]')
+    const tabs = page.locator('.module-tab, [role="tab"], .ms-tab-btn, [class*="tab"]').locator('visible=true')
     const tabCount = await tabs.count()
 
     if (tabCount >= 2) {
@@ -95,7 +95,7 @@ test.describe('Medical Records - Tabs', () => {
     await page.goto('/medical-records')
     await page.waitForLoadState('networkidle')
 
-    const tabs = page.locator('.module-tab, [class*="tab"]')
+    const tabs = page.locator('.module-tab, [role="tab"], .ms-tab-btn, [class*="tab"]').locator('visible=true')
     const tabCount = await tabs.count()
 
     if (tabCount >= 2) {
@@ -129,7 +129,7 @@ test.describe('Wellness Portal - Tabs', () => {
     await page.goto('/wellness')
     await page.waitForLoadState('networkidle')
 
-    const tabs = page.locator('.module-tab, [class*="tab"]')
+    const tabs = page.locator('.module-tab, [role="tab"], .ms-tab-btn, [class*="tab"]').locator('visible=true')
     const tabCount = await tabs.count()
 
     if (tabCount >= 2) {
@@ -149,7 +149,7 @@ test.describe('Marketplace - Tabs', () => {
     await page.goto('/marketplace')
     await page.waitForLoadState('networkidle')
 
-    const tabs = page.locator('.module-tab, [class*="tab"]')
+    const tabs = page.locator('.module-tab, [role="tab"], .ms-tab-btn, [class*="tab"]').locator('visible=true')
     const tabCount = await tabs.count()
 
     if (tabCount >= 2) {
@@ -169,7 +169,7 @@ test.describe('Health Analytics - Tabs & Enterprise Selector', () => {
     await page.goto('/health-analytics')
     await page.waitForLoadState('networkidle')
 
-    const tabs = page.locator('.module-tab, [class*="tab"]')
+    const tabs = page.locator('.module-tab, [role="tab"], .ms-tab-btn, [class*="tab"]').locator('visible=true')
     if (await tabs.count() >= 2) {
       await tabs.nth(1).click()
       await page.waitForTimeout(500)
@@ -196,7 +196,7 @@ test.describe('Schedule Management - Tabs', () => {
     await page.goto('/doctor/manage-schedule')
     await page.waitForLoadState('networkidle')
 
-    const tabs = page.locator('.module-tab, [class*="tab"]')
+    const tabs = page.locator('.module-tab, [role="tab"], .ms-tab-btn, [class*="tab"]').locator('visible=true')
     const tabCount = await tabs.count()
 
     if (tabCount >= 2) {
@@ -216,7 +216,7 @@ test.describe('Breeding Manager - Tabs', () => {
     await page.goto('/breeding')
     await page.waitForLoadState('networkidle')
 
-    const tabs = page.locator('.module-tab, [class*="tab"]')
+    const tabs = page.locator('.module-tab, [role="tab"], .ms-tab-btn, [class*="tab"]').locator('visible=true')
     if (await tabs.count() >= 2) {
       await tabs.nth(1).click()
       await page.waitForTimeout(500)

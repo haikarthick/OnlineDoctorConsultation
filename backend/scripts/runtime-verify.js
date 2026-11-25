@@ -120,6 +120,7 @@ let PG_LOG = null;
 // no matter how many times it retries - which is why every run used to strand its cluster.
 let PG_LOG_FD = null;
 let serverProc = null;
+let serverLog = ''; // module level so the crash report can print the server's last output
 
 function pgRun(bin, args, opts = {}) {
   // maxBuffer: a full-schema snapshot is megabytes of JSON; the 1MB default throws ENOBUFS.
@@ -404,7 +405,19 @@ async function waitForServerQuiet(port, { needed = 3, fastMs = 1500, budgetMs = 
 async function http(method, url, body, token) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  // The server closes an idle keep-alive connection after 5 s; this script can sit that long between requests (psql calls on a slow
+  // machine), and the next fetch then reuses a dead socket and fails with a bare "fetch failed" before the request reaches the server.
+  // Retry ONCE, and only for that socket-level failure (never for an HTTP answer), so a real outage still fails the run.
+  let res;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+      break;
+    } catch (e) {
+      const code = e && e.cause && (e.cause.code || e.cause.name);
+      if (attempt >= 1 || !['ECONNRESET', 'UND_ERR_SOCKET', 'EPIPE', 'SocketError'].includes(code)) throw e;
+    }
+  }
   let json = null;
   try { json = await res.json(); } catch { /* non-JSON */ }
   return { status: res.status, json };
@@ -511,7 +524,7 @@ async function http(method, url, body, token) {
     let baseline = null;
     let port = null;
     let serverHealthy = false;
-    let serverLog = '';
+    serverLog = '';
     if (!failed) {
       step('PHASE 3  Schema snapshot (before the server has ever connected)');
       baseline = snapshot('verifydb');
@@ -1229,6 +1242,7 @@ async function http(method, url, body, token) {
             if (s.status < 400) problems.push('a stranger found another owner\'s animal by its ID card number');
             const sv = await http('GET', `${apiBase}/animals/search/by-uid?uid=${encodeURIComponent(uid)}`, null, vet.token);
             if (sv.json?.data?.ownerEmail) problems.push('a vet\'s ID-card lookup exposed the owner\'s email');
+            if (sv.status < 400) problems.push('a vet with no booking for the animal found it by its ID card number (any vet is never enough, H15)');
           }
           // And the owner still has full access to their own animal.
           for (const p of [`/animals/${id}`, `/weight-history/animal/${id}`, `/allergies/animal/${id}`, `/timeline/animal/${id}`]) {
@@ -2902,8 +2916,9 @@ async function http(method, url, body, token) {
             for (const [who, u] of [['unbooked vet', vetU], ['stranger', stranger]]) {
               if (notifs(u.id, 'nutrition_plan_review').length) problems.push(`[5 metabolic] the ${who} was notified about another person's waiting ration`);
             }
-            const ownerNotes = notifs(ownerP.id, 'nutrition_plan_review').length;
-            if (ownerNotes === 0) notes.push('waiting ration notifies only the connected vet (NutritionNotifier.planWaitingForVet); the owner who saved it gets no note - matches ledger NUT-174, differs from the QA brief ("farm owner/team and the connected vet")');
+            const ownerNotes = notifs(ownerP.id, 'nutrition_plan_waiting', `AND metadata->>'planId' = '${draftId}'`).length;
+            if (ownerNotes !== 1) problems.push(`[5 metabolic] the owner should be told ONCE that the new ration is waiting for a vet, got ${ownerNotes}`);
+            if (notifs(stranger.id, 'nutrition_plan_waiting').length || notifs(vetU.id, 'nutrition_plan_waiting').length) problems.push('[5 metabolic] a stranger or unbooked vet was told about another person waiting ration');
             const ownerActivate = await http('POST', `${apiBase}/nutrition/plans/${draftId}/review`, { note: 'x' }, ownerP.token);
             refusal('[5 metabolic] the owner activating the waiting ration', ownerActivate);
             const strangerActivate = await http('POST', `${apiBase}/nutrition/plans/${draftId}/review`, { note: 'x' }, vetU.token);
@@ -2947,7 +2962,9 @@ async function http(method, url, body, token) {
             const mgrN = notifs(mgr.id, 'nutrition_plan_review', `AND metadata->>'planId' = '${draft}'`).length;
             const vetN = notifs(vetB.id, 'nutrition_plan_review', `AND metadata->>'planId' = '${draft}'`).length;
             if (vetN !== 1) problems.push(`[5 metabolic] the connected vet of a farm cow's waiting ration should be told once, got ${vetN}`);
-            if (tomN === 0 || mgrN === 0) notes.push(`waiting ration on a FARM cow saved by a worker: farm owner told ${tomN}x, manager ${mgrN}x, vet ${vetN}x - only vets are notified (planWaitingForVet), the farm owner/manager are not`);
+            const tomW = notifs(tom.id, 'nutrition_plan_waiting', `AND metadata->>'planId' = '${draft}'`).length;
+            const mgrW = notifs(mgr.id, 'nutrition_plan_waiting', `AND metadata->>'planId' = '${draft}'`).length;
+            if (tomW !== 1 || mgrW !== 1) problems.push(`[5 metabolic] a farm cow's waiting ration should tell the farm owner once and the manager once, got owner ${tomW}x, manager ${mgrW}x`);
           }
         }
 
@@ -3094,10 +3111,10 @@ async function http(method, url, body, token) {
               // a stranger with a made-up id vs a real one: same words?
               const real = await http('GET', `${apiBase}/nutrition/groups/${herd}/feeding`, null, stranger.token);
               const fake = await http('GET', `${apiBase}/nutrition/groups/${uuid()}/feeding`, null, stranger.token);
-              if (real.status !== fake.status) notes.push(`group ids: a stranger gets HTTP ${real.status} for a real farm's group but HTTP ${fake.status} for an unknown id - this confirms the group exists (owner decision needed on revealing it, CLAUDE.md H15 note)`);
+              if (real.status !== fake.status || msgOf(real) !== msgOf(fake)) problems.push(`[7 access] a stranger gets HTTP ${real.status} for a real farm's group but HTTP ${fake.status} for an unknown id (or different words): ids can be probed`);
               const realA = await http('GET', `${apiBase}/nutrition/animals/${dogAcc}`, null, stranger.token);
               const fakeA = await http('GET', `${apiBase}/nutrition/animals/${uuid()}`, null, stranger.token);
-              if (realA.status !== fakeA.status) notes.push(`animal ids: a stranger gets HTTP ${realA.status} for a real animal but HTTP ${fakeA.status} for an unknown id - the real one's existence can be told apart`);
+              if (realA.status !== fakeA.status || msgOf(realA) !== msgOf(fakeA)) problems.push(`[7 access] animal ids: a stranger gets HTTP ${realA.status} for a real animal but HTTP ${fakeA.status} for an unknown id (or different words): ids can be probed`);
             }
           }
         }
@@ -3355,12 +3372,12 @@ async function http(method, url, body, token) {
           // (deprecated + unescaped args) and `npx.cmd` is not reliably spawnable - both fail
           // with EMPTY stdout/stderr, which makes a real test failure look like a mystery.
           const cli = path.join(FRONTEND, 'node_modules', '@playwright', 'test', 'cli.js');
-          await runAsync(process.execPath, [cli, 'test', ...(FULL ? [] : ['--grep', process.env.VERIFY_E2E_GREP || '@critical']), '--reporter', 'list', '--retries=0', `--workers=${process.env.VERIFY_E2E_WORKERS || 1}`], {
+          await runAsync(process.execPath, [cli, 'test', ...(process.env.VERIFY_E2E_GREP ? ['--grep', process.env.VERIFY_E2E_GREP] : FULL ? [] : ['--grep', '@critical']), '--reporter', 'list,json', '--retries=0', `--workers=${process.env.VERIFY_E2E_WORKERS || 1}`], {
             cwd: FRONTEND,
             // @critical is a handful of journeys; --full is 462 tests on a single worker and
             // needs far longer. Overridable via VERIFY_E2E_TIMEOUT_MS.
             timeout: Number(process.env.VERIFY_E2E_TIMEOUT_MS) || (FULL ? 3600000 : 1800000),
-            env: { ...process.env, E2E_BASE_URL: `http://127.0.0.1:${port}`, CI: '1', SWEEP_ACCOUNTS: JSON.stringify(sweepAccounts), NUTRI_FIXTURES: JSON.stringify(globalThis.__nutriFixtures || null) },
+            env: { ...process.env, PLAYWRIGHT_JSON_OUTPUT_NAME: path.join(FRONTEND, 'test-results', 'last-run.json'), E2E_BASE_URL: `http://127.0.0.1:${port}`, CI: '1', SWEEP_ACCOUNTS: JSON.stringify(sweepAccounts), NUTRI_FIXTURES: JSON.stringify(globalThis.__nutriFixtures || null) },
           });
           ok('registration, shell render, i18n, password toggle, whole-app sweep');
         } catch (e) {
@@ -3446,7 +3463,7 @@ async function http(method, url, body, token) {
     }
 
   } catch (err) {
-    fail('Runtime verification crashed.', String(err.stack || err.message).split('\n').slice(0, 12));
+    fail('Runtime verification crashed.', [...String(err.stack || err.message).split('\n').slice(0, 12), 'cause: ' + String(err.cause && (err.cause.code || err.cause.message)), '--- last server output ---', ...String(serverLog || '').split('\n').filter(Boolean).slice(-25).map(l => l.slice(0, 300))]);
   } finally {
     stopEverything();
   }

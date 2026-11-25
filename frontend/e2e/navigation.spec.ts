@@ -110,7 +110,7 @@ test.describe('Permission Guards - Unauthorized Access', () => {
     },
     {
       role: 'veterinarian',
-      routes: ['/admin/dashboard', '/admin/users', '/admin/payments', '/animals', '/enterprises'],
+      routes: ['/admin/dashboard', '/admin/users', '/admin/payments', '/enterprises'], // vets open /animals: it is their Patients list
     },
     {
       role: 'farmer',

@@ -18,7 +18,8 @@ export async function loginAs(page: Page, userKey: UserKey): Promise<void> {
   await page.fill('#login-password', user.password)
   await page.click('.login-submit')
   await page.waitForURL('**/dashboard', { timeout: 15_000 })
-  await expect(page.locator('.sidebar, .nav-sidebar, .navigation')).toBeVisible({ timeout: 10_000 })
+  // The main navigation is the sidebar on a desktop and the bottom tab bar on a phone or tablet; either proves the signed-in layout.
+  await expect(page.locator('.sidebar:visible, .nav-sidebar:visible, .navigation:visible, nav.bottom-tabbar:visible').first()).toBeVisible({ timeout: 10_000 })
 }
 
 // ── Reusable helper: navigate via sidebar click ─────────────
@@ -63,7 +64,11 @@ export async function assertPageLoaded(page: Page, expectedPath: string): Promis
 
 // ── Helper: assert access denied (redirected to /dashboard) ──
 export async function assertAccessDenied(page: Page): Promise<void> {
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 10_000 })
+  // A refusal is never silent: the person is sent to their dashboard or shown a plain explanation with a way back (no error code).
+  const explained = page.getByRole('alert').filter({ hasText: /don't have access/i })
+  await expect.poll(async () => /\/dashboard/.test(page.url()) || (await explained.count()) > 0, { timeout: 10_000 }).toBe(true)
+  const text = (await page.textContent('body')) || ''
+  expect(text).not.toMatch(/\b(403|404|500)\b|Request failed with status/)
 }
 
 // ── Custom test fixture type ────────────────────────────────

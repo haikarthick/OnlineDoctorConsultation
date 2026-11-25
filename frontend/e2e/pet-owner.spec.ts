@@ -61,12 +61,11 @@ test.describe('Pet Owner - Animal Management', () => {
       await addBtn.first().click()
       await page.waitForTimeout(500)
 
-      // Try submitting empty form
-      const submitBtn = page.locator('button[type="submit"], button:has-text("Save"), button:has-text("Submit"), button:has-text("Create")')
+      // The animal form is a step form: its Next / Save button stays disabled until the required fields are filled, so an empty form
+      // cannot be submitted (that disabled button IS the validation).
+      const submitBtn = page.locator('button[type="submit"], button:has-text("Save"), button:has-text("Submit"), button:has-text("Create")').first()
       if (await submitBtn.count() > 0) {
-        await submitBtn.first().click()
-        // Should show validation - either HTML5 or app-level
-        await page.waitForTimeout(1_000)
+        await expect(submitBtn).toBeDisabled()
       }
     }
   })
