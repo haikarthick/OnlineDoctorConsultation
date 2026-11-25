@@ -69,6 +69,9 @@ specific case, and using it should come with a reason in the commit message, not
 If `vetcare-demo` has not also been switched to deploy after CI checks pass, treat anything headed
 for `demo` with the old level of caution — run this locally before pushing, don't assume.
 
+## No orphans (H17)
+A new route, client method, column or table ships with the screen that calls it and a reader of what it writes. `backend/tests/unit/orphans.guard.test.ts` and `frontend/src/guards/orphanClientMethods.guard.test.ts` fail on an uncalled one; their allowlists may only shrink.
+
 ## For a UI change specifically
 
 The whole-app sweep (`frontend/e2e/app-sweep.spec.ts`, inside gate 5) visits **every** route for

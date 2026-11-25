@@ -30,6 +30,7 @@ asked for this standing process, so this skill spawning them IS the explicit req
 
 **The ledger** (`docs/modules/<module>-ledger.md`, guard `frontend/src/guards/requirementsLedger.guard.test.ts`,
 HARNESS H16): every requirement, cross-module link and use case is a row; rows never disappear (lock file), `Built`
+Every new route or client method also ships with its screen (HARNESS H17, orphan guards); an uncalled one fails the push.
 needs real evidence including a test, `Deferred` needs the owner's decision and date. A feature is reported done
 only with the ledger table and the auditor's DONE verdict in the message.
 
