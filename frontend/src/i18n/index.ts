@@ -15,18 +15,21 @@ import HttpBackend from 'i18next-http-backend'
 // unmanageable. Merged back into one `en` object at module-eval time via
 // import.meta.glob, so this is the only place the split is visible; every
 // translation call site elsewhere in the app is unaffected.
-const enModules = import.meta.glob('../locales/en/modules/*.json', { eager: true }) as Record<
-  string,
-  { default: Record<string, unknown> }
->
-const en: Record<string, unknown> = {}
-for (const mod of Object.values(enModules)) {
-  for (const key of Object.keys(mod.default)) {
-    if (Object.prototype.hasOwnProperty.call(en, key)) {
-      throw new Error(`[i18n] Duplicate top-level key "${key}" across en/modules/*.json files.`)
+// Lazy (one chunk per module, fetched in parallel) so ~430KB of English text is not inside the entry chunk. main.tsx waits for
+// `i18nInitialized` before it renders, so English is always loaded before the first screen - no raw-key flash.
+const enModules = import.meta.glob('../locales/en/modules/*.json') as Record<string, () => Promise<{ default: Record<string, unknown> }>>
+async function loadEnglish(): Promise<Record<string, unknown>> {
+  const en: Record<string, unknown> = {}
+  const mods = await Promise.all(Object.values(enModules).map(load => load()))
+  for (const mod of mods) {
+    for (const key of Object.keys(mod.default)) {
+      if (Object.prototype.hasOwnProperty.call(en, key)) {
+        throw new Error(`[i18n] Duplicate top-level key "${key}" across en/modules/*.json files.`)
+      }
+      en[key] = mod.default[key]
     }
-    en[key] = mod.default[key]
   }
+  return en
 }
 
 export const supportedLanguages = [
@@ -38,7 +41,7 @@ export const supportedLanguages = [
   { code: 'ml', label: 'Malayalam', nativeLabel: 'മലയാളം', flag: '🇮🇳' }
 ] as const
 
-export const i18nInitialized = i18n
+export const i18nInitialized = loadEnglish().then(en => i18n
   .use(HttpBackend)
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -64,6 +67,6 @@ export const i18nInitialized = i18n
     react: {
       useSuspense: false
     }
-  })
+  }))
 
 export default i18n
