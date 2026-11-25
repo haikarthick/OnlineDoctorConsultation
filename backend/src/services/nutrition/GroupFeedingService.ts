@@ -1,6 +1,6 @@
 import NutritionNotifier from './NutritionNotifier';
 import database from '../../utils/database';
-import { ForbiddenError, NotFoundError, ValidationError } from '../../utils/errors';
+import { ForbiddenError, NotFoundError, ValidationError, CodedError } from '../../utils/errors';
 import AnimalAccessService from '../AnimalAccessService';
 import { ANIMAL_NO_ACCESS_MESSAGE } from '../AnimalAccessService';
 import { groupDailyFeed, fcr, type FeedingCurveRow, type TemperatureFactor } from './engine/groupFeeding';
@@ -23,8 +23,8 @@ class GroupFeedingService {
 
   async forGroup(groupId: string, caller: Caller, input: { avgWeightG?: number | null; waterTempC?: number | null } = {}) {
     const access = await AnimalAccessService.checkGroup(caller, groupId, 'read');
-    if (!access.found) throw new NotFoundError('Group');
-    if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
+    if (!access.found) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
+    if (!access.allowed) throw new CodedError(403, 'ANIMAL_NO_ACCESS', ANIMAL_NO_ACCESS_MESSAGE);
 
     const g = await database.query(
       `SELECT g.id, g.name, g.species, g.group_type, g.current_count,
@@ -35,7 +35,7 @@ class GroupFeedingService {
       [groupId]
     );
     const grp = g.rows[0];
-    if (!grp) throw new NotFoundError('Group');
+    if (!grp) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
 
     // Herds of cattle, buffalo, goats, sheep, horses: their feeding is a balanced ration (FarmRationService), not a
     // per-head table - the card hands over to the herd ration instead of saying "no table".

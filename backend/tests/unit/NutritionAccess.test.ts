@@ -2,7 +2,6 @@ import database from '../../src/utils/database';
 import FarmAccessService from '../../src/services/FarmAccessService';
 import { checkAnimalAccess } from '../../src/middleware/hospitalDataIsolation';
 import NutritionAccess, { NO_NUTRITION_ACCESS_MESSAGE, READ_ONLY_MESSAGE, REVIEW_ONLY_VET_MESSAGE } from '../../src/services/nutrition/NutritionAccess';
-import { ForbiddenError, NotFoundError } from '../../src/utils/errors';
 
 jest.mock('../../src/utils/database');
 jest.mock('../../src/middleware/hospitalDataIsolation', () => ({
@@ -38,13 +37,13 @@ describe('NutritionAccess - one gate for every nutrition endpoint', () => {
   it('a stranger is refused with words that say why and what to do (no ids, no codes)', async () => {
     animal(petRow);
     const err = await NutritionAccess.forAnimal('a1', { userId: 'someone', role: 'pet_owner' }).catch(e => e);
-    expect(err).toBeInstanceOf(ForbiddenError);
+    expect(err).toMatchObject({ statusCode: 403, errorCode: expect.stringMatching(/^NUT_/) });
     expect(err.message).toBe(NO_NUTRITION_ACCESS_MESSAGE);
   });
 
   it('another pet owner cannot reach a farm animal just by knowing its id', async () => {
     animal(farmRow);
-    await expect(NutritionAccess.forAnimal('a2', { userId: 'someone', role: 'farmer' })).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(NutritionAccess.forAnimal('a2', { userId: 'someone', role: 'farmer' })).rejects.toMatchObject({ statusCode: 403, errorCode: expect.stringMatching(/^(NUT|ANIMAL)_/) });
   });
 
   it('a farm worker writes, a farm viewer only reads', async () => {
@@ -59,7 +58,7 @@ describe('NutritionAccess - one gate for every nutrition endpoint', () => {
 
   it('a vet gets in only with an appointment for this animal', async () => {
     animal(petRow);
-    await expect(NutritionAccess.forAnimal('a1', { userId: 'vet', role: 'veterinarian' })).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(NutritionAccess.forAnimal('a1', { userId: 'vet', role: 'veterinarian' })).rejects.toMatchObject({ statusCode: 403, errorCode: expect.stringMatching(/^(NUT|ANIMAL)_/) });
 
     animal(petRow);
     (FarmAccessService.consultingVetMayRead as jest.Mock).mockResolvedValueOnce(true);
@@ -77,7 +76,7 @@ describe('NutritionAccess - one gate for every nutrition endpoint', () => {
     animal(petRow);
     expect(await NutritionAccess.forAnimal('a1', { userId: 'adm', role: 'admin' }, 'review')).toMatchObject({ via: 'admin' });
     (database.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
-    await expect(NutritionAccess.forAnimal('zz', { userId: 'adm', role: 'admin' })).rejects.toBeInstanceOf(NotFoundError);
+    await expect(NutritionAccess.forAnimal('zz', { userId: 'adm', role: 'admin' })).rejects.toMatchObject({ statusCode: 404, errorCode: 'NUT_NOT_FOUND' });
   });
 
   it('a user holding the vet role as a second role is treated as a vet', async () => {

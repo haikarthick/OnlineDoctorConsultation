@@ -59,6 +59,8 @@ interface Subject {
   activityLevel: string | null;
   expectedDueDate: string | null;
   headCount: number;
+  /** A herd: how many of its animals are in milk (recorded milk in the last 7 days, or a milk yield on the profile). Null for one animal. */
+  milkingCount?: number | null;
   /** Age in months (an animal's, or the herd's average). Null = no date of birth recorded. */
   ageMonths: number | null;
   /** The animal was dried off on or before today (profile). */
@@ -101,7 +103,7 @@ class FarmRationService {
         ORDER BY (s.species_code IS NULL), s.version DESC`,
       [speciesCode, stage, model]
     );
-    if (r.rows.length === 0) throw new ValidationError('No ration requirements are set up for this kind of animal yet. An admin can add them in Nutrition data.');
+    if (r.rows.length === 0) throw new CodedError(400, 'NUT_NO_RATION_REQUIREMENTS_ARE_SET', 'No ration requirements are set up for this kind of animal yet. An admin can add them in Nutrition data.');
     const setId = r.rows[0].id;
     return { setId, title: r.rows[0].title as string, status: r.rows[0].status as string, rows: r.rows.filter((x: any) => x.id === setId) };
   }
@@ -119,9 +121,9 @@ class FarmRationService {
     }
     const needed: Array<keyof RuminantRequirements> = ['nelMaintenancePerKgBw075', 'dmiMinPctBw', 'dmiMaxPctBw', 'cpMinPctDm', 'caMinPctDm', 'pMinPctDm', 'forageMinPctDm'];
     const gaps = needed.filter(k => req[k] === undefined || req[k] === null);
-    if (gaps.length) throw new ValidationError(`The ration requirements "${title}" are incomplete (${gaps.join(', ')}). An admin can complete them in Nutrition data.`);
+    if (gaps.length) throw new CodedError(400, 'NUT_REQ_INCOMPLETE', `The ration requirements "${title}" are incomplete (${gaps.join(', ')}). An admin can complete them in Nutrition data.`, { title: String(title), gaps: gaps.join(', ') });
     if (state === 'growing' && (!req.targetAdgKg || !req.nelPerKgGain)) {
-      throw new ValidationError(`The growing-stock requirements "${title}" are incomplete (target gain / energy per kg gain). An admin can complete them in Nutrition data.`);
+      throw new CodedError(400, 'NUT_GROWING_REQ_INCOMPLETE', `The growing-stock requirements "${title}" are incomplete (target gain / energy per kg gain). An admin can complete them in Nutrition data.`, { title: String(title) });
     }
     const age = (n: string): number | null => num(rows.find((x: any) => x.nutrient === n)?.min_value);
     return { setId, title, status, req: { latePregnancyExtraFraction: 0, ndfMinPctDm: 0, ...req } as RuminantRequirements, weanMonths: age('wean_months'), adultMonths: age('adult_months') };
@@ -154,7 +156,7 @@ class FarmRationService {
     };
     const gaps = (['deMaintenancePerKgBw', 'cpGPerMcalDe', 'caGPerKgBw', 'pGPerKgBw', 'dmiMinPctBw', 'dmiMaxPctBw', 'forageMinPctBw'] as const)
       .filter(k => req[k] === null);
-    if (gaps.length) throw new ValidationError(`The ration requirements "${title}" are incomplete (${gaps.join(', ')}). An admin can complete them in Nutrition data.`);
+    if (gaps.length) throw new CodedError(400, 'NUT_REQ_INCOMPLETE', `The ration requirements "${title}" are incomplete (${gaps.join(', ')}). An admin can complete them in Nutrition data.`, { title: String(title), gaps: gaps.join(', ') });
     return { setId, title, status, req: req as EquineRequirements, adultMonths: v('adult_months') };
   }
 
@@ -190,10 +192,12 @@ class FarmRationService {
   /** A herd: the group's species decides the model; weight and milk are the members' averages (read live). */
   async groupSubject(groupId: string, caller: Caller, need: 'read' | 'write'): Promise<Subject & { canWrite: boolean; canReview: boolean }> {
     const access = await AnimalAccessService.checkGroup(caller, groupId, need);
-    if (!access.found) throw new NotFoundError('Group');
-    if (!access.allowed) throw new ForbiddenError(need === 'write'
-      ? "You can see this herd's ration but not change it. Ask the owner or the farm manager if something needs to change."
-      : ANIMAL_NO_ACCESS_MESSAGE);
+    if (!access.found) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
+    if (!access.allowed) {
+      throw need === 'write'
+        ? new CodedError(403, 'NUT_HERD_READ_ONLY', "You can see this herd's ration but not change it. Ask the owner or the farm manager if something needs to change.")
+        : new CodedError(403, 'ANIMAL_NO_ACCESS', ANIMAL_NO_ACCESS_MESSAGE);
+    }
     const canWrite = need === 'write' || (await AnimalAccessService.checkGroup(caller, groupId, 'write')).allowed;
     const isVet = caller.role === 'veterinarian' || (caller.roles || []).includes('veterinarian') || caller.role === 'admin' || (caller.roles || []).includes('admin');
     const r = await database.query(
@@ -211,7 +215,9 @@ class FarmRationService {
                   MIN(a.expected_due_date)::text AS due,
                   AVG(EXTRACT(EPOCH FROM (NOW() - a.date_of_birth::timestamp)) / (86400 * 30.4)) AS avg_age_months,
                   COUNT(*) FILTER (WHERE a.expected_due_date BETWEEN CURRENT_DATE - 15 AND CURRENT_DATE + 62) AS near_calving,
-                  COUNT(*) FILTER (WHERE a.dry_off_date IS NOT NULL AND a.dry_off_date <= CURRENT_DATE) AS dried
+                  COUNT(*) FILTER (WHERE a.dry_off_date IS NOT NULL AND a.dry_off_date <= CURRENT_DATE) AS dried,
+                  COUNT(*) FILTER (WHERE a.avg_daily_milk_litres > 0 OR a.id IN (
+                    SELECT animal_id FROM farm_daily_records WHERE record_type = 'milk' AND record_date >= CURRENT_DATE - 7 AND quantity > 0 AND animal_id IS NOT NULL)) AS milking
              FROM animals a WHERE a.group_id = g.id AND a.is_active = true
          ) m ON true
          LEFT JOIN LATERAL (
@@ -227,7 +233,7 @@ class FarmRationService {
       [groupId]
     );
     const g = r.rows[0];
-    if (!g) throw new NotFoundError('Group');
+    if (!g) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
     const headCount = Math.max(num(g.current_count) || 0, Number(g.members) || 0);
     const avgWeight = num(g.avg_weight);
     const members = Number(g.members) || 0;
@@ -239,7 +245,7 @@ class FarmRationService {
       weightKg: avgWeight ? round(avgWeight, 1) : null, weightSource: avgWeight ? 'members' : null,
       avgDailyMilkLitres: recordedMilk !== null ? round(recordedMilk, 1) : profileMilk === null ? null : round(profileMilk, 1),
       milkSource: recordedMilk !== null ? 'recorded' : profileMilk !== null ? 'profile' : null,
-      activityLevel: null, expectedDueDate: null, headCount,
+      activityLevel: null, expectedDueDate: null, headCount, milkingCount: Number(g.milking) || 0,
       ageMonths: num(g.avg_age_months) === null ? null : Math.round(Number(g.avg_age_months)), driedOff: members > 0 && Number(g.dried) === members,
       // The herd's due dates are kept as a SHARE: the late-pregnancy allowance applies to that share of the animals.
       pregnancyShare: members > 0 ? round(Number(g.near_calving) / members, 2) : null, breedingStatus: null,
@@ -251,8 +257,8 @@ class FarmRationService {
 
   /** Feeds the caller may use for this subject, with composition from the library and price from the farm's stock. */
   private async feedRows(subject: Subject, choices: RationFeedChoice[]) {
-    if (!Array.isArray(choices) || choices.length === 0) throw new ValidationError('Choose the feeds you have - at least one fodder and one concentrate.');
-    if (choices.length > 25) throw new ValidationError('A ration can use up to 25 feeds.');
+    if (!Array.isArray(choices) || choices.length === 0) throw new CodedError(400, 'NUT_CHOOSE_THE_FEEDS_YOU_HAVE', 'Choose the feeds you have - at least one fodder and one concentrate.');
+    if (choices.length > 25) throw new CodedError(400, 'NUT_A_RATION_CAN_USE_UP', 'A ration can use up to 25 feeds.');
     const r = await database.query(
       `SELECT i.id, i.label, i.kind, i.models, (i.owner_id IS NULL AND i.enterprise_id IS NULL) AS is_shared, i.dry_matter_pct, i.composition,
               (SELECT fi.cost_per_unit / NULLIF(COALESCE(fi.kg_per_unit, CASE lower(fi.unit) WHEN 'kg' THEN 1 WHEN 'g' THEN 0.001 WHEN 'ton' THEN 1000 WHEN 'lb' THEN 0.45359237 END), 0)
@@ -268,18 +274,18 @@ class FarmRationService {
     const unsafeList = await NutritionService.unsafeFoods(subject.speciesCode);
     return choices.map(c => {
       const x: any = byId.get(c.ingredientId);
-      if (!x) throw new ValidationError('One of the chosen feeds is no longer available. Choose it again.');
+      if (!x) throw new CodedError(400, 'NUT_ONE_OF_THE_CHOSEN_FEEDS', 'One of the chosen feeds is no longer available. Choose it again.');
       // A feed is only offered for the kinds of animal it is listed for (no cattle mixture for a horse) - shared or the farm's own.
       if (Array.isArray(x.models) && x.models.length > 0 && !x.models.includes(subject.model)) {
-        throw new ValidationError(`${x.label} is not a feed for this kind of animal. Choose another feed.`);
+        throw new CodedError(400, 'NUT_FEED_NOT_FOR_ANIMAL', `${x.label} is not a feed for this kind of animal. Choose another feed.`, { label: String(x.label) });
       }
       // Species safety: a feed on this species' danger list is refused in words; a caution list item is shown with the ration.
       const hit = unsafeList.filter(u => matchesUnsafe(x.label, u.matchTerms));
       const danger = hit.find(u => u.severity === 'danger');
-      if (danger) throw new ValidationError(`${x.label} is not safe for this animal (${danger.label}). Take it out and choose another feed.`);
+      if (danger) throw new CodedError(400, 'NUT_FEED_UNSAFE', `${x.label} is not safe for this animal (${danger.label}). Take it out and choose another feed.`, { label: String(x.label), danger: String(danger.label) });
       // One place for a feed's price: the stock item (Feed Inventory). A typed price is only for a feed with no stock item.
       const price = num(x.stock_price) ?? num(c.pricePerKg) ?? 0;
-      if (price < 0 || price > 100000) throw new ValidationError(`Check the price of ${x.label}.`);
+      if (price < 0 || price > 100000) throw new CodedError(400, 'NUT_FEED_PRICE', `Check the price of ${x.label}.`, { label: String(x.label) });
       const comp = x.composition || {};
       // Copper: a feed named anything can still carry copper. Where the species has the copper rule, the feed's own
       // composition decides (over 15 mg/kg DM is refused); a farm's own feed with no copper figure is shown as a caution.
@@ -287,7 +293,7 @@ class FarmRationService {
       const cu = num(comp.cu_mg_kg_dm);
       const extraCautions: Caution[] = [];
       if (copperRule) {
-        if (cu !== null && cu > 15) throw new ValidationError(`${x.label} has too much copper for this animal (${cu} mg per kg). Take it out and choose another feed.`);
+        if (cu !== null && cu > 15) throw new CodedError(400, 'NUT_FEED_COPPER', `${x.label} has too much copper for this animal (${cu} mg per kg). Take it out and choose another feed.`, { label: String(x.label), cu: Number(cu) });
         if (cu === null && !x.is_shared && !hit.includes(copperRule)) extraCautions.push({ feed: x.label as string, code: copperRule.code, label: copperRule.label, labelKey: copperRule.labelKey });
       }
       return { x, comp, dm: num(comp.dm_pct) ?? num(x.dry_matter_pct), price, choice: c, cautions: [...hit.filter(u => u.severity !== 'danger').map(u => ({ feed: x.label as string, code: u.code, label: u.label, labelKey: u.labelKey })), ...extraCautions] };
@@ -298,7 +304,7 @@ class FarmRationService {
     const rows = await this.feedRows(subject, choices);
     const feeds = rows.map(({ x, comp, dm, price, choice }) => {
       if (dm === null || num(comp.nel_mcal_kg_dm) === null || num(comp.cp_pct_dm) === null) {
-        throw new ValidationError(`${x.label} has no feed values (dry matter, energy, protein) yet, so it cannot be used in a ration.`);
+        throw new CodedError(400, 'NUT_FEED_NO_VALUES', `${x.label} has no feed values (dry matter, energy, protein) yet, so it cannot be used in a ration.`, { label: String(x.label) });
       }
       return {
         key: x.id, label: x.label, isMineral: x.kind === 'mineral', isForage: Number(comp.is_forage) === 1, dmPct: dm,
@@ -314,7 +320,7 @@ class FarmRationService {
     const rows = await this.feedRows(subject, choices);
     const feeds = rows.map(({ x, comp, dm, price, choice }) => {
       if (dm === null || num(comp.de_mcal_kg_dm) === null || num(comp.cp_pct_dm) === null) {
-        throw new ValidationError(`${x.label} has no horse feed values (dry matter, energy, protein) yet, so it cannot be used in a horse ration.`);
+        throw new CodedError(400, 'NUT_FEED_NO_HORSE_VALUES', `${x.label} has no horse feed values (dry matter, energy, protein) yet, so it cannot be used in a horse ration.`, { label: String(x.label) });
       }
       return {
         key: x.id, label: x.label, isForage: Number(comp.is_forage) === 1, dmPct: dm,
@@ -330,19 +336,19 @@ class FarmRationService {
 
   private async compute(subject: Subject, input: RationInput) {
     if (!RATION_MODELS.has(subject.model)) {
-      throw new ValidationError(subject.kind === 'group'
-        ? 'A herd ration is for cattle, buffalo, goats, sheep, camels, horses and donkeys. For poultry, pigs and fish use the daily feed card.'
-        : 'The ration calculator is for cattle, buffalo, goats, sheep, camels, horses and donkeys.');
+      throw subject.kind === 'group'
+        ? new CodedError(400, 'NUT_RATION_MODEL_HERD', 'A herd ration is for cattle, buffalo, goats, sheep, camels, horses and donkeys. For poultry, pigs and fish use the daily feed card.')
+        : new CodedError(400, 'NUT_RATION_MODEL_ANIMAL', 'The ration calculator is for cattle, buffalo, goats, sheep, camels, horses and donkeys.');
     }
     const typedWeight = num(input.avgWeightKg);
-    if (typedWeight !== null && (typedWeight <= 0 || typedWeight > 2000)) throw new ValidationError('Average weight must be between 1 and 2000 kg.');
+    if (typedWeight !== null && (typedWeight <= 0 || typedWeight > 2000)) throw new CodedError(400, 'NUT_AVERAGE_WEIGHT_MUST_BE_BETWEEN', 'Average weight must be between 1 and 2000 kg.');
     const weightKg = subject.kind === 'group' ? (typedWeight ?? subject.weightKg) : subject.weightKg;
     if (!weightKg) {
-      throw new ValidationError(subject.kind === 'group'
-        ? "Type the herd's average weight (a weighing band estimate is fine) - no weights are recorded for its animals yet."
-        : 'A current weight is needed first. Add it on the Body tab (a weighing band estimate is fine).');
+      throw subject.kind === 'group'
+        ? new CodedError(400, 'NUT_WEIGHT_NEEDED_HERD', "Type the herd's average weight (a weighing band estimate is fine) - no weights are recorded for its animals yet.")
+        : new CodedError(400, 'NUT_WEIGHT_NEEDED_ANIMAL', 'A current weight is needed first. Add it on the Body tab (a weighing band estimate is fine).');
     }
-    if (subject.kind === 'group' && subject.headCount <= 0) throw new ValidationError('This group has no animals in it yet. Add animals to the group first.');
+    if (subject.kind === 'group' && subject.headCount <= 0) throw new CodedError(400, 'NUT_THIS_GROUP_HAS_NO_ANIMALS', 'This group has no animals in it yet. Add animals to the group first.');
     const weightSource = subject.kind === 'group' && typedWeight !== null ? 'typed' : subject.weightSource;
 
     if (subject.model === 'equine_dm') {
@@ -353,7 +359,8 @@ class FarmRationService {
       if (subject.kind === 'animal' && subject.ageMonths === null) throw new CodedError(400, 'NUT_AGE_REQUIRED', 'Add this animal\'s date of birth first (an estimate is fine). A ration depends on its age, and a young animal must not be fed like an adult.');
       // A foal or yearling is growing fast and its needs are not an adult's: a vet makes that plan.
       if (subject.ageMonths !== null && reqs.adultMonths !== null && subject.ageMonths < reqs.adultMonths) {
-        throw new NeedsVetError(`${subject.kind === 'group' ? 'The young horses in this group are' : 'This horse is'} still growing (under ${reqs.adultMonths} months). A growing horse needs a feeding plan from a vet - book a consultation.`);
+        throw new NeedsVetError(`${subject.kind === 'group' ? 'The young horses in this group are' : 'This horse is'} still growing (under ${reqs.adultMonths} months). A growing horse needs a feeding plan from a vet - book a consultation.`,
+          { reason: subject.kind === 'group' ? 'NEEDS_VET_HORSE_GROUP' : 'NEEDS_VET_HORSE_ANIMAL', months: Number(reqs.adultMonths) });
       }
       const dueMonths = subject.expectedDueDate ? (new Date(subject.expectedDueDate).getTime() - Date.now()) / (30.4 * 86400000) : null;
       const reproState = subject.breedingStatus === 'lactating' ? 'lactating' as const : (dueMonths !== null && dueMonths >= 0 && dueMonths <= 3 ? 'pregnant' as const : null);
@@ -363,9 +370,9 @@ class FarmRationService {
     }
 
     const milk = num(input.milkLitresPerDay) ?? subject.avgDailyMilkLitres ?? 0;
-    if (milk < 0 || milk > 200) throw new ValidationError('Milk per day must be between 0 and 200 litres.');
+    if (milk < 0 || milk > 200) throw new CodedError(400, 'NUT_MILK_PER_DAY_MUST_BE', 'Milk per day must be between 0 and 200 litres.');
     const fat = num(input.milkFatPct);
-    if (fat !== null && (fat <= 0 || fat > 15)) throw new ValidationError('Milk fat must be between 0 and 15%.');
+    if (fat !== null && (fat <= 0 || fat > 15)) throw new CodedError(400, 'NUT_MILK_FAT_MUST_BE_BETWEEN', 'Milk fat must be between 0 and 15%.');
     // Life stage (data per species, migration 064): a calf, kid or lamb is not fed as a dry adult. Below weaning age the
     // young are on milk and starter feed - no fodder ration; until adult age they are GROWING (maintenance + gain).
     const limits = await this.growingLimits(subject.speciesCode);
@@ -373,7 +380,8 @@ class FarmRationService {
     // No date of birth: a calf, kid or lamb would be fed as an adult and judged against adult limits. Ask for the date first.
     if (subject.kind === 'animal' && age === null) throw new CodedError(400, 'NUT_AGE_REQUIRED', 'Add this animal\'s date of birth first (an estimate is fine). A ration depends on its age, and a young animal must not be fed like an adult.');
     if (age !== null && limits.weanMonths !== null && age < limits.weanMonths) {
-      throw new NeedsVetError(`${subject.kind === 'group' ? 'The young animals in this group are' : 'This animal is'} still on milk and starter feed (under ${limits.weanMonths} months). A fodder ration is not right for them yet - ask your vet for a calf feeding plan.`);
+      throw new NeedsVetError(`${subject.kind === 'group' ? 'The young animals in this group are' : 'This animal is'} still on milk and starter feed (under ${limits.weanMonths} months). A fodder ration is not right for them yet - ask your vet for a calf feeding plan.`,
+        { reason: subject.kind === 'group' ? 'NEEDS_VET_STOCK_GROUP' : 'NEEDS_VET_STOCK_ANIMAL', months: Number(limits.weanMonths) });
     }
     const isYoung = age !== null && limits.adultMonths !== null && age < limits.adultMonths;
     const state: RuminantState = milk > 0 ? 'lactating' : isYoung ? 'growing' : 'dry';
@@ -396,12 +404,18 @@ class FarmRationService {
     };
   }
 
-  /** Whole-herd totals: the per-head ration times the head count. */
-  private herd(subject: Subject, result: { status: string; lines?: Array<{ key: string; label: string; kgAsFedPerDay: number; costPerDay: number }>; totalCostPerDay?: number }) {
+  /**
+   * Whole-herd totals: the per-head ration times the animals it is FOR. A ration for a herd in milk is worked out for an animal giving the
+   * herd's average milk, so it is multiplied by the animals in milk - not the whole herd, which would feed dry cows, heifers and calves as
+   * if they were milking and overstate the feed and its cost. The others are reported (`notCounted`) so the screen can say so.
+   */
+  private herd(subject: Subject, result: { status: string; lines?: Array<{ key: string; label: string; kgAsFedPerDay: number; costPerDay: number }>; totalCostPerDay?: number }, state?: string) {
     if (subject.kind !== 'group' || result.status !== 'ok' || !result.lines) return null;
-    const n = subject.headCount;
+    const inMilk = subject.milkingCount || 0;
+    const n = state === 'lactating' && inMilk > 0 && inMilk < subject.headCount ? inMilk : subject.headCount;
     return {
       headCount: n,
+      notCounted: subject.headCount - n,
       lines: result.lines.map(l => ({ key: l.key, label: l.label, kgAsFedPerDay: round(l.kgAsFedPerDay * n, 1), costPerDay: round(l.costPerDay * n) })),
       totalCostPerDay: round((result.totalCostPerDay || 0) * n),
     };
@@ -425,7 +439,7 @@ class FarmRationService {
       cautions: c.cautions,
       requirementSet: { id: c.reqs.setId, title: c.reqs.title, status: c.reqs.status },
       result: c.result,
-      herd: this.herd(subject, c.result as any),
+      herd: this.herd(subject, c.result as any, c.state),
     };
   }
 
@@ -440,7 +454,7 @@ class FarmRationService {
     const subject = await this.animalSubject(animalId, caller, 'write');
     const c = await this.compute(subject, input);
     if (c.result.status !== 'ok') {
-      throw new ValidationError('These feeds cannot meet the animal\'s needs yet. Follow the suggestions on screen, then save.', { reasons: c.result.reasons });
+      throw new CodedError(400, 'NUT_RATION_CANNOT_MEET_ANIMAL', 'These feeds cannot meet the animal\'s needs yet. Follow the suggestions on screen, then save.');
     }
     // Values typed here are the animal's facts: save them on the profile so every screen agrees.
     const patch: Record<string, unknown> = {};
@@ -467,7 +481,7 @@ class FarmRationService {
     const subject = await this.groupSubject(groupId, caller, 'write');
     const c = await this.compute(subject, input);
     if (c.result.status !== 'ok') {
-      throw new ValidationError('These feeds cannot meet the herd\'s needs yet. Follow the suggestions on screen, then save.', { reasons: c.result.reasons });
+      throw new CodedError(400, 'NUT_RATION_CANNOT_MEET_HERD', 'These feeds cannot meet the herd\'s needs yet. Follow the suggestions on screen, then save.');
     }
     const planId = await this.persist(subject, c, input, caller);
     NutritionService.track(caller, 'herd_ration_saved', c.model).catch(() => {});
@@ -489,9 +503,9 @@ class FarmRationService {
   }
 
   private async persist(subject: Subject, c: Awaited<ReturnType<FarmRationService['compute']>>, input: RationInput, caller: Caller): Promise<string> {
-    if (c.result.status !== 'ok') throw new ValidationError('These feeds cannot meet the needs yet.');
+    if (c.result.status !== 'ok') throw new CodedError(400, 'NUT_THESE_FEEDS_CANNOT_MEET_THE', 'These feeds cannot meet the needs yet.');
     const ok = c.result as any;
-    const herd = this.herd(subject, ok);
+    const herd = this.herd(subject, ok, c.state);
     const subjectCol = subject.kind === 'group' ? 'group_id' : 'animal_id';
     // A recorded condition (kidney, liver, heart ...) or pregnant-and-unwell: the new ration waits as a draft for a vet and the one in use stays.
     const conditions = subject.kind === 'animal' ? await NutritionService.activeConditions(subject.id, subject.breedingStatus ?? null) : [];

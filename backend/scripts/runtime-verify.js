@@ -2612,6 +2612,616 @@ async function http(method, url, body, token) {
       else ok('walk-in invite accept/refuse paths, patient transfer start/complete/refusals, pharmacist review for the vet, seat limit, removed routes and plans all behave');
     }
 
+    // ── PHASE 6m: animal nutrition end to end (QA 2026-11-25) - one weight, no adult ration without an age, home-only pet diet,
+    //    breeder caution, metabolic-illness vet gate, safe-food gaps, whole-module access (H15), connections to feed / stock /
+    //    withdrawal / notifications / sale, and the milk-yield source ──
+    if (serverHealthy && port) {
+      step('PHASE 6m Nutrition end to end: one weight, age gate, home diet, breeder caution, metabolic gate, safe foods, access, connections');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const mark = serverLog.length;
+      const problems = [];
+      const notes = [];
+      const S = SCHEMA;
+      const sql = (q) => psql('verifydb', `SET search_path TO ${S}, public; ${q}`);
+      const rows = (q) => psqlJson('verifydb', q);
+      const uuid = () => require('crypto').randomUUID();
+      const iso = (d) => new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
+      const msgOf = (r) => r.json?.message || r.json?.error?.message || (typeof r.json?.error === 'string' ? r.json.error : '') || '';
+      const codeOf = (r) => r.json?.error?.code || '';
+      const plain = (r) => { const m = msgOf(r); return m.length >= 12 && !/status code|\bHTTP\b|\b[45]\d\d\b|\bat .+\(|undefined|\[object|Error:|violates|syntax/i.test(m); };
+      let seq = (Math.floor(Date.now() / 1000) % 100000000) + 92000;
+      let slotN = 0;
+      try {
+        sql(`INSERT INTO system_settings (key, value, description) VALUES ('nutrition.enabled', 'true', 'runtime-verify 6m') ON CONFLICT (key) DO UPDATE SET value = 'true';
+             INSERT INTO system_settings (key, value, description) VALUES ('farm.records.enabled', 'true', 'runtime-verify 6m') ON CONFLICT (key) DO UPDATE SET value = 'true';
+             INSERT INTO system_settings (key, value, description) VALUES ('nutrition.ai_assist.enabled', 'false', 'off in runtime-verify: no outside AI calls') ON CONFLICT (key) DO UPDATE SET value = 'false';`);
+      } catch { problems.push('could not switch nutrition / farm records on (and the AI explanation off) in the verification database'); }
+      const signUp = async (role, dbRole) => {
+        const email = `verify.m6.${role}.${Date.now()}.${seq}@example.com`;
+        const body = { firstName: 'Nm', lastName: 'Verify', email, phone: `9${String(seq++).padStart(9, '0')}`, password: 'Password1', confirmPassword: 'Password1', role, acceptTerms: true };
+        if (role === 'veterinarian') body.licenseNumber = 'VERIFY-LIC-6M';
+        await http('POST', `${apiBase}/auth/register`, body);
+        if (dbRole || role === 'veterinarian') sql(`UPDATE users SET ${dbRole ? `role = '${dbRole}', ` : ''}account_status = 'active', is_active = true WHERE email = '${email}';`);
+        const login = await http('POST', `${apiBase}/auth/login`, { email, password: 'Password1' });
+        return { token: login.json?.data?.token, id: login.json?.data?.user?.id, email };
+      };
+      // The server caches each module switch for 60 s: wait until it reports both on.
+      {
+        const probe = (await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' })).json?.data?.token;
+        const until = Date.now() + 90000;
+        let on = false;
+        while (probe && Date.now() < until) {
+          const a = await http('GET', `${apiBase}/farm-records/enabled`, null, probe);
+          const b = await http('GET', `${apiBase}/nutrition/enabled`, null, probe);
+          if (a.json?.data?.enabled === true && b.json?.data?.enabled === true) { on = true; break; }
+          await sleep(3000);
+        }
+        if (!on) problems.push('the server still reports farm records / nutrition off 90 s after they were switched on');
+      }
+      const admin = await signUp('pet_owner', 'admin');
+      const ownerP = await signUp('pet_owner');
+      const stranger = await signUp('pet_owner');
+      const vetB = await signUp('veterinarian');   // booked
+      const vetU = await signUp('veterinarian');   // never booked
+      const worker = await signUp('pet_owner');
+      const viewer = await signUp('pet_owner');
+      const mgr = await signUp('pet_owner');
+      const hs = await signUp('pet_owner', 'hospital_staff');
+      const pharm = await signUp('pet_owner', 'pharmacist');
+      const tomLogin = await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' });
+      const tom = { token: tomLogin.json?.data?.token, id: tomLogin.json?.data?.user?.id };
+      let ent = null; let herd = null;
+      try {
+        ent = rows(`SELECT e.id FROM ${S}.enterprises e JOIN ${S}.users u ON u.id = e.owner_id WHERE u.email = 'tom.wilson@example.com' ORDER BY e.created_at LIMIT 1`)[0]?.id;
+        herd = rows(`SELECT id FROM ${S}.animal_groups WHERE enterprise_id = '${ent}' AND species = 'Cattle' LIMIT 1`)[0]?.id;
+      } catch { /* reported below */ }
+      const people = { admin, ownerP, stranger, vetB, vetU, worker, viewer, mgr, hs, pharm };
+      const missing = Object.entries(people).filter(([, u]) => !u.token || !u.id).map(([k]) => k);
+      if (missing.length || !tom.token || !ent || !herd) problems.push(`could not set up the accounts / seeded farm for the nutrition journeys (missing: ${missing.join(', ')}${!tom.token ? ', tom' : ''}${!ent ? ', farm' : ''}${!herd ? ', herd' : ''})`);
+      else {
+        // Handed to the browser spec (frontend/e2e/nutrition-devices.spec.ts) through NUTRI_FIXTURES in PHASE 7.
+        const fx = (globalThis.__nutriFixtures = { accounts: {
+          farmer: { email: 'tom.wilson@example.com', password: 'Demo@123' }, pet_owner: { email: ownerP.email, password: 'Password1' },
+          veterinarian: { email: vetB.email, password: 'Password1' }, admin: { email: admin.email, password: 'Password1' } } });
+        // fixtures: farm team, hospital network the animals were NOT given to
+        const net = uuid(); const hosp = uuid();
+        sql(`INSERT INTO enterprise_members (enterprise_id, user_id, role) VALUES ('${ent}', '${worker.id}', 'worker'), ('${ent}', '${viewer.id}', 'viewer'), ('${ent}', '${mgr.id}', 'manager') ON CONFLICT DO NOTHING;
+             INSERT INTO hospital_networks (id, name) VALUES ('${net}', 'Verify 6m Network');
+             INSERT INTO vet_hospitals (id, name, owner_id) VALUES ('${hosp}', 'Verify 6m Hospital', '${admin.id}');
+             INSERT INTO hospital_network_hospitals (network_id, hospital_id) VALUES ('${net}', '${hosp}');
+             INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id) VALUES ('${net}', '${hs.id}', 'hospital_staff', '${hosp}'), ('${net}', '${pharm.id}', 'hospital_staff', '${hosp}');`);
+        const book = (vetId, ownerId, col, id, withEnt) => {
+          const m = 8 * 60 + 5 * slotN++;
+          const t = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+          sql(`INSERT INTO bookings (pet_owner_id, veterinarian_id, ${col}, ${withEnt ? 'enterprise_id, ' : ''}scheduled_date, time_slot_start, time_slot_end, status) VALUES ('${ownerId}', '${vetId}', '${id}', ${withEnt ? `'${ent}', ` : ''}CURRENT_DATE, '${t}', '23:59', 'confirmed');`);
+        };
+        const mk = async (tok, body, kg) => {
+          const a = await http('POST', `${apiBase}/animals`, body, tok);
+          const id = a.json?.data?.id;
+          if (!id) problems.push(`could not create ${body.name}: HTTP ${a.status} ${msgOf(a).slice(0, 120)}`);
+          else if (kg) await http('POST', `${apiBase}/nutrition/animals/${id}/measurements`, { weight: kg, unit: 'kg' }, tok);
+          return id;
+        };
+        const foodMap = async (q, tok) => Object.fromEntries(((await http('GET', `${apiBase}/nutrition/foods?${q}`, null, tok)).json?.data?.items || []).map(f => [f.code || f.label, f.id]));
+        const COW_FEEDS = ['feed_green_maize', 'feed_wheat_straw', 'feed_cattle_feed', 'feed_groundnut_cake', 'feed_mineral_mixture'];
+        const COW_PRICE = [2, 6, 25, 45, 80];
+        const cowBody = (fm, milk = 10) => ({ milkLitresPerDay: milk, feeds: COW_FEEDS.map((c, i) => ({ ingredientId: fm[c], pricePerKg: COW_PRICE[i] })) });
+        const refusal = (label, r) => {
+          if (![403, 404].includes(r.status)) problems.push(`${label}: expected a refusal (403/404), got HTTP ${r.status} ${msgOf(r).slice(0, 80)}`);
+          else if (!plain(r)) problems.push(`${label}: refused (HTTP ${r.status}) without plain words: '${msgOf(r).slice(0, 110)}'`);
+        };
+        const notifs = (userId, type, extra = '') => rows(`SELECT id, metadata->>'planId' AS plan_id, metadata->>'dedupeKey' AS dk FROM ${S}.notifications WHERE user_id = '${userId}' AND metadata->>'type' = '${type}' ${extra}`);
+
+        // ═══ 1. ONE WEIGHT ═══
+        {
+          const dog = await mk(ownerP.token, { name: 'Verify M1 Dog', species: 'Dog', gender: 'male', weight: 12, dateOfBirth: iso(-1800) });
+          if (dog) {
+            book(vetB.id, ownerP.id, 'animal_id', dog, false);
+            const whRows = () => rows(`SELECT weight, source, recorded_at FROM ${S}.weight_history WHERE animal_id = '${dog}' AND weight IS NOT NULL ORDER BY recorded_at, created_at`);
+            const aw = () => rows(`SELECT weight, current_weight, last_weighed_at FROM ${S}.animals WHERE id = '${dog}'`)[0] || {};
+            const w0 = whRows(); const a0 = aw();
+            if (w0.length !== 1 || Number(w0[0]?.weight) !== 12) problems.push(`[1 one weight] creating an animal with weight 12 should leave exactly ONE weight_history row of 12, found ${w0.length} (${w0.map(w => w.weight)})`);
+            if (Number(a0.weight) !== 12 || Number(a0.current_weight) !== 12) problems.push(`[1 one weight] after create animals.weight=${a0.weight} current_weight=${a0.current_weight}, both must be 12`);
+            await sleep(1100);
+            const p1 = await http('PUT', `${apiBase}/animals/${dog}`, { weight: 14 }, ownerP.token);
+            const w1 = whRows(); const a1 = aw();
+            if (p1.status !== 200) problems.push(`[1 one weight] PUT /animals/:id {weight:14}: HTTP ${p1.status} ${msgOf(p1).slice(0, 100)} (the brief said PATCH; the route is PUT, there is no PATCH /animals/:id)`);
+            if (w1.length !== 2 || Number(w1[w1.length - 1]?.weight) !== 14 || w1[w1.length - 1]?.source !== 'medical_record') problems.push(`[1 one weight] a typed weight of 14 must add ONE history row (source medical_record); rows ${w1.length}, newest ${w1[w1.length - 1]?.weight}/${w1[w1.length - 1]?.source}`);
+            if (Number(a1.weight) !== 14 || Number(a1.current_weight) !== 14) problems.push(`[1 one weight] after PUT weight=${a1.weight} current_weight=${a1.current_weight}, both must be 14`);
+            if (!(new Date(a1.last_weighed_at) > new Date(a0.last_weighed_at))) problems.push(`[1 one weight] last_weighed_at did not move forward (${a0.last_weighed_at} -> ${a1.last_weighed_at})`);
+            await http('PUT', `${apiBase}/animals/${dog}`, { weight: 14 }, ownerP.token);
+            if (whRows().length !== 2) problems.push(`[1 one weight] saving the SAME weight again stacked a row (${whRows().length} rows, want 2)`);
+            const back = await http('POST', `${apiBase}/nutrition/animals/${dog}/measurements`, { weight: 9, unit: 'kg', recordedAt: `${iso(-3)}T10:00:00Z` }, ownerP.token);
+            if (back.status !== 201) problems.push(`[1 one weight] a back-dated weighing: HTTP ${back.status} ${msgOf(back).slice(0, 100)}`);
+            const a2 = aw();
+            if (Number(a2.weight) !== 14 || Number(a2.current_weight) !== 14) problems.push(`[1 one weight] a lower BACK-DATED weighing overwrote the newer current weight (weight=${a2.weight}, current_weight=${a2.current_weight}, want 14). (POST /weight-history takes no date, so the back-dated entry was sent through POST /nutrition/animals/:id/measurements)`);
+            const ov = await http('GET', `${apiBase}/nutrition/animals/${dog}`, null, ownerP.token);
+            if (ov.json?.data?.facts?.weightKg !== 14) problems.push(`[1 one weight] the nutrition overview shows weight ${ov.json?.data?.facts?.weightKg}, the animal has 14`);
+            for (const [who, tok] of [['owner', ownerP.token], ['booked vet', vetB.token]]) {
+              const wh = await http('GET', `${apiBase}/weight-history/animal/${dog}`, null, tok);
+              const list = (wh.json?.data || []).filter(w => w.weight !== null);
+              const latest = [...list].sort((x, y) => new Date(y.recordedAt) - new Date(x.recordedAt))[0];
+              if (wh.status !== 200 || Number(latest?.weight) !== 14) problems.push(`[1 one weight] the weight chart read by the ${who} ends at ${latest?.weight} (HTTP ${wh.status}), the animal has 14`);
+            }
+            const ovV = await http('GET', `${apiBase}/nutrition/animals/${dog}`, null, vetB.token);
+            if (ovV.json?.data?.facts?.weightKg !== 14) problems.push(`[1 one weight] the booked vet's nutrition view shows weight ${ovV.json?.data?.facts?.weightKg}, want 14`);
+            const before = whRows().length;
+            for (const bad of [-5, 'abc']) {
+              const r = await http('PUT', `${apiBase}/animals/${dog}`, { weight: bad }, ownerP.token);
+              if (r.status !== 400 || !plain(r)) problems.push(`[1 one weight] PUT weight ${JSON.stringify(bad)} should be 400 in words, got HTTP ${r.status} '${msgOf(r).slice(0, 90)}'`);
+            }
+            const neg = await http('POST', `${apiBase}/weight-history`, { animalId: dog, weight: -5, unit: 'kg' }, ownerP.token);
+            if (neg.status !== 400 || !plain(neg)) problems.push(`[1 one weight] POST /weight-history -5 should be 400 in words, got HTTP ${neg.status} '${msgOf(neg).slice(0, 90)}'`);
+            if (whRows().length !== before || Number(aw().weight) !== 14) problems.push('[1 one weight] a refused weight still wrote a row or changed the animal');
+            const strangerPut = await http('PUT', `${apiBase}/animals/${dog}`, { weight: 99 }, stranger.token);
+            refusal('[1 one weight] a stranger editing the weight of another owner\'s animal', strangerPut);
+          }
+        }
+
+        // ═══ 2. NO ADULT RATION WITHOUT AGE ═══
+        {
+          const cow = await mk(ownerP.token, { name: 'Verify M2 Cow', species: 'Cattle', gender: 'female' }, 400);
+          const horse = await mk(ownerP.token, { name: 'Verify M2 Horse', species: 'Horse', gender: 'male' }, 450);
+          const calf = await mk(ownerP.token, { name: 'Verify M2 Calf', species: 'Cattle', gender: 'female', dateOfBirth: iso(-30) }, 45);
+          if (cow && horse && calf) {
+            const cf = await foodMap(`animalId=${cow}`, ownerP.token);
+            const hf = await foodMap(`animalId=${horse}`, ownerP.token);
+            const need = (f, list) => list.filter(c => !f[c]);
+            const horseBody = { work: 'moderate', feeds: [['feed_grass_hay', 8], ['feed_lucerne_hay', 18], ['feed_oats', 30], ['feed_mineral_mixture', 80]].map(([c, p]) => ({ ingredientId: hf[c], pricePerKg: p })) };
+            if (need(cf, COW_FEEDS).length || need(hf, ['feed_grass_hay', 'feed_lucerne_hay', 'feed_oats', 'feed_mineral_mixture']).length) problems.push('[2 age] the seeded cattle / horse feeds are missing');
+            else {
+              for (const [what, id, body] of [['cow', cow, cowBody(cf)], ['horse', horse, horseBody]]) {
+                const pv = await http('POST', `${apiBase}/nutrition/animals/${id}/ration/preview`, body, ownerP.token);
+                coded2(`[2 age] ${what} with no date of birth - preview`, pv);
+                const sv = await http('POST', `${apiBase}/nutrition/animals/${id}/ration`, body, ownerP.token);
+                coded2(`[2 age] ${what} with no date of birth - save`, sv);
+                const planRows = Number(rows(`SELECT COUNT(*) AS n FROM ${S}.nutrition_plans WHERE animal_id = '${id}'`)[0]?.n);
+                if (planRows !== 0) problems.push(`[2 age] a ${what} with no date of birth still got ${planRows} plan row(s) saved`);
+                await http('PUT', `${apiBase}/animals/${id}`, { dateOfBirth: iso(-365 * 6) }, ownerP.token);
+                const ok2 = await http('POST', `${apiBase}/nutrition/animals/${id}/ration`, body, ownerP.token);
+                if (ok2.status !== 201 || ok2.json?.data?.status !== 'active') problems.push(`[2 age] after adding a date of birth the ${what} ration should save as active, got HTTP ${ok2.status} ${msgOf(ok2).slice(0, 100)}`);
+              }
+              const calfFoods = await foodMap(`animalId=${calf}`, ownerP.token);
+              const cr = await http('POST', `${apiBase}/nutrition/animals/${calf}/ration/preview`, { feeds: [{ ingredientId: calfFoods.feed_green_maize, pricePerKg: 2 }] }, ownerP.token);
+              if (cr.status !== 400 || codeOf(cr) !== 'NEEDS_VET' || !plain(cr)) problems.push(`[2 age] a 30-day-old calf should still be sent to a vet (NEEDS_VET), got HTTP ${cr.status} code '${codeOf(cr)}' '${msgOf(cr).slice(0, 80)}'`);
+              const gf = await foodMap(`groupId=${herd}`, tom.token);
+              const gp = await http('POST', `${apiBase}/nutrition/groups/${herd}/ration/preview`, { milkLitresPerDay: 8, avgWeightKg: 400, feeds: COW_FEEDS.map((c, i) => ({ ingredientId: gf[c], pricePerKg: COW_PRICE[i] })) }, tom.token);
+              if (gp.status !== 200 || gp.json?.data?.result?.status !== 'ok') problems.push(`[2 age] a herd of mixed ages (members have no date of birth) must still compute: HTTP ${gp.status} ${codeOf(gp)} ${msgOf(gp).slice(0, 100)}`);
+            }
+          }
+        }
+        function coded2(label, r) {
+          if (r.status !== 400 || codeOf(r) !== 'NUT_AGE_REQUIRED') problems.push(`${label}: expected HTTP 400 code NUT_AGE_REQUIRED, got HTTP ${r.status} code '${codeOf(r)}' '${msgOf(r).slice(0, 90)}'`);
+          else if (!plain(r)) problems.push(`${label}: NUT_AGE_REQUIRED came back without plain words: '${msgOf(r).slice(0, 110)}'`);
+        }
+
+        // ═══ 3. HOME-ONLY PET PLAN ═══
+        {
+          const petFacts = { isNeutered: true, activityLevel: 'moderate', housing: 'indoor' };
+          const dogA = await mk(ownerP.token, { name: 'Verify M3 Adult Dog', species: 'Dog', gender: 'male', dateOfBirth: iso(-1800) }, 20);
+          const puppy = await mk(ownerP.token, { name: 'Verify M3 Puppy', species: 'Dog', gender: 'male', dateOfBirth: iso(-120) }, 5);
+          const kitten = await mk(ownerP.token, { name: 'Verify M3 Kitten', species: 'Cat', gender: 'female', dateOfBirth: iso(-100) }, 2);
+          const catA = await mk(ownerP.token, { name: 'Verify M3 Adult Cat', species: 'Cat', gender: 'female', dateOfBirth: iso(-1500) }, 4);
+          for (const id of [dogA, puppy, kitten, catA]) if (id) await http('PATCH', `${apiBase}/nutrition/animals/${id}/facts`, petFacts, ownerP.token);
+          if (dogA && puppy && kitten && catA) {
+            const mkFood = async (animalId, label, kind, kcal) => (await http('POST', `${apiBase}/nutrition/foods`, { animalId, label, kcalPer100g: kcal, kind }, ownerP.token)).json?.data?.id;
+            const dFoods = await foodMap(`animalId=${dogA}`, ownerP.token);
+            const rice = dFoods.home_rice_cooked;
+            const kibble = await mkFood(dogA, 'Verify kibble complete', 'commercial_food', 360);
+            const treatId = await mkFood(dogA, 'Verify biscuit treat', 'treat', 400);
+            if (!rice || !kibble || !treatId) problems.push(`[3 home diet] could not set up a home food (${!!rice}), a commercial food (${!!kibble}) and a treat (${!!treatId})`);
+            else {
+              const homeOnly = { goal: 'maintain', mealsPerDay: 2, foods: [{ ingredientId: rice, sharePct: 100 }] };
+              const pre = await http('POST', `${apiBase}/nutrition/animals/${dogA}/plan/preview`, homeOnly, ownerP.token);
+              if (pre.status !== 200) problems.push(`[3 home diet] preview of a home-only plan: HTTP ${pre.status} ${msgOf(pre).slice(0, 100)}`);
+              else if (pre.json?.data?.incompleteDiet !== true) problems.push(`[3 home diet] the PREVIEW of a home-only plan does not carry incompleteDiet (got ${JSON.stringify(pre.json?.data?.incompleteDiet)}). The plan sheet reads preview.incompleteDiet to show its warning (PlanBuilderSheet.tsx:195), but the preview route (nutrition.routes.ts) returns only energy/portions/unsafe/mealsPerDay`);
+              const saved = await http('POST', `${apiBase}/nutrition/animals/${dogA}/plan`, homeOnly, ownerP.token);
+              if (saved.status !== 201 || saved.json?.data?.incompleteDiet !== true) problems.push(`[3 home diet] the SAVED home-only plan should carry incompleteDiet true: HTTP ${saved.status} incompleteDiet=${saved.json?.data?.incompleteDiet}`);
+              const ov = await http('GET', `${apiBase}/nutrition/animals/${dogA}`, null, ownerP.token);
+              if (ov.json?.data?.plan?.incompleteDiet !== true) problems.push(`[3 home diet] overview plan.incompleteDiet should be true, got ${ov.json?.data?.plan?.incompleteDiet}`);
+              for (const [what, foods] of [['custom-typed food', [{ label: 'Verify home mix', kcalPer100g: 150, sharePct: 100 }]], ['treat only', [{ ingredientId: treatId, sharePct: 100 }]]]) {
+                const r = await http('POST', `${apiBase}/nutrition/animals/${dogA}/plan`, { goal: 'maintain', mealsPerDay: 2, foods }, ownerP.token);
+                if (r.status !== 201 || r.json?.data?.incompleteDiet !== true) problems.push(`[3 home diet] a ${what} plan should be incompleteDiet true: HTTP ${r.status} ${r.json?.data?.incompleteDiet} ${msgOf(r).slice(0, 80)}`);
+              }
+              const full = await http('POST', `${apiBase}/nutrition/animals/${dogA}/plan`, { goal: 'maintain', mealsPerDay: 2, foods: [{ ingredientId: kibble, sharePct: 70 }, { ingredientId: rice, sharePct: 30 }] }, ownerP.token);
+              if (full.status !== 201 || full.json?.data?.incompleteDiet !== false) problems.push(`[3 home diet] with one commercial food added incompleteDiet should be false: HTTP ${full.status} ${full.json?.data?.incompleteDiet}`);
+              const ov2 = await http('GET', `${apiBase}/nutrition/animals/${dogA}`, null, ownerP.token);
+              if (ov2.json?.data?.plan?.incompleteDiet !== false) problems.push(`[3 home diet] overview plan.incompleteDiet should now be false, got ${ov2.json?.data?.plan?.incompleteDiet}`);
+
+              for (const [what, id] of [['puppy', puppy], ['kitten', kitten]]) {
+                const food = await mkFood(id, `Verify home ${what} food`, 'home_food', 130);
+                const home = { goal: 'maintain', mealsPerDay: 3, foods: [{ ingredientId: food, sharePct: 100 }] };
+                for (const route of ['plan', 'plan/preview']) {
+                  const r = await http('POST', `${apiBase}/nutrition/animals/${id}/${route}`, home, ownerP.token);
+                  if (r.status !== 400 || codeOf(r) !== 'NUT_HOME_DIET_YOUNG' || !plain(r)) problems.push(`[3 home diet] a home-only ${route} for a ${what} under 12 months should be 400 NUT_HOME_DIET_YOUNG in words, got HTTP ${r.status} code '${codeOf(r)}' '${msgOf(r).slice(0, 80)}'`);
+                }
+                const n = Number(rows(`SELECT COUNT(*) AS n FROM ${S}.nutrition_plans WHERE animal_id = '${id}'`)[0]?.n);
+                if (n !== 0) problems.push(`[3 home diet] the refused ${what} plan still left ${n} plan row(s)`);
+              }
+              const kfood = await mkFood(puppy, 'Verify puppy complete food', 'commercial_food', 380);
+              const pOk = await http('POST', `${apiBase}/nutrition/animals/${puppy}/plan`, { goal: 'maintain', mealsPerDay: 3, foods: [{ ingredientId: kfood, sharePct: 100 }] }, ownerP.token);
+              if (pOk.status !== 201) problems.push(`[3 home diet] a puppy on a complete food must be allowed: HTTP ${pOk.status} ${msgOf(pOk).slice(0, 100)}`);
+              const catFood = await mkFood(catA, 'Verify home cat food', 'home_food', 140);
+              const cOk = await http('POST', `${apiBase}/nutrition/animals/${catA}/plan`, { goal: 'maintain', mealsPerDay: 2, foods: [{ ingredientId: catFood, sharePct: 100 }] }, ownerP.token);
+              if (cOk.status !== 201 || cOk.json?.data?.incompleteDiet !== true) problems.push(`[3 home diet] an adult cat on a home-only plan is allowed with the warning: HTTP ${cOk.status} incompleteDiet=${cOk.json?.data?.incompleteDiet} ${msgOf(cOk).slice(0, 80)}`);
+            }
+          }
+        }
+
+        // ═══ 4. BAND CAUTION ═══
+        {
+          const cols = rows(`SELECT column_name FROM information_schema.columns WHERE table_schema = '${S}' AND table_name = 'nutrition_feeding_curves' AND column_name = 'caution_key'`);
+          if (!cols.length) problems.push('[4 caution] nutrition_feeding_curves.caution_key is missing (migration 069)');
+          else {
+            const flagged = rows(`SELECT curve_key, feed_type FROM ${S}.nutrition_feeding_curves WHERE caution_key = 'breeders_need_vet'`);
+            if (flagged.length !== 1 || flagged[0].curve_key !== 'pig_general' || flagged[0].feed_type !== 'adult / sow') problems.push(`[4 caution] only the pig adult/sow band should carry breeders_need_vet, found ${JSON.stringify(flagged)}`);
+          }
+          const group = (name, species, type, startedDaysAgo, placementAge) => {
+            const g = uuid();
+            sql(`INSERT INTO animal_groups (id, enterprise_id, name, species, group_type, current_count) VALUES ('${g}', '${ent}', '${name}', '${species}', ${type ? `'${type}'` : 'NULL'}, 10);
+                 INSERT INTO group_cycles (group_id, cycle_number, species, placed_count, current_count, started_at, status${placementAge ? ', age_at_placement_days' : ''}) VALUES ('${g}', 1, '${species}', 10, 10, CURRENT_DATE - ${startedDaysAgo}, 'active'${placementAge ? `, ${placementAge}` : ''});`);
+            return g;
+          };
+          try {
+            const old = group('Verify M4 Old Pigs', 'Pig', null, 300, 0);
+            fx.pigGroupId = old; fx.pigGroupName = 'Verify M4 Old Pigs';
+            const placed = group('Verify M4 Placed Pigs', 'Pig', null, 100, 150);
+            const young = group('Verify M4 Young Pigs', 'Pig', null, 50, 0);
+            const hens = group('Verify M4 Hens', 'Chicken', 'layers', 300, 0);
+            for (const [what, id, want] of [['a pig group over 221 days', old, 'breeders_need_vet'], ['a pig group placed at 150 days, 100 days ago', placed, 'breeders_need_vet'], ['a young pig group', young, null], ['a poultry group', hens, null]]) {
+              const r = await http('GET', `${apiBase}/nutrition/groups/${id}/feeding`, null, tom.token);
+              const got = r.json?.data?.today?.cautionKey;
+              if (r.status !== 200 || r.json?.data?.status !== 'ok') problems.push(`[4 caution] feeding card for ${what}: HTTP ${r.status}, status ${r.json?.data?.status}`);
+              else if ((got ?? null) !== want) problems.push(`[4 caution] ${what}: today.cautionKey should be ${JSON.stringify(want)}, got ${JSON.stringify(got)}`);
+            }
+          } catch (e) { problems.push(`[4 caution] could not create the pig / poultry groups: ${String(e.message).slice(0, 150)}`); }
+        }
+
+        // ═══ 5. METABOLIC GATE ═══
+        {
+          const plant = async (label, animalOwner, extraSetup) => {
+            const id = await mk(animalOwner.token, { name: label, species: 'Cattle', gender: 'female', dateOfBirth: iso(-365 * 5) }, 400);
+            if (extraSetup) await extraSetup(id);
+            return id;
+          };
+          const cowK = await plant('Verify M5 Ketosis Cow', ownerP, async (id) => book(vetB.id, ownerP.id, 'animal_id', id, false));
+          if (cowK) {
+            const fm = await foodMap(`animalId=${cowK}`, ownerP.token);
+            const first = await http('POST', `${apiBase}/nutrition/animals/${cowK}/ration`, cowBody(fm, 10), ownerP.token);
+            if (first.status !== 201 || first.json?.data?.status !== 'active') problems.push(`[5 metabolic] a cow without a condition should get an ACTIVE ration at once: HTTP ${first.status} ${first.json?.data?.status}`);
+            sql(`INSERT INTO medical_records (user_id, animal_id, record_type, title, content, status) VALUES ('${ownerP.id}', '${cowK}', 'diagnosis', 'Ketosis', 'subclinical', 'active');`);
+            const second = await http('POST', `${apiBase}/nutrition/animals/${cowK}/ration`, cowBody(fm, 12), ownerP.token);
+            const draftId = second.json?.data?.id;
+            if (second.status !== 201 || second.json?.data?.status !== 'draft' || !(second.json?.data?.conditions || []).includes('metabolic')) problems.push(`[5 metabolic] a ration for a cow with ketosis on record must wait as a draft (conditions metabolic): HTTP ${second.status} status ${second.json?.data?.status} conditions ${JSON.stringify(second.json?.data?.conditions)}`);
+            const ov = await http('GET', `${apiBase}/nutrition/animals/${cowK}`, null, ownerP.token);
+            if (ov.json?.data?.plan?.id !== first.json?.data?.id) problems.push('[5 metabolic] the ration in use changed before a vet looked at the draft');
+            if (!draftId || ov.json?.data?.pendingPlan?.id !== draftId) problems.push('[5 metabolic] the waiting ration is not shown as pending on the animal');
+            const vNotes = draftId ? notifs(vetB.id, 'nutrition_plan_review', `AND metadata->>'planId' = '${draftId}'`) : [];
+            if (vNotes.length !== 1) problems.push(`[5 metabolic] the connected vet should be told ONCE about the waiting ration, got ${vNotes.length} notification(s)`);
+            for (const [who, u] of [['unbooked vet', vetU], ['stranger', stranger]]) {
+              if (notifs(u.id, 'nutrition_plan_review').length) problems.push(`[5 metabolic] the ${who} was notified about another person's waiting ration`);
+            }
+            const ownerNotes = notifs(ownerP.id, 'nutrition_plan_review').length;
+            if (ownerNotes === 0) notes.push('waiting ration notifies only the connected vet (NutritionNotifier.planWaitingForVet); the owner who saved it gets no note - matches ledger NUT-174, differs from the QA brief ("farm owner/team and the connected vet")');
+            const ownerActivate = await http('POST', `${apiBase}/nutrition/plans/${draftId}/review`, { note: 'x' }, ownerP.token);
+            refusal('[5 metabolic] the owner activating the waiting ration', ownerActivate);
+            const strangerActivate = await http('POST', `${apiBase}/nutrition/plans/${draftId}/review`, { note: 'x' }, vetU.token);
+            refusal('[5 metabolic] an unbooked vet activating the waiting ration', strangerActivate);
+            const rev = await http('POST', `${apiBase}/nutrition/plans/${draftId}/review`, { note: 'Checked: ketosis managed' }, vetB.token);
+            if (rev.status >= 300) problems.push(`[5 metabolic] the booked vet activating the draft: HTTP ${rev.status} ${msgOf(rev).slice(0, 100)}`);
+            const ov2 = await http('GET', `${apiBase}/nutrition/animals/${cowK}`, null, ownerP.token);
+            if (ov2.json?.data?.plan?.id !== draftId || ov2.json?.data?.plan?.validation !== 'vet_reviewed' || ov2.json?.data?.pendingPlan) problems.push(`[5 metabolic] after the vet's review the draft must be the plan in use and reviewed, nothing pending (plan ${ov2.json?.data?.plan?.id === draftId}, validation ${ov2.json?.data?.plan?.validation}, pending ${!!ov2.json?.data?.pendingPlan})`);
+          }
+          fx.ownerCowId = cowK;
+          // a ration left waiting for a vet (the vet's pending card in the browser spec)
+          const cowP = await plant('Verify UI Pending Cow', ownerP, async (id) => book(vetB.id, ownerP.id, 'animal_id', id, false));
+          if (cowP) {
+            const fmP = await foodMap(`animalId=${cowP}`, ownerP.token);
+            await http('POST', `${apiBase}/nutrition/animals/${cowP}/ration`, cowBody(fmP, 10), ownerP.token);
+            sql(`INSERT INTO medical_records (user_id, animal_id, record_type, title, content, status) VALUES ('${ownerP.id}', '${cowP}', 'diagnosis', 'Ketosis', 'ui fixture', 'active');`);
+            const waitingP = await http('POST', `${apiBase}/nutrition/animals/${cowP}/ration`, cowBody(fmP, 12), ownerP.token);
+            if (waitingP.json?.data?.status === 'draft') fx.pendingCowId = cowP;
+          }
+          // an abnormal BHB lab result gates the same way
+          const cowL = await plant('Verify M5 Lab Cow', ownerP);
+          if (cowL) {
+            const fm = await foodMap(`animalId=${cowL}`, ownerP.token);
+            const first = await http('POST', `${apiBase}/nutrition/animals/${cowL}/ration`, cowBody(fm, 10), ownerP.token);
+            sql(`INSERT INTO lab_results (animal_id, test_name, test_date, result_value, normal_range, unit, is_abnormal, status) VALUES ('${cowL}', 'BHB (beta-hydroxybutyrate)', CURRENT_DATE, '3.4', '< 1.2', 'mmol/L', true, 'completed');`);
+            const second = await http('POST', `${apiBase}/nutrition/animals/${cowL}/ration`, cowBody(fm, 12), ownerP.token);
+            if (first.status !== 201 || second.json?.data?.status !== 'draft' || !(second.json?.data?.conditions || []).includes('metabolic')) problems.push(`[5 metabolic] an abnormal BHB lab result should send the new ration to a vet (draft, metabolic), got status ${second.json?.data?.status} conditions ${JSON.stringify(second.json?.data?.conditions)} (HTTP ${second.status} ${msgOf(second).slice(0, 80)})`);
+          }
+          // a farm cow: the team member who saves it, and who is told
+          const cowF = await plant('Verify M5 Farm Cow', tom, async (id) => { await http('PUT', `${apiBase}/animals/${id}`, { enterpriseId: ent }, tom.token); book(vetB.id, tom.id, 'animal_id', id, true); });
+          if (cowF) {
+            const fm = await foodMap(`animalId=${cowF}`, tom.token);
+            await http('POST', `${apiBase}/nutrition/animals/${cowF}/ration`, cowBody(fm, 10), tom.token);
+            sql(`INSERT INTO medical_records (user_id, animal_id, record_type, title, content, status) VALUES ('${tom.id}', '${cowF}', 'diagnosis', 'Milk fever', 'hypocalcaemia', 'active');`);
+            const byWorker = await http('POST', `${apiBase}/nutrition/animals/${cowF}/ration`, cowBody(fm, 12), worker.token);
+            if (byWorker.status !== 201 || byWorker.json?.data?.status !== 'draft') problems.push(`[5 metabolic] a farm worker saving a ration for a cow with milk fever must create a draft: HTTP ${byWorker.status} ${byWorker.json?.data?.status} ${msgOf(byWorker).slice(0, 90)}`);
+            const byViewer = await http('POST', `${apiBase}/nutrition/animals/${cowF}/ration`, cowBody(fm, 12), viewer.token);
+            refusal('[5 metabolic] a farm viewer saving a ration', byViewer);
+            const draft = byWorker.json?.data?.id;
+            const tomN = notifs(tom.id, 'nutrition_plan_review', `AND metadata->>'planId' = '${draft}'`).length;
+            const mgrN = notifs(mgr.id, 'nutrition_plan_review', `AND metadata->>'planId' = '${draft}'`).length;
+            const vetN = notifs(vetB.id, 'nutrition_plan_review', `AND metadata->>'planId' = '${draft}'`).length;
+            if (vetN !== 1) problems.push(`[5 metabolic] the connected vet of a farm cow's waiting ration should be told once, got ${vetN}`);
+            if (tomN === 0 || mgrN === 0) notes.push(`waiting ration on a FARM cow saved by a worker: farm owner told ${tomN}x, manager ${mgrN}x, vet ${vetN}x - only vets are notified (planWaitingForVet), the farm owner/manager are not`);
+          }
+        }
+
+        // ═══ 6. SAFE-FOOD GAPS ═══
+        {
+          const species = [['Pig', 'Pig', ['urea_nonruminant']], ['Horse', 'Horse', ['oleander', 'lawn_clippings']], ['Chicken', 'Chicken', ['chocolate_bird']], ['Dog', 'Dog', ['dough_raw', 'mushrooms_wild']]];
+          const made = {};
+          for (const [label, sp, codes] of species) {
+            const id = await mk(ownerP.token, { name: `Verify M6 ${label}`, species: sp, gender: 'male', dateOfBirth: iso(-900) }, sp === 'Horse' ? 450 : sp === 'Pig' ? 90 : sp === 'Chicken' ? 2 : 20);
+            made[sp] = id;
+            if (!id) continue;
+            const ov = await http('GET', `${apiBase}/nutrition/animals/${id}`, null, ownerP.token);
+            const list = ov.json?.data?.unsafeFoods || [];
+            for (const c of codes) {
+              const row = list.find(u => u.code === c);
+              if (!row) problems.push(`[6 safe foods] the ${sp} safe-food list is missing '${c}' (has ${list.map(u => u.code).join(', ')})`);
+              else if (row.status !== 'unvalidated') problems.push(`[6 safe foods] '${c}' for ${sp} should be status 'unvalidated' (not yet signed off by a vet), got '${row.status}'`);
+            }
+          }
+          const dbRows = rows(`SELECT code, species_code, status FROM ${S}.nutrition_unsafe_foods WHERE code IN ('urea_nonruminant','oleander','lawn_clippings','chocolate_bird','dough_raw','mushrooms_wild','onion_bird','cottonseed_cake','mustard_cake')`);
+          const notUnvalidated = dbRows.filter(r => r.status !== 'unvalidated');
+          if (notUnvalidated.length) problems.push(`[6 safe foods] new migration-070 rows that are not 'unvalidated': ${notUnvalidated.map(r => `${r.code}/${r.species_code}=${r.status}`).join(', ')}`);
+          // a plan / feeding entry that includes the danger is caught
+          if (made.Pig) {
+            const r = await http('POST', `${apiBase}/nutrition/animals/${made.Pig}/plan`, { goal: 'maintain', mealsPerDay: 2, foods: [{ label: 'Urea mixed feed', kcalPer100g: 300, sharePct: 100 }] }, ownerP.token);
+            if (!(r.status === 400 && /unsafe/i.test(msgOf(r)))) {
+              const f = await http('POST', `${apiBase}/nutrition/animals/${made.Pig}/feeding`, { label: 'urea', kind: 'meal', amountG: 100 }, ownerP.token);
+              if (!(f.json?.data?.warnings || []).length) problems.push(`[6 safe foods] urea given to a pig is neither refused in a plan (HTTP ${r.status} '${msgOf(r).slice(0, 80)}') nor warned when logged (HTTP ${f.status})`);
+              else notes.push(`pig plan with urea answered HTTP ${r.status} '${msgOf(r).slice(0, 80)}', but logging urea as fed is flagged`);
+            }
+          }
+          if (made.Chicken) {
+            const f = await http('POST', `${apiBase}/nutrition/animals/${made.Chicken}/feeding`, { label: 'chocolate biscuit', kind: 'treat', amountG: 5 }, ownerP.token);
+            if (f.status !== 201 || !(f.json?.data?.warnings || []).some(w => w.severity === 'danger')) problems.push(`[6 safe foods] chocolate logged for a chicken was not flagged as a danger (HTTP ${f.status})`);
+          }
+          if (made.Dog) {
+            for (const food of ['raw dough', 'wild mushrooms']) {
+              const f = await http('POST', `${apiBase}/nutrition/animals/${made.Dog}/feeding`, { label: food, kind: 'treat', amountG: 20 }, ownerP.token);
+              if (f.status !== 201 || !(f.json?.data?.warnings || []).some(w => w.severity === 'danger')) problems.push(`[6 safe foods] '${food}' logged for a dog was not flagged as a danger (HTTP ${f.status})`);
+            }
+          }
+          if (made.Horse) {
+            const f = await http('POST', `${apiBase}/nutrition/animals/${made.Horse}/feeding`, { label: 'oleander leaves (kaner)', kind: 'meal', amountG: 200 }, ownerP.token);
+            if (f.status !== 201 || !(f.json?.data?.warnings || []).some(w => w.severity === 'danger')) problems.push(`[6 safe foods] oleander logged for a horse was not flagged as a danger (HTTP ${f.status})`);
+            const hf = await foodMap(`animalId=${made.Horse}`, ownerP.token);
+            const oleanderFeed = Object.entries(hf).find(([k]) => /oleander|urea/i.test(k));
+            if (oleanderFeed) problems.push(`[6 safe foods] the horse feed library offers '${oleanderFeed[0]}'`);
+            else notes.push('ration builders take library feeds only (no free-typed feed), so oleander / urea cannot enter a horse or pig RATION; the danger is caught on the pet plan route and the feeding log');
+          }
+        }
+
+        // ═══ 7. WHOLE-MODULE ACCESS (H15) ═══
+        {
+          const dogAcc = await mk(ownerP.token, { name: 'Verify M7 Dog', species: 'Dog', gender: 'male', dateOfBirth: iso(-1800) }, 20);
+          const cowAcc = await mk(tom.token, { name: 'Verify M7 Farm Cow', species: 'Cattle', gender: 'female', dateOfBirth: iso(-365 * 5), enterpriseId: ent }, 400);
+          if (dogAcc && cowAcc) {
+            book(vetB.id, ownerP.id, 'animal_id', dogAcc, false);
+            book(vetB.id, tom.id, 'animal_id', cowAcc, true);
+            await http('PATCH', `${apiBase}/nutrition/animals/${dogAcc}/facts`, { isNeutered: true, activityLevel: 'moderate', housing: 'indoor' }, ownerP.token);
+            const dPlan = { goal: 'maintain', mealsPerDay: 2, foods: [{ label: 'Verify access kibble', kcalPer100g: 350, sharePct: 100 }] };
+            fx.dogId = dogAcc; fx.cowId = cowAcc;
+            const dp = await http('POST', `${apiBase}/nutrition/animals/${dogAcc}/plan`, dPlan, ownerP.token);
+            const dogPlanId = dp.json?.data?.id;
+            await http('POST', `${apiBase}/nutrition/animals/${dogAcc}/measurements`, { weight: 30, unit: 'kg', bodyConditionScore: 9, bcsScale: 9 }, ownerP.token);
+            const dogFlag = (await http('GET', `${apiBase}/nutrition/animals/${dogAcc}`, null, ownerP.token)).json?.data?.flags?.[0]?.id;
+            const meal1 = (await http('POST', `${apiBase}/nutrition/animals/${dogAcc}/feeding`, { label: 'kibble', kind: 'meal', amountG: 100 }, ownerP.token)).json?.data?.id;
+            const fm = await foodMap(`animalId=${cowAcc}`, tom.token);
+            const cp = await http('POST', `${apiBase}/nutrition/animals/${cowAcc}/ration`, cowBody(fm, 10), tom.token);
+            const cowPlanId = cp.json?.data?.id;
+            if (!dogPlanId || !dogFlag || !meal1 || !cowPlanId) problems.push(`[7 access] fixtures not ready: dog plan ${!!dogPlanId}, flag ${!!dogFlag}, meal ${!!meal1}, cow ration ${!!cowPlanId} (${msgOf(cp).slice(0, 80)})`);
+            else {
+              const P = { owner: ownerP, tom, worker, viewer, vetB, vetU, stranger, hs, pharm, admin };
+              const run = async (label, method, path, body, allow, subjectNote) => {
+                for (const [name, u] of Object.entries(P)) {
+                  const r = await http(method, `${apiBase}${path}`, body, u.token);
+                  if (allow.includes(name)) {
+                    if (r.status >= 300) problems.push(`[7 access] ${label}: ${name} should be allowed but got HTTP ${r.status} ${codeOf(r)} '${msgOf(r).slice(0, 90)}'`);
+                  } else refusal(`[7 access] ${label}: ${name} must be refused`, r);
+                }
+              };
+              // pet dog: owner + booked vet + admin may read and write; reviewing is a vet's job
+              const petRW = ['owner', 'vetB', 'admin'];
+              await run('GET dog overview', 'GET', `/nutrition/animals/${dogAcc}`, null, petRW);
+              await run('GET dog feeding', 'GET', `/nutrition/animals/${dogAcc}/feeding`, null, petRW);
+              await run('GET dog foods', 'GET', `/nutrition/foods?animalId=${dogAcc}`, null, petRW);
+              await run('POST dog plan preview', 'POST', `/nutrition/animals/${dogAcc}/plan/preview`, dPlan, petRW);
+              await run('POST explain dog plan', 'POST', `/nutrition/plans/${dogPlanId}/explain`, { language: 'en' }, petRW);
+              await run('POST review dog plan', 'POST', `/nutrition/plans/${dogPlanId}/review`, { note: 'ok' }, ['vetB', 'admin']);
+              for (const name of ['owner', 'vetU', 'stranger', 'hs', 'pharm']) {
+                refusal(`[7 access] prescribe the dog plan as ${name}`, await http('POST', `${apiBase}/nutrition/plans/${dogPlanId}/prescribe`, { durationDays: 10 }, P[name].token));
+              }
+              await run('PATCH dog flag', 'PATCH', `/nutrition/flags/${dogFlag}`, { status: 'reviewed' }, petRW);
+              await run('PATCH dog facts', 'PATCH', `/nutrition/animals/${dogAcc}/facts`, { activityLevel: 'moderate' }, petRW);
+              await run('POST dog measurement', 'POST', `/nutrition/animals/${dogAcc}/measurements`, { weight: 20.5, unit: 'kg' }, petRW);
+              await run('POST dog feeding', 'POST', `/nutrition/animals/${dogAcc}/feeding`, { label: 'kibble', kind: 'meal', amountG: 80 }, petRW);
+              await run('POST dog food', 'POST', '/nutrition/foods', { animalId: dogAcc, label: 'Verify access treat', kcalPer100g: 300, kind: 'treat' }, petRW);
+              for (const name of ['viewer', 'stranger', 'vetU', 'hs', 'pharm']) {
+                refusal(`[7 access] delete another person's dog meal as ${name}`, await http('DELETE', `${apiBase}/nutrition/feeding/${meal1}`, null, P[name].token));
+              }
+              if ((await http('DELETE', `${apiBase}/nutrition/feeding/${meal1}`, null, ownerP.token)).status >= 300) problems.push('[7 access] the owner could not delete their own meal entry');
+              await run('POST dog plan', 'POST', `/nutrition/animals/${dogAcc}/plan`, dPlan, petRW);
+
+              // farm cow: owner, worker, manager-less here; viewer read-only; booked vet read+write; admin all
+              const farmRead = ['tom', 'worker', 'viewer', 'vetB', 'admin'];
+              const farmWrite = ['tom', 'worker', 'vetB', 'admin'];
+              await run('GET cow overview', 'GET', `/nutrition/animals/${cowAcc}`, null, farmRead);
+              await run('GET cow feeding', 'GET', `/nutrition/animals/${cowAcc}/feeding`, null, farmRead);
+              await run('GET cow foods', 'GET', `/nutrition/foods?animalId=${cowAcc}`, null, farmRead);
+              await run('POST cow ration preview', 'POST', `/nutrition/animals/${cowAcc}/ration/preview`, cowBody(fm, 10), farmRead);
+              await run('POST explain cow ration', 'POST', `/nutrition/plans/${cowPlanId}/explain`, { language: 'en' }, farmRead);
+              await run('POST review cow ration', 'POST', `/nutrition/plans/${cowPlanId}/review`, { note: 'ok' }, ['vetB', 'admin']);
+              await run('POST cow measurement', 'POST', `/nutrition/animals/${cowAcc}/measurements`, { weight: 401, unit: 'kg' }, farmWrite);
+              await run('PATCH cow facts', 'PATCH', `/nutrition/animals/${cowAcc}/facts`, { activityLevel: 'moderate' }, farmWrite);
+              await run('POST cow feeding', 'POST', `/nutrition/animals/${cowAcc}/feeding`, { label: 'green maize', kind: 'meal', amountG: 5000 }, farmWrite);
+              await run('POST cow ration', 'POST', `/nutrition/animals/${cowAcc}/ration`, cowBody(fm, 10), farmWrite);
+              // herd
+              const gf = await foodMap(`groupId=${herd}`, tom.token);
+              const herdBody = { milkLitresPerDay: 8, avgWeightKg: 400, feeds: COW_FEEDS.map((c, i) => ({ ingredientId: gf[c], pricePerKg: COW_PRICE[i] })) };
+              const herdRead = ['tom', 'worker', 'viewer', 'admin'];
+              await run('GET herd ration', 'GET', `/nutrition/groups/${herd}/ration`, null, herdRead);
+              await run('GET herd feeding card', 'GET', `/nutrition/groups/${herd}/feeding`, null, herdRead);
+              await run('GET herd foods', 'GET', `/nutrition/foods?groupId=${herd}`, null, herdRead);
+              await run('POST herd ration preview', 'POST', `/nutrition/groups/${herd}/ration/preview`, herdBody, herdRead);
+              await run('POST herd ration', 'POST', `/nutrition/groups/${herd}/ration`, herdBody, ['tom', 'worker', 'admin']);
+              // admin master data: admin only
+              for (const p of ['species', 'energy-factors', 'foods', 'unsafe-foods', 'requirement-sets', 'curves', 'usage?days=30']) {
+                await run(`GET /nutrition/admin/${p}`, 'GET', `/nutrition/admin/${p}`, null, ['admin']);
+              }
+              for (const name of ['owner', 'tom', 'worker', 'vetB', 'vetU', 'hs', 'pharm', 'stranger']) {
+                refusal(`[7 access] approve-pending master data as ${name}`, await http('POST', `${apiBase}/nutrition/admin/approve-pending`, null, P[name].token));
+                refusal(`[7 access] change a species model as ${name}`, await http('PUT', `${apiBase}/nutrition/admin/species/Dog`, { nutritionModel: 'guidance_only' }, P[name].token));
+              }
+              // lists and the dashboard follow the same rule
+              for (const [name, u] of Object.entries({ stranger, vetU, hs, pharm })) {
+                const l = await http('GET', `${apiBase}/nutrition/animals?limit=100`, null, u.token);
+                const ids = (l.json?.data?.items || []).map(x => x.id);
+                if (ids.includes(dogAcc) || ids.includes(cowAcc)) problems.push(`[7 access] ${name} sees another person's animal in the Nutrition list`);
+                const sm = await http('GET', `${apiBase}/nutrition/summary`, null, u.token);
+                if (sm.json?.data?.total !== 0) problems.push(`[7 access] ${name}'s dashboard counts ${sm.json?.data?.total} animal(s) that are not theirs`);
+              }
+              for (const [name, u] of Object.entries({ worker, viewer, vetB })) {
+                const l = await http('GET', `${apiBase}/nutrition/animals?limit=100`, null, u.token);
+                if (!(l.json?.data?.items || []).some(x => x.id === cowAcc)) problems.push(`[7 access] ${name} cannot find the farm cow they may open in the Nutrition list`);
+              }
+              // a stranger with a made-up id vs a real one: same words?
+              const real = await http('GET', `${apiBase}/nutrition/groups/${herd}/feeding`, null, stranger.token);
+              const fake = await http('GET', `${apiBase}/nutrition/groups/${uuid()}/feeding`, null, stranger.token);
+              if (real.status !== fake.status) notes.push(`group ids: a stranger gets HTTP ${real.status} for a real farm's group but HTTP ${fake.status} for an unknown id - this confirms the group exists (owner decision needed on revealing it, CLAUDE.md H15 note)`);
+              const realA = await http('GET', `${apiBase}/nutrition/animals/${dogAcc}`, null, stranger.token);
+              const fakeA = await http('GET', `${apiBase}/nutrition/animals/${uuid()}`, null, stranger.token);
+              if (realA.status !== fakeA.status) notes.push(`animal ids: a stranger gets HTTP ${realA.status} for a real animal but HTTP ${fakeA.status} for an unknown id - the real one's existence can be told apart`);
+            }
+          }
+        }
+
+        // ═══ 8. CONNECTIONS ═══
+        {
+          // 8a feed recorded in Daily records lowers stock and shows in cost
+          const feedPath = `${apiBase}/enterprises/${ent}/feed`;
+          const item = await http('POST', feedPath, { feedName: 'Verify M8 feed', unit: 'kg', currentStock: 300, minimumStock: 10, costPerUnit: 10 }, tom.token);
+          const itemId = item.json?.data?.id;
+          const pigs = uuid();
+          sql(`INSERT INTO animal_groups (id, enterprise_id, name, species, current_count) VALUES ('${pigs}', '${ent}', 'Verify M8 Pigs', 'Pig', 10);
+               INSERT INTO group_cycles (group_id, cycle_number, species, placed_count, current_count, started_at, status) VALUES ('${pigs}', 1, 'Pig', 10, 10, CURRENT_DATE - 90, 'active');`);
+          if (!itemId) problems.push(`[8 connections] could not create a stock item: HTTP ${item.status} ${msgOf(item).slice(0, 100)}`);
+          else {
+            const before = Number((await http('GET', `${apiBase}/nutrition/summary`, null, tom.token)).json?.data?.feedCostToday || 0);
+            const rec = await http('POST', `${apiBase}/farm-records`, { enterpriseId: ent, recordType: 'feed', groupId: pigs, quantity: 25, feedId: itemId }, tom.token);
+            const stock = ((await http('GET', feedPath, null, tom.token)).json?.data?.items || []).find(f => f.id === itemId);
+            if (rec.status >= 300 || stock?.currentStock !== 275 || rec.json?.data?.cost !== 250) problems.push(`[8 connections] recording 25 kg of a 10-per-kg stock item: HTTP ${rec.status}, stock ${stock?.currentStock} (want 275), cost ${rec.json?.data?.cost} (want 250)`);
+            const after = Number((await http('GET', `${apiBase}/nutrition/summary`, null, tom.token)).json?.data?.feedCostToday || 0);
+            if (Math.abs(after - before - 250) > 0.01) problems.push(`[8 connections] the dashboard's feed cost today went ${before} -> ${after}, expected +250 from the recorded feed`);
+            const card = await http('GET', `${apiBase}/nutrition/groups/${pigs}/feeding`, null, tom.token);
+            const t = card.json?.data?.today;
+            if (card.status !== 200 || t?.status !== 'ok' || !(t?.costPerDay > 0) || Math.abs(t.costPerDay - t.kgPerDay * 10) > 0.2) problems.push(`[8 connections] the pig group's feed card should price today's feed at the recorded stock price (10 per kg): HTTP ${card.status}, kg ${t?.kgPerDay}, cost ${t?.costPerDay}`);
+            for (const [who, tok] of [['worker', worker.token], ['viewer', viewer.token], ['admin', admin.token]]) {
+              const c2 = await http('GET', `${apiBase}/nutrition/groups/${pigs}/feeding`, null, tok);
+              if (c2.json?.data?.today?.costPerDay !== t?.costPerDay) problems.push(`[8 connections] the pig card shows ${c2.json?.data?.today?.costPerDay} to the ${who} but ${t?.costPerDay} to the farmer`);
+            }
+            const sFarmer = await http('GET', `${apiBase}/nutrition/summary`, null, tom.token);
+            const sWorker = await http('GET', `${apiBase}/nutrition/summary`, null, worker.token);
+            if (sWorker.json?.data?.feedCostToday !== sFarmer.json?.data?.feedCostToday) problems.push(`[8 connections] the farm's feed cost today differs: farmer ${sFarmer.json?.data?.feedCostToday}, worker ${sWorker.json?.data?.feedCostToday}`);
+            const strangerCost = (await http('GET', `${apiBase}/nutrition/summary`, null, stranger.token)).json?.data?.feedCostToday;
+            if (strangerCost !== null && strangerCost !== undefined) problems.push(`[8 connections] a stranger's dashboard shows a feed cost today (${strangerCost})`);
+          }
+          // 8b medicated-feed prescription: the ration carries the one withdrawal answer
+          const wCow = await mk(tom.token, { name: 'Verify M8 Withdrawal Cow', species: 'Cattle', gender: 'female', dateOfBirth: iso(-365 * 5), enterpriseId: ent }, 400);
+          if (wCow) {
+            const rx = await http('POST', `${apiBase}/prescriptions`, { petOwnerId: tom.id, animalId: wCow, diagnosis: 'Verify', instructions: '', medications: [{ name: 'Verify medicated feed', dosage: '5 ml', frequency: 'Once daily', treatmentDays: 2, withdrawalMilkDays: 3, withdrawalMeatDays: 10 }] }, admin.token);
+            const fm = await foodMap(`animalId=${wCow}`, tom.token);
+            const pv = await http('POST', `${apiBase}/nutrition/animals/${wCow}/ration/preview`, cowBody(fm, 10), tom.token);
+            const wd = (await http('GET', `${apiBase}/animals/${wCow}/withdrawal`, null, tom.token)).json?.data;
+            const got = pv.json?.data?.withdrawals;
+            if (rx.status !== 201) problems.push(`[8 connections] medicated prescription for the cow: HTTP ${rx.status} ${msgOf(rx).slice(0, 100)}`);
+            else if (!Array.isArray(got) || got.find(w => w.what === 'milk')?.until !== wd?.milkUntil || got.find(w => w.what === 'meat')?.until !== wd?.meatUntil || !wd?.milkUntil) problems.push(`[8 connections] the ration's withdrawals ${JSON.stringify(got)} must equal the withdrawal service's answer (milk ${wd?.milkUntil}, meat ${wd?.meatUntil})`);
+            const none = await http('POST', `${apiBase}/nutrition/animals/${wCow}/ration/preview`, cowBody(fm, 10), vetB.token);
+            if (none.status < 400) problems.push('[8 connections] an unbooked vet previewed a farm cow\'s ration (and its withdrawals)');
+          }
+          // 8c sold animal (recorded as a sale in Daily records, the real path): plan archived at once
+          const sold = await mk(tom.token, { name: 'Verify M8 Sold Cow', species: 'Cattle', gender: 'female', dateOfBirth: iso(-365 * 5), enterpriseId: ent }, 400);
+          if (sold) {
+            const fm = await foodMap(`animalId=${sold}`, tom.token);
+            const rs = await http('POST', `${apiBase}/nutrition/animals/${sold}/ration`, cowBody(fm, 10), tom.token);
+            const planState = () => rows(`SELECT status FROM ${S}.nutrition_plans WHERE animal_id = '${sold}' ORDER BY created_at DESC LIMIT 1`)[0]?.status;
+            if (rs.status !== 201 || planState() !== 'active') problems.push(`[8 connections] could not set up the sold-animal plan (HTTP ${rs.status}, state ${planState()})`);
+            const sale = await http('POST', `${apiBase}/farm-records/events`, { animalId: sold, eventType: 'sale', eventDate: iso(0), detail: { amount: 40000 } }, tom.token);
+            if (sale.status >= 300) problems.push(`[8 connections] recording the sale of the cow: HTTP ${sale.status} ${codeOf(sale)} ${msgOf(sale).slice(0, 120)}`);
+            else if (planState() !== 'archived') problems.push(`[8 connections] after the sale the cow's plan should be archived, it is '${planState()}'`);
+            const ovSold = await http('GET', `${apiBase}/nutrition/animals/${sold}`, null, tom.token);
+            if (ovSold.json?.data?.plan) problems.push('[8 connections] a sold animal still shows a plan in its Nutrition panel');
+            const lst = await http('GET', `${apiBase}/nutrition/animals?limit=100`, null, tom.token);
+            const row = (lst.json?.data?.items || []).find(x => x.id === sold);
+            if (row?.plan) problems.push('[8 connections] a sold animal still shows a plan in the Nutrition list');
+          }
+          // 8d notifications of a feeding alert: owner, farm managers and connected vets; not a stranger
+          const farmDog = await mk(tom.token, { name: 'Verify M8 Farm Dog', species: 'Dog', gender: 'male', dateOfBirth: iso(-1800), enterpriseId: ent }, 30);
+          if (farmDog) {
+            book(vetB.id, tom.id, 'animal_id', farmDog, true);
+            await http('PATCH', `${apiBase}/nutrition/animals/${farmDog}/facts`, { isNeutered: true, activityLevel: 'moderate', housing: 'indoor' }, tom.token);
+            await http('POST', `${apiBase}/nutrition/animals/${farmDog}/measurements`, { weight: 30, unit: 'kg', bodyConditionScore: 9, bcsScale: 9 }, tom.token);
+            const flags = (await http('GET', `${apiBase}/nutrition/animals/${farmDog}`, null, tom.token)).json?.data?.flags || [];
+            if (!flags.length) problems.push('[8 connections] a body condition of 9/9 raised no alert');
+            const mine = (u) => rows(`SELECT metadata->>'dedupeKey' AS dk FROM ${S}.notifications WHERE user_id = '${u.id}' AND metadata->>'type' = 'nutrition_flag' AND metadata->>'animalId' = '${farmDog}'`);
+            for (const [who, u] of [['farm owner', tom], ['farm manager', mgr], ['connected vet', vetB]]) {
+              const m = mine(u);
+              if (m.length === 0) problems.push(`[8 connections] the ${who} got no notification for the feeding alert`);
+              else if (new Set(m.map(x => x.dk)).size !== m.length) problems.push(`[8 connections] the ${who} was told about the same alert more than once (${m.length} notes, ${new Set(m.map(x => x.dk)).size} distinct)`);
+            }
+            for (const [who, u] of [['stranger', stranger], ['unbooked vet', vetU], ['hospital staff', hs], ['pharmacist', pharm]]) {
+              if (mine(u).length) problems.push(`[8 connections] the ${who} was notified about another person's animal`);
+            }
+            notes.push(`feeding-alert notifications: farm worker ${mine(worker).length}, farm viewer ${mine(viewer).length} (by design only owner / manager / supervisor and connected vets are told)`);
+          }
+          // 8e the assistant builds its context on the real schema (the AI itself is not called)
+          const dogCtx = await mk(ownerP.token, { name: 'Verify M8 Context Dog', species: 'Dog', gender: 'male', dateOfBirth: iso(-1800) }, 20);
+          if (dogCtx) {
+            await http('PATCH', `${apiBase}/nutrition/animals/${dogCtx}/facts`, { isNeutered: true, activityLevel: 'moderate', housing: 'indoor' }, ownerP.token);
+            await http('POST', `${apiBase}/nutrition/animals/${dogCtx}/plan`, { goal: 'maintain', mealsPerDay: 2, foods: [{ label: 'Verify ctx kibble', kcalPer100g: 350, sharePct: 100 }] }, ownerP.token);
+            const logMark = serverLog.length;
+            const sess = await http('POST', `${apiBase}/ai-copilot/sessions`, { title: 'verify 6m' }, ownerP.token);
+            const sid = sess.json?.data?.id || sess.json?.data?.session?.id;
+            const sent = sid ? await http('POST', `${apiBase}/ai-copilot/sessions/${sid}/messages`, { content: 'What should Verify M8 Context Dog eat?' }, ownerP.token) : sess;
+            const ctxFail = serverLog.slice(logMark).split('\n').filter(l => /Failed to build user context for AI/.test(l));
+            if (!sid || sent.status >= 400) problems.push(`[8 connections] the assistant did not answer the owner: session HTTP ${sess.status}, message HTTP ${sent.status}`);
+            else if (ctxFail.length) problems.push('[8 connections] the assistant could not build the owner\'s context with a nutrition plan on the animal');
+            else notes.push('assistant context builds without error with a plan on the animal; whether the plan text reaches the model is not observable over HTTP (the context string is internal; AI calls are off here)');
+          }
+        }
+
+        // ═══ 9. MILK YIELD ONE-PLACE CHECK (report only) ═══
+        {
+          const mc = await mk(tom.token, { name: 'Verify M9 Milk Cow', species: 'Cattle', gender: 'female', dateOfBirth: iso(-365 * 5), enterpriseId: ent, avgDailyMilkLitres: 5 }, 450);
+          if (mc) {
+            const fm = await foodMap(`animalId=${mc}`, tom.token);
+            const noMilkBody = { feeds: COW_FEEDS.map((c, i) => ({ ingredientId: fm[c], pricePerKg: COW_PRICE[i] })) };
+            const typed = (await http('POST', `${apiBase}/nutrition/animals/${mc}/ration/preview`, noMilkBody, tom.token)).json?.data;
+            for (let d = 1; d <= 3; d++) await http('POST', `${apiBase}/farm-records`, { enterpriseId: ent, recordType: 'milk', animalId: mc, quantity: 9, session: 'am', recordDate: iso(-d) }, tom.token);
+            const recMilk = Number(rows(`SELECT COALESCE(SUM(quantity), 0) AS n FROM ${S}.farm_daily_records WHERE animal_id = '${mc}' AND record_type = 'milk'`)[0]?.n);
+            const afterRec = (await http('POST', `${apiBase}/nutrition/animals/${mc}/ration/preview`, noMilkBody, tom.token)).json?.data;
+            const typedOver = (await http('POST', `${apiBase}/nutrition/animals/${mc}/ration/preview`, { ...noMilkBody, milkLitresPerDay: 20 }, tom.token)).json?.data;
+            const profileNow = Number(rows(`SELECT avg_daily_milk_litres AS v FROM ${S}.animals WHERE id = '${mc}'`)[0]?.v);
+            await http('POST', `${apiBase}/nutrition/animals/${mc}/ration`, { ...noMilkBody, milkLitresPerDay: 20 }, tom.token);
+            const profileAfterSave = Number(rows(`SELECT avg_daily_milk_litres AS v FROM ${S}.animals WHERE id = '${mc}'`)[0]?.v);
+            notes.push(`MILK YIELD: profile avg typed 5 L; ration preview with no recorded milk used ${typed?.milkLitresPerDay} L (source ${typed?.milkSource}); after ${recMilk} L of milk recorded in Daily records over 3 days (9 L/day) the preview used ${afterRec?.milkLitresPerDay} L (source ${afterRec?.milkSource}); a typed 20 L in the ration form was used as ${typedOver?.milkLitresPerDay} L; the profile avg_daily_milk_litres stayed ${profileNow} until the ration was SAVED with 20 L, then became ${profileAfterSave} (the typed value is written back to the profile, so the profile can drift from the recorded 9 L/day)`);
+          }
+        }
+      }
+      const sqlErrs = serverLog.slice(mark).split('\n')
+        .filter(l => /syntax error|does not exist|violates|invalid input syntax|there is no unique|could not determine|DATABASE_ERROR|statusCode":5\d\d/i.test(l))
+        .map(l => l.replace(/\x1b\[[0-9;]*m/g, '').slice(-240));
+      if (notes.length) log(`   PHASE 6m notes:\n     - ${notes.join('\n     - ')}`);
+      if (problems.length || sqlErrs.length) fail('Animal nutrition misbehaves end to end (weight, age gate, home diet, caution, metabolic gate, safe foods, access, connections).', [...problems, ...sqlErrs]);
+      else ok('one weight; no adult ration without an age; home-only diet; breeder caution; metabolic gate; safe-food gaps; whole-module access; feed/withdrawal/sale/notification connections');
+    }
+
     // ── PHASE 7: the browser ──
     let sweepAccounts = [];
     if (serverHealthy && port) {
@@ -2685,7 +3295,7 @@ async function http(method, url, body, token) {
             // @critical is a handful of journeys; --full is 462 tests on a single worker and
             // needs far longer. Overridable via VERIFY_E2E_TIMEOUT_MS.
             timeout: Number(process.env.VERIFY_E2E_TIMEOUT_MS) || (FULL ? 3600000 : 1800000),
-            env: { ...process.env, E2E_BASE_URL: `http://127.0.0.1:${port}`, CI: '1', SWEEP_ACCOUNTS: JSON.stringify(sweepAccounts) },
+            env: { ...process.env, E2E_BASE_URL: `http://127.0.0.1:${port}`, CI: '1', SWEEP_ACCOUNTS: JSON.stringify(sweepAccounts), NUTRI_FIXTURES: JSON.stringify(globalThis.__nutriFixtures || null) },
           });
           ok('registration, shell render, i18n, password toggle, whole-app sweep');
         } catch (e) {

@@ -86,7 +86,7 @@ export interface NutritionPlan {
     work?: string | null
     weightKg?: number | null
     /** Herd rations: the per-head plan times the head count. */
-    herd?: { headCount: number; totalCostPerDay: number; lines: Array<{ key: string; label: string; kgAsFedPerDay: number; costPerDay: number }> } | null
+    herd?: { headCount: number; notCounted?: number; totalCostPerDay: number; lines: Array<{ key: string; label: string; kgAsFedPerDay: number; costPerDay: number }> } | null
   } | null
   model?: NutritionModel
   groupId?: string | null

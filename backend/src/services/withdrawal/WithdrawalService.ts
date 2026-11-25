@@ -232,7 +232,9 @@ class WithdrawalService {
       if (seen.rows.length) continue;
       await NotificationService.createNotification(p.id, 'system', `Withdrawal: ${x.name}`,
         `${x.name} was treated - hold back ${parts}. Open Daily records to see what is under withdrawal.`, 'in_app',
-        { type: 'withdrawal_started', prescriptionId: rx.id, dedupeKey: key });
+        { type: 'withdrawal_started', prescriptionId: rx.id, dedupeKey: key,
+          i18n: { title: { code: 'NOTIF_WD_TITLE', params: { name: x.name } },
+                  body: { code: s.milkUntil && s.meatUntil ? 'NOTIF_WD_MILK_MEAT' : s.milkUntil ? 'NOTIF_WD_MILK' : 'NOTIF_WD_MEAT', params: { name: x.name, milk: s.milkUntil || '', meat: s.meatUntil || '' } } } });
     }
   }
 

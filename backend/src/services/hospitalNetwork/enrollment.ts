@@ -313,7 +313,8 @@ import { getNetworkMember } from './members';
     try {
       await NotificationService.createNotification(row.invited_by, 'system', `${inv.patientName} accepted your invitation`,
         `${inv.patientName} accepted the invitation to ${inv.networkName}. You can now ask to enrol ${inv.animalName || 'their pet'}; they will be asked to approve sharing.`,
-        'in_app', { type: 'walkin_invite_accepted', inviteId: row.id });
+        'in_app', { type: 'walkin_invite_accepted', inviteId: row.id,
+          i18n: { title: { code: 'NOTIF_WI_TITLE', params: { patient: inv.patientName } }, body: { code: 'NOTIF_WI_BODY', params: { patient: inv.patientName, network: inv.networkName, pet: inv.animalName || '' } } } });
     } catch (err: any) { logger.warn('Could not tell the inviter a walk-in invitation was accepted', { error: err?.message }); }
     return { id: row.id, networkId: row.network_id, hospitalId: row.hospital_id };
   }

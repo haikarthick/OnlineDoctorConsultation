@@ -67,7 +67,7 @@ class NutritionService {
       [animalId]
     );
     const a = r.rows[0];
-    if (!a) throw new NotFoundError('Animal');
+    if (!a) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
     const measurements = await BodyMeasurementService.list(animalId, { limit: 60 });
     const latestWeight = measurements.find(m => m.weightKg !== null);
     const latestBcs = measurements.find(m => m.bcs9 !== null);
@@ -107,18 +107,18 @@ class NutritionService {
       const v = patch[key];
       if (key === 'dateOfBirth' && v) {
         const s = String(v);
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(s) || Number.isNaN(Date.parse(s))) throw new ValidationError('That date of birth is not a valid date.');
-        if (s > todayIso()) throw new ValidationError('Date of birth cannot be in the future.');
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(s) || Number.isNaN(Date.parse(s))) throw new CodedError(400, 'NUT_THAT_DATE_OF_BIRTH_IS', 'That date of birth is not a valid date.');
+        if (s > todayIso()) throw new CodedError(400, 'NUT_DATE_OF_BIRTH_CANNOT_BE', 'Date of birth cannot be in the future.');
       }
       if (key === 'activityLevel' && v && !(ACTIVITY_LEVELS as readonly string[]).includes(String(v))) {
-        throw new ValidationError('Activity must be low, moderate, high or working.');
+        throw new CodedError(400, 'NUT_ACTIVITY_MUST_BE_LOW_MODERATE', 'Activity must be low, moderate, high or working.');
       }
       if (key === 'housing' && v && !(HOUSING_TYPES as readonly string[]).includes(String(v))) {
-        throw new ValidationError('Choose where the animal is kept from the list.');
+        throw new CodedError(400, 'NUT_CHOOSE_WHERE_THE_ANIMAL_IS', 'Choose where the animal is kept from the list.');
       }
       updates[key] = v;
     }
-    if (Object.keys(updates).length === 0) throw new ValidationError('Nothing to save - choose at least one answer.');
+    if (Object.keys(updates).length === 0) throw new CodedError(400, 'NUT_NOTHING_TO_SAVE_CHOOSE_AT', 'Nothing to save - choose at least one answer.');
     await AnimalService.updateAnimal(animalId, updates as any);
     this.track(caller, 'facts_saved').catch(() => {});
     await this.evaluateFlags(animalId).catch(err => logger.error('Nutrition flag evaluation failed', { animalId, error: err.message }));
@@ -133,8 +133,8 @@ class NutritionService {
     await NutritionAccess.forAnimal(animalId, caller, 'write');
     if (input.recordedAt) {
       const t = Date.parse(input.recordedAt);
-      if (Number.isNaN(t)) throw new ValidationError('That date is not valid.');
-      if (t > Date.now() + 86400000) throw new ValidationError('That date is in the future. Choose today or an earlier day.');
+      if (Number.isNaN(t)) throw new CodedError(400, 'NUT_THAT_DATE_IS_NOT_VALID', 'That date is not valid.');
+      if (t > Date.now() + 86400000) throw new CodedError(400, 'NUT_THAT_DATE_IS_IN_THE', 'That date is in the future. Choose today or an earlier day.');
     }
     const saved = await BodyMeasurementService.record({ ...input, animalId, source: 'nutrition', recordedBy: caller.userId });
     this.track(caller, 'measurement_added').catch(() => {});
@@ -187,8 +187,8 @@ class NutritionService {
 
   /** Loads chosen foods the caller may use for this animal: shared library rows, or the household's / farm's own. */
   private async resolveFoods(access: AnimalAccess, foods: FoodChoice[]): Promise<Array<PortionFood & { ingredientId: string | null; kind: string | null }>> {
-    if (!Array.isArray(foods) || foods.length === 0) throw new ValidationError('Choose at least one food.');
-    if (foods.length > 12) throw new ValidationError('A plan can have up to 12 foods.');
+    if (!Array.isArray(foods) || foods.length === 0) throw new CodedError(400, 'NUT_CHOOSE_AT_LEAST_ONE_FOOD', 'Choose at least one food.');
+    if (foods.length > 12) throw new CodedError(400, 'NUT_A_PLAN_CAN_HAVE_UP', 'A plan can have up to 12 foods.');
     const ids = foods.map(f => f.ingredientId).filter(Boolean) as string[];
     const rows = new Map<string, any>();
     if (ids.length) {
@@ -202,17 +202,17 @@ class NutritionService {
     }
     return foods.map((f, i) => {
       const share = num(f.sharePct);
-      if (share === null || share <= 0 || share > 100) throw new ValidationError('Each food needs a share between 1 and 100%.');
+      if (share === null || share <= 0 || share > 100) throw new CodedError(400, 'NUT_EACH_FOOD_NEEDS_A_SHARE', 'Each food needs a share between 1 and 100%.');
       if (f.ingredientId) {
         const row = rows.get(f.ingredientId);
-        if (!row) throw new ValidationError('One of the chosen foods is no longer available. Choose it again.');
+        if (!row) throw new CodedError(400, 'NUT_ONE_OF_THE_CHOSEN_FOODS', 'One of the chosen foods is no longer available. Choose it again.');
         const ownKcal = num(f.kcalPer100g);
         return { key: `f${i}`, ingredientId: row.id, label: row.label, kind: row.kind || null, kcalPer100g: ownKcal ?? num(row.energy_kcal_per_100g), sharePct: share };
       }
       const label = String(f.label || '').trim();
-      if (!label) throw new ValidationError('Give each food a name.');
+      if (!label) throw new CodedError(400, 'NUT_GIVE_EACH_FOOD_A_NAME', 'Give each food a name.');
       const kcal = num(f.kcalPer100g);
-      if (kcal !== null && (kcal <= 0 || kcal > 1000)) throw new ValidationError('Energy per 100 g must be between 1 and 1000 kcal. Check the food label.');
+      if (kcal !== null && (kcal <= 0 || kcal > 1000)) throw new CodedError(400, 'NUT_ENERGY_PER_100_G_MUST', 'Energy per 100 g must be between 1 and 1000 kcal. Check the food label.');
       return { key: `f${i}`, ingredientId: null, kind: null, label: label.slice(0, 200), kcalPer100g: kcal, sharePct: share };
     });
   }
@@ -231,22 +231,22 @@ class NutritionService {
   }> {
     const { facts } = await this.loadFacts(access.animal.id);
     if (facts.model === 'ruminant_dm' || facts.model === 'equine_dm') {
-      throw new ValidationError('For cattle, buffalo, goats, sheep, horses and donkeys, use "Work out a ration" - it balances the feeds you have.');
+      throw new CodedError(400, 'NUT_FOR_CATTLE_BUFFALO_GOATS_SHEEP', 'For cattle, buffalo, goats, sheep, horses and donkeys, use "Work out a ration" - it balances the feeds you have.');
     }
     if (facts.model !== 'companion_energy' || !CALCULATOR_MODELS.has(facts.model)) {
-      throw new ValidationError('A food calculator for this kind of animal is not available yet. The safe-food guide, weight and body condition tracking work now.');
+      throw new CodedError(400, 'NUT_A_FOOD_CALCULATOR_FOR_THIS', 'A food calculator for this kind of animal is not available yet. The safe-food guide, weight and body condition tracking work now.');
     }
-    if (input.goal && !(PLAN_GOALS as readonly string[]).includes(input.goal)) throw new ValidationError('Choose a goal from the list.');
+    if (input.goal && !(PLAN_GOALS as readonly string[]).includes(input.goal)) throw new CodedError(400, 'NUT_CHOOSE_A_GOAL_FROM_THE', 'Choose a goal from the list.');
     const missing = missingFacts(facts).filter(m => m.required);
     if (missing.length) {
-      throw new ValidationError(`A few details are needed first: ${missing.map(m => FACT_WORDS[m.key]).join(', ')}.`, { missingFacts: missing });
+      throw new CodedError(400, 'NUT_FACTS_NEEDED', `A few details are needed first: ${missing.map(m => FACT_WORDS[m.key]).join(', ')}.`, { facts: missing.map(m => FACT_CODES[m.key] || m.key).join('|') });
     }
     const mealsPerDay = Math.min(Math.max(Math.round(num(input.mealsPerDay) ?? 2), 1), 12);
     let energy: CompanionEnergyResult;
     try {
       energy = companionEnergy({ facts, factors: await this.energyFactors(facts.speciesCode), goal: input.goal ?? null, targetWeightKg: num(input.targetWeightKg) });
     } catch (e: any) {
-      if (e instanceof EnergyInputError) throw new ValidationError(e.message);
+      if (e instanceof EnergyInputError) throw new CodedError(400, ENERGY_CODES[String(e.code)] || 'NUT_ENERGY_NO_FACTOR', e.message);
       throw e;
     }
     const foods = await this.resolveFoods(access, input.foods);
@@ -301,10 +301,10 @@ class NutritionService {
     const c = await this.compute(access, input);
     const allergyHits = c.unsafe.filter(u => u.kind === 'allergy');
     if (allergyHits.length) {
-      throw new ValidationError(`This plan includes a food this animal is recorded as allergic to (${allergyHits.map(u => `${u.food}: ${u.item}`).join(', ')}). Remove it and save again, or ask the vet.`);
+      throw new CodedError(400, 'NUT_PLAN_ALLERGY', `This plan includes a food this animal is recorded as allergic to (${allergyHits.map(u => `${u.food}: ${u.item}`).join(', ')}). Remove it and save again, or ask the vet.`, { foods: allergyHits.map(u => `${u.food}: ${u.item}`).join(', ') });
     }
     if (c.unsafe.some(u => u.severity === 'danger')) {
-      throw new ValidationError(`This plan includes a food that is unsafe for this animal (${c.unsafe.filter(u => u.severity === 'danger').map(u => u.food).join(', ')}). Remove it and save again.`);
+      throw new CodedError(400, 'NUT_PLAN_UNSAFE', `This plan includes a food that is unsafe for this animal (${c.unsafe.filter(u => u.severity === 'danger').map(u => u.food).join(', ')}). Remove it and save again.`, { foods: c.unsafe.filter(u => u.severity === 'danger').map(u => u.food).join(', ') });
     }
     const reviewed = !!input.markReviewed && access.canReview;
     // A recorded condition (kidney, diabetes, ...) means a vet looks BEFORE this plan replaces the one in use: the new
@@ -351,15 +351,15 @@ class NutritionService {
   async reviewPlan(planId: string, input: { overrideKcal?: number | null; note?: string | null }, caller: Caller): Promise<any> {
     const p = await this.planRow(planId);
     await this.assertMayReview(p, caller);
-    if (p.status !== 'active' && p.status !== 'draft') throw new ValidationError('This plan has been replaced by a newer one. Review the current plan instead.');
+    if (p.status !== 'active' && p.status !== 'draft') throw new CodedError(400, 'NUT_THIS_PLAN_HAS_BEEN_REPLACED', 'This plan has been replaced by a newer one. Review the current plan instead.');
     const override = num(input.overrideKcal);
     if (override !== null && p.nutrition_model !== 'companion_energy') {
-      throw new ValidationError('For a farm ration, change the feeds or limits and save a new ration instead of setting the energy by hand.');
+      throw new CodedError(400, 'NUT_FOR_A_FARM_RATION_CHANGE', 'For a farm ration, change the feeds or limits and save a new ration instead of setting the energy by hand.');
     }
-    if (override !== null && (override <= 0 || override > 50000)) throw new ValidationError('The daily energy must be a number above zero.');
+    if (override !== null && (override <= 0 || override > 50000)) throw new CodedError(400, 'NUT_THE_DAILY_ENERGY_MUST_BE', 'The daily energy must be a number above zero.');
     // A number far from the calculated one is allowed - but never silently: the vet says why, and it is kept with their name.
     if (override !== null && Number(p.daily_energy_kcal) > 0 && Math.abs(override / Number(p.daily_energy_kcal) - 1) > 0.25 && !String(input.note || '').trim()) {
-      throw new ValidationError('This is more than 25% away from the calculated amount. Add a short reason so the owner and the next vet can see why.');
+      throw new CodedError(400, 'NUT_THIS_IS_MORE_THAN_25', 'This is more than 25% away from the calculated amount. Add a short reason so the owner and the next vet can see why.');
     }
     const kcal = override ?? Number(p.daily_energy_kcal);
     await database.transaction(async (client: any) => {
@@ -394,7 +394,7 @@ class NutritionService {
 
   private async planRow(planId: string): Promise<any> {
     const r = await database.query(`SELECT * FROM nutrition_plans WHERE id = $1`, [planId]);
-    if (!r.rows[0]) throw new NotFoundError('Food plan');
+    if (!r.rows[0]) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
     return r.rows[0];
   }
 
@@ -402,10 +402,10 @@ class NutritionService {
   private async assertMayReview(p: any, caller: Caller): Promise<void> {
     if (p.animal_id) { await NutritionAccess.forAnimal(p.animal_id, caller, 'review'); return; }
     const access = await AnimalAccessService.checkGroup(caller, p.group_id, 'read');
-    if (!access.found) throw new NotFoundError('Group');
-    if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
+    if (!access.found) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
+    if (!access.allowed) throw new CodedError(403, 'ANIMAL_NO_ACCESS', ANIMAL_NO_ACCESS_MESSAGE);
     const isVetOrAdmin = ['veterinarian', 'admin'].some(r => caller.role === r || (caller.roles || []).includes(r));
-    if (!isVetOrAdmin) throw new ForbiddenError(REVIEW_ONLY_VET_MESSAGE);
+    if (!isVetOrAdmin) throw new CodedError(403, 'NUT_REVIEW_ONLY_VET', REVIEW_ONLY_VET_MESSAGE);
   }
 
   /**
@@ -418,14 +418,14 @@ class NutritionService {
     await this.assertMayReview(p, caller);
     const isVet = caller.role === 'veterinarian' || (caller.roles || []).includes('veterinarian');
     const isAdmin = caller.role === 'admin' || (caller.roles || []).includes('admin');
-    if (!isVet && !isAdmin) throw new ForbiddenError('Only a vet can prescribe a diet.');
-    if (p.status !== 'active' && p.status !== 'draft') throw new ValidationError('This plan has been replaced by a newer one. Prescribe the current plan instead.');
+    if (!isVet && !isAdmin) throw new CodedError(403, 'NUT_ONLY_A_VET_CAN_PRESCRIBE', 'Only a vet can prescribe a diet.');
+    if (p.status !== 'active' && p.status !== 'draft') throw new CodedError(400, 'NUT_THIS_PLAN_HAS_BEEN_REPLACED_2', 'This plan has been replaced by a newer one. Prescribe the current plan instead.');
     if (p.prescription_id) {
       const existing = await database.query(`SELECT is_active FROM prescriptions WHERE id = $1`, [p.prescription_id]);
-      if (existing.rows[0]?.is_active) throw new ValidationError('This plan is already prescribed. Make a new plan to prescribe a different diet.');
+      if (existing.rows[0]?.is_active) throw new CodedError(400, 'NUT_THIS_PLAN_IS_ALREADY_PRESCRIBED', 'This plan is already prescribed. Make a new plan to prescribe a different diet.');
     }
     const plan = await this.planById(planId);
-    if (!plan.items.length) throw new ValidationError('This plan has no foods to prescribe.');
+    if (!plan.items.length) throw new CodedError(400, 'NUT_THIS_PLAN_HAS_NO_FOODS', 'This plan has no foods to prescribe.');
     const days = Math.min(Math.max(Math.round(num(input.durationDays) ?? 30), 1), 365);
 
     // Subject and owner come from the plan, never from the request.
@@ -433,7 +433,7 @@ class NutritionService {
       ? await database.query(`SELECT owner_id FROM animals WHERE id = $1`, [p.animal_id])
       : await database.query(`SELECT e.owner_id FROM animal_groups g JOIN enterprises e ON e.id = g.enterprise_id WHERE g.id = $1`, [p.group_id]);
     const ownerId: string | null = ownerRow.rows[0]?.owner_id || null;
-    if (!ownerId) throw new ValidationError('This animal has no owner on record, so a prescription cannot be written for it.');
+    if (!ownerId) throw new CodedError(400, 'NUT_THIS_ANIMAL_HAS_NO_OWNER', 'This animal has no owner on record, so a prescription cannot be written for it.');
     // Link to the vet's own consultation for this animal / herd when there is one (the given one, else the latest).
     const subjectSql = p.animal_id ? 'animal_id = $3' : 'group_id = $3';
     const subjectId = p.animal_id || p.group_id;
@@ -441,7 +441,7 @@ class NutritionService {
       ? await database.query(`SELECT id FROM consultations WHERE id = $1 AND veterinarian_id = $2 AND ${subjectSql}`, [input.consultationId, caller.userId, subjectId])
       : await database.query(`SELECT id FROM consultations WHERE veterinarian_id = $1 AND ${subjectSql.replace('$3', '$2')} ORDER BY created_at DESC LIMIT 1`, [caller.userId, subjectId]);
     if (input.consultationId && !consult.rows[0]) {
-      throw new ValidationError("That appointment is not yours or is for another animal. Prescribe the diet from this animal's own consultation.");
+      throw new CodedError(400, 'NUT_THAT_APPOINTMENT_IS_NOT_YOURS', 'That appointment is not yours or is for another animal. Prescribe the diet from this animal\'s own consultation.');
     }
     const consultationId: string | null = consult.rows[0]?.id || null;
 
@@ -564,7 +564,7 @@ class NutritionService {
       [planId]
     );
     const p = r.rows[0];
-    if (!p) throw new NotFoundError('Food plan');
+    if (!p) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
     const items = await database.query(`SELECT * FROM nutrition_plan_items WHERE plan_id = $1 ORDER BY sort_order`, [planId]);
     const meals = Number(p.meals_per_day) || 2;
     return {
@@ -610,15 +610,15 @@ class NutritionService {
     // This log is for pets (kcal of meals and treats). Feed for a farm animal is recorded in ONE place: Daily records.
     const model = (await this.loadFacts(animalId)).facts.model;
     if (['ruminant_dm', 'equine_dm', 'monogastric_spec', 'aqua_biomass'].includes(model)) {
-      throw new ValidationError('Feed for farm animals is recorded in Daily records - open Daily records, choose this animal or group, and tap Feed.');
+      throw new CodedError(400, 'NUT_FEED_FOR_FARM_ANIMALS_IS', 'Feed for farm animals is recorded in Daily records - open Daily records, choose this animal or group, and tap Feed.');
     }
     const kind = input.kind === 'treat' ? 'treat' : 'meal';
     const fedOn = input.fedOn || todayIso();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(fedOn)) throw new ValidationError('That date is not valid.');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fedOn)) throw new CodedError(400, 'NUT_THAT_DATE_IS_NOT_VALID', 'That date is not valid.');
     const latest = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
     const earliest = new Date(Date.now() - 31 * 86400000).toISOString().slice(0, 10);
-    if (fedOn > latest) throw new ValidationError('That date is in the future. Choose today or an earlier day.');
-    if (fedOn < earliest) throw new ValidationError('Feeding can be recorded for the last 30 days only.');
+    if (fedOn > latest) throw new CodedError(400, 'NUT_THAT_DATE_IS_IN_THE', 'That date is in the future. Choose today or an earlier day.');
+    if (fedOn < earliest) throw new CodedError(400, 'NUT_FEEDING_CAN_BE_RECORDED_FOR', 'Feeding can be recorded for the last 30 days only.');
 
     let label = String(input.label || '').trim();
     let kcalPer100g: number | null = null;
@@ -628,21 +628,21 @@ class NutritionService {
       const r = await database.query(
         `SELECT i.*, p.animal_id FROM nutrition_plan_items i JOIN nutrition_plans p ON p.id = i.plan_id WHERE i.id = $1`, [input.planItemId]);
       const item = r.rows[0];
-      if (!item || item.animal_id !== animalId) throw new ValidationError('That food is not in this animal\'s plan.');
+      if (!item || item.animal_id !== animalId) throw new CodedError(400, 'NUT_THAT_FOOD_IS_NOT_IN', 'That food is not in this animal\'s plan.');
       label = item.label; kcalPer100g = num(item.energy_kcal_per_100g); planId = item.plan_id; ingredientId = item.ingredient_id;
     } else if (ingredientId) {
       const r = await database.query(
         `SELECT label, energy_kcal_per_100g FROM nutrition_ingredients WHERE id = $1 AND is_active = true
             AND ((owner_id IS NULL AND enterprise_id IS NULL) OR owner_id = $2 OR ($3::uuid IS NOT NULL AND enterprise_id = $3::uuid))`,
         [ingredientId, access.animal.ownerId, access.animal.enterpriseId]);
-      if (!r.rows[0]) throw new ValidationError('That food is no longer available. Choose it again.');
+      if (!r.rows[0]) throw new CodedError(400, 'NUT_THAT_FOOD_IS_NO_LONGER', 'That food is no longer available. Choose it again.');
       label = r.rows[0].label; kcalPer100g = num(r.rows[0].energy_kcal_per_100g);
     }
-    if (!label) throw new ValidationError('Say what was fed.');
+    if (!label) throw new CodedError(400, 'NUT_SAY_WHAT_WAS_FED', 'Say what was fed.');
     const amountG = num(input.amountG);
-    if (amountG !== null && (amountG < 0 || amountG > 100000)) throw new ValidationError('Amount must be a number of grams, zero or more.');
+    if (amountG !== null && (amountG < 0 || amountG > 100000)) throw new CodedError(400, 'NUT_AMOUNT_MUST_BE_A_NUMBER', 'Amount must be a number of grams, zero or more.');
     let kcal = num(input.kcal);
-    if (kcal !== null && (kcal < 0 || kcal > 50000)) throw new ValidationError('Energy must be a number, zero or more.');
+    if (kcal !== null && (kcal < 0 || kcal > 50000)) throw new CodedError(400, 'NUT_ENERGY_MUST_BE_A_NUMBER', 'Energy must be a number, zero or more.');
     if (kcal === null && amountG !== null && kcalPer100g !== null) kcal = Math.round((amountG * kcalPer100g) / 100);
 
     const saved = await database.query(
@@ -670,10 +670,10 @@ class NutritionService {
   async deleteFeeding(id: string, caller: Caller): Promise<void> {
     const r = await database.query(`SELECT id, animal_id, recorded_by FROM nutrition_feeding_logs WHERE id = $1`, [id]);
     const row = r.rows[0];
-    if (!row) throw new NotFoundError('Feeding entry');
+    if (!row) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
     const access = await NutritionAccess.forAnimal(row.animal_id, caller, 'write');
     if (row.recorded_by !== caller.userId && access.via !== 'owner' && access.via !== 'admin') {
-      throw new ForbiddenError('Only the person who entered this, or the animal\'s owner, can delete it.');
+      throw new CodedError(403, 'NUT_ONLY_THE_PERSON_WHO_ENTERED', 'Only the person who entered this, or the animal\'s owner, can delete it.');
     }
     await database.query(`DELETE FROM nutrition_feeding_logs WHERE id = $1`, [id]);
   }
@@ -724,8 +724,8 @@ class NutritionService {
     if (params.groupId) {
       // A herd's feeds: the shared library for its species' model plus the farm's own feeds.
       const access = await AnimalAccessService.checkGroup(caller, params.groupId, 'read');
-      if (!access.found) throw new NotFoundError('Group');
-      if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
+      if (!access.found) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
+      if (!access.allowed) throw new CodedError(403, 'ANIMAL_NO_ACCESS', ANIMAL_NO_ACCESS_MESSAGE);
       const g = await database.query(
         `SELECT g.enterprise_id, e.owner_id, ms.nutrition_model FROM animal_groups g
            LEFT JOIN enterprises e ON e.id = g.enterprise_id LEFT JOIN master_species ms ON ms.code = g.species WHERE g.id = $1`,
@@ -766,9 +766,9 @@ class NutritionService {
 
   async createFood(input: { animalId?: string | null; label: string; kcalPer100g?: number | null; kind?: string }, caller: Caller): Promise<any> {
     const label = String(input.label || '').trim();
-    if (!label) throw new ValidationError('Give the food a name, as it is written on the pack.');
+    if (!label) throw new CodedError(400, 'NUT_GIVE_THE_FOOD_A_NAME', 'Give the food a name, as it is written on the pack.');
     const kcal = num(input.kcalPer100g);
-    if (kcal !== null && (kcal <= 0 || kcal > 1000)) throw new ValidationError('Energy per 100 g must be between 1 and 1000 kcal. Check the food label.');
+    if (kcal !== null && (kcal <= 0 || kcal > 1000)) throw new CodedError(400, 'NUT_ENERGY_PER_100_G_MUST', 'Energy per 100 g must be between 1 and 1000 kcal. Check the food label.');
     const kind = ['commercial_food', 'home_food', 'treat'].includes(String(input.kind)) ? String(input.kind) : 'commercial_food';
     let ownerId: string | null = caller.userId;
     let enterpriseId: string | null = null;
@@ -875,13 +875,13 @@ class NutritionService {
     const r = await database.query(
       `SELECT id, animal_id, group_id, flag_type, severity, rule_version, params, status FROM nutrition_risk_flags WHERE id = $1`, [flagId]);
     const f = r.rows[0];
-    if (!f) throw new NotFoundError('Alert');
+    if (!f) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
     if (f.animal_id) {
       await NutritionAccess.forAnimal(f.animal_id, caller, 'write');
     } else {
       const access = await AnimalAccessService.checkGroup(caller, f.group_id, 'write');
-      if (!access.found) throw new NotFoundError('Alert');
-      if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
+      if (!access.found) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
+      if (!access.allowed) throw new CodedError(403, 'ANIMAL_NO_ACCESS', ANIMAL_NO_ACCESS_MESSAGE);
     }
     await database.query(
       `UPDATE nutrition_risk_flags SET status = $2, reviewed_by = $3, reviewed_at = NOW(), updated_at = NOW() WHERE id = $1`,
@@ -981,7 +981,7 @@ class NutritionService {
 
   private async assertEntitled(caller: Caller, feature: NutritionFeature): Promise<void> {
     if (!(await isEntitled(caller.userId, feature))) {
-      throw new ForbiddenError('This part of nutrition is not included in your plan yet.');
+      throw new CodedError(403, 'NUT_THIS_PART_OF_NUTRITION_IS', 'This part of nutrition is not included in your plan yet.');
     }
   }
 
@@ -1007,6 +1007,15 @@ export async function recordOutcome(
   ).catch((err: any) => logger.error('nutrition outcome not recorded', { flagId: flag.id, error: err.message }));
 }
 
+const ENERGY_CODES: Record<string, string> = {
+  no_weight: 'NUT_ENERGY_NO_WEIGHT', needs_target_weight: 'NUT_ENERGY_NEEDS_TARGET_WEIGHT', no_factor: 'NUT_ENERGY_NO_FACTOR',
+};
+
+/** The code the app translates for each missing fact (serverMessages.FACT_*). */
+const FACT_CODES: Record<string, string> = {
+  weight: 'FACT_WEIGHT', dateOfBirth: 'FACT_DATE_OF_BIRTH', gender: 'FACT_GENDER', isNeutered: 'FACT_NEUTERED',
+  activityLevel: 'FACT_ACTIVITY', housing: 'FACT_HOUSING', bodyCondition: 'FACT_BODY_CONDITION',
+};
 const FACT_WORDS: Record<string, string> = {
   weight: 'a current weight', dateOfBirth: 'date of birth', gender: 'sex', isNeutered: 'neutered or not',
   activityLevel: 'how active it is', housing: 'where it is kept', bodyCondition: 'a body condition score',

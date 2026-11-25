@@ -24,6 +24,14 @@ const FLAG_WORDS: Record<string, string> = {
   feed_above_need: 'is being fed more than the table amount',
 };
 
+/** The code each alert type is told with (the app says it in the person's language; `what` is the English fallback). */
+const FLAG_CODES: Record<string, string> = {
+  bcs_high: 'NOTIF_NUT_FLAG_BCS_HIGH', bcs_low: 'NOTIF_NUT_FLAG_BCS_LOW', muscle_loss: 'NOTIF_NUT_FLAG_MUSCLE_LOSS',
+  rapid_weight_loss: 'NOTIF_NUT_FLAG_RAPID_WEIGHT_LOSS', weight_drift: 'NOTIF_NUT_FLAG_WEIGHT_DRIFT', no_recent_weight: 'NOTIF_NUT_FLAG_NO_RECENT_WEIGHT',
+  treats_over_limit: 'NOTIF_NUT_FLAG_TREATS_OVER_LIMIT', unsafe_food_logged: 'NOTIF_NUT_FLAG_UNSAFE_FOOD', transition_condition_loss: 'NOTIF_NUT_FLAG_TRANSITION_LOSS',
+  feed_below_need: 'NOTIF_NUT_FLAG_FEED_BELOW', feed_above_need: 'NOTIF_NUT_FLAG_FEED_ABOVE',
+};
+
 export interface Subject { animalId?: string | null; groupId?: string | null }
 
 class NutritionNotifier {
@@ -81,7 +89,9 @@ class NutritionNotifier {
       await this.send(people, `nutrition-flag:${flag.id}`,
         flag.severity === 'act' ? `Feeding alert: ${info.name}` : `Feeding watch: ${info.name}`,
         `${info.name} ${what}. Open Nutrition to see what to do.`,
-        { type: 'nutrition_flag', animalId: subject.animalId || null, groupId: subject.groupId || null, flagType: flag.type });
+        { type: 'nutrition_flag', animalId: subject.animalId || null, groupId: subject.groupId || null, flagType: flag.type,
+          i18n: { title: { code: flag.severity === 'act' ? 'NOTIF_NUT_FLAG_ACT_TITLE' : 'NOTIF_NUT_FLAG_WATCH_TITLE', params: { name: info.name } },
+                  body: { code: FLAG_CODES[flag.type] || 'NOTIF_NUT_FLAG_OTHER', params: { name: info.name } } } });
     } catch (err: any) { logger.warn('Nutrition alert notification failed', { error: err.message }); }
   }
 
@@ -93,7 +103,8 @@ class NutritionNotifier {
       await this.send(await this.vets(subject), `nutrition-plan:${planId}`,
         `Feeding plan to check: ${info.name}`,
         `A new feeding plan for ${info.name} is waiting for a vet to check it. Open Nutrition and use Review.`,
-        { type: 'nutrition_plan_review', animalId: subject.animalId || null, groupId: subject.groupId || null, planId });
+        { type: 'nutrition_plan_review', animalId: subject.animalId || null, groupId: subject.groupId || null, planId,
+          i18n: { title: { code: 'NOTIF_NUT_PLAN_TITLE', params: { name: info.name } }, body: { code: 'NOTIF_NUT_PLAN_BODY', params: { name: info.name } } } });
     } catch (err: any) { logger.warn('Nutrition plan notification failed', { error: err.message }); }
   }
 }

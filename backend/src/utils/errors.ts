@@ -42,8 +42,9 @@ export class CodedError extends AppError {
 
 /** A refusal whose next step is a vet (a young animal that needs a feeding plan made by one); the screen offers to find one. */
 export class NeedsVetError extends AppError {
-  constructor(message: string) {
-    super(400, message, 'NEEDS_VET');
+  /** `params.reason` names the sentence the app says in the person's language (serverMessages.NEEDS_VET_*); the code stays NEEDS_VET so the "find a vet" button still shows. */
+  constructor(message: string, params?: Record<string, string | number | boolean | null>) {
+    super(400, message, 'NEEDS_VET', undefined, params);
     Object.setPrototypeOf(this, NeedsVetError.prototype);
   }
 }

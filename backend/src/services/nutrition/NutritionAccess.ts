@@ -1,5 +1,5 @@
 import database from '../../utils/database';
-import { ForbiddenError, NotFoundError } from '../../utils/errors';
+import { ForbiddenError, NotFoundError, CodedError } from '../../utils/errors';
 import FarmAccessService, { roleCan } from '../FarmAccessService';
 import { checkAnimalAccess, logClinicalAccess } from '../../middleware/hospitalDataIsolation';
 
@@ -53,7 +53,7 @@ class NutritionAccess {
       [animalId]
     );
     const a = r.rows[0];
-    if (!a) throw new NotFoundError('Animal');
+    if (!a) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
     return { id: a.id, name: a.name, ownerId: a.owner_id, enterpriseId: a.enterprise_id || null, species: a.species, animalClass: a.animal_class || null };
   }
 
@@ -68,7 +68,7 @@ class NutritionAccess {
     } else {
       // Hospital-private animals: the existing rule decides, unchanged.
       const isolation = await checkAnimalAccess(caller.userId, caller.role || '', animalId);
-      if (!isolation.allowed) throw new ForbiddenError(isolation.reason || NO_NUTRITION_ACCESS_MESSAGE);
+      if (!isolation.allowed) throw isolation.reason ? new ForbiddenError(isolation.reason) : new CodedError(403, 'NUT_NO_ACCESS', NO_NUTRITION_ACCESS_MESSAGE);
 
       if (animal.ownerId === caller.userId) {
         access = { animal, canWrite: true, canReview: isVet, via: 'owner' };
@@ -87,9 +87,9 @@ class NutritionAccess {
       }
     }
 
-    if (!access) throw new ForbiddenError(NO_NUTRITION_ACCESS_MESSAGE);
-    if (need === 'write' && !access.canWrite) throw new ForbiddenError(READ_ONLY_MESSAGE);
-    if (need === 'review' && !access.canReview) throw new ForbiddenError(REVIEW_ONLY_VET_MESSAGE);
+    if (!access) throw new CodedError(403, 'NUT_NO_ACCESS', NO_NUTRITION_ACCESS_MESSAGE);
+    if (need === 'write' && !access.canWrite) throw new CodedError(403, 'NUT_READ_ONLY', READ_ONLY_MESSAGE);
+    if (need === 'review' && !access.canReview) throw new CodedError(403, 'NUT_REVIEW_ONLY_VET', REVIEW_ONLY_VET_MESSAGE);
     return access;
   }
 }

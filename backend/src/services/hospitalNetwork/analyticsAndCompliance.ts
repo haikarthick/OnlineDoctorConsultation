@@ -204,7 +204,8 @@ import { resolveNetworkAccess } from '../../middleware/networkAccess';
         const NotificationService = (await import('../NotificationService')).default;
         await NotificationService.createNotification(who.rows[0].owner_id, 'system', `${who.rows[0].name} moved to ${who.rows[0].to_name || 'another hospital'}`,
           `${who.rows[0].name}'s care has moved to ${who.rows[0].to_name || 'another hospital'} in the same network. Your consent and records stay as they were.`, 'in_app',
-          { type: 'patient_transferred', transferId });
+          { type: 'patient_transferred', transferId,
+            i18n: { title: { code: 'NOTIF_TRANSFER_TITLE', params: { name: who.rows[0].name, to: who.rows[0].to_name || '' } }, body: { code: 'NOTIF_TRANSFER_BODY', params: { name: who.rows[0].name, to: who.rows[0].to_name || '' } } } });
       }
     } catch { /* telling the owner is a courtesy: the transfer itself is done */ }
     return result.rows[0];

@@ -66,7 +66,14 @@ export function userMessage(err: unknown, fallbackKey?: string, defaultText?: st
   // A refusal that carries a code we have a translation for is said in the person's own language (values like a medicine name
   // come from the server's params); the server's English sentence below is only the fallback.
   const code = data?.error?.code
-  if (typeof code === 'string' && i18n.exists(`serverMessages.${code}`)) return i18n.t(`serverMessages.${code}`, serverErrorParams(err) || {})
+  const params: Record<string, string | number | boolean | null> = { ...(serverErrorParams(err) || {}) }
+  // "Needs a vet" keeps its code (the screen offers to find a vet); params.reason names the sentence. A list of missing facts arrives as
+  // codes joined by '|' and is said word by word in the person's language.
+  const key = code === 'NEEDS_VET' && typeof params.reason === 'string' ? params.reason : code
+  if (typeof params.facts === 'string') {
+    params.facts = params.facts.split('|').map(f => (i18n.exists(`serverMessages.${f}`) ? i18n.t(`serverMessages.${f}`) : f)).join(', ')
+  }
+  if (typeof key === 'string' && i18n.exists(`serverMessages.${key}`)) return i18n.t(`serverMessages.${key}`, params)
   const server = [data?.error?.message, typeof data?.error === 'string' ? data.error : undefined, data?.message]
     .find(isReadableMessage)
   if (server) return server

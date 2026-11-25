@@ -1,6 +1,6 @@
 import database from '../../utils/database';
 import logger from '../../utils/logger';
-import { ForbiddenError, NotFoundError } from '../../utils/errors';
+import { ForbiddenError, NotFoundError, CodedError } from '../../utils/errors';
 import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE } from '../AnimalAccessService';
 import AiCopilotService from '../AiCopilotService';
 import NutritionAccess, { type Caller } from './NutritionAccess';
@@ -44,13 +44,13 @@ class NutritionExplainService {
     const lang = EXPLAIN_LANGUAGES[language] ? language : 'en';
     const r = await database.query(`SELECT id, animal_id, group_id, updated_at FROM nutrition_plans WHERE id = $1`, [planId]);
     const row = r.rows[0];
-    if (!row) throw new NotFoundError('Food plan');
+    if (!row) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
     // The same gate as reading the plan itself.
     if (row.animal_id) await NutritionAccess.forAnimal(row.animal_id, caller, 'read');
     else {
       const access = await AnimalAccessService.checkGroup(caller, row.group_id, 'read');
-      if (!access.found) throw new NotFoundError('Food plan');
-      if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
+      if (!access.found) throw new CodedError(404, 'NUT_NOT_FOUND', 'We could not find that. It may have been removed, or you may not have access to it. Refresh the screen and try again.');
+      if (!access.allowed) throw new CodedError(403, 'ANIMAL_NO_ACCESS', ANIMAL_NO_ACCESS_MESSAGE);
     }
 
     if (!(await isEntitled(caller.userId, 'ai_assist')) || !(await isAiAssistEnabled()) || !AiCopilotService.isConfigured()) {

@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import MedicalRecordService from '../services/MedicalRecordService';
-import { ValidationError, ForbiddenError } from '../utils/errors';
+import { ValidationError, ForbiddenError, CodedError } from '../utils/errors';
 import database from '../utils/database';
 import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE } from '../services/AnimalAccessService';
 
@@ -318,7 +318,7 @@ export class MedicalRecordController {
       const access = animalId
         ? await AnimalAccessService.check({ userId: req.userId!, role: req.userRole, roles: req.userRoles }, animalId, 'read')
         : { allowed: false };
-      if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
+      if (!access.allowed) throw new CodedError(403, 'ANIMAL_NO_ACCESS', ANIMAL_NO_ACCESS_MESSAGE);
     }
     const filters: any = {
       limit: Math.min(parseInt(req.query.limit as string) || 50, 200),

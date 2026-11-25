@@ -93,7 +93,7 @@ router.get('/treatments/animals/:animalId/feed-courses', authMiddleware, require
 router.get('/treatments/groups/:groupId/feed-courses', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const access = await AnimalAccessService.checkGroup({ userId: who(req).userId, role: who(req).role, roles: (req as any).userRoles }, req.params.groupId, 'read');
   if (!access.found) throw new CodedError(404, 'WD_GROUP_NOT_FOUND', 'We could not find this herd. It may have been removed.');
-  if (!access.allowed) throw new ForbiddenError(ANIMAL_NO_ACCESS_MESSAGE);
+  if (!access.allowed) throw new CodedError(403, 'ANIMAL_NO_ACCESS', ANIMAL_NO_ACCESS_MESSAGE);
   res.json({ success: true, data: await WithdrawalService.activeFeedCourses({ groupId: req.params.groupId }) });
 }));
 

@@ -49,6 +49,7 @@ export const RationPlanCard: React.FC<Props> = ({ plan, herd = false, children }
       {r?.herd && (
         <>
           <h4 className="nutri-sub-title">{t('nutrition.ration.herdTotal', { count: r.herd.headCount, cost: money(r.herd.totalCostPerDay) })}</h4>
+          {!!r.herd.notCounted && <p className="nutri-note is-warning">{t('nutrition.ration.herdNotCounted', { count: r.herd.headCount, other: r.herd.notCounted })}</p>}
           <ul className="nutri-list">
             {r.herd.lines.map(l => (
               <li key={l.key} className="nutri-list-row">

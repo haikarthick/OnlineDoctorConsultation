@@ -618,7 +618,8 @@
       "priceFromStock": "Price from your stock: ₹{{price}} per kg. Change it in Feed Inventory.",
       "fromHerd": "This animal is in the herd \"{{name}}\". Every animal in the herd gets this ration; change it on the herd.",
       "ownInstead": "Make a ration for this animal only",
-      "findVet": "Find a vet"
+      "findVet": "Find a vet",
+      "herdNotCounted": "These totals are for the {{count}} animals in milk. The other {{other}} (dry cows, heifers, calves) are not included - keep them in their own group to feed them right."
     },
     "group": {
       "title": "Today's feed",
