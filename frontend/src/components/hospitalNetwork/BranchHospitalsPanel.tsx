@@ -5,21 +5,27 @@ import { NetworkHospital } from './hospitalNetworksShared'
 export interface BranchHospitalsPanelProps {
   networkHospitals: NetworkHospital[]
   onAddBranch: () => void
+  onAttachHospital?: () => void
+  networkId?: string
   onEditBranch: (h: NetworkHospital) => void
   onDeleteBranch: (h: NetworkHospital) => void
   t: TFunction
 }
 
 const BranchHospitalsPanel: React.FC<BranchHospitalsPanelProps> = ({
-  networkHospitals, onAddBranch, onEditBranch, onDeleteBranch, t,
+  networkHospitals, onAddBranch, onAttachHospital, networkId, onEditBranch, onDeleteBranch, t,
 }) => {
   return (
     <div className="module-card">
       <div className="hn-panel-header">
         <h3>{t('hospitalNetworks.detail.hospitals')}</h3>
-        <button type="button" className="module-btn small primary" onClick={onAddBranch}>
-          + Add Branch Hospital
-        </button>
+        <div className="hn-panel-actions">
+          {networkId && <a className="module-btn small" href={`/network/${networkId}`} target="_blank" rel="noopener noreferrer">{t('networkProfile.viewPublic')}</a>}
+          {onAttachHospital && <button type="button" className="module-btn small" onClick={onAttachHospital}>{t('attachHospital.button')}</button>}
+          <button type="button" className="module-btn small primary" onClick={onAddBranch}>
+            + Add Branch Hospital
+          </button>
+        </div>
       </div>
       <div className="card-body">
         {networkHospitals.length === 0 ? (

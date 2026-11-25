@@ -15,6 +15,7 @@ import {
 } from '../../components/hospitalNetwork/hospitalNetworksShared'
 import NetworkModal from '../../components/hospitalNetwork/NetworkModal'
 import CreateBranchHospitalModal from '../../components/hospitalNetwork/CreateBranchHospitalModal'
+import { AttachHospitalSheet } from '../../components/hospitalNetwork/AttachHospitalSheet'
 import EditBranchHospitalModal from '../../components/hospitalNetwork/EditBranchHospitalModal'
 import DeleteBranchConfirmModal from '../../components/hospitalNetwork/DeleteBranchConfirmModal'
 import AddMemberModal from '../../components/hospitalNetwork/AddMemberModal'
@@ -80,6 +81,7 @@ const HospitalNetworks: React.FC = () => {
   const [networkHospitals, setNetworkHospitals] = useState<NetworkHospital[]>([])
   const [networkMembers, setNetworkMembers] = useState<NetworkMember[]>([])
   const [showCreateBranch, setShowCreateBranch] = useState(false)
+  const [showAttach, setShowAttach] = useState(false)
   const [editingBranch, setEditingBranch] = useState<NetworkHospital | null>(null)
   const [deletingBranch, setDeletingBranch] = useState<NetworkHospital | null>(null)
   const [showAddMember, setShowAddMember] = useState(false)
@@ -986,6 +988,7 @@ const HospitalNetworks: React.FC = () => {
           onEditNetwork={() => selectedNetwork && setEditingNetwork(selectedNetwork)}
           onDeactivateNetwork={handleDeactivateNetwork}
           onAddBranch={() => setShowCreateBranch(true)}
+          onAttachHospital={() => setShowAttach(true)}
           onEditBranch={setEditingBranch}
           onDeleteBranch={setDeletingBranch}
           onApprovalRequestInfo={() => setShowApprovalModal('info_requested')}
@@ -1072,6 +1075,11 @@ const HospitalNetworks: React.FC = () => {
           }}
           t={t}
         />
+      )}
+
+      {selectedNetwork && (
+        <AttachHospitalSheet open={showAttach} networkId={selectedNetwork.id} onClose={() => setShowAttach(false)}
+          onAttached={() => { setSuccessMsg(t('attachHospital.done')); loadDetail(selectedNetwork) }} />
       )}
 
       {showCreateBranch && selectedNetwork && (

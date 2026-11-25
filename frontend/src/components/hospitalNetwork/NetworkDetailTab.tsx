@@ -29,6 +29,7 @@ export interface NetworkDetailTabProps {
   onEditNetwork: () => void
   onDeactivateNetwork: (networkId: string) => void
   onAddBranch: () => void
+  onAttachHospital?: () => void
   onEditBranch: (h: NetworkHospital) => void
   onDeleteBranch: (h: NetworkHospital) => void
   onApprovalRequestInfo: () => void
@@ -74,6 +75,8 @@ const NetworkDetailTab: React.FC<NetworkDetailTabProps> = (props) => {
             <BranchHospitalsPanel
               networkHospitals={props.networkHospitals}
               onAddBranch={props.onAddBranch}
+              onAttachHospital={props.onAttachHospital}
+              networkId={selectedNetwork?.id}
               onEditBranch={props.onEditBranch}
               onDeleteBranch={props.onDeleteBranch}
               t={t}

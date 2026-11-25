@@ -1,0 +1,11 @@
+:where(.npp) { max-width: 720px; margin: 0 auto; padding: 16px; }
+:where(.npp-back) { display: inline-block; margin-bottom: 12px; min-height: 44px; line-height: 44px; }
+:where(.npp-card) { padding: 20px; border: 1px solid #e5e7eb; border-radius: 16px; background: #fff; overflow-wrap: anywhere; }
+:where(.npp-card) h1 { margin: 0 0 4px; font-size: 24px; }
+:where(.npp-card) h2 { font-size: 16px; margin: 18px 0 6px; }
+:where(.npp-logo) { max-width: 96px; max-height: 96px; border-radius: 12px; margin-bottom: 8px; }
+:where(.npp-muted) { color: #6b7280; }
+:where(.npp-pill) { display: inline-block; padding: 3px 12px; border-radius: 999px; background: #fee2e2; color: #b91c1c; font-weight: 600; font-size: 13px; }
+:where(.npp-tags, .npp-contact) { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+:where(.npp-contact) { flex-direction: column; }
+:where(.npp-tags) li { padding: 4px 12px; border-radius: 999px; background: #eef2ff; color: #3730a3; font-size: 13px; }

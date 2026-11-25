@@ -106,11 +106,7 @@ export function PassportCard({
       {/* Expanded protocol list */}
       {isExpanded && (
         <div className="vp-protocol-list">
-          <VaccinePlanPanel
-            animal={animal}
-            onChanged={onChanged}
-            openDoses={animal.protocols.filter(p => !p.waived).flatMap(p => p.doses.filter(d => d.status === 'pending' || d.status === 'overdue').map(dose => ({ dose, protocolName: p.protocolName })))}
-          />
+          <VaccinePlanPanel animal={animal} onChanged={onChanged} />
           {animal.protocols.length === 0 ? (
             <div className="vp-empty-protocols">{t('vaccinationPassport.noProtocols')}</div>
           ) : (

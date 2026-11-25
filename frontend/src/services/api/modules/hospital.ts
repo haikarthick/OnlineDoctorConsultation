@@ -193,6 +193,11 @@ export const hospitalApi = {
     const response = await sharedClient.get(`/hospital-networks/${networkId}/hospitals`)
     return response.data
   },
+  /** The public-safe profile of an approved network (no sign-in needed). */
+  async getNetworkPublicProfile(networkId: string) {
+    const response = await sharedClient.get(`/hospital-networks/${networkId}/public`)
+    return response.data
+  },
   async assignHospitalToNetwork(networkId: string, hospitalId: string) {
     const response = await sharedClient.post(`/hospital-networks/${networkId}/hospitals/${hospitalId}`)
     return response.data

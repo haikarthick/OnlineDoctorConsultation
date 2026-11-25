@@ -141,6 +141,15 @@ class HospitalNetworkController {
 
   async assignHospitalToNetwork(req: AuthRequest, res: Response): Promise<void> {
     await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'addHospitalToNetwork');
+    // A network can only take in a hospital its caller owns (or any hospital for the platform admin), and not one that already belongs to
+    // another network. A made-up id and someone else's hospital get the same plain answer.
+    const h = await database.query(`SELECT owner_id, branch_network_id FROM vet_hospitals WHERE id = $1`, [req.params.hospitalId]);
+    const row = h.rows[0];
+    const allowed = !!row && (req.userRole === 'admin' || row.owner_id === req.userId) && (!row.branch_network_id || row.branch_network_id === req.params.id);
+    if (!allowed) {
+      res.status(403).json({ success: false, message: 'This hospital cannot be added to the network. You can only add a hospital you own that is not already part of another network.', error: { code: 'HN_HOSPITAL_NOT_ATTACHABLE', message: 'This hospital cannot be added to the network. You can only add a hospital you own that is not already part of another network.' } });
+      return;
+    }
     await HospitalNetworkService.assignHospitalToNetwork(req.params.id, req.params.hospitalId, req.userId!);
     res.status(201).json({ success: true, message: 'Hospital assigned to network' });
   }

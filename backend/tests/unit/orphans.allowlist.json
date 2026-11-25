@@ -6,7 +6,6 @@
     "GET /compliance/report",
     "GET /debug/db-state",
     "GET /farm-profile/resolve",
-    "GET /hospital-networks/:id/public",
     "GET /nutrition/admin/energy-factors",
     "GET /nutrition/admin/unsafe-foods",
     "GET /public/marketplace/listings",

@@ -8,10 +8,9 @@ import type { PassportAnimal, PassportDose } from './vaccinationPassportShared'
 import './VaccinePlanPanel.css'
 
 interface Protocol { id: string; name: string; disease?: string }
+interface ScheduleRow { id: string; protocolId: string; protocolName?: string; doseNumber: number; dueDate: string; status: string }
 interface Props {
   animal: PassportAnimal
-  /** Doses still to give (pending or overdue), across every plan of this animal. */
-  openDoses: Array<{ dose: PassportDose; protocolName: string }>
   /** Called after anything was saved so the passport reloads. */
   onChanged: () => void
 }
@@ -21,7 +20,7 @@ interface Props {
  * Giving a dose writes ONE vaccination entry and links the schedule row to it in the same action, so the passport's counts and the
  * animal's vaccination history can never disagree. A person who is not allowed to reach this animal is refused by the server in plain words.
  */
-export function VaccinePlanPanel({ animal, openDoses, onChanged }: Props) {
+export function VaccinePlanPanel({ animal, onChanged }: Props) {
   const { t } = useTranslation()
   const [protocols, setProtocols] = useState<Protocol[]>([])
   const [choice, setChoice] = useState('')
@@ -31,7 +30,27 @@ export function VaccinePlanPanel({ animal, openDoses, onChanged }: Props) {
   const [date, setDate] = useState(localIsoDate())
   const [batch, setBatch] = useState('')
 
-  const assigned = new Set(animal.protocols.map(p => p.protocolId))
+  const [schedule, setSchedule] = useState<ScheduleRow[]>([])
+  const [assignedIds, setAssignedIds] = useState<Set<string>>(new Set(animal.protocols.map(p => p.protocolId)))
+  const [reload, setReload] = useState(0)
+
+  // The plan's own lists come from the plan endpoints, so they are right the moment something is saved.
+  useEffect(() => {
+    let live = true
+    Promise.all([apiService.getAnimalVaccineSchedule(animal.animalId), apiService.getAnimalVaccineAssignments(animal.animalId)])
+      .then(([s, a]) => {
+        if (!live) return
+        setSchedule(Array.isArray(s?.data) ? s.data : [])
+        const rows: Array<{ protocolId?: string; protocol_id?: string }> = Array.isArray(a?.data) ? a.data : []
+        setAssignedIds(new Set(rows.map(r => String(r.protocolId ?? r.protocol_id)).filter(Boolean)))
+      })
+      .catch(() => { /* the passport below still shows what is saved */ })
+    return () => { live = false }
+  }, [animal.animalId, reload])
+  const openDoses = schedule
+    .filter(r => r.status === 'pending' || r.status === 'overdue')
+    .map(r => ({ dose: { scheduleId: r.id, doseNumber: r.doseNumber, dueDate: r.dueDate, administeredAt: null, status: r.status as PassportDose['status'], reminderSent: false, vaccinationRecordId: null }, protocolName: r.protocolName || '' }))
+  const assigned = assignedIds
   useEffect(() => {
     let live = true
     apiService.listVaccineProtocols({ species: animal.species })
@@ -44,7 +63,7 @@ export function VaccinePlanPanel({ animal, openDoses, onChanged }: Props) {
   const run = async (fn: () => Promise<unknown>, okText: string) => {
     if (busy) return
     setBusy(true); setMessage(null)
-    try { await fn(); setMessage({ text: okText, ok: true }); onChanged() }
+    try { await fn(); setMessage({ text: okText, ok: true }); setReload(n => n + 1); onChanged() }
     catch (e) { setMessage({ text: userMessage(e, 'vaccinePlan.saveFailed'), ok: false }) }
     finally { setBusy(false) }
   }

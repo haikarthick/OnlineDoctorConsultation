@@ -66,6 +66,7 @@ const PayablesAdmin = lazy(() => import('./pages/admin/Payables'))
 const FinanceReportsAdmin = lazy(() => import('./pages/admin/FinanceReports'))
 // Payment module
 const PolicyPage = lazy(() => import('./pages/PolicyPage'))
+const NetworkPublicProfile = lazy(() => import('./pages/NetworkPublicProfile'))
 const PaymentsHistory = lazy(() => import('./pages/PaymentsHistory'))
 const Referrals = lazy(() => import('./pages/Referrals'))
 const PendingPolicyModal = lazy(() => import('./components/PendingPolicyModal'))
@@ -282,6 +283,7 @@ function AppRoutes() {
       <Route path="/join-farm" element={<JoinFarm />} />
       <Route path="/browse-marketplace" element={<PublicMarketplace />} />
       <Route path="/policies/:docType" element={<PolicyPage />} />
+      <Route path="/network/:id" element={<NetworkPublicProfile />} />
 
       {/* Protected pages (inside AppLayout) */}
       <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />

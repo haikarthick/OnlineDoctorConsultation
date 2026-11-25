@@ -1,0 +1,22 @@
+{
+  "attachHospital": {
+    "title": "Add one of my hospitals",
+    "hint": "Only hospitals you own that are not already in a network are listed.",
+    "none": "You have no hospital to add. A hospital you own that is not in another network will appear here.",
+    "attach": "Add to network",
+    "button": "Add my existing hospital",
+    "done": "The hospital is now part of the network.",
+    "loadFailed": "We could not load your hospitals. Check your connection and try again.",
+    "failed": "This hospital could not be added, so nothing was changed. Please try again."
+  },
+  "networkProfile": {
+    "back": "Back to home",
+    "missingTitle": "This network page is not available",
+    "missingBody": "The link may be wrong, or the network is not published yet. Check the link and try again.",
+    "emergency": "Emergency services",
+    "treats": "What they treat",
+    "contact": "How to reach them",
+    "noContact": "No public contact details yet.",
+    "viewPublic": "View public page"
+  }
+}

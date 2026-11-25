@@ -1396,13 +1396,14 @@ async function http(method, url, body, token) {
           const s4 = await stockOf(bagId);
           if (del.status >= 300 || s4?.currentStock !== 9) problems.push(`deleting a feed entry should put its stock back: HTTP ${del.status}, stock ${s4?.currentStock} (want 9)`);
 
-          // Reports read the one table; the removed "Log use" answers in words.
+          // Reports read the one table; the removed "Log use" route is gone.
           const wholeFarmRows = (await http('GET', `${apiBase}/farm-records?enterpriseId=${ent}&recordType=feed&wholeFarm=true`, null, farmer)).json?.data?.items || [];
           if (!wholeFarmRows.some(l => l.wholeFarm === true && l.feedId === bagId)) problems.push(`the whole-farm feed entry is not listed by Daily records (got ${wholeFarmRows.length})`);
           const an = await http('GET', `${feedPath}/analytics`, null, farmer);
           if (an.status !== 200 || !(an.json?.data?.consumptionByType || []).length) problems.push(`feed analytics from Daily records: HTTP ${an.status}`);
           const old = await http('POST', `${feedPath}/consumption`, { feedId: bagId, quantity: 5 }, farmer);
-          if (old.status !== 410 || !/Daily records/.test(msgOf(old))) problems.push(`the removed "Log use" should say where to go (HTTP ${old.status}: ${msgOf(old).slice(0, 80)})`);
+          // The route was deleted whole (orphan workstream W9): it answers like any unknown address, never a stale instruction.
+          if (old.status !== 404) problems.push(`the removed "Log use" route should be gone (HTTP ${old.status}: ${msgOf(old).slice(0, 80)})`);
 
           // A purchase with a price writes the feed expense ONCE; without a price none.
           await http('POST', `${apiBase}/feed/${bagId}/restock`, { quantity: 2, pricePerUnit: 1300 }, farmer);
@@ -2648,6 +2649,26 @@ async function http(method, url, body, token) {
         const names = await listFor(corp.token);
         if (names.includes(planFreeName)) problems.push('a removed plan still lists for a corporate admin');
         if (!names.includes(planUsedName)) problems.push('the plan in use disappeared from the corporate admin\'s plan list');
+
+        // ── Attach an existing hospital (orphan workstream W11): only one you own, never one in another network ──
+        const hOwn = uuid();
+        sql(`INSERT INTO vet_hospitals (id, name, owner_id) VALUES ('${hOwn}', 'Verify Hn Hospital Own', '${corp.id}');`);
+        const attach = (id, tok = corp.token) => http('POST', `${apiBase}/hospital-networks/${net1}/hospitals/${id}`, {}, tok);
+        coded('attaching a hospital owned by someone else', await attach(hX), 403, 'HN_HOSPITAL_NOT_ATTACHABLE');
+        coded('attaching a hospital that is already in another network', await attach(hD), 403, 'HN_HOSPITAL_NOT_ATTACHABLE');
+        coded('attaching a hospital id that does not exist (same answer as someone else)', await attach(uuid()), 403, 'HN_HOSPITAL_NOT_ATTACHABLE');
+        const att = await attach(hOwn);
+        if (att.status !== 201) problems.push(`attaching the corporate admin's own hospital: HTTP ${att.status} ${msgOf(att).slice(0, 100)}`);
+        else if (rows(`SELECT branch_network_id FROM ${S}.vet_hospitals WHERE id = '${hOwn}'`)[0]?.branch_network_id !== net1) problems.push('the attached hospital is not part of the network afterwards');
+
+        // ── Public network profile: approved networks only, public-safe fields only ──
+        sql(`UPDATE hospital_networks SET is_approved = true, is_active = true WHERE id = '${net1}'; UPDATE hospital_networks SET is_approved = false WHERE id = '${net2}';`);
+        const pub = await http('GET', `${apiBase}/hospital-networks/${net1}/public`, null);
+        const pd = pub.json?.data || {};
+        if (pub.status !== 200 || pd.name !== 'Verify Hn Network One') problems.push(`the public network page should open without signing in: HTTP ${pub.status}`);
+        if (['members', 'patients', 'subscription', 'seatLimit', 'ownerId', 'contactPhone'].some(k => k in pd)) problems.push(`the public network page leaks a private field: ${Object.keys(pd).join(', ')}`);
+        const pub2 = await http('GET', `${apiBase}/hospital-networks/${net2}/public`, null);
+        if (pub2.status !== 404) problems.push(`an unapproved network must not have a public page (HTTP ${pub2.status})`);
       }
       const sqlErrs = serverLog.slice(mark).split('\n')
         .filter(l => /syntax error|does not exist|violates|invalid input syntax|there is no unique|could not determine|DATABASE_ERROR|statusCode":5\d\d/i.test(l))
