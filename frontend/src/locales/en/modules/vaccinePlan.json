@@ -1,0 +1,18 @@
+{
+  "vaccinePlan": {
+    "title": "Vaccination plan",
+    "addLabel": "Add a vaccination plan",
+    "choose": "Choose a plan",
+    "add": "Add plan",
+    "nothingToAdd": "Every plan for this animal's species is already added.",
+    "planAdded": "Plan added. The dose dates are worked out and listed above.",
+    "giveDose": "Give dose",
+    "giveTitle": "Give a dose to {{name}}",
+    "dateGiven": "Date given",
+    "batchNumber": "Batch number (optional)",
+    "saveDose": "Save dose",
+    "saving": "Saving...",
+    "doseSaved": "Dose saved. It is now in the vaccination history and the passport.",
+    "saveFailed": "This could not be saved, so nothing was changed. Please try again."
+  }
+}

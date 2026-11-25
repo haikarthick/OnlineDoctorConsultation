@@ -1,0 +1,12 @@
+:where(.vp-plan-panel) { display: flex; flex-direction: column; gap: 10px; padding: 12px; margin-bottom: 8px; border: 1px dashed #c7d2fe; border-radius: 12px; background: #f8f9ff; }
+:where(.vp-plan-panel) h4 { margin: 0; font-size: 15px; }
+:where(.vp-plan-doses) { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+:where(.vp-plan-doses) li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; overflow-wrap: anywhere; }
+:where(.vp-plan-row) { display: flex; flex-wrap: wrap; gap: 8px; }
+:where(.vp-plan-row) select { flex: 1 1 200px; min-height: 44px; }
+:where(.vp-plan-add) { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+:where(.vp-plan-muted) { color: #6b7280; font-size: 13px; margin: 0; }
+:where(.vp-plan-ok) { padding: 8px 12px; border-radius: 10px; background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+:where(.vp-plan-error) { padding: 8px 12px; border-radius: 10px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+:where(.vp-plan-sheet) { display: flex; flex-direction: column; gap: 12px; }
+:where(.vp-plan-sheet) label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }

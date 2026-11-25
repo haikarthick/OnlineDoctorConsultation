@@ -1249,6 +1249,36 @@ async function http(method, url, body, token) {
             const r = await http('GET', `${apiBase}${p}`, null, owner.token);
             if (r.status !== 200) problems.push(`the OWNER was refused their own ${p} (HTTP ${r.status})`);
           }
+          // Vaccination plan end to end (orphan workstream W3): add a plan -> doses are scheduled -> give a dose writes ONE vaccination
+          // entry and links the schedule row -> the passport counts it once. A dose can never be linked to another animal's entry.
+          const protos = await http('GET', `${apiBase}/vaccine-protocols?species=Dog`, null, owner.token);
+          const proto = (protos.json?.data || [])[0];
+          if (!proto) console.log('   note: no Dog vaccine protocol in this database, vaccination plan journey skipped');
+          else {
+            const asg = await http('POST', `${apiBase}/animals/${id}/vaccine-assignments`, { protocolId: proto.id }, owner.token);
+            if (asg.status !== 201) problems.push(`the owner could not add a vaccination plan (HTTP ${asg.status})`);
+            const sched = await http('GET', `${apiBase}/vaccine-schedule/animal/${id}`, null, owner.token);
+            const rows = sched.json?.data || [];
+            if (rows.length === 0) problems.push('adding a plan produced no dose schedule');
+            else {
+              const dose = rows.find(r => r.status !== 'administered') || rows[0];
+              const rec = await http('POST', `${apiBase}/vaccinations`, { animalId: id, vaccineName: proto.name, dateAdministered: '2026-11-01' }, owner.token);
+              const recId = rec.json?.data?.id;
+              const theirs = await http('POST', `${apiBase}/vaccinations`, { animalId: strangerAnimal, vaccineName: proto.name, dateAdministered: '2026-11-01' }, stranger.token);
+              const theirId = theirs.json?.data?.id;
+              if (!recId || !theirId) problems.push(`could not save the probe vaccination entries (HTTP ${rec.status}/${theirs.status})`);
+              else {
+                const cross = await http('PATCH', `${apiBase}/vaccine-schedule/${dose.id}/administer`, { vaccinationRecordId: theirId, administeredAt: '2026-11-01' }, owner.token);
+                if (cross.status < 400) problems.push('a dose was linked to ANOTHER animal vaccination entry');
+                const good = await http('PATCH', `${apiBase}/vaccine-schedule/${dose.id}/administer`, { vaccinationRecordId: recId, administeredAt: '2026-11-01' }, owner.token);
+                if (good.status !== 200) problems.push(`giving a dose failed (HTTP ${good.status})`);
+                const after = await http('GET', `${apiBase}/vaccine-schedule/animal/${id}`, null, owner.token);
+                if (!(after.json?.data || []).some(r => r.id === dose.id && r.status === 'administered' && r.vaccinationRecordId === recId)) problems.push('the dose is not shown as given after saving');
+                const pass = await http('GET', `${apiBase}/vaccination-passport/animal/${id}`, null, owner.token);
+                if (pass.status !== 200) problems.push(`the vaccination passport did not open after a dose (HTTP ${pass.status})`);
+              }
+            }
+          }
         }
       }
       if (problems.length) fail('Another person\'s animal data is reachable (or the owner is locked out).', problems);

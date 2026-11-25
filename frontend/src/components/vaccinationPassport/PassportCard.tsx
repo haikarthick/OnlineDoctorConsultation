@@ -1,5 +1,6 @@
 import type { PassportAnimal } from './vaccinationPassportShared'
 import { StatusBadge, ComplianceMeter } from './VaccinationPassportHelpers'
+import { VaccinePlanPanel } from './VaccinePlanPanel'
 
 interface PassportCardProps {
   animal: PassportAnimal
@@ -17,6 +18,8 @@ interface PassportCardProps {
   speciesLabel: (species: string, t: any) => string
   formatDate: (d: string) => string
   t: (k: string, opts?: any) => string
+  /** Reload the passport after a plan or a dose was saved. */
+  onChanged: () => void
 }
 
 export function PassportCard({
@@ -35,6 +38,7 @@ export function PassportCard({
   speciesLabel,
   formatDate,
   t,
+  onChanged,
 }: PassportCardProps) {
   const icon = speciesIcon(animal.species)
   return (
@@ -102,6 +106,11 @@ export function PassportCard({
       {/* Expanded protocol list */}
       {isExpanded && (
         <div className="vp-protocol-list">
+          <VaccinePlanPanel
+            animal={animal}
+            onChanged={onChanged}
+            openDoses={animal.protocols.filter(p => !p.waived).flatMap(p => p.doses.filter(d => d.status === 'pending' || d.status === 'overdue').map(dose => ({ dose, protocolName: p.protocolName })))}
+          />
           {animal.protocols.length === 0 ? (
             <div className="vp-empty-protocols">{t('vaccinationPassport.noProtocols')}</div>
           ) : (

@@ -1,5 +1,6 @@
 import database from '../utils/database';
 import logger from '../utils/logger';
+import { ValidationError } from '../utils/errors';
 import VaccineProtocolService, { VaccineProtocol } from './VaccineProtocolService';
 
 // ─── Interfaces ──────────────────────────────────────────────────────────────
@@ -153,6 +154,14 @@ class VaccineScheduleService {
     vaccinationRecordId: string,
     administeredAt: string
   ): Promise<void> {
+    // The vaccination entry named in the request must belong to the SAME animal as the schedule row (H15: an id from the body never
+    // decides access, and a dose can never be linked to someone else's record).
+    const same = await database.query(
+      `SELECT 1 FROM vaccine_schedule vs JOIN vaccination_records vr ON vr.animal_id = vs.animal_id
+       WHERE vs.id = $1 AND vr.id = $2`, [scheduleId, vaccinationRecordId]);
+    if (same.rows.length === 0) {
+      throw new ValidationError('That vaccination entry does not belong to this animal, so the dose was not marked as given. Save the dose again from this animal\'s plan.');
+    }
     await database.query(
       `UPDATE vaccine_schedule
        SET status = 'administered',

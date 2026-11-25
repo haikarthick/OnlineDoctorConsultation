@@ -411,6 +411,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                   speciesLabel={speciesLabel}
                   formatDate={formatDate}
                   t={t}
+                  onChanged={loadPassports}
                 />
               ))
             )}
