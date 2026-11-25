@@ -5,6 +5,7 @@ import { MarketplaceListing } from '../../types'
 import { ListingGallery } from './ListingGallery'
 import { useMasterData } from '../../context/MasterDataContext'
 import { CATEGORY_ICONS, g } from './publicListingShared'
+import { appLocale } from '../../utils/appLocale'
 
 // ─── Public Listing Detail (with login gates) ───
 export const PublicListingDetail: React.FC<{
@@ -157,7 +158,7 @@ export const PublicListingDetail: React.FC<{
               </div>
               {auctionEnd && (
                 <div className="mp-auction-end">
-                  <span>{t('marketplace.detail.ends')} {new Date(auctionEnd).toLocaleString()}</span>
+                  <span>{t('marketplace.detail.ends')} {new Date(auctionEnd).toLocaleString(appLocale())}</span>
                 </div>
               )}
               {isAuthenticated ? (

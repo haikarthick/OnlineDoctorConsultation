@@ -1,6 +1,7 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
 import { NetworkMember, RoleBadge } from './hospitalNetworksShared'
+import { appLocale } from '../../utils/appLocale'
 
 export interface StaffMembersPanelProps {
   networkMembers: NetworkMember[]
@@ -77,7 +78,7 @@ const StaffMembersPanel: React.FC<StaffMembersPanelProps> = ({
                 <div className="hn-pending-invite-row2">
                   <span className="hn-pending-invite-position">{inv.staffPosition ?? inv.staff_position}</span>
                   <span className="hn-pending-invite-expiry">
-                    {t('hospitalNetworks.detail.expires')} {new Date(inv.expiresAt ?? inv.expires_at).toLocaleDateString()}
+                    {t('hospitalNetworks.detail.expires')} {new Date(inv.expiresAt ?? inv.expires_at).toLocaleDateString(appLocale())}
                   </span>
                   <div className="hn-pending-invite-actions">
                     <button

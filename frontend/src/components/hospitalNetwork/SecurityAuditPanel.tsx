@@ -1,5 +1,6 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
+import { appLocale } from '../../utils/appLocale'
 
 export interface SecurityAuditPanelProps {
   securityAuditLoading: boolean
@@ -40,7 +41,7 @@ const SecurityAuditPanel: React.FC<SecurityAuditPanelProps> = ({ securityAuditLo
               <tbody>
                 {securityAudit.map((a: any) => (
                   <tr key={a.id}>
-                    <td>{a.createdAt ? new Date(a.createdAt).toLocaleString() : '-'}</td>
+                    <td>{a.createdAt ? new Date(a.createdAt).toLocaleString(appLocale()) : '-'}</td>
                     <td>{a.actorName || '-'}</td>
                     <td><span className="status-badge">{a.action}</span></td>
                     <td>{a.targetType || '-'}</td>

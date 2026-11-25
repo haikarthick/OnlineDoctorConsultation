@@ -8,6 +8,7 @@ import { useMasterData } from '../context/MasterDataContext'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 // Render AI markdown responses nicely
 const AIMessage: React.FC<{ content: string; confidence?: number; sources?: string[] }> = ({ content, confidence, sources }) => (
   <div className="si-369fec94">
@@ -104,7 +105,7 @@ const AICopilot: React.FC = () => {
 
   const createSession = async (contextType: string = 'general') => {
     try {
-      const res = await apiService.createChatSession({ title: `Chat ${new Date().toLocaleDateString()}`, contextType })
+      const res = await apiService.createChatSession({ title: `Chat ${new Date().toLocaleDateString(appLocale())}`, contextType })
       const newSession = res.data
       setSessions(prev => [newSession, ...prev])
       selectSession(newSession)

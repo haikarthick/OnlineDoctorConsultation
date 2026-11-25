@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { AIChatMessage } from '../types'
 import { userMessage } from '../utils/userMessage'
 import './FloatingChatWidget.css'
+import { appLocale } from '../utils/appLocale'
 
 interface PetSummary {
   id: string
@@ -66,7 +67,7 @@ const FloatingChatWidget: React.FC = () => {
   // Create a brand-new session via the API
   const createNewSession = async (): Promise<string | null> => {
     const res = await apiService.createChatSession({
-      title: `AI Buddy ${new Date().toLocaleDateString()}`,
+      title: `AI Buddy ${new Date().toLocaleDateString(appLocale())}`,
       contextType: 'general',
     })
     const id = res.data?.id

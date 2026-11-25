@@ -41,6 +41,8 @@ export interface PlanItem {
   id: string
   ingredientId: string | null
   label: string
+  /** Translation key of a library food; the name is shown in the person's language, `label` is the English fallback. */
+  labelKey?: string | null
   sharePct: number | null
   /** 'g' for a pet plan, 'kg' (as fed, per day) for a farm ration. */
   unit?: 'g' | 'kg'
@@ -179,3 +181,7 @@ export function evenShares(count: number): number[] {
 }
 
 export const FLAG_ICON: Record<RiskFlag['severity'], string> = { act: '⚠️', watch: '👀', info: 'ℹ️' }
+
+/** A plan line's name in the person's language (library foods are translated; a food the person typed shows as typed). */
+export const planItemName = (t: (k: string, o?: Record<string, unknown>) => string, item: { label: string; labelKey?: string | null }): string =>
+  item.labelKey ? t(item.labelKey, { defaultValue: item.label }) : item.label

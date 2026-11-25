@@ -1,6 +1,7 @@
 import React from 'react'
 import type { PendingUser } from './userManagementShared'
 import { getRoleBadge } from './userManagementShared'
+import { appLocale } from '../../utils/appLocale'
 
 interface PendingApprovalsTabProps {
   pendingUsers: PendingUser[]
@@ -62,7 +63,7 @@ const PendingApprovalsTab: React.FC<PendingApprovalsTabProps> = ({
                       <span className="si-e70e9abd">Corporate Admin account</span>
                     )}
                   </td>
-                  <td className="si-0a803082">{new Date(pu.createdAt).toLocaleDateString()}</td>
+                  <td className="si-0a803082">{new Date(pu.createdAt).toLocaleDateString(appLocale())}</td>
                   <td>
                     <div className="si-9f20fe5e">
                       <button

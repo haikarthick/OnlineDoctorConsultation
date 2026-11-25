@@ -7,6 +7,7 @@ import DispensingReceiptView, { DispensingReceiptData } from '../../components/p
 import MedicationLabelPrint, { LabelItem } from '../../components/pharmacy/MedicationLabelPrint'
 
 import { userMessage } from '../../utils/userMessage'
+import { appLocale } from '../../utils/appLocale'
 interface Medication {
   name: string
   dosage: string
@@ -311,7 +312,7 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
                               {inventory.map(i => (
                                 <option key={i.id} value={i.id}>
                                   {i.med_name} {i.strength} - Batch {i.batch_number} (Qty: {i.quantity})
-                                  {i.expiry_date ? ` Exp: ${new Date(i.expiry_date).toLocaleDateString()}` : ''}
+                                  {i.expiry_date ? ` Exp: ${new Date(i.expiry_date).toLocaleDateString(appLocale())}` : ''}
                                 </option>
                               ))}
                             </select>

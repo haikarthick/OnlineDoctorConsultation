@@ -6,6 +6,7 @@ import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
 import { userMessage } from '../../utils/userMessage'
+import { appLocale } from '../../utils/appLocale'
 interface Props { onNavigate: (path: string) => void }
 
 interface Slot { startTime: string; endTime: string; isAvailable: boolean; remainingCapacity: number }
@@ -27,7 +28,7 @@ function dateChips(t: (k: string) => string) {
     return {
       value: localDate(d),
       label: i === 0 ? t('groomingBook.today') : i === 1 ? t('groomingBook.tomorrow')
-        : d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
+        : d.toLocaleDateString(appLocale(), { weekday: 'short', month: 'short', day: 'numeric' }),
     }
   })
 }

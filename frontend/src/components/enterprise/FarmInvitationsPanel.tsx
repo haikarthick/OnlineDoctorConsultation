@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { userMessage } from '../../utils/userMessage'
 import { FarmRole, canInvite } from '../../utils/farmRoles'
 import { InviteResult, InviteResultNotice } from './InviteResultNotice'
+import { appLocale } from '../../utils/appLocale'
 
 interface Invitation {
   id: string; role: string; status: string; inviteeName: string | null; inviteePhoneMasked: string | null; inviteeEmail: string | null
@@ -96,7 +97,7 @@ export const FarmInvitationsPanel: React.FC<{
               <span className={`farm-invitation-status is-${inv.status}`}>{t(`farmTeam.statuses.${inv.status}`)}</span>
               {inv.status === 'pending' && (
                 <div className="farm-invitation-actions">
-                  <span className="farm-invitation-expires">{t('farmTeam.expiresOn', { date: new Date(inv.expiresAt).toLocaleDateString() })}</span>
+                  <span className="farm-invitation-expires">{t('farmTeam.expiresOn', { date: new Date(inv.expiresAt).toLocaleDateString(appLocale()) })}</span>
                   <button type="button" className="btn btn-sm btn-secondary" disabled={busyId === inv.id} onClick={() => resend(inv)}>{t('farmTeam.resend')}</button>
                   <button type="button" className="btn btn-sm btn-secondary" disabled={busyId === inv.id} onClick={() => cancel(inv)}>{t('farmTeam.cancelInvite')}</button>
                 </div>

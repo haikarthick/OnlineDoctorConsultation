@@ -11,6 +11,7 @@ import { NumberStepper } from '../components/mobile/NumberStepper'
 import { SaveState } from '../components/mobile/SaveState'
 import { StepForm, type FormStep } from '../components/mobile/StepForm'
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 
 const METHODS = ['natural', 'artificial_insemination', 'embryo_transfer', 'ivf']
 const STATUSES = ['bred', 'confirmed_pregnant', 'not_pregnant', 'delivered', 'aborted', 'reabsorbed']
@@ -28,7 +29,7 @@ const emptyForm = (): BreedingForm => ({
   offspringCount: '', liveOffspring: '', stillborn: '', notes: '',
 })
 
-const day = (iso?: string) => (iso ? new Date(iso).toLocaleDateString() : '-')
+const day = (iso?: string) => (iso ? new Date(iso).toLocaleDateString(appLocale()) : '-')
 
 const BreedingManager: React.FC = () => {
   const { t } = useTranslation()

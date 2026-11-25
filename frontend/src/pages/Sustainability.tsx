@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 const METRIC_TYPES = [
   { value: 'carbon_emissions', label: '🏭 Carbon Emissions', unit: 'kg CO2e' },
   { value: 'water_usage', label: '💧 Water Usage', unit: 'liters' },
@@ -295,7 +296,7 @@ const Sustainability: React.FC = () => {
                   <thead><tr><th>{t('sustainability.species')}</th><th>{t('sustainability.headCount')}</th><th>{t('sustainability.emissionFactor')}</th><th>{t('sustainability.annualCO2kg')}</th><th>{t('sustainability.annualCO2tons')}</th></tr></thead>
                   <tbody>{carbonEst.estimates?.map((e: any) => (
                     <tr key={e.species}><td className="si-b2cfcbec">{speciesLabel(e.species, t)}</td><td>{e.count}</td><td>{e.emissionFactor} kg CO₂e/head/yr</td>
-                    <td>{Number(e.annualCO2kg ?? 0).toLocaleString()}</td><td>{(Number(e.annualCO2kg ?? 0) / 1000).toFixed(2)}</td></tr>
+                    <td>{Number(e.annualCO2kg ?? 0).toLocaleString(appLocale())}</td><td>{(Number(e.annualCO2kg ?? 0) / 1000).toFixed(2)}</td></tr>
                   ))}</tbody>
                 </table>
               </div>

@@ -1,6 +1,7 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
 import { MarketplaceThread, MarketplaceMessage } from '../../types'
+import { appLocale } from '../../utils/appLocale'
 
 export const MessagesTab: React.FC<{
   threads: MarketplaceThread[]; activeThread: MarketplaceThread | null; onOpenThread: (thread: MarketplaceThread) => void; onCloseThread: () => void;
@@ -19,7 +20,7 @@ export const MessagesTab: React.FC<{
           </div>
           <div className="mp-thread-sub">
             <span className="mp-thread-role">{th.my_role === 'buyer' ? `🛒 ${th.seller_name || ''}` : `🏠 ${th.buyer_name || ''}`}</span>
-            {th.last_message_at && <span className="mp-thread-time">{new Date(th.last_message_at).toLocaleDateString()}</span>}
+            {th.last_message_at && <span className="mp-thread-time">{new Date(th.last_message_at).toLocaleDateString(appLocale())}</span>}
           </div>
           {th.last_message && <div className="mp-thread-preview">{th.last_message}</div>}
         </div>

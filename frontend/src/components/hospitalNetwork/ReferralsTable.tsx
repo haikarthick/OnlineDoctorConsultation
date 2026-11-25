@@ -1,5 +1,6 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
+import { appLocale } from '../../utils/appLocale'
 
 export interface ReferralsTableProps {
   referralDirection: 'incoming' | 'outgoing' | 'all'
@@ -83,7 +84,7 @@ const ReferralsTable: React.FC<ReferralsTableProps> = ({
                       {String(t(`networkReferrals.status.${ref.status}` as any, ref.status))}
                     </span>
                   </td>
-                  <td className="si-0a803082">{new Date(ref.created_at || ref.createdAt).toLocaleDateString()}</td>
+                  <td className="si-0a803082">{new Date(ref.created_at || ref.createdAt).toLocaleDateString(appLocale())}</td>
                   <td>
                     {ref.status === 'pending' && referralDirection !== 'outgoing' && (
                       <div className="si-9f20fe5e">

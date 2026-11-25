@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRoleBadge } from './userManagementShared'
+import { appLocale } from '../../utils/appLocale'
 
 interface RoleChangeRequestsTabProps {
   roleRequests: any[]
@@ -78,7 +79,7 @@ const RoleChangeRequestsTab: React.FC<RoleChangeRequestsTabProps> = ({
                       </div>
                     )}
                   </td>
-                  <td className="si-0a803082">{new Date(r.createdAt).toLocaleDateString()}</td>
+                  <td className="si-0a803082">{new Date(r.createdAt).toLocaleDateString(appLocale())}</td>
                   {requestsFilter === 'pending' ? (
                     <td>
                       <div className="si-9f20fe5e">

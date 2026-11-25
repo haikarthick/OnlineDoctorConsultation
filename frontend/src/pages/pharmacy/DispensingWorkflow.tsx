@@ -6,6 +6,7 @@ import DispensingModal from './DispensingModal'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 import { userMessage } from '../../utils/userMessage'
+import { appLocale } from '../../utils/appLocale'
 interface Prescription {
   id: string
   pet_name: string
@@ -89,7 +90,7 @@ export default function DispensingWorkflow({ pharmacyId, mode, onRefresh }: Prop
                     <td>{rx.owner_name || '-'}</td>
                     <td>{rx.vet_name || '-'}</td>
                     <td className="si-d83d7d70">{rx.medication_names || '-'}</td>
-                    <td>{rx.created_at ? new Date(rx.created_at).toLocaleDateString() : '-'}</td>
+                    <td>{rx.created_at ? new Date(rx.created_at).toLocaleDateString(appLocale()) : '-'}</td>
                     <td><span className={`pharm-badge ${rx.review_status === 'pending_review' ? 'pending' : 'approved'}`}>{rx.review_status}</span></td>
                     <td>
                       <button className="module-btn small primary" onClick={() => setTarget(rx)}>

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import { useMasterData } from '../../context/MasterDataContext'
 import type { DashboardSummary, PendingPrescription, ReadyDispensing } from './pharmacyDashboardShared'
+import { appLocale } from '../../utils/appLocale'
 
 export default function PharmacyOverviewTab({
   summary,
@@ -99,7 +100,7 @@ export default function PharmacyOverviewTab({
                     <td>{rx.owner_name || '-'}</td>
                     <td>{rx.vet_name || '-'}</td>
                     <td className="si-cf8f70f1">{rx.medication_names || '-'}</td>
-                    <td className="si-86931177">{rx.created_at ? new Date(rx.created_at).toLocaleDateString() : '-'}</td>
+                    <td className="si-86931177">{rx.created_at ? new Date(rx.created_at).toLocaleDateString(appLocale()) : '-'}</td>
                     <td>
                       <button type="button" className="module-btn small primary" onClick={() => onReview(rx)}>
                         {t('pharmacy.actions.review')}

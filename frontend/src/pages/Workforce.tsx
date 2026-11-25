@@ -7,6 +7,7 @@ import { Enterprise, WorkforceTask, ShiftSchedule } from '../types'
 import { useTranslation } from 'react-i18next'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 const PRIORITY_COLORS: Record<string, string> = {
   low: '#6b7280', medium: '#3b82f6', high: '#f97316', critical: '#ef4444'
 }
@@ -205,7 +206,7 @@ const WorkforcePage: React.FC = () => {
                     <thead><tr><th>{t('workforce.task')}</th><th>{t('workforce.assignedTo')}</th><th>{t('workforce.due')}</th><th>{t('workforce.priority')}</th></tr></thead>
                     <tbody>{dashboard.overdueTasks.map((ot: any, i: number) => (
                       <tr key={i}><td>{ot.title}</td><td>{ot.assigned_to_name || '-'}</td>
-                        <td className="si-4fb20e94">{ot.due_date ? new Date(ot.due_date).toLocaleDateString() : '-'}</td>
+                        <td className="si-4fb20e94">{ot.due_date ? new Date(ot.due_date).toLocaleDateString(appLocale()) : '-'}</td>
                         <td><span className="badge" style={{ backgroundColor: PRIORITY_COLORS[ot.priority] }}>{ot.priority}</span></td></tr>
                     ))}</tbody>
                   </table>
@@ -273,7 +274,7 @@ const WorkforcePage: React.FC = () => {
                     {task.description && <p className="card-note">{task.description}</p>}
                     <div className="card-stats">
                       <div>{t('workforce.assigned')}: <strong>{task.assignedToName || (task as any).assigned_to_name || t('workforce.unassigned')}</strong></div>
-                      {(task.dueDate || (task as any).due_date) && <div>{t('workforce.due')}: {new Date(task.dueDate || (task as any).due_date).toLocaleDateString()}</div>}
+                      {(task.dueDate || (task as any).due_date) && <div>{t('workforce.due')}: {new Date(task.dueDate || (task as any).due_date).toLocaleDateString(appLocale())}</div>}
                       {(task.estimatedHours || (task as any).estimated_hours) && <div>{t('workforce.est')}: {task.estimatedHours || (task as any).estimated_hours}h</div>}
                     </div>
                     <div className="card-footer">
@@ -313,7 +314,7 @@ const WorkforcePage: React.FC = () => {
                   {shifts.map(s => (
                     <tr key={s.id}>
                       <td>{s.userName || (s as any).user_name || s.userId}</td>
-                      <td>{(s.shiftDate || (s as any).shift_date) ? new Date(s.shiftDate || (s as any).shift_date).toLocaleDateString() : '-'}</td>
+                      <td>{(s.shiftDate || (s as any).shift_date) ? new Date(s.shiftDate || (s as any).shift_date).toLocaleDateString(appLocale()) : '-'}</td>
                       <td>{s.startTime || (s as any).start_time}</td>
                       <td>{s.endTime || (s as any).end_time}</td>
                       <td>{s.roleOnShift || (s as any).role_on_shift || '-'}</td>

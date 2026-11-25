@@ -9,6 +9,7 @@ import { useMasterData } from '../context/MasterDataContext'
 import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 const SEVERITY_COLORS: Record<string, string> = {
   low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444'
 }
@@ -247,7 +248,7 @@ const HealthAnalytics: React.FC = () => {
                           <td>{o.observationType}</td>
                           <td><span className="badge" style={{ background: SEVERITY_COLORS[o.severity] }}>{o.severity}</span></td>
                           <td>{o.animalName || '-'}</td>
-                          <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '-'}</td>
+                          <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString(appLocale()) : '-'}</td>
                           <td>{!o.isResolved && <button className="btn btn-sm btn-success" onClick={() => handleResolve(o.id)}>{t('healthAnalytics.resolve')}</button>}</td>
                         </tr>
                       ))}
@@ -296,7 +297,7 @@ const HealthAnalytics: React.FC = () => {
                         <td><span className="badge" style={{ background: SEVERITY_COLORS[o.severity] }}>{o.severity}</span></td>
                         <td>{o.animalName || '-'}</td>
                         <td>{o.isResolved ? t('healthAnalytics.headers.resolved') : t('healthAnalytics.headers.open')}</td>
-                        <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '-'}</td>
+                        <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString(appLocale()) : '-'}</td>
                         <td>{!o.isResolved && <button className="btn btn-sm btn-success" onClick={() => handleResolve(o.id)}>{t('healthAnalytics.resolve')}</button>}</td>
                       </tr>
                     ))}

@@ -1,5 +1,6 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
+import { appLocale } from '../../utils/appLocale'
 
 export const AdminRevenueSubtab: React.FC<{
   monetizationDashboard: any; formatCurrency: (n: number) => string; t: TFunction;
@@ -67,7 +68,7 @@ export const AdminRevenueSubtab: React.FC<{
                   <td><span className="module-badge">{tx.transaction_type}</span></td>
                   <td>{formatCurrency(tx.amount)}</td>
                   <td><span className={`module-badge ${tx.status === 'completed' ? 'success' : ''}`}>{tx.status}</span></td>
-                  <td>{new Date(tx.created_at).toLocaleDateString()}</td>
+                  <td>{new Date(tx.created_at).toLocaleDateString(appLocale())}</td>
                 </tr>
               ))}
             </tbody>

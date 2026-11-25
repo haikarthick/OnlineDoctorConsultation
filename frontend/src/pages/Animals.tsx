@@ -18,6 +18,7 @@ import BulkImportModal from '../components/animals/BulkImportModal'
 import { emptyAnimalFormData, animalToFormData, buildAnimalPayload, type AnimalData, type EnterpriseOption, type GroupOption } from '../components/animals/animalsShared'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 const Animals: React.FC = () => {
   const { t } = useTranslation()
   const { breedsForSpecies, breedLabel, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies, speciesLabel, resolveLabel } = useMasterData()
@@ -305,7 +306,7 @@ const Animals: React.FC = () => {
 </head>
 <body>
   <h1>&#x1F43E; waytovet Health Passport</h1>
-  <p style="color:#666; margin:0;">Generated on ${new Date().toLocaleDateString()}</p>
+  <p style="color:#666; margin:0;">Generated on ${new Date().toLocaleDateString(appLocale())}</p>
   <h2>Animal Information</h2>
   <div class="info-grid">
     <div class="info-item"><span class="label">Name:</span> ${animal.name}</div>

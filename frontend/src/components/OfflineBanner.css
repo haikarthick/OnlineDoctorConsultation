@@ -1,0 +1,10 @@
+:where(.offline-banner) {
+  margin: 8px 0 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 14px;
+  line-height: 1.4;
+}

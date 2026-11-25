@@ -1,5 +1,6 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
+import { appLocale } from '../../utils/appLocale'
 
 export interface AnalyticsTabProps {
   analyticsLoading: boolean
@@ -54,7 +55,7 @@ const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ analyticsLoading, analytics
               </div>
               <div className="card-body">
                 {[...analyticsData.enrollmentTrend].reverse().map((item: any, i: number) => {
-                  const month = item.month ? new Date(item.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '-'
+                  const month = item.month ? new Date(item.month).toLocaleDateString(appLocale(), { month: 'short', year: 'numeric' }) : '-'
                   const count = parseInt(item.count ?? 0)
                   const max = Math.max(...analyticsData.enrollmentTrend.map((r: any) => parseInt(r.count ?? 0)), 1)
                   return (

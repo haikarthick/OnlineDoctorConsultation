@@ -7,6 +7,7 @@ import { useScrollToForm } from '../hooks/useScrollToForm'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 const SEVERITY_COLORS: Record<string, string> = { info: '#3b82f6', warning: '#f97316', critical: '#ef4444' }
 const RULE_TYPES = ['vaccination_due', 'breeding_due', 'low_feed_stock', 'document_expiry', 'health_threshold', 'custom']
 
@@ -222,7 +223,7 @@ const AlertCenter: React.FC = () => {
                       <div className="alert-event-header">
                         <span className="badge" style={{ background: SEVERITY_COLORS[ev.severity] }}>{ev.severity}</span>
                         <strong>{ev.title}</strong>
-                        <span className="alert-event-time">{ev.createdAt ? new Date(ev.createdAt).toLocaleString() : '-'}</span>
+                        <span className="alert-event-time">{ev.createdAt ? new Date(ev.createdAt).toLocaleString(appLocale()) : '-'}</span>
                       </div>
                       <p className="alert-event-message">{ev.message}</p>
                       <div className="alert-event-meta">

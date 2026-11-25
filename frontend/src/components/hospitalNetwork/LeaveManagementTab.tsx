@@ -1,6 +1,7 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
 import LeaveRequestModal from './LeaveRequestModal'
+import { appLocale } from '../../utils/appLocale'
 
 export interface LeaveManagementTabProps {
   leaveRequests: any[]
@@ -49,7 +50,7 @@ const LeaveManagementTab: React.FC<LeaveManagementTabProps> = ({
                 <tr key={lr.id}>
                   <td>{lr.userName || '-'}</td>
                   <td><span className="module-badge">{lr.leave_type}</span></td>
-                  <td>{new Date(lr.start_date).toLocaleDateString()} - {new Date(lr.end_date).toLocaleDateString()}</td>
+                  <td>{new Date(lr.start_date).toLocaleDateString(appLocale())} - {new Date(lr.end_date).toLocaleDateString(appLocale())}</td>
                   <td>
                     <span className={`module-badge ${lr.status === 'approved' ? 'badge-success' : lr.status === 'rejected' ? 'badge-error' : 'badge-pending'}`}>
                       {lr.status}

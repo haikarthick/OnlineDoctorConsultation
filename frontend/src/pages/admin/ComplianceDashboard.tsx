@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import '../../styles/modules.css'
+import { appLocale } from '../../utils/appLocale'
 
 interface ComplianceDashboardProps {
   onNavigate: (path: string) => void
@@ -145,7 +146,7 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
             ].map((kpi, i) => (
               <div key={i} className="module-card si-4b6b7fbc">
                 <div className="si-4b9a6e6e">{kpi.icon}</div>
-                <div style={{ fontSize: 28, fontWeight: 800, color: kpi.color, margin: '4px 0' }}>{kpi.value.toLocaleString()}</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: kpi.color, margin: '4px 0' }}>{kpi.value.toLocaleString(appLocale())}</div>
                 <div className="si-c3b93ebb">{kpi.label}</div>
               </div>
             ))}
@@ -200,7 +201,7 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
                   <div key={i} className="si-0e4f2832">
                     <span className="si-5f543982">{day.count}</span>
                     <div style={{ width: '100%', height: h, background: '#667eea', borderRadius: 4, minWidth: 8 }} />
-                    <span className="si-227aab77">{new Date(day.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                    <span className="si-227aab77">{new Date(day.date).toLocaleDateString(appLocale(), { month: 'short', day: 'numeric' })}</span>
                   </div>
                 )
               })}

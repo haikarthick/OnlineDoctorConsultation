@@ -18,6 +18,7 @@ import {
 } from '../components/farmRecords/recordShared'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 
 /** Three families of subject, each with its own colour: batches/flocks, herds, single animals. */
 type CardKind = 'batch' | 'herd' | 'single'
@@ -158,7 +159,7 @@ const FarmRecords: React.FC = () => {
     } else if (Array.isArray(result?.newborns) && result.newborns.length > 0) {
       setMessage(t('farmRecords.newbornsAdded', { count: result.newborns.length }))
     } else if (result?.expectedDueDate) {
-      setMessage(t('farmRecords.dueAbout', { date: new Date(result.expectedDueDate).toLocaleDateString() }))
+      setMessage(t('farmRecords.dueAbout', { date: new Date(result.expectedDueDate).toLocaleDateString(appLocale()) }))
     } else {
       setMessage(result?.replaced ? t('farmRecords.updated') : t('farmRecords.saved'))
     }

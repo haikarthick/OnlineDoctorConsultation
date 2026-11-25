@@ -1,4 +1,5 @@
 import React from 'react'
+import { appLocale } from '../../utils/appLocale'
 
 interface MinimapSegment { label: string; color: string; pct: number }
 interface ScrubDot { id: string; pct: number; color: string }
@@ -33,7 +34,7 @@ const TimelineScrubberBar: React.FC<TimelineScrubberBarProps> = ({
     <>
       {/* Distribution bar */}
       <div className="tl-dist-bar-wrap">
-        <span className="tl-dist-label">Showing: {new Date(viewStartMs).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} - {new Date(viewStartMs + daysVisible * 86400000).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} · {daysVisible} day(s) · {filteredEventsCount} item(s)</span>
+        <span className="tl-dist-label">Showing: {new Date(viewStartMs).toLocaleDateString(appLocale(), { day:'2-digit', month:'short', year:'numeric' })} - {new Date(viewStartMs + daysVisible * 86400000).toLocaleDateString(appLocale(), { day:'2-digit', month:'short', year:'numeric' })} · {daysVisible} day(s) · {filteredEventsCount} item(s)</span>
         <div className="tl-dist-bar">
           {minimapSegments.map(seg => (
             // eslint-disable-next-line react/forbid-dom-props -- segment width is a computed percentage of filtered events, not a finite enum
@@ -53,8 +54,8 @@ const TimelineScrubberBar: React.FC<TimelineScrubberBarProps> = ({
       {/* Scrubber */}
       <div className="tl-scrubber-wrap">
         <div className="tl-scrubber-track" ref={scrubberRef}>
-          <span className="tl-scrubber-min">{new Date(minMs).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}</span>
-          <span className="tl-scrubber-max">{new Date(maxMs).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}</span>
+          <span className="tl-scrubber-min">{new Date(minMs).toLocaleDateString(appLocale(), { day:'2-digit', month:'short', year:'numeric' })}</span>
+          <span className="tl-scrubber-max">{new Date(maxMs).toLocaleDateString(appLocale(), { day:'2-digit', month:'short', year:'numeric' })}</span>
           {scrubDots.map(dot => (
             // eslint-disable-next-line react/forbid-dom-props -- dot x-position is a computed percentage along the full date range, not a finite enum
             <div key={dot.id} className="tl-scrubber-dot" style={{ ['--x' as string]: `${Math.max(0, Math.min(100, dot.pct))}%`, ['--c' as string]: dot.color }} />

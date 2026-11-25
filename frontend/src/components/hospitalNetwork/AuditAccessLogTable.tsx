@@ -1,6 +1,7 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
 import { AUDIT_RECORD_TYPE_LABELS, AuditEntry, AuditStats } from './hospitalNetworksShared'
+import { appLocale } from '../../utils/appLocale'
 
 const KNOWN_AUDIT_ROLES = new Set(['veterinarian', 'admin', 'farmer', 'pet_owner'])
 
@@ -164,7 +165,7 @@ const AuditAccessLogTable: React.FC<AuditAccessLogTableProps> = ({
                       <td>
                         <div className="hn-audit-date">{formatDate(entry.accessedAt)}</div>
                         <div className="hn-audit-time">
-                          {new Date(entry.accessedAt).toLocaleTimeString()}
+                          {new Date(entry.accessedAt).toLocaleTimeString(appLocale())}
                         </div>
                       </td>
                     </tr>

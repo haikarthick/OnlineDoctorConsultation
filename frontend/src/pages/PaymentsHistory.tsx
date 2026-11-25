@@ -4,6 +4,7 @@ import apiService from '../services/api'
 import { useSettings } from '../context/SettingsContext'
 import './ModulePage.css'
 import '../styles/modules.css'
+import { appLocale } from '../utils/appLocale'
 
 /**
  * Payments & Receipts page (docs/PAYMENT_MODULE_PLAN.md §10 - patient/farmer).
@@ -94,7 +95,7 @@ export default function PaymentsHistory() {
                   )}
                 </div>
                 <div className="si-c3b93ebb">
-                  {p.createdAt ? new Date(p.createdAt).toLocaleString() : '-'}
+                  {p.createdAt ? new Date(p.createdAt).toLocaleString(appLocale()) : '-'}
                   {p.transactionId ? ` · ${p.transactionId}` : ''}
                 </div>
                 {parseFloat(String(p.refundAmount || 0)) > 0 && (
@@ -147,7 +148,7 @@ export default function PaymentsHistory() {
                   </ul>
                 </div>
               )}
-              <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.date')}</span><strong>{receipt.paidAt ? new Date(receipt.paidAt).toLocaleString() : '-'}</strong></div>
+              <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.date')}</span><strong>{receipt.paidAt ? new Date(receipt.paidAt).toLocaleString(appLocale()) : '-'}</strong></div>
               {parseFloat(String(receipt.walletAmountUsed || 0)) > 0 && (
                 <div className="si-34ec0bf0"><span className="si-23033f05">{t('payment.walletApplied')}</span><strong>{formatCurrency(parseFloat(String(receipt.walletAmountUsed)))}</strong></div>
               )}

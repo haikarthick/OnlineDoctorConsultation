@@ -1,5 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { appLocale } from '../../utils/appLocale'
 
 interface RoleChangeRequestPanelProps {
   currentUserRole?: string
@@ -52,7 +53,7 @@ const RoleChangeRequestPanel: React.FC<RoleChangeRequestPanelProps> = ({
         <div className="module-alert si-e120eda2">
           <strong>{t('settings.roleChange.pendingTitle')}</strong>
           <p>{t('settings.roleChange.pendingDesc', { currentRole: pendingRequest.currentRole?.replace('_', ' '), requestedRole: pendingRequest.requestedRole?.replace('_', ' ') })}</p>
-          <p className="si-322b324f">{t('settings.roleChange.submitted')}: {new Date(pendingRequest.createdAt).toLocaleDateString()}</p>
+          <p className="si-322b324f">{t('settings.roleChange.submitted')}: {new Date(pendingRequest.createdAt).toLocaleDateString(appLocale())}</p>
           <button className="module-btn si-cbfb1eb8" onClick={() => onCancel(pendingRequest.id)}>
             {t('settings.roleChange.cancelBtn')}
           </button>

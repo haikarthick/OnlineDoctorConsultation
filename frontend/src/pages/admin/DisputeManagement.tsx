@@ -5,6 +5,7 @@ import '../../styles/modules.css'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 import { userMessage } from '../../utils/userMessage'
+import { appLocale } from '../../utils/appLocale'
 interface Dispute {
   id: string
   subject: string
@@ -168,7 +169,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
                       {d.reportedByEmail && <div className="si-48a0b045">{d.reportedByEmail}</div>}
                     </td>
                     <td className="si-c3b93ebb">
-                      {d.createdAt ? new Date(d.createdAt).toLocaleDateString() : '-'}
+                      {d.createdAt ? new Date(d.createdAt).toLocaleDateString(appLocale()) : '-'}
                     </td>
                     <td>
                       {!['resolved', 'dismissed'].includes(d.status) && (

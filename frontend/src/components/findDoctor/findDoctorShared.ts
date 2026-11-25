@@ -1,4 +1,5 @@
 import { VetProfile, TimeSlot } from '../../types'
+import { appLocale } from '../../utils/appLocale'
 
 export interface VetWithAvailability extends VetProfile {
   availableSlots?: TimeSlot[]
@@ -33,7 +34,7 @@ export function getDateChips() {
     const dateStr = d.toISOString().split('T')[0]
     const label = i === 0 ? 'Today'
       : i === 1 ? 'Tomorrow'
-      : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+      : d.toLocaleDateString(appLocale(), { weekday: 'short', month: 'short', day: 'numeric' })
     return { dateStr, label }
   })
 }
@@ -56,7 +57,7 @@ export function formatDateLabel(dateStr: string): string {
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
   if (dateStr === today)    return 'Today'
   if (dateStr === tomorrow) return 'Tomorrow'
-  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString(appLocale(), {
     weekday: 'long', month: 'short', day: 'numeric',
   })
 }

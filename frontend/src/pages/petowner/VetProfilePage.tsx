@@ -4,6 +4,7 @@ import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import { VetProfile, Review, DoctorReliability } from '../../types'
 import '../../styles/modules.css'
+import { appLocale } from '../../utils/appLocale'
 
 interface VetProfilePageProps {
   vetId?: string
@@ -266,7 +267,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
                         {review.petOwnerName || review.reviewerName || 'Anonymous'}
                       </div>
                       <div className="si-3f4bbe41">
-                        {new Date(review.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        {new Date(review.createdAt).toLocaleDateString(appLocale(), { year: 'numeric', month: 'long', day: 'numeric' })}
                       </div>
                     </div>
                   </div>

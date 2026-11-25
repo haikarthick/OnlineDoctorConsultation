@@ -1,5 +1,6 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
+import { appLocale } from '../../utils/appLocale'
 
 interface Props {
   t: TFunction
@@ -54,7 +55,7 @@ const AppointmentsTab: React.FC<Props> = ({ t, bookings, bookingsLoading, bookin
           <tbody>
             {bookings.map((b: any) => (
               <tr key={b.id}>
-                <td>{b.scheduledDate ? new Date(b.scheduledDate).toLocaleDateString() : '-'}</td>
+                <td>{b.scheduledDate ? new Date(b.scheduledDate).toLocaleDateString(appLocale()) : '-'}</td>
                 <td>{b.timeSlotStart ? formatSlotTime(b.timeSlotStart) : '-'}{b.timeSlotEnd ? ` - ${formatSlotTime(b.timeSlotEnd)}` : ''}</td>
                 <td>{b.patientName || b.ownerName || '-'}</td>
                 <td>{b.vetName || b.veterinarianName || '-'}</td>

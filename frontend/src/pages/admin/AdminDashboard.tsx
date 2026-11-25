@@ -7,6 +7,7 @@ import '../../styles/modules.css'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 import { userMessage } from '../../utils/userMessage'
+import { appLocale } from '../../utils/appLocale'
 interface RevenueTrend {
   date: string
   revenue: number
@@ -132,7 +133,7 @@ setError(userMessage(err))
         </div>
         <div className="stat-card si-3c1f81b9" onClick={() => onNavigate('/admin/payments')} title={t('adminDashboard.payments')}>
           <div className="stat-icon">💰</div>
-          <div className="stat-value">${((stats.totalRevenue || 0) / 100).toLocaleString()}</div>
+          <div className="stat-value">${((stats.totalRevenue || 0) / 100).toLocaleString(appLocale())}</div>
           <div className="stat-label">{t('adminDashboard.totalRevenue')}</div>
         </div>
       </div>
@@ -296,7 +297,7 @@ setError(userMessage(err))
               </div>
               <div className="stat-card">
                 <div className="stat-icon">💰</div>
-                <div className="stat-value">${((pharmacyOverview.revenueThisWeek || 0)).toLocaleString()}</div>
+                <div className="stat-value">${((pharmacyOverview.revenueThisWeek || 0)).toLocaleString(appLocale())}</div>
                 <div className="stat-label">{t('adminDashboard.pharmacyRevenueThisWeek')}</div>
               </div>
             </div>

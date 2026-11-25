@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 const SEVERITY_COLORS: Record<string, string> = {
   low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444'
 }
@@ -240,7 +241,7 @@ const DiseasePredictionPage: React.FC = () => {
                       <td><strong>{p.diseaseName || (p as any).disease_name}</strong><br /><small>{p.animalName || (p as any).animal_name || 'Enterprise-wide'}</small></td>
                       <td><span className="badge" style={{ backgroundColor: +(p.riskScore || (p as any).risk_score) > 70 ? '#ef4444' : +(p.riskScore || (p as any).risk_score) > 40 ? '#f97316' : '#22c55e' }}>{+(p.riskScore || (p as any).risk_score)}%</span></td>
                       <td>{+(p.confidence || 0)}%</td>
-                      <td>{(p.predictedOnset || (p as any).predicted_onset) ? new Date(p.predictedOnset || (p as any).predicted_onset).toLocaleDateString() : '-'}</td>
+                      <td>{(p.predictedOnset || (p as any).predicted_onset) ? new Date(p.predictedOnset || (p as any).predicted_onset).toLocaleDateString(appLocale()) : '-'}</td>
                       <td><span className={`badge badge-${p.status}`}>{p.status}</span></td>
                       <td>{p.status === 'active' && <button className="btn-sm" onClick={() => handleResolve(p.id)}>{t('diseasePrediction.resolve')}</button>}</td>
                     </tr>
@@ -359,7 +360,7 @@ const DiseasePredictionPage: React.FC = () => {
                       <div className="si-5b3d984f">📍 {(+(z.centerLat || (z as any).center_lat)).toFixed(4)}, {(+(z.centerLng || (z as any).center_lng)).toFixed(4)}</div>
                     )}
                     <div className="card-footer">
-                      <small>{t('diseasePrediction.started')} {(z.startedAt || (z as any).started_at) ? new Date(z.startedAt || (z as any).started_at).toLocaleDateString() : '-'}</small>
+                      <small>{t('diseasePrediction.started')} {(z.startedAt || (z as any).started_at) ? new Date(z.startedAt || (z as any).started_at).toLocaleDateString(appLocale()) : '-'}</small>
                       {(z.containmentStatus || (z as any).containment_status) !== 'resolved' && (
                         <button className="btn-sm" onClick={() => handleResolveOutbreak(z.id)}>{t('diseasePrediction.resolve')}</button>
                       )}

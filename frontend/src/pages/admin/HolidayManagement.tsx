@@ -5,6 +5,7 @@ import { useSettings } from '../../context/SettingsContext'
 import './HolidayManagement.css'
 
 import { userMessage } from '../../utils/userMessage'
+import { appLocale } from '../../utils/appLocale'
 interface Holiday {
   id: string; holidayDate: string; name: string; holidayType: string;
   isFullDay: boolean; startTime?: string; endTime?: string; createdAt: string;
@@ -24,7 +25,7 @@ function formatDisplayDate(raw: string, opts?: Intl.DateTimeFormatOptions): stri
   if (!dateStr) return ''
   const [y, m, d] = dateStr.split('-').map(Number)
   const dt = new Date(y, m - 1, d)
-  return dt.toLocaleDateString('en-US', opts || { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+  return dt.toLocaleDateString(appLocale(), opts || { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 export default function HolidayManagement() {

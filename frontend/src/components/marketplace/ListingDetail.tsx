@@ -5,6 +5,7 @@ import { ListingGallery } from './ListingGallery'
 import { useMasterData } from '../../context/MasterDataContext'
 import { CATEGORY_ICONS, g } from './publicListingShared'
 import { AuctionCountdown } from './AuctionCountdown'
+import { appLocale } from '../../utils/appLocale'
 
 // ─── Listing Detail Component ───
 export const ListingDetail: React.FC<{
@@ -241,7 +242,7 @@ export const ListingDetail: React.FC<{
                 <div className="mp-auction-end">
                   <span>{t('marketplace.detail.ends')} </span>
                   <AuctionCountdown endTime={auctionEnd} t={t} />
-                  <div className="si-b1a83cef">{new Date(auctionEnd).toLocaleString()}</div>
+                  <div className="si-b1a83cef">{new Date(auctionEnd).toLocaleString(appLocale())}</div>
                 </div>
               )}
               <input className="module-input" type="number" inputMode="decimal" placeholder={t('marketplace.detail.yourBidAmount')} value={bidAmount} onChange={e => onBidAmountChange(e.target.value)} />

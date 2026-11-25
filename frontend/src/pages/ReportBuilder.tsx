@@ -5,6 +5,7 @@ import { Enterprise, ReportTemplate, GeneratedReport } from '../types'
 import { useTranslation } from 'react-i18next'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 const REPORT_TYPES = [
   { value: 'animal_census', label: '🐄 Animal Census', desc: 'Comprehensive animal inventory by species, breed, gender' },
   { value: 'health_summary', label: '🏥 Health Summary', desc: 'Health observations, resolution rates, severity analysis' },
@@ -72,7 +73,7 @@ const ReportBuilderPage: React.FC = () => {
     try {
       const result = await apiService.generateReport(selectedEnterpriseId, {
         enterpriseId: selectedEnterpriseId, reportType: genForm.reportType,
-        name: genForm.name || `${genForm.reportType} - ${new Date().toLocaleDateString()}`,
+        name: genForm.name || `${genForm.reportType} - ${new Date().toLocaleDateString(appLocale())}`,
         format: genForm.format,
         parameters: { days: parseInt(genForm.days) || 90, months: parseInt(genForm.months) || 12 }
       })
@@ -125,14 +126,14 @@ const ReportBuilderPage: React.FC = () => {
         <div className="card-stats si-1cb81cae">
           <div>Rows: <strong>{data.totalRows || rows.length}</strong></div>
           {data.period && <div>Period: <strong>{data.period}</strong></div>}
-          {data.reportDate && <div>Date: <strong>{new Date(data.reportDate).toLocaleDateString()}</strong></div>}
+          {data.reportDate && <div>Date: <strong>{new Date(data.reportDate).toLocaleDateString(appLocale())}</strong></div>}
         </div>
         <div className="si-9aa6c55f">
           <table className="data-table">
             <thead><tr>{columns.map(c => <th key={c}>{c.replace(/_/g, ' ')}</th>)}</tr></thead>
             <tbody>
               {rows.map((row: any, i: number) => (
-                <tr key={i}>{columns.map(c => <td key={c}>{typeof row[c] === 'number' ? (+row[c]).toLocaleString(undefined, { maximumFractionDigits: 2 }) : String(row[c] ?? '-')}</td>)}</tr>
+                <tr key={i}>{columns.map(c => <td key={c}>{typeof row[c] === 'number' ? (+row[c]).toLocaleString(appLocale(), { maximumFractionDigits: 2 }) : String(row[c] ?? '-')}</td>)}</tr>
               ))}
             </tbody>
           </table>
@@ -217,7 +218,7 @@ const ReportBuilderPage: React.FC = () => {
                       <td><span className="badge">{typeInfo(r.reportType || (r as any).report_type)?.label || r.reportType || (r as any).report_type}</span></td>
                       <td>{r.format}</td>
                       <td>{r.rowCount || (r as any).row_count || 0}</td>
-                      <td>{(r.generatedAt || (r as any).generated_at) ? new Date(r.generatedAt || (r as any).generated_at).toLocaleString() : '-'}</td>
+                      <td>{(r.generatedAt || (r as any).generated_at) ? new Date(r.generatedAt || (r as any).generated_at).toLocaleString(appLocale()) : '-'}</td>
                       <td>
                         <button className="btn-sm" onClick={() => handleViewReport(r.id)}>{t('common.view')}</button>
                         <button className="btn-sm btn-danger si-fd5a3e17" onClick={() => handleDeleteReport(r.id)}>{t('common.delete')}</button>
@@ -239,7 +240,7 @@ const ReportBuilderPage: React.FC = () => {
                     <div className="card-meta">
                       <span className="badge">{typeInfo(selectedReport.reportType || (selectedReport as any).report_type)?.label || selectedReport.reportType}</span>
                       <span className="badge">{selectedReport.format?.toUpperCase()}</span>
-                      <span>Generated: {(selectedReport.generatedAt || (selectedReport as any).generated_at) ? new Date(selectedReport.generatedAt || (selectedReport as any).generated_at).toLocaleString() : '-'}</span>
+                      <span>Generated: {(selectedReport.generatedAt || (selectedReport as any).generated_at) ? new Date(selectedReport.generatedAt || (selectedReport as any).generated_at).toLocaleString(appLocale()) : '-'}</span>
                     </div>
                   </div>
                   {renderReportData(selectedReport)}

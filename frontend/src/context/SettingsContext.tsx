@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
+import { appLocale } from '../utils/appLocale'
 
 // ─── Types ───────────────────────────────────────────────────
 export type TimeFormatType = '12h' | '24h'
@@ -117,7 +118,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     try {
       const date = typeof d === 'string' ? new Date(d) : d
       if (isNaN(date.getTime())) return String(d)
-      return date.toLocaleTimeString('en-US', {
+      return date.toLocaleTimeString(appLocale(), {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
@@ -130,7 +131,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     try {
       const date = typeof d === 'string' ? new Date(d) : d
       if (isNaN(date.getTime())) return String(d)
-      return date.toLocaleDateString('en-US', opts || {
+      return date.toLocaleDateString(appLocale(), opts || {
         year: 'numeric', month: 'short', day: 'numeric',
       })
     } catch { return String(d) }
@@ -140,7 +141,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     try {
       const date = typeof d === 'string' ? new Date(d) : d
       if (isNaN(date.getTime())) return String(d)
-      return date.toLocaleString('en-US', {
+      return date.toLocaleString(appLocale(), {
         year: 'numeric', month: 'short', day: 'numeric',
         hour: '2-digit', minute: '2-digit',
         hour12: settings.timeFormat === '12h',
@@ -212,7 +213,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   const formatCurrency = useCallback((amount: number | string): string => {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount
     if (isNaN(num)) return `${getCurrencySymbol(settings.currency)}0`
-    return `${getCurrencySymbol(settings.currency)}${num.toLocaleString()}`
+    return `${getCurrencySymbol(settings.currency)}${num.toLocaleString(appLocale())}`
   }, [settings.currency])
 
   return (

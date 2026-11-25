@@ -1,5 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { appLocale } from '../../utils/appLocale'
 
 interface RoleChangeHistoryTableProps {
   roleRequests: any[]
@@ -26,7 +27,7 @@ const RoleChangeHistoryTable: React.FC<RoleChangeHistoryTableProps> = ({ roleReq
               <tr key={r.id}>
                 <td>{r.requestedRole?.replace('_', ' ')}</td>
                 <td><span className={`badge badge-${r.status === 'approved' ? 'active' : r.status === 'rejected' ? 'danger' : 'pending'}`}>{r.status}</span></td>
-                <td className="si-756a9f21">{new Date(r.createdAt).toLocaleDateString()}</td>
+                <td className="si-756a9f21">{new Date(r.createdAt).toLocaleDateString(appLocale())}</td>
                 <td className="si-756a9f21">
                   {r.reviewedBy || '-'}
                   {r.rejectionReason && <div className="si-16697caf">{r.rejectionReason}</div>}

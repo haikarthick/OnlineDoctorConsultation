@@ -1,5 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { appLocale } from '../../utils/appLocale'
 
 interface Props {
   show: boolean
@@ -46,8 +47,8 @@ const DisplayCard: React.FC<Props> = ({
           <p className="si-baf5210b">
             <strong>Preview:</strong>{' '}
             {timeFormat === '12h'
-              ? new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })
-              : new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+              ? new Date().toLocaleTimeString(appLocale(), { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })
+              : new Date().toLocaleTimeString(appLocale(), { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
           </p>
         </div>
 

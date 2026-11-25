@@ -1,6 +1,7 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
 import { parseJsonbArray } from './inpatientShared'
+import { appLocale } from '../../utils/appLocale'
 
 // ─── Animal's medical summary: allergies, recent records, prescriptions, vaccinations ───
 export const MedicalHistoryModal: React.FC<{
@@ -75,7 +76,7 @@ export const MedicalHistoryModal: React.FC<{
                       {meds.length > 0 ? meds.map((m: any, j: number) => (
                         <div key={j}><span className="si-7d5d38b3">{m.name || m.medication}</span>{m.dosage && <span className="si-98734f9a"> - {m.dosage}</span>}</div>
                       )) : <span className="si-7d5d38b3">{rx.instructions || 'Prescription'}</span>}
-                      {rx.valid_until && <div className="si-96a4ece3">Valid until: {new Date(rx.valid_until).toLocaleDateString()}</div>}
+                      {rx.valid_until && <div className="si-96a4ece3">Valid until: {new Date(rx.valid_until).toLocaleDateString(appLocale())}</div>}
                     </div>
                   )
                 })}
@@ -89,7 +90,7 @@ export const MedicalHistoryModal: React.FC<{
                 <div className="si-50c82988">
                   {medicalHistory.recentVaccinations.map((v: any, i: number) => (
                     <span key={i} className="si-8ca4e418">
-                      {v.vaccine_name} {v.date_administered ? `(${new Date(v.date_administered).toLocaleDateString()})` : ''}
+                      {v.vaccine_name} {v.date_administered ? `(${new Date(v.date_administered).toLocaleDateString(appLocale())})` : ''}
                     </span>
                   ))}
                 </div>

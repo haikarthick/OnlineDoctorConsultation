@@ -1,5 +1,6 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
+import { appLocale } from '../../utils/appLocale'
 
 export const AdminReportsSubtab: React.FC<{
   adminReportFilter: string; onFilterChange: (v: string) => void;
@@ -31,7 +32,7 @@ export const AdminReportsSubtab: React.FC<{
             <div className="mp-report-meta">
               <span className="mp-report-reason">{t(`marketplace.report.reasons.${r.reason}`)}</span>
               <span>· {t('marketplace.report.by')} {r.reporter_name}</span>
-              <span>· {new Date(r.created_at).toLocaleDateString()}</span>
+              <span>· {new Date(r.created_at).toLocaleDateString(appLocale())}</span>
             </div>
             {r.details && <div className="mp-report-details">{r.details}</div>}
             {['open', 'reviewing'].includes(r.status) && (

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import '../ModulePage.css'
 import { userMessage } from '../../utils/userMessage'
+import { appLocale } from '../../utils/appLocale'
 
 interface SettingRow { key: string; value: string | null; isSecret: boolean; isSet: boolean; description: string | null }
 interface LogRow { to: string; template: string; provider: string | null; status: string; error: string | null; createdAt: string }
@@ -175,7 +176,7 @@ const SmsSettings: React.FC = () => {
           <div className="sms-log">
             {log.map((l, i) => (
               <div key={`${l.createdAt}-${i}`} className="sms-log-row">
-                <span className="sms-log-when">{new Date(l.createdAt).toLocaleString()}</span>
+                <span className="sms-log-when">{new Date(l.createdAt).toLocaleString(appLocale())}</span>
                 <span>{l.to}</span>
                 <span className={`sms-log-status is-${l.status}`}>{t(`smsSettings.statuses.${l.status}`)}</span>
                 {l.error && <span className="sms-log-error">{l.error}</span>}

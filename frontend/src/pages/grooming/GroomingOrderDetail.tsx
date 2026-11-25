@@ -5,6 +5,7 @@ import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
 import { userMessage } from '../../utils/userMessage'
+import { appLocale } from '../../utils/appLocale'
 interface Props { onNavigate: (path: string) => void; id?: string }
 
 const SCENT_KEYS = ['Skin', 'Coat', 'Ears', 'Nails', 'Teeth'] as const
@@ -264,7 +265,7 @@ const GroomingOrderDetail: React.FC<Props> = ({ onNavigate, id }) => {
           {(order.history || []).map((h: any, i: number) => (
             <li key={i}>
               <span className="badge badge-info">{t(`groomingStatus.${h.toStatus}`, { defaultValue: (h.toStatus || '').replace(/_/g, ' ') })}</span>
-              <span className="timeline-meta">{new Date(h.createdAt).toLocaleString()}{h.note ? ` · ${h.note}` : ''}</span>
+              <span className="timeline-meta">{new Date(h.createdAt).toLocaleString(appLocale())}{h.note ? ` · ${h.note}` : ''}</span>
             </li>
           ))}
         </ul>

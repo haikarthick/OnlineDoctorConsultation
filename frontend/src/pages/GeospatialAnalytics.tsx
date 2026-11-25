@@ -8,6 +8,7 @@ import { useMasterData } from '../context/MasterDataContext'
 import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 const ZONE_TYPES = ['pasture', 'barn', 'medical', 'quarantine', 'feeding', 'water', 'boundary', 'custom']
 const ZONE_COLORS: Record<string, string> = { pasture: '#22c55e', barn: '#a78bfa', medical: '#ef4444', quarantine: '#f97316', feeding: '#eab308', water: '#3b82f6', boundary: '#64748b', custom: '#ec4899' }
 const EVENT_TYPES = ['location_update', 'zone_entry', 'zone_exit', 'zone_breach', 'sos_alert']
@@ -180,7 +181,7 @@ const GeospatialAnalytics: React.FC = () => {
                     <strong>{ev.animal_name}</strong><br />
                     <span className={`module-badge ${ev.event_type === 'zone_breach' ? 'error' : ''} si-6af9d82f`}>{ev.event_type}</span><br />
                     {ev.zone_name && <span className="si-756a9f21">Zone: {ev.zone_name}</span>}<br />
-                    <span className="si-dd67611c">{ev.recorded_at ? new Date(ev.recorded_at).toLocaleString() : ''}</span>
+                    <span className="si-dd67611c">{ev.recorded_at ? new Date(ev.recorded_at).toLocaleString(appLocale()) : ''}</span>
                   </div>
                 ),
               }))}
@@ -192,7 +193,7 @@ const GeospatialAnalytics: React.FC = () => {
               <h3>{t('geospatialAnalytics.recentEvents')}</h3>
               <table className="module-table"><thead><tr><th>{t('iotSensors.time')}</th><th>{t('genomicLineage.animal')}</th><th>{t('common.type')}</th><th>{t('geospatialAnalytics.zone')}</th><th>{t('geospatialAnalytics.location')}</th></tr></thead>
                 <tbody>{dashboard.recentEvents.map((ev: any) => (
-                  <tr key={ev.id}><td>{ev.recorded_at ? new Date(ev.recorded_at).toLocaleString() : '-'}</td><td>{ev.animal_name}</td>
+                  <tr key={ev.id}><td>{ev.recorded_at ? new Date(ev.recorded_at).toLocaleString(appLocale()) : '-'}</td><td>{ev.animal_name}</td>
                     <td><span className={`module-badge ${ev.event_type === 'zone_breach' ? 'error' : ''}`}>{ev.event_type}</span></td>
                     <td>{ev.zone_name || '-'}</td><td>{(+ev.latitude).toFixed(4)}, {(+ev.longitude).toFixed(4)}</td></tr>
                 ))}</tbody></table>
@@ -377,7 +378,7 @@ const GeospatialAnalytics: React.FC = () => {
                        >{ev.eventType?.replace(/_/g, ' ')}</span><br />
                       {ev.zoneName && <span className="si-756a9f21">Zone: {ev.zoneName}</span>}
                       {ev.zoneName && <br />}
-                      <span className="si-dd67611c">{ev.createdAt ? new Date(ev.createdAt).toLocaleString() : ''}</span>
+                      <span className="si-dd67611c">{ev.createdAt ? new Date(ev.createdAt).toLocaleString(appLocale()) : ''}</span>
                       {ev.metadata && <div className="si-7e00f8e2">{JSON.stringify(ev.metadata).slice(0, 80)}</div>}
                     </div>
                   ),
@@ -424,7 +425,7 @@ const GeospatialAnalytics: React.FC = () => {
               <tbody>
                 {events.map(ev => (
                   <tr key={ev.id}>
-                    <td>{ev.createdAt ? new Date(ev.createdAt).toLocaleString() : '-'}</td>
+                    <td>{ev.createdAt ? new Date(ev.createdAt).toLocaleString(appLocale()) : '-'}</td>
                     <td>{ev.animalName || ev.animalId}</td>
                     <td><span className={`module-badge ${ev.eventType === 'boundary_breach' ? 'error' : ev.eventType === 'speed_alert' ? 'error' : ''}`}>{ev.eventType?.replace(/_/g, ' ')}</span></td>
                     <td>{ev.zoneName || '-'}</td>
@@ -526,7 +527,7 @@ const GeospatialAnalytics: React.FC = () => {
                           popup: (
                             <div>
                               <strong>Start</strong><br />
-                              <span className="si-756a9f21">{trailData.trail[0].recorded_at ? new Date(trailData.trail[0].recorded_at).toLocaleString() : '-'}</span>
+                              <span className="si-756a9f21">{trailData.trail[0].recorded_at ? new Date(trailData.trail[0].recorded_at).toLocaleString(appLocale()) : '-'}</span>
                             </div>
                           ),
                         }] : []),
@@ -539,7 +540,7 @@ const GeospatialAnalytics: React.FC = () => {
                           popup: (
                             <div>
                               <strong>Latest Position</strong><br />
-                              <span className="si-756a9f21">{trailData.trail[trailData.trail.length - 1].recorded_at ? new Date(trailData.trail[trailData.trail.length - 1].recorded_at).toLocaleString() : '-'}</span>
+                              <span className="si-756a9f21">{trailData.trail[trailData.trail.length - 1].recorded_at ? new Date(trailData.trail[trailData.trail.length - 1].recorded_at).toLocaleString(appLocale()) : '-'}</span>
                             </div>
                           ),
                         }] : []),
@@ -557,7 +558,7 @@ const GeospatialAnalytics: React.FC = () => {
                         <thead><tr><th>#</th><th>{t('iotSensors.time')}</th><th>{t('geospatialAnalytics.lat')}</th><th>{t('geospatialAnalytics.lng')}</th><th>{t('common.type')}</th></tr></thead>
                         <tbody>
                           {trailData.trail.slice(0, 50).map((p: any, i: number) => (
-                            <tr key={i}><td>{i + 1}</td><td>{p.recorded_at ? new Date(p.recorded_at).toLocaleString() : '-'}</td>
+                            <tr key={i}><td>{i + 1}</td><td>{p.recorded_at ? new Date(p.recorded_at).toLocaleString(appLocale()) : '-'}</td>
                               <td>{(+p.latitude).toFixed(5)}</td><td>{(+p.longitude).toFixed(5)}</td><td>{p.event_type}</td></tr>
                           ))}
                         </tbody>

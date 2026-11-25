@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next'
 import { MarketplaceListing } from '../../types'
 import { cldCardImageProps } from '../../utils/media'
 import { g } from './publicListingShared'
+import { appLocale } from '../../utils/appLocale'
 
 type Draft = { title: string; price: string; description: string }
 
@@ -108,7 +109,7 @@ export const MyListingsTab: React.FC<{
                 {contactViews.length === 0 ? <p className="mp-compliance-hint">{t('marketplace.mine.noViews')}</p> : (
                   <ul>
                     {contactViews.map((v, i) => (
-                      <li key={i}>{v.channel === 'whatsapp' ? '💬' : '📞'} {v.first_name} {v.last_initial ? v.last_initial + '.' : ''} · {new Date(v.created_at).toLocaleString()}</li>
+                      <li key={i}>{v.channel === 'whatsapp' ? '💬' : '📞'} {v.first_name} {v.last_initial ? v.last_initial + '.' : ''} · {new Date(v.created_at).toLocaleString(appLocale())}</li>
                     ))}
                   </ul>
                 )}

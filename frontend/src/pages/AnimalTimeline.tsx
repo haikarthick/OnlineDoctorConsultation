@@ -18,6 +18,7 @@ import TimelineRail from '../components/animalTimeline/TimelineRail'
 import TimelineScrubberBar from '../components/animalTimeline/TimelineScrubberBar'
 import EventHoverTooltip from '../components/animalTimeline/EventHoverTooltip'
 import EventDetailDrawer from '../components/animalTimeline/EventDetailDrawer'
+import { appLocale } from '../utils/appLocale'
 
 const AnimalTimeline: React.FC = () => {
   const { t } = useTranslation()
@@ -189,7 +190,7 @@ const AnimalTimeline: React.FC = () => {
     let cur = firstTick
     while (cur <= viewEndMs) {
       const x = (cur - viewStartMs) / msPerPx
-      const label = new Date(cur).toLocaleDateString('en-GB', {
+      const label = new Date(cur).toLocaleDateString(appLocale(), {
         day: '2-digit', month: 'short',
         year: tickIntervalDays >= 28 ? 'numeric' : undefined,
       })
@@ -401,7 +402,7 @@ const AnimalTimeline: React.FC = () => {
   }, [filteredEvents])
 
   const selectedAnimal = animals.find(a => a.id === selectedAnimalId)
-  const formatEventDate = (d: string) => { try { return formatDate(d) } catch { return new Date(d).toLocaleDateString() } }
+  const formatEventDate = (d: string) => { try { return formatDate(d) } catch { return new Date(d).toLocaleDateString(appLocale()) } }
   const clearAll = () => { setActiveFilters(new Set()); setDateFrom(''); setDateTo(''); setSearchQuery('') }
   const activeFilterCount = activeFilters.size + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0)
 

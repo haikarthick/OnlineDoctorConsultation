@@ -5,6 +5,7 @@ import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
 import { userMessage } from '../../utils/userMessage'
+import { appLocale } from '../../utils/appLocale'
 interface Props { onNavigate: (path: string) => void }
 
 const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
@@ -156,7 +157,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
               <tbody>
                 {settlements.map(s => (
                   <tr key={s.id}>
-                    <td>{s.settledAt ? new Date(s.settledAt).toLocaleDateString() : '-'}</td>
+                    <td>{s.settledAt ? new Date(s.settledAt).toLocaleDateString(appLocale()) : '-'}</td>
                     <td>{formatCurrency(Number(s.amount))}</td>
                     <td>{formatCurrency(Number(s.tdsAmount))}</td>
                     <td>{formatCurrency(Number(s.netPaid))}</td>
@@ -188,7 +189,7 @@ const GroomingEarnings: React.FC<Props> = ({ onNavigate }) => {
                 <div><span className="field-caption">{t('groomingEarnings.netPaid')}</span><div><strong>{formatCurrency(Number(statement.netPaid))}</strong></div></div>
                 <div><span className="field-caption">TDS</span><div>{formatCurrency(Number(statement.tdsAmount))}</div></div>
                 <div><span className="field-caption">{t('groomingEarnings.reference')}</span><div>{statement.reference || '-'}</div></div>
-                <div><span className="field-caption">{t('groomingEarnings.date')}</span><div>{statement.settledAt ? new Date(statement.settledAt).toLocaleDateString() : '-'}</div></div>
+                <div><span className="field-caption">{t('groomingEarnings.date')}</span><div>{statement.settledAt ? new Date(statement.settledAt).toLocaleDateString(appLocale()) : '-'}</div></div>
               </div>
               {statement.notes && <p className="slot-hint">{statement.notes}</p>}
               <div className="data-table-container">

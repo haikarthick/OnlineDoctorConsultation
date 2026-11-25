@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 const STATUS_COLORS: Record<string, string> = {
   draft: '#94a3b8', active: '#22c55e', expired: '#ef4444', revoked: '#dc2626', pending_renewal: '#f97316'
 }
@@ -216,7 +217,7 @@ const ComplianceDocs: React.FC = () => {
                           <td>{(d.documentType || '').replace(/_/g, ' ')}</td>
                           <td>{d.documentNumber || '-'}</td>
                           <td>{d.issuingAuthority || '-'}</td>
-                          <td>{d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : '-'}</td>
+                          <td>{d.expiryDate ? new Date(d.expiryDate).toLocaleDateString(appLocale()) : '-'}</td>
                           <td><span className="badge" style={{ background: STATUS_COLORS[d.status] || '#888' }}>{(d.status || '').replace(/_/g, ' ')}</span></td>
                           <td>{d.verifiedAt ? `✅ ${d.verifiedByName || ''}` : '-'}</td>
                           <td>
@@ -239,7 +240,7 @@ const ComplianceDocs: React.FC = () => {
                   <ul className="alert-list">
                     {summary.expiringSoon.map(d => (
                       <li key={d.id} className="alert-item warning">
-                        <strong>{d.title}</strong> {t('complianceDocs.summary.expiresPrefix')} {d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : ''}
+                        <strong>{d.title}</strong> {t('complianceDocs.summary.expiresPrefix')} {d.expiryDate ? new Date(d.expiryDate).toLocaleDateString(appLocale()) : ''}
                       </li>
                     ))}
                   </ul>
@@ -252,7 +253,7 @@ const ComplianceDocs: React.FC = () => {
                   <ul className="alert-list">
                     {summary.expired.map(d => (
                       <li key={d.id} className="alert-item danger">
-                        <strong>{d.title}</strong> {t('complianceDocs.summary.expiredPrefix')} {d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : ''}
+                        <strong>{d.title}</strong> {t('complianceDocs.summary.expiredPrefix')} {d.expiryDate ? new Date(d.expiryDate).toLocaleDateString(appLocale()) : ''}
                       </li>
                     ))}
                   </ul>

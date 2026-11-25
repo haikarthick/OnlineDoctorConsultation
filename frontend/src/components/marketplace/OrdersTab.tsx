@@ -2,6 +2,7 @@ import React from 'react'
 import type { TFunction } from 'i18next'
 import { MarketplaceOrder } from '../../types'
 import { g } from './publicListingShared'
+import { appLocale } from '../../utils/appLocale'
 
 export const OrdersTab: React.FC<{
   orderRole: 'buyer' | 'seller'; onOrderRoleChange: (role: 'buyer' | 'seller') => void;
@@ -26,7 +27,7 @@ export const OrdersTab: React.FC<{
                 <tr key={inq.id}>
                   <td>{inq.listingTitle || inq.listing_title || '-'}</td>
                   <td>{inq.message || '-'}</td>
-                  <td>{inq.created_at ? new Date(inq.created_at).toLocaleDateString() : '-'}</td>
+                  <td>{inq.created_at ? new Date(inq.created_at).toLocaleDateString(appLocale()) : '-'}</td>
                   <td><span className={`module-badge ${inq.status === 'responded' ? 'success' : ''}`}>{inq.status || 'pending'}</span></td>
                 </tr>
               ))}
@@ -57,10 +58,10 @@ export const OrdersTab: React.FC<{
                 <td>
                   <span className={`module-badge ${o.status === 'completed' || o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'error' : ''}`}>{statusLabel}</span>
                   {o.status === 'reserved' && reservedUntil && (
-                    <div className="mp-deal-until">{t('marketplace.deal.reservedUntil')}: {new Date(reservedUntil).toLocaleDateString()}</div>
+                    <div className="mp-deal-until">{t('marketplace.deal.reservedUntil')}: {new Date(reservedUntil).toLocaleDateString(appLocale())}</div>
                   )}
                 </td>
-                <td>{(g(o, 'createdAt', 'created_at')) ? new Date(g(o, 'createdAt', 'created_at')).toLocaleDateString() : '-'}</td>
+                <td>{(g(o, 'createdAt', 'created_at')) ? new Date(g(o, 'createdAt', 'created_at')).toLocaleDateString(appLocale()) : '-'}</td>
                 <td>
                   {o.status === 'reserved' ? (
                     <div className="mp-deal-actions">

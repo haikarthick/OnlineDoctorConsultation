@@ -1,4 +1,5 @@
 import type { TFunction } from 'i18next'
+import { appLocale } from '../../utils/appLocale'
 
 interface Props {
   t: TFunction
@@ -39,7 +40,7 @@ const ActionLogModal = ({ t, actionLogs, actionLogsLoading, formatSlotTime, acti
                   {t('consultations.actionLog.by')} <strong>{log.userName || t('consultations.actionLog.system')}</strong>
                   {log.details?.role && <span> ({log.details.role})</span>}
                   {' · '}
-                  {log.createdAt ? new Date(log.createdAt).toLocaleString() : '-'}
+                  {log.createdAt ? new Date(log.createdAt).toLocaleString(appLocale()) : '-'}
                 </div>
                 {log.action === 'BOOKING_RESCHEDULED' && log.details && (
                   <div className="si-e4117c98">

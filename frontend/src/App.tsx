@@ -9,6 +9,7 @@ import { PermissionProvider } from './context/PermissionContext'
 import { PageLoader, ProtectedRoute, RoleRoute, PublicOnlyRoute } from './components/routing/RouteGuards'
 import { PendingFarmInvitations } from './components/enterprise/PendingFarmInvitations'
 import { PendingWalkInInvites } from './components/hospitalNetwork/PendingWalkInInvites'
+import { OfflineBanner } from './components/OfflineBanner'
 import { SocketProvider } from './context/SocketContext'
 import { Layout } from './components/Layout'
 import FloatingChatWidget from './components/FloatingChatWidget'
@@ -171,6 +172,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
         <PendingPolicyModal />
       </Suspense>
       <div className="layout-content">
+        <OfflineBanner />
         <PendingFarmInvitations />
         <PendingWalkInInvites />
         {children}

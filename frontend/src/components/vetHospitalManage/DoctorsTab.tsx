@@ -1,6 +1,7 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
 import type { HospitalDepartment, HospitalDoctor } from '../../types'
+import { appLocale } from '../../utils/appLocale'
 
 interface Props {
   t: TFunction
@@ -36,7 +37,7 @@ const DoctorsTab: React.FC<Props> = ({ t, doctors, departments, invites, linkCop
               <span className="si-6acd75e8">
                 <strong>{inv.first_name || ''} {inv.last_name || ''}</strong> · {inv.email} · <span className="si-ecf1d5e5">{(inv.hospital_role || 'staff').replace(/_/g, ' ')}</span>
               </span>
-              <span className="si-908660d1">Expires {new Date(inv.expires_at).toLocaleDateString()}</span>
+              <span className="si-908660d1">Expires {new Date(inv.expires_at).toLocaleDateString(appLocale())}</span>
               {inv.inviteUrl && <button type="button" className="btn-secondary si-a792b2c1" onClick={() => onCopyInviteLink(inv.inviteUrl, inv.id)}>{linkCopied === inv.id ? '✓ Copied' : '📋 Copy Link'}</button>}
               <button className="btn-danger si-fb053872" onClick={() => onRevokeInvite(inv.id)}>{t('vetHospitalManage.invite.revoke')}</button>
             </div>

@@ -6,6 +6,7 @@ import { Enterprise, IoTSensor, SensorReading } from '../types'
 import { useTranslation } from 'react-i18next'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 const SENSOR_ICONS: Record<string, string> = {
   temperature: '🌡️', humidity: '💧', weight: '⚖️', activity: '🏃', air_quality: '🌬️',
   heart_rate: '💓', water_flow: '🚿', gps: '📍', camera: '📷', pressure: '🔵'
@@ -195,7 +196,7 @@ const IoTSensorPage: React.FC = () => {
                         <td>{a.sensor_name}</td><td>{a.sensor_type}</td>
                         <td><strong>{(+a.value).toFixed(2)}</strong> {a.sensor_unit || a.unit}</td>
                         <td><span className="badge badge-critical">{a.anomaly_type}</span></td>
-                        <td>{a.recorded_at ? new Date(a.recorded_at).toLocaleString() : '-'}</td>
+                        <td>{a.recorded_at ? new Date(a.recorded_at).toLocaleString(appLocale()) : '-'}</td>
                       </tr>
                     ))}</tbody>
                   </table>
@@ -285,7 +286,7 @@ const IoTSensorPage: React.FC = () => {
                       <div className="card-stats">
                         {(s as any).serial_number && <div>SN: {(s as any).serial_number}</div>}
                         {sBat != null && <div>🔋 {sBat}%</div>}
-                        {((s as any).last_reading_at || s.lastReadingAt) && <div>Last: {new Date((s as any).last_reading_at || s.lastReadingAt!).toLocaleString()}</div>}
+                        {((s as any).last_reading_at || s.lastReadingAt) && <div>Last: {new Date((s as any).last_reading_at || s.lastReadingAt!).toLocaleString(appLocale())}</div>}
                       </div>
                       <div className="card-footer">
                         <button className="btn-sm" onClick={() => fetchReadings(s.id)}>{t('iotSensors.viewReadings')}</button>
@@ -317,7 +318,7 @@ const IoTSensorPage: React.FC = () => {
                       <td>{r.unit}</td>
                       <td>{(r.isAnomaly || (r as any).is_anomaly) ? <span className="badge badge-critical">Yes</span> : '-'}</td>
                       <td>{(r.anomalyType || (r as any).anomaly_type) || '-'}</td>
-                      <td>{(r.recordedAt || (r as any).recorded_at) ? new Date(r.recordedAt || (r as any).recorded_at).toLocaleString() : '-'}</td>
+                      <td>{(r.recordedAt || (r as any).recorded_at) ? new Date(r.recordedAt || (r as any).recorded_at).toLocaleString(appLocale()) : '-'}</td>
                     </tr>
                   ))}
                   {!readings.length && <tr><td colSpan={5} className="empty-cell">{t('iotSensors.noReadings')}</td></tr>}

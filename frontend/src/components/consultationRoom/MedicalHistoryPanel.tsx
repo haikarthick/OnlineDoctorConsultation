@@ -5,6 +5,7 @@ import { RecentFarmRecords } from '../farmRecords/RecentFarmRecords'
 import NutritionPanel from '../nutrition/NutritionPanel'
 import GroupFeedingCard from '../nutrition/GroupFeedingCard'
 import { GroupSummary, type ConsultationGroup } from '../shared/GroupSummary'
+import { appLocale } from '../../utils/appLocale'
 
 interface MedicalHistoryPanelProps {
   historyLoading: boolean
@@ -102,7 +103,7 @@ const MedicalHistoryPanel: React.FC<MedicalHistoryPanelProps> = ({
                     <strong>{v.vaccineName || v.vaccine_name || v.name || 'Vaccine'}</strong>
                     {v.dateAdministered || v.date_administered ? (
                       <span className="si-ee2911f8">
-                        {new Date(v.dateAdministered || v.date_administered).toLocaleDateString()}
+                        {new Date(v.dateAdministered || v.date_administered).toLocaleDateString(appLocale())}
                       </span>
                     ) : null}
                     {v.status && <span className={`cr-vaccination-status ${v.status === 'completed' ? 'is-completed' : ''}`}>({v.status})</span>}
@@ -128,7 +129,7 @@ const MedicalHistoryPanel: React.FC<MedicalHistoryPanelProps> = ({
                     {r.treatment && <div className="si-23033f05">Tx: {r.treatment}</div>}
                     {(r.createdAt || r.created_at || r.date) && (
                       <div className="si-a5de6cea">
-                        {new Date(r.createdAt || r.created_at || r.date).toLocaleDateString()}
+                        {new Date(r.createdAt || r.created_at || r.date).toLocaleDateString(appLocale())}
                       </div>
                     )}
                   </div>

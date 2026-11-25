@@ -7,6 +7,7 @@ import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
 
 import { userMessage } from '../utils/userMessage'
+import { appLocale } from '../utils/appLocale'
 const STATUS_COLORS: Record<string, string> = {
   in_production: '#3b82f6', quality_check: '#f59e0b', in_transit: '#8b5cf6', delivered: '#22c55e', recalled: '#ef4444'
 }
@@ -207,7 +208,7 @@ const SupplyChainPage: React.FC = () => {
                     <thead><tr><th>{t('supplyChain.batchNum')}</th><th>{t('supplyChain.product')}</th><th>{t('supplyChain.expiry')}</th><th>{t('supplyChain.qty')}</th></tr></thead>
                     <tbody>{dashboard.expiringBatches.map((b: any, i: number) => (
                       <tr key={i}><td>{b.batch_number}</td><td>{b.product_type}</td>
-                        <td className="si-a80c554d">{b.expiry_date ? new Date(b.expiry_date).toLocaleDateString() : '-'}</td><td>{b.quantity} {b.unit}</td></tr>
+                        <td className="si-a80c554d">{b.expiry_date ? new Date(b.expiry_date).toLocaleDateString(appLocale()) : '-'}</td><td>{b.quantity} {b.unit}</td></tr>
                     ))}</tbody>
                   </table>
                 </div>
@@ -258,7 +259,7 @@ const SupplyChainPage: React.FC = () => {
                       <td>{b.quantity} {b.unit}</td>
                       <td>{b.qualityGrade || (b as any).quality_grade || '-'}</td>
                       <td><span className="badge" style={{ backgroundColor: STATUS_COLORS[b.status] || '#6b7280' }}>{b.status?.replace(/_/g, ' ')}</span></td>
-                      <td>{(b.expiryDate || (b as any).expiry_date) ? new Date(b.expiryDate || (b as any).expiry_date).toLocaleDateString() : '-'}</td>
+                      <td>{(b.expiryDate || (b as any).expiry_date) ? new Date(b.expiryDate || (b as any).expiry_date).toLocaleDateString(appLocale()) : '-'}</td>
                       <td><button className="btn-sm" onClick={() => handleGenerateQR(b.id)}>🔲 QR</button></td>
                     </tr>
                   ))}
@@ -370,7 +371,7 @@ const SupplyChainPage: React.FC = () => {
                       <td>{ev.batchNumber || (ev as any).batch_number || '-'}</td>
                       <td>{ev.location || '-'}</td>
                       <td>{(ev.verifiedBy || (ev as any).verified_by) ? <span className="badge badge-verified">✓ Verified</span> : <span className="badge badge-pending">Unverified</span>}</td>
-                      <td>{(ev.eventDate || (ev as any).event_date) ? new Date(ev.eventDate || (ev as any).event_date).toLocaleDateString() : '-'}</td>
+                      <td>{(ev.eventDate || (ev as any).event_date) ? new Date(ev.eventDate || (ev as any).event_date).toLocaleDateString(appLocale()) : '-'}</td>
                       <td>{!(ev.verifiedBy || (ev as any).verified_by) && <button className="btn-sm" onClick={() => handleVerifyEvent(ev.id)}>{t('supplyChain.verify')}</button>}</td>
                     </tr>
                   ))}
@@ -391,7 +392,7 @@ const SupplyChainPage: React.FC = () => {
                       <div>Scans: <strong>{qr.scanCount || (qr as any).scan_count || 0}</strong></div>
                     </div>
                     <div className="card-footer">
-                      <small>Created {(qr.createdAt || (qr as any).created_at) ? new Date(qr.createdAt || (qr as any).created_at).toLocaleDateString() : '-'}</small>
+                      <small>Created {(qr.createdAt || (qr as any).created_at) ? new Date(qr.createdAt || (qr as any).created_at).toLocaleDateString(appLocale()) : '-'}</small>
                       <span className={`badge badge-${(qr.isActive || (qr as any).is_active) ? 'active' : 'inactive'}`}>
                         {(qr.isActive || (qr as any).is_active) ? 'Active' : 'Inactive'}
                       </span>
