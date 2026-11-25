@@ -29,6 +29,17 @@ export class ValidationError extends AppError {
   }
 }
 
+/**
+ * A refusal with a stable code: the server's sentence (English) is a fallback, the app looks the code up in `serverMessages`
+ * and says it in the person's own language, with the values in `params` (a medicine name, a date).
+ */
+export class CodedError extends AppError {
+  constructor(statusCode: number, code: string, message: string, params?: Record<string, string | number | boolean | null>) {
+    super(statusCode, message, code, undefined, params);
+    Object.setPrototypeOf(this, CodedError.prototype);
+  }
+}
+
 /** A refusal whose next step is a vet (a young animal that needs a feeding plan made by one); the screen offers to find one. */
 export class NeedsVetError extends AppError {
   constructor(message: string) {

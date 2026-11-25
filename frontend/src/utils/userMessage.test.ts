@@ -66,3 +66,16 @@ describe('isReadableMessage', () => {
     expect(isReadableMessage('x'.repeat(500))).toBe(false)
   })
 })
+
+describe('userMessage - a coded refusal is said in the person\'s language', () => {
+  it('uses the translation for the code, with the values the server sent', () => {
+    i18n.addResourceBundle('en', 'translation', { serverMessages: { RX_TEST: '{{label}}: enter the days.' } }, true, true)
+    const err = axiosErr(400, { message: 'Product A: enter the days (English from the server)', error: { code: 'RX_TEST', params: { label: 'Product A' } } })
+    expect(userMessage(err)).toBe('Product A: enter the days.')
+  })
+
+  it('a code with no translation falls back to the server\'s own readable sentence', () => {
+    const err = axiosErr(400, { message: 'Words from the server.', error: { code: 'NO_SUCH_CODE_YET' } })
+    expect(userMessage(err)).toBe('Words from the server.')
+  })
+})

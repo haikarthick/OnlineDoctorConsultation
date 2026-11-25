@@ -193,7 +193,9 @@
       "matchNone": "Not matched yet",
       "matchedLabel": "Its label: milk/eggs {{milk}} d, meat {{meat}} d",
       "matchDiffers": "These label days differ from the vet's line. The farm follows the vet's prescription.",
-      "matchFailed": "Could not save which product this is. Check your signal and choose it again."
+      "matchFailed": "Could not save which product this is. Check your signal and choose it again.",
+      "herdBadge": "Herd",
+      "herdBadgeCount": "Herd - {{count}} animals"
     },
     "dispense": {
       "title": "Dispense Medication",

@@ -43,10 +43,10 @@ async function guardNetworkPharmacy(req: Request, res: Response, networkId: stri
 // is a medicine list, and the vet's prescription line - not the pharmacy's figure - is what the farmer is held to.
 const PRODUCT_KINDS = ['medicine', 'diet', 'supplement'];
 
-function readLabelFields(body: any): { error?: string; kind?: string; milk?: number | null; meat?: number | null; hasMilk: boolean; hasMeat: boolean } {
+function readLabelFields(body: any): { error?: string; code?: string; kind?: string; milk?: number | null; meat?: number | null; hasMilk: boolean; hasMeat: boolean } {
   const out: any = { hasMilk: 'withdrawal_milk_days' in (body || {}), hasMeat: 'withdrawal_meat_days' in (body || {}) };
   if (body?.product_kind !== undefined && body.product_kind !== null) {
-    if (!PRODUCT_KINDS.includes(body.product_kind)) { out.error = 'Choose medicine, diet or supplement as the product kind.'; return out; }
+    if (!PRODUCT_KINDS.includes(body.product_kind)) { out.error = 'Choose medicine, diet or supplement as the product kind.'; out.code = 'PH_KIND_INVALID'; return out; }
     out.kind = body.product_kind;
   }
   for (const [key, field] of [['withdrawal_milk_days', 'milk'], ['withdrawal_meat_days', 'meat']] as const) {
@@ -56,6 +56,7 @@ function readLabelFields(body: any): { error?: string; kind?: string; milk?: num
     const n = Number(v);
     if (!Number.isInteger(n) || n < 0 || n > 365) {
       out.error = 'Withdrawal days must be a whole number from 0 to 365, as printed on the product label. Leave it empty if you do not know.';
+      out.code = 'PH_DAYS_INVALID';
       return out;
     }
     out[field] = n;
@@ -293,7 +294,7 @@ router.post('/networks/:networkId/medications', authMiddleware, asyncHandler(asy
   const { name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, contraindications, side_effects, common_interactions } = req.body;
   if (!name) return res.status(400).json({ error: 'name is required' });
   const label = readLabelFields(req.body);
-  if (label.error) return res.status(400).json({ success: false, message: label.error });
+  if (label.error) return res.status(400).json({ success: false, message: label.error, error: { message: label.error, code: label.code } });
   const result = await database.query(
     `INSERT INTO pharmacy_medications (network_id, name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, contraindications, side_effects, common_interactions, created_by, product_kind, withdrawal_milk_days, withdrawal_meat_days)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23) RETURNING *`,
@@ -306,7 +307,7 @@ router.patch('/networks/:networkId/medications/:medId', authMiddleware, asyncHan
   if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const { name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, is_active } = req.body;
   const label = readLabelFields(req.body);
-  if (label.error) return res.status(400).json({ success: false, message: label.error });
+  if (label.error) return res.status(400).json({ success: false, message: label.error, error: { message: label.error, code: label.code } });
   const result = await database.query(
     `UPDATE pharmacy_medications SET
        name = COALESCE($1, name), generic_name = COALESCE($2, generic_name),
@@ -520,14 +521,16 @@ router.get('/pharmacies/:pharmacyId/pending-prescriptions', authMiddleware, asyn
   const result = await database.query(
     `SELECT p.id, p.created_at, p.valid_until, p.instructions, p.medications, p.review_status,
             p.animal_id, p.veterinarian_id, p.pet_owner_id, p.consultation_id,
-            a.name AS pet_name, a.species AS animal_species, a.breed AS animal_breed,
+            COALESCE(a.name, g.name) AS pet_name, COALESCE(a.species, g.species) AS animal_species, a.breed AS animal_breed,
+            (p.group_id IS NOT NULL) AS is_group, p.head_count_treated,
             u.first_name || ' ' || u.last_name AS vet_name,
             po.first_name || ' ' || po.last_name AS owner_name,
             (SELECT STRING_AGG(med->>'name', ', ')
              FROM jsonb_array_elements(COALESCE(p.medications, '[]'::jsonb)) AS med
             ) AS medication_names
      FROM prescriptions p
-     JOIN animals a ON p.animal_id = a.id
+     LEFT JOIN animals a ON p.animal_id = a.id
+     LEFT JOIN animal_groups g ON p.group_id = g.id
      JOIN users u ON p.veterinarian_id = u.id
      LEFT JOIN users po ON p.pet_owner_id = po.id
      WHERE p.network_id = $1
@@ -557,15 +560,15 @@ router.put('/pharmacies/:pharmacyId/line-matches', authMiddleware, roleMiddlewar
   const networkId = await guardPharmacy(req, res, req.params.pharmacyId);
   if (!networkId) return;
   const key = lineKey(req.body?.lineName);
-  if (!key) return res.status(400).json({ success: false, message: 'Say which prescription line this is.' });
+  if (!key) return res.status(400).json({ success: false, message: 'Say which prescription line this is.', error: { message: 'Say which prescription line this is.', code: 'PH_LINE_REQUIRED' } });
   const medId = req.body?.medId;
   if (!medId) {
     await database.query(`DELETE FROM pharmacy_line_matches WHERE pharmacy_id = $1 AND line_key = $2`, [req.params.pharmacyId, key]);
     return res.json({ success: true, data: { lineKey: key, medId: null } });
   }
-  if (typeof medId !== 'string' || !UUID_RE.test(medId)) return res.status(400).json({ success: false, message: 'Choose one of the products in your catalogue.' });
+  if (typeof medId !== 'string' || !UUID_RE.test(medId)) return res.status(400).json({ success: false, message: 'Choose one of the products in your catalogue.', error: { message: 'Choose one of the products in your catalogue.', code: 'PH_PRODUCT_INVALID' } });
   const med = await database.query(`SELECT 1 FROM pharmacy_medications WHERE id = $1 AND network_id = $2 AND is_active = true`, [medId, networkId]);
-  if (!med.rows[0]) return res.status(404).json({ success: false, message: 'That product is not in your network\'s catalogue. Add it in the Catalogue tab first.' });
+  if (!med.rows[0]) return res.status(404).json({ success: false, message: 'That product is not in your network\'s catalogue. Add it in the Catalogue tab first.', error: { message: 'That product is not in your network\'s catalogue. Add it in the Catalogue tab first.', code: 'PH_PRODUCT_MISSING' } });
   await database.query(
     `INSERT INTO pharmacy_line_matches (pharmacy_id, line_key, med_id, created_by) VALUES ($1, $2, $3, $4)
      ON CONFLICT (pharmacy_id, line_key) DO UPDATE SET med_id = EXCLUDED.med_id, created_by = EXCLUDED.created_by, updated_at = NOW()`,
@@ -614,7 +617,7 @@ router.post('/prescriptions/:prescriptionId/review', authMiddleware, roleMiddlew
   if (review_status === 'rejected' || review_status === 'needs_clarification') {
     try {
       const rxRow = await database.query(
-        `SELECT p.veterinarian_id, a.name AS animal_name FROM prescriptions p LEFT JOIN animals a ON a.id=p.animal_id WHERE p.id=$1`,
+        `SELECT p.veterinarian_id, COALESCE(a.name, g.name) AS animal_name FROM prescriptions p LEFT JOIN animals a ON a.id=p.animal_id LEFT JOIN animal_groups g ON g.id=p.group_id WHERE p.id=$1`,
         [req.params.prescriptionId]
       );
       if (rxRow.rows[0]) {
@@ -665,7 +668,8 @@ router.get('/pharmacies/:pharmacyId/ready-for-dispensing', authMiddleware, async
   const result = await database.query(
     `SELECT p.id, p.created_at, p.valid_until, p.instructions, p.medications, p.review_status,
             p.animal_id, p.veterinarian_id, p.pet_owner_id, p.consultation_id,
-            a.name AS pet_name, a.species AS animal_species, a.breed AS animal_breed,
+            COALESCE(a.name, g.name) AS pet_name, COALESCE(a.species, g.species) AS animal_species, a.breed AS animal_breed,
+            (p.group_id IS NOT NULL) AS is_group, p.head_count_treated,
             u.first_name || ' ' || u.last_name AS vet_name,
             po.first_name || ' ' || po.last_name AS owner_name,
             dr.id AS dispensing_record_id, dr.dispensing_status,
@@ -673,7 +677,8 @@ router.get('/pharmacies/:pharmacyId/ready-for-dispensing', authMiddleware, async
              FROM jsonb_array_elements(COALESCE(p.medications, '[]'::jsonb)) AS med
             ) AS medication_names
      FROM prescriptions p
-     JOIN animals a ON p.animal_id = a.id
+     LEFT JOIN animals a ON p.animal_id = a.id
+     LEFT JOIN animal_groups g ON p.group_id = g.id
      JOIN users u ON p.veterinarian_id = u.id
      LEFT JOIN users po ON p.pet_owner_id = po.id
      LEFT JOIN dispensing_records dr ON dr.prescription_id = p.id AND dr.pharmacy_id = $1
@@ -746,7 +751,7 @@ router.post('/dispensing', authMiddleware, asyncHandler(async (req: Request, res
   // Notify pet owner that medication is ready/dispensed
   try {
     const rxRow = await database.query(
-      `SELECT p.pet_owner_id, a.name AS animal_name FROM prescriptions p LEFT JOIN animals a ON a.id=p.animal_id WHERE p.id=$1`,
+      `SELECT p.pet_owner_id, COALESCE(a.name, g.name) AS animal_name FROM prescriptions p LEFT JOIN animals a ON a.id=p.animal_id LEFT JOIN animal_groups g ON g.id=p.group_id WHERE p.id=$1`,
       [prescription_id]
     );
     if (rxRow.rows[0]?.pet_owner_id) {
@@ -792,7 +797,8 @@ router.get('/pharmacies/:pharmacyId/dispensing-history', authMiddleware, asyncHa
   const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
   const result = await database.query(
     `SELECT dr.*, p.medications AS prescription_medications,
-            a.name AS animal_name, a.species AS animal_species,
+            COALESCE(a.name, g.name) AS animal_name, COALESCE(a.species, g.species) AS animal_species,
+            (p.group_id IS NOT NULL) AS is_group,
             u.first_name || ' ' || u.last_name AS pharmacist_name,
             po.first_name || ' ' || po.last_name AS owner_name,
             v.first_name || ' ' || v.last_name AS vet_name,
@@ -802,7 +808,8 @@ router.get('/pharmacies/:pharmacyId/dispensing-history', authMiddleware, asyncHa
              WHERE dli.dispensing_record_id = dr.id) AS line_items
      FROM dispensing_records dr
      JOIN prescriptions p ON dr.prescription_id = p.id
-     JOIN animals a ON p.animal_id = a.id
+     LEFT JOIN animals a ON p.animal_id = a.id
+     LEFT JOIN animal_groups g ON p.group_id = g.id
      LEFT JOIN users po ON p.pet_owner_id = po.id
      LEFT JOIN users v ON p.veterinarian_id = v.id
      JOIN users u ON dr.pharmacist_id = u.id

@@ -3,7 +3,7 @@ import { needsWithdrawalChoice, withdrawalAnswered, wholeDays } from './withdraw
 import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
 import { Prescription, CreatePrescriptionDTO, Medication } from '../models/types';
-import { NotFoundError, ValidationError, ForbiddenError } from '../utils/errors';
+import { CodedError, NotFoundError } from '../utils/errors';
 import logger from '../utils/logger';
 
 class PrescriptionService {
@@ -36,8 +36,8 @@ class PrescriptionService {
     }
 
     // One subject, said in words: an animal OR a group. (The database also enforces it; this is what the person reads.)
-    if (animalId && groupId) throw new ValidationError('A prescription is for one animal or for one group, not both.');
-    if (!animalId && !groupId) throw new ValidationError('Choose the animal or the group this prescription is for. This appointment has none linked to it.');
+    if (animalId && groupId) throw new CodedError(400, 'RX_ONE_SUBJECT', 'A prescription is for one animal or for one group, not both.');
+    if (!animalId && !groupId) throw new CodedError(400, 'RX_SUBJECT_REQUIRED', 'Choose the animal or the group this prescription is for. This appointment has none linked to it.');
 
     // A vet writes for the patient's own animal, or one they already have an appointment / network relationship with - never
     // for a stranger's animal (a prescription lands in that animal's record and is shown to its owner).
@@ -53,7 +53,7 @@ class PrescriptionService {
         )`,
         [animalId, petOwnerId, veterinarianId]
       );
-      if (ok.rows.length === 0) throw new ForbiddenError('You can prescribe only for an animal that belongs to this patient, or one you already have an appointment for. Choose one of the owner\'s animals.');
+      if (ok.rows.length === 0) throw new CodedError(403, 'RX_ANIMAL_NOT_PATIENTS', 'You can prescribe only for an animal that belongs to this patient, or one you already have an appointment for. Choose one of the owner\'s animals.');
     }
 
     // A vet writes only for a group they are booked or in consultation for (a prescription lands in that farm's group
@@ -61,7 +61,7 @@ class PrescriptionService {
     if (groupId && vetRole !== 'admin') {
       const FarmAccessService = (await import('./FarmAccessService')).default;
       if (!(await FarmAccessService.consultingVetMayRead(veterinarianId, { groupId }))) {
-        throw new ForbiddenError('You can prescribe for a group only when you are booked or in consultation for it. Ask the farm owner to book you for it.');
+        throw new CodedError(403, 'RX_GROUP_NOT_BOOKED', 'You can prescribe for a group only when you are booked or in consultation for it. Ask the farm owner to book you for it.');
       }
     }
 
@@ -71,9 +71,9 @@ class PrescriptionService {
       for (const line of data.medications as any[]) {
         if (!needsWithdrawalChoice(line)) continue;
         const label = String(line.name || 'This medicine');
-        if (wholeDays(line.treatmentDays) < 1) throw new ValidationError(`${label}: enter how many days the treatment lasts.`);
+        if (wholeDays(line.treatmentDays) < 1) throw new CodedError(400, 'RX_TREATMENT_DAYS_REQUIRED', `${label}: enter how many days the treatment lasts.`, { label });
         if (!withdrawalAnswered(line)) {
-          throw new ValidationError(`${label}: enter the milk / egg and the meat withdrawal days from the product label, or choose "None". The farm needs this to know when milk and meat are safe.`);
+          throw new CodedError(400, 'RX_LABEL_DAYS_REQUIRED', `${label}: enter the milk / egg and the meat withdrawal days from the product label, or choose "None". The farm needs this to know when milk and meat are safe.`, { label });
         }
       }
     }
@@ -89,9 +89,9 @@ class PrescriptionService {
     let courseStartOn: string | null = null;
     if (data.courseStartOn) {
       const t = Date.parse(data.courseStartOn);
-      if (Number.isNaN(t)) throw new ValidationError('The course start day is not a valid date.');
+      if (Number.isNaN(t)) throw new CodedError(400, 'RX_START_INVALID', 'The course start day is not a valid date.');
       const days = Math.round((t - Date.parse(new Date().toISOString().slice(0, 10))) / 86400000);
-      if (days < -30 || days > 14) throw new ValidationError('The course start day must be within the last 30 days or the next 14 days.');
+      if (days < -30 || days > 14) throw new CodedError(400, 'RX_START_RANGE', 'The course start day must be within the last 30 days or the next 14 days.');
       courseStartOn = data.courseStartOn;
     }
 
@@ -102,6 +102,15 @@ class PrescriptionService {
     let targetPharmacyId: string | null = null;
     let isNetworkCoordinated = false;
     const networkId: string | null = (data as any).networkId || null;
+    // A prescription goes to a network's pharmacy only when the prescribing vet is an active member of that network (an admin may
+    // choose any): nobody can drop a prescription into another network's queue.
+    if (networkId && vetRole !== 'admin') {
+      const member = await database.query(
+        `SELECT 1 FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true AND (valid_until IS NULL OR valid_until > NOW())`,
+        [networkId, veterinarianId]
+      );
+      if (!member.rows[0]) throw new CodedError(403, 'RX_NETWORK_NOT_MEMBER', 'You can send a prescription to a hospital network\'s pharmacy only if you belong to that network. Choose one of your own networks, or send it without one.');
+    }
     if (networkId) {
       try {
         const pharmaResult = await database.query(
@@ -158,7 +167,8 @@ class PrescriptionService {
       try {
         const [vetRow, animalRow, pharmacists] = await Promise.all([
           database.query(`SELECT first_name, last_name FROM users WHERE id = $1`, [veterinarianId]),
-          animalId ? database.query(`SELECT name FROM animals WHERE id = $1`, [animalId]) : Promise.resolve({ rows: [] as any[] }),
+          animalId ? database.query(`SELECT name FROM animals WHERE id = $1`, [animalId])
+            : groupId ? database.query(`SELECT name FROM animal_groups WHERE id = $1`, [groupId]) : Promise.resolve({ rows: [] as any[] }),
           database.query(
             `SELECT hnm.user_id FROM hospital_network_members hnm
              JOIN users u ON u.id = hnm.user_id

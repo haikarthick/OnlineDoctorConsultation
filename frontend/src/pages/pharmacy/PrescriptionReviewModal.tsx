@@ -22,6 +22,9 @@ interface Prescription {
   medication_names: string
   medications?: Medication[] | string
   animal_species?: string
+  /** A herd or flock prescription: one prescription for the whole group, not one per animal. */
+  is_group?: boolean
+  head_count_treated?: number | null
   created_at: string
   review_status: string
 }
@@ -97,7 +100,8 @@ export default function PrescriptionReviewModal({ prescription, pharmacyId, onCl
         <div className="si-acd46076">
           <div className="si-9d036184">
             <div>
-              <strong>🐾 {prescription.pet_name}</strong>
+              <strong>{prescription.is_group ? '🐄' : '🐾'} {prescription.pet_name}</strong>
+              {prescription.is_group && <span className="pharm-badge">{prescription.head_count_treated ? t('pharmacy.review.herdBadgeCount', { count: prescription.head_count_treated }) : t('pharmacy.review.herdBadge')}</span>}
               {prescription.animal_species && <span className="si-4cb713cc">({speciesLabel(prescription.animal_species, t)})</span>}
               <br />
               <span className="si-c8a87bc3">👤 {prescription.owner_name}</span>

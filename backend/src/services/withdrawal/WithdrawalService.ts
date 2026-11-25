@@ -1,6 +1,6 @@
 import database from '../../utils/database';
 import logger from '../../utils/logger';
-import { NotFoundError, ValidationError, WithdrawalConfirmError } from '../../utils/errors';
+import { CodedError, WithdrawalConfirmError } from '../../utils/errors';
 import {
   CourseLine, WithdrawalItem, WithdrawalSummary, addDays, daysBetween, itemFor, summarise, wholeDays,
 } from './withdrawalMath';
@@ -51,7 +51,7 @@ class WithdrawalService {
   /** What holds back milk / eggs or meat for this subject right now. An animal also carries its herd's treatments. */
   async status(subject: Subject): Promise<WithdrawalSummary> {
     const id = subject.groupId || subject.animalId;
-    if (!id) throw new ValidationError('Choose an animal or a group.');
+    if (!id) throw new CodedError(400, 'WD_CHOOSE_SUBJECT', 'Choose an animal or a group.');
     const where = subject.groupId
       ? { rx: 'p.group_id = $1', self: 's.group_id = $1' }
       : {
@@ -133,18 +133,18 @@ class WithdrawalService {
 
   /** The farmer's correction on a prescription's course: "stopped early" / "last dose on". null puts it back as prescribed. */
   async correctCourse(prescriptionId: string, lastDoseOn: string | null, userId: string): Promise<void> {
-    if (lastDoseOn !== null && (!/^\d{4}-\d{2}-\d{2}$/.test(lastDoseOn) || Number.isNaN(Date.parse(lastDoseOn)))) throw new ValidationError('That date is not valid.');
+    if (lastDoseOn !== null && (!/^\d{4}-\d{2}-\d{2}$/.test(lastDoseOn) || Number.isNaN(Date.parse(lastDoseOn)))) throw new CodedError(400, 'WD_DATE_INVALID', 'That date is not valid.');
     const rx = await database.query(`SELECT COALESCE(course_start_on, created_at::date)::text AS started FROM prescriptions WHERE id = $1`, [prescriptionId]);
-    if (!rx.rows[0]) throw new NotFoundError('Prescription');
-    if (lastDoseOn !== null && lastDoseOn < rx.rows[0].started) throw new ValidationError('The last dose cannot be before the treatment started.');
-    if (lastDoseOn !== null && lastDoseOn > addDays(todayIso(), 1)) throw new ValidationError('That last dose date is too far ahead. Choose today or an earlier day.');
+    if (!rx.rows[0]) throw new CodedError(404, 'WD_NOT_FOUND', 'We could not find this treatment. It may have been removed.');
+    if (lastDoseOn !== null && lastDoseOn < rx.rows[0].started) throw new CodedError(400, 'WD_LAST_DOSE_BEFORE_START', 'The last dose cannot be before the treatment started.');
+    if (lastDoseOn !== null && lastDoseOn > addDays(todayIso(), 1)) throw new CodedError(400, 'WD_LAST_DOSE_TOO_FAR', 'That last dose date is too far ahead. Choose today or an earlier day.');
     await database.query(`UPDATE prescriptions SET last_dose_on = $2, course_corrected_by = $3, updated_at = NOW() WHERE id = $1`, [prescriptionId, lastDoseOn, userId]);
   }
 
   /** The withdrawal of the animal or herd a prescription is for (returned after a correction, so the screen updates at once). */
   async statusForPrescription(prescriptionId: string): Promise<WithdrawalSummary> {
     const r = await database.query(`SELECT animal_id, group_id FROM prescriptions WHERE id = $1`, [prescriptionId]);
-    if (!r.rows[0]) throw new NotFoundError('Prescription');
+    if (!r.rows[0]) throw new CodedError(404, 'WD_NOT_FOUND', 'We could not find this treatment. It may have been removed.');
     return this.status(r.rows[0].animal_id ? { animalId: r.rows[0].animal_id } : { groupId: r.rows[0].group_id });
   }
 
@@ -167,11 +167,11 @@ class WithdrawalService {
 
   /** The same correction for a treatment the farmer entered themselves. */
   async correctSelfCourse(id: string, lastDoseOn: string | null): Promise<void> {
-    if (lastDoseOn !== null && (!/^\d{4}-\d{2}-\d{2}$/.test(lastDoseOn) || Number.isNaN(Date.parse(lastDoseOn)))) throw new ValidationError('That date is not valid.');
+    if (lastDoseOn !== null && (!/^\d{4}-\d{2}-\d{2}$/.test(lastDoseOn) || Number.isNaN(Date.parse(lastDoseOn)))) throw new CodedError(400, 'WD_DATE_INVALID', 'That date is not valid.');
     const r = await database.query(`SELECT started_on::text AS started FROM self_treatments WHERE id = $1`, [id]);
-    if (!r.rows[0]) throw new NotFoundError('Treatment');
-    if (lastDoseOn !== null && lastDoseOn < r.rows[0].started) throw new ValidationError('The last dose cannot be before the treatment started.');
-    if (lastDoseOn !== null && lastDoseOn > addDays(todayIso(), 1)) throw new ValidationError('That last dose date is too far ahead. Choose today or an earlier day.');
+    if (!r.rows[0]) throw new CodedError(404, 'WD_NOT_FOUND', 'We could not find this treatment. It may have been removed.');
+    if (lastDoseOn !== null && lastDoseOn < r.rows[0].started) throw new CodedError(400, 'WD_LAST_DOSE_BEFORE_START', 'The last dose cannot be before the treatment started.');
+    if (lastDoseOn !== null && lastDoseOn > addDays(todayIso(), 1)) throw new CodedError(400, 'WD_LAST_DOSE_TOO_FAR', 'That last dose date is too far ahead. Choose today or an earlier day.');
     await database.query(`UPDATE self_treatments SET last_dose_on = $2, updated_at = NOW() WHERE id = $1`, [id, lastDoseOn]);
   }
 
@@ -181,21 +181,23 @@ class WithdrawalService {
     withdrawalMilkDays: number; withdrawalMeatDays: number; startedOn?: string | null; note?: string | null;
   }, userId: string): Promise<{ id: string }> {
     const name = String(input.medicineName || '').trim().slice(0, 255);
-    if (!name) throw new ValidationError('Write the name of the medicine, as it is on the label.');
-    if (!!input.animalId === !!input.groupId) throw new ValidationError('Choose one animal or one group.');
+    if (!name) throw new CodedError(400, 'WD_NAME_REQUIRED', 'Write the name of the medicine, as it is on the label.');
+    if (!!input.animalId === !!input.groupId) throw new CodedError(400, 'WD_ONE_SUBJECT', 'Choose one animal or one group.');
     const subject = input.animalId
       ? await database.query(`SELECT 1 FROM animals WHERE id = $1 AND enterprise_id = $2`, [input.animalId, enterpriseId])
       : await database.query(`SELECT 1 FROM animal_groups WHERE id = $1 AND enterprise_id = $2`, [input.groupId, enterpriseId]);
-    if (!subject.rows.length) throw new ValidationError('That animal or group is not on this farm.');
+    if (!subject.rows.length) throw new CodedError(400, 'WD_SUBJECT_NOT_ON_FARM', 'That animal or group is not on this farm.');
     const started = input.startedOn || todayIso();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(started) || Number.isNaN(Date.parse(started))) throw new ValidationError('That date is not valid.');
-    if (started > addDays(todayIso(), 1)) throw new ValidationError('The treatment cannot start in the future. Choose today or an earlier day.');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(started) || Number.isNaN(Date.parse(started))) throw new CodedError(400, 'WD_DATE_INVALID', 'That date is not valid.');
+    if (started > addDays(todayIso(), 1)) throw new CodedError(400, 'WD_START_IN_FUTURE', 'The treatment cannot start in the future. Choose today or an earlier day.');
     const days = wholeDays(input.treatmentDays);
-    if (days < 1) throw new ValidationError('How many days was it given? Enter a number of days, 1 or more.');
-    const milk = Number(input.withdrawalMilkDays); const meat = Number(input.withdrawalMeatDays);
+    if (days < 1) throw new CodedError(400, 'WD_DAYS_REQUIRED', 'How many days was it given? Enter a number of days, 1 or more.');
+    const missing = (v: unknown) => v === undefined || v === null || v === '';
+    const milk = missing(input.withdrawalMilkDays) ? NaN : Number(input.withdrawalMilkDays);
+    const meat = missing(input.withdrawalMeatDays) ? NaN : Number(input.withdrawalMeatDays);
     // Both numbers are required, 0 meaning the label says none - the farmer reads the label, the platform never assumes.
     if (!Number.isFinite(milk) || !Number.isFinite(meat) || milk < 0 || meat < 0 || milk > 365 || meat > 365) {
-      throw new ValidationError('Enter the milk / egg and the meat withdrawal days from the label. Enter 0 if the label says none.');
+      throw new CodedError(400, 'WD_LABEL_DAYS_REQUIRED', 'Enter the milk / egg and the meat withdrawal days from the label. Enter 0 if the label says none.');
     }
     // A phone that was offline sends the entry again with the same id: the first row stands, no second one is made.
     const r = await database.query(

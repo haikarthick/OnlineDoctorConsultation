@@ -129,7 +129,9 @@ export const createPrescriptionSchema = Joi.object({
   courseStartOn: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).optional().allow('', null),
   diagnosis: longText().optional().allow('', null),
   followUpDate: Joi.string().optional().allow('', null),
-  // At most one: a prescription written from a consultation names neither - the server takes the subject from the
-  // consultation - and the service says in words when there is still none.
-}).oxor('animalId', 'groupId').messages({ 'object.oxor': 'A prescription is for one animal or for one group, not both.' });
+  // The hospital network whose pharmacy should receive it (the vet must be an active member: checked in the service).
+  networkId: uuid.optional().allow('', null),
+  // One subject at most: a prescription written from a consultation names neither - the server takes the subject from the
+  // consultation. "Both" and "none" are refused by the service with a coded, translated sentence (RX_ONE_SUBJECT / RX_SUBJECT_REQUIRED).
+});
 

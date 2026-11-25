@@ -63,6 +63,10 @@ export function serverErrorParams(err: unknown): Record<string, string | number 
 export function userMessage(err: unknown, fallbackKey?: string, defaultText?: string): string {
   const e = (err || {}) as ErrorLike
   const data = e.response?.data
+  // A refusal that carries a code we have a translation for is said in the person's own language (values like a medicine name
+  // come from the server's params); the server's English sentence below is only the fallback.
+  const code = data?.error?.code
+  if (typeof code === 'string' && i18n.exists(`serverMessages.${code}`)) return i18n.t(`serverMessages.${code}`, serverErrorParams(err) || {})
   const server = [data?.error?.message, typeof data?.error === 'string' ? data.error : undefined, data?.message]
     .find(isReadableMessage)
   if (server) return server
