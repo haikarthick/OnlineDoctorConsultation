@@ -176,6 +176,21 @@
       "rehabilitation": "மறுவாழ்வு",
       "sale": "விற்பனை",
       "other": "மற்றவை"
+    },
+    "legacyGroupTypes": {
+      "herd": "மந்தை",
+      "flock": "ஆடு/கோழி கூட்டம்",
+      "pen": "கொட்டில்",
+      "paddock": "மேய்ச்சல் நிலம்",
+      "enclosure": "வேலியிட்ட இடம்",
+      "tank": "தொட்டி",
+      "aviary": "பறவைக் கூடம்",
+      "kennel_group": "கென்னல் குழு",
+      "breeding_group": "இனப்பெருக்கக் குழு",
+      "quarantine": "தனிமைப்படுத்தல்",
+      "nursery": "குட்டிகள் கொட்டில்",
+      "production": "உற்பத்தி",
+      "other": "மற்றவை"
     }
   }
 }

@@ -55,13 +55,12 @@ test.describe('Floating Chat Widget', () => {
     const panel = page.locator('.chat-widget-panel')
     await expect(panel).toBeVisible()
 
-    // Close via close button
-    const closeBtn = page.locator('.chat-widget-close')
-    if (await closeBtn.count() > 0) {
-      await closeBtn.first().click()
-      await page.waitForTimeout(500)
-      await expect(panel).not.toBeVisible()
-    }
+    // The header has two round buttons with the same look: "new chat" and "Close". Use the one that is named Close.
+    const closeBtn = page.locator('.chat-widget-close[title="Close"]')
+    await expect(closeBtn).toBeVisible()
+    await closeBtn.click()
+    await expect(panel).not.toBeVisible()
+    await expect(bubble).toBeVisible()
   })
 
   test('welcome message shows on first open', async ({ petOwnerPage: page }) => {
@@ -211,7 +210,10 @@ test.describe('AI Copilot Page', () => {
     await page.goto('/ai-copilot')
     await page.waitForLoadState('networkidle')
 
-    const input = page.locator('input[type="text"], textarea, [class*="input"]')
-    expect(await input.count()).toBeGreaterThan(0)
+    // The message box belongs to a chat: a first-time person sees "Start a new chat", taps it, and then gets the box.
+    await page.getByRole('button', { name: /new chat|start/i }).first().click()
+    const input = page.locator('.module-page input[placeholder]:not([disabled])').last()
+    await expect(input).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('.module-page').getByRole('button', { name: /send/i })).toBeVisible()
   })
 })

@@ -12,7 +12,7 @@ import { useCssVar } from '../hooks/useCssVar'
 import GroupFormModal from '../components/animalGroups/GroupFormModal'
 import { ShareGroupSheet } from '../components/animalGroups/ShareGroupSheet'
 import { useMyFarmRole } from '../hooks/useMyFarmRole'
-import { emptyGroupForm, groupToFormData, buildGroupPayload, type GroupFormData } from '../components/animalGroups/groupShared'
+import { emptyGroupForm, purposeLabel, groupToFormData, buildGroupPayload, type GroupFormData } from '../components/animalGroups/groupShared'
 
 import { userMessage } from '../utils/userMessage'
 interface SimpleAnimal { id: string; name: string; species: string; breed?: string; uniqueId?: string; groupId?: string; groupName?: string }
@@ -291,7 +291,7 @@ const AnimalGroups: React.FC = () => {
                 </div>
               </div>
               {g.species && <p className="si-cf622af4">{t('animalGroups.species')} {speciesLabel(g.species, t)} {g.breed ? `(${g.breed})` : ''}</p>}
-              {g.purpose && <p className="si-cf622af4">{t('animalGroups.purpose')} {g.purpose}</p>}
+              {g.purpose && <p className="si-cf622af4">{t('animalGroups.purpose')} {purposeLabel(t, g.purpose)}</p>}
               <div className="si-bbfa5d5e">
                 {/* "12 of 20 planned": the planned count is a hope, the first number is the real count. */}
                 {g.targetCount > 0

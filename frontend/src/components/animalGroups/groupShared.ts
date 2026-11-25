@@ -18,6 +18,11 @@ export interface GroupFormData {
 export const DEFAULT_GROUP_COLOR = '#4F46E5'
 
 /** Purposes a farmer can give a group. The stored value is the key; labels are translated (farmProfile.purposes). */
+/** A group's purpose in the person's language; an unknown or custom purpose is shown as typed. */
+export function purposeLabel(t: (k: string, o?: any) => string, purpose: string): string {
+  return t(`farmProfile.purposes.${purpose}`, { defaultValue: purpose })
+}
+
 export const GROUP_PURPOSES = [
   'dairy', 'meat', 'breeding', 'layer', 'broiler', 'companion', 'exhibition',
   'conservation', 'racing', 'working', 'research', 'rehabilitation', 'sale', 'other',

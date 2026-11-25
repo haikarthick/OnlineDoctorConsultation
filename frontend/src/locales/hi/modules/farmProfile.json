@@ -176,6 +176,21 @@
       "rehabilitation": "पुनर्वास",
       "sale": "बिक्री",
       "other": "अन्य"
+    },
+    "legacyGroupTypes": {
+      "herd": "झुंड",
+      "flock": "मुर्गी/भेड़ का झुंड",
+      "pen": "बाड़ा",
+      "paddock": "चारागाह",
+      "enclosure": "घेरा",
+      "tank": "टैंक",
+      "aviary": "पक्षीशाला",
+      "kennel_group": "केनेल समूह",
+      "breeding_group": "प्रजनन समूह",
+      "quarantine": "संगरोध",
+      "nursery": "नर्सरी (बछड़ा/चूजा बाड़ा)",
+      "production": "उत्पादन",
+      "other": "अन्य"
     }
   }
 }

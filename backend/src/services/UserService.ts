@@ -164,7 +164,7 @@ export class UserService {
       logger.info('User updated', { userId });
       return result.rows[0];
     } catch (error) {
-      if (error instanceof ConflictError) throw error;
+      if (error instanceof ConflictError || error instanceof ValidationError) throw error;
       throw new DatabaseError('Error updating user', { originalError: error });
     }
   }

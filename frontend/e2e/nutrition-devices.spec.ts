@@ -1,5 +1,5 @@
 import { test, expect, request as pwRequest, Page, Locator, BrowserContext } from '@playwright/test'
-import { mkdirSync, appendFileSync } from 'node:fs'
+import { mkdirSync, appendFileSync, readFileSync, readdirSync, statSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
@@ -37,6 +37,74 @@ const VIEWPORTS = [
 const ROLES: Role[] = ['farmer', 'pet_owner', 'veterinarian', 'admin']
 const LOCALES = ['hi', 'kn', 'ml', 'ta', 'te'] as const
 
+
+// ── which English text on a screen is a real gap, and which is simply not translatable ──────────────────────────
+// A text found on a screen in hi / kn / ml / ta / te counts as "plain English" only when it is a UI string the app owns that is
+// still untranslated:
+//   (a) it equals a value of the English locale files AND the same key in that language file is still identical to English
+//       (an untranslated key; "{{name}}"-style placeholders match any text), or
+//   (b) it is a string written straight into the app's source (src/**/*.ts, *.tsx) and so was never put in a locale file.
+// Everything else is somebody's data (animal, farm and feed names typed by people, seeded sample data, dates) or text that is
+// the same in every language (brand "waytovet" / "way" + "vet", units, example formats, numbers) and is not counted.
+const LOCALES_DIR = join(process.cwd(), 'src', 'locales')
+function flatten(o: unknown, prefix = '', out: Record<string, string> = {}): Record<string, string> {
+  if (o && typeof o === 'object') for (const [k, v] of Object.entries(o as Record<string, unknown>)) flatten(v, prefix ? `${prefix}.${k}` : k, out)
+  else if (typeof o === 'string') out[prefix] = o
+  return out
+}
+function readModules(lang: string): Record<string, string> {
+  const dir = join(LOCALES_DIR, lang, 'modules')
+  const all: Record<string, string> = {}
+  if (!existsSync(dir)) return all
+  for (const f of readdirSync(dir).filter(x => x.endsWith('.json'))) {
+    try { Object.assign(all, flatten(JSON.parse(readFileSync(join(dir, f), 'utf8')))) } catch { /* unreadable file: nothing to compare */ }
+  }
+  return all
+}
+const ENGLISH_REF = readModules('en')
+const untranslatedCache: Record<string, RegExp[]> = {}
+function untranslatedPatterns(lang: string): RegExp[] {
+  if (untranslatedCache[lang]) return untranslatedCache[lang]
+  const loc = readModules(lang)
+  const pats: RegExp[] = []
+  for (const [key, en] of Object.entries(ENGLISH_REF)) {
+    if (loc[key] !== en || !/[A-Za-z]{3,}/.test(en)) continue
+    // a value that is only placeholders and punctuation ("{{a}} - {{b}}") would match any text: it proves nothing
+    if ((en.replace(/\{\{[^}]*\}\}/g, '').match(/[A-Za-z]/g) || []).length < 4) continue
+    const body = en.trim().replace(/\s+/g, ' ').split(/\{\{[^}]*\}\}/).map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*')
+    try { pats.push(new RegExp(`^${body}$`)) } catch { /* skip an odd pattern */ }
+  }
+  return (untranslatedCache[lang] = pats)
+}
+let sourceText: string | null = null
+function appSource(): string {
+  if (sourceText !== null) return sourceText
+  const parts: string[] = []
+  const walk = (dir: string) => {
+    for (const name of readdirSync(dir)) {
+      const full = join(dir, name)
+      if (statSync(full).isDirectory()) { if (name !== 'locales' && name !== 'node_modules') walk(full); continue }
+      if (/\.(tsx?|jsx?)$/.test(name) && !/\.(test|spec)\./.test(name)) parts.push(readFileSync(full, 'utf8'))
+    }
+  }
+  // only the code that draws screens (not constants such as the breed lists, which are master data)
+  for (const sub of ['types', 'components', 'pages', 'utils', 'context', 'hooks']) { const d = join(process.cwd(), 'src', sub); if (existsSync(d)) walk(d) }
+  return (sourceText = parts.join('\n'))
+}
+const NOT_TRANSLATABLE = /^(waytovet|way|vet|vetcare|sms|gst|upi|pin|ok|whatsapp|ai)$/i
+const MONTHS = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\b|\b(am|pm)\b/gi
+/** 'untranslated' (counts), 'source-literal' (counts) or 'not-ui' (data / identical in every language: does not count). */
+function classifyEnglish(lang: string, raw: string): 'untranslated' | 'source-literal' | 'not-ui' {
+  const text = raw.trim().replace(/\s+/g, ' ')
+  if (NOT_TRANSLATABLE.test(text)) return 'not-ui'
+  // a date or a time, however it is spelled out, is data
+  if (!/[A-Za-z]/.test(text.replace(MONTHS, '').replace(/\b(st|nd|rd|th)\b/gi, ''))) return 'not-ui'
+  if (untranslatedPatterns(lang).some(re => re.test(text))) return 'untranslated'
+  // written in code as a WHOLE string ('Herd'), not a piece of a sample CSV row or of a longer sentence
+  if (text.length >= 4 && ["'", '"', '`'].some(q => appSource().includes(q + text + q))) return 'source-literal'
+  return 'not-ui'
+}
+
 type Finding = { role: string; viewport: string; screen: string; lang: string; kind: string; detail: string }
 const allFindings: Finding[] = []
 function note(f: Finding) { allFindings.push(f); try { appendFileSync(FINDINGS, JSON.stringify(f) + '\n') } catch { /* best effort */ } }
@@ -53,8 +121,8 @@ async function signIn(baseURL: string, role: Role) {
   return { token: data.token as string, refresh: (data.refreshToken || '') as string, user }
 }
 
-async function newContext(browser: import('@playwright/test').Browser, vp: { width: number; height: number; name: string }, session: Awaited<ReturnType<typeof signIn>>, lang?: string): Promise<BrowserContext> {
-  const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, hasTouch: vp.name === 'phone', isMobile: vp.name === 'phone' })
+async function newContext(browser: import('@playwright/test').Browser, vp: { width: number; height: number; name: string }, session: Awaited<ReturnType<typeof signIn>>, lang?: string, blockServiceWorker = false): Promise<BrowserContext> {
+  const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, hasTouch: vp.name === 'phone', isMobile: vp.name === 'phone', ...(blockServiceWorker ? { serviceWorkers: 'block' as const } : {}) })
   await context.addInitScript(({ token, refresh, user, lang }) => {
     try {
       localStorage.setItem('authToken', token)
@@ -133,8 +201,8 @@ async function audit(page: Page, phone: boolean, wantEnglish: boolean): Promise<
       if (!text) continue
       if (/^[a-z]+(\.[A-Za-z_]+)+$/.test(text) || NS.test(text)) out.rawKeys.push(text.slice(0, 80))
       if (/\b(404|403|500)\b(?![.,]?\d)(?!\s?(kcal|kg|g\b|ml|L\b|%|₹))|Request failed|status code|Network Error/i.test(text)) out.codes.push(text.slice(0, 100))
-      if (wantEnglish && /^[ -~]*$/.test(text) && ASCII_WORD.test(text) && !/Verify|@|Nm |^[\d\s.,:/%+-]*$/.test(text)
-          && !text.split(/[\s/·•|:-]+/).every(w => !w || SKIP.test(w) || !ASCII_WORD.test(w))) out.english.push(text.slice(0, 80))
+      if (wantEnglish && /^[ -~]*$/.test(text) && ASCII_WORD.test(text) && !/@|^[\d\s.,:/%+-]*$/.test(text)
+          && !text.split(/[\s/·•|:-]+/).every(w => !w || SKIP.test(w) || !ASCII_WORD.test(w))) out.english.push(text.slice(0, 200))
     }
     return out
   }, { phone, wantEnglish })
@@ -315,13 +383,14 @@ async function runScreens(ctxBase: { page: Page; role: Role; vp: typeof VIEWPORT
       for (const c of a.clipped) found.push(['clipped-text', c])
       for (const k of a.rawKeys) found.push(['raw-i18n-key', k])
       for (const c of a.codes) found.push(['http-code-text', c])
-      for (const e of a.english) found.push(['english-in-locale', e])
+      // English that is not counted (data, dates, brand, units) is still written to the findings file so nothing is hidden
+      for (const e of a.english) { const kind = classifyEnglish(lang, e); found.push([kind === 'not-ui' ? 'english-not-counted' : 'english-in-locale', `${e} (${kind})`]) }
       if (!extra) for (const f of await focusAudit(page)) found.push(['focus-not-visible', f])
       const file = `${role}-${vp.name}${lang !== 'en' ? '-' + lang : ''}-${s.id}${shot++ ? '-' + shot : ''}.png`
       await page.screenshot({ path: join(OUT, file), fullPage: true }).catch(() => undefined)
       for (const [kind, detail] of new Map(found.map(f => [f.join('|'), f] as const)).values()) {
         note({ role, viewport: vp.name, screen: `${s.id}: ${label}`, lang, kind, detail: `${detail} [${file}]` })
-        if (kind !== 'tap-target-shell' && kind !== 'english-in-locale') content++
+        if (kind !== 'tap-target-shell' && kind !== 'english-in-locale' && kind !== 'english-not-counted') content++
       }
     }
     try { await s.run({ page, role, vp, lang, phone }, check) } catch (e) {
@@ -370,6 +439,10 @@ test.describe('@nutrition-devices nutrition on phone, tablet and desktop', () =>
         await context.close()
       }
       test.info().annotations.push({ type: 'english-leaks', description: String(english) })
+      // Failing on purpose while these APP defects stand (QA report 2026-11-25; owner/developer to fix, not a test problem):
+      // text cut off on a 360px phone in ml / ta / kn (the farm pickers on /animal-groups and /farm-records, group cards, the
+      // "Confirmed" status pill, the nutrition header), and group type / purpose words ("Herd", "Nursery", "dairy", "breeding")
+      // shown in English in every Indian language (frontend/src/types/enterprise.ts labels).
       expect(n, `${n} problem(s) for ${role} in the Indian languages; see ${FINDINGS}`).toBe(0)
       expect(english, `${english} text(s) still in plain English for ${role} in hi/kn/ml/ta/te; see ${FINDINGS}`).toBe(0)
     })
@@ -378,7 +451,10 @@ test.describe('@nutrition-devices nutrition on phone, tablet and desktop', () =>
   test('pet owner on a phone over Fast 3G: a loading state, then the content, then a plain message when the network is cut', async ({ browser }) => {
     test.setTimeout(6 * 60_000)
     const vp = VIEWPORTS[0]
-    const context = await newContext(browser, vp, sessions.pet_owner!)
+    // The browser's Fast 3G emulation slows the PAGE's requests but not the ones a service worker makes for it, so with the worker
+    // in charge the panel loads at full speed and there is nothing slow to look at. A first-time visitor on a slow network has no
+    // worker yet either: block it, so the emulated network is the network the page really gets.
+    const context = await newContext(browser, vp, sessions.pet_owner!, undefined, true)
     const page = await context.newPage()
     await page.goto('/dashboard', { waitUntil: 'domcontentloaded' }); await settle(page)
     const cdp = await context.newCDPSession(page)

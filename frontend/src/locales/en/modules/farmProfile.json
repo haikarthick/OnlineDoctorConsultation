@@ -176,6 +176,21 @@
       "rehabilitation": "Rehabilitation",
       "sale": "For sale",
       "other": "Other"
+    },
+    "legacyGroupTypes": {
+      "herd": "Herd",
+      "flock": "Flock",
+      "pen": "Pen / Corral",
+      "paddock": "Paddock",
+      "enclosure": "Enclosure",
+      "tank": "Tank",
+      "aviary": "Aviary",
+      "kennel_group": "Kennel group",
+      "breeding_group": "Breeding group",
+      "quarantine": "Quarantine",
+      "nursery": "Nursery",
+      "production": "Production",
+      "other": "Other"
     }
   }
 }

@@ -29,8 +29,11 @@ export function registerServiceWorker(): void {
         });
 
         // Handle controller change (after skipWaiting)
+        // A FIRST visit also fires controllerchange (the worker claims the page for the first time). Reloading then would wipe whatever the
+        // person has already typed (the sign-in email). Only a real UPDATE, when a worker was already in control, reloads.
+        let hadController = !!navigator.serviceWorker.controller;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          // Reload to apply update
+          if (!hadController) { hadController = true; return; }
           window.location.reload();
         });
 

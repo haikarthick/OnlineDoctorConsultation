@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { USERS } from './constants'
+import { settleServiceWorker } from './fixtures'
 
 /**
  * AUTH E2E TESTS
@@ -9,6 +10,7 @@ import { USERS } from './constants'
 test.describe('Authentication - Login', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/login')
+    await settleServiceWorker(page)
   })
 
   test('should display login form with email and password fields', async ({ page }) => {
@@ -59,6 +61,7 @@ test.describe('Authentication - Login', () => {
     await page.waitForURL('**/dashboard')
     // Try navigating back to login
     await page.goto('/login')
+    await settleServiceWorker(page)
     // Should redirect to dashboard
     await expect(page).toHaveURL(/\/dashboard/)
   })
@@ -68,6 +71,7 @@ test.describe('Authentication - Logout', () => {
   test('should logout and redirect to login/home', async ({ page }) => {
     // Login
     await page.goto('/login')
+    await settleServiceWorker(page)
     await page.fill('#login-email', USERS.petOwner1.email)
     await page.fill('#login-password', USERS.petOwner1.password)
     await page.click('.login-submit')
@@ -89,6 +93,7 @@ test.describe('Authentication - Logout', () => {
 test.describe('Authentication - Registration', () => {
   test('should display registration form with all fields', async ({ page }) => {
     await page.goto('/register')
+    await settleServiceWorker(page)
     await expect(page.locator('#reg-firstName')).toBeVisible()
     await expect(page.locator('#reg-lastName')).toBeVisible()
     await expect(page.locator('#reg-email')).toBeVisible()
@@ -101,38 +106,55 @@ test.describe('Authentication - Registration', () => {
 
   test('should show role options: pet_owner, farmer, veterinarian', async ({ page }) => {
     await page.goto('/register')
-    await expect(page.locator('input[name="role"][value="pet_owner"]')).toBeVisible()
-    await expect(page.locator('input[name="role"][value="farmer"]')).toBeVisible()
-    await expect(page.locator('input[name="role"][value="veterinarian"]')).toBeVisible()
+    await settleServiceWorker(page)
+    // The radios are visually hidden; the person sees and taps the role CARD (a label that wraps the radio).
+    for (const role of ['pet_owner', 'farmer', 'veterinarian']) {
+      await expect(page.locator(`label.role-option:has(input[name="role"][value="${role}"])`)).toBeVisible()
+    }
   })
 
   test('should validate password mismatch', async ({ page }) => {
     await page.goto('/register')
+    await settleServiceWorker(page)
     await page.fill('#reg-firstName', 'Test')
     await page.fill('#reg-lastName', 'User')
     await page.fill('#reg-email', `test-${Date.now()}@e2e-test.com`)
     await page.fill('#reg-phone', '+1234567890')
     await page.fill('#reg-password', 'TestPass123')
     await page.fill('#reg-confirmPassword', 'DifferentPass')
+    // Create Account stays disabled until the terms are accepted; accept them so the password check is what is tested.
+    await page.check('input[type="checkbox"]')
     await page.click('.register-submit')
-    // Should show validation error
-    const errorMsg = page.locator('.message.error, [role="status"]')
+    const errorMsg = page.locator('.message.error')
     await expect(errorMsg).toBeVisible({ timeout: 5_000 })
+    await expect(errorMsg).toContainText(/do not match/i)
+    await expect(page).toHaveURL(/\/register/)
   })
 
   test('should validate minimum password length', async ({ page }) => {
     await page.goto('/register')
+    await settleServiceWorker(page)
     await page.fill('#reg-firstName', 'Test')
     await page.fill('#reg-lastName', 'User')
     await page.fill('#reg-email', `test-${Date.now()}@e2e-test.com`)
     await page.fill('#reg-phone', '+1234567890')
     await page.fill('#reg-password', '12345')
     await page.fill('#reg-confirmPassword', '12345')
+    await page.check('input[type="checkbox"]')
     await page.click('.register-submit')
-    // Should show error (password too short)
-    const passwordField = page.locator('#reg-password')
-    const isInvalid = await passwordField.evaluate((el: HTMLInputElement) => !el.validity.valid)
-    expect(isInvalid).toBe(true)
+    // The form (not the browser) explains the rule in words: at least 8 characters.
+    const errorMsg = page.locator('.message.error')
+    await expect(errorMsg).toBeVisible({ timeout: 5_000 })
+    await expect(errorMsg).toContainText(/at least 8 characters/i)
+    await expect(page).toHaveURL(/\/register/)
+  })
+
+  test('create account is disabled until the terms are accepted', async ({ page }) => {
+    await page.goto('/register')
+    await settleServiceWorker(page)
+    await expect(page.locator('.register-submit')).toBeDisabled()
+    await page.check('input[type="checkbox"]')
+    await expect(page.locator('.register-submit')).toBeEnabled()
   })
 })
 

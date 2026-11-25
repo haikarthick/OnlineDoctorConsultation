@@ -176,6 +176,21 @@
       "rehabilitation": "പുനരധിവാസം",
       "sale": "വിൽപ്പന",
       "other": "മറ്റുള്ളവ"
+    },
+    "legacyGroupTypes": {
+      "herd": "കൂട്ടം",
+      "flock": "ആട്/കോഴി കൂട്ടം",
+      "pen": "തൊഴുത്ത്",
+      "paddock": "മേച്ചിൽപ്പുറം",
+      "enclosure": "വേലിക്കെട്ട്",
+      "tank": "ടാങ്ക്",
+      "aviary": "പക്ഷിക്കൂട്",
+      "kennel_group": "കെന്നൽ ഗ്രൂപ്പ്",
+      "breeding_group": "പ്രജനന ഗ്രൂപ്പ്",
+      "quarantine": "ക്വാറന്റൈൻ",
+      "nursery": "കുഞ്ഞുങ്ങളുടെ കൂട്",
+      "production": "ഉൽപാദനം",
+      "other": "മറ്റുള്ളവ"
     }
   }
 }

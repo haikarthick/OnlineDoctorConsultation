@@ -391,7 +391,8 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
     if (!value) return ''
     const entry = groupTypesForSpecies(species).find(g => g.value === value)
     if (entry) return resolveLabel(entry, t) || value
-    return (GROUP_TYPE_LABELS as Record<string, string>)[value] || value
+    // Older group types have no master-data row: say them in the person's language (English is only the last resort).
+    return t(`farmProfile.legacyGroupTypes.${value}`, { defaultValue: (GROUP_TYPE_LABELS as Record<string, string>)[value] || value })
   }, [groupTypesForSpecies, resolveLabel])
 
   const groupTypeIcon = useCallback((species: string | null | undefined, value: string | null | undefined): string | null => {

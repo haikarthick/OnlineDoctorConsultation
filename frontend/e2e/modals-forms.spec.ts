@@ -16,104 +16,61 @@ import { test, expect } from './fixtures'
 // ── Animal CRUD ────────────────────────────────────────────
 
 test.describe('Animals - CRUD Forms', () => {
-  test('add animal button opens registration form', async ({ petOwnerPage: page }) => {
+  // The registration form is a two-step form opened on the page itself: pick the animal (one tap), type a name, then Next.
+  const openRegisterForm = async (page: import('@playwright/test').Page) => {
     await page.goto('/animals')
     await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: /register animal/i }).click()
+    await expect(page.locator('.step-form')).toBeVisible({ timeout: 5_000 })
+  }
 
-    const addBtn = page.locator('button').filter({ hasText: /register|add|new/i })
-    if (await addBtn.count() > 0) {
-      await addBtn.first().click()
-      await page.waitForTimeout(500)
-
-      // Form should be visible with required fields
-      const nameField = page.locator('input[name="name"]')
-      await expect(nameField).toBeVisible({ timeout: 5_000 })
-
-      const speciesSelect = page.locator('select[name="species"]')
-      await expect(speciesSelect).toBeVisible()
-    }
+  test('add animal button opens registration form', async ({ petOwnerPage: page }) => {
+    await openRegisterForm(page)
+    // Form shows the one-tap animal choices, the name box, and the first step of two
+    await expect(page.locator('.step-form .choice-chip', { hasText: /dog/i }).first()).toBeVisible()
+    await expect(page.locator('#animal-name')).toBeVisible()
+    await expect(page.locator('.step-form-count')).toContainText(/1/)
   })
 
-  test('species dropdown populates breed dropdown', async ({ petOwnerPage: page }) => {
-    await page.goto('/animals')
-    await page.waitForLoadState('networkidle')
-
-    const addBtn = page.locator('button').filter({ hasText: /register|add|new/i })
-    if (await addBtn.count() > 0) {
-      await addBtn.first().click()
-      await page.waitForTimeout(500)
-
-      const speciesSelect = page.locator('select[name="species"]')
-      if (await speciesSelect.count() > 0) {
-        // Select a species
-        await speciesSelect.selectOption({ index: 1 })
-        await page.waitForTimeout(300)
-
-        // Breed dropdown should now have options
-        const breedSelect = page.locator('select[name="breed"]')
-        if (await breedSelect.count() > 0) {
-          const breedOptions = await breedSelect.locator('option').count()
-          expect(breedOptions).toBeGreaterThanOrEqual(2) // placeholder + at least 1 breed
-        }
-      }
-    }
+  test('species choice populates breed dropdown', async ({ petOwnerPage: page }) => {
+    await openRegisterForm(page)
+    // No breed box before an animal is chosen
+    await expect(page.locator('#animal-breed')).toHaveCount(0)
+    await page.locator('.step-form .choice-chip', { hasText: /dog/i }).first().click()
+    const breed = page.locator('#animal-breed')
+    await expect(breed).toBeVisible({ timeout: 5_000 })
+    const breedOptions = await breed.locator('option').count()
+    expect(breedOptions).toBeGreaterThanOrEqual(2) // placeholder + at least 1 breed
   })
 
   test('animal form validates required fields', async ({ petOwnerPage: page }) => {
-    await page.goto('/animals')
-    await page.waitForLoadState('networkidle')
-
-    const addBtn = page.locator('button').filter({ hasText: /register|add|new/i })
-    if (await addBtn.count() > 0) {
-      await addBtn.first().click()
-      await page.waitForTimeout(500)
-
-      // Try submitting empty form
-      const submitBtn = page.locator('button[type="submit"], button').filter({ hasText: /save|submit|register/i })
-      if (await submitBtn.count() > 0) {
-        await submitBtn.first().click()
-        await page.waitForTimeout(500)
-
-        // Should stay on animals page (not navigate away)
-        await expect(page).toHaveURL(/\/animals/)
-      }
-    }
+    await openRegisterForm(page)
+    // Nothing chosen: Next is off and the form says why, in words
+    await expect(page.locator('.step-form-next')).toBeDisabled()
+    await expect(page.locator('.step-form-blocked')).toContainText(/choose the animal/i)
+    // Animal chosen but no name: still off, and the reason changes to the name
+    await page.locator('.step-form .choice-chip', { hasText: /dog/i }).first().click()
+    await expect(page.locator('.step-form-next')).toBeDisabled()
+    await expect(page.locator('.step-form-blocked')).toContainText(/name/i)
+    // Name typed: the person can go on
+    await page.fill('#animal-name', 'E2E Test Animal')
+    await expect(page.locator('.step-form-next')).toBeEnabled()
+    await expect(page).toHaveURL(/\/animals/)
   })
 
   test('animal form submission fills all fields', async ({ petOwnerPage: page }) => {
-    await page.goto('/animals')
-    await page.waitForLoadState('networkidle')
-
-    const addBtn = page.locator('button').filter({ hasText: /register|add|new/i })
-    if (await addBtn.count() > 0) {
-      await addBtn.first().click()
-      await page.waitForTimeout(500)
-
-      // Fill required fields
-      const nameField = page.locator('input[name="name"]')
-      if (await nameField.count() > 0) {
-        await nameField.fill('E2E Test Animal')
-      }
-
-      const speciesSelect = page.locator('select[name="species"]')
-      if (await speciesSelect.count() > 0) {
-        await speciesSelect.selectOption({ index: 1 })
-        await page.waitForTimeout(300)
-      }
-
-      const breedSelect = page.locator('select[name="breed"]')
-      if (await breedSelect.count() > 0) {
-        await breedSelect.selectOption({ index: 1 })
-      }
-
-      const genderSelect = page.locator('select[name="gender"]')
-      if (await genderSelect.count() > 0) {
-        await genderSelect.selectOption('male')
-      }
-
-      // Form should be filled without errors
-      await expect(page).toHaveURL(/\/animals/)
-    }
+    await openRegisterForm(page)
+    await page.locator('.step-form .choice-chip', { hasText: /dog/i }).first().click()
+    await page.fill('#animal-name', 'E2E Test Animal')
+    await page.locator('#animal-breed').selectOption({ index: 1 })
+    await expect(page.locator('#animal-name')).toHaveValue('E2E Test Animal')
+    await expect(page.locator('#animal-breed')).not.toHaveValue('')
+    // Step 2 (details) opens and keeps what was typed when going back
+    await page.locator('.step-form-next').click()
+    await expect(page.locator('#animal-dob')).toBeVisible()
+    await page.locator('.step-form-back').click()
+    await expect(page.locator('#animal-name')).toHaveValue('E2E Test Animal')
+    await expect(page).toHaveURL(/\/animals/)
   })
 
   test('delete animal shows confirmation dialog', async ({ petOwnerPage: page }) => {
@@ -419,7 +376,8 @@ test.describe('Settings - Profile Form', () => {
       const phoneInput = page.locator('input[name="phone"]')
       if (await phoneInput.count() > 0) {
         const currentValue = await phoneInput.inputValue()
-        await phoneInput.fill(currentValue || '1234567890')
+        // A mobile number the platform accepts (10 digits, starts 6-9) and nobody else owns; "1234567890" is rightly refused.
+        await phoneInput.fill(currentValue || `9${String(Date.now()).slice(-9)}`)
       }
 
       // Intercept API call
@@ -435,6 +393,18 @@ test.describe('Settings - Profile Form', () => {
         expect([200, 201, 204]).toContain(response.status())
       }
     }
+  })
+
+  // A mistyped mobile number is explained in words (UserService.updateUser passes the validation refusal through).
+  test('a mistyped mobile number is explained in words, not as a server error', async ({ petOwnerPage: page }) => {
+    await page.goto('/settings')
+    await page.waitForLoadState('networkidle')
+    await page.locator('input[name="phone"]').fill('1234567890')
+    const responsePromise = page.waitForResponse((resp) => resp.url().includes('/auth/profile') && resp.request().method() === 'PUT', { timeout: 10_000 })
+    await page.locator('button').filter({ hasText: /save/i }).first().click()
+    const response = await responsePromise
+    expect(response.status(), 'a number the platform refuses is a typing mistake: a 400, never a 500').toBe(400)
+    expect(JSON.stringify(await response.json())).toMatch(/valid mobile number/i)
   })
 })
 

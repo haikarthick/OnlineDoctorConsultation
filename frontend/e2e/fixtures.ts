@@ -11,11 +11,33 @@ import { USERS, UserKey, authStatePath } from './constants'
  */
 
 // ── Auth helper: login via UI and return storage state ──────
+/**
+ * On a person's FIRST visit the app's service worker installs, takes control of the page and the app then reloads the page once
+ * (frontend/src/pwa.ts: controllerchange -> location.reload(), about 0.4 s after load on a fast machine, later on a slow one).
+ * Anything typed before that reload is wiped. A test must therefore wait for that one reload to be over before it types.
+ * (Reported as an app defect: a first-time visitor on a slow connection loses what they typed, see the QA report.)
+ */
+export async function settleServiceWorker(page: Page): Promise<void> {
+  await page.waitForFunction(() => !('serviceWorker' in navigator) || !!navigator.serviceWorker.controller, null, { timeout: 15_000 }).catch(() => undefined)
+  // the reload (if one is coming) starts right after the controller is set: let it finish, then the page is stable
+  await page.waitForTimeout(800)
+  await page.waitForLoadState('load')
+}
+
 export async function loginAs(page: Page, userKey: UserKey): Promise<void> {
   const user = USERS[userKey]
   await page.goto('/login')
-  await page.fill('#login-email', user.email)
-  await page.fill('#login-password', user.password)
+  await settleServiceWorker(page)
+  // Fill both boxes and PROVE both still hold the typed text before pressing the button; a page that was reloaded underneath us
+  // would otherwise submit an empty email and the test would fail 15 s later with a misleading "no dashboard" timeout.
+  let filled = false
+  for (let attempt = 0; attempt < 4 && !filled; attempt++) {
+    await page.fill('#login-email', user.email)
+    await page.fill('#login-password', user.password)
+    filled = (await page.inputValue('#login-email')) === user.email && (await page.inputValue('#login-password')) === user.password
+    if (!filled) await page.waitForTimeout(500)
+  }
+  expect(filled, `the sign-in form lost the typed email or password for ${user.email} (page reloaded while typing?)`).toBe(true)
   await page.click('.login-submit')
   await page.waitForURL('**/dashboard', { timeout: 15_000 })
   // The main navigation is the sidebar on a desktop and the bottom tab bar on a phone or tablet; either proves the signed-in layout.

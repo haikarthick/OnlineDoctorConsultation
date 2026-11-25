@@ -28,6 +28,40 @@ const MAP_PAGES = [
 // ── Helpers ───────────────────────────────────────────────────
 
 /**
+ * None of these pages draws its map on arrival. The person first picks a farm (an admin has none picked yet) and then opens the map:
+ *   /enterprises         the "Map View" button in the page header
+ *   /locations           the "Map" choice of "Show as"
+ *   /geospatial          the "Heatmap" tab
+ *   /disease-prediction  the "Outbreak Zones" tab
+ *   /supply-chain        the "Traceability Events" tab, then "Log Event" (the route map shows next to the form)
+ * This does exactly that, so the test checks the map a real person gets to see.
+ */
+async function revealMap(page: import('@playwright/test').Page, path: string) {
+  const pickFarm = async () => {
+    const select = page.locator('.layout-content select').first()
+    await expect(select).toBeVisible({ timeout: 15_000 })
+    if (!(await select.inputValue())) {
+      const first = await select.locator('option').evaluateAll(o => (o as HTMLOptionElement[]).map(x => x.value).filter(Boolean)[0])
+      expect(first, `${path}: no farm to choose in the list`).toBeTruthy()
+      await select.selectOption(first)
+    }
+  }
+  const press = async (name: RegExp) => {
+    const btn = page.locator('.layout-content').getByRole('button', { name }).first()
+    await expect(btn, `${path}: no button matching ${name}`).toBeVisible({ timeout: 15_000 })
+    await btn.click()
+  }
+  switch (path) {
+    case '/enterprises': await press(/map view/i); break
+    case '/locations': await pickFarm(); await press(/^\W*map$/i); break
+    case '/geospatial': await pickFarm(); await press(/heatmap/i); break
+    case '/disease-prediction': await pickFarm(); await press(/outbreak/i); break
+    case '/supply-chain': await pickFarm(); await press(/traceability events/i); await press(/log event/i); break
+    default: throw new Error(`no way to open the map is known for ${path}`)
+  }
+}
+
+/**
  * Waits for Leaflet to render tile images inside .leaflet-tile-pane.
  * If CSP blocks tile requests, this pane will have no <img> children.
  */
@@ -68,16 +102,18 @@ async function assertTileNetworkRequests(page: import('@playwright/test').Page, 
     }
   })
 
-  // Navigate to the map page
+  // Navigate to the map page and open the map the way a person does
   await page.goto(path)
   await page.waitForLoadState('networkidle')
+  await revealMap(page, path)
 
   // Wait for Leaflet to render
   const leaflet = page.locator('.leaflet-container')
   await expect(leaflet.first()).toBeVisible({ timeout: 15_000 })
 
-  // Give tiles time to load (they are lazy-loaded as the map renders)
-  await page.waitForTimeout(3_000)
+  // Give tiles time to load (they are lazy-loaded as the map renders and come from a public server whose speed varies):
+  // wait for the first answer instead of a fixed 3 seconds. A blocked request never answers, so CSP trouble still fails here.
+  await expect.poll(() => tileResponses.length, { timeout: 20_000 }).toBeGreaterThan(0)
 
   // At least one tile request should have been made and returned 200
   const successfulTiles = tileResponses.filter(r => r.status === 200)

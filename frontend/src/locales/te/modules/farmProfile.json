@@ -176,6 +176,21 @@
       "rehabilitation": "పునరావాసం",
       "sale": "అమ్మకం",
       "other": "ఇతరాలు"
+    },
+    "legacyGroupTypes": {
+      "herd": "మంద",
+      "flock": "గొర్రెల/కోళ్ల మంద",
+      "pen": "దొడ్డి",
+      "paddock": "మేత మైదానం",
+      "enclosure": "కంచె ప్రాంతం",
+      "tank": "ట్యాంక్",
+      "aviary": "పక్షిశాల",
+      "kennel_group": "కెన్నెల్ సమూహం",
+      "breeding_group": "సంతానోత్పత్తి సమూహం",
+      "quarantine": "క్వారంటైన్",
+      "nursery": "పిల్లల దొడ్డి",
+      "production": "ఉత్పత్తి",
+      "other": "ఇతరాలు"
     }
   }
 }

@@ -101,7 +101,7 @@ test.describe('Auto-Discovered - /vet-certificates', () => {
   test('should load /vet-certificates without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
-    await loginAs(page, 'veterinarian')
+    await loginAs(page, 'vet1')
     await page.goto('/vet-certificates')
     await page.waitForLoadState('domcontentloaded')
     await expect(page).not.toHaveURL(/\/login/)
@@ -115,7 +115,7 @@ test.describe('Auto-Discovered - /doctor/certificates/new', () => {
   test('should load /doctor/certificates/new without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
-    await loginAs(page, 'veterinarian')
+    await loginAs(page, 'vet1')
     await page.goto('/doctor/certificates/new')
     await page.waitForLoadState('domcontentloaded')
     await expect(page).not.toHaveURL(/\/login/)
@@ -157,7 +157,7 @@ test.describe('Auto-Discovered - /patient-consent', () => {
   test('should load /patient-consent without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
-    await loginAs(page, 'pet_owner')
+    await loginAs(page, 'petOwner1')
     await page.goto('/patient-consent')
     await page.waitForLoadState('domcontentloaded')
     await expect(page).not.toHaveURL(/\/login/)
@@ -171,7 +171,7 @@ test.describe('Auto-Discovered - /network-memberships', () => {
   test('should load /network-memberships without crash', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
-    await loginAs(page, 'pet_owner')
+    await loginAs(page, 'petOwner1')
     await page.goto('/network-memberships')
     await page.waitForLoadState('domcontentloaded')
     await expect(page).not.toHaveURL(/\/login/)

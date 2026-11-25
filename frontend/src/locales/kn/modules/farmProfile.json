@@ -176,6 +176,21 @@
       "rehabilitation": "ಪುನರ್ವಸತಿ",
       "sale": "ಮಾರಾಟ",
       "other": "ಇತರೆ"
+    },
+    "legacyGroupTypes": {
+      "herd": "ಹಿಂಡು",
+      "flock": "ಕುರಿ/ಕೋಳಿ ಹಿಂಡು",
+      "pen": "ಹಟ್ಟಿ",
+      "paddock": "ಹುಲ್ಲುಗಾವಲು",
+      "enclosure": "ಕಟ್ಟೆ",
+      "tank": "ಟ್ಯಾಂಕ್",
+      "aviary": "ಪಕ್ಷಿಶಾಲೆ",
+      "kennel_group": "ಕೆನ್ನೆಲ್ ಗುಂಪು",
+      "breeding_group": "ತಳಿ ಗುಂಪು",
+      "quarantine": "ಪ್ರತ್ಯೇಕ ವಾಸ (ಕ್ವಾರಂಟೈನ್)",
+      "nursery": "ಮರಿಗಳ ಹಟ್ಟಿ",
+      "production": "ಉತ್ಪಾದನೆ",
+      "other": "ಇತರೆ"
     }
   }
 }
