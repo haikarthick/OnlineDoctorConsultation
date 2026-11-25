@@ -913,6 +913,8 @@ class Tier4Controller {
     try {
       const userId = (req as any).userId;
       const data = await monetizationService.respondToInquiry(req.params.id, userId, req.body.revealContact ?? false);
+      // Someone else's inquiry and a made-up id are refused the same way: the person is told what to do, not whether it exists.
+      if (!data) return res.status(403).json({ success: false, error: { code: 'MP_INQUIRY_NOT_YOURS', message: 'This inquiry is not on one of your listings, so it cannot be answered from your account.' } });
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }

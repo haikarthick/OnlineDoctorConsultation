@@ -164,6 +164,7 @@
     "NOTIF_WD_PAID_TITLE": "Withdrawal paid",
     "NOTIF_WD_PAID_BODY": "{{amount}} has been sent to your {{where}}. Reference: {{ref}}. It can take a few hours to appear.",
     "NOTIF_WD_WHERE_UPI": "UPI ID",
-    "NOTIF_WD_WHERE_BANK": "bank account"
+    "NOTIF_WD_WHERE_BANK": "bank account",
+    "MP_INQUIRY_NOT_YOURS": "This inquiry is not on one of your listings, so it cannot be answered from your account. Open Orders and choose one of your own inquiries."
   }
 }

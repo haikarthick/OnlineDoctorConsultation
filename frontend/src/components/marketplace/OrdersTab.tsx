@@ -10,7 +10,9 @@ export const OrdersTab: React.FC<{
   speciesLabel: (s: string, t: TFunction) => string; formatCurrency: (n: number) => string;
   dealPaymentMethod: Record<string, string>; onDealPaymentMethodChange: (orderId: string, method: string) => void;
   onConfirmDeal: (orderId: string) => void; onCancelDeal: (orderId: string) => void; t: TFunction;
-}> = ({ orderRole, onOrderRoleChange, inquiries, orders, speciesLabel, formatCurrency, dealPaymentMethod, onDealPaymentMethodChange, onConfirmDeal, onCancelDeal, t }) => (
+  onRespondInquiry: (inquiryId: string, revealContact: boolean) => void; respondingInquiryId: string | null;
+}> = ({ orderRole, onOrderRoleChange, inquiries, orders, speciesLabel, formatCurrency, dealPaymentMethod, onDealPaymentMethodChange, onConfirmDeal, onCancelDeal, t, onRespondInquiry, respondingInquiryId }) => (
+
   <div>
     <div className="mp-order-toggle">
       <button className={`module-btn ${orderRole === 'buyer' ? 'primary' : ''}`} onClick={() => onOrderRoleChange('buyer')}>{t('marketplace.orders.asBuyer')}</button>
@@ -21,14 +23,30 @@ export const OrdersTab: React.FC<{
         <h3 className="mp-section-title">💌 {t('marketplace.orders.inquiriesTitle')}</h3>
         <div className="data-table-container">
           <table className="module-table">
-            <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.orders.message')}</th><th>{t('marketplace.orders.date')}</th><th>{t('marketplace.orders.status')}</th></tr></thead>
+            <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.orders.from')}</th><th>{t('marketplace.orders.message')}</th><th>{t('marketplace.orders.date')}</th><th>{t('marketplace.orders.status')}</th>{orderRole === 'seller' && <th>{t('marketplace.deal.actionsCol')}</th>}</tr></thead>
             <tbody>
               {inquiries.map((inq: any) => (
                 <tr key={inq.id}>
                   <td>{inq.listingTitle || inq.listing_title || '-'}</td>
+                  <td>{inq.otherPartyName || '-'}</td>
                   <td>{inq.message || '-'}</td>
                   <td>{inq.created_at ? new Date(inq.created_at).toLocaleDateString(appLocale()) : '-'}</td>
-                  <td><span className={`module-badge ${inq.status === 'responded' ? 'success' : ''}`}>{inq.status || 'pending'}</span></td>
+                  <td>
+                    <span className={`module-badge ${inq.status === 'responded' ? 'success' : ''}`}>
+                      {inq.status === 'responded' ? t('marketplace.orders.inquiryStatus.responded') : t('marketplace.orders.inquiryStatus.pending')}
+                    </span>
+                    {inq.status === 'responded' && inq.contact_revealed && <div className="mp-deal-free-note">{t('marketplace.orders.contactShared')}</div>}
+                  </td>
+                  {orderRole === 'seller' && (
+                    <td>
+                      {inq.status !== 'responded' && (
+                        <div className="mp-inquiry-actions">
+                          <button type="button" className="module-btn primary" disabled={respondingInquiryId === inq.id} onClick={() => onRespondInquiry(inq.id, true)}>{t('marketplace.orders.shareContact')}</button>
+                          <button type="button" className="module-btn" disabled={respondingInquiryId === inq.id} onClick={() => onRespondInquiry(inq.id, false)}>{t('marketplace.orders.replyOnly')}</button>
+                        </div>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

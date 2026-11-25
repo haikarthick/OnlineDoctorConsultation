@@ -73,7 +73,6 @@
     "marketplace.ts:createUserSubscription",
     "marketplace.ts:getUserMonetizationStatus",
     "marketplace.ts:getUserSubscription",
-    "marketplace.ts:respondToInquiry",
     "marketplace.ts:updateOrderStatus",
     "medicalRecords.ts:createVetProfile",
     "medicalRecords.ts:deleteVaccination",

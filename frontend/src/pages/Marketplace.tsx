@@ -687,6 +687,15 @@ const Marketplace: React.FC = () => {
     } catch (e: any) { setError(userMessage(e)) }
   }
 
+  const [respondingInquiryId, setRespondingInquiryId] = useState<string | null>(null)
+  // The seller answers an inquiry; sharing the phone is their choice, made per answer (the number stays masked until they do).
+  const respondInquiry = async (inquiryId: string, revealContact: boolean) => {
+    if (respondingInquiryId) return
+    setRespondingInquiryId(inquiryId); setError('')
+    try { await apiService.respondToInquiry(inquiryId, revealContact); setSuccessMsg(t('marketplace.orders.inquiryAnswered')); await fetchInquiries('seller') }
+    catch (e: any) { setError(userMessage(e, 'marketplace.errors.generic')) } finally { setRespondingInquiryId(null) }
+  }
+
   const fetchInquiries = async (role: 'buyer' | 'seller' = orderRole) => {
     try { const res = await apiService.listInquiries(role); setInquiries(Array.isArray(res.data) ? res.data : []) } catch { setInquiries([]) }
   }
@@ -1020,6 +1029,7 @@ const Marketplace: React.FC = () => {
           speciesLabel={speciesLabel} formatCurrency={formatCurrency}
           dealPaymentMethod={dealPaymentMethod} onDealPaymentMethodChange={handleDealPaymentMethodChange}
           onConfirmDeal={confirmDeal} onCancelDeal={cancelDeal} t={t}
+          onRespondInquiry={respondInquiry} respondingInquiryId={respondingInquiryId}
         />
       )}
 

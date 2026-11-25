@@ -296,7 +296,16 @@
       "noOrders": "No requests found",
       "inquiriesTitle": "💌 Inquiries",
       "noInquiries": "No inquiries yet",
-      "message": "Message"
+      "message": "Message",
+      "from": "From",
+      "shareContact": "Reply and share my phone",
+      "replyOnly": "Reply without my phone",
+      "contactShared": "Phone shared",
+      "inquiryAnswered": "Reply sent. The buyer has been told.",
+      "inquiryStatus": {
+        "pending": "Waiting for your reply",
+        "responded": "Answered"
+      }
     },
     "prices": {
       "subtitle": "Average prices across all active and sold listings by species and breed",
