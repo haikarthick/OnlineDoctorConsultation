@@ -6,6 +6,8 @@ import { requireAnimal } from '../middleware/recordAccess';
 import { asyncHandler } from '../utils/errorHandler';
 import database from '../utils/database';
 import logger from '../utils/logger';
+import { CodedError } from '../utils/errors';
+import { getFrontendUrl } from '../config';
 import { emitDataRefresh, emitRoleRefresh } from '../utils/socketIO';
 import HospitalNetworkController from '../controllers/HospitalNetworkController';
 import HospitalNetworkService, { updateBranchHospital, deleteBranchHospital, addApprovalEvent, getApprovalHistory, updateNetworkBranding, getNotificationPreferences, updateNotificationPreferences } from '../services/HospitalNetworkService';
@@ -194,7 +196,7 @@ router.delete('/hospital-networks/:id/members/:userId', authMiddleware, asyncHan
 //
 // An empty `q` returns the whole candidate list rather than nothing: the set is bounded by
 // the network's own hospitals, so it is safe to show before the admin types. Someone with no
-// prior attachment to a branch hospital is onboarded through POST /:id/invite-staff instead.
+// prior attachment to a branch hospital is onboarded through POST /:id/staff-invites instead.
 router.get('/hospital-networks/:id/user-search', authMiddleware, requireNetworkAccess('addRemoveMembers'), asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   // hospital_director / hospital_staff are branch-scoped, so they only see their own branch,
@@ -345,16 +347,6 @@ router.post('/hospital-networks/:id/enroll-animal', authMiddleware, requireNetwo
     enrolledBy: (req as any).userId,
     notes,
   });
-  res.json(result);
-}));
-
-// List patients enrolled in a network
-// I-1: now gated by membership + viewEnrolledPatients action, with branch-level row scoping
-router.get('/hospital-networks/:id/patients', authMiddleware, requireNetworkAccess('viewEnrolledPatients'), asyncHandler(async (req: Request, res: Response) => {
-  const limit = parseInt(req.query.limit as string) || 50;
-  const offset = parseInt(req.query.offset as string) || 0;
-  const branchScopeHospitalId = (req as NetworkAccessRequest).branchScopeHospitalId ?? null;
-  const result = await HospitalNetworkService.getNetworkPatients(req.params.id, limit, offset, branchScopeHospitalId);
   res.json(result);
 }));
 
@@ -597,15 +589,16 @@ router.post('/hospital-networks/:id/invite-walkin', authMiddleware, requireNetwo
   try {
     const userId = (req as any).userId;
     const { patientName, patientEmail, patientPhone, animalName, animalSpecies, hospitalId, message } = req.body;
-    if (!patientName || !patientEmail) { res.status(400).json({ success: false, error: 'patientName and patientEmail are required' }); return; }
+    if (!patientName || !patientEmail) { res.status(400).json({ success: false, message: 'Enter the patient\'s name and email so the invitation can reach them.' }); return; }
     const result = await HospitalNetworkService.inviteWalkInPatient({
       networkId: req.params.id, hospitalId, patientName, patientEmail,
       patientPhone, animalName, animalSpecies, message,
     }, userId);
-    res.json({ success: true, data: result });
+    // The link the hospital shares with the patient (the patient also sees the invitation in the app after signing in).
+    res.json({ success: true, data: { ...result, inviteUrl: `${getFrontendUrl()}/accept-walkin-invite?token=${result.inviteToken}` } });
   } catch (err: any) {
     logger.error('Route error', { path: req.path, error: err.message });
-    res.status(500).json({ success: false, error: err.message || 'Internal server error' });
+    res.status(500).json({ success: false, message: 'We could not create this invitation just now. Check the details and try again.' });
   }
 }));
 
@@ -717,16 +710,19 @@ router.post('/hospital-networks/enrollments/:contextId/accept', authMiddleware, 
   }
 }));
 
-// Accept a walk-in patient invite by token (Fix 6)
+// Walk-in invitations for the signed-in person (found by their own email), the invitation behind a link, and accepting it.
+// Each answers in words with a code (WI_*) the app says in the person's language; accepting shares no animal data.
+router.get('/hospital-networks/walkin-invites/mine', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { items: await HospitalNetworkService.listMyWalkInInvites((req as any).userId) } });
+}));
+router.get('/hospital-networks/walkin-invites/by-token/:token', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await HospitalNetworkService.previewWalkInInvite(req.params.token) });
+}));
 router.post('/hospital-networks/walkin-invites/accept', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  try {
-    const { token } = req.body;
-    if (!token) { res.status(400).json({ success: false, message: 'token is required' }); return; }
-    const result = await HospitalNetworkService.acceptWalkInInvite(token, (req as any).userId);
-    res.json({ success: true, data: result });
-  } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message });
-  }
+  const { token } = req.body || {};
+  if (!token || typeof token !== 'string') throw new CodedError(400, 'WI_NOT_FOUND', 'We could not find this invitation. Check the link, or ask the hospital to send a new one.');
+  const result = await HospitalNetworkService.acceptWalkInInvite(token, (req as any).userId);
+  res.json({ success: true, data: result });
 }));
 
 // Patient declines enrollment request

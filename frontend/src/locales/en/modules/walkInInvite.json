@@ -1,0 +1,26 @@
+{
+  "walkInInvite": {
+    "shareLink": "Link for the patient",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "shareHint": "Send this link to the patient. They also see the invitation in the app once they sign in with this email.",
+    "bannerTitle": "{{network}} invited you",
+    "bannerBody": "{{inviter}} invited you to connect {{pet}} with their hospital network.",
+    "yourPet": "your pet",
+    "theHospital": "The hospital",
+    "noDataShared": "Accepting does not share any of your animal's records. The hospital will ask for your approval first.",
+    "accept": "Accept",
+    "notNow": "Not now",
+    "accepted": "Accepted. {{network}} can now ask to enrol {{pet}}; you will be asked to approve what is shared.",
+    "seeConnections": "See my hospital connections",
+    "pageTitle": "Hospital invitation",
+    "loading": "Opening your invitation...",
+    "signInFirst": "Sign in, or create an account with the email this invitation was sent to, and you can accept it. It will also appear at the top of the app.",
+    "signIn": "Sign in",
+    "register": "Create an account",
+    "doneTitle": "Invitation accepted",
+    "invalidTitle": "This invitation cannot be used",
+    "noToken": "This link is missing its invitation. Open the link from the invitation again, or ask the hospital to send a new one.",
+    "home": "Go to the app"
+  }
+}

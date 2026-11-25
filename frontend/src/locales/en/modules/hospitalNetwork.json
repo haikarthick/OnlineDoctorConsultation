@@ -193,7 +193,31 @@
       "reason": "Reason",
       "status": "Status",
       "actions": "Actions",
-      "complete": "Complete"
+      "complete": "Complete",
+      "start": "Start a transfer",
+      "startTitle": "Move a patient to another hospital",
+      "change": "Change",
+      "choose": "Choose...",
+      "searchPlaceholder": "Type at least 2 letters of the patient's or owner's name",
+      "noMatches": "No active patient of this network matches. Check the spelling.",
+      "reasonPlaceholder": "Why is the patient moving? (e.g. needs surgery at the main hospital)",
+      "notes": "Notes for the next hospital",
+      "submit": "Start transfer",
+      "errPatient": "Choose the patient first.",
+      "errHospitals": "Choose the hospital they move from and the one they move to.",
+      "errReason": "Say why the patient is moving.",
+      "ownerTold": "When the move is completed, the owner is told where their pet is now. Their consent and records stay as they were.",
+      "started": "Transfer started. Complete it when the patient arrives.",
+      "completed": "{{name}} is now at {{to}}.",
+      "completeFailed": "We could not complete this transfer. Check the signal and try again.",
+      "startFailed": "We could not start this transfer. Check the details and try again.",
+      "state": {
+        "pending": "Waiting",
+        "accepted": "Accepted",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "rejected": "Rejected"
+      }
     },
     "onboarding": {
       "title": "Network Setup Checklist",
@@ -222,6 +246,23 @@
       "target": "Target",
       "change": "Change",
       "ip": "IP address"
+    },
+    "plan": {
+      "title": "My plan",
+      "trial": "Trial",
+      "seats": "{{used}} of {{limit}} seats used",
+      "full": "All seats are used. To add more people, ask the platform admin to upgrade the plan or remove someone first.",
+      "suspended": "This plan is suspended, so no one new can be added. Contact platform support.",
+      "price": "{{amount}} per month",
+      "changeHint": "The platform admin changes the plan. Contact support to upgrade.",
+      "loadFailed": "We could not load your plan just now. Check the signal and open this tab again.",
+      "status": {
+        "trial": "Trial",
+        "active": "Active",
+        "suspended": "Suspended",
+        "expired": "Expired",
+        "cancelled": "Cancelled"
+      }
     }
   },
   "networkRoleMatrix": {

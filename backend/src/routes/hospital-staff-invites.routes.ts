@@ -1,3 +1,4 @@
+import { CodedError } from '../utils/errors';
 import { Router, Request, Response } from 'express';
 import UserServiceForPhone from '../services/UserService';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
@@ -5,77 +6,13 @@ import { resolveNetworkAccess } from '../middleware/networkAccess';
 import { asyncHandler } from '../utils/errorHandler';
 import database from '../utils/database';
 import logger from '../utils/logger';
-import emailService from '../services/EmailService';
 import { checkSeatLimit } from './network-subscriptions.routes';
-import { inviteHospitalStaffSchema, acceptStaffInviteSchema } from '../middleware/validation';
+import { acceptStaffInviteSchema } from '../middleware/validation';
 
 const router = Router();
 
 // HOSPITAL STAFF INVITES (invite-only registration for hospital_staff role)
 // ─────────────────────────────────────────────────────────────────────────────
-
-router.post('/hospital-networks/:id/invite-staff', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), validateBody(inviteHospitalStaffSchema), asyncHandler(async (req: Request, res: Response) => {
-  const authReq = req as any;
-  const db = (await import('../utils/database')).default;
-  const networkId = req.params.id;
-  // Secondary check: verify caller has appropriate network role for the (admin-configurable) inviteStaff action
-  const access = await resolveNetworkAccess(networkId, authReq.userId, authReq.userRole, 'inviteStaff');
-  if (!access.allowed) {
-    if (access.reason === 'not_member') return res.status(404).json({ success: false, message: 'Network not found' });
-    return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can invite staff' });
-  }
-  const seat = await checkSeatLimit(networkId, db);
-  if (!seat.allowed) {
-    if (seat.status === 'suspended') return res.status(403).json({ success: false, message: 'This network has been suspended. Contact platform support.', code: 'network_suspended' });
-    return res.status(403).json({ success: false, message: `Seat limit reached (${seat.used}/${seat.limit}). Contact platform admin to upgrade.`, code: 'seat_limit_exceeded', used: seat.used, limit: seat.limit });
-  }
-  const { invitee_email, invitee_name, staff_position, hospital_id } = req.body;
-  const crypto = require('crypto');
-  const token = crypto.randomBytes(48).toString('hex');
-  const existing = await db.query(`SELECT id FROM hospital_staff_invites WHERE network_id=$1 AND invitee_email=$2 AND status='pending' AND expires_at>NOW()`, [networkId, invitee_email]);
-  if (existing.rows.length > 0) return res.status(409).json({ success: false, message: 'A pending invite already exists for this email' });
-  await db.query(`INSERT INTO hospital_staff_invites (network_id, hospital_id, invited_by, invitee_email, invitee_name, staff_position, invite_token) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-    [networkId, hospital_id||null, authReq.userId, invitee_email, invitee_name || '', staff_position, token]);
-
-  // Build invite URL
-  const frontendUrl = process.env.FRONTEND_URL || (process.env.RENDER_EXTERNAL_URL ? process.env.RENDER_EXTERNAL_URL.replace('/api/v1', '') : '') || 'http://localhost:5173';
-  const inviteUrl = `${frontendUrl}/accept-hospital-invite?token=${token}`;
-
-  // Fetch network + hospital names for email
-  const networkResult = await db.query(`SELECT name FROM hospital_networks WHERE id = $1`, [networkId]);
-  const networkName = networkResult.rows[0]?.name || 'the network';
-  let hospitalName = '';
-  if (hospital_id) {
-    const hRes = await db.query(`SELECT name FROM vet_hospitals WHERE id = $1`, [hospital_id]);
-    hospitalName = hRes.rows[0]?.name || '';
-  }
-
-  // Send invite email (non-blocking)
-  emailService.send({
-    to: invitee_email,
-    subject: '',
-    template: 'staff_invite',
-    data: { inviteeName: invitee_name, networkName, hospitalName, position: staff_position, inviteUrl },
-  }).catch((err: any) => logger.error('Staff invite email failed', { error: err.message }));
-
-  // H6: In-app notification if invitee already has an account
-  try {
-    const inviteeUser = await db.query(`SELECT id FROM users WHERE LOWER(email) = LOWER($1)`, [invitee_email]);
-    if (inviteeUser.rows.length > 0) {
-      const NotificationService = (await import('../services/NotificationService')).default;
-      await NotificationService.createNotification(
-        inviteeUser.rows[0].id, 'system',
-        `Invitation to join ${networkName}`,
-        `You have been invited to join ${networkName}. Check your network invitations.`,
-        'in_app', { networkId, type: 'staff_invite' }
-      );
-    }
-  } catch (notifErr: any) {
-    logger.warn('Staff invite in-app notification failed (non-blocking)', { networkId, error: notifErr.message });
-  }
-
-  res.status(201).json({ success: true, message: 'Invite created. Email sent if configured.', data: { token, inviteUrl } });
-}));
 
 router.get('/hospital-staff-invites/token/:token', asyncHandler(async (req: Request, res: Response) => {
   const db = (await import('../utils/database')).default;
@@ -183,6 +120,13 @@ router.post('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewa
   if (!access.allowed) {
     if (access.reason === 'not_member') return res.status(404).json({ success: false, error: 'Network not found' });
     return res.status(403).json({ success: false, error: 'Only corporate admins and hospital directors can send staff invites' });
+  }
+
+  // The seat cap of the network's plan (this check used to live only on an unused duplicate route, so the live one never enforced it).
+  const seat = await checkSeatLimit(req.params.id, db);
+  if (!seat.allowed) {
+    if (seat.status === 'suspended') throw new CodedError(403, 'HN_NETWORK_SUSPENDED', 'This network has been suspended, so no one new can be added. Contact platform support.');
+    throw new CodedError(403, 'HN_SEAT_LIMIT', `Your plan allows ${seat.limit} people and ${seat.used} are already in this network. Ask the platform admin to upgrade the plan, or remove someone first.`, { used: seat.used, limit: seat.limit });
   }
 
   const { inviteeEmail, inviteeName = '', staffPosition, hospitalId, expiresInHours = 72 } = req.body;

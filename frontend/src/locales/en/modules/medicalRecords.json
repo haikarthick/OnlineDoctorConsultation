@@ -647,7 +647,20 @@
       "autoRouted": "Will be sent to",
       "selectNetwork": "Route prescription to which pharmacy network?",
       "noRouting": "No pharmacy routing (standalone)",
-      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review."
+      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review.",
+      "seeReview": "See the pharmacist's note",
+      "hideReview": "Hide the pharmacist's note",
+      "reviewTitle": "Pharmacy review",
+      "noReviewYet": "The pharmacist has not reviewed this yet.",
+      "decisionApproved": "Approved",
+      "decisionRejected": "Rejected",
+      "decisionClarify": "Needs clarification",
+      "reviewedBy": "{{name}}, {{date}}",
+      "reasonLabel": "Reason",
+      "changeLabel": "Change asked for",
+      "notesLabel": "Notes",
+      "nextStep": "You can write a corrected prescription, or call the pharmacy to talk it through.",
+      "reviewLoadFailed": "We could not open the pharmacist's note just now. Check the signal and try again."
     }
   },
   "prescriptionWriter": {

@@ -433,5 +433,11 @@
     "resolvedAt": "Resolved At",
     "submitDispute": "Submit Report",
     "noDisputes": "No disputes found"
+  },
+  "networkPlans": {
+    "remove": "Remove",
+    "removeConfirm": "Remove the plan \"{{name}}\"? It disappears from the lists. A plan that a network uses cannot be removed.",
+    "removed": "Plan \"{{name}}\" removed.",
+    "removeFailed": "We could not remove this plan. Check the signal and try again."
   }
 }

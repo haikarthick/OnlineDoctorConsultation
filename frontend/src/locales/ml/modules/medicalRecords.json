@@ -647,7 +647,20 @@
       "autoRouted": "Will be sent to",
       "selectNetwork": "Route prescription to which pharmacy network?",
       "noRouting": "No pharmacy routing (standalone)",
-      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review."
+      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review.",
+      "seeReview": "ഫാർമസിസ്റ്റിന്റെ കുറിപ്പ് കാണുക",
+      "hideReview": "ഫാർമസിസ്റ്റിന്റെ കുറിപ്പ് മറയ്ക്കുക",
+      "reviewTitle": "ഫാർമസി അവലോകനം",
+      "noReviewYet": "ഫാർമസിസ്റ്റ് ഇതുവരെ ഇത് അവലോകനം ചെയ്തിട്ടില്ല.",
+      "decisionApproved": "അംഗീകരിച്ചു",
+      "decisionRejected": "നിരസിച്ചു",
+      "decisionClarify": "വ്യക്തത വേണം",
+      "reviewedBy": "{{name}}, {{date}}",
+      "reasonLabel": "കാരണം",
+      "changeLabel": "ആവശ്യപ്പെട്ട മാറ്റം",
+      "notesLabel": "കുറിപ്പുകൾ",
+      "nextStep": "നിങ്ങൾക്ക് തിരുത്തിയ കുറിപ്പടി എഴുതാം, അല്ലെങ്കിൽ ഫാർമസിയെ വിളിച്ച് സംസാരിക്കാം.",
+      "reviewLoadFailed": "ഫാർമസിസ്റ്റിന്റെ കുറിപ്പ് ഇപ്പോൾ തുറക്കാനായില്ല. സിഗ്നൽ നോക്കി വീണ്ടും ശ്രമിക്കുക."
     }
   },
   "prescriptionWriter": {

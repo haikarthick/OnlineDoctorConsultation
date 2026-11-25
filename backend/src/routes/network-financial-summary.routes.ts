@@ -1,3 +1,4 @@
+import { CodedError } from '../utils/errors';
 import { Router, Request, Response } from 'express';
 import { authMiddleware, roleMiddleware, AuthRequest } from '../middleware/auth';
 import { resolveNetworkAccess } from '../middleware/networkAccess';
@@ -84,7 +85,7 @@ router.post('/hospital-networks/:id/patient-transfers', authMiddleware, asyncHan
   const { fromHospitalId, toHospitalId, animalId, reason, transferReason, clinicalNotes } = req.body;
 
   if (!fromHospitalId || !toHospitalId || !animalId || !reason) {
-    return res.status(400).json({ success: false, error: 'fromHospitalId, toHospitalId, animalId, and reason are required' });
+    throw new CodedError(400, 'HN_TRANSFER_FIELDS', 'Choose the patient, the hospital they move from, the hospital they move to, and give the reason for the move.');
   }
 
   const result = await HospitalNetworkService.createPatientTransfer({

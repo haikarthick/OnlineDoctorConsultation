@@ -30,6 +30,21 @@
     "PH_PRODUCT_MISSING": "That product is not in your network's catalogue. Add it in the Catalogue tab first.",
     "FORBIDDEN_ROLE": "Your account does not have access to this action. If you need it, ask the owner or an administrator to give you the right role.",
     "RX_NETWORK_NOT_MEMBER": "You can send a prescription to a hospital network's pharmacy only if you belong to that network. Choose one of your own networks, or send it without one.",
-    "WD_FARM_TEAM_ONLY": "Only the people who run this farm can change its treatment record. Ask the farm owner or a manager to do it."
+    "WD_FARM_TEAM_ONLY": "Only the people who run this farm can change its treatment record. Ask the farm owner or a manager to do it.",
+    "WI_NOT_FOUND": "We could not find this invitation. Check the link, or ask the hospital to send a new one.",
+    "WI_USED": "This invitation has already been used or cancelled. Ask the hospital if you need a new one.",
+    "WI_EXPIRED": "This invitation has expired. Ask the hospital to send you a new one.",
+    "HN_TRANSFER_FORBIDDEN": "Your role in this network cannot move patients between hospitals. Ask a hospital director or the network admin.",
+    "HN_HOSPITAL_NOT_IN_NETWORK": "Both hospitals must belong to this network. Choose the hospitals from the list.",
+    "HN_SAME_HOSPITAL": "The patient is already at that hospital. Choose a different hospital to move them to.",
+    "HN_ANIMAL_NOT_PATIENT": "That animal is not an active patient of this network. Choose a patient from the network's patient list.",
+    "HN_NOT_AT_HOSPITAL": "That patient is not at the hospital you chose to move them from. Open the patient to see where they are now.",
+    "HN_TRANSFER_OPEN": "This patient already has a transfer waiting. Complete or cancel it before starting another.",
+    "HN_TRANSFER_CLOSED": "This transfer is already finished or cancelled, so it cannot be completed again.",
+    "HN_TRANSFER_NOT_FOUND": "We could not find this transfer. It may have been removed. Refresh the list.",
+    "HN_TRANSFER_FIELDS": "Choose the patient, the hospital they move from, the hospital they move to, and give the reason for the move.",
+    "HN_NETWORK_SUSPENDED": "This network has been suspended, so no one new can be added. Contact platform support.",
+    "HN_SEAT_LIMIT": "Your plan allows {{limit}} people and {{used}} are already in this network. Ask the platform admin to upgrade the plan, or remove someone first.",
+    "HN_PLAN_IN_USE": "This plan is in use by one or more networks. Move them to another plan first, or hide the plan instead."
   }
 }

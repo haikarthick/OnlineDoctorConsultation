@@ -112,6 +112,15 @@ export default function NetworkSubscriptions() {
     } catch (e: any) { setError(userMessage(e)) }
   }
 
+  const handleRemovePlan = async (plan: SubscriptionPlan) => {
+    if (!window.confirm(t('networkPlans.removeConfirm', { name: plan.name }))) return
+    try {
+      await apiService.deleteNetworkPlan(plan.id)
+      showMsg(t('networkPlans.removed', { name: plan.name }))
+      loadData()
+    } catch (e: any) { setError(userMessage(e, 'networkPlans.removeFailed')) }
+  }
+
   const handlePublishToggle = async (plan: SubscriptionPlan) => {
     try {
       await apiService.updateNetworkPlan(plan.id, { is_published: !plan.isPublished })
@@ -311,6 +320,7 @@ export default function NetworkSubscriptions() {
                         <button className={`module-btn small ${plan.isPublished ? '' : 'success'}`} onClick={() => handlePublishToggle(plan)}>
                           {plan.isPublished ? 'Hide' : 'Publish'}
                         </button>
+                        <button className="module-btn small" onClick={() => handleRemovePlan(plan)}>{t('networkPlans.remove')}</button>
                       </div>
                     </td>
                   </tr>

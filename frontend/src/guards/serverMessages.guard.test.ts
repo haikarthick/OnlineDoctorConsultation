@@ -9,7 +9,7 @@ import path from 'node:path'
  */
 const BACKEND_SRC = path.resolve(__dirname, '../../../backend/src')
 const LOCALES = ['en', 'hi', 'kn', 'ml', 'ta', 'te']
-const CODE = /['"`]((?:WD|RX|PH)_[A-Z0-9_]+|FORBIDDEN_ROLE)['"`]/g
+const CODE = /['"`]((?:WD|RX|PH|WI|HN)_[A-Z0-9_]+|FORBIDDEN_ROLE)['"`]/g
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {

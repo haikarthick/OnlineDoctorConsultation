@@ -1,5 +1,5 @@
 import database from '../../utils/database';
-import { DatabaseError, NotFoundError, ForbiddenError, ValidationError, ConflictError } from '../../utils/errors';
+import { DatabaseError, NotFoundError, ForbiddenError, ValidationError, ConflictError, CodedError } from '../../utils/errors';
 import logger from '../../utils/logger';
 import NotificationService from '../NotificationService';
 import type { WalkInInviteDTO } from './types';
@@ -269,35 +269,53 @@ import { getNetworkMember } from './members';
     }
   }
 
-  // Fix 6: Accept a walk-in patient invite by token, with expiry and status validation
+  // A walk-in invite as the person it was sent to sees it: who invited them, which network, which pet (no token to anyone else).
+  const INVITE_VIEW = `
+    SELECT i.id, i.invite_token AS token, i.patient_name AS "patientName", i.animal_name AS "animalName", i.animal_species AS "animalSpecies",
+           i.message, i.expires_at AS "expiresAt", i.status, hn.name AS "networkName", vh.name AS "hospitalName",
+           u.first_name || ' ' || u.last_name AS "inviterName"
+      FROM hospital_patient_invites i
+      JOIN hospital_networks hn ON hn.id = i.network_id
+      LEFT JOIN vet_hospitals vh ON vh.id = i.hospital_id
+      LEFT JOIN users u ON u.id = i.invited_by`;
+
+  /** Invitations waiting for this signed-in person, found by their own email (they do not need the link). */
+  export async function listMyWalkInInvites(userId: string): Promise<any[]> {
+    const r = await database.query(
+      `${INVITE_VIEW}
+        WHERE i.status = 'pending' AND i.expires_at > NOW()
+          AND lower(i.patient_email) = (SELECT lower(email) FROM users WHERE id = $1)
+        ORDER BY i.created_at DESC`, [userId]);
+    return r.rows;
+  }
+
+  /** The invitation behind a link, for the page that asks "accept?". Only a pending, unexpired one is shown. */
+  export async function previewWalkInInvite(token: string): Promise<any> {
+    const r = await database.query(`${INVITE_VIEW} WHERE i.invite_token = $1 LIMIT 1`, [token]);
+    const inv = r.rows[0];
+    if (!inv) throw new CodedError(404, 'WI_NOT_FOUND', 'We could not find this invitation. Check the link, or ask the hospital to send a new one.');
+    if (inv.status !== 'pending') throw new CodedError(409, 'WI_USED', 'This invitation has already been used or cancelled. Ask the hospital if you need a new one.');
+    if (new Date(inv.expiresAt) < new Date()) throw new CodedError(410, 'WI_EXPIRED', 'This invitation has expired. Ask the hospital to send you a new one.');
+    return inv;
+  }
+
+  // Accept a walk-in patient invite (by its link or from the banner). Accepting links the person to the hospital's invitation only:
+  // it shares NO animal data - sharing still needs the owner's consent, asked separately. The inviter is told.
   export async function acceptWalkInInvite(token: string, acceptedByUserId: string): Promise<{ id: string; networkId: string; hospitalId: string | null }> {
+    const inv = await previewWalkInInvite(token);
+    // One winner even if two taps arrive together.
+    const up = await database.query(
+      `UPDATE hospital_patient_invites SET status = 'accepted', accepted_at = NOW(), accepted_by = $1, updated_at = NOW()
+        WHERE id = $2 AND status = 'pending' AND expires_at > NOW()
+        RETURNING id, network_id, hospital_id, invited_by`, [acceptedByUserId, inv.id]);
+    if (!up.rows[0]) throw new CodedError(409, 'WI_USED', 'This invitation has already been used or cancelled. Ask the hospital if you need a new one.');
+    const row = up.rows[0];
     try {
-      const inviteRes = await database.query(
-        `SELECT * FROM hospital_patient_invites WHERE invite_token = $1 LIMIT 1`,
-        [token]
-      );
-      if (inviteRes.rows.length === 0) {
-        throw new NotFoundError('Invitation not found. Please check the link and try again.');
-      }
-      const invite = inviteRes.rows[0];
-
-      if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
-        throw new ValidationError('This invitation has expired. Please request a new invitation.');
-      }
-      if (invite.status !== 'pending') {
-        throw new ConflictError(`This invitation has already been ${invite.status}.`);
-      }
-
-      await database.query(
-        `UPDATE hospital_patient_invites
-         SET status = 'accepted', accepted_at = NOW(), accepted_by = $1, updated_at = NOW()
-         WHERE id = $2`,
-        [acceptedByUserId, invite.id]
-      );
-      return { id: invite.id, networkId: invite.network_id, hospitalId: invite.hospital_id };
-    } catch (err: any) {
-      throw new DatabaseError(err.message);
-    }
+      await NotificationService.createNotification(row.invited_by, 'system', `${inv.patientName} accepted your invitation`,
+        `${inv.patientName} accepted the invitation to ${inv.networkName}. You can now ask to enrol ${inv.animalName || 'their pet'}; they will be asked to approve sharing.`,
+        'in_app', { type: 'walkin_invite_accepted', inviteId: row.id });
+    } catch (err: any) { logger.warn('Could not tell the inviter a walk-in invitation was accepted', { error: err?.message }); }
+    return { id: row.id, networkId: row.network_id, hospitalId: row.hospital_id };
   }
 
   // Direct walk-in registration: Staff registers patient on-site, treatment starts immediately.

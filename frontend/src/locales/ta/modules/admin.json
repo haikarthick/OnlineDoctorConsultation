@@ -433,5 +433,11 @@
     "resolvedAt": "Resolved At",
     "submitDispute": "Submit Report",
     "noDisputes": "No disputes found"
+  },
+  "networkPlans": {
+    "remove": "நீக்கு",
+    "removeConfirm": "திட்டம் \"{{name}}\" ஐ நீக்கவா? அது பட்டியல்களிலிருந்து மறையும். ஒரு நெட்வொர்க் பயன்படுத்தும் திட்டத்தை நீக்க முடியாது.",
+    "removed": "திட்டம் \"{{name}}\" நீக்கப்பட்டது.",
+    "removeFailed": "இந்தத் திட்டத்தை நீக்க முடியவில்லை. சிக்னலைப் பார்த்து மீண்டும் முயலுங்கள்."
   }
 }

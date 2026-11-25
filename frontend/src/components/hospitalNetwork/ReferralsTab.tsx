@@ -19,6 +19,8 @@ export interface ReferralsTabProps {
   onRejectReferral: (referral: any) => void
   transfers: any[]
   onCompleteTransfer: (transfer: any) => void
+  onStartTransfer?: () => void
+  transferNotice?: { kind: 'success' | 'error'; text: string } | null
   onOpenCreateReferral: () => void
   showCreateReferralModal: boolean
   referralForm: ReferralFormState
@@ -71,6 +73,8 @@ const ReferralsTab: React.FC<ReferralsTabProps> = (props) => {
         transfers={props.transfers}
         speciesLabel={props.speciesLabel}
         onComplete={props.onCompleteTransfer}
+        onStart={props.onStartTransfer}
+        notice={props.transferNotice}
         t={t}
       />
 

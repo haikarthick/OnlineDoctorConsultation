@@ -433,5 +433,11 @@
     "resolvedAt": "Resolved At",
     "submitDispute": "Submit Report",
     "noDisputes": "No disputes found"
+  },
+  "networkPlans": {
+    "remove": "നീക്കം ചെയ്യുക",
+    "removeConfirm": "പ്ലാൻ \"{{name}}\" നീക്കം ചെയ്യണോ? ഇത് ലിസ്റ്റുകളിൽ നിന്ന് അപ്രത്യക്ഷമാകും. ഒരു നെറ്റ്‌വർക്ക് ഉപയോഗിക്കുന്ന പ്ലാൻ നീക്കം ചെയ്യാനാവില്ല.",
+    "removed": "പ്ലാൻ \"{{name}}\" നീക്കം ചെയ്തു.",
+    "removeFailed": "ഈ പ്ലാൻ നീക്കം ചെയ്യാനായില്ല. സിഗ്നൽ നോക്കി വീണ്ടും ശ്രമിക്കുക."
   }
 }

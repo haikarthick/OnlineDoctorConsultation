@@ -31,6 +31,8 @@ import AuditTab from '../../components/hospitalNetwork/AuditTab'
 import PatientsTab from '../../components/hospitalNetwork/PatientsTab'
 import { SharedGroupsPanel } from '../../components/hospitalNetwork/SharedGroupsPanel'
 import ReferralsTab from '../../components/hospitalNetwork/ReferralsTab'
+import StartTransferModal from '../../components/hospitalNetwork/StartTransferModal'
+import MyNetworkPlanCard from '../../components/hospitalNetwork/MyNetworkPlanCard'
 import LeaveManagementTab from '../../components/hospitalNetwork/LeaveManagementTab'
 import AnalyticsTab from '../../components/hospitalNetwork/AnalyticsTab'
 
@@ -121,6 +123,7 @@ const HospitalNetworks: React.FC = () => {
   const [inviteForm, setInviteForm] = useState<WalkInInviteForm>({ patientName: '', patientEmail: '', patientPhone: '', animalName: '', animalSpecies: '', message: '' })
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteSuccess, setInviteSuccess] = useState(false)
+  const [inviteUrl, setInviteUrl] = useState('')
   const [showWalkInRegModal, setShowWalkInRegModal] = useState(false)
   const [walkInForm, setWalkInForm] = useState({ patientName: '', patientPhone: '', patientEmail: '', animalName: '', animalSpecies: '', animalBreed: '', reasonForVisit: '', hospitalId: '', consentCollected: false })
   const [walkInLoading, setWalkInLoading] = useState(false)
@@ -160,6 +163,8 @@ const HospitalNetworks: React.FC = () => {
   const [leaveRequests, setLeaveRequests] = useState<any[]>([])
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [transfers, setTransfers] = useState<any[]>([])
+  const [showStartTransfer, setShowStartTransfer] = useState(false)
+  const [transferNotice, setTransferNotice] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
 
   // Onboarding checklist state
   const [showOnboarding, setShowOnboarding] = useState(false)
@@ -530,7 +535,7 @@ const HospitalNetworks: React.FC = () => {
     if (!selectedNetwork) return
     setInviteLoading(true)
     try {
-      await apiService.inviteWalkInPatient(selectedNetwork.id, {
+      const created = await apiService.inviteWalkInPatient(selectedNetwork.id, {
         patientName: inviteForm.patientName,
         patientEmail: inviteForm.patientEmail,
         patientPhone: inviteForm.patientPhone || undefined,
@@ -538,8 +543,10 @@ const HospitalNetworks: React.FC = () => {
         animalSpecies: inviteForm.animalSpecies || undefined,
         message: inviteForm.message || undefined,
       })
+      setInviteUrl(created?.data?.inviteUrl || '')
       setInviteSuccess(true)
-      setTimeout(() => { setShowInviteModal(false); setInviteSuccess(false); setInviteForm({ patientName: '', patientEmail: '', patientPhone: '', animalName: '', animalSpecies: '', message: '' }) }, 2000)
+      // The modal stays open so the link can be copied; closing it resets the form.
+      setInviteForm({ patientName: '', patientEmail: '', patientPhone: '', animalName: '', animalSpecies: '', message: '' })
     } catch (err: any) {
       setError(userMessage(err))
     } finally { setInviteLoading(false) }
@@ -764,10 +771,25 @@ const HospitalNetworks: React.FC = () => {
 
   const handleCompleteTransfer = async (transfer: any) => {
     if (!selectedNetwork) return
+    setTransferNotice(null)
     try {
       await apiService.completePatientTransfer(selectedNetwork.id, transfer.id)
+      setTransferNotice({ kind: 'success', text: t('hospitalNetworks.transfers.completed', { name: transfer.animalName || '', to: transfer.toHospitalName || '' }) })
       loadTransfers()
-    } catch (err: any) { console.error(err) }
+    } catch (err: any) {
+      setTransferNotice({ kind: 'error', text: userMessage(err, 'hospitalNetworks.transfers.completeFailed') })
+    }
+  }
+
+  // The start-a-transfer form needs the network's hospitals (the same list the referral form uses).
+  const openStartTransfer = () => {
+    if (!selectedNetwork) return
+    setTransferNotice(null)
+    ;(apiService as any).client
+      .get(`/hospital-networks/${selectedNetwork.id}/hospitals`)
+      .then((res: any) => setReferralNetworkHospitals(res.data?.hospitals || res.data || []))
+      .catch(() => setTransferNotice({ kind: 'error', text: t('networkReferrals.hospitalsLoadFailed') }))
+    setShowStartTransfer(true)
   }
 
   const filteredNetworks = networks.filter(n => {
@@ -938,6 +960,8 @@ const HospitalNetworks: React.FC = () => {
           t={t}
         />
       )}
+
+      {activeTab === 'detail' && user?.role === 'corporate_admin' && <MyNetworkPlanCard />}
 
       {activeTab === 'detail' && (
         <NetworkDetailTab
@@ -1134,13 +1158,24 @@ const HospitalNetworks: React.FC = () => {
         />
       )}
 
+      {showStartTransfer && selectedNetwork && (
+        <StartTransferModal
+          networkId={selectedNetwork.id}
+          hospitals={referralNetworkHospitals}
+          onClose={() => setShowStartTransfer(false)}
+          onStarted={() => { setShowStartTransfer(false); setTransferNotice({ kind: 'success', text: t('hospitalNetworks.transfers.started') }); loadTransfers() }}
+          t={t}
+        />
+      )}
+
       {showInviteModal && selectedNetwork && (
         <WalkInInviteModal
           inviteForm={inviteForm}
           setInviteForm={setInviteForm}
           inviteLoading={inviteLoading}
           inviteSuccess={inviteSuccess}
-          onClose={() => setShowInviteModal(false)}
+          inviteUrl={inviteUrl}
+          onClose={() => { setShowInviteModal(false); setInviteSuccess(false); setInviteUrl('') }}
           onSubmit={handleInviteWalkIn}
           t={t}
         />
@@ -1173,6 +1208,8 @@ const HospitalNetworks: React.FC = () => {
           onRejectReferral={(ref) => setResponseModal({ referral: ref, action: 'rejected' })}
           transfers={transfers}
           onCompleteTransfer={handleCompleteTransfer}
+          onStartTransfer={openStartTransfer}
+          transferNotice={transferNotice}
           onOpenCreateReferral={() => setShowCreateReferralModal(true)}
           showCreateReferralModal={showCreateReferralModal}
           referralForm={referralForm}

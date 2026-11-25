@@ -647,7 +647,20 @@
       "autoRouted": "Will be sent to",
       "selectNetwork": "Route prescription to which pharmacy network?",
       "noRouting": "No pharmacy routing (standalone)",
-      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review."
+      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review.",
+      "seeReview": "ఫార్మసిస్ట్ నోట్ చూడండి",
+      "hideReview": "ఫార్మసిస్ట్ నోట్ దాచండి",
+      "reviewTitle": "ఫార్మసీ సమీక్ష",
+      "noReviewYet": "ఫార్మసిస్ట్ ఇంకా దీన్ని సమీక్షించలేదు.",
+      "decisionApproved": "ఆమోదించారు",
+      "decisionRejected": "తిరస్కరించారు",
+      "decisionClarify": "స్పష్టత కావాలి",
+      "reviewedBy": "{{name}}, {{date}}",
+      "reasonLabel": "కారణం",
+      "changeLabel": "కోరిన మార్పు",
+      "notesLabel": "గమనికలు",
+      "nextStep": "మీరు సరిచేసిన చీటీ రాయవచ్చు, లేదా ఫార్మసీకి ఫోన్ చేసి మాట్లాడవచ్చు.",
+      "reviewLoadFailed": "ఫార్మసిస్ట్ నోట్ ఇప్పుడు తెరవలేకపోయాం. సిగ్నల్ చూసి మళ్లీ ప్రయత్నించండి."
     }
   },
   "prescriptionWriter": {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import PharmacyReviewPanel from '../../components/prescription/PharmacyReviewPanel'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
@@ -306,10 +307,8 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
                       )
                     })()}
                     {/* Rejection reason for vet */}
-                    {(isVet || isAdmin) && rx.reviewStatus === 'rejected' && rx.reviewNotes && (
-                      <span className="si-cc5b138f" title={rx.reviewNotes}>
-                        Reason: {rx.reviewNotes}
-                      </span>
+                    {(isVet || isAdmin) && rx.isNetworkCoordinated && rx.reviewStatus && rx.reviewStatus !== 'pending_review' && (
+                      <PharmacyReviewPanel prescriptionId={rx.id} />
                     )}
                     <button
                       className="btn btn-outline si-3557c289"

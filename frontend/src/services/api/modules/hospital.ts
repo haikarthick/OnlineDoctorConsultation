@@ -154,10 +154,6 @@ export const hospitalApi = {
     const response = await sharedClient.post('/hospital-networks', data)
     return response.data
   },
-  async getHospitalNetwork(id: string) {
-    const response = await sharedClient.get(`/hospital-networks/${id}`)
-    return response.data
-  },
   async updateHospitalNetwork(id: string, data: Record<string, any>) {
     const response = await sharedClient.put(`/hospital-networks/${id}`, data)
     return response.data
@@ -232,6 +228,21 @@ export const hospitalApi = {
   },
   async inviteWalkInPatient(networkId: string, data: Record<string, any>) {
     const response = await sharedClient.post(`/hospital-networks/${networkId}/invite-walkin`, data)
+    return response.data
+  },
+  /** Walk-in invitations waiting for the signed-in person (found by their own email). */
+  async myWalkInInvites() {
+    const response = await sharedClient.get('/hospital-networks/walkin-invites/mine')
+    return response.data
+  },
+  /** The invitation behind a link, for the page that asks "accept?". */
+  async walkInInvitePreview(token: string) {
+    const response = await sharedClient.get(`/hospital-networks/walkin-invites/by-token/${encodeURIComponent(token)}`)
+    return response.data
+  },
+  /** Accepting links the person to the hospital's invitation; it shares no animal data. */
+  async acceptWalkInInvite(token: string) {
+    const response = await sharedClient.post('/hospital-networks/walkin-invites/accept', { token })
     return response.data
   },
   async registerWalkInPatientDirect(networkId: string, data: {

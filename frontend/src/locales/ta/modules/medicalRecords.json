@@ -647,7 +647,20 @@
       "autoRouted": "Will be sent to",
       "selectNetwork": "Route prescription to which pharmacy network?",
       "noRouting": "No pharmacy routing (standalone)",
-      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review."
+      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review.",
+      "seeReview": "மருந்தாளரின் குறிப்பைப் பார்",
+      "hideReview": "மருந்தாளரின் குறிப்பை மறை",
+      "reviewTitle": "மருந்தகத்தின் மதிப்பாய்வு",
+      "noReviewYet": "மருந்தாளர் இன்னும் இதை மதிப்பாய்வு செய்யவில்லை.",
+      "decisionApproved": "ஒப்புதல்",
+      "decisionRejected": "நிராகரிப்பு",
+      "decisionClarify": "விளக்கம் தேவை",
+      "reviewedBy": "{{name}}, {{date}}",
+      "reasonLabel": "காரணம்",
+      "changeLabel": "கேட்கப்பட்ட மாற்றம்",
+      "notesLabel": "குறிப்புகள்",
+      "nextStep": "நீங்கள் திருத்திய சீட்டை எழுதலாம், அல்லது மருந்தகத்தை அழைத்துப் பேசலாம்.",
+      "reviewLoadFailed": "மருந்தாளரின் குறிப்பை இப்போது திறக்க முடியவில்லை. சிக்னலைப் பார்த்து மீண்டும் முயலுங்கள்."
     }
   },
   "prescriptionWriter": {

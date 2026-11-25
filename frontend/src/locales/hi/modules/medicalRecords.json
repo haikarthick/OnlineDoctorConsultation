@@ -647,7 +647,20 @@
       "autoRouted": "Will be sent to",
       "selectNetwork": "Route prescription to which pharmacy network?",
       "noRouting": "No pharmacy routing (standalone)",
-      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review."
+      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review.",
+      "seeReview": "फार्मासिस्ट का नोट देखें",
+      "hideReview": "फार्मासिस्ट का नोट छिपाएँ",
+      "reviewTitle": "फार्मेसी की समीक्षा",
+      "noReviewYet": "फार्मासिस्ट ने अभी इसकी समीक्षा नहीं की है।",
+      "decisionApproved": "स्वीकृत",
+      "decisionRejected": "अस्वीकृत",
+      "decisionClarify": "स्पष्टीकरण चाहिए",
+      "reviewedBy": "{{name}}, {{date}}",
+      "reasonLabel": "कारण",
+      "changeLabel": "माँगा गया बदलाव",
+      "notesLabel": "टिप्पणी",
+      "nextStep": "आप सुधारी हुई पर्ची लिख सकते हैं, या फार्मेसी को फ़ोन करके बात कर सकते हैं।",
+      "reviewLoadFailed": "फार्मासिस्ट का नोट अभी नहीं खुल सका। सिग्नल देखकर फिर कोशिश करें।"
     }
   },
   "prescriptionWriter": {

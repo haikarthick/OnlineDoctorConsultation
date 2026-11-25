@@ -433,5 +433,11 @@
     "resolvedAt": "Resolved At",
     "submitDispute": "Submit Report",
     "noDisputes": "No disputes found"
+  },
+  "networkPlans": {
+    "remove": "తొలగించండి",
+    "removeConfirm": "ప్లాన్ \"{{name}}\" ను తొలగించాలా? ఇది జాబితాల నుండి మాయమవుతుంది. ఒక నెట్‌వర్క్ వాడుతున్న ప్లాన్‌ను తొలగించలేరు.",
+    "removed": "ప్లాన్ \"{{name}}\" తొలగించబడింది.",
+    "removeFailed": "ఈ ప్లాన్‌ను తొలగించలేకపోయాం. సిగ్నల్ చూసి మళ్లీ ప్రయత్నించండి."
   }
 }

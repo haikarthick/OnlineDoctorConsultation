@@ -6,14 +6,21 @@ export interface WalkInInviteModalProps {
   setInviteForm: React.Dispatch<React.SetStateAction<WalkInInviteForm>>
   inviteLoading: boolean
   inviteSuccess: boolean
+  /** The link the patient can open; shown after the invitation is created. */
+  inviteUrl?: string
   onClose: () => void
   onSubmit: (e: React.FormEvent) => void
   t: (key: string) => string
 }
 
 const WalkInInviteModal: React.FC<WalkInInviteModalProps> = ({
-  inviteForm, setInviteForm, inviteLoading, inviteSuccess, onClose, onSubmit, t,
+  inviteForm, setInviteForm, inviteLoading, inviteSuccess, inviteUrl, onClose, onSubmit, t,
 }) => {
+  const [copied, setCopied] = React.useState(false)
+  const copy = () => {
+    if (!inviteUrl) return
+    navigator.clipboard?.writeText(inviteUrl).then(() => setCopied(true)).catch(() => setCopied(false))
+  }
   return (
     <div className="hn-modal-overlay" onClick={onClose}>
       <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
@@ -23,7 +30,17 @@ const WalkInInviteModal: React.FC<WalkInInviteModalProps> = ({
         </div>
         <div className="hn-modal-body">
           {inviteSuccess ? (
-            <div className="module-alert success">{t('hospitalNetworks.patients.inviteSuccess')}</div>
+            <>
+              <div className="module-alert success">{t('hospitalNetworks.patients.inviteSuccess')}</div>
+              {inviteUrl && (
+                <div className="module-form-group">
+                  <label className="module-label">{t('walkInInvite.shareLink')}</label>
+                  <input className="module-input" readOnly value={inviteUrl} onFocus={e => e.currentTarget.select()} />
+                  <button type="button" className="module-btn" onClick={copy}>{copied ? t('walkInInvite.copied') : t('walkInInvite.copy')}</button>
+                  <p className="hn-hint">{t('walkInInvite.shareHint')}</p>
+                </div>
+              )}
+            </>
           ) : (
             <form onSubmit={onSubmit}>
               <div className="module-form-group">

@@ -1,5 +1,5 @@
 import database from '../../utils/database';
-import { DatabaseError, NotFoundError, ForbiddenError } from '../../utils/errors';
+import { DatabaseError, NotFoundError, ForbiddenError, CodedError } from '../../utils/errors';
 import { resolveNetworkAccess } from '../../middleware/networkAccess';
   // ─── P5-ANALYTICS ─────────────────────────────────────────────────────────
   export async function getNetworkAnalytics(networkId: string): Promise<Record<string, any>> {
@@ -168,13 +168,16 @@ import { resolveNetworkAccess } from '../../middleware/networkAccess';
       `SELECT * FROM network_referrals WHERE id = $1 AND referral_type = 'transfer'`,
       [transferId]
     );
-    if (transfer.rows.length === 0) throw new NotFoundError('Patient transfer');
+    if (transfer.rows.length === 0) throw new CodedError(404, 'HN_TRANSFER_NOT_FOUND', 'We could not find this transfer. It may have been removed. Refresh the list.');
 
     // Was a bare "is an active member" check - now checks the patientTransfers matrix
     // action, same as createPatientTransfer, so compliance_officer/auditor (false in the
     // matrix) can't complete a transfer even though they could see it exists.
     const access = await resolveNetworkAccess(transfer.rows[0].network_id, userId, userRole, 'patientTransfers');
-    if (!access.allowed) throw new ForbiddenError('Not authorized');
+    if (!access.allowed) throw new CodedError(403, 'HN_TRANSFER_FORBIDDEN', 'Your role in this network cannot move patients between hospitals. Ask a hospital director or the network admin.');
+    if (!['pending', 'accepted'].includes(String(transfer.rows[0].status))) {
+      throw new CodedError(409, 'HN_TRANSFER_CLOSED', 'This transfer is already finished or cancelled, so it cannot be completed again.');
+    }
 
     await database.query(
       `UPDATE animal_care_contexts
@@ -186,8 +189,23 @@ import { resolveNetworkAccess } from '../../middleware/networkAccess';
     const result = await database.query(
       `UPDATE network_referrals
        SET status = 'completed', transferred_at = NOW(), updated_at = NOW()
-       WHERE id = $1 RETURNING *`,
+       WHERE id = $1 AND status IN ('pending', 'accepted') RETURNING *`,
       [transferId]
     );
+    if (!result.rows[0]) throw new CodedError(409, 'HN_TRANSFER_CLOSED', 'This transfer is already finished or cancelled, so it cannot be completed again.');
+
+    // The animal's owner is told where their patient is now (the care moved, so the person who decides consent should know).
+    try {
+      const who = await database.query(
+        `SELECT a.owner_id, a.name, th.name AS to_name FROM animals a LEFT JOIN vet_hospitals th ON th.id = $2 WHERE a.id = $1`,
+        [transfer.rows[0].animal_id, transfer.rows[0].to_hospital_id]
+      );
+      if (who.rows[0]?.owner_id) {
+        const NotificationService = (await import('../NotificationService')).default;
+        await NotificationService.createNotification(who.rows[0].owner_id, 'system', `${who.rows[0].name} moved to ${who.rows[0].to_name || 'another hospital'}`,
+          `${who.rows[0].name}'s care has moved to ${who.rows[0].to_name || 'another hospital'} in the same network. Your consent and records stay as they were.`, 'in_app',
+          { type: 'patient_transferred', transferId });
+      }
+    } catch { /* telling the owner is a courtesy: the transfer itself is done */ }
     return result.rows[0];
   }

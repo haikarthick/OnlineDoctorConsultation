@@ -1,3 +1,4 @@
+import { CodedError } from '../utils/errors';
 import { Router, Request, Response } from 'express';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
 import { asyncHandler } from '../utils/errorHandler';
@@ -49,7 +50,7 @@ router.put('/admin/network-subscription-plans/:id', authMiddleware, roleMiddlewa
 router.delete('/admin/network-subscription-plans/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
   const db = (await import('../utils/database')).default;
   const inUse = await db.query(`SELECT COUNT(*) FROM network_subscriptions WHERE plan_id = $1`, [req.params.id]);
-  if (parseInt(inUse.rows[0].count) > 0) return res.status(400).json({ success: false, message: 'Plan is in use by one or more networks' });
+  if (parseInt(inUse.rows[0].count) > 0) throw new CodedError(409, 'HN_PLAN_IN_USE', 'This plan is in use by one or more networks. Move them to another plan first, or hide the plan instead.');
   await db.query(`UPDATE network_subscription_plans SET is_active = false, updated_at = NOW() WHERE id = $1`, [req.params.id]);
   res.json({ success: true });
 }));

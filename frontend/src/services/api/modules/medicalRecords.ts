@@ -11,6 +11,12 @@ export const medicalRecordsApi = {
     return response.data
   },
 
+  /** The pharmacist's review(s) of a prescription: decision, reason or suggested change, who and when. */
+  async prescriptionReviews(id: string) {
+    const response = await sharedClient.get(`/prescriptions/${id}/reviews`)
+    return response.data
+  },
+
   async getPrescription(id: string) {
     const response = await sharedClient.get(`/prescriptions/${id}`)
     return response.data

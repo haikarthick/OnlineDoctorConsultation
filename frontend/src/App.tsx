@@ -8,6 +8,7 @@ import { MasterDataProvider } from './context/MasterDataContext'
 import { PermissionProvider } from './context/PermissionContext'
 import { PageLoader, ProtectedRoute, RoleRoute, PublicOnlyRoute } from './components/routing/RouteGuards'
 import { PendingFarmInvitations } from './components/enterprise/PendingFarmInvitations'
+import { PendingWalkInInvites } from './components/hospitalNetwork/PendingWalkInInvites'
 import { SocketProvider } from './context/SocketContext'
 import { Layout } from './components/Layout'
 import FloatingChatWidget from './components/FloatingChatWidget'
@@ -135,6 +136,7 @@ const PatientConsent = React.lazy(() => import('./pages/petowner/PatientConsent'
 const NetworkSubscriptions = React.lazy(() => import('./pages/admin/NetworkSubscriptions'))
 const DisputeManagement = React.lazy(() => import('./pages/admin/DisputeManagement'))
 const AcceptHospitalInvite = React.lazy(() => import('./pages/AcceptHospitalInvite'))
+const AcceptWalkInInvite = React.lazy(() => import('./pages/AcceptWalkInInvite'))
 const NetworkMemberships = React.lazy(() => import('./pages/petowner/NetworkMemberships'))
 // Pharmacy
 const PharmacyDashboard = React.lazy(() => import('./pages/pharmacy/PharmacyDashboard'))
@@ -170,6 +172,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       </Suspense>
       <div className="layout-content">
         <PendingFarmInvitations />
+        <PendingWalkInInvites />
         {children}
       </div>
     </Layout>
@@ -388,6 +391,7 @@ function AppRoutes() {
       <Route path="/accept-hospital-invite" element={<AcceptHospitalInvite />} />
       {/* Alias: staff-invites endpoint sends this URL - must match /accept-hospital-invite behaviour */}
       <Route path="/accept-staff-invite" element={<AcceptHospitalInvite />} />
+      <Route path="/accept-walkin-invite" element={<AcceptWalkInInvite />} />
 
       {/* ── Patient Consent Module ── */}
       <Route path="/patient-consent" element={<RoleRoute path="/patient-consent"><AppLayout><PatientConsent /></AppLayout></RoleRoute>} />

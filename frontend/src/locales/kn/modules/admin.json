@@ -433,5 +433,11 @@
     "resolvedAt": "Resolved At",
     "submitDispute": "Submit Report",
     "noDisputes": "No disputes found"
+  },
+  "networkPlans": {
+    "remove": "ತೆಗೆಯಿರಿ",
+    "removeConfirm": "ಯೋಜನೆ \"{{name}}\" ತೆಗೆಯಬೇಕೆ? ಅದು ಪಟ್ಟಿಗಳಿಂದ ಮಾಯವಾಗುತ್ತದೆ. ನೆಟ್‌ವರ್ಕ್ ಬಳಸುತ್ತಿರುವ ಯೋಜನೆಯನ್ನು ತೆಗೆಯಲಾಗದು.",
+    "removed": "ಯೋಜನೆ \"{{name}}\" ತೆಗೆಯಲಾಗಿದೆ.",
+    "removeFailed": "ಈ ಯೋಜನೆಯನ್ನು ತೆಗೆಯಲಾಗಲಿಲ್ಲ. ಸಿಗ್ನಲ್ ನೋಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
   }
 }

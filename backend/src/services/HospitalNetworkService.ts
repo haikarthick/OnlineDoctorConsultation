@@ -51,6 +51,8 @@ import {
   getMyEnrollments,
   inviteWalkInPatient,
   acceptWalkInInvite,
+  listMyWalkInInvites,
+  previewWalkInInvite,
   registerWalkInPatientDirect,
   getPendingEnrollments,
 } from './hospitalNetwork/enrollment';
@@ -130,6 +132,8 @@ class HospitalNetworkService {
   getMyEnrollments = getMyEnrollments;
   inviteWalkInPatient = inviteWalkInPatient;
   acceptWalkInInvite = acceptWalkInInvite;
+  listMyWalkInInvites = listMyWalkInInvites;
+  previewWalkInInvite = previewWalkInInvite;
   registerWalkInPatientDirect = registerWalkInPatientDirect;
   getPendingEnrollments = getPendingEnrollments;
 

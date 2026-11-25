@@ -1,5 +1,5 @@
 import database from '../../utils/database';
-import { NotFoundError, ForbiddenError, ValidationError } from '../../utils/errors';
+import { NotFoundError, ForbiddenError, ValidationError, CodedError } from '../../utils/errors';
 import { resolveNetworkAccess } from '../../middleware/networkAccess';
   // ─── Leave Management ───────────────────────────────────────
   export async function createLeaveRequest(data: {
@@ -91,23 +91,41 @@ import { resolveNetworkAccess } from '../../middleware/networkAccess';
     animalId: string; reason: string; transferReason?: string;
     clinicalNotes?: string; createdBy: string; createdByRole: string;
   }): Promise<any> {
-    const fromCheck = await database.query(
-      `SELECT id FROM hospital_network_hospitals WHERE network_id = $1 AND hospital_id = $2`,
-      [data.networkId, data.fromHospitalId]
-    );
-    if (fromCheck.rows.length === 0) throw new ValidationError('Source hospital is not in this network');
-
-    const toCheck = await database.query(
-      `SELECT id FROM hospital_network_hospitals WHERE network_id = $1 AND hospital_id = $2`,
-      [data.networkId, data.toHospitalId]
-    );
-    if (toCheck.rows.length === 0) throw new ValidationError('Destination hospital is not in this network');
-
     // Was a bare "is an active member" check - compliance_officer/auditor have
     // patientTransfers=false in the matrix but could still hit this route. Now checks the
-    // actual matrix action, same as every other network-gated mutation.
+    // actual matrix action, same as every other network-gated mutation. It runs FIRST, so a person without the right learns nothing
+    // about the network's hospitals or patients.
     const access = await resolveNetworkAccess(data.networkId, data.createdBy, data.createdByRole, 'patientTransfers');
-    if (!access.allowed) throw new ForbiddenError('Not authorized to create transfers');
+    if (!access.allowed) throw new CodedError(403, 'HN_TRANSFER_FORBIDDEN', 'Your role in this network cannot move patients between hospitals. Ask a hospital director or the network admin.');
+
+    const inNetwork = await database.query(
+      `SELECT hospital_id FROM hospital_network_hospitals WHERE network_id = $1 AND hospital_id = ANY($2::uuid[])`,
+      [data.networkId, [data.fromHospitalId, data.toHospitalId]]
+    );
+    const have = new Set(inNetwork.rows.map((r: any) => r.hospital_id));
+    if (!have.has(data.fromHospitalId) || !have.has(data.toHospitalId)) {
+      throw new CodedError(400, 'HN_HOSPITAL_NOT_IN_NETWORK', 'Both hospitals must belong to this network. Choose the hospitals from the list.');
+    }
+    if (data.fromHospitalId === data.toHospitalId) {
+      throw new CodedError(400, 'HN_SAME_HOSPITAL', 'The patient is already at that hospital. Choose a different hospital to move them to.');
+    }
+
+    // The patient must be an active patient of THIS network (a transfer shows the animal's name and species to the network, so an
+    // animal id from the request is never trusted on its own) and must be at the hospital it is said to move from.
+    const ctx = await database.query(
+      `SELECT hospital_id FROM animal_care_contexts
+        WHERE network_id = $1 AND animal_id = $2 AND is_active = true AND enrollment_status = 'active' LIMIT 1`,
+      [data.networkId, data.animalId]
+    );
+    if (!ctx.rows[0]) throw new CodedError(400, 'HN_ANIMAL_NOT_PATIENT', 'That animal is not an active patient of this network. Choose a patient from the network\'s patient list.');
+    if (ctx.rows[0].hospital_id && ctx.rows[0].hospital_id !== data.fromHospitalId) {
+      throw new CodedError(400, 'HN_NOT_AT_HOSPITAL', 'That patient is not at the hospital you chose to move them from. Open the patient to see where they are now.');
+    }
+    const open = await database.query(
+      `SELECT 1 FROM network_referrals WHERE network_id = $1 AND animal_id = $2 AND referral_type = 'transfer' AND status IN ('pending', 'accepted') LIMIT 1`,
+      [data.networkId, data.animalId]
+    );
+    if (open.rows[0]) throw new CodedError(409, 'HN_TRANSFER_OPEN', 'This patient already has a transfer waiting. Complete or cancel it before starting another.');
 
     const result = await database.query(
       `INSERT INTO network_referrals

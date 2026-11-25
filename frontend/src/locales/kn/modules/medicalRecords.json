@@ -649,7 +649,20 @@
       "autoRouted": "Will be sent to",
       "selectNetwork": "Route prescription to which pharmacy network?",
       "noRouting": "No pharmacy routing (standalone)",
-      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review."
+      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review.",
+      "seeReview": "ಔಷಧಿಕಾರರ ಟಿಪ್ಪಣಿ ನೋಡಿ",
+      "hideReview": "ಔಷಧಿಕಾರರ ಟಿಪ್ಪಣಿ ಮರೆಮಾಡಿ",
+      "reviewTitle": "ಔಷಧಾಲಯದ ಪರಿಶೀಲನೆ",
+      "noReviewYet": "ಔಷಧಿಕಾರರು ಇನ್ನೂ ಇದನ್ನು ಪರಿಶೀಲಿಸಿಲ್ಲ.",
+      "decisionApproved": "ಅನುಮೋದಿಸಲಾಗಿದೆ",
+      "decisionRejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
+      "decisionClarify": "ಸ್ಪಷ್ಟೀಕರಣ ಬೇಕು",
+      "reviewedBy": "{{name}}, {{date}}",
+      "reasonLabel": "ಕಾರಣ",
+      "changeLabel": "ಕೇಳಿದ ಬದಲಾವಣೆ",
+      "notesLabel": "ಟಿಪ್ಪಣಿ",
+      "nextStep": "ನೀವು ಸರಿಪಡಿಸಿದ ಚೀಟಿ ಬರೆಯಬಹುದು, ಅಥವಾ ಔಷಧಾಲಯಕ್ಕೆ ಕರೆ ಮಾಡಿ ಮಾತನಾಡಬಹುದು.",
+      "reviewLoadFailed": "ಔಷಧಿಕಾರರ ಟಿಪ್ಪಣಿ ಈಗ ತೆರೆಯಲಾಗಲಿಲ್ಲ. ಸಿಗ್ನಲ್ ನೋಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
     }
   },
   "prescriptionWriter": {

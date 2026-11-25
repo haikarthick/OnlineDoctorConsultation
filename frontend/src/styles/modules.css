@@ -3994,3 +3994,17 @@ button.record-due-row { cursor: pointer; }
 .wd-label-box legend { font-weight: 600; padding: 0 6px; }
 .wd-none { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 0.9rem; }
 @media (max-width: 480px) { .wd-two { grid-template-columns: 1fr; } }
+
+/* Pharmacy review (what the pharmacist said), shown to the vet who wrote the prescription. */
+.rx-review-panel { margin-top: 6px; }
+.rx-review-body { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.rx-review-item { border-left: 4px solid #9ca3af; padding: 8px 10px; border-radius: 6px; background: #f9fafb; }
+.rx-review-item p { margin: 4px 0 0; }
+.rx-review-approved { border-left-color: #2e7d32; }
+.rx-review-rejected { border-left-color: #c62828; }
+.rx-review-needs_clarification { border-left-color: #f57f17; }
+.rx-review-hint { font-size: 0.85rem; opacity: 0.85; }
+.rx-review-error { color: #b91c1c; font-size: 0.9rem; }
+
+/* My network plan (corporate admin): seats used. */
+.hn-plan-bar { width: 100%; height: 10px; margin: 6px 0 10px; accent-color: #2e7d32; }

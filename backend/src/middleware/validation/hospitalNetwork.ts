@@ -117,16 +117,6 @@ export const updatePricingSettingsSchema = Joi.object({
 }).min(1);
 
 // ─── Hospital Staff Invites ───────────────────────────────────
-export const inviteHospitalStaffSchema = Joi.object({
-  invitee_email: Joi.string().email().required(),
-  invitee_name: Joi.string().max(200).optional().allow('', null),
-  staff_position: Joi.string().valid(
-    'nurse','technician','receptionist','lab_tech',
-    'radiologist','anesthesiologist','pharmacist','intern','admin_staff'
-  ).required(),
-  hospital_id: Joi.string().uuid().optional().allow(null),
-});
-
 export const acceptStaffInviteSchema = Joi.object({
   token: Joi.string().min(20).required(),
   first_name: Joi.string().max(100).required(),
