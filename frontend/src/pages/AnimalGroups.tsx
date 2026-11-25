@@ -11,6 +11,7 @@ import { useSaveAction } from '../hooks/useSaveAction'
 import { useCssVar } from '../hooks/useCssVar'
 import GroupFormModal from '../components/animalGroups/GroupFormModal'
 import { ShareGroupSheet } from '../components/animalGroups/ShareGroupSheet'
+import { GroupPrescriptionsSheet } from '../components/animalGroups/GroupPrescriptionsSheet'
 import { useMyFarmRole } from '../hooks/useMyFarmRole'
 import { emptyGroupForm, purposeLabel, groupToFormData, buildGroupPayload, type GroupFormData } from '../components/animalGroups/groupShared'
 
@@ -33,6 +34,7 @@ const AnimalGroups: React.FC = () => {
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   // Only the farm's owner decides to share a group's records with a hospital network.
   const [shareGroup, setShareGroup] = useState<{ id: string; name: string } | null>(null)
+  const [rxGroup, setRxGroup] = useState<{ id: string; name: string } | null>(null)
   const myFarmRole = useMyFarmRole(enterprises.find(e => e.id === selectedEnterpriseId))
   const [groups, setGroups] = useState<AnimalGroup[]>([])
   const [loading, setLoading] = useState(false)
@@ -305,6 +307,7 @@ const AnimalGroups: React.FC = () => {
                     {t('animalGroups.health.view')}
                   </button>
                 )}
+                <button className="btn btn-sm btn-secondary" onClick={() => setRxGroup({ id: g.id, name: g.name })}>{t('groupPrescriptions.button')}</button>
                 <button className="btn btn-sm btn-primary" onClick={() => openManageAnimals(g)} title={t('animalGroups.manageAnimals')}>
                   {t('animalGroups.manageAnimals')}
                 </button>
@@ -547,6 +550,7 @@ const AnimalGroups: React.FC = () => {
         />
       )}
       <ShareGroupSheet group={shareGroup} onClose={() => setShareGroup(null)} />
+      {rxGroup && <GroupPrescriptionsSheet open groupId={rxGroup.id} groupName={rxGroup.name} onClose={() => setRxGroup(null)} />}
     </div>
   )
 }

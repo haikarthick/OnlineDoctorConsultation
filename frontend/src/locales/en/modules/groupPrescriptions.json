@@ -1,0 +1,17 @@
+{
+  "groupPrescriptions": {
+    "button": "Prescriptions",
+    "title": "Prescriptions for {{name}}",
+    "loading": "Loading prescriptions...",
+    "loadFailed": "We could not load the prescriptions for this group. Check your connection and try again.",
+    "empty": "No vet has prescribed anything for this group yet. When one does, it appears here.",
+    "byVet": "Prescribed by {{name}}",
+    "aVet": "a vet",
+    "active": "Active",
+    "ended": "Ended",
+    "validUntil": "valid until {{date}}",
+    "headTreated": "{{count}} treated",
+    "holdMilk": "Hold milk for {{count}} day(s)",
+    "holdMeat": "Hold meat for {{count}} day(s)"
+  }
+}

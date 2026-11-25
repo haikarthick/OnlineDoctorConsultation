@@ -27,6 +27,11 @@ export const medicalRecordsApi = {
     return response.data
   },
 
+  async listGroupPrescriptions(groupId: string, params?: { limit?: number; offset?: number }) {
+    const response = await sharedClient.get(`/prescriptions/group/${groupId}`, { params })
+    return response.data
+  },
+
   async getPrescriptionsByAnimal(animalId: string, params?: { limit?: number; offset?: number }) {
     const response = await sharedClient.get(`/prescriptions/animal/${animalId}`, { params })
     return response.data
