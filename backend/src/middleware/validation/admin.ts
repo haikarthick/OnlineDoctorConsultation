@@ -2,10 +2,6 @@ import Joi from 'joi';
 import { shortText, positiveInt, positiveNumber } from './core';
 
 // ─── Admin ───────────────────────────────────────────────────
-export const toggleUserStatusSchema = Joi.object({
-  isActive: Joi.boolean().required(),
-});
-
 // Vet details captured when a user takes the veterinarian role - used both by the self-serve
 // role-change request (licenseNumber required there) and the admin direct role change
 // (licenseNumber optional there). Provisions/updates the vet_profiles satellite row.

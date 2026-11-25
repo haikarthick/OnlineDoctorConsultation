@@ -21,6 +21,8 @@ test('pet owner: marking all read leaves nothing unread', async ({ petOwnerPage:
   await page.goto('/notifications')
   const markAll = page.getByRole('button', { name: /mark all|सभी को पढ़ा/i })
   await expect(markAll).toBeVisible()
+  // the list (or its empty note) must be on screen first: the button stays disabled until the unread count has loaded
+  await expect(page.locator('.notification-row, .notifications-empty').first()).toBeVisible()
   if (await markAll.isEnabled()) await markAll.click()
   await expect(markAll).toBeDisabled()
   await expect(page.locator('.notification-row-unread')).toHaveCount(0)

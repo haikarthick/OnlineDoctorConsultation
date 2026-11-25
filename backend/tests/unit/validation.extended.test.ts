@@ -3,7 +3,7 @@
   createScheduleSchema, updateScheduleSchema, createAnimalSchema, updateAnimalSchema,
   createVetProfileSchema, updateVetProfileSchema, createMedicalRecordSchema, updateMedicalRecordSchema,
   deleteMedicalRecordSchema, createVaccinationSchema, addWeightSchema, createAllergySchema,
-  createLabResultSchema, createPaymentSchema, toggleUserStatusSchema, changeUserRoleSchema,
+  createLabResultSchema, createPaymentSchema, changeUserRoleSchema,
   processRefundSchema, moderateReviewSchema, updateSystemSettingSchema, updatePermissionSchema,
   bulkUpdatePermissionsSchema, resetPermissionsSchema, createEnterpriseSchema, addMemberSchema,
   updateMemberSchema, createAnimalGroupSchema, assignAnimalToGroupSchema, createLocationSchema,
@@ -110,10 +110,6 @@ describe('Extended Validation Schemas', () => {
   describe('createPaymentSchema', () => {
     it('accepts valid', () => { expect(createPaymentSchema.validate({ consultationId: u, amount: 50 }).error).toBeUndefined(); });
     it('rejects missing amount', () => { expect(createPaymentSchema.validate({ consultationId: u }).error).toBeDefined(); });
-  });
-
-  describe('toggleUserStatusSchema', () => {
-    it('accepts valid', () => { expect(toggleUserStatusSchema.validate({ isActive: false }).error).toBeUndefined(); });
   });
 
   describe('changeUserRoleSchema', () => {

@@ -1,9 +1,6 @@
 {
   "note": "Client methods with no caller. May only shrink (H17). See docs/modules/orphans-ledger.md.",
   "methods": [
-    "admin.ts:adminToggleUserStatus",
-    "admin.ts:getFeatureFlags",
-    "admin.ts:healthCheck",
     "admin.ts:revokeUserSessions",
     "analytics.ts:deleteReportTemplate",
     "analytics.ts:deleteSensor",

@@ -221,19 +221,6 @@ class AdminService {
     return result.rows[0];
   }
 
-  async toggleUserStatus(userId: string, isActive: boolean): Promise<any> {
-    const newStatus = isActive ? 'active' : 'suspended';
-    const result = await database.query(
-      `UPDATE users SET is_active = $1, account_status = $2, updated_at = NOW() WHERE id = $3
-       RETURNING id, email, first_name as "firstName", last_name as "lastName", role,
-       is_active as "isActive", account_status as "accountStatus", updated_at as "updatedAt"`,
-      [isActive, newStatus, userId]
-    );
-    if (result.rows.length === 0) throw new NotFoundError('User', userId);
-    logger.info('User status toggled', { userId, isActive, newStatus });
-    return result.rows[0];
-  }
-
   async changeUserRole(
     userId: string,
     newRole: string,

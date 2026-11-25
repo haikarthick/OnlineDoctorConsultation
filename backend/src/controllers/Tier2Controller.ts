@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import healthAnalyticsService from '../services/HealthAnalyticsService';
 import breedingService from '../services/BreedingService';
-import feedInventoryService, { FEED_GIVEN_MOVED_MESSAGE } from '../services/FeedInventoryService';
+import feedInventoryService from '../services/FeedInventoryService';
 import complianceService from '../services/ComplianceService';
 import financialService from '../services/FinancialService';
 import alertService from '../services/AlertService';
@@ -217,11 +217,6 @@ class Tier2Controller {
     if (!await ensureFeedAccess(req, res, req.params.id)) return;
     await feedInventoryService.deleteFeed(req.params.id);
     res.json({ data: { success: true } });
-  }
-
-  /** Feed given is recorded only in Daily records now; an old screen still calling here is told where to go. */
-  async logFeedConsumption(_req: Request, res: Response) {
-    res.status(410).json({ success: false, message: FEED_GIVEN_MOVED_MESSAGE, error: { message: FEED_GIVEN_MOVED_MESSAGE } });
   }
 
   async getFeedAnalytics(req: Request, res: Response) {

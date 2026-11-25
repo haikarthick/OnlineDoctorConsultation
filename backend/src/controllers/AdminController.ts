@@ -163,19 +163,6 @@ class AdminController {
     res.json({ success: true, data: user });
   }
 
-  async toggleUserStatus(req: Request, res: Response) {
-    const authReq = this.assertAdmin(req);
-    const { isActive } = req.body;
-    if (isActive === undefined) throw new ValidationError('isActive field is required');
-    const user = await AdminService.toggleUserStatus(req.params.id, isActive);
-    await AdminService.createAuditLog({
-      userId: authReq.userId!,
-      action: isActive ? 'ACTIVATE_USER' : 'DEACTIVATE_USER',
-      resource: 'users', resourceId: req.params.id, ipAddress: req.ip,
-    });
-    res.json({ success: true, data: user });
-  }
-
   async changeUserRole(req: Request, res: Response) {
     const authReq = this.assertAdmin(req);
     const { role, profile } = req.body;

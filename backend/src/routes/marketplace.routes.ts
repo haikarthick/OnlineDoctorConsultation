@@ -7,7 +7,6 @@ import database from '../utils/database';
 import logger from '../utils/logger';
 import cacheManager from '../utils/cacheManager';
 import { emitRoleRefresh } from '../utils/socketIO';
-import { getAllFeatureFlags } from '../config/featureFlags';
 import AdminService from '../services/AdminService';
 import Tier4Controller from '../controllers/Tier4Controller';
 import { FileController } from '../controllers/FileController';
@@ -211,10 +210,6 @@ router.get('/health', async (_req, res) => {
   });
 });
 
-router.get('/features', (_req, res) => {
-  res.json({ success: true, data: getAllFeatureFlags() });
-});
-
 // ─── Emergency diagnostics (break-glass token required) ──────
 /**
  * These two endpoints exist for the case where a deploy left the database in a
@@ -308,8 +303,6 @@ router.post('/repair-schema', emergencyGate, async (_req, res) => {
 router.post('/files/upload', authMiddleware, uploadAny.single('file'), asyncHandler((req: Request, res: Response) => FileController.upload(req, res)));
 router.post('/files/upload-image', authMiddleware, uploadImage.single('file'), asyncHandler((req: Request, res: Response) => FileController.upload(req, res)));
 router.post('/files/upload-video', authMiddleware, uploadVideo.single('file'), asyncHandler((req: Request, res: Response) => FileController.uploadVideo(req, res)));
-router.post('/files/upload-multiple', authMiddleware, uploadAny.array('files', 10), asyncHandler((req: Request, res: Response) => FileController.uploadMultiple(req, res)));
-router.get('/files', authMiddleware, asyncHandler((req: Request, res: Response) => FileController.list(req, res)));
 router.delete('/files/*', authMiddleware, asyncHandler((req: Request, res: Response) => FileController.remove(req, res)));
 
 

@@ -459,19 +459,9 @@ const options: swaggerJsdoc.Options = {
       '/files/upload': {
         post: { tags: ['Files'], summary: 'Upload single file', requestBody: { required: true, content: { 'multipart/form-data': { schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' }, folder: { type: 'string' } } } } } }, responses: { '201': { description: 'Uploaded', content: { 'application/json': { schema: { $ref: '#/components/schemas/StoredFile' } } } } } },
       },
-      '/files/upload-multiple': {
-        post: { tags: ['Files'], summary: 'Upload multiple files (max 10)', requestBody: { required: true, content: { 'multipart/form-data': { schema: { type: 'object', properties: { files: { type: 'array', items: { type: 'string', format: 'binary' } }, folder: { type: 'string' } } } } } }, responses: { '201': { description: 'Uploaded' } } },
-      },
-      '/files': {
-        get: { tags: ['Files'], summary: 'List uploaded files', parameters: [{ name: 'folder', in: 'query', schema: { type: 'string' } }], responses: { '200': { description: 'File list' } } },
-      },
-
       // ── System ──
       '/health': {
         get: { tags: ['System'], summary: 'Health check', security: [], responses: { '200': { description: 'OK' } } },
-      },
-      '/features': {
-        get: { tags: ['System'], summary: 'Feature flags', security: [], responses: { '200': { description: 'Flags' } } },
       },
       '/settings/public': {
         get: { tags: ['System'], summary: 'Public settings', security: [], responses: { '200': { description: 'Settings' } } },

@@ -43,15 +43,6 @@ describe('AdminService', () => {
     });
   });
 
-  describe('toggleUserStatus', () => {
-    it('should toggle user active status', async () => {
-      const user = { id: 'u1', is_active: false };
-      (database.query as jest.Mock).mockResolvedValue({ rows: [user] });
-      const result = await adminService.toggleUserStatus('u1', false);
-      expect(result).toEqual(user);
-    });
-  });
-
   describe('changeUserRole', () => {
     it('should change user role and provision vet_profiles in a transaction', async () => {
       const user = { id: 'u1', role: 'veterinarian' };

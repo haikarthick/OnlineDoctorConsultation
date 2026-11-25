@@ -129,12 +129,6 @@ router.get('/vaccine-protocols', authMiddleware, asyncHandler(async (req: Reques
   res.json({ success: true, data: protocols });
 }));
 
-router.get('/vaccine-protocols/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const protocol = await VaccineProtocolService.getProtocol(req.params.id);
-  if (!protocol) return res.status(404).json({ success: false, message: 'Not found' });
-  res.json({ success: true, data: protocol });
-}));
-
 // ═══════════════════════════════════════════════════════════════════
 // Master Data - species, breeds, animal classes, marketplace categories/conditions.
 // Public read (active-only, powers dropdowns) + admin CRUD (archive/restore + delete

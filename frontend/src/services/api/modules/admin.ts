@@ -17,11 +17,6 @@ export const adminApi = {
     return response.data
   },
 
-  async adminToggleUserStatus(userId: string, isActive: boolean) {
-    const response = await sharedClient.put(`/admin/users/${userId}/status`, { isActive })
-    return response.data
-  },
-
   async adminChangeUserRole(
     userId: string,
     role: string,
@@ -233,12 +228,6 @@ export const adminApi = {
     return response.data
   },
 
-  // ─── Feature Flags ─────────────────────────────────────────
-  async getFeatureFlags() {
-    const response = await sharedClient.get('/features')
-    return response.data
-  },
-
   // ─── Permissions (RBAC) ────────────────────────────────────
   async getMyPermissions() {
     const response = await sharedClient.get('/permissions/my')
@@ -302,12 +291,6 @@ export const adminApi = {
 
   async deleteNetworkCustomRole(networkId: string, roleKey: string) {
     const response = await sharedClient.delete(`/hospital-networks/${networkId}/roles/${roleKey}`)
-    return response.data
-  },
-
-  // ─── Health check ──────────────────────────────────────────
-  async healthCheck() {
-    const response = await sharedClient.get('/health')
     return response.data
   }
 

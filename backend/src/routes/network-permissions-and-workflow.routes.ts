@@ -148,7 +148,6 @@ router.put('/feed/:id', authMiddleware, validateBody(updateFeedSchema), asyncHan
 router.post('/feed/:id/restock', authMiddleware, validateBody(restockFeedSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.restockFeed(req, res)));
 router.delete('/feed/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.deleteFeed(req, res)));
 // Feed given is recorded only in Daily records (migration 063, owner rule: one place). Kept so an old screen gets words, not an error code.
-router.post('/enterprises/:enterpriseId/feed/consumption', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.logFeedConsumption(req, res)));
 router.get('/enterprises/:enterpriseId/feed/library', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.feedLibrary(req, res)));
 router.get('/enterprises/:enterpriseId/feed/analytics', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getFeedAnalytics(req, res)));
 

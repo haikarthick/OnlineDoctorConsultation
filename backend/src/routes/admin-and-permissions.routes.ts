@@ -12,7 +12,7 @@ import PermissionService from '../services/PermissionService';
 import HospitalNetworkController from '../controllers/HospitalNetworkController';
 import HospitalNetworkService from '../services/HospitalNetworkService';
 import {
-  toggleUserStatusSchema, changeUserRoleSchema, processRefundSchema, moderateReviewSchema, updateSystemSettingSchema,
+  changeUserRoleSchema, processRefundSchema, moderateReviewSchema, updateSystemSettingSchema,
   updatePermissionSchema, bulkUpdatePermissionsSchema, resetPermissionsSchema,
   updateVetProfileSchema,
 } from '../middleware/validation';
@@ -27,34 +27,8 @@ router.get('/dashboard/hospital-staff', authMiddleware, asyncHandler(async (req:
 }));
 router.get('/dashboard/corporate', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), asyncHandler((req: Request, res: Response) => HospitalNetworkController.getCorporateDashboard(req, res)));
 router.get('/admin/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getDashboardStats(req, res)));
-router.get('/admin/users/search', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
-  const q = ((req.query.q as string) || '').trim();
-  const role = (req.query.role as string) || '';
-  try {
-    const filter = q.length >= 1 ? `%${q}%` : '%';
-    const params: any[] = [filter];
-    let roleClause = '';
-    if (role) { params.push(role); roleClause = `AND role = $${params.length}`; }
-    const result = await database.query(
-      `SELECT id, first_name AS "firstName", last_name AS "lastName", email, role
-       FROM users
-       WHERE is_active = true
-         AND (first_name ILIKE $1 OR last_name ILIKE $1 OR email ILIKE $1
-              OR (first_name || ' ' || last_name) ILIKE $1)
-         ${roleClause}
-       ORDER BY first_name, last_name
-       LIMIT 30`,
-      params
-    );
-    res.json({ success: true, data: result.rows });
-  } catch (err: any) {
-    logger.error('Admin user search failed', { error: err.message });
-    res.status(500).json({ success: false, message: 'Search failed' });
-  }
-}));
 router.get('/admin/users', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listUsers(req, res)));
 router.get('/admin/users/pending', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listPendingUsers(req, res)));
-router.put('/admin/users/:id/status', authMiddleware, roleMiddleware(['admin']), validateBody(toggleUserStatusSchema), asyncHandler((req: Request, res: Response) => AdminController.toggleUserStatus(req, res)));
 router.put('/admin/users/:id/role', authMiddleware, roleMiddleware(['admin']), validateBody(changeUserRoleSchema), asyncHandler((req: Request, res: Response) => AdminController.changeUserRole(req, res)));
 router.post('/admin/users/:id/approve', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.approveUser(req, res)));
 router.post('/admin/users/:id/reject', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.rejectUser(req, res)));

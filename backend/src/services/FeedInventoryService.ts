@@ -14,9 +14,6 @@ import { NotFoundError, ValidationError } from '../utils/errors';
 const WEIGHT_KG: Record<string, number> = { kg: 1, g: 0.001, ton: 1000, lb: 0.45359237 };
 const num = (v: unknown): number | null => (v === null || v === undefined || v === '' ? null : Number.isFinite(Number(v)) ? Number(v) : null);
 
-export const FEED_GIVEN_MOVED_MESSAGE =
-  'Feed given is now recorded in one place: Daily records. Open Daily records, choose the animal, group or "All my animals", tap Feed and pick the feed - it is taken out of stock automatically.';
-
 /** kg in one stock unit: a weight unit converts itself; a bag / bale / litre needs the farmer's figure. */
 export function kgPerUnit(feed: { unit?: string | null; kg_per_unit?: unknown }): number | null {
   const own = num(feed.kg_per_unit);

@@ -109,53 +109,6 @@ export class FileController {
   }
 
   /**
-   * POST /api/files/upload-multiple
-   * Body: multipart/form-data with field "files" (array, max 10) and optional "folder"
-   */
-  static async uploadMultiple(req: Request, res: Response) {
-    const files = req.files as Express.Multer.File[];
-    if (!files || files.length === 0) {
-      return res.status(400).json({ error: 'No files provided. Use field name "files".' });
-    }
-
-    const folder = String(req.body.folder || 'general');
-    if (!/^[a-z0-9_/-]{1,80}$/i.test(folder) || folder.includes('..')) {
-      return res.status(400).json({ error: 'Invalid folder name' });
-    }
-    const results: StoredFile[] = [];
-
-    for (const file of files) {
-      const storedFile = await storage.save(file, folder);
-      const record = {
-        ...storedFile,
-        uploadedBy: (req as any).userId || 'anonymous',
-        uploadedAt: new Date().toISOString(),
-      };
-      fileRegistry.set(storedFile.key, record);
-      results.push(storedFile);
-    }
-
-    logger.info(`${results.length} files uploaded to ${folder}`);
-    return res.status(201).json({ files: results });
-  }
-
-  /**
-   * GET /api/files
-   * List uploaded files (optionally filter by folder query param)
-   */
-  static async list(req: Request, res: Response) {
-    const folder = req.query.folder as string | undefined;
-    // A person lists only what they uploaded themselves; an admin sees all.
-    const me = (req as any).userId as string | undefined;
-    const isAdmin = (req as any).userRole === 'admin' || ((req as any).userRoles || []).includes('admin');
-    let files = Array.from(fileRegistry.values()).filter(f => isAdmin || (!!me && f.uploadedBy === me));
-    if (folder) {
-      files = files.filter(f => f.key.startsWith(`${folder}/`));
-    }
-    return res.json({ files, total: files.length });
-  }
-
-  /**
    * DELETE /api/files/:key(*)
    * Delete a file by its storage key
    */
