@@ -1,5 +1,5 @@
 import { test, expect, request as pwRequest, Page, Locator, BrowserContext } from '@playwright/test'
-import { mkdirSync, appendFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, appendFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
@@ -26,6 +26,8 @@ interface Fixtures {
 const FX: Fixtures | null = (() => { try { return JSON.parse(process.env.NUTRI_FIXTURES || 'null') } catch { return null } })()
 const OUT = process.env.NUTRI_SHOTS_DIR || join(process.cwd(), 'test-results', 'nutrition-devices')
 const FINDINGS = join(OUT, 'findings.jsonl')
+/** NUTRI_ONLY=pig-group-card,dashboard narrows a run to those screens (debugging a single screen). */
+const ONLY = (process.env.NUTRI_ONLY || '').split(',').filter(Boolean)
 
 const VIEWPORTS = [
   { name: 'phone', width: 360, height: 740 },
@@ -248,19 +250,32 @@ function screens(): Screen[] {
       await check('dog plan builder sheet', async () => sheetAudit(page, opener, vp))
       await check('dog plan sheet, Escape', async () => sheetEscape(page))
     } },
-    { id: 'pig-group-card', roles: ['farmer', 'admin'], run: async ({ page }, check) => {
+    { id: 'pig-group-card', roles: ['farmer', 'admin'], run: async ({ page, lang }, check) => {
       await page.goto('/animal-groups', { waitUntil: 'domcontentloaded' }); await settle(page)
       const name = FX?.pigGroupName || 'Verify M4 Old Pigs'
-      const clicked = await page.evaluate((groupName) => {
+      // the page opens on the first farm: choose the farm that holds the group
+      const farmSelect = page.locator('select').first()
+      if (await farmSelect.count()) {
+        const values = await farmSelect.locator('option').evaluateAll(o => o.map(x => (x as HTMLOptionElement).value).filter(Boolean))
+        for (const v of values) {
+          if (await page.getByText(name, { exact: false }).count()) break
+          await farmSelect.selectOption(v)
+          await page.waitForTimeout(900)
+        }
+      }
+      // the card's "Health" button, named in the page's own language (read from the same translation file the app loads)
+      const tr = await page.request.get(`/locales/${lang}/translation.json`).then(r => r.json()).catch(() => null)
+      const viewText: string = tr?.animalGroups?.health?.view || 'Health'
+      const clicked = await page.evaluate(({ groupName, viewText }) => {
         const hit = Array.from(document.querySelectorAll('*')).filter(e => e.children.length === 0 && (e.textContent || '').includes(groupName))[0]
         let el: Element | null = hit || null
         while (el && el !== document.body) {
-          const b = Array.from(el.querySelectorAll('button')).find(x => /health|view|rates|sheht/i.test(x.textContent || '') || x.title)
+          const b = Array.from(el.querySelectorAll('button')).find(x => (x.textContent || '').trim() === viewText)
           if (b) { (b as HTMLElement).click(); return true }
           el = el.parentElement
         }
         return false
-      }, name)
+      }, { groupName: name, viewText })
       if (!clicked) { await check('animal groups (pig group card button not found)'); return }
       await page.locator('.modal-overlay').first().waitFor({ state: 'visible', timeout: 10_000 }).catch(() => undefined)
       await page.waitForTimeout(1200)
@@ -288,7 +303,7 @@ async function runScreens(ctxBase: { page: Page; role: Role; vp: typeof VIEWPORT
   const phone = vp.name === 'phone'
   let content = 0
   for (const s of screens()) {
-    if (!s.roles.includes(role) || (wanted && !wanted.includes(s.id))) continue
+    if (!s.roles.includes(role) || (wanted && !wanted.includes(s.id)) || (ONLY.length && !ONLY.includes(s.id))) continue
     let shot = 0
     const check = async (label: string, extra?: () => Promise<string[]>) => {
       const found: Array<[string, string]> = []
@@ -320,7 +335,7 @@ async function runScreens(ctxBase: { page: Page; role: Role; vp: typeof VIEWPORT
 // ── the tests ───────────────────────────────────────────────────────────────
 test.describe('@nutrition-devices nutrition on phone, tablet and desktop', () => {
   test.skip(!FX || !FX.dogId || !FX.cowId, 'the nutrition fixtures are built by runtime-verify PHASE 6m (NUTRI_FIXTURES)')
-  test.beforeAll(() => { mkdirSync(OUT, { recursive: true }); writeFileSync(FINDINGS, '') })
+  test.beforeAll(() => { mkdirSync(OUT, { recursive: true }) })
   const sessions: Partial<Record<Role, Awaited<ReturnType<typeof signIn>>>> = {}
   test.beforeAll(async ({ baseURL }) => {
     for (const r of ROLES) sessions[r] = await signIn(baseURL || 'http://127.0.0.1:3000', r)

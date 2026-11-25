@@ -356,7 +356,8 @@
       "feed_lucerne_hay": "लूसर्न (रिजका) घास",
       "feed_oats": "जई",
       "feed_horse_gram": "कुल्थी",
-      "feed_bengal_gram": "चना"
+      "feed_bengal_gram": "चना",
+      "feed_mineral_mixture_small": "खनिज मिश्रण (भेड़ और बकरी, कम तांबा)"
     },
     "unsafe": {
       "chocolate": "चॉकलेट और कोको",

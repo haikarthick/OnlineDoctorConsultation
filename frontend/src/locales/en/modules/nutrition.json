@@ -356,7 +356,8 @@
       "feed_lucerne_hay": "Lucerne (alfalfa) hay",
       "feed_oats": "Oats",
       "feed_horse_gram": "Horse gram (kulthi)",
-      "feed_bengal_gram": "Bengal gram (chana)"
+      "feed_bengal_gram": "Bengal gram (chana)",
+      "feed_mineral_mixture_small": "Mineral mixture (sheep and goats, low copper)"
     },
     "unsafe": {
       "chocolate": "Chocolate and cocoa",

@@ -2783,7 +2783,7 @@ async function http(method, url, body, token) {
               }
               const calfFoods = await foodMap(`animalId=${calf}`, ownerP.token);
               const cr = await http('POST', `${apiBase}/nutrition/animals/${calf}/ration/preview`, { feeds: [{ ingredientId: calfFoods.feed_green_maize, pricePerKg: 2 }] }, ownerP.token);
-              if (cr.status !== 400 || codeOf(cr) !== 'NEEDS_VET' || !plain(cr)) problems.push(`[2 age] a 30-day-old calf should still be sent to a vet (NEEDS_VET), got HTTP ${cr.status} code '${codeOf(cr)}' '${msgOf(cr).slice(0, 80)}'`);
+              if (cr.status !== 400 || codeOf(cr) !== 'NEEDS_VET' || !cr.json?.error?.params?.reason || !plain(cr)) problems.push(`[2 age] a 30-day-old calf should still be sent to a vet (NEEDS_VET), got HTTP ${cr.status} code '${codeOf(cr)}' '${msgOf(cr).slice(0, 80)}'`);
               const gf = await foodMap(`groupId=${herd}`, tom.token);
               const gp = await http('POST', `${apiBase}/nutrition/groups/${herd}/ration/preview`, { milkLitresPerDay: 8, avgWeightKg: 400, feeds: COW_FEEDS.map((c, i) => ({ ingredientId: gf[c], pricePerKg: COW_PRICE[i] })) }, tom.token);
               if (gp.status !== 200 || gp.json?.data?.result?.status !== 'ok') problems.push(`[2 age] a herd of mixed ages (members have no date of birth) must still compute: HTTP ${gp.status} ${codeOf(gp)} ${msgOf(gp).slice(0, 100)}`);
@@ -2969,32 +2969,18 @@ async function http(method, url, body, token) {
           const dbRows = rows(`SELECT code, species_code, status FROM ${S}.nutrition_unsafe_foods WHERE code IN ('urea_nonruminant','oleander','lawn_clippings','chocolate_bird','dough_raw','mushrooms_wild','onion_bird','cottonseed_cake','mustard_cake')`);
           const notUnvalidated = dbRows.filter(r => r.status !== 'unvalidated');
           if (notUnvalidated.length) problems.push(`[6 safe foods] new migration-070 rows that are not 'unvalidated': ${notUnvalidated.map(r => `${r.code}/${r.species_code}=${r.status}`).join(', ')}`);
-          // a plan / feeding entry that includes the danger is caught
-          if (made.Pig) {
-            const r = await http('POST', `${apiBase}/nutrition/animals/${made.Pig}/plan`, { goal: 'maintain', mealsPerDay: 2, foods: [{ label: 'Urea mixed feed', kcalPer100g: 300, sharePct: 100 }] }, ownerP.token);
-            if (!(r.status === 400 && /unsafe/i.test(msgOf(r)))) {
-              const f = await http('POST', `${apiBase}/nutrition/animals/${made.Pig}/feeding`, { label: 'urea', kind: 'meal', amountG: 100 }, ownerP.token);
-              if (!(f.json?.data?.warnings || []).length) problems.push(`[6 safe foods] urea given to a pig is neither refused in a plan (HTTP ${r.status} '${msgOf(r).slice(0, 80)}') nor warned when logged (HTTP ${f.status})`);
-              else notes.push(`pig plan with urea answered HTTP ${r.status} '${msgOf(r).slice(0, 80)}', but logging urea as fed is flagged`);
-            }
+          // Farm species (pig, chicken, horse) cannot take a pet plan (no calculator) or a nutrition-route meal (feed is recorded in Daily records):
+          // the danger match is therefore checked on the data - the term a farmer would type must be in the row's match_terms.
+          for (const [code, sp, term] of [['urea_nonruminant', 'Pig', 'urea'], ['chocolate_bird', 'Chicken', 'chocolate'], ['oleander', 'Horse', 'oleander'], ['lawn_clippings', 'Horse', 'lawn clippings']]) {
+            const r = rows(`SELECT array_to_string(match_terms, ',') AS terms, severity FROM ${S}.nutrition_unsafe_foods WHERE code = '${code}' AND species_code = '${sp}'`)[0];
+            if (!r || !String(r.terms ?? '').toLowerCase().includes(term)) problems.push(`[6 safe foods] '${code}' for ${sp} has no match term '${term}' (${JSON.stringify(r)})`);
           }
-          if (made.Chicken) {
-            const f = await http('POST', `${apiBase}/nutrition/animals/${made.Chicken}/feeding`, { label: 'chocolate biscuit', kind: 'treat', amountG: 5 }, ownerP.token);
-            if (f.status !== 201 || !(f.json?.data?.warnings || []).some(w => w.severity === 'danger')) problems.push(`[6 safe foods] chocolate logged for a chicken was not flagged as a danger (HTTP ${f.status})`);
-          }
+          notes.push('NOT TESTABLE over HTTP: urea for a pig, chocolate for a chicken, oleander for a horse - an individual pig/chicken/horse has no pet plan (400 calculator not available) and no nutrition-route meal log (400 NUT_FEED_FOR_FARM_ANIMALS_IS); ration builders take library feeds only. Only the dog dangers are exercised end to end.');
           if (made.Dog) {
             for (const food of ['raw dough', 'wild mushrooms']) {
               const f = await http('POST', `${apiBase}/nutrition/animals/${made.Dog}/feeding`, { label: food, kind: 'treat', amountG: 20 }, ownerP.token);
               if (f.status !== 201 || !(f.json?.data?.warnings || []).some(w => w.severity === 'danger')) problems.push(`[6 safe foods] '${food}' logged for a dog was not flagged as a danger (HTTP ${f.status})`);
             }
-          }
-          if (made.Horse) {
-            const f = await http('POST', `${apiBase}/nutrition/animals/${made.Horse}/feeding`, { label: 'oleander leaves (kaner)', kind: 'meal', amountG: 200 }, ownerP.token);
-            if (f.status !== 201 || !(f.json?.data?.warnings || []).some(w => w.severity === 'danger')) problems.push(`[6 safe foods] oleander logged for a horse was not flagged as a danger (HTTP ${f.status})`);
-            const hf = await foodMap(`animalId=${made.Horse}`, ownerP.token);
-            const oleanderFeed = Object.entries(hf).find(([k]) => /oleander|urea/i.test(k));
-            if (oleanderFeed) problems.push(`[6 safe foods] the horse feed library offers '${oleanderFeed[0]}'`);
-            else notes.push('ration builders take library feeds only (no free-typed feed), so oleander / urea cannot enter a horse or pig RATION; the danger is caught on the pet plan route and the feeding log');
           }
         }
 
@@ -3024,7 +3010,10 @@ async function http(method, url, body, token) {
                   const r = await http(method, `${apiBase}${path}`, body, u.token);
                   if (allow.includes(name)) {
                     if (r.status >= 300) problems.push(`[7 access] ${label}: ${name} should be allowed but got HTTP ${r.status} ${codeOf(r)} '${msgOf(r).slice(0, 90)}'`);
-                  } else refusal(`[7 access] ${label}: ${name} must be refused`, r);
+                  } else {
+                    refusal(`[7 access] ${label}: ${name} must be refused`, r);
+                    if (path.startsWith('/nutrition') && !path.startsWith('/nutrition/admin') && [403, 404].includes(r.status) && !/^(NUT_|ANIMAL_NO_ACCESS|FARM_|FACT_)/.test(codeOf(r))) problems.push(`[7 access] ${label}: ${name} was refused (HTTP ${r.status}) with error.code '${codeOf(r)}', expected a NUT_* / ANIMAL_NO_ACCESS code`);
+                  }
                 }
               };
               // pet dog: owner + booked vet + admin may read and write; reviewing is a vet's job
@@ -3060,7 +3049,10 @@ async function http(method, url, body, token) {
               await run('POST review cow ration', 'POST', `/nutrition/plans/${cowPlanId}/review`, { note: 'ok' }, ['vetB', 'admin']);
               await run('POST cow measurement', 'POST', `/nutrition/animals/${cowAcc}/measurements`, { weight: 401, unit: 'kg' }, farmWrite);
               await run('PATCH cow facts', 'PATCH', `/nutrition/animals/${cowAcc}/facts`, { activityLevel: 'moderate' }, farmWrite);
-              await run('POST cow feeding', 'POST', `/nutrition/animals/${cowAcc}/feeding`, { label: 'green maize', kind: 'meal', amountG: 5000 }, farmWrite);
+              {
+                const cf = await http('POST', `${apiBase}/nutrition/animals/${cowAcc}/feeding`, { label: 'green maize', kind: 'meal', amountG: 5000 }, tom.token);
+                if (cf.status !== 400 || !/^NUT_FEED_FOR_FARM/.test(codeOf(cf)) || !plain(cf)) problems.push(`[7 access] logging a meal for a farm cow in the nutrition route should point to Daily records (400 NUT_FEED_FOR_FARM_ANIMALS_IS...), got HTTP ${cf.status} code '${codeOf(cf)}'`);
+              }
               await run('POST cow ration', 'POST', `/nutrition/animals/${cowAcc}/ration`, cowBody(fm, 10), farmWrite);
               // herd
               const gf = await foodMap(`groupId=${herd}`, tom.token);
@@ -3196,6 +3188,68 @@ async function http(method, url, body, token) {
           }
         }
 
+        // ═══ 8f. HERD TOTALS COUNT ONLY THE ANIMALS IN MILK ═══
+        {
+          const mkHerd = async (name, count) => {
+            const g = uuid();
+            sql(`INSERT INTO animal_groups (id, enterprise_id, name, species, current_count) VALUES ('${g}', '${ent}', '${name}', 'Cattle', ${count});`);
+            const ids = [];
+            for (let i = 0; i < count; i++) {
+              const id = await mk(tom.token, { name: `${name} ${i}`, species: 'Cattle', gender: 'female', dateOfBirth: iso(-365 * 5), enterpriseId: ent, groupId: g }, 400);
+              if (id) ids.push(id);
+            }
+            return { g, ids };
+          };
+          const herdBodyFor = async (g, milk) => {
+            const gf = await foodMap(`groupId=${g}`, tom.token);
+            return { milkLitresPerDay: milk, avgWeightKg: 400, feeds: COW_FEEDS.map((c, i) => ({ ingredientId: gf[c], pricePerKg: COW_PRICE[i] })) };
+          };
+          const checkTotals = (label, status, data, wantCount, wantNot) => {
+            const h = data?.herd; const res = data?.result;
+            if (status !== 200 || res?.status !== 'ok') { problems.push(`[8f herd milk] ${label}: HTTP ${status} ${JSON.stringify(res?.reasons || '')}`); return; }
+            if (h?.headCount !== wantCount || h?.notCounted !== wantNot) problems.push(`[8f herd milk] ${label}: herd.headCount ${h?.headCount} / notCounted ${h?.notCounted}, expected ${wantCount} / ${wantNot}`);
+            if (Math.abs((h?.totalCostPerDay || 0) - res.totalCostPerDay * wantCount) > 0.05) problems.push(`[8f herd milk] ${label}: total cost ${h?.totalCostPerDay} is not per-animal ${res.totalCostPerDay} x ${wantCount}`);
+            const line = (res.lines || [])[0]; const hl = (h?.lines || [])[0];
+            if (line && hl && Math.abs(hl.kgAsFedPerDay - line.kgAsFedPerDay * wantCount) > 0.15) problems.push(`[8f herd milk] ${label}: first feed line ${hl.kgAsFedPerDay} kg is not per-animal ${line.kgAsFedPerDay} x ${wantCount}`);
+          };
+          const preview = (g, body) => http('POST', `${apiBase}/nutrition/groups/${g}/ration/preview`, body, tom.token);
+          // 10 cows, 4 with a typed daily yield
+          const H = await mkHerd('Verify M8f Milking Herd', 10);
+          if (H.ids.length !== 10) problems.push(`[8f herd milk] could create only ${H.ids.length} of 10 cows for the herd`);
+          else {
+            for (const id of H.ids.slice(0, 4)) await http('PUT', `${apiBase}/animals/${id}`, { avgDailyMilkLitres: 8 }, tom.token);
+            const body = await herdBodyFor(H.g, 8);
+            const pv = await preview(H.g, body);
+            checkTotals('10 cows, 4 in milk (preview)', pv.status, pv.json?.data, 4, 6);
+            const sv = await http('POST', `${apiBase}/nutrition/groups/${H.g}/ration`, body, tom.token);
+            if (sv.status !== 201) problems.push(`[8f herd milk] saving the herd ration: HTTP ${sv.status} ${codeOf(sv)} ${msgOf(sv).slice(0, 90)}`);
+            const ovw = await http('GET', `${apiBase}/nutrition/groups/${H.g}/ration`, null, tom.token);
+            const rh = ovw.json?.data?.plan?.ration?.herd;
+            if (rh?.headCount !== 4 || rh?.notCounted !== 6) problems.push(`[8f herd milk] the saved herd plan reads back headCount ${rh?.headCount} / notCounted ${rh?.notCounted}, expected 4 / 6`);
+            const dry = await preview(H.g, { ...body, milkLitresPerDay: 0 });
+            if (dry.status !== 200 || dry.json?.data?.herd?.notCounted !== 0 || dry.json?.data?.herd?.headCount !== 10) problems.push(`[8f herd milk] a non-lactating herd ration (milk 0) must count all 10 animals (notCounted 0), got HTTP ${dry.status} headCount ${dry.json?.data?.herd?.headCount} notCounted ${dry.json?.data?.herd?.notCounted} state ${dry.json?.data?.state}`);
+          }
+          // a herd with nobody in milk counts everyone
+          const D = await mkHerd('Verify M8f Dry Herd', 5);
+          if (D.ids.length === 5) {
+            const b = await herdBodyFor(D.g, 8);
+            const a1 = await preview(D.g, b);
+            checkTotals('5 cows, nobody in milk', a1.status, a1.json?.data, 5, 0);
+            const a2 = await preview(D.g, { ...b, milkLitresPerDay: 0 });
+            checkTotals('5 cows, nobody in milk, milk 0', a2.status, a2.json?.data, 5, 0);
+          } else problems.push('[8f herd milk] could not create the dry herd');
+          // recorded milk marks cows as in milk, and the herd ration prefers it over the typed average
+          const R = await mkHerd('Verify M8f Recorded Herd', 4);
+          if (R.ids.length === 4) {
+            for (const id of R.ids.slice(0, 2)) for (let d = 1; d <= 3; d++) await http('POST', `${apiBase}/farm-records`, { enterpriseId: ent, recordType: 'milk', animalId: id, quantity: 9, session: 'am', recordDate: iso(-d) }, tom.token);
+            const b = await herdBodyFor(R.g, undefined);
+            delete b.milkLitresPerDay;
+            const pv = await preview(R.g, b);
+            if (pv.status !== 200 || pv.json?.data?.milkSource !== 'recorded' || Math.abs((pv.json?.data?.milkLitresPerDay || 0) - 9) > 0.1) problems.push(`[8f herd milk] a herd whose cows have 9 L/day recorded in the last 7 days must use the recorded milk: milkSource ${pv.json?.data?.milkSource}, milkLitresPerDay ${pv.json?.data?.milkLitresPerDay} (HTTP ${pv.status} ${msgOf(pv).slice(0, 80)})`);
+            checkTotals('4 cows, 2 with recorded milk', pv.status, pv.json?.data, 2, 2);
+          } else problems.push('[8f herd milk] could not create the recorded-milk herd');
+        }
+
         // ═══ 9. MILK YIELD ONE-PLACE CHECK (report only) ═══
         {
           const mc = await mk(tom.token, { name: 'Verify M9 Milk Cow', species: 'Cattle', gender: 'female', dateOfBirth: iso(-365 * 5), enterpriseId: ent, avgDailyMilkLitres: 5 }, 450);
@@ -3210,6 +3264,9 @@ async function http(method, url, body, token) {
             const profileNow = Number(rows(`SELECT avg_daily_milk_litres AS v FROM ${S}.animals WHERE id = '${mc}'`)[0]?.v);
             await http('POST', `${apiBase}/nutrition/animals/${mc}/ration`, { ...noMilkBody, milkLitresPerDay: 20 }, tom.token);
             const profileAfterSave = Number(rows(`SELECT avg_daily_milk_litres AS v FROM ${S}.animals WHERE id = '${mc}'`)[0]?.v);
+            if (typed?.milkSource === 'recorded') problems.push(`[9 milk] before any milk is recorded the source must be the profile, got ${typed?.milkSource}`);
+            if (afterRec?.milkSource !== 'recorded' || Math.abs((afterRec?.milkLitresPerDay || 0) - 9) > 0.1) problems.push(`[9 milk] with 9 L/day recorded in the last 7 days the ration must use the RECORDED milk over the typed 5 L: milkSource ${afterRec?.milkSource}, milkLitresPerDay ${afterRec?.milkLitresPerDay}`);
+            if (Math.abs((typedOver?.milkLitresPerDay || 0) - 20) > 0.1) problems.push(`[9 milk] a yield typed in the ration form (20 L) should be used for that calculation, got ${typedOver?.milkLitresPerDay}`);
             notes.push(`MILK YIELD: profile avg typed 5 L; ration preview with no recorded milk used ${typed?.milkLitresPerDay} L (source ${typed?.milkSource}); after ${recMilk} L of milk recorded in Daily records over 3 days (9 L/day) the preview used ${afterRec?.milkLitresPerDay} L (source ${afterRec?.milkSource}); a typed 20 L in the ration form was used as ${typedOver?.milkLitresPerDay} L; the profile avg_daily_milk_litres stayed ${profileNow} until the ration was SAVED with 20 L, then became ${profileAfterSave} (the typed value is written back to the profile, so the profile can drift from the recorded 9 L/day)`);
           }
         }

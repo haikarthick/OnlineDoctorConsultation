@@ -203,7 +203,7 @@ class FarmRationService {
     const r = await database.query(
       `SELECT g.id, g.name, g.species, g.enterprise_id, g.current_count, e.owner_id,
               COALESCE(ms.nutrition_model, 'guidance_only') AS model,
-              m.members, m.avg_weight, m.avg_milk, m.due, m.avg_age_months, m.near_calving, m.dried,
+              m.members, m.avg_weight, m.avg_milk, m.due, m.avg_age_months, m.near_calving, m.dried, m.milking,
               rm.recorded_milk
          FROM animal_groups g
          LEFT JOIN enterprises e ON e.id = g.enterprise_id

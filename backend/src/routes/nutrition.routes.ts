@@ -69,7 +69,7 @@ router.post('/nutrition/animals/:animalId/measurements', ...gate, validateBody(n
 // ─── Plans ───
 router.post('/nutrition/animals/:animalId/plan/preview', ...gate, validateBody(nutritionPlanSchema), asyncHandler(async (req: Request, res: Response) => {
   const c = await NutritionService.preview(req.params.animalId, req.body, caller(req));
-  res.json({ success: true, data: { energy: c.energy, portions: c.portions, unsafe: c.unsafe, mealsPerDay: c.mealsPerDay } });
+  res.json({ success: true, data: { energy: c.energy, portions: c.portions, unsafe: c.unsafe, mealsPerDay: c.mealsPerDay, incompleteDiet: c.incompleteDiet } });
 }));
 
 router.post('/nutrition/animals/:animalId/plan', ...gate, validateBody(nutritionPlanSchema), asyncHandler(async (req: Request, res: Response) => {
