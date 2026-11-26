@@ -3,3 +3,4 @@
 :where(.ah-list) li { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; overflow-wrap: anywhere; }
 :where(.ah-hint) { color: #6b7280; font-size: 13px; margin: 0; }
 :where(.ah-error) { padding: 8px 12px; border-radius: 10px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; margin: 0; }
+:where(.hn-panel-actions) { display: flex; flex-wrap: wrap; gap: 8px; }

@@ -182,8 +182,11 @@
   cursor: pointer;
   transition: all 0.15s;
   text-decoration: none;
-  line-height: 1;
-  white-space: nowrap;
+  line-height: 1.25;
+  /* a long label in Malayalam, Tamil or Kannada wraps inside the button instead of being cut off */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .btn:disabled {
@@ -615,6 +618,7 @@
 .search-input {
   flex: 1;
   min-width: 250px;
+  max-width: 100%; /* a select with a long option (Tamil, Malayalam) must not grow past the screen */
   min-height: var(--tap-min, 44px);
   padding: 10px 14px 10px 36px;
   border: 1px solid var(--gray-300);
@@ -4013,3 +4017,10 @@ button.record-due-row { cursor: pointer; }
 
 /* My network plan (corporate admin): seats used. */
 .hn-plan-bar { width: 100%; height: 10px; margin: 6px 0 10px; accent-color: #2e7d32; }
+
+/* Long words in Malayalam, Tamil and Kannada have no spaces to break at: every module page and card wraps them instead of pushing
+   past the edge of a 360px phone (found by the nutrition browser pass). */
+:where(.module-page) { min-width: 0; overflow-wrap: anywhere; }
+:where(.module-page) :where(h1, h2, h3, p, span, label, button, td, th) { overflow-wrap: anywhere; }
+:where(.group-card, .group-card-grid > *) { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+

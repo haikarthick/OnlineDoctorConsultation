@@ -339,10 +339,11 @@
   text-transform: capitalize;
   padding: 2px 8px;
   border-radius: 4px;
-  white-space: nowrap;
-  max-width: 110px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* a long status word (Tamil, Malayalam) wraps instead of being cut off */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  text-align: center;
 }
 .activity-status.status-completed { background: #dcfce7; color: #16a34a; }
 .activity-status.status-pending { background: #fef3c7; color: #d97706; }
@@ -401,10 +402,10 @@
   font-weight: 600;
   text-transform: capitalize;
   flex-shrink: 0;
-  white-space: nowrap;
-  max-width: 110px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  text-align: center;
 }
 .status-pill.status-confirmed { background: #dcfce7; color: #16a34a; }
 .status-pill.status-pending { background: #fef3c7; color: #d97706; }

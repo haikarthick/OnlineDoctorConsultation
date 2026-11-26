@@ -541,6 +541,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap; /* a long title or button label in Tamil or Malayalam drops the actions to the next line */
+  gap: 12px;
   margin-bottom: 40px;
   padding-bottom: 32px;
   border-bottom: 2px solid rgba(102, 126, 234, 0.1);
@@ -1590,3 +1592,6 @@
   background: #fff; color: #374151; cursor: pointer;
 }
 :where(.module-page) .mr-rt-filter-chip.is-active { border-color: #667eea; background: #667eea; color: #fff; }
+
+:where(.module-page) .module-header > * { min-width: 0; }
+:where(.module-page) .header-actions { flex-wrap: wrap; }

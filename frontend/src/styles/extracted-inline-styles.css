@@ -3751,7 +3751,7 @@
   gap: 16px;
 }
 .si-58fb376a {
-  max-width: 350px;
+  max-width: min(350px, 100%);
 }
 .si-590e8f62 {
   margin: 0;
