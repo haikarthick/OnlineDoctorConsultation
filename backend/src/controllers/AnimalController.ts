@@ -3,7 +3,7 @@ import FarmAccessService from '../services/FarmAccessService';
 import AnimalAccessService from '../services/AnimalAccessService';
 import { AuthRequest } from '../middleware/auth';
 import AnimalService from '../services/AnimalService';
-import { ValidationError, ForbiddenError } from '../utils/errors';
+import { ValidationError, ForbiddenError, CodedError } from '../utils/errors';
 import database from '../utils/database';
 import AnimalGroupService from '../services/AnimalGroupService';
 import logger from '../utils/logger';
@@ -140,22 +140,15 @@ export class AnimalController {
 
   async searchByUniqueId(req: AuthRequest, res: Response): Promise<void> {
     const uid = (req.query.uid as string || '').trim();
-    if (!uid) {
-      res.status(400).json({ success: false, error: 'uid query parameter is required' });
-      return;
-    }
+    if (!uid) throw new ValidationError('Type the ID card number first.');
+    // ONE refusal for "no such card" and "not shared with you": the answer never tells a stranger whether the animal exists.
+    const notShared = () => new CodedError(404, 'AL_NOT_SHARED', 'We could not open an animal with this ID card number. Check the number, or ask the owner to share the animal with you.');
     const animal: any = await AnimalService.searchByUniqueId(uid);
-    if (!animal) {
-      res.status(404).json({ success: false, message: `No animal has the ID ${uid}. Check the ID card and try again.` });
-      return;
-    }
+    if (!animal) throw notShared();
     // H15: the one platform rule decides, for every role including vets and hospital staff - "any vet" is never enough. A clinic reaches
     // an animal by its card only when the owner booked it, shared it with the hospital, or enrolled it. The owner's email is never handed out.
     const access = await AnimalAccessService.check({ userId: req.userId!, role: req.userRole, roles: req.userRoles }, animal.id, 'read');
-    if (!access.allowed) {
-      res.status(404).json({ success: false, message: `No animal you can open has the ID ${uid}. Check the ID card and try again, or ask the owner to share the animal with you.` });
-      return;
-    }
+    if (!access.allowed) throw notShared();
     if (req.userRole !== 'admin') delete animal.ownerEmail;
     res.json({ success: true, data: animal });
   }

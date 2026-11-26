@@ -25,57 +25,6 @@ describe('PaymentService', () => {
     jest.clearAllMocks();
   });
 
-  describe('createPayment', () => {
-    it('should create a payment successfully', async () => {
-      // getGatewayMode
-      (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ value: 'sandbox' }] })
-        .mockResolvedValueOnce({ rows: [mockPayment] });
-
-      const result = await PaymentService.createPayment('user-1', {
-        consultationId: 'cons-1',
-        amount: 100,
-        currency: 'USD',
-        paymentMethod: 'credit_card',
-      } as any);
-
-      expect(result).toBeDefined();
-      expect(result.amount).toBe(100);
-    });
-
-    it('should handle missing gateway mode gracefully', async () => {
-      (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [] })        // no gateway setting
-        .mockResolvedValueOnce({ rows: [mockPayment] });
-
-      const result = await PaymentService.createPayment('user-1', {
-        consultationId: 'cons-1',
-        amount: 50,
-      } as any);
-
-      expect(result).toBeDefined();
-    });
-  });
-
-  describe('getPayment', () => {
-    it('should return payment by id', async () => {
-      (database.query as jest.Mock).mockResolvedValue({ rows: [mockPayment] });
-
-      const result = await PaymentService.getPayment('pay-1');
-      expect(result).toEqual(mockPayment);
-      expect(database.query).toHaveBeenCalledWith(
-        expect.stringContaining('payments'),
-        ['pay-1']
-      );
-    });
-
-    it('should throw NotFoundError if payment not found', async () => {
-      (database.query as jest.Mock).mockResolvedValue({ rows: [] });
-
-      await expect(PaymentService.getPayment('non-existent')).rejects.toThrow(NotFoundError);
-    });
-  });
-
   describe('getPaymentByBooking', () => {
     it('should return payment by booking id', async () => {
       (database.query as jest.Mock).mockResolvedValue({ rows: [mockPayment] });

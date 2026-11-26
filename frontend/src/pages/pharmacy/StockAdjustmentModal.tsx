@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
+import { StockHistory } from './StockHistory'
 
 
 import { userMessage } from '../../utils/userMessage'
@@ -100,6 +101,7 @@ export default function StockAdjustmentModal({ pharmacyId, item, onClose, onDone
             </button>
           </div>
         </form>
+        <StockHistory pharmacyId={pharmacyId} medId={item.med_id} />
       </div>
     </div>
   )

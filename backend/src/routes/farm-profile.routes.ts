@@ -2,10 +2,8 @@ import { Router, Request, Response } from 'express';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
 import { asyncHandler } from '../utils/errorHandler';
 import MasterDataService from '../services/MasterDataService';
-import FarmProfileService from '../services/FarmProfileService';
 import {
   createMasterGroupTypeSchema, updateMasterGroupTypeSchema, updateMasterRecordTypeSchema,
-  resolveFarmProfileQuerySchema,
 } from '../middleware/validation';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -26,23 +24,6 @@ router.get('/master-data/group-types', asyncHandler(async (req: Request, res: Re
 }));
 router.get('/master-data/record-types', asyncHandler(async (_req: Request, res: Response) => {
   res.json({ success: true, data: await MasterDataService.listRecordTypes(true) });
-}));
-
-// What applies to one animal or group. The frontend resolves this locally from master data with
-// the same function; this endpoint exists for other clients and for checking the two agree.
-router.get('/farm-profile/resolve', asyncHandler(async (req: Request, res: Response) => {
-  const { error, value } = resolveFarmProfileQuerySchema.validate(req.query, { abortEarly: false, stripUnknown: true });
-  if (error) {
-    return res.status(400).json({ success: false, message: error.details.map(d => d.message).join(', ') });
-  }
-  const profile = await FarmProfileService.resolve({
-    speciesCode: value.species,
-    animalClass: value.animalClass || null,
-    gender: value.gender || null,
-    managementMode: value.managementMode || null,
-    groupType: value.groupType || null,
-  });
-  res.json({ success: true, data: profile });
 }));
 
 // ─── Admin CRUD: Group Types ───────────────────────────────────

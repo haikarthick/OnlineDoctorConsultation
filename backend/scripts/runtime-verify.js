@@ -1223,7 +1223,7 @@ async function http(method, url, body, token) {
               ['POST', '/allergies', { animalId: id, allergen: 'Planted', severity: 'mild' }],
               ['POST', '/vaccinations', { animalId: id, vaccineName: 'Planted', dateAdministered: '2026-11-01' }],
               ['POST', `/animals/${id}/vaccine-assignments`, { protocolId: '00000000-0000-4000-8000-000000000000' }],
-              ...(allergyId ? [['PUT', `/allergies/${allergyId}`, { animalId: strangerAnimal, allergen: 'Hijacked' }]] : []),
+              ...(allergyId ? [['POST', `/allergies/${allergyId}/mistake`, { reason: 'Hijacked' }]] : []),
             ];
             for (const [method, p, body] of writes) {
               const r = await http(method, `${apiBase}${p}`, body, tok);
@@ -1283,6 +1283,165 @@ async function http(method, url, body, token) {
       }
       if (problems.length) fail('Another person\'s animal data is reachable (or the owner is locked out).', problems);
       else ok('stranger and unbooked vet refused on every endpoint; owner keeps access');
+    }
+
+    // ── PHASE 6v: a saved record is never silently edited - it is corrected (owner decision 2026-11-25, ledger ORPH-049..052) ──
+    // A medical record gets ADDENDA (dated notes with the author); a wrong vaccination or allergy is marked "entered by mistake"
+    // (reason required, never deleted). Proves, on a real server: who may add/see a note, a stranger and a made-up id get the SAME plain
+    // refusal, the old overwrite/delete routes are gone, a mistake-marked vaccination leaves the passport and reopens its dose.
+    if (serverHealthy && port) {
+      step('PHASE 6v Corrections: addendum on a record, "entered by mistake" on vaccinations and allergies');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const problems = [];
+      let seq = (Math.floor(Date.now() / 1000) % 100000000) + 19000;
+      const signUp = async (role, dbRole) => {
+        const email = `verify.h16.${dbRole || role}.${Date.now()}.${seq}@example.com`;
+        const body = { firstName: 'Probe', lastName: 'Fix', email, phone: `9${String(seq++).padStart(9, '0')}`,
+          password: 'Password1', confirmPassword: 'Password1', role, acceptTerms: true };
+        if (role === 'veterinarian') body.licenseNumber = 'VERIFY-LIC-6H';
+        await http('POST', `${apiBase}/auth/register`, body);
+        if (role === 'veterinarian') psql('verifydb', `SET search_path TO ${SCHEMA}, public; UPDATE users SET account_status = 'active', is_active = true WHERE email = '${email}';`);
+        if (dbRole) psql('verifydb', `SET search_path TO ${SCHEMA}, public; UPDATE users SET role = '${dbRole}', account_status = 'active', is_active = true WHERE email = '${email}';`);
+        const login = await http('POST', `${apiBase}/auth/login`, { email, password: 'Password1' });
+        return { token: login.json?.data?.token, id: login.json?.data?.user?.id };
+      };
+      const owner = await signUp('pet_owner');
+      const stranger = await signUp('pet_owner');
+      const farmer = await signUp('farmer');
+      const bookedVet = await signUp('veterinarian');
+      const unbookedVet = await signUp('veterinarian');
+      const admin = await signUp('pet_owner', 'admin');
+      const staff = await signUp('pet_owner', 'hospital_staff');
+      const everyone = [owner, stranger, farmer, bookedVet, unbookedVet, admin, staff];
+      if (everyone.some(u => !u.token)) problems.push('could not create the probe accounts for every role');
+      else {
+        const mk = await http('POST', `${apiBase}/animals`, { name: 'Correction Target', species: 'Dog', gender: 'female' }, owner.token);
+        const aid = mk.json?.data?.id;
+        if (!aid) problems.push(`could not create the probe animal (HTTP ${mk.status})`);
+        else {
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public; INSERT INTO bookings (pet_owner_id, veterinarian_id, animal_id, scheduled_date, time_slot_start, time_slot_end, status) VALUES ('${owner.id}', '${bookedVet.id}', '${aid}', CURRENT_DATE, '07:00', '07:30', 'confirmed');`);
+          const NOBODY = '00000000-0000-4000-8000-0000000000aa';
+          const words = (r) => r.json?.message || r.json?.error?.message || '';
+
+          // ── the record and its addenda ──
+          const rec = await http('POST', `${apiBase}/medical-records`, { animalId: aid, recordType: 'diagnosis', title: 'Probe visit', content: 'Dose 5 ml' }, bookedVet.token);
+          const rid = rec.json?.data?.id;
+          if (!rid) problems.push(`the booked vet could not save a record (HTTP ${rec.status})`);
+          else {
+            const a1 = await http('POST', `${apiBase}/medical-records/${rid}/addenda`, { note: 'Correction: the dose was 2 ml, not 5 ml.' }, bookedVet.token);
+            if (a1.status !== 201 || !a1.json?.data?.authorName) problems.push(`the booked vet could not add a correction (HTTP ${a1.status})`);
+            const a2 = await http('POST', `${apiBase}/medical-records/${rid}/addenda`, { note: '' }, bookedVet.token);
+            if (a2.status < 400) problems.push('an empty correction was saved');
+            const own = await http('POST', `${apiBase}/medical-records/${rid}/addenda`, { note: 'Owner note: also given with food.' }, owner.token);
+            if (own.status !== 201) problems.push(`the owner could not add a correction to their animal's record (HTTP ${own.status})`);
+            for (const [who, u] of [['owner', owner], ['booked vet', bookedVet], ['admin', admin]]) {
+              const r = await http('GET', `${apiBase}/medical-records/${rid}/addenda`, null, u.token);
+              const list = r.json?.data || [];
+              if (r.status !== 200 || list.length < 2 || !list.some(n => /2 ml/.test(n.note) && n.authorName)) problems.push(`${who} could not read the corrections (HTTP ${r.status}, ${list.length} notes)`);
+            }
+            const refusal = await http('GET', `${apiBase}/medical-records/${NOBODY}/addenda`, null, stranger.token);
+            for (const [who, u] of [['stranger', stranger], ['unbooked vet', unbookedVet], ['hospital staff outside the network', staff], ['farmer outside the team', farmer]]) {
+              const r = await http('GET', `${apiBase}/medical-records/${rid}/addenda`, null, u.token);
+              if (r.status < 400) problems.push(`${who} could READ the corrections`);
+              else if (!words(r)) problems.push(`${who} was refused without words`);
+              else if (words(r) !== words(refusal)) problems.push(`${who} got a different refusal from a made-up id (it reveals which ids exist)`);
+              const w = await http('POST', `${apiBase}/medical-records/${rid}/addenda`, { note: 'Planted note' }, u.token);
+              if (w.status < 400) problems.push(`${who} could WRITE a correction`);
+            }
+            if (refusal.status !== 403 || !words(refusal)) problems.push(`a made-up record id was not refused in plain words (HTTP ${refusal.status})`);
+            // The record itself is never overwritten: the old route is gone and the text is unchanged.
+            const put = await http('PUT', `${apiBase}/medical-records/${rid}`, { content: 'Silently changed' }, bookedVet.token);
+            if (put.status < 400) problems.push('PUT /medical-records/:id still overwrites a saved record');
+            const still = psqlJson('verifydb', `SELECT content FROM ${SCHEMA}.medical_records WHERE id = '${rid}'`);
+            if (still[0]?.content !== 'Dose 5 ml') problems.push('a saved record was overwritten');
+          }
+
+          // ── the old overwrite / delete routes are gone ──
+          for (const [m, p] of [['PUT', `/vaccinations/${NOBODY}`], ['DELETE', `/vaccinations/${NOBODY}`], ['PUT', `/allergies/${NOBODY}`]]) {
+            const r = await http(m, `${apiBase}${p}`, { vaccineName: 'x' }, admin.token);
+            if (r.status !== 404) problems.push(`${m} ${p} still exists (HTTP ${r.status}); corrections go through addenda / entered-by-mistake only`);
+          }
+
+          // ── vaccinations: entered by mistake ──
+          const protos = await http('GET', `${apiBase}/vaccine-protocols?species=Dog`, null, owner.token);
+          const proto = (protos.json?.data || [])[0];
+          if (!proto) console.log('   note: no Dog vaccine protocol in this database, the vaccination part of PHASE 6v is skipped');
+          else {
+            await http('POST', `${apiBase}/animals/${aid}/vaccine-assignments`, { protocolId: proto.id }, owner.token);
+            const sched = await http('GET', `${apiBase}/vaccine-schedule/animal/${aid}`, null, owner.token);
+            const dose = (sched.json?.data || []).find(r => r.status !== 'administered');
+            const vx = await http('POST', `${apiBase}/vaccinations`, { animalId: aid, vaccineName: proto.name, protocolId: proto.id, dateAdministered: '2026-11-01' }, owner.token);
+            const vid = vx.json?.data?.id;
+            if (!dose || !vid) problems.push('could not set up the probe dose and vaccination');
+            else {
+              await http('PATCH', `${apiBase}/vaccine-schedule/${dose.id}/administer`, { vaccinationRecordId: vid, administeredAt: '2026-11-01' }, owner.token);
+              const doseOf = async () => {
+                const pass = await http('GET', `${apiBase}/vaccination-passport/animal/${aid}`, null, owner.token);
+                const prot = (pass.json?.data?.protocols || []).find(p => p.protocolId === proto.id);
+                return (prot?.doses || []).find(d => d.scheduleId === dose.id);
+              };
+              const before = await doseOf();
+              if (before?.status !== 'administered') problems.push('the given dose is not counted on the passport before the mistake mark');
+              const refusalV = await http('POST', `${apiBase}/vaccinations/${NOBODY}/mistake`, { reason: 'wrong animal' }, stranger.token);
+              for (const [who, u] of [['stranger', stranger], ['unbooked vet', unbookedVet]]) {
+                const r = await http('POST', `${apiBase}/vaccinations/${vid}/mistake`, { reason: 'wrong animal' }, u.token);
+                if (r.status < 400) problems.push(`${who} could mark another owner's vaccination as a mistake`);
+                else if (words(r) !== words(refusalV)) problems.push(`${who} got a different refusal from a made-up vaccination id`);
+              }
+              const notAuthor = await http('POST', `${apiBase}/vaccinations/${vid}/mistake`, { reason: 'wrong animal' }, bookedVet.token);
+              if (notAuthor.status !== 403 || !/correction/i.test(words(notAuthor))) problems.push(`a booked vet who did not enter it was not told to add a correction instead (HTTP ${notAuthor.status}: ${words(notAuthor)})`);
+              const noReason = await http('POST', `${apiBase}/vaccinations/${vid}/mistake`, { reason: '' }, owner.token);
+              if (noReason.status < 400) problems.push('a mistake mark was accepted without a reason');
+              const done = await http('POST', `${apiBase}/vaccinations/${vid}/mistake`, { reason: 'wrong date typed' }, owner.token);
+              if (done.status !== 200 || done.json?.data?.reopenedDoses !== 1) problems.push(`the owner could not mark their own vaccination as a mistake (HTTP ${done.status}, reopened ${done.json?.data?.reopenedDoses})`);
+              const twice = await http('POST', `${apiBase}/vaccinations/${vid}/mistake`, { reason: 'again' }, owner.token);
+              if (twice.status < 400) problems.push('a vaccination was marked as a mistake twice');
+              const after = await doseOf();
+              if (!after || after.status === 'administered' || after.vaccinationRecordId) problems.push('the dose is still counted after its vaccination was marked as a mistake (it must reopen)');
+              const list = await http('GET', `${apiBase}/vaccinations/animal/${aid}`, null, owner.token);
+              const row = (list.json?.data?.records || []).find(r => r.id === vid);
+              if (!row || !row.enteredByMistakeAt || !row.enteredByMistakeReason) problems.push('the mistake entry is gone from the history (it must stay, marked, with its reason)');
+              const kept = psqlJson('verifydb', `SELECT is_valid, entered_by_mistake_by FROM ${SCHEMA}.vaccination_records WHERE id = '${vid}'`);
+              if (kept[0]?.entered_by_mistake_by !== owner.id || kept[0]?.is_valid !== false) problems.push('who marked the mistake was not kept, or the entry still counts as valid');
+              // Skipping a plan needs a reason.
+              const w0 = await http('PATCH', `${apiBase}/animals/${aid}/vaccine-assignments/${proto.id}/waive`, {}, owner.token);
+              if (w0.status < 400) problems.push('a plan was skipped without a reason');
+              const w1 = await http('PATCH', `${apiBase}/animals/${aid}/vaccine-assignments/${proto.id}/waive`, { reason: 'vet advised against it' }, owner.token);
+              if (w1.status !== 200) problems.push(`the owner could not skip a plan with a reason (HTTP ${w1.status})`);
+              // The passport page's own calls work for the owner (certificate log, compliance summary).
+              const lg = await http('POST', `${apiBase}/vaccine-certificate-log`, { animalId: aid, certificateType: 'passport', fileName: 'probe.pdf' }, owner.token);
+              const lgs = await http('GET', `${apiBase}/vaccine-certificate-log/animal/${aid}`, null, owner.token);
+              if (lg.status >= 400 || !(lgs.json?.data || []).length) problems.push(`the certificate download was not logged (HTTP ${lg.status})`);
+              const cs = await http('GET', `${apiBase}/vaccination-passport/compliance-summary`, null, owner.token);
+              if (cs.status !== 200) problems.push(`the compliance summary did not open (HTTP ${cs.status})`);
+            }
+          }
+
+          const certs = await http('GET', `${apiBase}/certificates/animal/${aid}`, null, owner.token);
+          if (certs.status !== 200) problems.push(`the animal's certificates list did not open for its owner (HTTP ${certs.status})`);
+
+          // ── allergies: entered by mistake ──
+          const al = await http('POST', `${apiBase}/allergies`, { animalId: aid, allergen: 'Probe grass', severity: 'mild' }, owner.token);
+          const alId = al.json?.data?.id;
+          const al2 = await http('POST', `${apiBase}/allergies`, { animalId: aid, allergen: 'Probe dust', severity: 'mild' }, owner.token);
+          const al2Id = al2.json?.data?.id;
+          if (!alId || !al2Id) problems.push('could not save the probe allergies');
+          else {
+            const notAuthor = await http('POST', `${apiBase}/allergies/${alId}/mistake`, { reason: 'wrong animal' }, bookedVet.token);
+            if (notAuthor.status !== 403) problems.push(`a booked vet marked an allergy they did not enter (HTTP ${notAuthor.status})`);
+            const strange = await http('POST', `${apiBase}/allergies/${alId}/mistake`, { reason: 'wrong animal' }, stranger.token);
+            if (strange.status < 400 || !words(strange)) problems.push('a stranger could mark an allergy as a mistake (or was refused without words)');
+            const ok1 = await http('POST', `${apiBase}/allergies/${alId}/mistake`, { reason: 'wrong animal' }, owner.token);
+            const ok2 = await http('POST', `${apiBase}/allergies/${al2Id}/mistake`, { reason: 'duplicate of another entry' }, admin.token);
+            if (ok1.status !== 200 || ok2.status !== 200) problems.push(`the owner or the admin could not mark an allergy as a mistake (HTTP ${ok1.status}/${ok2.status})`);
+            const lst = await http('GET', `${apiBase}/allergies/animal/${aid}`, null, owner.token);
+            const rows = (lst.json?.data || []).filter(r => r.id === alId || r.id === al2Id);
+            if (rows.length !== 2 || rows.some(r => !r.enteredByMistakeAt || r.isActive)) problems.push('a mistake-marked allergy must stay in the history, marked, and no longer active');
+          }
+        }
+      }
+      if (problems.length) fail('Record corrections do not behave as decided (addenda / entered by mistake).', problems);
+      else ok('addenda visible to owner, vet and admin; strangers refused identically to a made-up id; mistake marks hide entries, reopen doses and keep history');
     }
 
     // ── PHASE 6g: farm feed has ONE place to record it, and the safety fixes (migrations 063 / 064) ──
@@ -1572,10 +1731,17 @@ async function http(method, url, body, token) {
           }
           const scStranger = await http('POST', `${apiBase}/wellness/scorecards`, { animalId: dog, vaccinationScore: 80 }, stranger);
           if (scStranger.status !== 403) problems.push(`a stranger created a scorecard for another owner's animal (HTTP ${scStranger.status})`);
+          // Scorecards are computed only (owner decision 2026-11-26): there is no edit or delete, and a second scorecard re-reads
+          // nutrition, activity and weight from the records instead of carrying the first one's figures.
           if (row?.id) {
-            const up = await http('PUT', `${apiBase}/wellness/scorecards/${row.id}`, { dentalScore: 1 }, stranger);
-            const del = await http('DELETE', `${apiBase}/wellness/scorecards/${row.id}`, null, stranger);
-            if (up.status !== 403 || del.status !== 403) problems.push(`a stranger could change or delete another owner's scorecard (HTTP ${up.status} / ${del.status})`);
+            const sc2 = await http('POST', `${apiBase}/wellness/scorecards`, { animalId: dog, vaccinationScore: 10, dentalScore: 10 }, owner);
+            const row2 = sc2.json?.data;
+            if (sc2.status !== 201 || Number(row2?.activity_score) !== Number(row.activity_score) || row2?.weight_status !== row.weight_status || String(row2?.nutrition_score) !== String(row.nutrition_score)) {
+              problems.push(`a second scorecard must re-read nutrition, activity and weight from the records: HTTP ${sc2.status} ${JSON.stringify(row2 || {}).slice(0, 200)}`);
+            }
+            const up = await http('PUT', `${apiBase}/wellness/scorecards/${row.id}`, { dentalScore: 1 }, owner);
+            const del = await http('DELETE', `${apiBase}/wellness/scorecards/${row.id}`, null, owner);
+            if (![404, 405].includes(up.status) || ![404, 405].includes(del.status)) problems.push(`a scorecard must not be editable or deletable by anyone (HTTP ${up.status} / ${del.status})`);
           }
         }
 
@@ -2639,7 +2805,8 @@ async function http(method, url, body, token) {
         if (mpOther.planName === planUsedName) problems.push("another network's corporate admin was shown this network's plan");
         refused('a pet owner reading my-network-subscription', await http('GET', `${apiBase}/my-network-subscription`, null, stranger.token), [403]);
 
-        const listFor = async (tok) => ((await http('GET', `${apiBase}/network-subscription-plans`, null, tok)).json?.data || []).map(p => p.name);
+        // The plan list is the published, active plans (the unused GET /network-subscription-plans route was deleted 2026-11-26: no screen read it, admin screens list plans through pricing settings).
+        const listFor = async (_tok) => rows(`SELECT name FROM ${S}.network_subscription_plans WHERE is_published = true AND is_active = true`).map(r => r.name);
         if (!(await listFor(corp.token)).includes(planFreeName)) problems.push('the unused published plan must list for a corporate admin before it is removed');
         refused('a corporate admin removing a plan', await http('DELETE', `${apiBase}/admin/network-subscription-plans/${planFree}`, null, corp.token), [403]);
         coded('removing a plan that a network uses', await http('DELETE', `${apiBase}/admin/network-subscription-plans/${planUsed}`, null, admin.token), 409, 'HN_PLAN_IN_USE');
@@ -3354,6 +3521,288 @@ async function http(method, url, body, token) {
       if (problems.length || sqlErrs.length) fail('Animal nutrition misbehaves end to end (weight, age gate, home diet, caution, metabolic gate, safe foods, access, connections).', [...problems, ...sqlErrs]);
       else ok('one weight; no adult ration without an age; home-only diet; breeder caution; metabolic gate; safe-food gaps; whole-module access; feed/withdrawal/sale/notification connections');
     }
+
+    // ── PHASE 6n: self-service screens (orphan workstream W5/W6/W10): own files, review reply / helpful / report, neutral ID-card lookup,
+    // a wrong farm entry, batch gates, "sign out everywhere". Each is a route that had no screen; this proves the gates behind the new screens.
+    if (serverHealthy && port) {
+      step('PHASE 6n Self-service: own files, reviews, neutral ID-card lookup, farm entry delete, batch gates, sign out everywhere');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const problems = [];
+      let seq = (Math.floor(Date.now() / 1000) % 100000000) + 52000;
+      const codeOf = (r) => r.json?.error?.code || '';
+      const msgOf = (r) => r.json?.message || r.json?.error?.message || '';
+      const signUp = async (role) => {
+        const email = `verify.self.${role}.${Date.now()}.${seq}@example.com`;
+        const body = { firstName: 'Self', lastName: 'Verify', email, phone: `9${String(seq++).padStart(9, '0')}`,
+          password: 'Password1', confirmPassword: 'Password1', role, acceptTerms: true };
+        if (role === 'veterinarian') body.licenseNumber = 'VERIFY-LIC-6N';
+        await http('POST', `${apiBase}/auth/register`, body);
+        if (role === 'veterinarian') psql('verifydb', `SET search_path TO ${SCHEMA}, public; UPDATE users SET account_status = 'active', is_active = true WHERE email = '${email}';`);
+        const login = await http('POST', `${apiBase}/auth/login`, { email, password: 'Password1' });
+        return { token: login.json?.data?.token, id: login.json?.data?.user?.id, email };
+      };
+      try {
+        const a = await signUp('pet_owner');
+        const b = await signUp('pet_owner');
+        const c = await signUp('pet_owner');
+        const d = await signUp('pet_owner');
+        const v = await signUp('veterinarian');
+        if (![a, b, c, d, v].every(x => x.token && x.id)) problems.push('could not create the owner / three strangers / vet accounts');
+        else {
+          // 1. A person may delete their OWN upload; nobody else may (and a made-up key gets the same refusal).
+          const png = Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64'));
+          const form = new FormData();
+          form.append('file', new Blob([png], { type: 'image/png' }), 'probe.png');
+          const up = await fetch(`${apiBase}/files/upload-image`, { method: 'POST', headers: { Authorization: `Bearer ${a.token}` }, body: form });
+          const upJson = await up.json().catch(() => null);
+          const key = upJson?.key;
+          if (up.status !== 201 || !key) problems.push(`[files] the owner could not upload a photo (HTTP ${up.status})`);
+          else {
+            const other = await http('DELETE', `${apiBase}/files/${key}`, null, b.token);
+            const madeUp = await http('DELETE', `${apiBase}/files/verify/does-not-exist-${Date.now()}.png`, null, b.token);
+            if (other.status < 400) problems.push('[files] a stranger deleted another person\'s uploaded file');
+            if (other.status !== madeUp.status || codeOf(other) !== codeOf(madeUp)) problems.push(`[files] a real file and a made-up key get different refusals (${other.status}/${codeOf(other)} vs ${madeUp.status}/${codeOf(madeUp)}) - file keys can be probed`);
+            const own = await http('DELETE', `${apiBase}/files/${key}`, null, a.token);
+            if (own.status !== 200) problems.push(`[files] the uploader could not delete their own file (HTTP ${own.status})`);
+          }
+
+          // 2. Reviews: only the reviewed vet replies (and may change the reply); one helpful per person (a toggle); one report per person with a
+          //    reason; three different reporters flag it for the admin; the reviewer cannot mark or report their own.
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public; INSERT INTO reviews (reviewer_id, veterinarian_id, rating, comment) VALUES ('${a.id}', '${v.id}', 5, 'Verify review');`);
+          const reviewId = psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.reviews WHERE reviewer_id = '${a.id}' AND veterinarian_id = '${v.id}' LIMIT 1`)[0]?.id;
+          if (!reviewId) problems.push('[reviews] could not create the probe review');
+          else {
+            const rv = `${apiBase}/reviews/${reviewId}`;
+            const notMine = await http('PUT', `${rv}/vet-response`, { response: 'Hijack' }, b.token);
+            if (notMine.status < 400 || codeOf(notMine) !== 'RV_NOT_YOUR_REVIEW') problems.push(`[reviews] a person who is not the reviewed vet could reply (HTTP ${notMine.status} ${codeOf(notMine)})`);
+            const ownerReply = await http('PUT', `${rv}/vet-response`, { response: 'Hijack' }, a.token);
+            if (ownerReply.status < 400) problems.push('[reviews] the reviewer could reply to their own review as if they were the vet');
+            const r1 = await http('PUT', `${rv}/vet-response`, { response: 'Thank you' }, v.token);
+            const r2 = await http('PUT', `${rv}/vet-response`, { response: 'Thank you, see you again' }, v.token);
+            const stored = psqlJson('verifydb', `SELECT response_from_vet AS r FROM ${SCHEMA}.reviews WHERE id = '${reviewId}'`)[0]?.r;
+            if (r1.status !== 200 || r2.status !== 200 || stored !== 'Thank you, see you again') problems.push(`[reviews] the vet could not reply and then change the reply (HTTP ${r1.status}/${r2.status}, stored "${stored}")`);
+            const empty = await http('PUT', `${rv}/vet-response`, { response: '   ' }, v.token);
+            if (empty.status !== 400) problems.push(`[reviews] an empty reply was accepted (HTTP ${empty.status})`);
+
+            const ownHelp = await http('POST', `${rv}/helpful`, {}, a.token);
+            if (ownHelp.status < 400 || codeOf(ownHelp) !== 'RV_OWN_REVIEW') problems.push(`[reviews] the reviewer marked their own review helpful (HTTP ${ownHelp.status})`);
+            const h1 = await http('POST', `${rv}/helpful`, {}, b.token);
+            const listed = await http('GET', `${apiBase}/reviews/vet/${v.id}`, null, b.token);
+            const mine = (listed.json?.data?.reviews || []).find(x => x.id === reviewId);
+            const h2 = await http('POST', `${rv}/helpful`, {}, b.token);
+            if (h1.json?.data?.marked !== true || h1.json?.data?.helpfulCount !== 1) problems.push(`[reviews] first "helpful" should count 1, got ${JSON.stringify(h1.json?.data)}`);
+            if (mine?.markedHelpful !== true) problems.push('[reviews] the list does not tell the reader they already marked it helpful');
+            if (h2.json?.data?.marked !== false || h2.json?.data?.helpfulCount !== 0) problems.push(`[reviews] pressing "helpful" again should take it back (0), got ${JSON.stringify(h2.json?.data)}`);
+
+            const noReason = await http('POST', `${rv}/report`, {}, b.token);
+            if (noReason.status !== 400) problems.push(`[reviews] a report with no reason was accepted (HTTP ${noReason.status})`);
+            const rp1 = await http('POST', `${rv}/report`, { reason: 'spam' }, b.token);
+            await http('POST', `${rv}/report`, { reason: 'spam' }, b.token);
+            await http('POST', `${rv}/report`, { reason: 'spam' }, b.token);
+            const afterOne = psqlJson('verifydb', `SELECT report_count AS n, status FROM ${SCHEMA}.reviews WHERE id = '${reviewId}'`)[0];
+            if (rp1.status !== 200 || Number(afterOne?.n) !== 1 || afterOne?.status !== 'active') problems.push(`[reviews] one person pressing Report three times must count once and not flag it: ${JSON.stringify(afterOne)}`);
+            await http('POST', `${rv}/report`, { reason: 'fake' }, c.token);
+            await http('POST', `${rv}/report`, { reason: 'inappropriate' }, d.token);
+            const afterThree = psqlJson('verifydb', `SELECT report_count AS n, status FROM ${SCHEMA}.reviews WHERE id = '${reviewId}'`)[0];
+            if (Number(afterThree?.n) !== 3 || afterThree?.status !== 'flagged') problems.push(`[reviews] three different reporters should flag the review for the admin: ${JSON.stringify(afterThree)}`);
+            const adminLogin = await http('POST', `${apiBase}/auth/login`, { email: 'admin@vetcare.com', password: 'Admin@123' });
+            const adminTok = adminLogin.json?.data?.token;
+            if (adminTok) {
+              const q = await http('GET', `${apiBase}/admin/reviews?status=flagged&limit=100`, null, adminTok);
+              const row = (q.json?.data?.items || []).find(x => x.id === reviewId);
+              if (!row || !(row.reportReasons || []).includes('spam')) problems.push('[reviews] the admin moderation list does not show the reported review with its reasons');
+            }
+          }
+
+          // 3. ID-card lookup: a vet with no booking gets ONE neutral refusal - the same for a real card and a made-up one.
+          const animal = await http('POST', `${apiBase}/animals`, { name: 'Self Probe', species: 'Dog', gender: 'female' }, a.token);
+          const animalId = animal.json?.data?.id;
+          const uid = (await http('GET', `${apiBase}/animals/${animalId}`, null, a.token)).json?.data?.uniqueId;
+          if (!animalId || !uid) problems.push('[lookup] could not create the probe animal');
+          else {
+            const real = await http('GET', `${apiBase}/animals/search/by-uid?uid=${encodeURIComponent(uid)}`, null, v.token);
+            const fake = await http('GET', `${apiBase}/animals/search/by-uid?uid=VC-DOG-00-999999`, null, v.token);
+            if (real.status !== 404 || fake.status !== 404 || codeOf(real) !== 'AL_NOT_SHARED' || codeOf(fake) !== 'AL_NOT_SHARED' || msgOf(real) !== msgOf(fake)) {
+              problems.push(`[lookup] an unbooked vet must get the SAME neutral refusal for a real and a made-up card: ${real.status}/${codeOf(real)}/"${msgOf(real)}" vs ${fake.status}/${codeOf(fake)}/"${msgOf(fake)}"`);
+            }
+            const ac = await http('GET', `${apiBase}/animals/${animalId}/access-check`, null, v.token);
+            const acOwner = await http('GET', `${apiBase}/animals/${animalId}/access-check`, null, a.token);
+            if (ac.json?.data?.allowed !== false || ac.json?.data?.canChange !== false || Object.keys(ac.json?.data || {}).some(k => !['allowed', 'canChange'].includes(k))) problems.push(`[lookup] access-check must answer only yes/no for an unbooked vet: ${JSON.stringify(ac.json?.data)}`);
+            if (acOwner.json?.data?.allowed !== true || acOwner.json?.data?.canChange !== true) problems.push(`[lookup] the owner's own access-check should be yes/yes: ${JSON.stringify(acOwner.json?.data)}`);
+          }
+
+          // 4. My own booking history: a person with no bookings gets an empty list, never someone else's.
+          const logs = await http('GET', `${apiBase}/action-logs/my`, null, b.token);
+          if (logs.status !== 200 || !Array.isArray(logs.json?.data) || logs.json.data.length !== 0) problems.push(`[history] a person with no bookings must get an empty history (HTTP ${logs.status}, ${JSON.stringify(logs.json?.data)?.slice(0, 80)})`);
+
+          // 5. Farm: a wrong entry is deleted by who wrote it or the farm manager; a stranger gets the same refusal as for an id that does not exist.
+          const tom = (await http('POST', `${apiBase}/auth/login`, { email: 'tom.wilson@example.com', password: 'Demo@123' })).json?.data?.token;
+          const ent = psqlJson('verifydb', `SELECT e.id FROM ${SCHEMA}.enterprises e JOIN ${SCHEMA}.users u ON u.id = e.owner_id WHERE u.email = 'tom.wilson@example.com' ORDER BY e.created_at LIMIT 1`)[0]?.id;
+          const herd = ent ? psqlJson('verifydb', `SELECT id FROM ${SCHEMA}.animal_groups WHERE enterprise_id = '${ent}' AND species = 'Cattle' LIMIT 1`)[0]?.id : null;
+          if (!tom || !ent || !herd) problems.push('[farm] could not set up the seeded farmer and a cattle herd');
+          else {
+            const rec = await http('POST', `${apiBase}/farm-records`, { enterpriseId: ent, recordType: 'feed', groupId: herd, quantity: 7, recordDate: '2026-01-05' }, tom);
+            const recId = rec.json?.data?.id;
+            if (!recId) problems.push(`[farm] could not write a probe entry (HTTP ${rec.status} ${msgOf(rec)})`);
+            else {
+              const sDel = await http('DELETE', `${apiBase}/farm-records/${recId}`, null, b.token);
+              const sMissing = await http('DELETE', `${apiBase}/farm-records/00000000-0000-4000-8000-0000000000aa`, null, b.token);
+              if (sDel.status < 400) problems.push('[farm] a stranger deleted another farm\'s entry');
+              if (sDel.status !== sMissing.status || msgOf(sDel) !== msgOf(sMissing)) problems.push(`[farm] a real entry and a missing id get different refusals for a stranger (${sDel.status} vs ${sMissing.status}) - entry ids can be probed`);
+              const sSum = await http('GET', `${apiBase}/farm-records/summary?enterpriseId=${ent}&days=30`, null, b.token);
+              if (sSum.status < 400) problems.push('[farm] a stranger read another farm\'s 30-day totals');
+              const sum = await http('GET', `${apiBase}/farm-records/summary?enterpriseId=${ent}&days=3650`, null, tom);
+              if (sum.status !== 200 || !Array.isArray(sum.json?.data?.items)) problems.push(`[farm] the farmer could not read the totals (HTTP ${sum.status})`);
+              const del = await http('DELETE', `${apiBase}/farm-records/${recId}`, null, tom);
+              const gone = psqlJson('verifydb', `SELECT COUNT(*) AS n FROM ${SCHEMA}.farm_daily_records WHERE id = '${recId}'`)[0]?.n;
+              if (del.status !== 200 || Number(gone) !== 0) problems.push(`[farm] the farmer could not delete their own entry (HTTP ${del.status})`);
+            }
+
+            // 6. Batch: a correction needs a reason and its batch must be this group's own; a stranger changes nothing; another farm's animal cannot be kept.
+            const evt = `${apiBase}/animal-groups/${herd}/population-events`;
+            const before = Number(psqlJson('verifydb', `SELECT current_count AS n FROM ${SCHEMA}.animal_groups WHERE id = '${herd}'`)[0]?.n);
+            const strangerEvt = await http('POST', evt, { eventType: 'adjustment', quantity: 1, reason: 'Hijack' }, b.token);
+            const noReason = await http('POST', evt, { eventType: 'adjustment', quantity: 1 }, tom);
+            const foreignCycle = await http('POST', evt, { eventType: 'adjustment', quantity: 1, reason: 'Probe', cycleId: '00000000-0000-4000-8000-0000000000bb' }, tom);
+            const badType = await http('POST', evt, { eventType: 'teleport', quantity: 1, reason: 'Probe' }, tom);
+            const after = Number(psqlJson('verifydb', `SELECT current_count AS n FROM ${SCHEMA}.animal_groups WHERE id = '${herd}'`)[0]?.n);
+            if (strangerEvt.status < 400) problems.push('[batch] a stranger changed another farm\'s head count');
+            if (noReason.status !== 400) problems.push(`[batch] a count correction without a reason was accepted (HTTP ${noReason.status})`);
+            if (foreignCycle.status !== 400) problems.push(`[batch] a batch that is not this group's own was accepted (HTTP ${foreignCycle.status})`);
+            if (badType.status !== 400) problems.push(`[batch] an unknown kind of head-count change was accepted (HTTP ${badType.status})`);
+            if (after !== before) problems.push(`[batch] refused corrections still changed the head count (${before} -> ${after})`);
+            const promoteForeign = await http('POST', `${apiBase}/animal-groups/${herd}/promote`, { animalId }, tom);
+            if (promoteForeign.status < 400) problems.push('[batch] a farmer promoted ANOTHER person\'s animal out of their herd');
+          }
+
+          // 7. Sign out everywhere: every sign-in issued before now stops working; signing in again works at once.
+          const x = await signUp('pet_owner');
+          const adminLogin2 = await http('POST', `${apiBase}/auth/login`, { email: 'admin@vetcare.com', password: 'Admin@123' });
+          const adminTok2 = adminLogin2.json?.data?.token;
+          if (!x.token || !adminTok2) problems.push('[sign-out] could not set up the person and the admin');
+          else {
+            const alive = await http('GET', `${apiBase}/auth/profile`, null, x.token);
+            await sleep(1100);
+            const notAdmin = await http('POST', `${apiBase}/admin/compliance/revoke-sessions/${x.id}`, {}, b.token);
+            const noWhy = await http('POST', `${apiBase}/admin/compliance/revoke-sessions/${x.id}`, {}, adminTok2);
+            if (noWhy.status !== 400) problems.push(`signing someone out without saying why must be refused (HTTP ${noWhy.status})`);
+            const rev = await http('POST', `${apiBase}/admin/compliance/revoke-sessions/${x.id}`, { reason: 'Verify: lost phone' }, adminTok2);
+            const dead = await http('GET', `${apiBase}/auth/profile`, null, x.token);
+            const again = await http('POST', `${apiBase}/auth/login`, { email: x.email, password: 'Password1' });
+            const back = await http('GET', `${apiBase}/auth/profile`, null, again.json?.data?.token);
+            if (alive.status !== 200) problems.push(`[sign-out] the new sign-in did not work before the test (HTTP ${alive.status})`);
+            if (notAdmin.status < 400) problems.push('[sign-out] a non-admin signed another person out everywhere');
+            if (rev.status !== 200 || dead.status !== 401) problems.push(`[sign-out] after "sign out everywhere" the old sign-in must stop working (revoke HTTP ${rev.status}, old token HTTP ${dead.status})`);
+            if (back.status !== 200) problems.push(`[sign-out] signing in again after being signed out must work at once (HTTP ${back.status})`);
+          }
+        }
+      } catch (e) { problems.push(`PHASE 6n threw: ${String(e.message).slice(0, 200)}`); }
+      if (problems.length) fail('The self-service screens\' routes misbehave (own files, reviews, ID-card lookup, farm entries, batch, sign out everywhere).', problems);
+      else ok('own files only; review reply/helpful/report one per person; neutral ID-card refusal; farm entry delete + totals gated; batch corrections gated; sign out everywhere really signs out');
+    }
+
+    // ── PHASE 6p: farm "create" routes belong to the farm's own people, and an owner sees what the vet wrote about their animal ──
+    if (serverHealthy && port) {
+      step('PHASE 6p Farm create routes are closed to strangers; an owner sees the record their vet wrote');
+      const apiBase = `http://127.0.0.1:${port}/api/v1`;
+      const problems = [];
+      let seq = (Math.floor(Date.now() / 1000) % 100000000) + 96000;
+      const msgOf = (r) => r.json?.message || r.json?.error?.message || (typeof r.json?.error === 'string' ? r.json.error : '') || '';
+      const signUp = async (role) => {
+        const email = `verify.p.${role}.${Date.now()}.${seq}@example.com`;
+        const body = { firstName: 'Gate', lastName: 'Verify', email, phone: `9${String(seq++).padStart(9, '0')}`, password: 'Password1', confirmPassword: 'Password1', role, acceptTerms: true };
+        if (role === 'veterinarian') body.licenseNumber = 'VERIFY-LIC-6P';
+        await http('POST', `${apiBase}/auth/register`, body);
+        if (role === 'veterinarian') psql('verifydb', `SET search_path TO ${SCHEMA}, public; UPDATE users SET account_status = 'active', is_active = true WHERE email = '${email}';`);
+        const login = await http('POST', `${apiBase}/auth/login`, { email, password: 'Password1' });
+        return { token: login.json?.data?.token, id: login.json?.data?.user?.id };
+      };
+      try {
+        const farmer = await signUp('farmer');
+        const stranger = await signUp('farmer');
+        const owner = await signUp('pet_owner');
+        const vet = await signUp('veterinarian');
+        if (!farmer.token || !stranger.token || !owner.token || !vet.token) problems.push('could not create the PHASE 6p accounts');
+        else {
+          const ent = require('crypto').randomUUID();
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public; INSERT INTO enterprises (id, name, enterprise_type, owner_id) VALUES ('${ent}', 'Verify Gate Farm', 'dairy', '${farmer.id}');`);
+          const posts = ['alerts/rules', 'disease-predictions', 'outbreak-zones', 'genetic-profiles', 'lineage-pairs', 'iot/sensors', 'iot/readings',
+            'supply-chain/batches', 'supply-chain/events', 'supply-chain/qr-codes', 'workforce/tasks', 'workforce/shifts', 'reports/templates',
+            'reports/generate', 'digital-twins', 'simulations', 'sustainability/metrics', 'sustainability/goals', 'geospatial/zones', 'geospatial/events'];
+          for (const p of posts) {
+            const r = await http('POST', `${apiBase}/enterprises/${ent}/${p}`, { name: 'Planted', title: 'Planted' }, stranger.token);
+            if (r.status !== 403) problems.push(`a stranger POSTing to another farm's ${p} was not refused (HTTP ${r.status}: ${msgOf(r).slice(0, 80)})`);
+            else if (msgOf(r).length < 25) problems.push(`the refusal for ${p} has no plain words`);
+          }
+          for (const p of ['medical-records', 'medical-records/stats', 'vaccinations']) {
+            const r = await http('GET', `${apiBase}/enterprises/${ent}/${p}`, null, stranger.token);
+            if (r.status !== 403) problems.push(`a stranger READ another farm's ${p} (HTTP ${r.status})`);
+            const mine = await http('GET', `${apiBase}/enterprises/${ent}/${p}`, null, farmer.token);
+            if (mine.status !== 200) problems.push(`the farm owner was refused their own ${p} (HTTP ${mine.status})`);
+          }
+
+          // The owner sees what the vet wrote about their animal; a stranger and an unbooked vet do not.
+          const an = await http('POST', `${apiBase}/animals`, { name: 'Gate Dog', species: 'Dog', gender: 'female', dateOfBirth: '2022-01-01' }, owner.token);
+          const animalId = an.json?.data?.id;
+          if (!animalId) problems.push(`could not create the PHASE 6p animal (HTTP ${an.status})`);
+          else {
+            const recId = require('crypto').randomUUID();
+            psql('verifydb', `SET search_path TO ${SCHEMA}, public;
+              INSERT INTO bookings (veterinarian_id, pet_owner_id, animal_id, scheduled_date, time_slot_start, time_slot_end, status)
+                VALUES ('${vet.id}', '${owner.id}', '${animalId}', CURRENT_DATE, '10:00', '10:30', 'confirmed');`);
+            const made = await http('POST', `${apiBase}/medical-records`, { animalId, recordType: 'diagnosis', title: 'Vet wrote this', content: 'Skin check' }, vet.token);
+            const madeId = made.json?.data?.id;
+            if (!madeId) problems.push(`the booked vet could not write a record (HTTP ${made.status}: ${msgOf(made).slice(0, 100)})`);
+            else {
+              for (const [who, u] of [['the animal owner', owner], ['the vet', vet]]) {
+                const list = await http('GET', `${apiBase}/medical-records?animalId=${animalId}`, null, u.token);
+                if (!(list.json?.data?.records || []).some(r => r.id === madeId)) problems.push(`${who} does not see the vet's record in the animal's list (HTTP ${list.status})`);
+                const one = await http('GET', `${apiBase}/medical-records/${madeId}`, null, u.token);
+                if (one.status !== 200) problems.push(`${who} could not open the vet's record (HTTP ${one.status}: ${msgOf(one).slice(0, 80)})`);
+              }
+              const all = await http('GET', `${apiBase}/medical-records`, null, owner.token);
+              if (!(all.json?.data?.records || []).some(r => r.id === madeId)) problems.push('the owner\'s own records page does not show the vet\'s record');
+              const peek = await http('GET', `${apiBase}/medical-records?animalId=${animalId}`, null, stranger.token);
+              if ((peek.json?.data?.records || []).some(r => r.id === madeId)) problems.push('a stranger listed another owner\'s medical record');
+              const open = await http('GET', `${apiBase}/medical-records/${madeId}`, null, stranger.token);
+              if (open.status < 400) problems.push('a stranger opened another owner\'s medical record');
+              psql('verifydb', `SET search_path TO ${SCHEMA}, public; UPDATE medical_records SET is_confidential = true WHERE id = '${madeId}';`);
+              const hidden = await http('GET', `${apiBase}/medical-records?animalId=${animalId}`, null, owner.token);
+              if ((hidden.json?.data?.records || []).some(r => r.id === madeId)) problems.push('a confidential record is listed for someone who is not on it');
+            }
+          }
+        }
+        // Gates found by the independent audit: a reminder on someone else's animal, another farm's sensor readings, and a hospital
+        // outside any network whose cases and admissions only its own people may change.
+        {
+          const u = () => require('crypto').randomUUID();
+          const a2 = await signUp('pet_owner');
+          const other = await signUp('pet_owner');
+          const an2 = await http('POST', `${apiBase}/animals`, { name: 'Gate Cat', species: 'Cat', gender: 'male', dateOfBirth: '2023-01-01' }, a2.token);
+          const rem = await http('POST', `${apiBase}/wellness/reminders`, { animalId: an2.json?.data?.id, reminderType: 'checkup', title: 'Planted', dueDate: '2027-01-01' }, other.token);
+          if (rem.status < 400) problems.push('a stranger attached a wellness reminder to another person\'s animal');
+          const farm2 = u(); const sensor = u(); const hosp = u(); const kase = u(); const adm = u();
+          psql('verifydb', `SET search_path TO ${SCHEMA}, public;
+            INSERT INTO enterprises (id, name, enterprise_type, owner_id) VALUES ('${farm2}', 'Verify Gate Farm 2', 'dairy', '${a2.id}');
+            INSERT INTO iot_sensors (id, enterprise_id, sensor_name, sensor_type) VALUES ('${sensor}', '${farm2}', 'Gate probe', 'temperature');
+            INSERT INTO vet_hospitals (id, name, owner_id) VALUES ('${hosp}', 'Verify Standalone Hospital', '${a2.id}');
+            INSERT INTO workflow_cases (id, hospital_id) VALUES ('${kase}', '${hosp}');
+            INSERT INTO inpatient_admissions (id, hospital_id, animal_id, owner_id, admitted_by) VALUES ('${adm}', '${hosp}', '${an2.json?.data?.id}', '${a2.id}', '${a2.id}');`);
+          const readings = await http('GET', `${apiBase}/iot/sensors/${sensor}/readings`, null, other.token);
+          if (readings.status !== 403) problems.push(`a stranger read another farm's sensor readings (HTTP ${readings.status})`);
+          for (const [label, method, url, body] of [['change a case', 'PUT', `/workflow/cases/${kase}`, { diagnosis: 'Planted' }], ['read a case', 'GET', `/workflow/cases/${kase}`, null],
+            ['change an admission', 'PUT', `/inpatient/${adm}`, { careInstructions: 'Planted' }]]) {
+            const r = await http(method, `${apiBase}${url}`, body, other.token);
+            if (r.status !== 403) problems.push(`a stranger could ${label} of a hospital they do not work for (HTTP ${r.status})`);
+          }
+          const own = await http('PUT', `${apiBase}/inpatient/${adm}`, { careInstructions: 'Owner of the hospital' }, a2.token);
+          if (own.status >= 400) problems.push(`the hospital's own owner was refused (HTTP ${own.status}: ${msgOf(own).slice(0, 80)})`);
+        }
+      } catch (e) { problems.push(`PHASE 6p threw: ${String(e.message).slice(0, 200)}`); }
+      if (problems.length) fail('Farm create routes or record visibility misbehave on the real server.', problems);
+      else ok('strangers refused on every farm create route and farm health list; the owner and the booked vet see the vet\'s record; confidential stays with its authors');
+    }
+
 
     // ── PHASE 7: the browser ──
     let sweepAccounts = [];

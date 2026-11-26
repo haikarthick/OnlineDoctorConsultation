@@ -1,0 +1,29 @@
+{
+  "batchCorrections": {
+    "correct": "Correct the count",
+    "keep": "Keep one as an individual animal",
+    "correctHint": "The app counts {{count}} in this batch. If you counted again and the number is different, enter the real number. Deaths and sales are written in Daily records, not here.",
+    "realCount": "How many are there really?",
+    "moreBy": "This adds {{count}} to the count.",
+    "fewerBy": "This takes {{count}} off the count.",
+    "reasonLabel": "Why is the count different?",
+    "reasonPlaceholder": "For example: counted the shed again",
+    "saveCorrection": "Save the correct count",
+    "corrected": "The count is now {{count}}. Your reason is saved in the ledger.",
+    "keepHint": "Take one animal out of this batch and give it its own record, for example a breeding bird or a calf you want to follow closely. The batch count goes down by one.",
+    "keepName": "Name or tag number",
+    "keepNamePlaceholder": "For example: Lakshmi or tag 214",
+    "gender": "Male or female?",
+    "female": "Female",
+    "male": "Male",
+    "unknown": "Not sure",
+    "keepSave": "Keep as an individual",
+    "keepReason": "Kept as an individual animal: {{name}}",
+    "kept": "{{name}} now has its own record and is no longer counted in the batch.",
+    "failed": "This could not be saved, so nothing was changed. Please try again.",
+    "errors": {
+      "BM_ANIMAL_NOT_ON_FARM": "That animal is not on this farm, so it cannot be kept from this batch.",
+      "BM_ALREADY_KEPT": "This animal was already kept as an individual."
+    }
+  }
+}

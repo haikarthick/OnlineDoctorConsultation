@@ -163,11 +163,3 @@ export const updateMasterRecordTypeSchema = Joi.object({
   sortOrder: Joi.number().integer().optional(),
   ...localeLabelFields,
 });
-
-export const resolveFarmProfileQuerySchema = Joi.object({
-  species: Joi.string().max(50).required(),
-  animalClass: Joi.string().max(50).allow('').optional(),
-  gender: Joi.string().max(20).allow('').optional(),
-  managementMode: Joi.string().valid('individual', 'batch').allow('').optional(),
-  groupType: Joi.string().max(50).allow('').optional(),
-});

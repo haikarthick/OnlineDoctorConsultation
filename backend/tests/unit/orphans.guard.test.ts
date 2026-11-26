@@ -20,6 +20,10 @@ const ALLOWLIST = path.join(__dirname, 'orphans.allowlist.json');
 const NOT_CALLED_BY_THE_APP: Array<{ test: RegExp; why: string }> = [
   { test: /\/webhooks?\b/, why: 'payment gateway / provider webhooks call the server, not a screen' },
   { test: /^\/health|^\/ready|^\/live/, why: 'platform health probes' },
+  { test: /^\/public\/marketplace\//, why: 'the signed-out marketplace pages call these with plain axios and the API base URL, not through the signed-in client' },
+  { test: /^\/auth\/(logout|refresh)$/, why: 'AuthContext (fetch) and the token refresher in services/api/core.ts (axios) build the URL from the API base variable' },
+  { test: /^\/(debug\/db-state|repair-schema)$/, why: 'operator-only emergency routes behind EMERGENCY_DIAGNOSTIC_TOKEN, called with curl, never by a screen' },
+  { test: /^\/nutrition\/admin\//, why: 'NutritionAdmin builds its paths from variables (nutritionAdminList / nutritionAdminSave in services/api/modules/nutrition.ts)' },
 ];
 
 function walk(dir: string, accept: (f: string) => boolean, out: string[] = []): string[] {
@@ -58,7 +62,7 @@ function frontendPaths(): string[] {
 }
 
 function toRegex(route: string): RegExp {
-  const pattern = route.split('/').map(seg => (seg.startsWith(':') ? '[^/]+' : seg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))).join('/');
+  const pattern = route.split('/').map(seg => (seg.startsWith(':') ? '[^/]+' : seg === '*' ? '.+' : seg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))).join('/');
   return new RegExp(`^${pattern}$`);
 }
 

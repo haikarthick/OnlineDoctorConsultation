@@ -372,8 +372,10 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       ])
       if (animalRes?.data) setAnimalInfo(animalRes.data)
       setMedicalRecords(recordsRes?.data?.items || recordsRes?.data?.records || (Array.isArray(recordsRes?.data) ? recordsRes.data : []))
-      setVaccinations(vaccsRes?.data?.items || vaccsRes?.data?.vaccinations || (Array.isArray(vaccsRes?.data) ? vaccsRes.data : []))
-      setAllergies(allergiesRes?.data?.items || allergiesRes?.data?.allergies || (Array.isArray(allergiesRes?.data) ? allergiesRes.data : []))
+      // An entry marked "entered by mistake" is history: the vet must never act on it (a false allergy, a dose that was never given).
+      const real = (rows: any[]) => rows.filter(r => !(r?.enteredByMistakeAt || r?.entered_by_mistake_at))
+      setVaccinations(real(vaccsRes?.data?.records || vaccsRes?.data?.items || vaccsRes?.data?.vaccinations || (Array.isArray(vaccsRes?.data) ? vaccsRes.data : [])))
+      setAllergies(real(allergiesRes?.data?.items || allergiesRes?.data?.allergies || allergiesRes?.data?.records || (Array.isArray(allergiesRes?.data) ? allergiesRes.data : [])))
       setLabResults(labRes?.data?.items || labRes?.data?.results || (Array.isArray(labRes?.data) ? labRes.data : []))
       setHistoryLoaded(true)
     } catch { /* ignore */ }

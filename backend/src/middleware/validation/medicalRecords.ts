@@ -43,7 +43,7 @@ export const updateAnimalSchema = createAnimalSchema.fork(
 ).min(1);
 
 // ─── Vet Profile ─────────────────────────────────────────────
-export const createVetProfileSchema = Joi.object({
+const createVetProfileSchema = Joi.object({
   licenseNumber: shortText(100).required(),
   specializations: Joi.array().items(Joi.string().max(100)).optional(),
   qualifications: Joi.array().items(Joi.string().max(200)).optional(),
@@ -102,12 +102,6 @@ export const createMedicalRecordSchema = Joi.object({
 // Exactly one subject, rejected at the edge so a bad request never reaches the DB CHECK.
 }).xor('animalId', 'groupId');
 
-export const updateMedicalRecordSchema = createMedicalRecordSchema.fork(
-  ['recordType', 'title', 'content'], (schema) => schema.optional()
-).keys({
-  changeReason: shortText(500).optional().allow('', null),
-}).min(1);
-
 export const deleteMedicalRecordSchema = Joi.object({
   reason: shortText(500).optional().allow('', null),
 });
@@ -137,10 +131,6 @@ export const createVaccinationSchema = Joi.object({
 // Exactly one subject - see createMedicalRecordSchema.
 }).xor('animalId', 'groupId');
 
-export const updateVaccinationSchema = createVaccinationSchema.fork(
-  ['animalId', 'vaccineName', 'dateAdministered'], (schema) => schema.optional()
-).min(1);
-
 // ─── Weight History ──────────────────────────────────────────
 export const addWeightSchema = Joi.object({
   animalId: requiredUuid,
@@ -161,9 +151,9 @@ export const createAllergySchema = Joi.object({
   notes: longText(2000).optional().allow('', null),
 });
 
-export const updateAllergySchema = createAllergySchema.fork(
-  ['animalId', 'allergen'], (schema) => schema.optional()
-).min(1);
+// ─── Corrections (a saved record is never edited in place) ────
+export const addAddendumSchema = Joi.object({ note: longText(2000).required() });
+export const markMistakeSchema = Joi.object({ reason: shortText(500).required() });
 
 // ─── Lab Result ──────────────────────────────────────────────
 export const createLabResultSchema = Joi.object({

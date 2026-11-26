@@ -1,0 +1,19 @@
+{
+  "accountTools": {
+    "signOutAll": "Sign out on all my devices",
+    "signOutAllConfirm": "You will be signed out on every phone and computer, this one too. You can sign in again straight away.",
+    "signOutAllAction": "Sign out everywhere",
+    "signOutAllFailed": "We could not sign you out everywhere, so nothing changed. Check your connection and try again.",
+    "historyTitle": "Past stock changes for this medicine",
+    "historyEmpty": "No stock changes yet.",
+    "historyFailed": "We could not load the past changes. Close this and try again.",
+    "historyLine": "{{type}} {{qty}} by {{who}} on {{date}}",
+    "policiesButton": "Policies accepted",
+    "policiesTitle": "Policies accepted by {{name}}",
+    "policiesEmpty": "This person has not accepted any policy yet.",
+    "policiesFailed": "We could not load the accepted policies. Please try again.",
+    "policiesLine": "Version {{version}}, accepted {{date}}",
+    "signOutReason": "Why are you signing them out? (kept in the audit log)",
+    "showMoreAnimals": "Show more animals ({{count}} more)"
+  }
+}

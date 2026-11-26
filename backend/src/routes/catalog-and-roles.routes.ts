@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { requireAnimal, requireRecordAccess } from '../middleware/recordAccess';
 import { authMiddleware, roleMiddleware, validateBody, AuthRequest } from '../middleware/auth';
 import { asyncHandler } from '../utils/errorHandler';
+import { ValidationError } from '../utils/errors';
 import database from '../utils/database';
 import { uploadAny } from '../middleware/upload';
 import VetHospitalController from '../controllers/VetHospitalController';
@@ -293,8 +294,10 @@ router.post('/animals/:animalId/vaccine-assignments', authMiddleware, requireAni
 }));
 
 router.patch('/animals/:animalId/vaccine-assignments/:protocolId/waive', authMiddleware, requireAnimal('params:animalId'), asyncHandler(async (req: Request, res: Response) => {
-  const { reason } = req.body;
-  await VaccineProtocolService.waiverProtocol(req.params.animalId, req.params.protocolId, reason || 'Owner waiver');
+  // Skipping a plan is a health decision: the reason is required and kept (it shows on the passport).
+  const reason = String(req.body?.reason || '').trim();
+  if (reason.length < 3) throw new ValidationError('Say why this plan is being skipped (for example "not needed on this farm" or "vet advised against it").');
+  await VaccineProtocolService.waiverProtocol(req.params.animalId, req.params.protocolId, reason);
   res.json({ success: true, message: 'Protocol waived' });
 }));
 

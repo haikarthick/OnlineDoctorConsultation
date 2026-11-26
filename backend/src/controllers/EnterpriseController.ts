@@ -19,14 +19,6 @@ class EnterpriseController {
     res.status(201).json({ success: true, data: enterprise });
   }
 
-  async getEnterprise(req: AuthRequest, res: Response): Promise<void> {
-    const enterprise = await EnterpriseService.getEnterprise(req.params.id);
-    if (req.userRole !== 'admin') {
-      await FarmAccessService.assert(req.params.id, { userId: req.userId!, role: req.userRole }, 'read');
-    }
-    res.json({ success: true, data: enterprise });
-  }
-
   async listEnterprises(req: AuthRequest, res: Response): Promise<void> {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
     const offset = parseInt(req.query.offset as string) || 0;
@@ -62,15 +54,6 @@ class EnterpriseController {
     await this.ensureEnterpriseAccess(req.params.id, req.userId!, req.userRole!);
     const members = await EnterpriseService.listMembers(req.params.id);
     res.json({ success: true, data: members });
-  }
-
-  async addMember(req: AuthRequest, res: Response): Promise<void> {
-    const actorRole = await FarmAccessService.assert(req.params.id, { userId: req.userId!, role: req.userRole }, 'manage_team');
-    const { userId, role, title } = req.body;
-    if (!userId || !role) throw new ValidationError('userId and role are required');
-    FarmAccessService.assertTeamChange(actorRole, { kind: 'add', newRole: role });
-    const member = await EnterpriseService.addMember(req.params.id, userId, role, title);
-    res.status(201).json({ success: true, data: member });
   }
 
   async updateMember(req: AuthRequest, res: Response): Promise<void> {
@@ -113,12 +96,6 @@ class EnterpriseController {
     await this.ensureEnterpriseAccess(enterpriseId, req.userId!, req.userRole!, ['owner', 'manager', 'supervisor']);
     const group = await AnimalGroupService.createGroup(req.body);
     res.status(201).json({ success: true, data: group });
-  }
-
-  async getGroup(req: AuthRequest, res: Response): Promise<void> {
-    const group = await AnimalGroupService.getGroup(req.params.id);
-    await this.ensureEnterpriseAccess(group.enterpriseId, req.userId!, req.userRole!);
-    res.json({ success: true, data: group });
   }
 
   async listGroups(req: AuthRequest, res: Response): Promise<void> {
@@ -167,12 +144,6 @@ class EnterpriseController {
     await this.ensureEnterpriseAccess(enterpriseId, req.userId!, req.userRole!, ['owner', 'manager']);
     const location = await LocationService.createLocation(req.body);
     res.status(201).json({ success: true, data: location });
-  }
-
-  async getLocation(req: AuthRequest, res: Response): Promise<void> {
-    const location = await LocationService.getLocation(req.params.id);
-    await this.ensureEnterpriseAccess(location.enterpriseId, req.userId!, req.userRole!);
-    res.json({ success: true, data: location });
   }
 
   async listLocations(req: AuthRequest, res: Response): Promise<void> {
@@ -233,12 +204,6 @@ class EnterpriseController {
     res.json({ success: true, data: { status, message: `Movement ${status}` } });
   }
 
-  async getMovement(req: AuthRequest, res: Response): Promise<void> {
-    const movement = await MovementService.getMovement(req.params.id);
-    await this.ensureEnterpriseAccess(movement.enterpriseId, req.userId!, req.userRole!);
-    res.json({ success: true, data: movement });
-  }
-
   // ─── Treatment Campaigns ──────────────────────────────────
   async createCampaign(req: AuthRequest, res: Response): Promise<void> {
     const { enterpriseId, campaignType, name } = req.body;
@@ -246,12 +211,6 @@ class EnterpriseController {
     await this.ensureEnterpriseAccess(enterpriseId, req.userId!, req.userRole!, ['owner', 'manager', 'supervisor', 'farm_vet']);
     const campaign = await TreatmentCampaignService.createCampaign(req.body);
     res.status(201).json({ success: true, data: campaign });
-  }
-
-  async getCampaign(req: AuthRequest, res: Response): Promise<void> {
-    const campaign = await TreatmentCampaignService.getCampaign(req.params.id);
-    await this.ensureEnterpriseAccess(campaign.enterpriseId, req.userId!, req.userRole!);
-    res.json({ success: true, data: campaign });
   }
 
   async listCampaigns(req: AuthRequest, res: Response): Promise<void> {

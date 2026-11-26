@@ -9,6 +9,9 @@ import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
 import { userMessage } from '../utils/userMessage'
 import { appLocale } from '../utils/appLocale'
+import { RowActions, ConfirmDeleteSheet, EditFieldsSheet, textOrEmpty, numOrUndefined, type SheetField } from '../components/mobile/RowActions'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
+import { fieldText, mayChangeFarmRecords } from '../utils/recordForm'
 const ZONE_TYPES = ['pasture', 'barn', 'medical', 'quarantine', 'feeding', 'water', 'boundary', 'custom']
 const ZONE_COLORS: Record<string, string> = { pasture: '#22c55e', barn: '#a78bfa', medical: '#ef4444', quarantine: '#f97316', feeding: '#eab308', water: '#3b82f6', boundary: '#64748b', custom: '#ec4899' }
 const EVENT_TYPES = ['location_update', 'zone_entry', 'zone_exit', 'zone_breach', 'sos_alert']
@@ -27,6 +30,21 @@ const GeospatialAnalytics: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [editingZone, setEditingZone] = useState<GeofenceZone | null>(null)
+  const [deletingZone, setDeletingZone] = useState<GeofenceZone | null>(null)
+  const farmRole = useMyFarmRole(enterprises.find((en: any) => en.id === enterpriseId))
+  const mayChange = mayChangeFarmRecords(farmRole)
+  const zoneFields: SheetField[] = [
+    { key: 'name', label: t('geospatialAnalytics.zoneName'), type: 'text', required: true },
+    { key: 'zoneType', label: t('common.type'), type: 'select', options: ZONE_TYPES.map(z => ({ value: z, label: z })) },
+    { key: 'centerLat', label: t('geospatialAnalytics.centerLatitude'), type: 'number', step: '0.0001' },
+    { key: 'centerLng', label: t('geospatialAnalytics.centerLongitude'), type: 'number', step: '0.0001' },
+    { key: 'radiusMeters', label: t('geospatialAnalytics.radiusMeters'), type: 'number' },
+    { key: 'alertOnEntry', label: t('geospatialAnalytics.alertOnEntry'), type: 'checkbox' },
+    { key: 'alertOnExit', label: t('geospatialAnalytics.alertOnExit'), type: 'checkbox' },
+    { key: 'isRestricted', label: t('geospatialAnalytics.restrictedZone'), type: 'checkbox' },
+    { key: 'active', label: t('recordActions.geofence.zoneActive'), type: 'checkbox' },
+  ]
   const [showZoneForm, setShowZoneForm] = useState(false)
   const [showEventForm, setShowEventForm] = useState(false)
   const [trailAnimalId, setTrailAnimalId] = useState('')
@@ -298,6 +316,7 @@ const GeospatialAnalytics: React.FC = () => {
                   {z.alertOnEntry && <span>🔔 Entry Alerts</span>}
                   {z.alertOnExit && <span>🔕 Exit Alerts</span>}
                 </div>
+                {mayChange && <RowActions name={z.name} onEdit={() => setEditingZone(z)} onDelete={() => setDeletingZone(z)} />}
               </div>
             ))}
             {zones.length === 0 && <p className="si-40d2db53">{t('geospatialAnalytics.noZones')}</p>}
@@ -571,6 +590,35 @@ const GeospatialAnalytics: React.FC = () => {
           </div>
         </div>
       )}
+
+      <EditFieldsSheet
+        open={!!editingZone}
+        title={t('recordActions.geofence.editZone')}
+        fields={zoneFields}
+        initial={{
+          name: fieldText(editingZone?.name), zoneType: fieldText(editingZone?.zoneType) || 'pasture',
+          centerLat: fieldText(editingZone?.centerLat), centerLng: fieldText(editingZone?.centerLng), radiusMeters: fieldText(editingZone?.radiusMeters),
+          alertOnEntry: String(!!editingZone?.alertOnEntry), alertOnExit: String(!!editingZone?.alertOnExit),
+          isRestricted: String(!!editingZone?.isRestricted), active: String(editingZone?.status !== 'inactive'),
+        }}
+        onSave={values => apiService.updateGeofenceZone(editingZone!.id, {
+          name: textOrEmpty(values.name), zoneType: values.zoneType,
+          centerLat: numOrUndefined(values.centerLat, true), centerLng: numOrUndefined(values.centerLng, true),
+          radiusMeters: numOrUndefined(values.radiusMeters),
+          alertOnEntry: values.alertOnEntry === 'true', alertOnExit: values.alertOnExit === 'true',
+          isRestricted: values.isRestricted === 'true', status: values.active === 'true' ? 'active' : 'inactive',
+        })}
+        onClose={() => setEditingZone(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.saved')); fetchAll() }}
+      />
+      <ConfirmDeleteSheet
+        open={!!deletingZone}
+        name={deletingZone?.name || ''}
+        what={t('recordActions.geofence.zoneWhat')}
+        onConfirm={() => apiService.deleteGeofenceZone(deletingZone!.id)}
+        onClose={() => setDeletingZone(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.deleted')); fetchAll() }}
+      />
     </div>
   )
 }

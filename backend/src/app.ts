@@ -193,7 +193,6 @@ app.get('/api', (_req: Request, res: Response) => {
     version: config.app.apiVersion,
     status: 'running',
     docs: `/api/${config.app.apiVersion}/health`,
-    features: `/api/${config.app.apiVersion}/features`,
   });
 });
 

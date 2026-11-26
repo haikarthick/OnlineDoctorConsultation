@@ -84,10 +84,6 @@ export const createMarketplaceOrderSchema = Joi.object({
   notes: shortText(500).optional().allow('', null),
 });
 
-export const updateOrderStatusSchema = Joi.object({
-  status: Joi.string().valid('pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded').required(),
-});
-
 // Deal handshake (free classifieds - money settles off-platform between the parties)
 export const confirmDealSchema = Joi.object({
   paymentMethod: Joi.string().valid('cash', 'upi', 'bank_transfer', 'other').optional().allow('', null),
@@ -179,19 +175,11 @@ export const updateMarketplacePlanSchema = Joi.object({
   sortOrder: Joi.number().integer().min(0).optional(),
 }).min(1);
 
-export const boostListingSchema = Joi.object({
-  boostType: Joi.string().valid('standard', 'premium', 'spotlight').optional(),
-});
-
 export const createInquirySchema = Joi.object({
   message: longText(2000).optional().allow('', null),
 });
 
 export const respondInquirySchema = Joi.object({
   revealContact: Joi.boolean().optional(),
-});
-
-export const createSubscriptionSchema = Joi.object({
-  planId: requiredUuid,
 });
 

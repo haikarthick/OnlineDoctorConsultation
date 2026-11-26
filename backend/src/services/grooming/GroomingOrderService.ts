@@ -153,11 +153,6 @@ class GroomingOrderService {
     return order;
   }
 
-  async getOrder(userId: string, orderId: string): Promise<any> {
-    await this.resolveOrderAccess(userId, orderId);
-    return this.getOrderById(orderId);
-  }
-
   // payOrder() was REMOVED with the legacy /pay route: it confirmed an order and credited the
   // provider without collecting a rupee. Payment lives in GroomingPaymentService only.
 

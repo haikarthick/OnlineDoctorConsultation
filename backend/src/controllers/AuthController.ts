@@ -298,6 +298,8 @@ export class AuthController {
   /** Revoke all refresh tokens for the current user (logout all devices) */
   async logoutAll(req: AuthRequest, res: Response): Promise<void> {
     const count = await RefreshTokenService.revokeAllForUser(req.userId!);
+    // Without this the other devices keep working until their access token runs out (migration 073, same rule as the admin button).
+    await database.query('UPDATE users SET sessions_revoked_at = NOW() WHERE id = $1', [req.userId]);
     logger.info('User logged out from all devices', { userId: req.userId, revokedCount: count });
     res.json({ success: true, message: `Revoked ${count} session(s)` });
   }

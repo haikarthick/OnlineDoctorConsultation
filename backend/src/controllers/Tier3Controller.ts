@@ -1,3 +1,4 @@
+import database from '../utils/database';
 import { Request, Response } from 'express';
 import diseasePredictionService from '../services/DiseasePredictionService';
 import genomicLineageService from '../services/GenomicLineageService';
@@ -186,6 +187,12 @@ class Tier3Controller {
 
   async recordSensorReading(req: Request, res: Response) {
     try {
+      // The sensor named in the body must belong to the farm named in the address (the route has already checked the caller on THAT farm).
+      const own = await database.query(`SELECT 1 FROM iot_sensors WHERE id::text = $1 AND enterprise_id::text = $2`, [String(req.body?.sensorId || ''), req.params.enterpriseId]);
+      if (!own.rows.length) {
+        const message = 'That sensor is not on this farm, so the reading was not saved. Open the farm the sensor belongs to and try again.';
+        return res.status(403).json({ success: false, message, error: { message, code: 'RECORD_ACCESS_DENIED' } });
+      }
       const data = await iotSensorService.recordReading(req.body);
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }

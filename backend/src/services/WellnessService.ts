@@ -80,37 +80,6 @@ class WellnessService {
     return row;
   }
 
-  async updateScorecard(id: string, data: any) {
-    const sets: string[] = []; const vals: any[] = []; let idx = 1;
-    for (const field of ['vaccination_score', 'dental_score', 'next_checkup']) {
-      const camel = field.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
-      if (data[camel] !== undefined) { sets.push(`${field} = $${idx++}`); vals.push(data[camel]); }
-    }
-    if (data.recommendations) { sets.push(`recommendations = $${idx++}`); vals.push(JSON.stringify(data.recommendations)); }
-    if (data.riskFlags) { sets.push(`risk_flags = $${idx++}`); vals.push(JSON.stringify(data.riskFlags)); }
-
-    // Recalculate overall
-    const current = await pool.query('SELECT * FROM wellness_scorecards WHERE id = $1', [id]);
-    if (current.rows[0]) {
-      // Re-read nutrition, activity and weight from the records, so an edit never freezes an old figure.
-      const derived = await NutritionService.wellnessMetrics(current.rows[0].animal_id);
-      sets.push(`nutrition_score = $${idx++}`); vals.push(derived.nutritionScore);
-      sets.push(`activity_score = $${idx++}`); vals.push(derived.activityScore);
-      sets.push(`weight_status = $${idx++}`); vals.push(derived.weightStatus);
-      const v = data.vaccinationScore ?? current.rows[0].vaccination_score;
-      const d = data.dentalScore ?? current.rows[0].dental_score;
-      sets.push(`overall_score = $${idx++}`); vals.push(overallOf([derived.nutritionScore, derived.activityScore, v, d]));
-    }
-
-    sets.push('updated_at = NOW()'); vals.push(id);
-    await pool.query(`UPDATE wellness_scorecards SET ${sets.join(', ')} WHERE id = $${idx}`, vals);
-    return (await pool.query('SELECT * FROM wellness_scorecards WHERE id = $1', [id])).rows[0];
-  }
-
-  async deleteScorecard(id: string) {
-    await pool.query('DELETE FROM wellness_scorecards WHERE id = $1', [id]);
-  }
-
   // ── Reminders ──
   async listReminders(ownerId: string, filters: any = {}) {
     const { status, animalId, priority, limit = 100, offset = 0 } = filters;

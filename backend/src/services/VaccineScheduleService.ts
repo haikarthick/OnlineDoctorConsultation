@@ -158,7 +158,7 @@ class VaccineScheduleService {
     // decides access, and a dose can never be linked to someone else's record).
     const same = await database.query(
       `SELECT 1 FROM vaccine_schedule vs JOIN vaccination_records vr ON vr.animal_id = vs.animal_id
-       WHERE vs.id = $1 AND vr.id = $2`, [scheduleId, vaccinationRecordId]);
+       WHERE vs.id = $1 AND vr.id = $2 AND vr.entered_by_mistake_at IS NULL`, [scheduleId, vaccinationRecordId]);
     if (same.rows.length === 0) {
       throw new ValidationError('That vaccination entry does not belong to this animal, so the dose was not marked as given. Save the dose again from this animal\'s plan.');
     }

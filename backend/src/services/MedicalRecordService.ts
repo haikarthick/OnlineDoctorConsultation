@@ -296,6 +296,8 @@ export class MedicalRecordService {
     userId?: string; animalId?: string; groupId?: string; recordType?: string;
     status?: string; severity?: string; veterinarianId?: string;
     search?: string; limit?: number; offset?: number; isAdmin?: boolean;
+    /** The caller passed the platform's access rule for `animalId`: they see that animal's records, whoever wrote them. */
+    animalAccessGranted?: boolean;
   }): Promise<{ records: MedicalRecord[]; total: number }> {
     try {
       const conditions: string[] = [];
@@ -303,7 +305,14 @@ export class MedicalRecordService {
       let idx = 0;
 
       if (filters.userId && !filters.isAdmin) {
-        idx++; conditions.push(`(mr.user_id = $${idx} OR mr.created_by = $${idx} OR mr.veterinarian_id = $${idx})`);
+        // Mine = I am on the record, or it is about an animal that is mine (a vet's record is stored under the vet, and the owner
+        // must still see it). With access to one animal, all its records. A confidential record stays with the people on it.
+        idx++;
+        const onIt = `(mr.user_id = $${idx} OR mr.created_by = $${idx} OR mr.veterinarian_id = $${idx})`;
+        const reach = filters.animalAccessGranted && filters.animalId
+          ? 'TRUE'
+          : `mr.animal_id IN (SELECT own.id FROM animals own WHERE own.owner_id = $${idx})`;
+        conditions.push(`(${onIt} OR (${reach} AND mr.is_confidential IS NOT TRUE))`);
         params.push(filters.userId);
       }
       if (filters.animalId) { idx++; conditions.push(`mr.animal_id = $${idx}`); params.push(filters.animalId); }
@@ -397,48 +406,6 @@ export class MedicalRecordService {
     }
   }
 
-  async updateRecord(recordId: string, updates: Partial<MedicalRecordCreateDTO>, updatedBy?: string, updatedByName?: string, changeReason?: string): Promise<MedicalRecord> {
-    try {
-      const oldRecord = await this.getRecord(recordId);
-      const fieldMap: Record<string, string> = {
-        recordType: 'record_type', title: 'title', content: 'content',
-        severity: 'severity', status: 'status', fileUrl: 'file_url',
-        animalId: 'animal_id', consultationId: 'consultation_id',
-        veterinarianId: 'veterinarian_id', isConfidential: 'is_confidential',
-        followUpDate: 'follow_up_date',
-        // Add any other fields that are explicitly allowed to be updated
-      };
-      // Strictly whitelist allowed fields to prevent arbitrary column updates
-      const allowedUpdateFields = Object.keys(fieldMap);
-      const entries = Object.entries(updates).filter(([k, v]) => v !== undefined && allowedUpdateFields.includes(k));
-      const sets: string[] = [];
-      const values: any[] = [recordId];
-      let paramIdx = 1;
-      for (const [key, val] of entries) {
-        paramIdx++;
-        sets.push(`${fieldMap[key] || key} = $${paramIdx}`);
-        values.push(val);
-      }
-      if (updates.medications !== undefined) { paramIdx++; sets.push(`medications = $${paramIdx}`); values.push(JSON.stringify(updates.medications)); }
-      if (updates.attachments !== undefined) { paramIdx++; sets.push(`attachments = $${paramIdx}`); values.push(JSON.stringify(updates.attachments)); }
-      if (updates.tags !== undefined) { paramIdx++; sets.push(`tags = $${paramIdx}`); values.push(updates.tags); }
-      if (sets.length === 0) return oldRecord;
-
-      const query = `UPDATE medical_records SET ${sets.join(', ')}, updated_at = NOW() WHERE id = $1 RETURNING id`;
-      const result = await database.query(query, values);
-      if (result.rows.length === 0) throw new NotFoundError('MedicalRecord', recordId);
-
-      const newRecord = await this.getRecord(recordId);
-      await logMedicalAudit(recordId, 'medical_record', 'UPDATE', updatedBy, updatedByName,
-        { title: oldRecord.title, content: oldRecord.content, severity: oldRecord.severity },
-        { title: newRecord.title, content: newRecord.content, severity: newRecord.severity }, changeReason);
-      return newRecord;
-    } catch (error) {
-      if (error instanceof NotFoundError) throw error;
-      throw new DatabaseError('Error updating medical record', { originalError: error });
-    }
-  }
-
   async deleteRecord(recordId: string, deletedBy?: string, deletedByName?: string, reason?: string): Promise<void> {
     try {
       const record = await this.getRecord(recordId);
@@ -511,6 +478,8 @@ export class MedicalRecordService {
                vr.next_due_date as "nextDueDate", vr.administered_by as "administeredBy",
                vr.site_of_administration as "siteOfAdministration", vr.dosage,
                vr.reaction_notes as "reactionNotes", vr.is_valid as "isValid",
+               vr.entered_by_mistake_at as "enteredByMistakeAt", vr.entered_by_mistake_by_name as "enteredByMistakeByName",
+               vr.entered_by_mistake_reason as "enteredByMistakeReason",
                vr.certificate_number as "certificateNumber",
                vr.created_by as "createdBy", vr.created_at as "createdAt", vr.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "administeredByName",
@@ -538,6 +507,8 @@ export class MedicalRecordService {
                vr.next_due_date as "nextDueDate", vr.administered_by as "administeredBy",
                vr.dosage, vr.reaction_notes as "reactionNotes",
                vr.is_valid as "isValid", vr.certificate_number as "certificateNumber",
+               vr.entered_by_mistake_at as "enteredByMistakeAt", vr.entered_by_mistake_by_name as "enteredByMistakeByName",
+               vr.entered_by_mistake_reason as "enteredByMistakeReason",
                vr.created_at as "createdAt", vr.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "administeredByName",
                COALESCE(a.name, '') as "animalName", COALESCE(a.unique_id, '') as "animalUniqueId"
@@ -555,43 +526,6 @@ export class MedicalRecordService {
       return { records: data.rows, total: parseInt(cnt.rows[0]?.count || '0', 10) };
     } catch (error) {
       throw new DatabaseError('Error listing vaccination records', { originalError: error });
-    }
-  }
-
-  async updateVaccination(id: string, updates: Partial<VaccinationRecord>, updatedBy?: string, updatedByName?: string): Promise<VaccinationRecord> {
-    try {
-      const old = await this.getVaccination(id);
-      const fieldMap: Record<string, string> = {
-        vaccineName: 'vaccine_name', vaccineType: 'vaccine_type', batchNumber: 'batch_number',
-        manufacturer: 'manufacturer', dateAdministered: 'date_administered', nextDueDate: 'next_due_date',
-        administeredBy: 'administered_by', siteOfAdministration: 'site_of_administration',
-        dosage: 'dosage', reactionNotes: 'reaction_notes', isValid: 'is_valid', certificateNumber: 'certificate_number'
-      };
-      const entries = Object.entries(updates).filter(([k, v]) => v !== undefined && fieldMap[k]);
-      if (entries.length === 0) return old;
-      const sets = entries.map(([k], i) => `${fieldMap[k]} = $${i + 2}`);
-      const vals = entries.map(([_, v]) => v);
-      const result = await database.query(`UPDATE vaccination_records SET ${sets.join(', ')}, updated_at = NOW() WHERE id = $1 RETURNING id`, [id, ...vals]);
-      if (result.rows.length === 0) throw new NotFoundError('VaccinationRecord', id);
-      await logMedicalAudit(id, 'vaccination', 'UPDATE', updatedBy, updatedByName, { vaccineName: old.vaccineName }, updates);
-      return this.getVaccination(id);
-    } catch (error) {
-      if (error instanceof NotFoundError) throw error;
-      throw new DatabaseError('Error updating vaccination record', { originalError: error });
-    }
-  }
-
-  async deleteVaccination(id: string, deletedBy?: string, deletedByName?: string): Promise<void> {
-    try {
-      // MEDIUM FIX-9: Check rowCount to return 404 instead of 500 for missing records
-      const result = await database.query(`UPDATE vaccination_records SET is_valid = false, updated_at = NOW() WHERE id = $1`, [id]);
-      if (result.rowCount === 0) {
-        throw new NotFoundError(`Vaccination record ${id} not found`);
-      }
-      await logMedicalAudit(id, 'vaccination', 'INVALIDATE', deletedBy, deletedByName);
-    } catch (error) {
-      if (error instanceof NotFoundError) throw error;
-      throw new DatabaseError('Error invalidating vaccination record', { originalError: error });
     }
   }
 
@@ -659,6 +593,8 @@ export class MedicalRecordService {
         SELECT ar.id, ar.animal_id as "animalId", ar.allergen, ar.reaction,
                ar.severity, ar.identified_date as "identifiedDate", ar.is_active as "isActive",
                ar.notes, ar.reported_by as "reportedBy",
+               ar.entered_by_mistake_at as "enteredByMistakeAt", ar.entered_by_mistake_by_name as "enteredByMistakeByName",
+               ar.entered_by_mistake_reason as "enteredByMistakeReason",
                ar.created_at as "createdAt", ar.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "reportedByName"
         FROM allergy_records ar LEFT JOIN users u ON u.id = ar.reported_by WHERE ar.id = $1
@@ -677,6 +613,8 @@ export class MedicalRecordService {
         SELECT ar.id, ar.animal_id as "animalId", ar.allergen, ar.reaction,
                ar.severity, ar.identified_date as "identifiedDate", ar.is_active as "isActive",
                ar.notes, ar.reported_by as "reportedBy",
+               ar.entered_by_mistake_at as "enteredByMistakeAt", ar.entered_by_mistake_by_name as "enteredByMistakeByName",
+               ar.entered_by_mistake_reason as "enteredByMistakeReason",
                ar.created_at as "createdAt", ar.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "reportedByName"
         FROM allergy_records ar LEFT JOIN users u ON u.id = ar.reported_by
@@ -685,29 +623,6 @@ export class MedicalRecordService {
       return result.rows;
     } catch (error) {
       throw new DatabaseError('Error listing allergies', { originalError: error });
-    }
-  }
-
-  async updateAllergy(id: string, updates: Partial<AllergyRecord>, updatedBy?: string, updatedByName?: string): Promise<AllergyRecord> {
-    try {
-      const fieldMap: Record<string, string> = {
-        allergen: 'allergen', reaction: 'reaction', severity: 'severity',
-        identifiedDate: 'identified_date', isActive: 'is_active', notes: 'notes'
-      };
-      const entries = Object.entries(updates).filter(([k, v]) => v !== undefined && fieldMap[k]);
-      if (entries.length === 0) return this.getAllergy(id);
-      const sets = entries.map(([k], i) => `${fieldMap[k]} = $${i + 2}`);
-      const vals = entries.map(([_, v]) => v);
-      // MEDIUM FIX-9: Check rowCount to return 404 instead of 500 for missing records
-      const result = await database.query(`UPDATE allergy_records SET ${sets.join(', ')}, updated_at = NOW() WHERE id = $1`, [id, ...vals]);
-      if (result.rowCount === 0) {
-        throw new NotFoundError(`Allergy record ${id} not found`);
-      }
-      await logMedicalAudit(id, 'allergy', 'UPDATE', updatedBy, updatedByName, null, updates);
-      return this.getAllergy(id);
-    } catch (error) {
-      if (error instanceof NotFoundError) throw error;
-      throw new DatabaseError('Error updating allergy record', { originalError: error });
     }
   }
 
@@ -864,7 +779,7 @@ export class MedicalRecordService {
         if (filters?.dateFrom) { params.push(filters.dateFrom); dateClause += ` AND vr.date_administered >= $${params.length}`; }
         if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND vr.date_administered <= $${params.length}`; }
         queries.push(database.query(`
-          SELECT vr.id, vr.vaccine_name, vr.date_administered as date, vr.next_due_date, vr.is_valid,
+          SELECT vr.id, vr.vaccine_name, vr.date_administered as date, vr.next_due_date, vr.is_valid, vr.entered_by_mistake_at,
                  COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName",
                  vr.group_id as "groupId", ag.name as "groupName",
                  vr.head_count_treated as "headCountTreated"
@@ -977,7 +892,7 @@ export class MedicalRecordService {
         if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND ar.identified_date <= $${params.length}`; }
         queries.push(database.query(`
           SELECT ar.id, ar.allergen, ar.reaction, ar.severity, ar.identified_date as date,
-                 ar.is_active, ar.notes,
+                 ar.is_active, ar.entered_by_mistake_at, ar.notes,
                  COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
           FROM allergy_records ar LEFT JOIN users u ON u.id = ar.reported_by
           WHERE ar.animal_id = $1${dateClause} ORDER BY ar.identified_date DESC LIMIT $2
@@ -1002,7 +917,7 @@ export class MedicalRecordService {
               timeline.push({
                 id: r.id, type: 'vaccination', title: `Vaccination: ${r.vaccine_name}`,
                 description: r.next_due_date ? `Next due: ${r.next_due_date}` : 'No follow-up scheduled',
-                date: r.date, status: r.is_valid ? 'valid' : 'expired', createdByName: r.createdByName
+                date: r.date, status: r.entered_by_mistake_at ? 'entered_by_mistake' : (r.is_valid ? 'valid' : 'expired'), createdByName: r.createdByName
               });
               break;
             case 'lab_result':
@@ -1055,7 +970,7 @@ export class MedicalRecordService {
                 id: r.id, type: 'allergy', title: `Allergy: ${r.allergen}`,
                 description: r.reaction || r.notes || '',
                 date: r.date, severity: r.severity,
-                status: r.is_active ? 'active' : 'resolved', createdByName: r.createdByName
+                status: r.entered_by_mistake_at ? 'entered_by_mistake' : (r.is_active ? 'active' : 'resolved'), createdByName: r.createdByName
               });
               break;
           }
@@ -1110,7 +1025,7 @@ export class MedicalRecordService {
       if (animalId) {
         const [records, vaccinations, allergies, labs, upcoming, prescriptions, consultations] = await Promise.all([
           database.query(`SELECT COUNT(*) as count, record_type as type FROM medical_records mr WHERE mr.animal_id = $1 GROUP BY record_type`, [animalId]),
-          database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records WHERE animal_id = $1`, [animalId]),
+          database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records WHERE animal_id = $1 AND entered_by_mistake_at IS NULL`, [animalId]),
           database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN is_active THEN 1 END) as active FROM allergy_records WHERE animal_id = $1`, [animalId]),
           database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending FROM lab_results WHERE animal_id = $1`, [animalId]),
           database.query(`SELECT COUNT(*) as count FROM medical_records WHERE animal_id = $1 AND follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE AND follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`, [animalId]),
@@ -1158,7 +1073,7 @@ export class MedicalRecordService {
 
       const [records, vaccinations, allergies, labs, upcoming, prescriptions, consultations] = await Promise.all([
         database.query(`SELECT COUNT(*) as count, record_type as type FROM medical_records mr ${userFilter} GROUP BY record_type`, params.slice(0, userFilter ? 1 : 0)),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records vr LEFT JOIN animals a ON a.id = vr.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 1) : []),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records vr LEFT JOIN animals a ON a.id = vr.animal_id ${vetAnimalFilter}${vetAnimalFilter ? ' AND' : ' WHERE'} vr.entered_by_mistake_at IS NULL`, vetAnimalFilter ? params.slice(0, 1) : []),
         database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN ar.is_active THEN 1 END) as active FROM allergy_records ar LEFT JOIN animals a ON a.id = ar.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 1) : []),
         database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN lr.status = 'pending' THEN 1 END) as pending FROM lab_results lr LEFT JOIN animals a ON a.id = lr.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 1) : []),
         database.query(`SELECT COUNT(*) as count FROM medical_records mr ${userFilter ? userFilter.replace(/^WHERE (.*)$/, 'WHERE ($1) AND') : 'WHERE'} follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE AND follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`, params.slice(0, userFilter ? 1 : 0)),
@@ -1335,7 +1250,8 @@ export class MedicalRecordService {
     try {
       // Same as listEnterpriseRecords: a vaccination reaches the enterprise via its animal OR
       // its group. Joining only on animals hid every flock vaccination.
-      const conditions: string[] = [`(a.enterprise_id = $1 OR ag_direct.enterprise_id = $1)`];
+      // An entry marked "entered by mistake" is history, not a due date: it leaves this tracker.
+      const conditions: string[] = [`(a.enterprise_id = $1 OR ag_direct.enterprise_id = $1)`, `vr.entered_by_mistake_at IS NULL`];
       const params: any[] = [enterpriseId];
       let idx = 1;
 
@@ -1421,7 +1337,7 @@ export class MedicalRecordService {
            FROM vaccination_records vr
            LEFT JOIN animals a ON a.id = vr.animal_id
            LEFT JOIN animal_groups agx ON agx.id = vr.group_id
-           WHERE (a.enterprise_id = $1 OR agx.enterprise_id = $1)`,
+           WHERE (a.enterprise_id = $1 OR agx.enterprise_id = $1) AND vr.entered_by_mistake_at IS NULL`,
           [enterpriseId]
         ),
         database.query(
@@ -1473,7 +1389,7 @@ export class MedicalRecordService {
            FROM animal_groups ag
            LEFT JOIN animals a ON a.group_id = ag.id AND a.is_active = true
            LEFT JOIN medical_records mr ON mr.animal_id = a.id OR mr.group_id = ag.id
-           LEFT JOIN vaccination_records vr ON vr.animal_id = a.id OR vr.group_id = ag.id
+           LEFT JOIN vaccination_records vr ON (vr.animal_id = a.id OR vr.group_id = ag.id) AND vr.entered_by_mistake_at IS NULL
            WHERE ag.enterprise_id = $1 AND ag.is_active = true
            GROUP BY ag.id, ag.name, ag.group_type, ag.species, ag.management_mode, ag.current_count
            ORDER BY ag.name`,

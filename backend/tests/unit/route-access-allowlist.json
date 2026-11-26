@@ -3,7 +3,6 @@
   "PUT /animals/:id": "AnimalController.updateAnimal allows only the animal's owner or an admin",
   "DELETE /animals/:id": "AnimalController.deleteAnimal allows only the animal's owner or an admin",
   "DELETE /animal-groups/:id/animals/:animalId": "EnterpriseController.removeAnimalFromGroup checks the caller's farm role on the group's farm",
-  "POST /animal-groups/:groupId/promote": "BatchManagementService route already gated by the group's farm (ensureGroupAccess); the animalId it mentions is created, not read",
   "GET /grooming/pets/:animalId/passport": "GroomingCareService.getPetPassport refuses unless the caller owns the animal",
   "GET /nutrition/animals/:animalId": "service gate NutritionAccess.forAnimal (owner, farm team, vet with appointment, admin; hospital-private rule first)",
   "PATCH /nutrition/animals/:animalId/facts": "service gate NutritionAccess.forAnimal(write)",

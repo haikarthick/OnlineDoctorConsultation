@@ -180,11 +180,6 @@ export const hospitalApi = {
     const response = await sharedClient.get(`/hospital-networks/${networkId}/security-audit`, { params })
     return response.data
   },
-  /** Per-pharmacy revenue and dispensing volume across a network. */
-  async getNetworkPharmacyReports(networkId: string, days = 30) {
-    const response = await sharedClient.get(`/networks/${networkId}/pharmacy-reports`, { params: { days } })
-    return response.data
-  },
   async getNetworkDashboard(networkId: string) {
     const response = await sharedClient.get(`/hospital-networks/${networkId}/dashboard`)
     return response.data

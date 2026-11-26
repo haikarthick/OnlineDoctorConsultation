@@ -12,6 +12,8 @@ import { resolveFarmProfile } from '../utils/farmProfile/resolveFarmProfile'
 import { DateQuick, localIsoDate } from '../components/mobile/DateQuick'
 import RecordEntrySheet from '../components/farmRecords/RecordEntrySheet'
 import { FarmOutboxBanner } from '../components/farmRecords/FarmOutboxBanner'
+import { FarmSummaryCard } from '../components/farmRecords/FarmSummaryCard'
+import { DeleteRecordSheet } from '../components/farmRecords/DeleteRecordSheet'
 import { useFarmOutbox } from '../hooks/useFarmOutbox'
 import {
   recordableTypesFor, formatQuantity, totalsByType, dueTiming, farmWideTypes, isRecordOf, type DueItem, type FarmRecord, type RecordSubject,
@@ -50,6 +52,8 @@ const FarmRecords: React.FC = () => {
   const [open, setOpen] = useState<{ subject: RecordSubject; type?: string } | null>(null)
   const [view, setView] = useState<'all' | CardKind>('all')
   const [search, setSearch] = useState('')
+  const [deleting, setDeleting] = useState<FarmRecord | null>(null)
+  const [summaryKey, setSummaryKey] = useState(0)
 
   useEffect(() => {
     apiService.listEnterprises({ limit: 100 })
@@ -90,6 +94,7 @@ const FarmRecords: React.FC = () => {
       setCounts(Object.fromEntries(groups.map(g => [g.id, typeof g.currentCount === 'number' ? g.currentCount : null])))
       setRecords(recordsRes.data?.items || [])
       setDue(dueRes.data?.items || [])
+      setSummaryKey(k => k + 1)
     } catch (err: any) {
       setError(userMessage(err, 'farmRecords.loadFailed'))
     } finally {
@@ -147,6 +152,14 @@ const FarmRecords: React.FC = () => {
     const e = recordTypeEntry(code)
     return e ? (resolveLabel(e, t) || code) : code
   }
+
+  /** Tapping an entry's chip asks to delete it (one confirm sheet; the server decides who may). */
+  const chipTap = (r: FarmRecord) => ({
+    role: 'button' as const, tabIndex: 0, 'aria-label': `${labelFor(r.recordType)}: ${t('deleteRecord.tapToDelete')}`,
+    onClick: () => setDeleting(r),
+    onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDeleting(r) } },
+  })
+  const subjectNameOf = (r: FarmRecord) => subjects.find(x => (r.animalId ? x.kind === 'animal' && x.id === r.animalId : r.groupId ? x.kind === 'group' && x.id === r.groupId : false))?.name
 
   const onSaved = (result: any) => {
     setOpen(null)
@@ -250,6 +263,8 @@ const FarmRecords: React.FC = () => {
             </div>
           )}
 
+          <FarmSummaryCard farmId={farmId} refreshKey={summaryKey} />
+
           {loading || !farmMasterLoaded ? (
             <div className="loading-spinner">{t('farmRecords.loading')}</div>
           ) : cards.length === 0 ? (
@@ -296,7 +311,7 @@ const FarmRecords: React.FC = () => {
                     {recordsOf(wholeFarm).length === 0
                       ? <span className="record-chip is-empty">{t('farmRecords.nothingYet')}</span>
                       : recordsOf(wholeFarm).map(r => (
-                        <span key={r.id} className="record-chip">
+                        <span key={r.id} className="record-chip" {...chipTap(r)}>
                           <span aria-hidden="true">{recordTypeEntry(r.recordType)?.icon}</span> {labelFor(r.recordType)}{' '}
                           <strong>{r.quantity !== null ? `${formatQuantity(r.quantity)}${r.unit ? ` ${r.unit}` : ''}` : '✓'}</strong>
                         </span>
@@ -343,7 +358,7 @@ const FarmRecords: React.FC = () => {
                       {done.length === 0
                         ? <span className="record-chip is-empty">{t('farmRecords.nothingYet')}</span>
                         : done.map(r => (
-                          <span key={r.id} className="record-chip">
+                          <span key={r.id} className="record-chip" {...chipTap(r)}>
                             <span aria-hidden="true">{recordTypeEntry(r.recordType)?.icon}</span> {labelFor(r.recordType)}
                             {r.session !== 'day' ? ` ${t(`farmRecords.options.${r.session}`)}` : ''}{' '}
                             <strong>{r.quantity !== null ? `${formatQuantity(r.quantity)}${r.unit ? ` ${r.unit}` : ''}` : '✓'}</strong>
@@ -371,6 +386,14 @@ const FarmRecords: React.FC = () => {
           )}
         </>
       )}
+
+      <DeleteRecordSheet
+        record={deleting}
+        label={deleting ? labelFor(deleting.recordType) : ''}
+        subjectName={deleting ? (subjectNameOf(deleting) || t('farmRecords.allAnimals')) : undefined}
+        onClose={() => setDeleting(null)}
+        onDeleted={() => { setDeleting(null); setMessage(t('deleteRecord.done')); void load() }}
+      />
 
       {open && (
         <RecordEntrySheet

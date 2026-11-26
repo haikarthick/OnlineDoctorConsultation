@@ -2,17 +2,18 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { BottomSheet } from '../mobile/BottomSheet'
+import { BatchCorrections } from './BatchCorrections'
 import { DateQuick, localIsoDate } from '../mobile/DateQuick'
 import { NumberStepper, parseStepperValue } from '../mobile/NumberStepper'
 import { userMessage } from '../../utils/userMessage'
 import { appLocale } from '../../utils/appLocale'
 import './GroupCyclesSheet.css'
 
-interface Cycle { id: string; cycle_number: number; name?: string | null; placed_count: number; current_count: number; started_at: string; ended_at?: string | null; status: 'active' | 'closed' }
-interface PopEvent { id: string; event_type: string; quantity: number; event_date: string; reason?: string | null }
+interface Cycle { id: string; cycleNumber: number; name?: string | null; placedCount: number; currentCount: number; startedAt: string; endedAt?: string | null; status: 'active' | 'closed' }
+interface PopEvent { id: string; eventType: string; quantity: number; eventDate: string; reason?: string | null }
 interface Reconcile { stored: number; fromLedger: number; reconciles: boolean; drift: number }
 
-interface Props { open: boolean; groupId: string; groupName: string; onClose: () => void; onChanged?: () => void }
+interface Props { open: boolean; groupId: string; groupName: string; enterpriseId?: string; species?: string; breed?: string; onClose: () => void; onChanged?: () => void }
 
 const day = (iso?: string | null) => (iso ? new Date(iso).toLocaleDateString(appLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) : '')
 
@@ -21,7 +22,7 @@ const day = (iso?: string | null) => (iso ? new Date(iso).toLocaleDateString(app
  * must reconcile, and the read-only ledger of every head that came in or went out. Deaths and sales are still entered in Daily records;
  * this screen only reads them, so a head is never counted twice.
  */
-export function GroupCyclesSheet({ open, groupId, groupName, onClose, onChanged }: Props) {
+export function GroupCyclesSheet({ open, groupId, groupName, enterpriseId, species, breed, onClose, onChanged }: Props) {
   const { t } = useTranslation()
   const [cycles, setCycles] = useState<Cycle[]>([])
   const [active, setActive] = useState<Cycle | null>(null)
@@ -74,15 +75,17 @@ export function GroupCyclesSheet({ open, groupId, groupName, onClose, onChanged 
             <h4>{t('batchCycles.active')}</h4>
             {active ? (
               <>
-                <strong>{active.name || t('batchCycles.batchN', { n: active.cycle_number })}</strong>
-                <div className="gc-muted">{t('batchCycles.startedOn', { date: day(active.started_at) })} · {t('batchCycles.placed', { count: active.placed_count })} · {t('batchCycles.current', { count: active.current_count })}</div>
+                <strong>{active.name || t('batchCycles.batchN', { n: active.cycleNumber })}</strong>
+                <div className="gc-muted">{t('batchCycles.startedOn', { date: day(active.startedAt) })} · {t('batchCycles.placed', { count: active.placedCount })} · {t('batchCycles.current', { count: active.currentCount })}</div>
                 {rec && <div className={rec.reconciles ? 'gc-good' : 'gc-warn'}>{rec.reconciles ? t('batchCycles.reconcileOk', { count: rec.stored }) : t('batchCycles.reconcileOff', { stored: rec.stored, ledger: rec.fromLedger })}</div>}
                 <p className="gc-muted">{t('batchCycles.mortalityHint')}</p>
+                <BatchCorrections groupId={groupId} enterpriseId={enterpriseId} species={species} breed={breed} cycleId={active.id} currentCount={active.currentCount}
+                  onDone={text => { setMessage({ text, ok: true }); void load(); onChanged?.() }} />
                 {!closing
                   ? <button type="button" className="module-btn" onClick={() => { setClosing(true); setReason('') }}>{t('batchCycles.close')}</button>
                   : (
                     <div className="gc-form">
-                      <p>{t('batchCycles.closeConfirm', { count: active.current_count })}</p>
+                      <p>{t('batchCycles.closeConfirm', { count: active.currentCount })}</p>
                       <label>{t('batchCycles.closeReason')}<input value={reason} onChange={e => setReason(e.target.value)} autoComplete="off" /></label>
                       <div className="record-sheet-actions">
                         <button type="button" className="module-btn" onClick={() => setClosing(false)}>{t('common.cancel')}</button>
@@ -117,7 +120,7 @@ export function GroupCyclesSheet({ open, groupId, groupName, onClose, onChanged 
             <h4>{t('batchCycles.past')}</h4>
             <ul className="gc-list">
               {past.map(c => (
-                <li key={c.id}><strong>{c.name || t('batchCycles.batchN', { n: c.cycle_number })}</strong> <span className="gc-muted">{day(c.started_at)} – {day(c.ended_at)} · {t('batchCycles.placed', { count: c.placed_count })}</span></li>
+                <li key={c.id}><strong>{c.name || t('batchCycles.batchN', { n: c.cycleNumber })}</strong> <span className="gc-muted">{day(c.startedAt)} – {day(c.endedAt)} · {t('batchCycles.placed', { count: c.placedCount })}</span></li>
               ))}
             </ul>
           </section>
@@ -131,8 +134,8 @@ export function GroupCyclesSheet({ open, groupId, groupName, onClose, onChanged 
                 {events.map(ev => (
                   <li key={ev.id}>
                     <span className={ev.quantity < 0 ? 'gc-out' : 'gc-in'}>{ev.quantity > 0 ? `+${ev.quantity}` : ev.quantity}</span>{' '}
-                    <strong>{t(`batchCycles.event.${ev.event_type}`, { defaultValue: ev.event_type })}</strong>{' '}
-                    <span className="gc-muted">{day(ev.event_date)}{ev.reason ? ` · ${ev.reason}` : ''}</span>
+                    <strong>{t(`batchCycles.event.${ev.eventType}`, { defaultValue: ev.eventType })}</strong>{' '}
+                    <span className="gc-muted">{day(ev.eventDate)}{ev.reason ? ` · ${ev.reason}` : ''}</span>
                   </li>
                 ))}
               </ul>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
+import { useAuth } from '../../context/AuthContext'
+import { ReviewActions } from '../../components/reviews/ReviewActions'
 import { VetProfile, Review, DoctorReliability } from '../../types'
 import '../../styles/modules.css'
 import { appLocale } from '../../utils/appLocale'
@@ -14,6 +16,7 @@ interface VetProfilePageProps {
 const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
   const { t } = useTranslation()
   const { formatCurrency } = useSettings()
+  const { user } = useAuth()
   const [vet, setVet] = useState<VetProfile | null>(null)
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
@@ -288,6 +291,13 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
                     <p className="si-387955ba">{review.responseFromVet}</p>
                   </div>
                 )}
+                <ReviewActions
+                  review={review}
+                  signedIn={!!user}
+                  isOwnReview={!!user && review.reviewerId === user.id}
+                  canReply={!!user && review.veterinarianId === user.id}
+                  onChange={patch => setReviews(prev => prev.map(r => (r.id === review.id ? { ...r, ...patch } : r)))}
+                />
               </div>
             ))}
           </div>

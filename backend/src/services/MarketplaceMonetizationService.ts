@@ -70,14 +70,6 @@ class MarketplaceMonetizationService {
     return result.rows[0];
   }
 
-  async isFeatureEnabled(key: string): Promise<boolean> {
-    const result = await pool.query(
-      `SELECT is_enabled FROM marketplace_monetization_settings WHERE setting_key = $1`,
-      [key]
-    );
-    return result.rows[0]?.is_enabled === true;
-  }
-
   // ══════════════════════════════════════════
   // Subscription Plans
   // ══════════════════════════════════════════
@@ -139,120 +131,6 @@ class MarketplaceMonetizationService {
   async deletePlan(id: string) {
     await pool.query(`DELETE FROM marketplace_plans WHERE id = $1`, [id]);
     return { deleted: true };
-  }
-
-  // ══════════════════════════════════════════
-  // User Subscriptions
-  // ══════════════════════════════════════════
-
-  async getUserSubscription(userId: string) {
-    const result = await pool.query(
-      `SELECT s.*, p.name AS "planName", p.price AS "planPrice",
-              p.features AS "planFeatures", p.max_listings AS "maxListings",
-              p.max_boosts_per_month AS "maxBoosts"
-       FROM marketplace_subscriptions s
-       JOIN marketplace_plans p ON s.plan_id = p.id
-       WHERE s.user_id = $1 AND s.status = 'active' AND s.expires_at > NOW()
-       ORDER BY s.created_at DESC LIMIT 1`,
-      [userId]
-    );
-    return result.rows[0] || null;
-  }
-
-  async createSubscription(userId: string, planId: string) {
-    const plan = await this.getPlan(planId);
-    if (!plan) throw new Error('Plan not found');
-
-    // Cancel existing active subscription
-    await pool.query(
-      `UPDATE marketplace_subscriptions SET status = 'cancelled', cancelled_at = NOW()
-       WHERE user_id = $1 AND status = 'active'`,
-      [userId]
-    );
-
-    const id = uuidv4();
-    const expiresAt = plan.duration_days > 0
-      ? `NOW() + INTERVAL '${plan.duration_days} days'`
-      : `NOW() + INTERVAL '100 years'`;
-
-    const result = await pool.query(
-      `INSERT INTO marketplace_subscriptions (id, user_id, plan_id, status, starts_at, expires_at)
-       VALUES ($1, $2, $3, 'active', NOW(), ${expiresAt})
-       RETURNING *`,
-      [id, userId, planId]
-    );
-
-    // Log transaction
-    if (plan.price > 0) {
-      await this.logTransaction(userId, 'subscription', plan.price, plan.currency || 'INR', id, 'subscription');
-    }
-
-    return result.rows[0];
-  }
-
-  async cancelSubscription(userId: string) {
-    const result = await pool.query(
-      `UPDATE marketplace_subscriptions SET status = 'cancelled', cancelled_at = NOW()
-       WHERE user_id = $1 AND status = 'active'
-       RETURNING *`,
-      [userId]
-    );
-    return result.rows[0] || null;
-  }
-
-  // ══════════════════════════════════════════
-  // Listing Boosts
-  // ══════════════════════════════════════════
-
-  async boostListing(listingId: string, userId: string, boostType: string = 'standard') {
-    const setting = await this.getSetting('listing_boost');
-    const isEnabled = setting?.isEnabled;
-    const prices = setting?.settingValue || { standard: 99, premium: 199, spotlight: 499, duration_days: 7 };
-    const pricePaid = isEnabled ? (prices[boostType] || 0) : 0;
-    const durationDays = prices.duration_days || 7;
-
-    const id = uuidv4();
-    const result = await pool.query(
-      `INSERT INTO listing_boosts (id, listing_id, user_id, boost_type, price_paid, starts_at, expires_at, is_active)
-       VALUES ($1, $2, $3, $4, $5, NOW(), NOW() + INTERVAL '${durationDays} days', true)
-       RETURNING *`,
-      [id, listingId, userId, boostType, pricePaid]
-    );
-
-    // Update listing tier
-    const tierMap: Record<string, string> = { standard: 'standard', premium: 'premium', spotlight: 'spotlight' };
-    await pool.query(
-      `UPDATE marketplace_listings SET listing_tier = $1, updated_at = NOW() WHERE id = $2`,
-      [tierMap[boostType] || 'standard', listingId]
-    );
-
-    if (pricePaid > 0) {
-      await this.logTransaction(userId, 'boost', pricePaid, 'INR', id, 'boost');
-    }
-
-    return result.rows[0];
-  }
-
-  async getActiveBoosts(listingId: string) {
-    const result = await pool.query(
-      `SELECT * FROM listing_boosts WHERE listing_id = $1 AND is_active = true AND expires_at > NOW()`,
-      [listingId]
-    );
-    return result.rows;
-  }
-
-  async expireBoosts() {
-    const result = await pool.query(
-      `UPDATE listing_boosts SET is_active = false WHERE is_active = true AND expires_at <= NOW() RETURNING listing_id`
-    );
-    // Reset listing tiers for expired boosts
-    for (const row of result.rows) {
-      await pool.query(
-        `UPDATE marketplace_listings SET listing_tier = 'standard', updated_at = NOW() WHERE id = $1`,
-        [row.listing_id]
-      );
-    }
-    return result.rowCount || 0;
   }
 
   // ══════════════════════════════════════════
@@ -368,33 +246,6 @@ class MarketplaceMonetizationService {
       subscriptionStats: subscriptionStats.rows,
       boostStats: boostStats.rows,
       inquiryStats: inquiryStats.rows[0],
-    };
-  }
-
-  // ══════════════════════════════════════════
-  // User Monetization Status
-  // ══════════════════════════════════════════
-
-  async getUserMonetizationStatus(userId: string) {
-    const [subscription, settings, listingCount, boostCount, inquiryCount] = await Promise.all([
-      this.getUserSubscription(userId),
-      this.getAllSettings(),
-      pool.query(`SELECT COUNT(*) AS count FROM marketplace_listings WHERE seller_id = $1 AND status = 'active'`, [userId]),
-      pool.query(`SELECT COUNT(*) AS count FROM listing_boosts WHERE user_id = $1 AND is_active = true AND expires_at > NOW()`, [userId]),
-      pool.query(`SELECT COUNT(*) AS count FROM marketplace_inquiries WHERE buyer_id = $1 AND created_at >= CURRENT_DATE`, [userId]),
-    ]);
-
-    const settingsMap: Record<string, any> = {};
-    for (const s of settings) {
-      settingsMap[s.settingKey] = { isEnabled: s.isEnabled, value: s.settingValue };
-    }
-
-    return {
-      subscription,
-      activeListings: parseInt(listingCount.rows[0].count),
-      activeBoosts: parseInt(boostCount.rows[0].count),
-      inquiriesToday: parseInt(inquiryCount.rows[0].count),
-      features: settingsMap,
     };
   }
 }

@@ -13,18 +13,6 @@ const router = Router();
 // NETWORK SUBSCRIPTION PLANS (platform admin only)
 // ─────────────────────────────────────────────────────────────────────────────
 
-router.get('/network-subscription-plans', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const authReq = req as any;
-  const db = (await import('../utils/database')).default;
-  const isAdmin = authReq.userRole === 'admin';
-  const result = await db.query(
-    isAdmin
-      ? `SELECT * FROM network_subscription_plans ORDER BY sort_order, name`
-      : `SELECT id, name, description, max_seats, max_hospitals, price_monthly, price_annually, currency, features, sort_order FROM network_subscription_plans WHERE is_published = true AND is_active = true ORDER BY sort_order, name`
-  );
-  res.json({ success: true, data: result.rows });
-}));
-
 router.post('/admin/network-subscription-plans', authMiddleware, roleMiddleware(['admin']), validateBody(createNetworkPlanSchema), asyncHandler(async (req: Request, res: Response) => {
   const db = (await import('../utils/database')).default;
   const { name, description, max_seats, max_hospitals, price_monthly, price_annually, currency, features, is_published, sort_order } = req.body;

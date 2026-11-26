@@ -1,0 +1,14 @@
+{
+  "bookingHistory": {
+    "button": "My history",
+    "title": "My booking history",
+    "hint": "Everything that happened to your appointments: booked, confirmed, cancelled or moved. Newest first.",
+    "loading": "Loading your history...",
+    "empty": "Nothing yet. When you book, cancel or move an appointment it will be listed here.",
+    "by": "by {{who}}",
+    "you": "you",
+    "otherParty": "the other person",
+    "more": "Show more",
+    "failed": "We could not load your history just now. Check your connection and try again."
+  }
+}

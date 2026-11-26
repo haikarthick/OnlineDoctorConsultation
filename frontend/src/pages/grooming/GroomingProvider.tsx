@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
+import { EditServiceSheet, type GroomingServiceRow } from '../../components/grooming/EditServiceSheet'
 import { useSettings } from '../../context/SettingsContext'
 import { usePermission } from '../../context/PermissionContext'
 import '../../styles/modules.css'
@@ -211,6 +212,7 @@ const OverviewTab: React.FC<any> = ({ provider, canManage, onSaved, flash, fail,
 const ServicesTab: React.FC<any> = ({ provider, canManage, formatCurrency, flash, fail, t }) => {
   const [items, setItems] = useState<any[]>([])
   const [showAdd, setShowAdd] = useState(false)
+  const [editing, setEditing] = useState<GroomingServiceRow | null>(null)
   const [n, setN] = useState<any>({ name: '', basePrice: '', durationMinutes: 60, taxPercent: 18, paymentRule: 'full' })
   const reload = useCallback(async () => { try { setItems((await apiService.listGroomingServices(provider.id)).data || []) } catch (e) { fail(e) } }, [provider.id])
   useEffect(() => { reload() }, [reload])
@@ -247,6 +249,7 @@ const ServicesTab: React.FC<any> = ({ provider, canManage, formatCurrency, flash
           <button className="module-btn primary" onClick={add}>{t('grooming.addService')}</button>
         </div>
       )}
+      <EditServiceSheet providerId={provider.id} service={editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); flash(t('grooming.saved')); reload() }} />
       {items.length === 0 ? <p className="si-676930d7">{t('grooming.noServices')}</p> : (
         <div className="data-table-container spaced-top">
           <table className="data-table">
@@ -258,7 +261,10 @@ const ServicesTab: React.FC<any> = ({ provider, canManage, formatCurrency, flash
                   <td>{formatCurrency(Number(s.basePrice))}{Number(s.taxPercent) > 0 ? ` +${s.taxPercent}%` : ''}</td>
                   <td>{s.durationMinutes} min</td>
                   <td>{t(s.paymentRule === 'deposit' ? 'grooming.payDeposit' : 'grooming.payFull')}</td>
-                  {canManage && <td><button className="btn btn-sm btn-outline" onClick={() => remove(s.id)}>{t('grooming.remove')}</button></td>}
+                  {canManage && <td>
+                    <button className="btn btn-sm btn-outline" onClick={() => setEditing(s)}>{t('groomingConsole.edit')}</button>{' '}
+                    <button className="btn btn-sm btn-outline" onClick={() => remove(s.id)}>{t('grooming.remove')}</button>
+                  </td>}
                 </tr>
               ))}
             </tbody>

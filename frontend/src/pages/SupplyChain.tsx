@@ -8,6 +8,10 @@ import { useTranslation } from 'react-i18next'
 
 import { userMessage } from '../utils/userMessage'
 import { appLocale } from '../utils/appLocale'
+import { EditFieldsSheet, textOrEmpty, textOrNull, numOrUndefined, type SheetField } from '../components/mobile/RowActions'
+import { BatchTraceSheet } from '../components/supplyChain/BatchTraceSheet'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
+import { pickField, dateInput, fieldText, mayChangeFarmRecords } from '../utils/recordForm'
 const STATUS_COLORS: Record<string, string> = {
   in_production: '#3b82f6', quality_check: '#f59e0b', in_transit: '#8b5cf6', delivered: '#22c55e', recalled: '#ef4444'
 }
@@ -28,6 +32,22 @@ const SupplyChainPage: React.FC = () => {
   const [showEventForm, setShowEventForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [editingBatch, setEditingBatch] = useState<ProductBatch | null>(null)
+  const [tracingBatchId, setTracingBatchId] = useState<string | null>(null)
+  const farmRole = useMyFarmRole(enterprises.find(en => en.id === selectedEnterpriseId))
+  const mayChange = mayChangeFarmRecords(farmRole)
+  const batchFields: SheetField[] = [
+    { key: 'status', label: t('common.status'), type: 'select', options: Object.keys(STATUS_COLORS).map(s => ({ value: s, label: s.replace(/_/g, ' ') })) },
+    { key: 'quantity', label: t('supplyChain.qty'), type: 'number' },
+    { key: 'qualityGrade', label: t('supplyChain.grade'), type: 'text' },
+    { key: 'currentHolder', label: t('recordActions.supplyChain.currentHolder'), type: 'text' },
+    { key: 'expiryDate', label: t('supplyChain.expiry'), type: 'date' },
+    { key: 'description', label: t('common.description'), type: 'textarea' },
+  ]
+  const batchInitial = (b: ProductBatch | null): Record<string, string> => ({
+    status: fieldText(b?.status) || 'in_production', quantity: fieldText(b?.quantity), qualityGrade: fieldText(pickField(b, 'qualityGrade')),
+    currentHolder: fieldText(pickField(b, 'currentHolder')), expiryDate: dateInput(pickField(b, 'expiryDate')), description: fieldText(b?.description),
+  })
 
   const [formData, setFormData] = useState({
     batchNumber: '', productType: '', description: '', quantity: '', unit: 'kg',
@@ -260,7 +280,11 @@ const SupplyChainPage: React.FC = () => {
                       <td>{b.qualityGrade || (b as any).quality_grade || '-'}</td>
                       <td><span className="badge" style={{ backgroundColor: STATUS_COLORS[b.status] || '#6b7280' }}>{b.status?.replace(/_/g, ' ')}</span></td>
                       <td>{(b.expiryDate || (b as any).expiry_date) ? new Date(b.expiryDate || (b as any).expiry_date).toLocaleDateString(appLocale()) : '-'}</td>
-                      <td><button className="btn-sm" onClick={() => handleGenerateQR(b.id)}>🔲 QR</button></td>
+                      <td>
+                        <button className="btn-sm" onClick={() => handleGenerateQR(b.id)}>🔲 QR</button>
+                        <button className="btn-sm" onClick={() => setTracingBatchId(b.id)}>{t('recordActions.supplyChain.trace')}</button>
+                        {mayChange && <button className="btn-sm" onClick={() => setEditingBatch(b)} aria-label={t('recordActions.editItem', { name: b.batchNumber || (b as any).batch_number })}>{t('recordActions.edit')}</button>}
+                      </td>
                     </tr>
                   ))}
                   {!batches.length && <tr><td colSpan={7} className="empty-cell">{t('supplyChain.noBatches')}</td></tr>}
@@ -405,6 +429,20 @@ const SupplyChainPage: React.FC = () => {
           )}
         </>
       )}
+      <EditFieldsSheet
+        open={!!editingBatch}
+        title={t('recordActions.supplyChain.editBatch', { batch: editingBatch?.batchNumber || (editingBatch as any)?.batch_number || '' })}
+        fields={batchFields}
+        initial={batchInitial(editingBatch)}
+        onSave={values => apiService.updateBatch(editingBatch!.id, {
+          status: values.status, quantity: numOrUndefined(values.quantity),
+          qualityGrade: textOrEmpty(values.qualityGrade), currentHolder: textOrEmpty(values.currentHolder),
+          expiryDate: textOrNull(values.expiryDate), description: textOrEmpty(values.description),
+        })}
+        onClose={() => setEditingBatch(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.saved')); fetchData() }}
+      />
+      <BatchTraceSheet open={!!tracingBatchId} batchId={tracingBatchId} onClose={() => setTracingBatchId(null)} />
     </div>
   )
 }

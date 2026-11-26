@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { requireAnimal, requireRecordAccess } from '../middleware/recordAccess';
 import { authMiddleware, roleMiddleware, validateBody, AuthRequest } from '../middleware/auth';
-import { checkAnimalAccess, requireAnimalAccess } from '../middleware/hospitalDataIsolation';
+import { requireAnimalAccess } from '../middleware/hospitalDataIsolation';
+import AnimalAccessService from '../services/AnimalAccessService';
 import { asyncHandler } from '../utils/errorHandler';
 import database from '../utils/database';
 import logger from '../utils/logger';
@@ -26,7 +27,7 @@ import {
   createScheduleSchema, updateScheduleSchema,
   createPrescriptionSchema,
   createAnimalSchema, updateAnimalSchema,
-  createVetProfileSchema, updateVetProfileSchema,
+  updateVetProfileSchema,
   forgotPasswordSchema, resetPasswordSchema,
 } from '../middleware/validation';
 
@@ -239,7 +240,6 @@ router.post('/bookings', authMiddleware, validateBody(createBookingSchema), asyn
   await BookingController.createBooking(req, res)
 }));
 router.get('/bookings', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.listBookings(req, res)));
-router.get('/bookings/:id', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getBooking(req, res)));
 router.put('/bookings/:id/confirm', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'bookings'); emitRoleRefresh('admin', 'bookings') } })
   await BookingController.confirmBooking(req, res)
@@ -311,19 +311,10 @@ router.post('/video-sessions', authMiddleware, validateBody(createVideoSessionSc
   if (!(await assertConsultationPaymentOk(req.body.consultationId, res))) return;
   await VideoSessionController.createSession(req, res);
 }));
-router.get('/video-sessions/active', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.listActiveSessions(req, res)));
 router.get('/video-sessions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.getSession(req, res)));
 router.get('/video-sessions/consultation/:consultationId', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.getSessionByConsultation(req, res)));
 router.put('/video-sessions/:id/start', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.startSession(req, res)));
 router.put('/video-sessions/:id/end', authMiddleware, validateBody(endVideoSessionSchema), asyncHandler((req: Request, res: Response) => VideoSessionController.endSession(req, res)));
-router.post('/video-sessions/join/:roomId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  try {
-    const VideoSessionService = (await import('../services/VideoSessionService')).default;
-    const session = await VideoSessionService.getSessionByRoom(req.params.roomId);
-    if (session && !(await assertConsultationPaymentOk(session.consultationId, res))) return;
-  } catch { /* session lookup errors fall through to the controller's own handling */ }
-  await VideoSessionController.joinSession(req, res);
-}));
 router.post('/video-sessions/:id/messages', authMiddleware, validateBody(sendVideoMessageSchema), asyncHandler((req: Request, res: Response) => VideoSessionController.sendMessage(req, res)));
 router.get('/video-sessions/:id/messages', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.getMessages(req, res)));
 router.post('/video-sessions/:id/signal', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.sendSignal(req, res)));
@@ -332,7 +323,6 @@ router.get('/video-sessions/:id/signals', authMiddleware, asyncHandler((req: Req
 // ─── Schedule & Availability routes ─────────────────────────
 router.post('/schedules', authMiddleware, validateBody(createScheduleSchema), asyncHandler((req: Request, res: Response) => ScheduleController.createSchedule(req, res)));
 router.get('/schedules/me', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.getSchedules(req, res)));
-router.get('/schedules/vet/:vetId', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.getSchedules(req, res)));
 router.put('/schedules/:id', authMiddleware, validateBody(updateScheduleSchema), asyncHandler((req: Request, res: Response) => ScheduleController.updateSchedule(req, res)));
 router.delete('/schedules/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.deleteSchedule(req, res)));
 router.get('/availability/search', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.searchByAvailability(req, res)));
@@ -406,8 +396,14 @@ router.get('/animals', authMiddleware, asyncHandler((req: Request, res: Response
 // Access-check endpoint - frontend can call this before showing a "Request Access" button
 router.get('/animals/:id/access-check', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
-  const decision = await checkAnimalAccess(authReq.userId!, authReq.userRole!, req.params.id);
-  res.json({ success: true, data: { allowed: decision.allowed, isPrivate: decision.isPrivate, accessType: decision.accessType, reason: decision.reason } });
+  // The platform rule (AnimalAccessService) decides, the same one every animal route uses. The answer is only yes/no for reading and for
+  // changing: it never says WHY (a private hospital network, a missing animal) so it cannot be used to find out what exists.
+  const user = { userId: authReq.userId!, role: authReq.userRole, roles: authReq.userRoles };
+  const [read, write] = await Promise.all([
+    AnimalAccessService.check(user, req.params.id, 'read'),
+    AnimalAccessService.check(user, req.params.id, 'write'),
+  ]);
+  res.json({ success: true, data: { allowed: read.allowed, canChange: write.allowed } });
 }));
 router.get('/animals/:id', authMiddleware, requireAnimalAccess('params:id', 'animal_profile'), requireAnimal('params:id'), asyncHandler((req: Request, res: Response) => AnimalController.getAnimal(req, res)));
 router.put('/animals/:id', authMiddleware, validateBody(updateAnimalSchema), asyncHandler(async (req: Request, res: Response) => {
@@ -420,7 +416,6 @@ router.delete('/animals/:id', authMiddleware, asyncHandler(async (req: Request, 
 }));
 
 // ─── Vet Profile routes ─────────────────────────────────────
-router.post('/vet-profiles', authMiddleware, validateBody(createVetProfileSchema), asyncHandler((req: Request, res: Response) => VetProfileController.createProfile(req, res)));
 router.get('/vet-profiles/me', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.getMyProfile(req, res)));
 router.get('/vet-profiles', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.listVets(req, res)));
 router.get('/vet-profiles/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.getProfile(req, res)));

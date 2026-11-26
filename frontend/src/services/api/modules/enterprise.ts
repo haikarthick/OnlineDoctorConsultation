@@ -12,11 +12,6 @@ export const enterpriseApi = {
     return response.data
   },
 
-  async getEnterprise(id: string) {
-    const response = await sharedClient.get(`/enterprises/${id}`)
-    return response.data
-  },
-
   async updateEnterprise(id: string, data: Record<string, unknown>) {
     const response = await sharedClient.put(`/enterprises/${id}`, data)
     return response.data
@@ -38,16 +33,6 @@ export const enterpriseApi = {
     return response.data
   },
 
-  async addEnterpriseMember(enterpriseId: string, data: { userId: string; role: string; title?: string }) {
-    const response = await sharedClient.post(`/enterprises/${enterpriseId}/members`, data)
-    return response.data
-  },
-
-  async inviteEnterpriseMember(enterpriseId: string, data: { email: string; role: string }) {
-    const response = await sharedClient.post(`/enterprises/${enterpriseId}/invite-member`, data)
-    return response.data
-  },
-
   async updateEnterpriseMember(enterpriseId: string, userId: string, data: { role: string; title?: string }) {
     const response = await sharedClient.put(`/enterprises/${enterpriseId}/members/${userId}`, data)
     return response.data
@@ -61,11 +46,6 @@ export const enterpriseApi = {
   // Animal Groups
   async createAnimalGroup(data: { enterpriseId: string; name: string; groupType: string; species?: string; breed?: string; purpose?: string; targetCount?: number; description?: string; colorCode?: string }) {
     const response = await sharedClient.post('/animal-groups', data)
-    return response.data
-  },
-
-  async getAnimalGroup(id: string) {
-    const response = await sharedClient.get(`/animal-groups/${id}`)
     return response.data
   },
 
@@ -100,11 +80,6 @@ export const enterpriseApi = {
     return response.data
   },
 
-  async getLocation(id: string) {
-    const response = await sharedClient.get(`/locations/${id}`)
-    return response.data
-  },
-
   async listLocations(enterpriseId: string, params?: { limit?: number; offset?: number }) {
     const response = await sharedClient.get(`/enterprises/${enterpriseId}/locations`, { params })
     return response.data
@@ -136,11 +111,6 @@ export const enterpriseApi = {
     return response.data
   },
 
-  async getMovement(id: string) {
-    const response = await sharedClient.get(`/movements/${id}`)
-    return response.data
-  },
-
   async approveMovement(id: string, action: 'approve' | 'reject') {
     const response = await sharedClient.patch(`/movements/${id}/approve`, { action })
     return response.data
@@ -149,11 +119,6 @@ export const enterpriseApi = {
   // Treatment Campaigns
   async createCampaign(data: { enterpriseId: string; groupId?: string; campaignType: string; name: string; description?: string; productUsed?: string; dosage?: string; targetCount?: number; scheduledDate?: string; cost?: number; notes?: string }) {
     const response = await sharedClient.post('/campaigns', data)
-    return response.data
-  },
-
-  async getCampaign(id: string) {
-    const response = await sharedClient.get(`/campaigns/${id}`)
     return response.data
   },
 

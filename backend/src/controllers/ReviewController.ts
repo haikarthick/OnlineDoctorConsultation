@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
-import ReviewService from '../services/ReviewService';
+import ReviewService, { REVIEW_REPORT_REASONS } from '../services/ReviewService';
 import { ValidationError } from '../utils/errors';
 
 export class ReviewController {
@@ -41,7 +41,7 @@ export class ReviewController {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
     const offset = parseInt(req.query.offset as string) || 0;
     const veterinarianId = req.params.vetId || (req as any).userId;
-    const result = await ReviewService.listReviewsByVet(veterinarianId, limit, offset);
+    const result = await ReviewService.listReviewsByVet(veterinarianId, limit, offset, (req as any).userId);
     res.json({ success: true, data: result });
   }
 
@@ -55,12 +55,16 @@ export class ReviewController {
   }
 
   async markHelpful(req: AuthRequest, res: Response): Promise<void> {
-    const result = await ReviewService.markHelpful(req.params.id);
+    const result = await ReviewService.markHelpful(req.params.id, (req as any).userId);
     res.json({ success: true, data: result });
   }
 
   async reportReview(req: AuthRequest, res: Response): Promise<void> {
-    await ReviewService.reportReview(req.params.id);
+    const reason = String(req.body?.reason || '');
+    if (!(REVIEW_REPORT_REASONS as readonly string[]).includes(reason)) {
+      throw new ValidationError('Choose why you are reporting this review.');
+    }
+    await ReviewService.reportReview(req.params.id, (req as any).userId, reason);
     res.json({ success: true, message: 'Review reported' });
   }
 }

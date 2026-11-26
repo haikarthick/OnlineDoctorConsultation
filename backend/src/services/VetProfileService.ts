@@ -1,7 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
 import { DatabaseError, NotFoundError } from '../utils/errors';
-import logger from '../utils/logger';
 
 export interface VetProfile {
   id: string;
@@ -53,53 +51,6 @@ export interface VetProfileCreateDTO {
 }
 
 export class VetProfileService {
-  async createProfile(userId: string, data: VetProfileCreateDTO): Promise<VetProfile> {
-    try {
-      const id = uuidv4();
-      const query = `
-        INSERT INTO vet_profiles (id, user_id, license_number, specializations, qualifications,
-          years_of_experience, bio, clinic_name, clinic_address, consultation_fee, currency,
-          is_available, accepts_emergency, available_days, available_hours_start, available_hours_end,
-          languages, is_verified, rating, total_reviews, total_consultations)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,false,0.00,0,0)
-        RETURNING id, user_id as "userId", license_number as "licenseNumber",
-                  specializations, qualifications,
-                  years_of_experience as "yearsOfExperience", bio,
-                  clinic_name as "clinicName", clinic_address as "clinicAddress",
-                  consultation_fee as "consultationFee", currency,
-                  is_verified as "isVerified", is_available as "isAvailable",
-                  accepts_emergency as "acceptsEmergency",
-                  available_days as "availableDays",
-                  available_hours_start as "availableHoursStart",
-                  available_hours_end as "availableHoursEnd",
-                  languages, rating, total_reviews as "totalReviews",
-                  total_consultations as "totalConsultations",
-                  created_at as "createdAt", updated_at as "updatedAt"
-      `;
-      const result = await database.query(query, [
-        id, userId, data.licenseNumber,
-        data.specializations || [],
-        data.qualifications || [],
-        data.yearsOfExperience || 0,
-        data.bio || null,
-        data.clinicName || null,
-        data.clinicAddress || null,
-        data.consultationFee || 0,
-        data.currency || 'USD',
-        data.isAvailable !== false,
-        data.acceptsEmergency || false,
-        data.availableDays || 'Mon,Tue,Wed,Thu,Fri',
-        data.availableHoursStart || '09:00',
-        data.availableHoursEnd || '17:00',
-        data.languages || ['English'],
-      ]);
-      logger.info('Vet profile created', { id, userId });
-      return result.rows[0];
-    } catch (error) {
-      throw new DatabaseError('Error creating vet profile', { originalError: error });
-    }
-  }
-
   async getProfileByUserId(userId: string): Promise<VetProfile> {
     try {
       const query = `

@@ -1,0 +1,94 @@
+{
+  "recordActions": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "editItem": "Edit {{name}}",
+    "deleteItem": "Delete {{name}}",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "close": "Close",
+    "loading": "Loading...",
+    "saved": "Saved. The change is on the list now.",
+    "deleted": "Deleted. It is no longer on the list.",
+    "saveFailed": "We could not save your change, so nothing was changed. Check your connection and try again.",
+    "deleteFailed": "We could not delete this, so nothing was removed. Check your connection and try again, or ask the farm owner.",
+    "fillRequired": "Please fill in: {{fields}}.",
+    "confirmTitle": "Delete {{name}}?",
+    "willRemove": "This will remove: {{what}}",
+    "cannotUndo": "This cannot be undone.",
+    "confirmDelete": "Yes, delete",
+    "keep": "No, keep it",
+    "deleting": "Deleting...",
+    "workforce": {
+      "editShift": "Edit shift",
+      "shiftName": "the shift of {{who}} on {{date}}",
+      "shiftWhat": "This shift from the schedule. The worker will no longer see it.",
+      "taskWhat": "This task, with its notes and progress."
+    },
+    "reportBuilder": {
+      "editTemplate": "Edit report template",
+      "templateWhat": "This report template. Reports already made from it stay in your history."
+    },
+    "supplyChain": {
+      "editBatch": "Edit batch {{batch}}",
+      "currentHolder": "Who holds it now",
+      "trace": "Trace",
+      "traceTitle": "Where batch {{batch}} has been",
+      "traceSummary": "{{steps}} recorded steps, {{verified}} verified.",
+      "traceEmpty": "Nothing has been recorded for this batch yet. Log an event on the Events tab to start its trail.",
+      "traceFailed": "We could not load the trail of this batch. Check your connection and try again, or ask the farm owner if you should see it.",
+      "recordedBy": "Recorded by {{name}}.",
+      "verified": "Verified",
+      "unverified": "Not verified yet"
+    },
+    "lineage": {
+      "editProfile": "Edit genetic profile of {{name}}",
+      "inbreedingHint": "A number from 0 to 1. Above 0.0625 is flagged as high.",
+      "dnaSampleId": "DNA sample ID",
+      "viewTree": "Family tree",
+      "treeTitle": "Family tree of {{name}}",
+      "thisAnimal": "This animal",
+      "generationBack": "{{count}} generation(s) back",
+      "treeEmpty": "No parents are recorded for this animal yet. Add the sire and dam when you create its genetic profile.",
+      "treeFailed": "We could not load the family tree. Check your connection and try again, or ask the animal's owner if you should see it."
+    },
+    "digitalTwin": {
+      "editTwin": "Edit digital twin",
+      "twinWhat": "This digital twin and every simulation that was run on it.",
+      "simWhat": "This simulation and its results. You can run it again any time."
+    },
+    "sustainability": {
+      "editMetric": "Edit sustainability entry",
+      "editGoal": "Edit sustainability goal",
+      "currentValue": "Where you are now",
+      "currentValueHint": "The progress bar is worked out from this number.",
+      "metricWhat": "This recorded entry. The totals and averages are worked out again without it.",
+      "goalWhat": "This goal and its progress."
+    },
+    "geofence": {
+      "editZone": "Edit zone",
+      "zoneActive": "Zone is active",
+      "zoneWhat": "This zone. Past movement events stay in the history without it."
+    },
+    "wellness": {
+      "reminderWhat": "This reminder. The animal and its health records are not affected."
+    },
+    "chat": {
+      "chatWhat": "This chat and all its messages. Only you could see it.",
+      "openFailed": "We could not open that chat. It may have been deleted, or your connection dropped. Pick another chat or start a new one."
+    },
+    "hospitalCase": {
+      "editTitle": "Edit case of {{name}}",
+      "dischargeSummary": "Discharge summary"
+    },
+    "inpatient": {
+      "editTitle": "Edit stay of {{name}}",
+      "specialNeeds": "Special needs"
+    },
+    "iot": {
+      "editSensor": "Edit sensor",
+      "sensorWhat": "This sensor and all the readings it recorded."
+    }
+  }
+}

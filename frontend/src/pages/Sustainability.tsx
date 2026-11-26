@@ -7,6 +7,9 @@ import { useMasterData } from '../context/MasterDataContext'
 
 import { userMessage } from '../utils/userMessage'
 import { appLocale } from '../utils/appLocale'
+import { RowActions, ConfirmDeleteSheet, EditFieldsSheet, textOrEmpty, numOrUndefined, type SheetField } from '../components/mobile/RowActions'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
+import { fieldText, mayChangeFarmRecords } from '../utils/recordForm'
 const METRIC_TYPES = [
   { value: 'carbon_emissions', label: '🏭 Carbon Emissions', unit: 'kg CO2e' },
   { value: 'water_usage', label: '💧 Water Usage', unit: 'liters' },
@@ -36,6 +39,29 @@ const Sustainability: React.FC = () => {
   const [showGoalForm, setShowGoalForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [editingMetric, setEditingMetric] = useState<SustainabilityMetric | null>(null)
+  const [deletingMetric, setDeletingMetric] = useState<SustainabilityMetric | null>(null)
+  const [editingGoal, setEditingGoal] = useState<SustainabilityGoal | null>(null)
+  const [deletingGoal, setDeletingGoal] = useState<SustainabilityGoal | null>(null)
+  const farmRole = useMyFarmRole(enterprises.find(en => en.id === selectedEnterpriseId))
+  const mayChange = mayChangeFarmRecords(farmRole)
+  const metricFields: SheetField[] = [
+    { key: 'metricName', label: t('common.name'), type: 'text', required: true },
+    { key: 'value', label: t('sustainability.value'), type: 'number', required: true },
+    { key: 'unit', label: t('sustainability.unit'), type: 'text', required: true },
+    { key: 'scope', label: t('sustainability.scope'), type: 'select', options: Object.entries(SCOPE_LABELS).map(([value, label]) => ({ value, label })) },
+    { key: 'notes', label: t('common.notes'), type: 'textarea' },
+  ]
+  const goalStatuses = ['active', 'achieved', 'missed']
+  const goalFields: SheetField[] = [
+    { key: 'goalName', label: t('sustainability.goalName'), type: 'text', required: true },
+    { key: 'description', label: t('common.description'), type: 'textarea' },
+    { key: 'currentValue', label: t('recordActions.sustainability.currentValue'), type: 'number', hint: t('recordActions.sustainability.currentValueHint') },
+    {
+      key: 'status', label: t('common.status'), type: 'select',
+      options: [...new Set([...goalStatuses, ...(editingGoal?.status ? [editingGoal.status] : [])])].map(s => ({ value: s, label: s })),
+    },
+  ]
 
   const [metricForm, setMetricForm] = useState({
     metricType: 'carbon_emissions', metricName: '', value: '', unit: 'kg CO2e',
@@ -215,11 +241,12 @@ const Sustainability: React.FC = () => {
             </div>
           )}
           <table className="module-table">
-            <thead><tr><th>{t('common.name')}</th><th>{t('common.type')}</th><th>{t('sustainability.value')}</th><th>{t('sustainability.unit')}</th><th>{t('sustainability.scope')}</th><th>{t('sustainability.period')}</th><th>{t('common.notes')}</th></tr></thead>
+            <thead><tr><th>{t('common.name')}</th><th>{t('common.type')}</th><th>{t('sustainability.value')}</th><th>{t('sustainability.unit')}</th><th>{t('sustainability.scope')}</th><th>{t('sustainability.period')}</th><th>{t('common.notes')}</th><th>{t('common.actions')}</th></tr></thead>
             <tbody>{metrics.map(m => (
               <tr key={m.id}><td>{m.metricName}</td><td><span className="module-badge">{m.metricType}</span></td>
               <td className="si-b2cfcbec">{m.value}</td><td>{m.unit}</td><td>{SCOPE_LABELS[m.scope] || m.scope}</td>
-              <td>{m.periodStart?.slice(0, 10)} → {m.periodEnd?.slice(0, 10)}</td><td>{m.notes || '-'}</td></tr>
+              <td>{m.periodStart?.slice(0, 10)} → {m.periodEnd?.slice(0, 10)}</td><td>{m.notes || '-'}</td>
+              <td>{mayChange && <RowActions name={m.metricName} onEdit={() => setEditingMetric(m)} onDelete={() => setDeletingMetric(m)} />}</td></tr>
             ))}</tbody>
           </table>
           {metrics.length === 0 && <p className="si-3a7b9567">{t('sustainability.noMetrics')}</p>}
@@ -275,6 +302,7 @@ const Sustainability: React.FC = () => {
                 <div className="si-80d0addd">
                   Target: {g.targetDate?.slice(0, 10)} · Type: {g.metricType}
                 </div>
+                {mayChange && <RowActions name={g.goalName} onEdit={() => setEditingGoal(g)} onDelete={() => setDeletingGoal(g)} />}
               </div>
             ))}
             {goals.length === 0 && <p className="si-40d2db53">{t('sustainability.noGoals')}</p>}
@@ -311,6 +339,47 @@ const Sustainability: React.FC = () => {
           )}
         </div>
       )}
+
+      <EditFieldsSheet
+        open={!!editingMetric}
+        title={t('recordActions.sustainability.editMetric')}
+        fields={metricFields}
+        initial={{ metricName: fieldText(editingMetric?.metricName), value: fieldText(editingMetric?.value), unit: fieldText(editingMetric?.unit), scope: fieldText(editingMetric?.scope) || 'scope_1', notes: fieldText(editingMetric?.notes) }}
+        onSave={values => apiService.updateSustainabilityMetric(editingMetric!.id, {
+          metricName: textOrEmpty(values.metricName), value: numOrUndefined(values.value), unit: textOrEmpty(values.unit),
+          scope: values.scope, notes: textOrEmpty(values.notes),
+        })}
+        onClose={() => setEditingMetric(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.saved')); fetchData() }}
+      />
+      <ConfirmDeleteSheet
+        open={!!deletingMetric}
+        name={deletingMetric?.metricName || ''}
+        what={t('recordActions.sustainability.metricWhat')}
+        onConfirm={() => apiService.deleteSustainabilityMetric(deletingMetric!.id)}
+        onClose={() => setDeletingMetric(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.deleted')); fetchData() }}
+      />
+      <EditFieldsSheet
+        open={!!editingGoal}
+        title={t('recordActions.sustainability.editGoal')}
+        fields={goalFields}
+        initial={{ goalName: fieldText(editingGoal?.goalName), description: fieldText(editingGoal?.description), currentValue: fieldText(editingGoal?.currentValue), status: fieldText(editingGoal?.status) || 'active' }}
+        onSave={values => apiService.updateSustainabilityGoal(editingGoal!.id, {
+          goalName: textOrEmpty(values.goalName), description: textOrEmpty(values.description),
+          currentValue: numOrUndefined(values.currentValue), status: values.status,
+        })}
+        onClose={() => setEditingGoal(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.saved')); fetchData() }}
+      />
+      <ConfirmDeleteSheet
+        open={!!deletingGoal}
+        name={deletingGoal?.goalName || ''}
+        what={t('recordActions.sustainability.goalWhat')}
+        onConfirm={() => apiService.deleteSustainabilityGoal(deletingGoal!.id)}
+        onClose={() => setDeletingGoal(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.deleted')); fetchData() }}
+      />
     </div>
   )
 }

@@ -151,11 +151,6 @@ export const medicalRecordsApi = {
   },
 
   // ─── Vet Profiles ─────────────────────────────────────────
-  async createVetProfile(data: Record<string, unknown>) {
-    const response = await sharedClient.post('/vet-profiles', data)
-    return response.data
-  },
-
   async getMyVetProfile() {
     const response = await sharedClient.get('/vet-profiles/me')
     return response.data
@@ -201,8 +196,14 @@ export const medicalRecordsApi = {
     return response.data
   },
 
-  async updateMedicalRecord(id: string, data: Record<string, unknown>) {
-    const response = await sharedClient.put(`/medical-records/${id}`, data)
+  /** A saved record is never edited in place: it is corrected by an addendum (a new dated note on the record). */
+  async listRecordAddenda(recordId: string) {
+    const response = await sharedClient.get(`/medical-records/${recordId}/addenda`)
+    return response.data
+  },
+
+  async addRecordAddendum(recordId: string, note: string) {
+    const response = await sharedClient.post(`/medical-records/${recordId}/addenda`, { note })
     return response.data
   },
 
@@ -233,13 +234,9 @@ export const medicalRecordsApi = {
     return response.data
   },
 
-  async updateVaccination(id: string, data: Record<string, unknown>) {
-    const response = await sharedClient.put(`/vaccinations/${id}`, data)
-    return response.data
-  },
-
-  async deleteVaccination(id: string) {
-    const response = await sharedClient.delete(`/vaccinations/${id}`)
+  /** A wrong vaccination is marked "entered by mistake" (reason required); it stays in the history but leaves counts and the passport. */
+  async markVaccinationMistake(id: string, reason: string) {
+    const response = await sharedClient.post(`/vaccinations/${id}/mistake`, { reason })
     return response.data
   },
 
@@ -265,8 +262,8 @@ export const medicalRecordsApi = {
     return response.data
   },
 
-  async updateAllergy(id: string, data: Record<string, unknown>) {
-    const response = await sharedClient.put(`/allergies/${id}`, data)
+  async markAllergyMistake(id: string, reason: string) {
+    const response = await sharedClient.post(`/allergies/${id}/mistake`, { reason })
     return response.data
   },
 

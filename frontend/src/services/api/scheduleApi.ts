@@ -10,10 +10,6 @@ export async function getMySchedules() {
   return response.data
 }
 
-export async function getVetSchedules(vetId: string) {
-  const response = await client.get(`/schedules/vet/${vetId}`)
-  return response.data
-}
 
 export async function updateSchedule(id: string, data: Record<string, unknown>) {
   const response = await client.put(`/schedules/${id}`, data)

@@ -68,16 +68,6 @@ export const clientPortalApi = {
     return response.data
   },
 
-  async updateWellnessScorecard(id: string, data: any) {
-    const response = await sharedClient.put(`/wellness/scorecards/${id}`, data)
-    return response.data
-  },
-
-  async deleteWellnessScorecard(id: string) {
-    const response = await sharedClient.delete(`/wellness/scorecards/${id}`)
-    return response.data
-  },
-
   async listWellnessReminders(filters: any = {}) {
     const response = await sharedClient.get('/wellness/reminders', { params: filters })
     return response.data

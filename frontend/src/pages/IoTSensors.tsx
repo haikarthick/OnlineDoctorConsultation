@@ -7,6 +7,9 @@ import { useTranslation } from 'react-i18next'
 
 import { userMessage } from '../utils/userMessage'
 import { appLocale } from '../utils/appLocale'
+import { RowActions, ConfirmDeleteSheet, EditFieldsSheet, textOrEmpty, numOrUndefined, type SheetField } from '../components/mobile/RowActions'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
+import { pickField, fieldText, mayChangeFarmRecords } from '../utils/recordForm'
 const SENSOR_ICONS: Record<string, string> = {
   temperature: '🌡️', humidity: '💧', weight: '⚖️', activity: '🏃', air_quality: '🌬️',
   heart_rate: '💓', water_flow: '🚿', gps: '📍', camera: '📷', pressure: '🔵'
@@ -28,6 +31,23 @@ const IoTSensorPage: React.FC = () => {
   const [showReadingForm, setShowReadingForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [editingSensor, setEditingSensor] = useState<IoTSensor | null>(null)
+  const [deletingSensor, setDeletingSensor] = useState<IoTSensor | null>(null)
+  const farmRole = useMyFarmRole(enterprises.find(en => en.id === selectedEnterpriseId))
+  const mayChange = mayChangeFarmRecords(farmRole)
+  const sensorFields: SheetField[] = [
+    { key: 'sensorName', label: t('iotSensors.sensorName'), type: 'text', required: true },
+    { key: 'sensorType', label: t('iotSensors.sensorType'), type: 'select', options: Object.keys(SENSOR_ICONS).map(st => ({ value: st, label: `${SENSOR_ICONS[st]} ${st.replace(/_/g, ' ')}` })) },
+    { key: 'status', label: t('common.status'), type: 'select', options: ['active', 'inactive', 'maintenance', 'offline'].map(s => ({ value: s, label: s })) },
+    { key: 'minThreshold', label: t('iotSensors.minThreshold'), type: 'number' },
+    { key: 'maxThreshold', label: t('iotSensors.maxThreshold'), type: 'number' },
+    { key: 'readingIntervalSeconds', label: t('iotSensors.readingInterval'), type: 'number', step: '1' },
+  ]
+  const sensorInitial = (s: IoTSensor | null): Record<string, string> => ({
+    sensorName: fieldText(pickField(s, 'sensorName')), sensorType: fieldText(pickField(s, 'sensorType')) || 'temperature',
+    status: fieldText(s?.status) || 'active', minThreshold: fieldText(pickField(s, 'minThreshold')),
+    maxThreshold: fieldText(pickField(s, 'maxThreshold')), readingIntervalSeconds: fieldText(pickField(s, 'readingIntervalSeconds')),
+  })
 
   const [formData, setFormData] = useState({
     sensorType: 'temperature', sensorName: '', serialNumber: '', manufacturer: '',
@@ -290,6 +310,7 @@ const IoTSensorPage: React.FC = () => {
                       </div>
                       <div className="card-footer">
                         <button className="btn-sm" onClick={() => fetchReadings(s.id)}>{t('iotSensors.viewReadings')}</button>
+                        {mayChange && <RowActions name={sName} onEdit={() => setEditingSensor(s)} onDelete={() => setDeletingSensor(s)} />}
                       </div>
                     </div>
                   )
@@ -328,6 +349,28 @@ const IoTSensorPage: React.FC = () => {
           )}
         </>
       )}
+
+      <EditFieldsSheet
+        open={!!editingSensor}
+        title={t('recordActions.iot.editSensor')}
+        fields={sensorFields}
+        initial={sensorInitial(editingSensor)}
+        onSave={values => apiService.updateSensor(editingSensor!.id, {
+          sensorName: textOrEmpty(values.sensorName), sensorType: values.sensorType, status: values.status,
+          minThreshold: numOrUndefined(values.minThreshold, true), maxThreshold: numOrUndefined(values.maxThreshold, true),
+          readingIntervalSeconds: numOrUndefined(values.readingIntervalSeconds),
+        })}
+        onClose={() => setEditingSensor(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.saved')); fetchData() }}
+      />
+      <ConfirmDeleteSheet
+        open={!!deletingSensor}
+        name={(deletingSensor as any)?.sensor_name || deletingSensor?.sensorName || ''}
+        what={t('recordActions.iot.sensorWhat')}
+        onConfirm={() => apiService.deleteSensor(deletingSensor!.id)}
+        onClose={() => setDeletingSensor(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.deleted')); setSelectedSensor(''); setReadings([]); fetchData() }}
+      />
     </div>
   )
 }

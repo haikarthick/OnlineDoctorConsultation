@@ -50,7 +50,11 @@ class ReportBuilderService {
   }
 
   async deleteTemplate(id: string): Promise<void> {
-    await database.query(`DELETE FROM report_templates WHERE id = $1`, [id]);
+    // Reports already generated from the template stay; they just no longer point at it.
+    await database.query(
+      `WITH g AS (UPDATE generated_reports SET template_id = NULL WHERE template_id = $1)
+       DELETE FROM report_templates WHERE id = $1`, [id]
+    );
   }
 
   // ─── Generated Reports ────────────────────────────────────

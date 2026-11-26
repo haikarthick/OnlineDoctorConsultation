@@ -17,6 +17,11 @@ export const adminApi = {
     return response.data
   },
 
+  /** Which policy documents (and versions) a person accepted, and when. */
+  async adminGetUserAcceptances(userId: string) {
+    return (await sharedClient.get(`/admin/legal-documents/user/${userId}`)).data
+  },
+
   async adminChangeUserRole(
     userId: string,
     role: string,
@@ -193,8 +198,8 @@ export const adminApi = {
     return response.data
   },
 
-  async revokeUserSessions(userId: string) {
-    const response = await sharedClient.post(`/admin/compliance/revoke-sessions/${userId}`)
+  async revokeUserSessions(userId: string, reason: string) {
+    const response = await sharedClient.post(`/admin/compliance/revoke-sessions/${userId}`, { reason })
     return response.data
   },
 

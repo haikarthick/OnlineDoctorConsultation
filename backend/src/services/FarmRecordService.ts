@@ -1,9 +1,9 @@
 import WithdrawalService from './withdrawal/WithdrawalService';
 import database from '../utils/database';
 import logger from '../utils/logger';
-import { ValidationError, NotFoundError, ForbiddenError } from '../utils/errors';
+import { ValidationError, NotFoundError, ForbiddenError, CodedError } from '../utils/errors';
 import FarmProfileService from './FarmProfileService';
-import FarmAccessService, { VET_NOT_BOOKED_MESSAGE } from './FarmAccessService';
+import FarmAccessService, { VET_NOT_BOOKED_MESSAGE, NO_ACCESS_MESSAGE } from './FarmAccessService';
 import { logClinicalAccess } from '../middleware/hospitalDataIsolation';
 import BatchManagementService from './BatchManagementService';
 import FeedInventoryService from './FeedInventoryService';
@@ -384,12 +384,16 @@ class FarmRecordService {
   async remove(id: string, caller: Caller): Promise<void> {
     const r = await database.query(`SELECT * FROM farm_daily_records WHERE id = $1`, [id]);
     const rec = r.rows[0];
-    if (!rec) throw new NotFoundError('Record not found');
+    // A missing entry and one on someone else's farm get the SAME answer (an admin, who may see everything, is told it is gone).
+    if (!rec) {
+      if (caller.role === 'admin') throw new CodedError(404, 'FR_GONE', 'This entry is already gone. Refresh the page to see the current entries.');
+      throw new ForbiddenError(NO_ACCESS_MESSAGE);
+    }
     await this.assertFarmAccess(rec.enterprise_id, caller, true);
     // The farm's owner and managers may delete anything; anyone else only what they entered themselves.
     if (caller.role !== 'admin' && rec.recorded_by !== caller.userId) {
       const role = await FarmAccessService.roleOf(rec.enterprise_id, caller.userId);
-      if (!canDeleteAnyRecord(role)) throw new ForbiddenError('Only the person who entered this record, or the farm owner or manager, can delete it.');
+      if (!canDeleteAnyRecord(role)) throw new CodedError(403, 'FR_NOT_YOURS', 'Only the person who entered this record, or the farm owner or manager, can delete it.');
     }
     await database.transaction(async (client: any) => {
       await client.query(

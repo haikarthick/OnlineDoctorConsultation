@@ -86,10 +86,12 @@ export function scheduleStaleChunkGuardRelease(): void {
  */
 export function installStaleChunkRecovery(): void {
   window.addEventListener('vite:preloadError', event => {
-    // Prevent Vite's default rethrow: we are handling it by reloading.
-    event.preventDefault()
-    if (!reloadForStaleChunk()) {
-      // Second time around - let it through so the ErrorBoundary can show something real.
+    if (reloadForStaleChunk()) {
+      // Stop Vite's rethrow only when we really are reloading.
+      event.preventDefault()
+    } else {
+      // Second time around: NOT prevented, so the import fails for real and the ErrorBoundary says so in plain words. Preventing it
+      // here made the import "succeed" with nothing, and the screen crashed on a code error instead.
       console.error('[vetcare] chunk still missing after reload', event.payload)
     }
   })

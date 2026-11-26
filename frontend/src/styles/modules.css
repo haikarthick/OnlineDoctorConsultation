@@ -3568,6 +3568,8 @@ textarea.module-input {
 @media (max-width: 480px) { .record-kind-hint { display: none; } }
 .record-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .record-chip { background: var(--success-light); color: #065f46; border-radius: var(--chip-radius); padding: 6px 12px; font-size: 14px; }
+/* A chip that opens "delete this entry" is a button: thumb-sized on a phone. */
+.record-chip[role="button"] { display: inline-flex; align-items: center; gap: 4px; min-height: var(--tap-min, 44px); cursor: pointer; }
 .record-chip.is-empty { background: var(--gray-100); color: var(--gray-600); }
 .record-card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .record-quick { min-height: var(--tap-min); flex: 1 1 auto; }
@@ -4024,3 +4026,31 @@ button.record-due-row { cursor: pointer; }
 :where(.module-page) :where(h1, h2, h3, p, span, label, button, td, th) { overflow-wrap: anywhere; }
 :where(.group-card, .group-card-grid > *) { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 
+
+/* ── Row actions + record sheets (components/mobile/RowActions.tsx): edit / delete on a list row, the same everywhere ── */
+:where(.row-actions) { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+:where(.row-action-btn) {
+  min-height: var(--tap-min); min-width: var(--tap-min); padding: 0 16px; border-radius: 10px; cursor: pointer;
+  border: 1.5px solid var(--brand-strong); background: #fff; color: var(--brand-strong); font-size: 15px; font-weight: 600;
+}
+:where(.row-action-btn.is-danger) { border-color: var(--danger); color: var(--danger); }
+:where(.row-action-btn):focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+:where(.record-sheet) { display: flex; flex-direction: column; gap: 14px; }
+:where(.record-sheet-text) { margin: 0; font-size: 16px; line-height: 1.45; color: var(--gray-800); }
+:where(.record-sheet-warn) { font-weight: 600; }
+:where(.record-sheet-field) { display: flex; flex-direction: column; gap: 6px; }
+:where(.record-sheet-field) label { font-size: 14px; font-weight: 600; color: #374151; }
+:where(.record-sheet-field) :where(input, select, textarea) {
+  width: 100%; box-sizing: border-box; min-height: var(--tap-min); padding: 10px 12px; font-size: var(--mobile-font);
+  border: 1.5px solid #d1d5db; border-radius: 10px; background: #fff;
+}
+:where(.record-sheet-check) { display: flex; align-items: center; gap: 12px; min-height: var(--tap-min); font-size: 16px; }
+:where(.record-sheet-check) input { width: 24px; height: 24px; }
+:where(.record-sheet-hint) { color: var(--gray-600, #4b5563); font-size: 13px; }
+:where(.record-sheet-error) { padding: 12px 14px; border-radius: 10px; background: var(--danger-light); color: #991b1b; font-size: 15px; line-height: 1.4; }
+:where(.record-sheet-buttons) { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+:where(.record-sheet-buttons) > button { min-height: var(--tap-min); padding: 0 20px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; flex: 1 1 140px; }
+:where(.record-sheet-buttons) > .btn-secondary { background: #fff; border: 1.5px solid #d1d5db; color: var(--gray-800); }
+:where(.trace-list) { margin: 0; padding: 0 0 0 20px; display: flex; flex-direction: column; gap: 12px; }
+:where(.trace-step) { display: flex; flex-direction: column; gap: 2px; font-size: 16px; }
+:where(.trace-meta) { font-size: 14px; color: var(--gray-600, #4b5563); }

@@ -64,29 +64,6 @@ class VideoSessionController {
     res.json({ success: true, data: session });
   }
 
-  async joinSession(req: Request, res: Response) {
-    const authReq = req as AuthRequest;
-    const { roomId } = req.params;
-
-    const session = await VideoSessionService.getSessionByRoom(roomId);
-    if (!session) {
-      throw new ValidationError('Session not found for this room');
-    }
-
-    const authorized = await this.isAuthorized(authReq.userId!, authReq.userRole!, session);
-    if (!authorized) {
-      throw new ForbiddenError('Not authorized to join this session');
-    }
-
-    // Auto-start the session when either party joins during waiting
-    if (session.status === 'waiting') {
-      const started = await VideoSessionService.startSession(session.id);
-      return res.json({ success: true, data: started });
-    }
-
-    res.json({ success: true, data: session });
-  }
-
   async startSession(req: Request, res: Response) {
     const authReq = req as AuthRequest;
     const session = await VideoSessionService.getSession(req.params.id);
@@ -144,15 +121,6 @@ class VideoSessionController {
     // The session ID is not guessable (UUID) and only shared with participants
     const messages = await VideoSessionService.getChatMessages(req.params.id);
     res.json({ success: true, data: messages });
-  }
-
-  async listActiveSessions(req: Request, res: Response) {
-    const authReq = req as AuthRequest;
-    if (authReq.userRole !== 'admin') {
-      throw new ForbiddenError('Only admins can list all active sessions');
-    }
-    const sessions = await VideoSessionService.listActiveSessions();
-    res.json({ success: true, data: sessions });
   }
 
   // ─── WebRTC Signaling ──────────────────────────────────────

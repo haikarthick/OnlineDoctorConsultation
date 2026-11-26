@@ -36,7 +36,7 @@ const TimelineTab: React.FC<Props> = ({ t, selectedAnimal, timeline, fmtDate }) 
                 {item.description && <p className="si-ada3b9d6">{item.description}</p>}
                 {item.createdByName && <p className="si-1f14f25b">{t('medicalRecords.timelineTab.by')} {item.createdByName}</p>}
                 <div className="si-beb18125">
-                  {item.status && <span className={`badge badge-${item.status === 'active' || item.status === 'valid' ? 'completed' : item.status === 'pending' ? 'pending' : 'info'} si-586056cf`}>{t(item.status === 'in_progress' ? 'common.inProgress' : `common.${item.status}`)}</span>}
+                  {item.status && <span className={`badge badge-${item.status === 'active' || item.status === 'valid' ? 'completed' : item.status === 'pending' ? 'pending' : 'info'} si-586056cf`}>{t(item.status === 'entered_by_mistake' ? 'recordCorrections.mistakeBadge' : item.status === 'in_progress' ? 'common.inProgress' : `common.${item.status}`)}</span>}
                   {item.severity && item.severity !== 'normal' && <span className={`badge mr-sev-badge sev-${item.severity}`}>{t(`medicalRecords.severityLevels.${item.severity}`)}</span>}
                 </div>
               </div>

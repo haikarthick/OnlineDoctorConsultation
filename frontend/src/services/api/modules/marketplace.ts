@@ -179,11 +179,6 @@ export const marketplaceApi = {
     return response.data
   },
 
-  async updateOrderStatus(id: string, status: string) {
-    const response = await sharedClient.patch(`/marketplace/orders/${id}/status`, { status })
-    return response.data
-  },
-
   async getMarketPrices(filters: any = {}) {
     const response = await sharedClient.get('/marketplace/prices', { params: filters })
     return response.data
@@ -255,27 +250,7 @@ export const marketplaceApi = {
     return response.data
   },
 
-  // ─── Marketplace Monetization - User ────────────────────────
-  async getUserSubscription() {
-    const response = await sharedClient.get('/marketplace/subscription')
-    return response.data
-  },
-
-  async createUserSubscription(planId: string) {
-    const response = await sharedClient.post('/marketplace/subscription', { planId })
-    return response.data
-  },
-
-  async cancelUserSubscription() {
-    const response = await sharedClient.delete('/marketplace/subscription')
-    return response.data
-  },
-
-  async boostListing(id: string, boostType: string = 'standard') {
-    const response = await sharedClient.post(`/marketplace/listings/${id}/boost`, { boostType })
-    return response.data
-  },
-
+  // ─── Marketplace inquiries ──────────────────────────────────
   async createInquiry(listingId: string, message: string) {
     const response = await sharedClient.post(`/marketplace/listings/${listingId}/inquiries`, { message })
     return response.data
@@ -288,11 +263,6 @@ export const marketplaceApi = {
 
   async respondToInquiry(id: string, revealContact: boolean) {
     const response = await sharedClient.patch(`/marketplace/inquiries/${id}/respond`, { revealContact })
-    return response.data
-  },
-
-  async getUserMonetizationStatus() {
-    const response = await sharedClient.get('/marketplace/monetization-status')
     return response.data
   },
 

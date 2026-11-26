@@ -33,6 +33,8 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
   // Passport data - keyed by animalId
   const [passports, setPassports] = useState<PassportAnimal[]>([])
   const [expandedAnimal, setExpandedAnimal] = useState<string | null>(null)
+  const [shownCount, setShownCount] = useState(20)
+  const [animalTotal, setAnimalTotal] = useState(0)
   const [expandedProtocol, setExpandedProtocol] = useState<string | null>(null)
 
   // Compliance summary (vet / farmer / admin view)
@@ -70,26 +72,25 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
     setError('')
     try {
       // For all roles: load animals first, then fetch passport for each
-      const animalsResp = await (apiService as any).client.get('/animals', { params: { limit: 100 } })
+      const animalsResp = await (apiService as any).client.get('/animals', { params: { limit: 500 } })
       const rawData = animalsResp.data?.data
       // Backend always returns { data: { animals: [], total: n } } - extract the animals array
       const animals: { id: string }[] = Array.isArray(rawData?.animals)
         ? rawData.animals
         : Array.isArray(rawData?.items) ? rawData.items  // legacy fallback
         : Array.isArray(rawData) ? rawData : []
+      setAnimalTotal(animals.length)
       if (animals.length === 0) {
         setPassports([])
         setLoading(false)
         return
       }
       const passportResults = await Promise.allSettled(
-        animals.slice(0, 20).map((a) =>
-          (apiService as any).client.get(`/vaccination-passport/animal/${a.id}`)
-        )
+        animals.slice(0, shownCount).map((a) => apiService.getVaccinationPassport(a.id))
       )
       const loaded: PassportAnimal[] = passportResults
         .filter((r) => r.status === 'fulfilled')
-        .map((r) => (r as PromiseFulfilledResult<any>).value.data?.data)
+        .map((r) => (r as PromiseFulfilledResult<any>).value?.data)
         .filter(Boolean)
       setPassports(loaded)
       if (loaded.length > 0) {
@@ -102,14 +103,14 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [t, shownCount])
 
   // ── Load compliance summary ─────────────────────────────────
   const loadComplianceSummary = useCallback(async () => {
     setSummaryLoading(true)
     try {
-      const resp = await (apiService as any).client.get('/vaccination-passport/compliance-summary')
-      setComplianceSummary(resp.data?.data || [])
+      const resp = await apiService.getVaccinationComplianceSummary()
+      setComplianceSummary(resp?.data || [])
     } catch {
       // non-critical
     } finally {
@@ -122,8 +123,8 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
     if (!animalId) return
     setCertLoading(true)
     try {
-      const resp = await (apiService as any).client.get(`/vaccine-certificate-log/animal/${animalId}`)
-      setCertLogs(resp.data?.data || [])
+      const resp = await apiService.getAnimalCertificateLogs(animalId)
+      setCertLogs(resp?.data || [])
     } catch {
       setCertLogs([])
     } finally {
@@ -246,7 +247,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
       setPrintHtml(html)
 
       // Log certificate download
-      await (apiService as any).client.post('/vaccine-certificate-log', {
+      await apiService.logVaccineCertificateDownload({
         animalId: animal.animalId,
         certificateType: 'passport',
         fileName,
@@ -414,6 +415,9 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                   onChanged={loadPassports}
                 />
               ))
+            )}
+            {animalTotal > shownCount && (
+              <button type="button" className="module-btn" onClick={() => setShownCount(n => n + 20)}>{t('accountTools.showMoreAnimals', { count: animalTotal - shownCount })}</button>
             )}
           </div>
         )}

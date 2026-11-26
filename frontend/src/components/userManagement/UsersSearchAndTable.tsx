@@ -16,6 +16,8 @@ interface UsersSearchAndTableProps {
   onOpenVetProfile: (u: User) => void
   onOpenSecondaryRoles: (u: User) => void
   onOpenResetPassword: (u: User) => void
+  onOpenSignOut: (u: User) => void
+  onOpenPolicies: (u: User) => void
   onApproveRegistration: (id: string) => void
   onOpenRejectRegistration: (u: User) => void
   onUnfreeze: (u: User) => void
@@ -26,7 +28,7 @@ interface UsersSearchAndTableProps {
 
 const UsersSearchAndTable: React.FC<UsersSearchAndTableProps> = ({
   search, setSearch, roleFilter, setRoleFilter, loading, users, processing, formatDate,
-  onOpenRoleModal, onOpenVetProfile, onOpenSecondaryRoles, onOpenResetPassword,
+  onOpenRoleModal, onOpenVetProfile, onOpenSecondaryRoles, onOpenResetPassword, onOpenSignOut, onOpenPolicies,
   onApproveRegistration, onOpenRejectRegistration, onUnfreeze, onReactivate, onOpenFreeze, onOpenSuspend,
 }) => {
   const { t } = useTranslation()
@@ -109,6 +111,8 @@ const UsersSearchAndTable: React.FC<UsersSearchAndTableProps> = ({
                       <button className="btn btn-sm btn-outline" onClick={() => onOpenResetPassword(u)}>
                         🔒 {t('userManagement.resetPasswordBtn')}
                       </button>
+                      <button className="btn btn-sm btn-outline" onClick={() => onOpenSignOut(u)}>🚪 {t('signOutEverywhere.button')}</button>
+                      <button className="btn btn-sm btn-outline" onClick={() => onOpenPolicies(u)}>📜 {t('accountTools.policiesButton')}</button>
                       {/* Account status actions - context-sensitive */}
                       {u.accountStatus === 'pending_approval' ? (
                         <>

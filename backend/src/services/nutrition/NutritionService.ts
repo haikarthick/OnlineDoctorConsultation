@@ -485,7 +485,7 @@ class NutritionService {
   /** Active allergies the medical record holds for this animal (read live - medical records own them). */
   async activeAllergies(animalId: string): Promise<Array<{ allergen: string; severity: string }>> {
     const r = await database.query(
-      `SELECT allergen, severity FROM allergy_records WHERE animal_id = $1 AND is_active = true ORDER BY created_at DESC LIMIT 50`,
+      `SELECT allergen, severity FROM allergy_records WHERE animal_id = $1 AND is_active = true AND entered_by_mistake_at IS NULL ORDER BY created_at DESC LIMIT 50`,
       [animalId]
     );
     return r.rows.map((x: any) => ({ allergen: String(x.allergen), severity: x.severity || 'mild' }));

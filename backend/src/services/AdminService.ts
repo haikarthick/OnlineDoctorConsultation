@@ -352,8 +352,9 @@ class AdminService {
        veterinarian_id as "veterinarianId", rating, comment,
        response_from_vet as "responseFromVet", is_public as "isPublic",
        status, helpful_count as "helpfulCount", report_count as "reportCount",
+       (SELECT COALESCE(array_agg(DISTINCT x.reason), '{}') FROM review_reactions x WHERE x.review_id = reviews.id AND x.kind = 'report') as "reportReasons",
        created_at as "createdAt", updated_at as "updatedAt"
-       FROM reviews ${whereClause} ORDER BY created_at DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`,
+       FROM reviews ${whereClause} ORDER BY (report_count > 0) DESC, created_at DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`,
       [...queryParams, limit, offset]
     );
 

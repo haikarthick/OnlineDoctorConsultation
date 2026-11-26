@@ -35,7 +35,7 @@ const AnimalGroups: React.FC = () => {
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   // Only the farm's owner decides to share a group's records with a hospital network.
   const [shareGroup, setShareGroup] = useState<{ id: string; name: string } | null>(null)
-  const [cyclesGroup, setCyclesGroup] = useState<{ id: string; name: string } | null>(null)
+  const [cyclesGroup, setCyclesGroup] = useState<{ id: string; name: string; enterpriseId?: string; species?: string; breed?: string } | null>(null)
   const [rxGroup, setRxGroup] = useState<{ id: string; name: string } | null>(null)
   const myFarmRole = useMyFarmRole(enterprises.find(e => e.id === selectedEnterpriseId))
   const [groups, setGroups] = useState<AnimalGroup[]>([])
@@ -305,7 +305,7 @@ const AnimalGroups: React.FC = () => {
               {g.description && <p className="si-9cbc3f5c">{g.description}</p>}
               <div className="si-0eca3602">
                 {g.managementMode === 'batch' && (
-                  <button className="btn btn-sm btn-secondary" onClick={() => setCyclesGroup({ id: g.id, name: g.name })}>{t('batchCycles.button')}</button>
+                  <button className="btn btn-sm btn-secondary" onClick={() => setCyclesGroup({ id: g.id, name: g.name, enterpriseId: g.enterpriseId, species: g.species, breed: g.breed })}>{t('batchCycles.button')}</button>
                 )}
                 {g.managementMode === 'batch' && (
                   <button className="btn btn-sm btn-secondary" onClick={() => openGroupHealth(g)} title={t('animalGroups.health.view')}>
@@ -555,7 +555,7 @@ const AnimalGroups: React.FC = () => {
         />
       )}
       <ShareGroupSheet group={shareGroup} onClose={() => setShareGroup(null)} />
-      {cyclesGroup && <GroupCyclesSheet open groupId={cyclesGroup.id} groupName={cyclesGroup.name} onClose={() => setCyclesGroup(null)} onChanged={() => fetchGroups()} />}
+      {cyclesGroup && <GroupCyclesSheet open groupId={cyclesGroup.id} groupName={cyclesGroup.name} enterpriseId={cyclesGroup.enterpriseId} species={cyclesGroup.species} breed={cyclesGroup.breed} onClose={() => setCyclesGroup(null)} onChanged={() => fetchGroups()} />}
       {rxGroup && <GroupPrescriptionsSheet open groupId={rxGroup.id} groupName={rxGroup.name} onClose={() => setRxGroup(null)} />}
     </div>
   )

@@ -1,6 +1,7 @@
 import type { PassportAnimal } from './vaccinationPassportShared'
 import { StatusBadge, ComplianceMeter } from './VaccinationPassportHelpers'
 import { VaccinePlanPanel } from './VaccinePlanPanel'
+import { MistakeAction } from '../recordCorrections/MistakeAction'
 
 interface PassportCardProps {
   animal: PassportAnimal
@@ -155,6 +156,7 @@ export function PassportCard({
                             <th>{t('vaccinationPassport.dueDate')}</th>
                             <th>{t('vaccinationPassport.administeredDate')}</th>
                             <th>{t('vaccinationPassport.doseStatus')}</th>
+                            <th aria-label={t('recordCorrections.mistakeButton')} />
                           </tr>
                         </thead>
                         <tbody>
@@ -164,6 +166,7 @@ export function PassportCard({
                               <td>{formatDate(dose.dueDate)}</td>
                               <td>{dose.administeredAt ? formatDate(dose.administeredAt) : '-'}</td>
                               <td><StatusBadge status={dose.status} t={t} /></td>
+                              <td>{dose.status === 'administered' && dose.vaccinationRecordId && <MistakeAction kind="vaccination" id={dose.vaccinationRecordId} onDone={onChanged} />}</td>
                             </tr>
                           ))}
                         </tbody>

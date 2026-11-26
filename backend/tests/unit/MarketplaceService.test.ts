@@ -219,25 +219,6 @@ describe('MarketplaceService', () => {
     });
   });
 
-  describe('updateOrderStatus', () => {
-    it('should update order status for a participant', async () => {
-      const updated = { id: 'o1', status: 'shipped' };
-      (pool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ buyer_id: 'u1', seller_id: 's1', status: 'pending' }] }) // participant check
-        .mockResolvedValueOnce({ rows: [] })          // UPDATE
-        .mockResolvedValueOnce({ rows: [updated] });  // SELECT back
-      const result = await marketplaceService.updateOrderStatus('o1', 'shipped', 'u1');
-      expect(result).toEqual(updated);
-    });
-
-    it('should reject status change from a non-participant', async () => {
-      (pool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ buyer_id: 'u1', seller_id: 's1', status: 'pending' }] });
-      await expect(marketplaceService.updateOrderStatus('o1', 'shipped', 'attacker'))
-        .rejects.toThrow(/not part of this order/);
-    });
-  });
-
   describe('getDashboard', () => {
     it('should return marketplace dashboard', async () => {
       (pool.query as jest.Mock)

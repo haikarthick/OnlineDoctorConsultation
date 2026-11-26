@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
+import { MonthCalendar } from '../../components/grooming/MonthCalendar'
 import { payGroomingOrderFlow } from '../../utils/groomingCheckout'
 import { useSettings } from '../../context/SettingsContext'
 import '../../styles/modules.css'
 
 import { userMessage } from '../../utils/userMessage'
-import { appLocale } from '../../utils/appLocale'
 interface Props { onNavigate: (path: string) => void }
 
 interface Slot { startTime: string; endTime: string; isAvailable: boolean; remainingCapacity: number }
@@ -14,23 +14,6 @@ interface Slot { startTime: string; endTime: string; isAvailable: boolean; remai
 function useQuery() {
   const p = new URLSearchParams(window.location.search)
   return { providerId: p.get('providerId') || '', serviceId: p.get('serviceId') || '' }
-}
-
-function localDate(d: Date): string {
-  // Deliberately NOT toISOString(): that converts to UTC first, so anywhere east of Greenwich
-  // "today" becomes yesterday's date for the first hours of the day.
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-function dateChips(t: (k: string) => string) {
-  return Array.from({ length: 14 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() + i)
-    return {
-      value: localDate(d),
-      label: i === 0 ? t('groomingBook.today') : i === 1 ? t('groomingBook.tomorrow')
-        : d.toLocaleDateString(appLocale(), { weekday: 'short', month: 'short', day: 'numeric' }),
-    }
-  })
 }
 
 const BookGrooming: React.FC<Props> = ({ onNavigate }) => {
@@ -180,12 +163,7 @@ const BookGrooming: React.FC<Props> = ({ onNavigate }) => {
 
       <div className="module-card">
         <label className="module-label">{t('groomingBook.date')} *</label>
-        <div className="chip-row chip-row-scroll">
-          {dateChips(t).map(d => (
-            <button key={d.value} className={`module-btn small${date === d.value ? ' primary' : ''}`}
-              onClick={() => setDate(d.value)}>{d.label}</button>
-          ))}
-        </div>
+        <MonthCalendar providerId={providerId} serviceId={serviceId} value={date} onPick={setDate} />
 
         <label className="module-label slot-label">{t('groomingBook.time')} *</label>
         {!date ? <p className="slot-hint">{t('groomingBook.pickDateFirst')}</p>

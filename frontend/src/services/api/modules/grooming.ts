@@ -102,10 +102,6 @@ export const groomingApi = {
     const response = await sharedClient.get('/grooming/orders')
     return response.data
   },
-  async getGroomingOrder(id: string) {
-    const response = await sharedClient.get(`/grooming/orders/${id}`)
-    return response.data
-  },
   async createGroomingCheckout(id: string, deposit = false) {
     const response = await sharedClient.post(`/grooming/orders/${id}/checkout`, { deposit })
     return response.data

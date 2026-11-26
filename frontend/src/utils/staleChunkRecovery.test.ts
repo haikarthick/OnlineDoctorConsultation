@@ -84,3 +84,15 @@ describe('reloadForStaleChunk - one-shot guard', () => {
     spy.mockRestore()
   })
 })
+
+describe('a chunk that still fails after the one reload', () => {
+  it('is not swallowed: the import fails for real so the error screen can explain it', async () => {
+    const { installStaleChunkRecovery } = await import('./staleChunkRecovery')
+    sessionStorage.setItem('vetcare:chunk-reload', location.pathname) // the one reload has been used
+    installStaleChunkRecovery()
+    const event = new Event('vite:preloadError', { cancelable: true })
+    window.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(false)
+    sessionStorage.removeItem('vetcare:chunk-reload')
+  })
+})

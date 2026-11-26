@@ -1,6 +1,7 @@
 import React from 'react'
 import { TFunction } from 'i18next'
 import { EmptyState, RecordItemProps } from './medicalRecordsShared'
+import { MistakeAction, MistakeBadge } from '../recordCorrections/MistakeAction'
 
 interface Props {
   t: TFunction
@@ -12,9 +13,11 @@ interface Props {
   recordItemProps: RecordItemProps
   fmtDate: (d: string) => string
   openVaccinationModal: () => void
+  /** Reload after an entry was marked as entered by mistake. */
+  onChanged: () => void
 }
 
-const VaccinationsTab: React.FC<Props> = ({ t, isVet, isAdmin, isFarmer, selectedAnimal, vaccinations, recordItemProps, fmtDate, openVaccinationModal }) => (
+const VaccinationsTab: React.FC<Props> = ({ t, isVet, isAdmin, isFarmer, selectedAnimal, vaccinations, recordItemProps, fmtDate, openVaccinationModal, onChanged }) => (
   <div>
     {!selectedAnimal ? (
       <EmptyState icon="💉" title={t('medicalRecords.vaccinationsTab.selectPet')} subtitle={t('medicalRecords.selectPetGenericSub')} />
@@ -35,11 +38,13 @@ const VaccinationsTab: React.FC<Props> = ({ t, isVet, isAdmin, isFarmer, selecte
             {vaccinations.map((v: any) => {
               const isOverdue = v.nextDueDate && new Date(v.nextDueDate) < new Date()
               const itemProps = recordItemProps(v.id)
+              const mistake = !!v.enteredByMistakeAt
               return (
-                <div key={v.id} {...itemProps} className={`${itemProps.className} mr-vax-card${isOverdue ? ' is-overdue' : ''}`}>
+                <div key={v.id} {...itemProps} className={`${itemProps.className} mr-vax-card${isOverdue && !mistake ? ' is-overdue' : ''}${mistake ? ' rc-struck' : ''}`}>
                   <div className="record-icon">💉</div>
                   <div className="record-details">
                     <h4>{v.vaccineName} {v.vaccineType ? `(${v.vaccineType})` : ''}</h4>
+                    <MistakeBadge entry={v} />
                     <p>{t('medicalRecords.vaccinationsTab.administered')} {fmtDate(v.dateAdministered)} {v.administeredByName ? `by ${v.administeredByName}` : ''}</p>
                     {v.dosage && <p className="text-muted">{t('medicalRecords.vaccinationsTab.dosage')} {v.dosage}</p>}
                     {v.batchNumber && <p className="text-muted">{t('medicalRecords.vaccinationsTab.batch')} {v.batchNumber} {v.manufacturer ? `| ${v.manufacturer}` : ''}</p>}
@@ -48,7 +53,10 @@ const VaccinationsTab: React.FC<Props> = ({ t, isVet, isAdmin, isFarmer, selecte
                     {v.reactionNotes && <p className="text-muted">{t('medicalRecords.vaccinationsTab.reaction')} {v.reactionNotes}</p>}
                   </div>
                   <div className="record-actions">
-                    <span className={`badge ${v.isValid ? 'badge-completed' : 'badge-cancelled'}`}>{v.isValid ? t('medicalRecords.vaccinationsTab.valid') : t('medicalRecords.vaccinationsTab.invalid')}</span>
+                    {mistake
+                      ? null
+                      : <span className={`badge ${v.isValid ? 'badge-completed' : 'badge-cancelled'}`}>{v.isValid ? t('medicalRecords.vaccinationsTab.valid') : t('medicalRecords.vaccinationsTab.invalid')}</span>}
+                    {!mistake && <MistakeAction kind="vaccination" id={v.id} onDone={onChanged} />}
                   </div>
                 </div>
               )

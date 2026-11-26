@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { requireAnimal, requireRecordAccess } from '../middleware/recordAccess';
+import { requireAnimal, requireRecordAccess, requireFarmRecord, requireFarm } from '../middleware/recordAccess';
 import { timingSafeEqual } from 'crypto';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
 import { asyncHandler } from '../utils/errorHandler';
@@ -13,14 +13,14 @@ import { FileController } from '../controllers/FileController';
 import { uploadAny, uploadImage, uploadVideo } from '../middleware/upload';
 import { getSchemaContractResult } from '../utils/database/schemaContract';
 import {
-  createMarketplaceListingSchema, updateMarketplaceListingSchema, placeBidSchema, createMarketplaceOrderSchema, updateOrderStatusSchema,
+  createMarketplaceListingSchema, updateMarketplaceListingSchema, placeBidSchema, createMarketplaceOrderSchema,
   confirmDealSchema, cancelDealSchema,
   startThreadSchema, sendMessageSchema, createSavedSearchSchema, updateSavedSearchSchema,
   reportListingSchema, resolveReportSchema, revealContactSchema,
   updateMonetizationSettingSchema, createMarketplacePlanSchema as createMPlanSchema, updateMarketplacePlanSchema as updateMPlanSchema,
-  boostListingSchema, createInquirySchema, respondInquirySchema, createSubscriptionSchema,
+  createInquirySchema, respondInquirySchema,
   createSustainabilityMetricSchema, updateSustainabilityMetricSchema, createSustainabilityGoalSchema, updateSustainabilityGoalSchema,
-  createWellnessScorecardSchema, updateWellnessScorecardSchema, createWellnessReminderSchema, snoozeReminderSchema,
+  createWellnessScorecardSchema, createWellnessReminderSchema, snoozeReminderSchema,
   createGeofenceZoneSchema, updateGeofenceZoneSchema, createGeospatialEventSchema,
 } from '../middleware/validation';
 
@@ -43,7 +43,6 @@ router.get('/marketplace/listings/:listingId/bids', authMiddleware, asyncHandler
 router.post('/marketplace/listings/:listingId/bids', authMiddleware, validateBody(placeBidSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.placeMarketplaceBid(req, res)));
 router.get('/marketplace/orders', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceOrders(req, res)));
 router.post('/marketplace/orders', authMiddleware, validateBody(createMarketplaceOrderSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createMarketplaceOrder(req, res)));
-router.patch('/marketplace/orders/:id/status', authMiddleware, validateBody(updateOrderStatusSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateOrderStatus(req, res)));
 // Deal handshake: both parties confirm off-platform settlement; either can cancel a reservation
 router.post('/marketplace/orders/:id/confirm', authMiddleware, validateBody(confirmDealSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.confirmMarketplaceDeal(req, res)));
 router.post('/marketplace/orders/:id/cancel', authMiddleware, validateBody(cancelDealSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.cancelMarketplaceDeal(req, res)));
@@ -84,14 +83,9 @@ router.put('/marketplace/admin/monetization/plans/:id', authMiddleware, roleMidd
 router.delete('/marketplace/admin/monetization/plans/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteMarketplacePlan(req, res)));
 router.get('/marketplace/admin/monetization/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.getMonetizationDashboard(req, res)));
 // Marketplace Monetization - User
-router.get('/marketplace/subscription', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getUserSubscription(req, res)));
-router.post('/marketplace/subscription', authMiddleware, validateBody(createSubscriptionSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createUserSubscription(req, res)));
-router.delete('/marketplace/subscription', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.cancelUserSubscription(req, res)));
-router.post('/marketplace/listings/:id/boost', authMiddleware, validateBody(boostListingSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.boostMarketplaceListing(req, res)));
 router.post('/marketplace/listings/:listingId/inquiries', authMiddleware, validateBody(createInquirySchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createMarketplaceInquiry(req, res)));
 router.get('/marketplace/inquiries', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceInquiries(req, res)));
 router.patch('/marketplace/inquiries/:id/respond', authMiddleware, validateBody(respondInquirySchema), asyncHandler((req: Request, res: Response) => Tier4Controller.respondToMarketplaceInquiry(req, res)));
-router.get('/marketplace/monetization-status', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getUserMonetizationStatus(req, res)));
 // Auction feature flag - readable by any authenticated user, writable by admin only
 router.get('/marketplace/auction-enabled', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getAuctionEnabled(req, res)));
 router.put('/marketplace/admin/auction-enabled', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.setAuctionEnabled(req, res)));
@@ -99,35 +93,33 @@ router.put('/marketplace/admin/auction-enabled', authMiddleware, roleMiddleware(
 // ─── Sustainability & Carbon Tracking ───────────────
 router.get('/enterprises/:enterpriseId/sustainability/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getSustainabilityDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/sustainability/metrics', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listSustainabilityMetrics(req, res)));
-router.post('/enterprises/:enterpriseId/sustainability/metrics', authMiddleware, validateBody(createSustainabilityMetricSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createSustainabilityMetric(req, res)));
-router.put('/sustainability/metrics/:id', authMiddleware, validateBody(updateSustainabilityMetricSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateSustainabilityMetric(req, res)));
-router.delete('/sustainability/metrics/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteSustainabilityMetric(req, res)));
+router.post('/enterprises/:enterpriseId/sustainability/metrics', authMiddleware, requireFarm(), validateBody(createSustainabilityMetricSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createSustainabilityMetric(req, res)));
+router.put('/sustainability/metrics/:id', authMiddleware, requireFarmRecord('sustainability_metrics'), validateBody(updateSustainabilityMetricSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateSustainabilityMetric(req, res)));
+router.delete('/sustainability/metrics/:id', authMiddleware, requireFarmRecord('sustainability_metrics'), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteSustainabilityMetric(req, res)));
 router.get('/enterprises/:enterpriseId/sustainability/goals', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listSustainabilityGoals(req, res)));
-router.post('/enterprises/:enterpriseId/sustainability/goals', authMiddleware, validateBody(createSustainabilityGoalSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createSustainabilityGoal(req, res)));
-router.put('/sustainability/goals/:id', authMiddleware, validateBody(updateSustainabilityGoalSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateSustainabilityGoal(req, res)));
-router.delete('/sustainability/goals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteSustainabilityGoal(req, res)));
+router.post('/enterprises/:enterpriseId/sustainability/goals', authMiddleware, requireFarm(), validateBody(createSustainabilityGoalSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createSustainabilityGoal(req, res)));
+router.put('/sustainability/goals/:id', authMiddleware, requireFarmRecord('sustainability_goals'), validateBody(updateSustainabilityGoalSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateSustainabilityGoal(req, res)));
+router.delete('/sustainability/goals/:id', authMiddleware, requireFarmRecord('sustainability_goals'), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteSustainabilityGoal(req, res)));
 router.get('/enterprises/:enterpriseId/sustainability/carbon-footprint', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getCarbonFootprint(req, res)));
 
 // ─── Client Portal & Wellness ───────────────────────
 router.get('/wellness/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getWellnessDashboard(req, res)));
 router.get('/wellness/scorecards', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listWellnessScorecards(req, res)));
 router.post('/wellness/scorecards', authMiddleware, requireAnimal('body:animalId'), validateBody(createWellnessScorecardSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createWellnessScorecard(req, res)));
-router.put('/wellness/scorecards/:id', authMiddleware, requireRecordAccess('wellness_scorecards'), validateBody(updateWellnessScorecardSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateWellnessScorecard(req, res)));
-router.delete('/wellness/scorecards/:id', authMiddleware, requireRecordAccess('wellness_scorecards'), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteWellnessScorecard(req, res)));
 router.get('/wellness/reminders', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listWellnessReminders(req, res)));
-router.post('/wellness/reminders', authMiddleware, validateBody(createWellnessReminderSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createWellnessReminder(req, res)));
-router.patch('/wellness/reminders/:id/complete', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.completeReminder(req, res)));
-router.patch('/wellness/reminders/:id/snooze', authMiddleware, validateBody(snoozeReminderSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.snoozeReminder(req, res)));
-router.delete('/wellness/reminders/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteWellnessReminder(req, res)));
+router.post('/wellness/reminders', authMiddleware, requireAnimal('body:animalId'), validateBody(createWellnessReminderSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createWellnessReminder(req, res)));
+router.patch('/wellness/reminders/:id/complete', authMiddleware, requireRecordAccess('wellness_reminders'), asyncHandler((req: Request, res: Response) => Tier4Controller.completeReminder(req, res)));
+router.patch('/wellness/reminders/:id/snooze', authMiddleware, requireRecordAccess('wellness_reminders'), validateBody(snoozeReminderSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.snoozeReminder(req, res)));
+router.delete('/wellness/reminders/:id', authMiddleware, requireRecordAccess('wellness_reminders'), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteWellnessReminder(req, res)));
 
 // ─── Geospatial Analytics & Geofencing ──────────────
 router.get('/enterprises/:enterpriseId/geospatial/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getGeospatialDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/geospatial/zones', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listGeofenceZones(req, res)));
-router.post('/enterprises/:enterpriseId/geospatial/zones', authMiddleware, validateBody(createGeofenceZoneSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createGeofenceZone(req, res)));
-router.put('/geospatial/zones/:id', authMiddleware, validateBody(updateGeofenceZoneSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateGeofenceZone(req, res)));
-router.delete('/geospatial/zones/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteGeofenceZone(req, res)));
+router.post('/enterprises/:enterpriseId/geospatial/zones', authMiddleware, requireFarm(), validateBody(createGeofenceZoneSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createGeofenceZone(req, res)));
+router.put('/geospatial/zones/:id', authMiddleware, requireFarmRecord('geofence_zones'), validateBody(updateGeofenceZoneSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateGeofenceZone(req, res)));
+router.delete('/geospatial/zones/:id', authMiddleware, requireFarmRecord('geofence_zones'), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteGeofenceZone(req, res)));
 router.get('/enterprises/:enterpriseId/geospatial/events', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listGeospatialEvents(req, res)));
-router.post('/enterprises/:enterpriseId/geospatial/events', authMiddleware, validateBody(createGeospatialEventSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createGeospatialEvent(req, res)));
+router.post('/enterprises/:enterpriseId/geospatial/events', authMiddleware, requireFarm(), validateBody(createGeospatialEventSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createGeospatialEvent(req, res)));
 router.get('/enterprises/:enterpriseId/geospatial/heatmap', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getHeatmapData(req, res)));
 router.get('/geospatial/animals/:animalId/trail', authMiddleware, requireAnimal('params:animalId'), asyncHandler((req: Request, res: Response) => Tier4Controller.getMovementTrail(req, res)));
 

@@ -37,25 +37,6 @@ describe('WellnessService', () => {
     });
   });
 
-  describe('updateScorecard', () => {
-    it('should update a scorecard', async () => {
-      (pool.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ id: 'sc1', animal_id: 'a1', nutrition_score: 7, activity_score: 6, vaccination_score: 8, dental_score: 7 }] })  // SELECT current
-        .mockResolvedValueOnce({ rows: [] })                      // UPDATE
-        .mockResolvedValueOnce({ rows: [{ id: 'sc1' }] });        // SELECT result
-      const result = await wellnessService.updateScorecard('sc1', { dentalScore: 9 });
-      expect(result).toBeDefined();
-    });
-  });
-
-  describe('deleteScorecard', () => {
-    it('should delete a scorecard', async () => {
-      (pool.query as jest.Mock).mockResolvedValue({ rows: [] });
-      await wellnessService.deleteScorecard('sc1');
-      expect(pool.query).toHaveBeenCalled();
-    });
-  });
-
   describe('createReminder', () => {
     it('should create a reminder', async () => {
       const rem = { id: 'r1', owner_id: 'u1', animal_id: 'a1', title: 'Vaccination' };

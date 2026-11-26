@@ -1,0 +1,20 @@
+{
+  "animalLookup": {
+    "open_button": "Find by ID card",
+    "title": "Find an animal by its ID card",
+    "hint": "Type the number printed on the animal's ID card. You can open an animal only if its owner has booked you, shared it with your hospital, or given you consent.",
+    "label": "ID card number",
+    "placeholder": "For example VC-DOG-26-000001",
+    "search": "Find",
+    "searching": "Looking...",
+    "resultTitle": "Animal found",
+    "cardNumber": "ID card: {{id}}",
+    "owner": "Owner: {{name}}",
+    "open": "Open the record",
+    "readOnly": "You can read this animal's records but not change them. Ask the owner to give you permission to add notes or prescriptions.",
+    "failed": "We could not look this up just now. Check your connection and try again.",
+    "errors": {
+      "AL_NOT_SHARED": "We could not open an animal with this ID card number. Check the number, or ask the owner to share the animal with you."
+    }
+  }
+}

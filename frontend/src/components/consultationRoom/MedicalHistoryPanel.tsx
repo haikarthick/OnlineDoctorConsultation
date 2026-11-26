@@ -6,6 +6,7 @@ import NutritionPanel from '../nutrition/NutritionPanel'
 import GroupFeedingCard from '../nutrition/GroupFeedingCard'
 import { GroupSummary, type ConsultationGroup } from '../shared/GroupSummary'
 import { appLocale } from '../../utils/appLocale'
+import { CorrectionsToggle } from '../recordCorrections/AddendaPanel'
 
 interface MedicalHistoryPanelProps {
   historyLoading: boolean
@@ -127,6 +128,7 @@ const MedicalHistoryPanel: React.FC<MedicalHistoryPanelProps> = ({
                     <div className="si-b2cfcbec">{r.recordType || r.record_type || r.type || 'Record'}</div>
                     {r.diagnosis && <div className="si-93b487ee">Dx: {r.diagnosis}</div>}
                     {r.treatment && <div className="si-23033f05">Tx: {r.treatment}</div>}
+                    {r.id && <CorrectionsToggle recordId={r.id} fmtDate={d => new Date(d).toLocaleDateString(appLocale())} />}
                     {(r.createdAt || r.created_at || r.date) && (
                       <div className="si-a5de6cea">
                         {new Date(r.createdAt || r.created_at || r.date).toLocaleDateString(appLocale())}

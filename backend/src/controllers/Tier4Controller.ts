@@ -303,18 +303,6 @@ class Tier4Controller {
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
 
-  async updateOrderStatus(req: Request, res: Response) {
-    try {
-      const userId = (req as any).userId;
-      const isAdmin = (req as any).userRole === 'admin';
-      const data = await marketplaceService.updateOrderStatus(req.params.id, req.body.status, userId, isAdmin);
-      res.json({ data });
-    } catch (err: any) {
-      const code = /not part of this order/i.test(err.message) ? 403 : err.message.includes('not found') ? 404 : 400;
-      res.status(code).json({ error: { message: err.message } });
-    }
-  }
-
   // ── Deal handshake (free classifieds - settlement happens off-platform) ──
 
   async confirmMarketplaceDeal(req: Request, res: Response) {
@@ -671,20 +659,6 @@ class Tier4Controller {
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
 
-  async updateWellnessScorecard(req: Request, res: Response) {
-    try {
-      const data = await wellnessService.updateScorecard(req.params.id, req.body);
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
-  }
-
-  async deleteWellnessScorecard(req: Request, res: Response) {
-    try {
-      await wellnessService.deleteScorecard(req.params.id);
-      res.json({ data: { success: true } });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
-  }
-
   async listWellnessReminders(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
@@ -850,48 +824,6 @@ class Tier4Controller {
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
 
-  async getUserSubscription(req: Request, res: Response) {
-    try {
-      const userId = (req as any).userId;
-      const data = await monetizationService.getUserSubscription(userId);
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
-  }
-
-  async createUserSubscription(req: Request, res: Response) {
-    try {
-      // Marketplace is free for end users - paid plans stay dark unless the
-      // platform admin explicitly enables them
-      const enabled = await monetizationService.isFeatureEnabled('subscription_plans');
-      if (!enabled) return res.status(403).json({ error: { message: 'Subscription plans are not available - the marketplace is free to use.' } });
-      const userId = (req as any).userId;
-      const data = await monetizationService.createSubscription(userId, req.body.planId);
-      res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
-  }
-
-  async cancelUserSubscription(req: Request, res: Response) {
-    try {
-      const userId = (req as any).userId;
-      const data = await monetizationService.cancelSubscription(userId);
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
-  }
-
-  async boostMarketplaceListing(req: Request, res: Response) {
-    try {
-      // Boosts stay dark while the marketplace is free for end users
-      const enabled = await monetizationService.isFeatureEnabled('listing_boost');
-      if (!enabled) return res.status(403).json({ error: { message: 'Listing boosts are not available - the marketplace is free to use.' } });
-      const userId = (req as any).userId;
-      // Ownership guard: you can only boost your own listing
-      const listing = await marketplaceService.getListing(req.params.id, userId);
-      if (!listing || listing.seller_id !== userId) return res.status(403).json({ error: { message: 'You can only boost your own listings' } });
-      const data = await monetizationService.boostListing(req.params.id, userId, req.body.boostType || 'standard');
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
-  }
-
   async createMarketplaceInquiry(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
@@ -922,14 +854,6 @@ class Tier4Controller {
   async getMonetizationDashboard(req: Request, res: Response) {
     try {
       const data = await monetizationService.getRevenueDashboard();
-      res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
-  }
-
-  async getUserMonetizationStatus(req: Request, res: Response) {
-    try {
-      const userId = (req as any).userId;
-      const data = await monetizationService.getUserMonetizationStatus(userId);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }

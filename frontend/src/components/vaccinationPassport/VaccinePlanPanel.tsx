@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { BottomSheet } from '../mobile/BottomSheet'
 import { DateQuick, localIsoDate } from '../mobile/DateQuick'
 import { userMessage } from '../../utils/userMessage'
+import { correctionError } from '../recordCorrections/correctionMessage'
 import type { PassportAnimal, PassportDose } from './vaccinationPassportShared'
 import './VaccinePlanPanel.css'
 
@@ -29,6 +30,11 @@ export function VaccinePlanPanel({ animal, onChanged }: Props) {
   const [giving, setGiving] = useState<{ dose: PassportDose; protocolName: string } | null>(null)
   const [date, setDate] = useState(localIsoDate())
   const [batch, setBatch] = useState('')
+  // The entry already saved for a dose whose link failed: a retry links it, it never writes a second vaccination.
+  const savedEntry = useRef<Record<string, string>>({})
+  const [waiving, setWaiving] = useState<{ protocolId: string; name: string } | null>(null)
+  const [waiveReason, setWaiveReason] = useState('')
+  const [waiveError, setWaiveError] = useState('')
 
   const [schedule, setSchedule] = useState<ScheduleRow[]>([])
   const [assignedIds, setAssignedIds] = useState<Set<string>>(new Set(animal.protocols.map(p => p.protocolId)))
@@ -74,12 +80,28 @@ export function VaccinePlanPanel({ animal, onChanged }: Props) {
     if (!giving) return
     const { dose, protocolName } = giving
     return run(async () => {
-      const created = await apiService.createVaccination({ animalId: animal.animalId, vaccineName: protocolName, dateAdministered: date, batchNumber: batch.trim() || undefined })
-      const recordId = created?.data?.id
-      if (!recordId) throw new Error('no record')
+      let recordId = savedEntry.current[dose.scheduleId]
+      if (!recordId) {
+        const created = await apiService.createVaccination({ animalId: animal.animalId, vaccineName: protocolName, dateAdministered: date, batchNumber: batch.trim() || undefined })
+        recordId = created?.data?.id
+        if (!recordId) throw new Error('no record')
+        savedEntry.current[dose.scheduleId] = recordId
+      }
       await apiService.markVaccineDoseAdministered(dose.scheduleId, { vaccinationRecordId: recordId, administeredAt: date })
       setGiving(null); setBatch('')
     }, t('vaccinePlan.doseSaved'))
+  }
+
+  const followed = animal.protocols.filter(p => !p.waived)
+  const waivePlan = async () => {
+    if (!waiving || busy || waiveReason.trim().length < 3) return
+    setBusy(true); setWaiveError('')
+    try {
+      await apiService.waiveVaccineProtocol(animal.animalId, waiving.protocolId, waiveReason.trim())
+      setWaiving(null); setWaiveReason('')
+      setMessage({ text: t('recordCorrections.waived'), ok: true }); setReload(n => n + 1); onChanged()
+    } catch (e) { setWaiveError(correctionError(e)) }
+    finally { setBusy(false) }
   }
 
   return (
@@ -98,6 +120,17 @@ export function VaccinePlanPanel({ animal, onChanged }: Props) {
         </ul>
       )}
 
+      {followed.length > 0 && (
+        <ul className="vp-plan-doses">
+          {followed.map(p => (
+            <li key={p.protocolId}>
+              <span>{p.protocolName}</span>
+              <button type="button" className="module-btn" disabled={busy} onClick={() => { setWaiveError(''); setWaiveReason(''); setWaiving({ protocolId: p.protocolId, name: p.protocolName }) }}>{t('recordCorrections.waiveButton')}</button>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <div className="vp-plan-add">
         <label htmlFor={`vp-plan-${animal.animalId}`}>{t('vaccinePlan.addLabel')}</label>
         {choices.length === 0 ? <p className="vp-plan-muted">{t('vaccinePlan.nothingToAdd')}</p> : (
@@ -110,6 +143,20 @@ export function VaccinePlanPanel({ animal, onChanged }: Props) {
           </div>
         )}
       </div>
+
+      <BottomSheet open={!!waiving} title={t('recordCorrections.waiveTitle', { plan: waiving?.name || '' })} onClose={() => setWaiving(null)}>
+        <div className="vp-plan-sheet">
+          <p className="vp-plan-muted">{t('recordCorrections.waiveExplain')}</p>
+          {waiveError && <div className="vp-plan-error" role="alert">{waiveError}</div>}
+          <label>{t('recordCorrections.waiveReason')}
+            <textarea value={waiveReason} onChange={e => setWaiveReason(e.target.value)} maxLength={500} placeholder={t('recordCorrections.waiveReasonPlaceholder')} />
+          </label>
+          <div className="record-sheet-actions">
+            <button type="button" className="module-btn" onClick={() => setWaiving(null)}>{t('common.cancel')}</button>
+            <button type="button" className="module-btn primary" disabled={busy || waiveReason.trim().length < 3} onClick={waivePlan}>{busy ? t('recordCorrections.saving') : t('recordCorrections.waiveConfirm')}</button>
+          </div>
+        </div>
+      </BottomSheet>
 
       <BottomSheet open={!!giving} title={t('vaccinePlan.giveTitle', { name: animal.animalName })} onClose={() => setGiving(null)}>
         {giving && (

@@ -75,16 +75,4 @@ describe('MovementService', () => {
     });
   });
 
-  describe('getMovement', () => {
-    it('should return a movement by id', async () => {
-      (database.query as jest.Mock).mockResolvedValueOnce({ rows: [snakeMovement] });
-      const result = await movementService.getMovement('m1');
-      expect(result).toEqual(expect.objectContaining({ id: 'm1', animalId: 'a1', fromLocationId: 'l1', toLocationId: 'l2' }));
-    });
-
-    it('should throw NotFoundError if not found', async () => {
-      (database.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
-      await expect(movementService.getMovement('nonexistent')).rejects.toThrow();
-    });
-  });
 });

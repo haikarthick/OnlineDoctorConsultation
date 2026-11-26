@@ -205,9 +205,6 @@ const options: swaggerJsdoc.Options = {
         get: { tags: ['Bookings'], summary: 'List bookings', responses: { '200': { description: 'Booking list' } } },
         post: { tags: ['Bookings'], summary: 'Create a booking', responses: { '201': { description: 'Booking created' } } },
       },
-      '/bookings/{id}': {
-        get: { tags: ['Bookings'], summary: 'Get booking', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Booking details' } } },
-      },
       '/bookings/{id}/reschedule': {
         put: { tags: ['Bookings'], summary: 'Reschedule booking', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Rescheduled' } } },
       },
@@ -269,7 +266,6 @@ const options: swaggerJsdoc.Options = {
       // ── Vet Profiles ──
       '/vet-profiles': {
         get: { tags: ['Vet Profiles'], summary: 'List vet profiles', responses: { '200': { description: 'List' } } },
-        post: { tags: ['Vet Profiles'], summary: 'Create vet profile', responses: { '201': { description: 'Created' } } },
       },
       '/vet-profiles/{id}': {
         get: { tags: ['Vet Profiles'], summary: 'Get vet profile', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Details' } } },
@@ -283,7 +279,6 @@ const options: swaggerJsdoc.Options = {
       },
       '/medical-records/{id}': {
         get: { tags: ['Medical Records'], summary: 'Get record', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Details' } } },
-        put: { tags: ['Medical Records'], summary: 'Update record', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Updated' } } },
         delete: { tags: ['Medical Records'], summary: 'Delete record', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Deleted' } } },
       },
       '/medical-records/animal/{animalId}/timeline': {
@@ -293,8 +288,8 @@ const options: swaggerJsdoc.Options = {
         get: { tags: ['Medical Records'], summary: 'List vaccinations', responses: { '200': { description: 'List' } } },
         post: { tags: ['Medical Records'], summary: 'Create vaccination', responses: { '201': { description: 'Created' } } },
       },
-      '/vaccinations/{id}': {
-        put: { tags: ['Medical Records'], summary: 'Update vaccination', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Updated' } } },
+      '/vaccinations/{id}/mistake': {
+        post: { tags: ['Medical Records'], summary: 'Mark a vaccination as entered by mistake (reason required)', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'OK' } } },
       },
       '/animals/{animalId}/weight': {
         post: { tags: ['Medical Records'], summary: 'Add weight record', parameters: [{ name: 'animalId', in: 'path', required: true, schema: { type: 'string' } }], responses: { '201': { description: 'Created' } } },
@@ -304,8 +299,11 @@ const options: swaggerJsdoc.Options = {
         get: { tags: ['Medical Records'], summary: 'List allergies', parameters: [{ name: 'animalId', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'List' } } },
         post: { tags: ['Medical Records'], summary: 'Add allergy', parameters: [{ name: 'animalId', in: 'path', required: true, schema: { type: 'string' } }], responses: { '201': { description: 'Created' } } },
       },
-      '/allergies/{id}': {
-        put: { tags: ['Medical Records'], summary: 'Update allergy', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Updated' } } },
+      '/allergies/{id}/mistake': {
+        post: { tags: ['Medical Records'], summary: 'Mark an allergy as entered by mistake (reason required)', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'OK' } } },
+      },
+      '/medical-records/{id}/addenda': {
+        post: { tags: ['Medical Records'], summary: 'Add a correction (addendum) to a saved record', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'OK' } } },
       },
       '/animals/{animalId}/lab-results': {
         get: { tags: ['Medical Records'], summary: 'List lab results', parameters: [{ name: 'animalId', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'List' } } },
@@ -329,7 +327,6 @@ const options: swaggerJsdoc.Options = {
       // ── Payments ──
       '/payments': {
         get: { tags: ['Payments'], summary: 'List payments', responses: { '200': { description: 'List' } } },
-        post: { tags: ['Payments'], summary: 'Create payment', responses: { '201': { description: 'Created' } } },
       },
       '/payments/{id}': {
         get: { tags: ['Payments'], summary: 'Get payment', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Details' } } },
@@ -670,9 +667,6 @@ const options: swaggerJsdoc.Options = {
       '/marketplace/orders': {
         post: { tags: ['Marketplace'], summary: 'Create order', responses: { '201': { description: 'Order created' } } },
         get: { tags: ['Marketplace'], summary: 'List orders', responses: { '200': { description: 'Orders' } } },
-      },
-      '/marketplace/orders/{id}/status': {
-        put: { tags: ['Marketplace'], summary: 'Update order status', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Updated' } } },
       },
 
       // ── Tier 4: Sustainability ──

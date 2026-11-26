@@ -211,7 +211,7 @@ const MedicalRecords: React.FC = () => {
       // `/vet-certificates` was never a registered route - this 404'd for every
       // animal and the catch below rendered it as "no certificates", so the panel
       // was permanently empty. The real route is /certificates/animal/:animalId.
-      const res = await (apiService as any).get(`/certificates/animal/${selectedAnimal}`)
+      const res = await apiService.getCertificatesByAnimal(selectedAnimal)
       const payload = res.data?.data ?? res.data
       // Only ever hand an array to setCertificates - `res.data || []` previously
       // could pass the whole { success, data } envelope through and blow up .map().
@@ -479,7 +479,7 @@ const MedicalRecords: React.FC = () => {
         )}
 
         {activeTab === 'vaccinations' && (
-          <VaccinationsTab t={t} isVet={isVet} isAdmin={isAdmin} isFarmer={isFarmer} selectedAnimal={selectedAnimal} vaccinations={vaccinations} recordItemProps={recordItemProps} fmtDate={fmtDate} openVaccinationModal={openVaccinationModal} />
+          <VaccinationsTab t={t} isVet={isVet} isAdmin={isAdmin} isFarmer={isFarmer} selectedAnimal={selectedAnimal} vaccinations={vaccinations} recordItemProps={recordItemProps} fmtDate={fmtDate} openVaccinationModal={openVaccinationModal} onChanged={() => { loadVaccinations(); loadStats() }} />
         )}
 
         {activeTab === 'lab_results' && (
@@ -487,7 +487,7 @@ const MedicalRecords: React.FC = () => {
         )}
 
         {activeTab === 'allergies' && (
-          <AllergiesTab t={t} selectedAnimal={selectedAnimal} allergies={allergies} recordItemProps={recordItemProps} fmtDate={fmtDate} setShowModal={setShowModal} setModalData={setModalData} />
+          <AllergiesTab t={t} selectedAnimal={selectedAnimal} allergies={allergies} recordItemProps={recordItemProps} fmtDate={fmtDate} setShowModal={setShowModal} setModalData={setModalData} onChanged={() => { loadAllergies(); loadStats() }} />
         )}
 
         {activeTab === 'weight' && (

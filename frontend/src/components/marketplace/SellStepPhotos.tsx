@@ -1,5 +1,6 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
+import { discardUpload } from '../../utils/uploadedFiles'
 
 /** Step 1 of selling: photos and video first - buyers decide from them before they read anything else. */
 export const SellStepPhotos: React.FC<{
@@ -44,6 +45,7 @@ export const SellStepPhotos: React.FC<{
                   }}>{t('marketplace.sell.makeCover')}</button>
                 )}
                 <button type="button" className="mp-image-remove" aria-label={t('marketplace.sell.removePhoto')} onClick={() => {
+                  discardUpload(url)
                   setSellForm((prev: Record<string, any>) => ({ ...prev, images: prev.images.filter((_: string, idx: number) => idx !== i) }))
                 }}>×</button>
               </div>
@@ -56,7 +58,7 @@ export const SellStepPhotos: React.FC<{
           {sellForm.videoUrl ? (
             <div className="mp-video-set">
               <span>✅ {t('marketplace.sell.videoAdded')}</span>
-              <button type="button" className="module-btn small" onClick={() => sf('videoUrl', '')}>{t('marketplace.sell.removeVideo')}</button>
+              <button type="button" className="module-btn small" onClick={() => { discardUpload(sellForm.videoUrl); sf('videoUrl', '') }}>{t('marketplace.sell.removeVideo')}</button>
             </div>
           ) : (
             <>

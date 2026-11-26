@@ -148,11 +148,11 @@ class StaffWorkflowService {
       `, [animalId]),
       database.query(`
         SELECT id, vaccine_name, date_administered, next_due_date, batch_number
-        FROM vaccination_records WHERE animal_id = $1 ORDER BY date_administered DESC LIMIT 5
+        FROM vaccination_records WHERE animal_id = $1 AND entered_by_mistake_at IS NULL ORDER BY date_administered DESC LIMIT 5
       `, [animalId]),
       database.query(`
         SELECT id, allergen, severity, reaction, identified_date
-        FROM allergy_records WHERE animal_id = $1 ORDER BY identified_date DESC
+        FROM allergy_records WHERE animal_id = $1 AND entered_by_mistake_at IS NULL ORDER BY identified_date DESC
       `, [animalId]),
     ]);
     return {

@@ -1,6 +1,8 @@
+import { checkAnimalAccess } from '../middleware/hospitalDataIsolation';
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import MedicalRecordService from '../services/MedicalRecordService';
+import RecordCorrectionService from '../services/RecordCorrectionService';
 import { ValidationError, ForbiddenError, CodedError } from '../utils/errors';
 import database from '../utils/database';
 import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE } from '../services/AnimalAccessService';
@@ -50,34 +52,12 @@ export class MedicalRecordController {
 
   async getRecord(req: AuthRequest, res: Response): Promise<void> {
     const record = await MedicalRecordService.getRecord(req.params.id);
-    const isOwner = record.userId === (req as any).userId || record.createdBy === (req as any).userId;
-    const isAdmin = (req as any).userRole === 'admin';
-
-    // Vets must have explicit booking/consultation with this animal - no blanket access
-    let isVetWithAccess = false;
-    if ((req as any).userRole === 'veterinarian' && record.animalId) {
-      const vetResult = await database.query(
-        `SELECT id FROM bookings WHERE veterinarian_id = $1 AND animal_id = $2
-         UNION
-         SELECT id FROM consultations WHERE veterinarian_id = $1 AND animal_id = $2`,
-        [(req as any).userId, record.animalId]
-      );
-      isVetWithAccess = vetResult.rows.length > 0;
-    }
-
-    let isFarmerWithAccess = false;
-    if ((req as any).userRole === 'farmer' && record.animalId) {
-      const animalResult = await database.query(
-        `SELECT a.enterprise_id FROM animals a
-         JOIN enterprises e ON e.id = a.enterprise_id
-         WHERE a.id = $1 AND e.owner_id = $2`,
-        [record.animalId, (req as any).userId]
-      );
-      isFarmerWithAccess = animalResult.rows.length > 0;
-    }
-
-    if (!isOwner && !isAdmin && !isVetWithAccess && !isFarmerWithAccess) {
-      throw new ForbiddenError('Access denied to this medical record');
+    // Who may open it is decided on the route by requireRecordAccess (the one platform rule: the record's own animal or group).
+    // The only extra rule here: a confidential record stays with the people on it.
+    const me = req.userId;
+    const onIt = record.userId === me || record.createdBy === me || (record as any).veterinarianId === me;
+    if ((record as any).isConfidential && !onIt && req.userRole !== 'admin') {
+      throw new ForbiddenError('This record was marked confidential by the person who wrote it. Ask them to share it with you.');
     }
     res.json({ success: true, data: record });
   }
@@ -109,34 +89,13 @@ export class MedicalRecordController {
     }
 
     filters.userId = req.userId;
+    if (filters.animalId) {
+      const user = { userId: req.userId!, role: req.userRole, roles: req.userRoles };
+      const isolation = await checkAnimalAccess(req.userId!, req.userRole || '', filters.animalId);
+      filters.animalAccessGranted = isolation.isPrivate ? isolation.allowed : (await AnimalAccessService.check(user, filters.animalId, 'read')).allowed;
+    }
     const result = await MedicalRecordService.listRecords(filters);
     res.json({ success: true, data: result });
-  }
-
-  async updateRecord(req: AuthRequest, res: Response): Promise<void> {
-    const record = await MedicalRecordService.getRecord(req.params.id);
-    const isCreator = record.createdBy === req.userId;
-    const isAdmin = req.userRole === 'admin';
-
-    // Vets must have booking/consultation with this animal
-    let isVetWithAccess = false;
-    if (req.userRole === 'veterinarian' && record.animalId) {
-      const vetResult = await database.query(
-        `SELECT id FROM bookings WHERE veterinarian_id = $1 AND animal_id = $2
-         UNION
-         SELECT id FROM consultations WHERE veterinarian_id = $1 AND animal_id = $2`,
-        [req.userId, record.animalId]
-      );
-      isVetWithAccess = vetResult.rows.length > 0;
-    }
-
-    if (!isCreator && !isAdmin && !isVetWithAccess) {
-      throw new ForbiddenError('You do not have permission to update this record');
-    }
-    const updated = await MedicalRecordService.updateRecord(
-      req.params.id, req.body, req.userId!, req.body._userName, req.body.changeReason
-    );
-    res.json({ success: true, data: updated });
   }
 
   async deleteRecord(req: AuthRequest, res: Response): Promise<void> {
@@ -191,22 +150,6 @@ export class MedicalRecordController {
     res.json({ success: true, data: result });
   }
 
-  async updateVaccination(req: AuthRequest, res: Response): Promise<void> {
-    if (req.userRole !== 'veterinarian' && req.userRole !== 'admin') {
-      throw new ForbiddenError('Only veterinarians or admins can update vaccinations');
-    }
-    const updated = await MedicalRecordService.updateVaccination(req.params.id, req.body, req.userId!);
-    res.json({ success: true, data: updated });
-  }
-
-  async deleteVaccination(req: AuthRequest, res: Response): Promise<void> {
-    if (req.userRole !== 'veterinarian' && req.userRole !== 'admin') {
-      throw new ForbiddenError('Only veterinarians or admins can invalidate vaccinations');
-    }
-    await MedicalRecordService.deleteVaccination(req.params.id, req.userId!);
-    res.json({ success: true, message: 'Vaccination invalidated' });
-  }
-
   // ═══ WEIGHT HISTORY ═══════════════════════════════════════
 
   async addWeight(req: AuthRequest, res: Response): Promise<void> {
@@ -244,9 +187,25 @@ export class MedicalRecordController {
     res.json({ success: true, data: records });
   }
 
-  async updateAllergy(req: AuthRequest, res: Response): Promise<void> {
-    const updated = await MedicalRecordService.updateAllergy(req.params.id, req.body, req.userId!);
-    res.json({ success: true, data: updated });
+  // ═══ CORRECTIONS (never an edit in place) ═════════════════
+
+  async listAddenda(req: AuthRequest, res: Response): Promise<void> {
+    res.json({ success: true, data: await RecordCorrectionService.listAddenda(req.params.id) });
+  }
+
+  async addAddendum(req: AuthRequest, res: Response): Promise<void> {
+    const note = await RecordCorrectionService.addAddendum(req.params.id, { userId: req.userId!, role: req.userRole, roles: req.userRoles }, req.body.note);
+    res.status(201).json({ success: true, data: note });
+  }
+
+  async markVaccinationMistake(req: AuthRequest, res: Response): Promise<void> {
+    const out = await RecordCorrectionService.markMistake('vaccination_records', req.params.id, { userId: req.userId!, role: req.userRole, roles: req.userRoles }, req.body.reason);
+    res.json({ success: true, data: out });
+  }
+
+  async markAllergyMistake(req: AuthRequest, res: Response): Promise<void> {
+    const out = await RecordCorrectionService.markMistake('allergy_records', req.params.id, { userId: req.userId!, role: req.userRole, roles: req.userRoles }, req.body.reason);
+    res.json({ success: true, data: out });
   }
 
   // ═══ LAB RESULTS ══════════════════════════════════════════

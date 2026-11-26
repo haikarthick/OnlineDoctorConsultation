@@ -1,0 +1,24 @@
+/* Small shared building blocks for the self-service sheets (review reply/report, ID-card lookup, history, delete confirm, totals card).
+   Global CSS: every selector is wrapped in :where() so it can never leak onto another screen (DESIGN_SYSTEM 5a). */
+:where(.ot-sheet) { display: flex; flex-direction: column; gap: 12px; }
+:where(.ot-form) { display: flex; flex-direction: column; gap: 10px; }
+:where(.ot-form) label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+:where(.ot-form) textarea { width: 100%; min-height: 96px; padding: 10px; border: 1px solid #d1d5db; border-radius: 10px; font: inherit; box-sizing: border-box; }
+:where(.ot-form) input { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 10px; font: inherit; box-sizing: border-box; min-height: 44px; }
+:where(.ot-card) { display: flex; flex-direction: column; gap: 6px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; overflow-wrap: anywhere; }
+:where(.ot-card) h4, :where(.ot-card) h3 { margin: 0; font-size: 15px; }
+:where(.ot-muted) { color: #6b7280; font-size: 13px; overflow-wrap: anywhere; }
+:where(.ot-ok) { padding: 8px 12px; border-radius: 10px; background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+:where(.ot-error) { padding: 8px 12px; border-radius: 10px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+:where(.ot-note) { padding: 8px 12px; border-radius: 10px; background: #f9fafb; border: 1px solid #e5e7eb; color: #374151; }
+:where(.ot-actions) { display: flex; flex-wrap: wrap; gap: 8px; }
+:where(.ot-actions) > * { min-height: 44px; }
+:where(.ot-list) { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+:where(.ot-list) li { padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; overflow-wrap: anywhere; }
+:where(.ot-stats) { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+:where(.ot-stat) { padding: 10px; border-radius: 10px; background: #f9fafb; border: 1px solid #e5e7eb; }
+:where(.ot-stat) strong { display: block; font-size: 20px; }
+:where(.ot-danger) { color: #b91c1c; }
+:where(.ot-toggle-on) { background: #eef2ff; border-color: #6366f1; }
+:where(.ot-form) .ot-check { flex-direction: row; align-items: center; gap: 8px; }
+:where(.ot-form) input[type=checkbox] { width: auto; min-height: 0; }

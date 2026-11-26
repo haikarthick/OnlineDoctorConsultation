@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { RECORD_TYPE_ICONS, severityClass } from './herdMedicalShared'
+import { AddendaPanel } from '../recordCorrections/AddendaPanel'
 
 interface ViewRecordModalProps {
   record: any
@@ -50,6 +51,7 @@ const ViewRecordModal: React.FC<ViewRecordModalProps> = ({ record, onClose, canM
             </div>
           </div>
         )}
+        <AddendaPanel recordId={record.id} fmtDate={fmtDate} />
         <div className="si-66181d73">
           {canManage && <button className="btn btn-secondary si-f84f41a5" onClick={onArchive}>{t('herdMedical.records.archive')}</button>}
           <button className="btn btn-primary" onClick={onClose}>{t('common.close')}</button>

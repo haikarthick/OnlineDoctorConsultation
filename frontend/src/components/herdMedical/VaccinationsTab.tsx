@@ -4,6 +4,7 @@ import type { TFunction } from 'i18next'
 import GroupFilterSelect from './GroupFilterSelect'
 import { dueStatusClass } from './herdMedicalShared'
 import type { Animal, AnimalGroup } from './herdMedicalShared'
+import { MistakeAction } from '../recordCorrections/MistakeAction'
 
 interface VaccinationsTabProps {
   vaccinations: any[]
@@ -18,11 +19,13 @@ interface VaccinationsTabProps {
   onVaccFilterChange: (v: 'all' | 'overdue' | 'upcoming') => void
   onGroupFilterChange: (v: string) => void
   onAddVaccination: () => void
+  /** Reload after an entry was marked as entered by mistake. */
+  onChanged: () => void
 }
 
 const VaccinationsTab: React.FC<VaccinationsTabProps> = ({
   vaccinations, vaccinationsTotal, animals, groups, vaccFilter, groupFilter, canCreate, fmtDate, speciesLabel,
-  onVaccFilterChange, onGroupFilterChange, onAddVaccination,
+  onVaccFilterChange, onGroupFilterChange, onAddVaccination, onChanged,
 }) => {
   const { t } = useTranslation()
   return (
@@ -46,7 +49,7 @@ const VaccinationsTab: React.FC<VaccinationsTabProps> = ({
       ) : (
         <div className="table-container">
           <table className="data-table">
-            <thead><tr><th>{t('herdMedical.table.animal')}</th><th>{t('herdMedical.table.group')}</th><th>{t('herdMedical.table.vaccine')}</th><th>{t('common.type')}</th><th>{t('herdMedical.table.dosage')}</th><th>{t('herdMedical.table.administered')}</th><th>{t('herdMedical.table.nextDue')}</th><th>{t('common.status')}</th></tr></thead>
+            <thead><tr><th>{t('herdMedical.table.animal')}</th><th>{t('herdMedical.table.group')}</th><th>{t('herdMedical.table.vaccine')}</th><th>{t('common.type')}</th><th>{t('herdMedical.table.dosage')}</th><th>{t('herdMedical.table.administered')}</th><th>{t('herdMedical.table.nextDue')}</th><th>{t('common.status')}</th>{canCreate && <th aria-label={t('recordCorrections.mistakeButton')} />}</tr></thead>
             <tbody>
               {vaccinations.map((v: any) => (
                 <tr key={v.id}>
@@ -62,6 +65,7 @@ const VaccinationsTab: React.FC<VaccinationsTabProps> = ({
                       {v.dueStatus === 'overdue' ? t('herdMedical.vaccinations.overdue') : v.dueStatus === 'upcoming' ? t('herdMedical.vaccinations.dueSoon') : t('herdMedical.vaccinations.current')}
                     </span>
                   </td>
+                  {canCreate && <td><MistakeAction kind="vaccination" id={v.id} onDone={onChanged} /></td>}
                 </tr>
               ))}
             </tbody>

@@ -33,11 +33,6 @@ export const consultationsApi = {
     return response.data
   },
 
-  async getBooking(id: string) {
-    const response = await sharedClient.get(`/bookings/${id}`)
-    return response.data
-  },
-
   async listBookings(params?: { limit?: number; offset?: number; status?: string }) {
     const response = await sharedClient.get('/bookings', { params })
     return response.data
@@ -93,11 +88,6 @@ export const consultationsApi = {
 
   async getVideoSessionByConsultation(consultationId: string) {
     const response = await sharedClient.get(`/video-sessions/consultation/${consultationId}`)
-    return response.data
-  },
-
-  async joinVideoSession(roomId: string) {
-    const response = await sharedClient.post(`/video-sessions/join/${roomId}`)
     return response.data
   },
 

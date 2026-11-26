@@ -224,40 +224,6 @@ router.post('/animals/bulk-import', authMiddleware, roleMiddleware(['admin', 'fa
   res.json({ success: true, data: results });
 }));
 
-// ─── Compliance Report ───────────────────────────────────────
-router.get('/compliance/report', authMiddleware, roleMiddleware(['admin', 'farmer']), asyncHandler(async (req: Request, res: Response) => {
-  const authReq = req as AuthRequest;
-  const isAdmin = authReq.userRole === 'admin';
-  const userId = isAdmin ? ((req.query.userId as string) || authReq.userId!) : authReq.userId!;
-  try {
-    const animals = await database.query(
-      `SELECT a.id, a.name, a.species, a.breed, a.gender, a.date_of_birth as "dateOfBirth", a.microchip_id as "microchipId",
-              COUNT(DISTINCT v.id)::text as "vaccinationCount",
-              COUNT(DISTINCT mr.id)::text as "medicalRecordCount",
-              MAX(v.administered_date) as "lastVaccination"
-       FROM animals a
-       LEFT JOIN vaccination_records v ON v.animal_id = a.id AND v.status = 'completed'
-       LEFT JOIN medical_records mr ON mr.animal_id = a.id
-       WHERE a.owner_id = $1
-       GROUP BY a.id, a.name, a.species, a.breed, a.gender, a.date_of_birth, a.microchip_id
-       ORDER BY a.name`,
-      [userId]
-    );
-    const summary = {
-      totalAnimals: animals.rows.length,
-      speciesBreakdown: animals.rows.reduce((acc: any, a: any) => {
-        acc[a.species] = (acc[a.species] || 0) + 1;
-        return acc;
-      }, {}),
-      vaccinationCoverage: animals.rows.filter((a: any) => parseInt(a.vaccinationCount) > 0).length,
-      generatedAt: new Date().toISOString()
-    };
-    res.json({ success: true, data: { animals: animals.rows, summary } });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-}));
-
 // ─── Dispute Resolution ──────────────────────────────────────
 router.post('/disputes', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;

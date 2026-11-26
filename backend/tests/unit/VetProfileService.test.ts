@@ -33,22 +33,6 @@ describe('VetProfileService', () => {
     jest.clearAllMocks();
   });
 
-  describe('createProfile', () => {
-    it('should create a vet profile', async () => {
-      (database.query as jest.Mock).mockResolvedValue({ rows: [mockProfile] });
-
-      const result = await VetProfileService.createProfile('vet-1', {
-        licenseNumber: 'LIC-001',
-        specializations: ['surgery'],
-        yearsOfExperience: 10,
-        consultationFee: 75,
-      } as any);
-
-      expect(result).toBeDefined();
-      expect(result.licenseNumber).toBe('LIC-001');
-    });
-  });
-
   describe('getProfileByUserId', () => {
     it('should return profile by user id', async () => {
       (database.query as jest.Mock).mockResolvedValue({ rows: [mockProfile] });

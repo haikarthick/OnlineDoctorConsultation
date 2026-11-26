@@ -1,0 +1,24 @@
+{
+  "farmSummary": {
+    "title": "The last {{days}} days",
+    "empty": "Nothing was written down in the last {{days}} days.",
+    "entries_one": "{{count}} entry",
+    "entries_other": "{{count}} entries",
+    "days_one": "on {{count}} day",
+    "days_other": "on {{count}} days",
+    "failed": "We could not add up the last days just now. The rest of the page still works."
+  },
+  "deleteRecord": {
+    "done": "The entry was deleted.",
+    "title": "Delete this entry?",
+    "confirm": "Delete it only if it was written by mistake. To correct a number, save the entry again instead.",
+    "stockBack": "The feed this entry used goes back into your stock.",
+    "delete": "Delete entry",
+    "failed": "We could not delete this entry just now. Check your connection and try again.",
+    "tapToDelete": "Delete this entry",
+    "errors": {
+      "FR_GONE": "This entry is already gone. Refresh the page to see the current entries.",
+      "FR_NOT_YOURS": "Only the person who wrote this entry, or the farm owner or manager, can delete it."
+    }
+  }
+}

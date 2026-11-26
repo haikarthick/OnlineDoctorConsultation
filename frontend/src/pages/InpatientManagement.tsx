@@ -14,6 +14,8 @@ import { VitalsHistoryModal } from '../components/inpatient/VitalsHistoryModal'
 import { MedicalHistoryModal } from '../components/inpatient/MedicalHistoryModal'
 
 import { userMessage } from '../utils/userMessage'
+import { EditFieldsSheet, textOrEmpty, textOrNull, numOrUndefined, type SheetField } from '../components/mobile/RowActions'
+import { dateInput, fieldText } from '../utils/recordForm'
 export default function InpatientManagement() {
   const { t } = useTranslation()
   const { formatDateTime, formatCurrency } = useSettings()
@@ -34,6 +36,15 @@ export default function InpatientManagement() {
   const [viewHistory, setViewHistory] = useState<any>(null)
   const [medicalHistory, setMedicalHistory] = useState<any>(null)
   const [loadingHistory, setLoadingHistory] = useState(false)
+  const [editingStay, setEditingStay] = useState<any>(null)
+  const stayFields: SheetField[] = [
+    { key: 'roomNumber', label: t('inpatientManagement.room'), type: 'text' },
+    { key: 'bedNumber', label: t('inpatientManagement.bed'), type: 'text' },
+    { key: 'careInstructions', label: t('inpatientManagement.care'), type: 'textarea' },
+    { key: 'specialNeeds', label: t('recordActions.inpatient.specialNeeds'), type: 'textarea' },
+    { key: 'estimatedDischarge', label: t('inpatientManagement.estDischarge'), type: 'date' },
+    { key: 'dailyRate', label: t('inpatientManagement.dailyRate'), type: 'number' },
+  ]
 
   const [admitForm, setAdmitForm] = useState<AdmitForm>({
     admissionType: 'overnight_observation', roomNumber: '', bedNumber: '',
@@ -189,10 +200,29 @@ export default function InpatientManagement() {
               onShowVitalsHistory={setShowVitalsHistory}
               onLoadMedicalHistory={loadMedicalHistory}
               onStatusChange={handleStatusChange}
+              onEdit={setEditingStay}
             />
           ))}
         </div>
       )}
+
+      <EditFieldsSheet
+        open={!!editingStay}
+        title={t('recordActions.inpatient.editTitle', { name: editingStay?.animal_name || '' })}
+        fields={stayFields}
+        initial={{
+          roomNumber: fieldText(editingStay?.room_number), bedNumber: fieldText(editingStay?.bed_number),
+          careInstructions: fieldText(editingStay?.care_instructions), specialNeeds: fieldText(editingStay?.special_needs),
+          estimatedDischarge: dateInput(editingStay?.estimated_discharge), dailyRate: fieldText(editingStay?.daily_rate),
+        }}
+        onSave={values => apiService.updateInpatientDetails(editingStay.id, {
+          roomNumber: textOrEmpty(values.roomNumber), bedNumber: textOrEmpty(values.bedNumber),
+          careInstructions: textOrEmpty(values.careInstructions), specialNeeds: textOrEmpty(values.specialNeeds),
+          estimatedDischarge: textOrNull(values.estimatedDischarge), dailyRate: numOrUndefined(values.dailyRate),
+        })}
+        onClose={() => setEditingStay(null)}
+        onDone={() => loadData()}
+      />
 
       {showAdmit && (
         <AdmitPatientModal

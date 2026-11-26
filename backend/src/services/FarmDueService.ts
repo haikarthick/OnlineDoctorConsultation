@@ -56,7 +56,7 @@ class FarmDueService {
          FROM animals a
          JOIN LATERAL (
            SELECT DISTINCT ON (vaccine_name) vaccine_name, next_due_date
-             FROM vaccination_records WHERE animal_id = a.id
+             FROM vaccination_records WHERE animal_id = a.id AND entered_by_mistake_at IS NULL
             ORDER BY vaccine_name, date_administered DESC, created_at DESC
          ) v ON true
         WHERE a.enterprise_id = $1 AND a.status = 'active'

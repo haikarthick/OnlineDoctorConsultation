@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
-import { DatabaseError, NotFoundError } from '../utils/errors';
+import { CodedError, DatabaseError } from '../utils/errors';
 import logger from '../utils/logger';
 
 export interface Review {
@@ -15,6 +15,9 @@ export interface Review {
   helpfulCount: number;
   reportCount: number;
   responseFromVet?: string;
+  /** Set only when the list is read by a signed-in person: did THIS person already mark / report it. */
+  markedHelpful?: boolean;
+  reportedByMe?: boolean;
   createdAt: Date;
   updatedAt: Date;
   // Joined fields
@@ -141,7 +144,8 @@ export class ReviewService {
   async listReviewsByVet(
     veterinarianId: string,
     limit: number = 20,
-    offset: number = 0
+    offset: number = 0,
+    viewerId?: string
   ): Promise<{ reviews: Review[]; total: number; averageRating: number }> {
     try {
       const query = `
@@ -152,6 +156,8 @@ export class ReviewService {
                u.first_name as "reviewerFirstName", u.last_name as "reviewerLastName",
                COALESCE(b.scheduled_date::TEXT, c.scheduled_at::DATE::TEXT) as "consultationDate",
                COALESCE(b.reason_for_visit, c.symptom_description) as "consultationReason",
+               EXISTS (SELECT 1 FROM review_reactions x WHERE x.review_id = r.id AND x.user_id = $4 AND x.kind = 'helpful') as "markedHelpful",
+               EXISTS (SELECT 1 FROM review_reactions x WHERE x.review_id = r.id AND x.user_id = $4 AND x.kind = 'report') as "reportedByMe",
                r.created_at as "createdAt", r.updated_at as "updatedAt"
         FROM reviews r
         JOIN users u ON u.id = r.reviewer_id
@@ -165,7 +171,7 @@ export class ReviewService {
         FROM reviews WHERE veterinarian_id = $1 AND status = 'active'
       `;
       const [reviewsResult, countResult] = await Promise.all([
-        database.query(query, [veterinarianId, limit, offset]),
+        database.query(query, [veterinarianId, limit, offset, viewerId || null]),
         database.query(countQuery, [veterinarianId]),
       ]);
       return {
@@ -178,45 +184,78 @@ export class ReviewService {
     }
   }
 
+  /** Only the reviewed vet may answer; saying it again replaces the earlier answer (the vet can correct it). */
   async addVetResponse(reviewId: string, vetUserId: string, response: string): Promise<Review> {
     const check = await database.query(
       `SELECT id FROM reviews WHERE id = $1 AND veterinarian_id = $2`,
       [reviewId, vetUserId]
     );
-    if (check.rows.length === 0) throw new NotFoundError('Review', reviewId);
+    if (check.rows.length === 0) {
+      throw new CodedError(403, 'RV_NOT_YOUR_REVIEW', 'You can only reply to reviews written about you.');
+    }
     try {
       const result = await database.query(`
         UPDATE reviews SET response_from_vet = $1, updated_at = NOW()
         WHERE id = $2
         RETURNING id, response_from_vet as "responseFromVet", updated_at as "updatedAt"
-      `, [response, reviewId]);
+      `, [response.slice(0, 1000), reviewId]);
       return result.rows[0];
     } catch (error) {
       throw new DatabaseError('Error adding vet response', { originalError: error });
     }
   }
 
-  async markHelpful(reviewId: string): Promise<{ helpfulCount: number }> {
+  /** The review a person reacts to: it must exist, be visible, and not be their own. */
+  private async reactableReview(reviewId: string, userId: string): Promise<void> {
+    const r = await database.query(`SELECT reviewer_id, status FROM reviews WHERE id = $1`, [reviewId]);
+    if (r.rows.length === 0 || !['active', 'flagged'].includes(r.rows[0].status)) {
+      throw new CodedError(404, 'RV_NOT_FOUND', 'This review is no longer available.');
+    }
+    if (r.rows[0].reviewer_id === userId) {
+      throw new CodedError(403, 'RV_OWN_REVIEW', 'This is your own review, so you cannot mark or report it.');
+    }
+  }
+
+  /** "Helpful" is a toggle: one per person; pressing it again takes it back. */
+  async markHelpful(reviewId: string, userId: string): Promise<{ helpfulCount: number; marked: boolean }> {
+    await this.reactableReview(reviewId, userId);
     try {
+      const del = await database.query(
+        `DELETE FROM review_reactions WHERE review_id = $1 AND user_id = $2 AND kind = 'helpful'`,
+        [reviewId, userId]
+      );
+      const marked = (del.rowCount || 0) === 0;
+      if (marked) {
+        await database.query(
+          `INSERT INTO review_reactions (review_id, user_id, kind) VALUES ($1, $2, 'helpful') ON CONFLICT DO NOTHING`,
+          [reviewId, userId]
+        );
+      }
       const result = await database.query(`
-        UPDATE reviews SET helpful_count = helpful_count + 1, updated_at = NOW()
+        UPDATE reviews SET helpful_count = (SELECT COUNT(*) FROM review_reactions WHERE review_id = $1 AND kind = 'helpful')
         WHERE id = $1 RETURNING helpful_count as "helpfulCount"
       `, [reviewId]);
-      if (result.rows.length === 0) throw new NotFoundError('Review', reviewId);
-      return result.rows[0];
+      return { helpfulCount: Number(result.rows[0]?.helpfulCount || 0), marked };
     } catch (error: any) {
-      if (error instanceof NotFoundError) throw error;
       throw new DatabaseError('Error marking review helpful', { originalError: error });
     }
   }
 
-  async reportReview(reviewId: string): Promise<void> {
+  /** One report per person per review, with a reason; three different people flag the review for the admin. */
+  async reportReview(reviewId: string, userId: string, reason: string): Promise<void> {
+    await this.reactableReview(reviewId, userId);
     try {
       await database.query(
-        `UPDATE reviews SET report_count = report_count + 1, updated_at = NOW() WHERE id = $1`,
+        `INSERT INTO review_reactions (review_id, user_id, kind, reason) VALUES ($1, $2, 'report', $3) ON CONFLICT DO NOTHING`,
+        [reviewId, userId, reason]
+      );
+      await database.query(
+        `UPDATE reviews SET report_count = (SELECT COUNT(*) FROM review_reactions WHERE review_id = $1 AND kind = 'report'),
+                            updated_at = NOW()
+         WHERE id = $1`,
         [reviewId]
       );
-      // Auto-flag reviews with 3+ reports
+      // Auto-flag reviews reported by 3 different people
       await database.query(
         `UPDATE reviews SET status = 'flagged', updated_at = NOW()
          WHERE id = $1 AND report_count >= 3 AND status = 'active'`,
@@ -227,5 +266,7 @@ export class ReviewService {
     }
   }
 }
+
+export const REVIEW_REPORT_REASONS = ['inappropriate', 'fake', 'spam', 'other'] as const;
 
 export default new ReviewService();

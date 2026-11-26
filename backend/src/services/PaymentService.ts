@@ -21,14 +21,6 @@ export interface Payment {
   updatedAt: Date;
 }
 
-export interface PaymentCreateDTO {
-  consultationId: string;
-  bookingId?: string;
-  amount: number;
-  currency?: string;
-  paymentMethod?: string;
-}
-
 export class PaymentService {
   /**
    * Get payment gateway mode from system settings.
@@ -41,61 +33,6 @@ export class PaymentService {
       );
       return result.rows[0]?.value || 'demo';
     } catch { return 'demo'; }
-  }
-
-  /**
-   * Creates a payment record. In demo mode, payment is immediately marked
-   * as "completed". In test/live mode, this would create a gateway intent
-   * and set status to "processing".
-   */
-  async createPayment(userId: string, data: PaymentCreateDTO): Promise<Payment> {
-    try {
-      const id = uuidv4();
-      const gatewayMode = await this.getGatewayMode();
-      const isDemoMode = gatewayMode === 'demo';
-
-      const status = isDemoMode ? 'completed' : 'processing';
-      const gateway = isDemoMode ? 'stub' : gatewayMode;
-      const transactionId = isDemoMode ? `DEMO-${id.substring(0, 8).toUpperCase()}` : null;
-
-      const query = `
-        INSERT INTO payments (id, consultation_id, booking_id, user_id, amount, currency, status, payment_method, gateway, transaction_id, paid_at, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, ${isDemoMode ? 'NOW()' : 'NULL'}, NOW(), NOW())
-        RETURNING id, consultation_id as "consultationId", booking_id as "bookingId",
-                  user_id as "userId", amount, currency,
-                  status, payment_method as "paymentMethod", transaction_id as "transactionId",
-                  gateway, refund_amount as "refundAmount", refund_reason as "refundReason",
-                  paid_at as "paidAt", created_at as "createdAt", updated_at as "updatedAt"
-      `;
-      const result = await database.query(query, [
-        id, data.consultationId, data.bookingId || null, userId, data.amount,
-        data.currency || 'INR', status, data.paymentMethod || 'card',
-        gateway, transactionId,
-      ]);
-      logger.info(`Payment created (${gatewayMode})`, { id, userId, amount: data.amount });
-      return result.rows[0];
-    } catch (error) {
-      throw new DatabaseError('Error creating payment', { originalError: error });
-    }
-  }
-
-  async getPayment(paymentId: string): Promise<Payment> {
-    try {
-      const query = `
-        SELECT id, consultation_id as "consultationId", booking_id as "bookingId",
-               user_id as "userId", amount, currency,
-               status, payment_method as "paymentMethod", transaction_id as "transactionId",
-               gateway, refund_amount as "refundAmount", refund_reason as "refundReason",
-               paid_at as "paidAt", created_at as "createdAt", updated_at as "updatedAt"
-        FROM payments WHERE id = $1
-      `;
-      const result = await database.query(query, [paymentId]);
-      if (result.rows.length === 0) throw new NotFoundError('Payment', paymentId);
-      return result.rows[0];
-    } catch (error) {
-      if (error instanceof NotFoundError) throw error;
-      throw new DatabaseError('Error fetching payment', { originalError: error });
-    }
   }
 
   /** Find payment linked to a booking */

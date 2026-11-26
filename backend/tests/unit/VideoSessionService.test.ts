@@ -45,15 +45,6 @@ describe('VideoSessionService', () => {
     });
   });
 
-  describe('getSessionByRoom', () => {
-    it('should get session by room id', async () => {
-      const session = { id: 'vs1', room_id: 'room1' };
-      (database.query as jest.Mock).mockResolvedValue({ rows: [session] });
-      const result = await videoSessionService.getSessionByRoom('room1');
-      expect(result).toEqual(session);
-    });
-  });
-
   describe('startSession', () => {
     it('should start a session', async () => {
       const session = { id: 'vs1', status: 'active', consultation_id: 'c1' };
@@ -89,14 +80,6 @@ describe('VideoSessionService', () => {
     it('should get chat messages for a session', async () => {
       (database.query as jest.Mock).mockResolvedValue({ rows: [{ id: 'm1', message: 'Hello' }] });
       const result = await videoSessionService.getChatMessages('vs1');
-      expect(result).toHaveLength(1);
-    });
-  });
-
-  describe('listActiveSessions', () => {
-    it('should list active sessions', async () => {
-      (database.query as jest.Mock).mockResolvedValue({ rows: [{ id: 'vs1', status: 'active' }] });
-      const result = await videoSessionService.listActiveSessions();
       expect(result).toHaveLength(1);
     });
   });

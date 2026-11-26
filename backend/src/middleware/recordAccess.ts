@@ -3,6 +3,8 @@ import database from '../utils/database';
 import { AuthRequest } from './auth';
 import AnimalAccessService, { ANIMAL_NO_ACCESS_MESSAGE, ANIMAL_READ_ONLY_MESSAGE } from '../services/AnimalAccessService';
 import { checkAnimalAccess } from './hospitalDataIsolation';
+import FarmAccessService from '../services/FarmAccessService';
+import { ForbiddenError } from '../utils/errors';
 
 /**
  * Gate for routes that address ONE RECORD by its own id (PUT /allergies/:id, DELETE /vaccinations/:id ...).
@@ -22,7 +24,7 @@ const RECORD_TABLES = {
   medical_records: { animal: 'animal_id', group: 'group_id' },
   weight_history: { animal: 'animal_id', group: null },
   vaccine_schedule: { animal: 'animal_id', group: null },
-  wellness_scorecards: { animal: 'animal_id', group: null },
+  wellness_reminders: { animal: 'animal_id', group: null },
   prescriptions: { animal: 'animal_id', group: 'group_id' },
   self_treatments: { animal: 'animal_id', group: 'group_id' },
 } as const;
@@ -94,6 +96,89 @@ export function requireRecordAccess(table: RecordTable, idParam = 'id') {
       const message = readOnly ? ANIMAL_READ_ONLY_MESSAGE : ANIMAL_NO_ACCESS_MESSAGE;
       return res.status(403).json({ success: false, message, error: { message, code: 'RECORD_ACCESS_DENIED' } });
     }
+    next();
+  };
+}
+
+/**
+ * Gate for routes that address ONE FARM RECORD by its own id (a sensor, a shift, a batch, a sustainability goal ...).
+ * The record's own farm decides - never an id from the request. The farm rules are the ones every farm screen uses
+ * (FarmAccessService): a viewer may look, not change; a farm vet / worker / supervisor / manager / owner may change.
+ * A missing record and a record on someone else's farm get the SAME plain refusal, so ids cannot be probed.
+ * Rows with no farm (built-in report templates) may be changed by an admin only.
+ */
+const FARM_RECORD_TABLES = [
+  'iot_sensors', 'product_batches', 'workforce_tasks', 'shift_schedules', 'report_templates', 'digital_twins',
+  'simulation_runs', 'sustainability_metrics', 'sustainability_goals', 'geofence_zones', 'genetic_profiles',
+  'alert_rules', 'alert_events', 'disease_predictions', 'outbreak_zones', 'traceability_events', 'generated_reports',
+] as const;
+export type FarmRecordTable = typeof FARM_RECORD_TABLES[number];
+
+export const FARM_RECORD_NO_ACCESS_MESSAGE =
+  'We could not find that record on a farm you work with, so nothing was changed. Check that you are signed in to the right account, or ask the farm owner to add you to the farm.';
+
+/**
+ * The same farm rule for a route that names the farm itself (`/enterprises/:enterpriseId/...`): only people of that farm get in, a
+ * viewer can look but not change, and a stranger gets the same plain refusal whether or not the farm exists.
+ */
+export function requireFarm(idParam = 'enterpriseId') {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Please sign in again.' });
+    const refuse = () => res.status(403).json({ success: false, message: FARM_RECORD_NO_ACCESS_MESSAGE, error: { message: FARM_RECORD_NO_ACCESS_MESSAGE, code: 'RECORD_ACCESS_DENIED' } });
+    const isAdmin = req.userRole === 'admin' || (req.userRoles || []).includes('admin');
+    const enterpriseId = req.params[idParam];
+    if (!enterpriseId || !/^[0-9a-f-]{36}$/i.test(enterpriseId)) return isAdmin ? next() : refuse();
+    const actor = { userId, role: req.userRole };
+    if (!(await FarmAccessService.can(enterpriseId, actor, 'read'))) return refuse();
+    try {
+      await FarmAccessService.assert(enterpriseId, actor, FarmAccessService.actionForMethod(req.method));
+    } catch (err: any) {
+      if (err instanceof ForbiddenError) return res.status(403).json({ success: false, message: err.message, error: { message: err.message, code: 'FARM_ROLE_READ_ONLY' } });
+      throw err;
+    }
+    next();
+  };
+}
+
+export function requireFarmRecord(table: FarmRecordTable, idParam = 'id') {
+  if (!(FARM_RECORD_TABLES as readonly string[]).includes(table)) throw new Error(`requireFarmRecord: unknown table ${table}`);
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Please sign in again.' });
+    const refuse = () => res.status(403).json({ success: false, message: FARM_RECORD_NO_ACCESS_MESSAGE, error: { message: FARM_RECORD_NO_ACCESS_MESSAGE, code: 'RECORD_ACCESS_DENIED' } });
+    const isAdmin = req.userRole === 'admin' || (req.userRoles || []).includes('admin');
+    const id = req.params[idParam];
+    if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return isAdmin ? next() : refuse();
+    const r = await database.query(`SELECT enterprise_id FROM ${table} WHERE id = $1`, [id]);
+    if (!r.rows[0]) return isAdmin ? next() : refuse();
+    const enterpriseId: string | null = r.rows[0].enterprise_id;
+    if (!enterpriseId) return isAdmin ? next() : refuse();
+    const actor = { userId, role: req.userRole };
+    if (!(await FarmAccessService.can(enterpriseId, actor, 'read'))) return refuse();
+    try {
+      await FarmAccessService.assert(enterpriseId, actor, FarmAccessService.actionForMethod(req.method));
+    } catch (err: any) {
+      if (err instanceof ForbiddenError) return res.status(403).json({ success: false, message: err.message, error: { message: err.message, code: 'FARM_ROLE_READ_ONLY' } });
+      throw err;
+    }
+    next();
+  };
+}
+
+/** Gate for an AI copilot chat addressed by id: only the person who had the chat may read, continue or delete it. */
+export const CHAT_NO_ACCESS_MESSAGE =
+  'We could not find that conversation in your history, so nothing was opened or changed. Start a new chat from the AI Copilot page.';
+
+export function requireOwnChatSession(idParam = 'id') {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Please sign in again.' });
+    const refuse = () => res.status(403).json({ success: false, message: CHAT_NO_ACCESS_MESSAGE, error: { message: CHAT_NO_ACCESS_MESSAGE, code: 'RECORD_ACCESS_DENIED' } });
+    const id = req.params[idParam];
+    if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return refuse();
+    const r = await database.query('SELECT user_id FROM ai_chat_sessions WHERE id = $1', [id]);
+    if (!r.rows[0] || r.rows[0].user_id !== userId) return refuse();
     next();
   };
 }

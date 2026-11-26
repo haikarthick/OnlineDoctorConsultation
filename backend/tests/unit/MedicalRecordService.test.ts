@@ -48,18 +48,6 @@ describe('MedicalRecordService', () => {
     });
   });
 
-  describe('updateRecord', () => {
-    it('should update a medical record', async () => {
-      (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ id: 'mr1', title: 'Old', content: 'Old', severity: 'normal' }] })  // getRecord (old)
-        .mockResolvedValueOnce({ rows: [{ id: 'mr1' }] })                                                     // UPDATE RETURNING
-        .mockResolvedValueOnce({ rows: [{ id: 'mr1', title: 'Updated', content: 'Old', severity: 'normal' }] }) // getRecord (new)
-        .mockResolvedValueOnce({ rows: [] });                                                                   // logMedicalAudit
-      const result = await medicalRecordService.updateRecord('mr1', { title: 'Updated' });
-      expect(result).toBeDefined();
-    });
-  });
-
   describe('deleteRecord', () => {
     it('should soft delete a record', async () => {
       (database.query as jest.Mock)

@@ -6,6 +6,9 @@ import { useTranslation } from 'react-i18next'
 
 import { userMessage } from '../utils/userMessage'
 import { appLocale } from '../utils/appLocale'
+import { RowActions, ConfirmDeleteSheet, EditFieldsSheet, textOrEmpty, type SheetField } from '../components/mobile/RowActions'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
+import { fieldText, mayChangeFarmRecords } from '../utils/recordForm'
 const SCENARIO_TYPES = [
   { value: 'disease_spread', label: '🦠 Disease Spread', desc: 'Model pathogen transmission through animal populations' },
   { value: 'resource_optimization', label: '⚙️ Resource Optimization', desc: 'Optimize workforce and feed allocation' },
@@ -30,6 +33,15 @@ const DigitalTwinPage: React.FC = () => {
   const [selectedSimulation, setSelectedSimulation] = useState<SimulationRun | null>(null)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [editingTwin, setEditingTwin] = useState<DigitalTwin | null>(null)
+  const [deletingTwin, setDeletingTwin] = useState<DigitalTwin | null>(null)
+  const [deletingSim, setDeletingSim] = useState<SimulationRun | null>(null)
+  const farmRole = useMyFarmRole(enterprises.find(en => en.id === selectedEnterpriseId))
+  const mayChange = mayChangeFarmRecords(farmRole)
+  const twinFields: SheetField[] = [
+    { key: 'name', label: t('common.name'), type: 'text', required: true },
+    { key: 'description', label: t('common.description'), type: 'textarea' },
+  ]
 
   const [twinForm, setTwinForm] = useState({ name: '', twinType: 'farm', description: '' })
   const [simForm, setSimForm] = useState({
@@ -202,14 +214,15 @@ const DigitalTwinPage: React.FC = () => {
             </div>
           )}
           <div className="si-8ebf7d50">
-            {twins.map(t => (
-              <div key={t.id} className="module-card">
+            {twins.map(tw => (
+              <div key={tw.id} className="module-card">
                 <div className="si-9803f8d1">
-                  <h4 className="si-44087c4b">{t.name}</h4>
-                  <span className="module-badge">{t.twinType}</span>
+                  <h4 className="si-44087c4b">{tw.name}</h4>
+                  <span className="module-badge">{tw.twinType}</span>
                 </div>
-                {t.description && <p className="si-911d5ad5">{t.description}</p>}
-                <div className="si-a3f3564c">Created: {t.createdAt ? new Date(t.createdAt).toLocaleDateString(appLocale()) : '-'}</div>
+                {tw.description && <p className="si-911d5ad5">{tw.description}</p>}
+                <div className="si-a3f3564c">Created: {tw.createdAt ? new Date(tw.createdAt).toLocaleDateString(appLocale()) : '-'}</div>
+                {mayChange && <RowActions name={tw.name} onEdit={() => setEditingTwin(tw)} onDelete={() => setDeletingTwin(tw)} />}
               </div>
             ))}
             {twins.length === 0 && <p className="si-40d2db53">{t('digitalTwin.noTwins')}</p>}
@@ -283,13 +296,40 @@ const DigitalTwinPage: React.FC = () => {
                 <tr key={s.id}><td>{s.name}</td><td>{s.twinName}</td><td><span className="module-badge">{s.scenarioType}</span></td>
                 <td><span className="module-badge success">{s.status}</span></td><td>{s.durationMs}ms</td>
                 <td>{s.createdAt ? new Date(s.createdAt).toLocaleDateString(appLocale()) : '-'}</td>
-                <td><button className="module-btn small" onClick={() => viewSimResult(s)}>{t('common.view')}</button></td></tr>
+                <td><button className="module-btn small" onClick={() => viewSimResult(s)}>{t('common.view')}</button>
+                {mayChange && <RowActions name={s.name} onDelete={() => setDeletingSim(s)} />}</td></tr>
               ))}
             </tbody>
           </table>
           {simulations.length === 0 && <p className="si-3a7b9567">{t('digitalTwin.noSimulations')}</p>}
         </div>
       )}
+
+      <EditFieldsSheet
+        open={!!editingTwin}
+        title={t('recordActions.digitalTwin.editTwin')}
+        fields={twinFields}
+        initial={{ name: fieldText(editingTwin?.name), description: fieldText(editingTwin?.description) }}
+        onSave={values => apiService.updateDigitalTwin(editingTwin!.id, { name: textOrEmpty(values.name), description: textOrEmpty(values.description) })}
+        onClose={() => setEditingTwin(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.saved')); fetchData() }}
+      />
+      <ConfirmDeleteSheet
+        open={!!deletingTwin}
+        name={deletingTwin?.name || ''}
+        what={t('recordActions.digitalTwin.twinWhat')}
+        onConfirm={() => apiService.deleteDigitalTwin(deletingTwin!.id)}
+        onClose={() => setDeletingTwin(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.deleted')); setSelectedSimulation(null); fetchData() }}
+      />
+      <ConfirmDeleteSheet
+        open={!!deletingSim}
+        name={deletingSim?.name || ''}
+        what={t('recordActions.digitalTwin.simWhat')}
+        onConfirm={() => apiService.deleteSimulation(deletingSim!.id)}
+        onClose={() => setDeletingSim(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.deleted')); if (selectedSimulation?.id === deletingSim?.id) setSelectedSimulation(null); fetchData() }}
+      />
     </div>
   )
 }

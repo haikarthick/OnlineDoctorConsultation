@@ -1,0 +1,24 @@
+{
+  "groomingCalendar": {
+    "previous": "Previous month",
+    "next": "Next month",
+    "full": "No free times on this day",
+    "unchecked": "We could not check which days are free. Pick a day and the times below will show what is open.",
+    "checking": "Checking which days are free...",
+    "legend": "Green days have free times. Grey days are full, closed or already past."
+  },
+  "groomingConsole": {
+    "edit": "Edit",
+    "editTitle": "Edit this service",
+    "depositAmount": "Deposit to pay when booking",
+    "pause": "Pause this service",
+    "pauseHint": "A paused service is hidden from new bookings. Bookings already made are not changed.",
+    "save": "Save changes",
+    "saveFailed": "We could not save these changes just now, so nothing was changed. Check your connection and try again.",
+    "removeHours": "Remove hours",
+    "removeHoursTitle": "Remove {{day}} hours?",
+    "removeHoursConfirm": "Remove the saved working hours for {{day}}?",
+    "removeHoursHint": "Customers will not be able to book {{day}} until you save hours for it again. Bookings already made are not changed. To close for one day only, use a day off instead.",
+    "removeFailed": "We could not remove these hours just now, so nothing was changed. Check your connection and try again."
+  }
+}

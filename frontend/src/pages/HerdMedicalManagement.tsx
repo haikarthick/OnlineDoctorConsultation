@@ -398,6 +398,7 @@ const HerdMedicalManagement: React.FC = () => {
             <VaccinationsTab
               vaccinations={vaccinations} vaccinationsTotal={vaccinationsTotal} animals={animals} groups={groups}
               vaccFilter={vaccFilter} groupFilter={groupFilter} canCreate={canCreate} fmtDate={fmtDate} speciesLabel={speciesLabel}
+              onChanged={() => { loadVaccinations(); loadStats() }}
               onVaccFilterChange={setVaccFilter}
               onGroupFilterChange={setGroupFilter}
               onAddVaccination={() => { setVaccForm({ subjectType: 'animal', animalId: '', groupId: '', vaccineName: '', vaccineType: '', dateAdministered: new Date().toISOString().slice(0, 10), nextDueDate: '', batchNumber: '', manufacturer: '', dosage: '', certificateNumber: '', headCountTreated: '' }); setModal('add-vaccination') }}
@@ -406,6 +407,7 @@ const HerdMedicalManagement: React.FC = () => {
           {tab === 'allergies' && (
             <AllergiesTab
               allergies={allergies} animals={animals} canCreate={canCreate} fmtDate={fmtDate} speciesLabel={speciesLabel}
+              onChanged={() => { loadAllergies(); loadStats() }}
               onAddAllergy={() => { setAllergyForm({ animalId: '', allergen: '', reaction: '', severity: 'normal', notes: '' }); setModal('add-allergy') }}
             />
           )}

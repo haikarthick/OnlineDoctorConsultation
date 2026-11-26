@@ -62,7 +62,11 @@ export interface Review {
   isPublic: boolean
   isVerified?: boolean
   helpfulCount?: number
+  /** Set when a signed-in person reads the list: did they already mark / report this review. */
+  markedHelpful?: boolean
+  reportedByMe?: boolean
   reportCount?: number
+  reportReasons?: string[]
   status: ReviewStatus
   petOwnerName?: string
   vetName?: string

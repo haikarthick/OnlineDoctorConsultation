@@ -52,7 +52,11 @@ class GeospatialService {
   }
 
   async deleteZone(id: string) {
-    await pool.query('DELETE FROM geofence_zones WHERE id = $1', [id]);
+    // Events recorded in the zone stay in the history without the zone.
+    await pool.query(
+      `WITH g AS (UPDATE geospatial_events SET zone_id = NULL WHERE zone_id = $1)
+       DELETE FROM geofence_zones WHERE id = $1`, [id]
+    );
   }
 
   // ── Geospatial Events ──

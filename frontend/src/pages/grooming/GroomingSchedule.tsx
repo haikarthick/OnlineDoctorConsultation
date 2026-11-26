@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
+import { RemoveScheduleSheet } from '../../components/grooming/RemoveScheduleSheet'
 import '../../styles/modules.css'
 
 import { userMessage } from '../../utils/userMessage'
@@ -37,6 +38,7 @@ const GroomingSchedule: React.FC<Props> = ({ onNavigate }) => {
   const [err, setErr] = useState('')
   const [msg, setMsg] = useState('')
   const [savingDay, setSavingDay] = useState<number | null>(null)
+  const [removingDay, setRemovingDay] = useState<number | null>(null)
 
   const [ovrForm, setOvrForm] = useState({ overrideDate: '', overrideType: 'closed', openTime: '09:00', closeTime: '18:00', reason: '' })
   const [blockForm, setBlockForm] = useState({ isRecurring: true, recurringDay: 1, blockDate: '', startTime: '13:00', endTime: '14:00', reason: '' })
@@ -152,6 +154,13 @@ const GroomingSchedule: React.FC<Props> = ({ onNavigate }) => {
       {msg && <div className="module-alert success">{msg}</div>}
 
       {/* ── Weekly working hours ── */}
+      <RemoveScheduleSheet
+        providerId={providerId}
+        scheduleId={removingDay !== null ? week[removingDay]?.id || null : null}
+        dayName={removingDay !== null ? t(`groomingSchedule.days.${DAY_KEYS[removingDay]}`) : ''}
+        onClose={() => setRemovingDay(null)}
+        onRemoved={() => { setRemovingDay(null); flash(t('groomingSchedule.saved')); void load() }}
+      />
       <div className="module-card">
         <h3>{t('groomingSchedule.weeklyHours')}</h3>
         <p className="slot-hint">{t('groomingSchedule.capacityHint')}</p>
@@ -195,6 +204,9 @@ const GroomingSchedule: React.FC<Props> = ({ onNavigate }) => {
                 onClick={() => saveDay(row.dayOfWeek)}>
                 {savingDay === row.dayOfWeek ? t('groomingSchedule.saving') : t('groomingSchedule.save')}
               </button>
+              {row.id && (
+                <button className="btn btn-sm btn-outline" onClick={() => setRemovingDay(row.dayOfWeek)}>{t('groomingConsole.removeHours')}</button>
+              )}
             </div>
           ))}
         </div>

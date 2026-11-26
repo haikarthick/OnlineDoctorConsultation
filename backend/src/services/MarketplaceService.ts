@@ -697,19 +697,6 @@ class MarketplaceService {
     return expired.rows.length;
   }
 
-  async updateOrderStatus(id: string, status: string, userId?: string, isAdmin = false) {
-    // Participant guard: only the buyer, the seller, or an admin may touch an order
-    const existing = await pool.query('SELECT buyer_id, seller_id, status FROM marketplace_orders WHERE id = $1', [id]);
-    if (!existing.rows[0]) throw new Error('Order not found');
-    const o = existing.rows[0];
-    if (!isAdmin && o.buyer_id !== userId && o.seller_id !== userId) throw new Error('You are not part of this order');
-    if (['completed', 'cancelled'].includes(o.status) && !isAdmin) throw new Error(`Order is already ${o.status}`);
-    const completedAt = ['delivered', 'completed'].includes(status) ? 'NOW()' : 'completed_at';
-    await pool.query(`UPDATE marketplace_orders SET status = $1, completed_at = ${completedAt}, updated_at = NOW() WHERE id = $2`, [status, id]);
-    const result = await pool.query('SELECT * FROM marketplace_orders WHERE id = $1', [id]);
-    return result.rows[0];
-  }
-
   // ── Dashboard ──
   async getDashboard(filters: any = {}) {
     const [listingStats, categoryBreakdown, recentListings, topSellers, speciesBreakdown, hotDeals] = await Promise.all([

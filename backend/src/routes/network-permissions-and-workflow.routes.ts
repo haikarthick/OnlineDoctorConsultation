@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { requireAnimal, requireRecordAccess } from '../middleware/recordAccess';
+import { requireAnimal, requireRecordAccess, requireFarmRecord, requireOwnChatSession, requireFarm } from '../middleware/recordAccess';
 import { authMiddleware, roleMiddleware, validateBody, AuthRequest } from '../middleware/auth';
 import { requireNetworkAccess, resolveNetworkAccess } from '../middleware/networkAccess';
 import { requireAnimalAccess, requireEnterpriseAccess } from '../middleware/hospitalDataIsolation';
@@ -130,9 +130,9 @@ router.patch('/health/observations/:id/resolve', authMiddleware, validateBody(re
 
 // ─── Enterprise / Herd Medical Management ────────────
 // CRITICAL FIX: Added requireEnterpriseAccess to prevent data exposure by arbitrary enterpriseId
-router.get('/enterprises/:enterpriseId/medical-records', authMiddleware, requireEnterpriseAccess(), asyncHandler((req: Request, res: Response) => MedicalRecordController.listEnterpriseRecords(req, res)));
-router.get('/enterprises/:enterpriseId/medical-records/stats', authMiddleware, requireEnterpriseAccess(), asyncHandler((req: Request, res: Response) => MedicalRecordController.getEnterpriseMedicalStats(req, res)));
-router.get('/enterprises/:enterpriseId/vaccinations', authMiddleware, requireEnterpriseAccess(), asyncHandler((req: Request, res: Response) => MedicalRecordController.listEnterpriseVaccinations(req, res)));
+router.get('/enterprises/:enterpriseId/medical-records', authMiddleware, requireFarm(), requireEnterpriseAccess(), asyncHandler((req: Request, res: Response) => MedicalRecordController.listEnterpriseRecords(req, res)));
+router.get('/enterprises/:enterpriseId/medical-records/stats', authMiddleware, requireFarm(), requireEnterpriseAccess(), asyncHandler((req: Request, res: Response) => MedicalRecordController.getEnterpriseMedicalStats(req, res)));
+router.get('/enterprises/:enterpriseId/vaccinations', authMiddleware, requireFarm(), requireEnterpriseAccess(), asyncHandler((req: Request, res: Response) => MedicalRecordController.listEnterpriseVaccinations(req, res)));
 
 // ─── Breeding & Genetics ────────────────────────────
 router.get('/enterprises/:enterpriseId/breeding', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listBreedingRecords(req, res)));
@@ -168,14 +168,14 @@ router.get('/enterprises/:enterpriseId/financial/dashboard', authMiddleware, asy
 
 // ─── Smart Alerts ───────────────────────────────────
 router.get('/enterprises/:enterpriseId/alerts/rules', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listAlertRules(req, res)));
-router.post('/enterprises/:enterpriseId/alerts/rules', authMiddleware, validateBody(createAlertRuleSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.createAlertRule(req, res)));
-router.put('/alerts/rules/:id', authMiddleware, validateBody(updateAlertRuleSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.updateAlertRule(req, res)));
-router.delete('/alerts/rules/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.deleteAlertRule(req, res)));
-router.patch('/alerts/rules/:id/toggle', authMiddleware, validateBody(toggleAlertRuleSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.toggleAlertRule(req, res)));
+router.post('/enterprises/:enterpriseId/alerts/rules', authMiddleware, requireFarm(), validateBody(createAlertRuleSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.createAlertRule(req, res)));
+router.put('/alerts/rules/:id', authMiddleware, requireFarmRecord('alert_rules'), validateBody(updateAlertRuleSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.updateAlertRule(req, res)));
+router.delete('/alerts/rules/:id', authMiddleware, requireFarmRecord('alert_rules'), asyncHandler((req: Request, res: Response) => Tier2Controller.deleteAlertRule(req, res)));
+router.patch('/alerts/rules/:id/toggle', authMiddleware, requireFarmRecord('alert_rules'), validateBody(toggleAlertRuleSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.toggleAlertRule(req, res)));
 router.get('/enterprises/:enterpriseId/alerts/events', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listAlertEvents(req, res)));
-router.patch('/alerts/events/:id/read', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.markAlertRead(req, res)));
-router.patch('/enterprises/:enterpriseId/alerts/events/read-all', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.markAllAlertsRead(req, res)));
-router.patch('/alerts/events/:id/acknowledge', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.acknowledgeAlert(req, res)));
+router.patch('/alerts/events/:id/read', authMiddleware, requireFarmRecord('alert_events'), asyncHandler((req: Request, res: Response) => Tier2Controller.markAlertRead(req, res)));
+router.patch('/enterprises/:enterpriseId/alerts/events/read-all', authMiddleware, requireFarm(), asyncHandler((req: Request, res: Response) => Tier2Controller.markAllAlertsRead(req, res)));
+router.patch('/alerts/events/:id/acknowledge', authMiddleware, requireFarmRecord('alert_events'), asyncHandler((req: Request, res: Response) => Tier2Controller.acknowledgeAlert(req, res)));
 router.post('/enterprises/:enterpriseId/alerts/run-checks', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.runAlertChecks(req, res)));
 
 // ═══════════════════════════════════════════════════════════════
@@ -183,54 +183,54 @@ router.post('/enterprises/:enterpriseId/alerts/run-checks', authMiddleware, asyn
 // ─── AI Disease Prediction & Outbreak Mapping ────────
 router.get('/enterprises/:enterpriseId/disease-predictions/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getRiskDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/disease-predictions', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listPredictions(req, res)));
-router.post('/enterprises/:enterpriseId/disease-predictions', authMiddleware, validateBody(createPredictionSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createPrediction(req, res)));
-router.patch('/disease-predictions/:id/resolve', authMiddleware, validateBody(resolvePredictionSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.resolvePrediction(req, res)));
+router.post('/enterprises/:enterpriseId/disease-predictions', authMiddleware, requireFarm(), validateBody(createPredictionSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createPrediction(req, res)));
+router.patch('/disease-predictions/:id/resolve', authMiddleware, requireFarmRecord('disease_predictions'), validateBody(resolvePredictionSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.resolvePrediction(req, res)));
 router.get('/enterprises/:enterpriseId/outbreak-zones', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listOutbreakZones(req, res)));
-router.post('/enterprises/:enterpriseId/outbreak-zones', authMiddleware, validateBody(createOutbreakZoneSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createOutbreakZone(req, res)));
-router.patch('/outbreak-zones/:id/resolve', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.resolveOutbreakZone(req, res)));
+router.post('/enterprises/:enterpriseId/outbreak-zones', authMiddleware, requireFarm(), validateBody(createOutbreakZoneSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createOutbreakZone(req, res)));
+router.patch('/outbreak-zones/:id/resolve', authMiddleware, requireFarmRecord('outbreak_zones'), asyncHandler((req: Request, res: Response) => Tier3Controller.resolveOutbreakZone(req, res)));
 
 // ─── Genomic Lineage & Genetic Diversity ────────────
 router.get('/enterprises/:enterpriseId/genetic-profiles', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listGeneticProfiles(req, res)));
-router.post('/enterprises/:enterpriseId/genetic-profiles', authMiddleware, validateBody(createGeneticProfileSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createGeneticProfile(req, res)));
-router.put('/genetic-profiles/:id', authMiddleware, validateBody(updateGeneticProfileSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateGeneticProfile(req, res)));
+router.post('/enterprises/:enterpriseId/genetic-profiles', authMiddleware, requireFarm(), validateBody(createGeneticProfileSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createGeneticProfile(req, res)));
+router.put('/genetic-profiles/:id', authMiddleware, requireFarmRecord('genetic_profiles'), validateBody(updateGeneticProfileSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateGeneticProfile(req, res)));
 router.get('/genetic-profiles/:animalId/lineage-tree', authMiddleware, requireAnimal('params:animalId'), asyncHandler((req: Request, res: Response) => Tier3Controller.getLineageTree(req, res)));
 router.get('/enterprises/:enterpriseId/lineage-pairs', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listPairRecommendations(req, res)));
-router.post('/enterprises/:enterpriseId/lineage-pairs', authMiddleware, validateBody(createPairRecommendationSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createPairRecommendation(req, res)));
+router.post('/enterprises/:enterpriseId/lineage-pairs', authMiddleware, requireFarm(), validateBody(createPairRecommendationSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createPairRecommendation(req, res)));
 router.get('/enterprises/:enterpriseId/genetic-dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getGeneticDashboard(req, res)));
 
 // ─── IoT Sensor Integration ─────────────────────────
 router.get('/enterprises/:enterpriseId/iot/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getSensorDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/iot/sensors', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listSensors(req, res)));
-router.post('/enterprises/:enterpriseId/iot/sensors', authMiddleware, validateBody(createSensorSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createSensor(req, res)));
-router.put('/iot/sensors/:id', authMiddleware, validateBody(updateSensorSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateSensor(req, res)));
-router.delete('/iot/sensors/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.deleteSensor(req, res)));
-router.post('/enterprises/:enterpriseId/iot/readings', authMiddleware, validateBody(recordSensorReadingSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.recordSensorReading(req, res)));
-router.get('/iot/sensors/:sensorId/readings', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listSensorReadings(req, res)));
+router.post('/enterprises/:enterpriseId/iot/sensors', authMiddleware, requireFarm(), validateBody(createSensorSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createSensor(req, res)));
+router.put('/iot/sensors/:id', authMiddleware, requireFarmRecord('iot_sensors'), validateBody(updateSensorSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateSensor(req, res)));
+router.delete('/iot/sensors/:id', authMiddleware, requireFarmRecord('iot_sensors'), asyncHandler((req: Request, res: Response) => Tier3Controller.deleteSensor(req, res)));
+router.post('/enterprises/:enterpriseId/iot/readings', authMiddleware, requireFarm(), validateBody(recordSensorReadingSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.recordSensorReading(req, res)));
+router.get('/iot/sensors/:sensorId/readings', authMiddleware, requireFarmRecord('iot_sensors', 'sensorId'), asyncHandler((req: Request, res: Response) => Tier3Controller.listSensorReadings(req, res)));
 
 // ─── Supply Chain & Traceability ─────────────────────
 router.get('/enterprises/:enterpriseId/supply-chain/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getSupplyChainDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/supply-chain/batches', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listBatches(req, res)));
-router.post('/enterprises/:enterpriseId/supply-chain/batches', authMiddleware, validateBody(createBatchSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createBatch(req, res)));
-router.put('/supply-chain/batches/:id', authMiddleware, validateBody(updateBatchSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateBatch(req, res)));
+router.post('/enterprises/:enterpriseId/supply-chain/batches', authMiddleware, requireFarm(), validateBody(createBatchSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createBatch(req, res)));
+router.put('/supply-chain/batches/:id', authMiddleware, requireFarmRecord('product_batches'), validateBody(updateBatchSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateBatch(req, res)));
 router.get('/enterprises/:enterpriseId/supply-chain/events', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listTraceabilityEvents(req, res)));
-router.post('/enterprises/:enterpriseId/supply-chain/events', authMiddleware, validateBody(createTraceabilityEventSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createTraceabilityEvent(req, res)));
-router.patch('/supply-chain/events/:id/verify', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.verifyTraceabilityEvent(req, res)));
-router.get('/supply-chain/batches/:batchId/traceability', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getBatchTraceability(req, res)));
-router.post('/enterprises/:enterpriseId/supply-chain/qr-codes', authMiddleware, validateBody(generateQRCodeSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.generateQRCode(req, res)));
+router.post('/enterprises/:enterpriseId/supply-chain/events', authMiddleware, requireFarm(), validateBody(createTraceabilityEventSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createTraceabilityEvent(req, res)));
+router.patch('/supply-chain/events/:id/verify', authMiddleware, requireFarmRecord('traceability_events'), asyncHandler((req: Request, res: Response) => Tier3Controller.verifyTraceabilityEvent(req, res)));
+router.get('/supply-chain/batches/:batchId/traceability', authMiddleware, requireFarmRecord('product_batches', 'batchId'), asyncHandler((req: Request, res: Response) => Tier3Controller.getBatchTraceability(req, res)));
+router.post('/enterprises/:enterpriseId/supply-chain/qr-codes', authMiddleware, requireFarm(), validateBody(generateQRCodeSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.generateQRCode(req, res)));
 router.get('/enterprises/:enterpriseId/supply-chain/qr-codes', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listQRCodes(req, res)));
 
 // ─── Workforce & Task Management ─────────────────────
 router.get('/enterprises/:enterpriseId/workforce/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getWorkforceDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/workforce/tasks', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listTasks(req, res)));
-router.post('/enterprises/:enterpriseId/workforce/tasks', authMiddleware, validateBody(createTaskSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createTask(req, res)));
-router.put('/workforce/tasks/:id', authMiddleware, validateBody(updateTaskSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateTask(req, res)));
-router.delete('/workforce/tasks/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.deleteTask(req, res)));
+router.post('/enterprises/:enterpriseId/workforce/tasks', authMiddleware, requireFarm(), validateBody(createTaskSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createTask(req, res)));
+router.put('/workforce/tasks/:id', authMiddleware, requireFarmRecord('workforce_tasks'), validateBody(updateTaskSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateTask(req, res)));
+router.delete('/workforce/tasks/:id', authMiddleware, requireFarmRecord('workforce_tasks'), asyncHandler((req: Request, res: Response) => Tier3Controller.deleteTask(req, res)));
 router.get('/enterprises/:enterpriseId/workforce/shifts', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listShifts(req, res)));
-router.post('/enterprises/:enterpriseId/workforce/shifts', authMiddleware, validateBody(createShiftSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createShift(req, res)));
-router.put('/workforce/shifts/:id', authMiddleware, validateBody(updateShiftSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateShift(req, res)));
-router.patch('/workforce/shifts/:id/check-in', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.checkInShift(req, res)));
-router.patch('/workforce/shifts/:id/check-out', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.checkOutShift(req, res)));
-router.delete('/workforce/shifts/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.deleteShift(req, res)));
+router.post('/enterprises/:enterpriseId/workforce/shifts', authMiddleware, requireFarm(), validateBody(createShiftSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createShift(req, res)));
+router.put('/workforce/shifts/:id', authMiddleware, requireFarmRecord('shift_schedules'), validateBody(updateShiftSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateShift(req, res)));
+router.patch('/workforce/shifts/:id/check-in', authMiddleware, requireFarmRecord('shift_schedules'), asyncHandler((req: Request, res: Response) => Tier3Controller.checkInShift(req, res)));
+router.patch('/workforce/shifts/:id/check-out', authMiddleware, requireFarmRecord('shift_schedules'), asyncHandler((req: Request, res: Response) => Tier3Controller.checkOutShift(req, res)));
+router.delete('/workforce/shifts/:id', authMiddleware, requireFarmRecord('shift_schedules'), asyncHandler((req: Request, res: Response) => Tier3Controller.deleteShift(req, res)));
 
 // ─── Staff & Workflow Management ─────────────────────
 // Animal Search & Medical Summary (for workflow integration)
@@ -321,6 +321,19 @@ router.patch('/referrals/:id/status', authMiddleware, asyncHandler(async (req: R
 // [[feedback-network-hospital-change-approval]]); only the hospital→network resolution
 // is specific to this helper. Non-membership responds 404 (not 403) - anti-enumeration,
 // consistent with VetHospitalService's getHospital/listDoctors pattern.
+/** A hospital outside any network is still not open to everyone: only its own people (owner, doctors, staff) work on its records. */
+async function standaloneHospitalPeople(hospitalId: string, userId: string, res: Response): Promise<boolean> {
+  const mine = await database.query(
+    `SELECT 1 FROM vet_hospitals h WHERE h.id = $1 AND (h.owner_id = $2
+        OR EXISTS (SELECT 1 FROM hospital_doctors d WHERE d.hospital_id = h.id AND d.doctor_id = $2 AND d.is_active = true)
+        OR EXISTS (SELECT 1 FROM staff_positions s WHERE s.hospital_id = h.id AND s.user_id = $2 AND s.is_active = true))`,
+    [hospitalId, userId]);
+  if (mine.rows.length) return true;
+  const message = 'This belongs to a hospital you do not work for, so nothing was shown or changed. Ask the hospital to add you to its team.';
+  res.status(403).json({ success: false, message, error: { message, code: 'RECORD_ACCESS_DENIED' } });
+  return false;
+}
+
 async function checkInpatientNetworkAccess(req: Request, res: Response): Promise<boolean> {
   const userId = (req as any).userId;
   const userRole = (req as any).userRole;
@@ -328,7 +341,7 @@ async function checkInpatientNetworkAccess(req: Request, res: Response): Promise
   const hospitalId = req.params.hospitalId;
   const hospitalRes = await database.query(`SELECT branch_network_id FROM vet_hospitals WHERE id = $1`, [hospitalId]);
   const networkId = hospitalRes.rows[0]?.branch_network_id;
-  if (!networkId) return true; // standalone hospital - no network check needed
+  if (!networkId) return standaloneHospitalPeople(hospitalId, userId, res);
   const result = await resolveNetworkAccess(networkId, userId, userRole);
   if (!result.allowed) {
     res.status(404).json({ success: false, error: 'Hospital not found' });
@@ -355,7 +368,10 @@ async function checkResourceNetworkAccess(req: Request, res: Response, table: st
   if (!hospitalId) return true; // not found here - let the controller 404 normally
   const hospitalRes = await database.query(`SELECT branch_network_id FROM vet_hospitals WHERE id = $1`, [hospitalId]);
   const networkId = hospitalRes.rows[0]?.branch_network_id;
-  if (!networkId) return true; // standalone hospital - no network check needed
+  if (!networkId) {
+    if (!['workflow_cases', 'inpatient_admissions', 'appointment_queue', 'staff_positions'].includes(table)) return true;
+    return standaloneHospitalPeople(hospitalId, userId, res);
+  }
   const result = await resolveNetworkAccess(networkId, userId, userRole);
   if (!result.allowed) {
     res.status(404).json({ success: false, error: 'Resource not found' });
@@ -395,23 +411,23 @@ router.get('/animals/:animalId/hospital-visits', authMiddleware, requireAnimalAc
 
 // ─── Report Builder & Export Center ──────────────────
 router.get('/enterprises/:enterpriseId/reports/templates', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listReportTemplates(req, res)));
-router.post('/enterprises/:enterpriseId/reports/templates', authMiddleware, validateBody(createReportTemplateSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createReportTemplate(req, res)));
-router.put('/reports/templates/:id', authMiddleware, validateBody(updateReportTemplateSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateReportTemplate(req, res)));
-router.delete('/reports/templates/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.deleteReportTemplate(req, res)));
-router.post('/enterprises/:enterpriseId/reports/generate', authMiddleware, validateBody(generateReportSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.generateReport(req, res)));
+router.post('/enterprises/:enterpriseId/reports/templates', authMiddleware, requireFarm(), validateBody(createReportTemplateSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.createReportTemplate(req, res)));
+router.put('/reports/templates/:id', authMiddleware, requireFarmRecord('report_templates'), validateBody(updateReportTemplateSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.updateReportTemplate(req, res)));
+router.delete('/reports/templates/:id', authMiddleware, requireFarmRecord('report_templates'), asyncHandler((req: Request, res: Response) => Tier3Controller.deleteReportTemplate(req, res)));
+router.post('/enterprises/:enterpriseId/reports/generate', authMiddleware, requireFarm(), validateBody(generateReportSchema), asyncHandler((req: Request, res: Response) => Tier3Controller.generateReport(req, res)));
 router.get('/enterprises/:enterpriseId/reports/generated', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listGeneratedReports(req, res)));
-router.get('/reports/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getReport(req, res)));
-router.delete('/reports/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.deleteReport(req, res)));
+router.get('/reports/:id', authMiddleware, requireFarmRecord('generated_reports'), asyncHandler((req: Request, res: Response) => Tier3Controller.getReport(req, res)));
+router.delete('/reports/:id', authMiddleware, requireFarmRecord('generated_reports'), asyncHandler((req: Request, res: Response) => Tier3Controller.deleteReport(req, res)));
 
 // ═══════════════════════════════════════════════════════════════
 
 // ─── AI Veterinary Copilot ──────────────────────────
 router.get('/ai-copilot/sessions', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listChatSessions(req, res)));
 router.post('/ai-copilot/sessions', authMiddleware, validateBody(createChatSessionSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createChatSession(req, res)));
-router.get('/ai-copilot/sessions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getChatSession(req, res)));
-router.delete('/ai-copilot/sessions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteChatSession(req, res)));
-router.get('/ai-copilot/sessions/:sessionId/messages', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listChatMessages(req, res)));
-router.post('/ai-copilot/sessions/:sessionId/messages', authMiddleware, validateBody(sendChatMessageSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.sendChatMessage(req, res)));
+router.get('/ai-copilot/sessions/:id', authMiddleware, requireOwnChatSession(), asyncHandler((req: Request, res: Response) => Tier4Controller.getChatSession(req, res)));
+router.delete('/ai-copilot/sessions/:id', authMiddleware, requireOwnChatSession(), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteChatSession(req, res)));
+router.get('/ai-copilot/sessions/:sessionId/messages', authMiddleware, requireOwnChatSession('sessionId'), asyncHandler((req: Request, res: Response) => Tier4Controller.listChatMessages(req, res)));
+router.post('/ai-copilot/sessions/:sessionId/messages', authMiddleware, requireOwnChatSession('sessionId'), validateBody(sendChatMessageSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.sendChatMessage(req, res)));
 router.post('/ai-copilot/drug-interactions', authMiddleware, validateBody(checkDrugInteractionsSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.checkDrugInteractions(req, res)));
 router.post('/ai-copilot/symptom-analysis', authMiddleware, validateBody(analyzeSymptomsSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.analyzeSymptoms(req, res)));
 router.post('/ai-copilot/analyze-scan', authMiddleware, uploadAny.single('image'), asyncHandler((req: Request, res: Response) => Tier4Controller.analyzeScan(req, res)));
@@ -419,13 +435,13 @@ router.post('/ai-copilot/analyze-scan', authMiddleware, uploadAny.single('image'
 // ─── Digital Twin & Scenario Simulator ──────────────
 router.get('/enterprises/:enterpriseId/digital-twins/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getDigitalTwinDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/digital-twins', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listDigitalTwins(req, res)));
-router.post('/enterprises/:enterpriseId/digital-twins', authMiddleware, validateBody(createDigitalTwinSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createDigitalTwin(req, res)));
-router.put('/digital-twins/:id', authMiddleware, validateBody(updateDigitalTwinSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateDigitalTwin(req, res)));
-router.delete('/digital-twins/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteDigitalTwin(req, res)));
+router.post('/enterprises/:enterpriseId/digital-twins', authMiddleware, requireFarm(), validateBody(createDigitalTwinSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createDigitalTwin(req, res)));
+router.put('/digital-twins/:id', authMiddleware, requireFarmRecord('digital_twins'), validateBody(updateDigitalTwinSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateDigitalTwin(req, res)));
+router.delete('/digital-twins/:id', authMiddleware, requireFarmRecord('digital_twins'), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteDigitalTwin(req, res)));
 router.get('/enterprises/:enterpriseId/simulations', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listSimulations(req, res)));
-router.post('/enterprises/:enterpriseId/simulations', authMiddleware, validateBody(runSimulationSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.runSimulation(req, res)));
-router.get('/simulations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getSimulation(req, res)));
-router.delete('/simulations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteSimulation(req, res)));
+router.post('/enterprises/:enterpriseId/simulations', authMiddleware, requireFarm(), validateBody(runSimulationSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.runSimulation(req, res)));
+router.get('/simulations/:id', authMiddleware, requireFarmRecord('simulation_runs'), asyncHandler((req: Request, res: Response) => Tier4Controller.getSimulation(req, res)));
+router.delete('/simulations/:id', authMiddleware, requireFarmRecord('simulation_runs'), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteSimulation(req, res)));
 
 
 export default router;

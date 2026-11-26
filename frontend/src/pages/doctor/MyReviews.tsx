@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
+import { ReviewActions } from '../../components/reviews/ReviewActions'
 import { Review } from '../../types'
 import '../../styles/modules.css'
 
@@ -16,8 +17,6 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
   const { formatDate } = useSettings()
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
-  const [respondingTo, setRespondingTo] = useState<string | null>(null)
-  const [responseText, setResponseText] = useState('')
 
   useEffect(() => {
     loadReviews()
@@ -32,16 +31,6 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
 } finally {
       setLoading(false)
     }
-  }
-
-  const handleRespond = async (reviewId: string) => {
-    if (!responseText.trim()) return
-    // In a real app, this would call an API to add vet response
-    setReviews(reviews.map(r =>
-      r.id === reviewId ? { ...r, responseFromVet: responseText } : r
-    ))
-    setRespondingTo(null)
-    setResponseText('')
   }
 
   const avgRating = reviews.length > 0
@@ -140,33 +129,14 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
                   </div>
                 )}
 
-                {/* Respond Form */}
-                {!review.responseFromVet && respondingTo === review.id && (
-                  <div className="si-66faea9d">
-                    <textarea
-                      className="module-input si-71dd43e2"
-                      placeholder={t('doctorReviews.writeResponse')}
-                      value={responseText}
-                      onChange={e => setResponseText(e.target.value)}
-                      rows={3}
-                     
-                    />
-                    <div className="si-d223efb3">
-                      <button className="btn btn-primary" onClick={() => handleRespond(review.id)}>{t('doctorReviews.send')}</button>
-                      <button className="btn btn-outline" onClick={() => { setRespondingTo(null); setResponseText('') }}>{t('doctorReviews.cancel')}</button>
-                    </div>
-                  </div>
-                )}
+                <ReviewActions
+                  review={review}
+                  signedIn
+                  isOwnReview={false}
+                  canReply={review.veterinarianId === user?.id}
+                  onChange={patch => setReviews(prev => prev.map(r => (r.id === review.id ? { ...r, ...patch } : r)))}
+                />
 
-                {!review.responseFromVet && respondingTo !== review.id && (
-                  <button
-                    className="btn btn-outline btn-sm si-66faea9d"
-                   
-                    onClick={() => setRespondingTo(review.id)}
-                  >
-                    💬 {t('doctorReviews.respond')}
-                  </button>
-                )}
               </div>
             </div>
           ))}

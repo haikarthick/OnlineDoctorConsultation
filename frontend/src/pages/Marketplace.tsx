@@ -31,6 +31,7 @@ import { PricesTab } from '../components/marketplace/PricesTab'
 import { AdminPanel } from '../components/marketplace/AdminPanel'
 
 import { userMessage } from '../utils/userMessage'
+import { rememberUpload, commitUploads } from '../utils/uploadedFiles'
 // The empty sell form. A new one each call so a published listing never leaks values into the next.
 const blankSellForm = (): Record<string, any> => ({
     title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
@@ -401,6 +402,7 @@ const Marketplace: React.FC = () => {
         return
       }
       const res = await apiService.uploadVideoFile(toUpload, 'marketplace')
+      rememberUpload(res)
       const url = res.url || res.fileUrl
       if (url) { sf('videoUrl', url); setSuccessMsg(t('marketplace.sell.videoUploaded')) }
     } catch (err: any) {
@@ -505,6 +507,7 @@ const Marketplace: React.FC = () => {
       // Animal-category listings go through admin review before appearing publicly
       const needsReview = ['animal', 'semen_embryo'].includes(payload.category)
       setSuccessMsg(needsReview ? t('marketplace.deal.submittedForReview') : t('marketplace.listingCreated'))
+      commitUploads()
       setSellForm(blankSellForm())
       clearSellDraft()
       setSelectedAnimalId('')
@@ -587,6 +590,7 @@ const Marketplace: React.FC = () => {
         const file = await compressImage(original)
         if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) { failed++ } else {
           const res = await apiService.uploadImageFile(file, 'marketplace')
+          rememberUpload(res)
           const url = res.url || res.fileUrl
           if (url) setSellForm((prev: Record<string, any>) => ({ ...prev, images: [...(prev.images || []), url].slice(0, MAX_LISTING_IMAGES) }))
           else failed++

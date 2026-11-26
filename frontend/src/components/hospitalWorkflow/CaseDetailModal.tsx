@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import { STAGES, STAGE_ICONS } from './hospitalWorkflowShared'
+import { RowActions } from '../mobile/RowActions'
 
 interface CaseDetailModalProps {
   selectedCase: any
@@ -9,9 +10,11 @@ interface CaseDetailModalProps {
   t: TFunction
   formatDateTime: (date: any) => string
   onAdvanceStage: (stage: string) => void
+  /** Opens the shared edit sheet for the case's priority, diagnosis, treatment plan and discharge summary. */
+  onEdit?: () => void
 }
 
-export default function CaseDetailModal({ selectedCase, setSelectedCase, caseMedicalSummary, t, formatDateTime, onAdvanceStage }: CaseDetailModalProps) {
+export default function CaseDetailModal({ selectedCase, setSelectedCase, caseMedicalSummary, t, formatDateTime, onAdvanceStage, onEdit }: CaseDetailModalProps) {
   if (!selectedCase) return null
 
   return (
@@ -43,7 +46,9 @@ export default function CaseDetailModal({ selectedCase, setSelectedCase, caseMed
           {selectedCase.chief_complaint && <div className="si-0defe487"><strong>{t('hospitalWorkflow.chiefComplaint')}:</strong> {selectedCase.chief_complaint}</div>}
           {selectedCase.diagnosis && <div className="si-0defe487"><strong>{t('hospitalWorkflow.diagnosis')}:</strong> {selectedCase.diagnosis}</div>}
           {selectedCase.treatment_plan && <div className="si-0defe487"><strong>{t('hospitalWorkflow.treatmentPlan')}:</strong> {selectedCase.treatment_plan}</div>}
+          {selectedCase.discharge_summary && <div className="si-0defe487"><strong>{t('recordActions.hospitalCase.dischargeSummary')}:</strong> {selectedCase.discharge_summary}</div>}
         </div>
+        {onEdit && <RowActions name={selectedCase.animal_name || t('hospitalWorkflow.unknown')} onEdit={onEdit} />}
 
         {/* Transition History */}
         {selectedCase.transitions && selectedCase.transitions.length > 0 && (

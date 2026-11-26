@@ -1,0 +1,11 @@
+{
+  "signOutEverywhere": {
+    "button": "Sign out everywhere",
+    "title": "Sign this person out everywhere",
+    "confirm": "Sign {{name}} out of every phone and browser?",
+    "hint": "They stay registered and can sign in again straight away. Use this if an account may be in the wrong hands or a lost phone is still signed in.",
+    "action": "Sign out everywhere",
+    "done": "{{name}} has been signed out everywhere. They will be asked to sign in again the next time they open the app.",
+    "failed": "We could not sign this person out just now, so nothing changed. Check your connection and try again."
+  }
+}

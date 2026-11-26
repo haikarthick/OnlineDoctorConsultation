@@ -22,6 +22,9 @@ import ReferralsList from '../components/hospitalWorkflow/ReferralsList'
 import NewReferralModal from '../components/hospitalWorkflow/NewReferralModal'
 
 import { userMessage } from '../utils/userMessage'
+import { EditFieldsSheet, textOrEmpty, type SheetField } from '../components/mobile/RowActions'
+import { PRIORITIES } from '../components/hospitalWorkflow/hospitalWorkflowShared'
+import { fieldText } from '../utils/recordForm'
 export default function HospitalWorkflow() {
   const { t } = useTranslation()
   const { formatDateTime } = useSettings()
@@ -46,6 +49,7 @@ export default function HospitalWorkflow() {
   const [dashboard, setDashboard] = useState<any>(null)
   const [stageFilter, setStageFilter] = useState('')
   const [selectedCase, setSelectedCase] = useState<any>(null)
+  const [editingCase, setEditingCase] = useState<any>(null)
   const [showNewCase, setShowNewCase] = useState(false)
   const [caseForm, setCaseForm] = useState({ chiefComplaint: '', priority: 'normal', animalId: '', ownerId: '' })
 
@@ -534,6 +538,7 @@ export default function HospitalWorkflow() {
             t={t}
             formatDateTime={formatDateTime}
             onAdvanceStage={s => { setTransTarget(selectedCase); setTransStage(s) }}
+            onEdit={() => setEditingCase(selectedCase)}
           />
 
           <TransitionModal
@@ -588,6 +593,27 @@ export default function HospitalWorkflow() {
           />
         </div>
       )}
+
+      <EditFieldsSheet
+        open={!!editingCase}
+        title={t('recordActions.hospitalCase.editTitle', { name: editingCase?.animal_name || t('hospitalWorkflow.unknown') })}
+        fields={[
+          { key: 'priority', label: t('hospitalWorkflow.priority'), type: 'select', options: PRIORITIES.map(p => ({ value: p, label: p })) },
+          { key: 'diagnosis', label: t('hospitalWorkflow.diagnosis'), type: 'textarea' },
+          { key: 'treatmentPlan', label: t('hospitalWorkflow.treatmentPlan'), type: 'textarea' },
+          { key: 'dischargeSummary', label: t('recordActions.hospitalCase.dischargeSummary'), type: 'textarea' },
+        ] as SheetField[]}
+        initial={{
+          priority: fieldText(editingCase?.priority) || 'normal', diagnosis: fieldText(editingCase?.diagnosis),
+          treatmentPlan: fieldText(editingCase?.treatment_plan), dischargeSummary: fieldText(editingCase?.discharge_summary),
+        }}
+        onSave={values => apiService.updateWorkflowCase(editingCase.id, {
+          priority: values.priority, diagnosis: textOrEmpty(values.diagnosis),
+          treatmentPlan: textOrEmpty(values.treatmentPlan), dischargeSummary: textOrEmpty(values.dischargeSummary),
+        })}
+        onClose={() => setEditingCase(null)}
+        onDone={() => { if (editingCase?.id) loadCaseDetail(editingCase.id); loadWorkflow() }}
+      />
     </div>
   )
 }

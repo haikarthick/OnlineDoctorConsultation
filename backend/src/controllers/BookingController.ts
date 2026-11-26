@@ -44,20 +44,6 @@ class BookingController {
     res.status(201).json({ success: true, data: booking });
   }
 
-  async getBooking(req: Request, res: Response) {
-    const authReq = req as AuthRequest;
-    const booking = await BookingService.getBooking(req.params.id);
-
-    // Only allow access to own bookings or admin
-    if (booking.petOwnerId !== authReq.userId && 
-        booking.veterinarianId !== authReq.userId && 
-        authReq.userRole !== 'admin') {
-      throw new ForbiddenError('Not authorized to view this booking');
-    }
-
-    res.json({ success: true, data: booking });
-  }
-
   async listBookings(req: Request, res: Response) {
     const authReq = req as AuthRequest;
     const params = {

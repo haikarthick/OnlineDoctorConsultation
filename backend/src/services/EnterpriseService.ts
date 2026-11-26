@@ -370,7 +370,7 @@ export class EnterpriseService {
          -- A vaccination belongs to the enterprise through its animal OR its group. The inner
          -- join here counted only animal-subject rows, so every flock vaccination was missing
          -- from the tile - the counter read 0 while the work had been done.
-         WHERE a.enterprise_id = $1 OR ag.enterprise_id = $1`,
+         WHERE (a.enterprise_id = $1 OR ag.enterprise_id = $1) AND vr.entered_by_mistake_at IS NULL`,
         [enterpriseId]
       ),
       database.query(

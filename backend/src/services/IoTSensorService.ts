@@ -68,7 +68,12 @@ class IoTSensorService {
   }
 
   async deleteSensor(id: string): Promise<void> {
-    await database.query(`DELETE FROM iot_sensors WHERE id = $1`, [id]);
+    // A sensor's readings go with it; an alert-event that named it keeps existing without the sensor (one statement, so the foreign keys are checked at the end).
+    await database.query(
+      `WITH r AS (DELETE FROM sensor_readings WHERE sensor_id = $1),
+            g AS (UPDATE geospatial_events SET sensor_id = NULL WHERE sensor_id = $1)
+       DELETE FROM iot_sensors WHERE id = $1`, [id]
+    );
   }
 
   // ─── Readings ─────────────────────────────────────────────

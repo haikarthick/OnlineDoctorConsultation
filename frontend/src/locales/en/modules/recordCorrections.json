@@ -1,0 +1,35 @@
+{
+  "recordCorrections": {
+    "addendaTitle": "Corrections",
+    "addendaHint": "A saved record is never changed. If something in it is wrong or missing, add a correction. It is dated, carries your name, and everyone who can see this record can read it.",
+    "addendaEmpty": "No corrections have been added to this record.",
+    "addCorrection": "Add a correction",
+    "addendumLabel": "Your correction",
+    "addendumPlaceholder": "For example: the dose was 2 ml, not 5 ml",
+    "saveCorrection": "Save correction",
+    "saving": "Saving...",
+    "addendumSaved": "Your correction was added under the record.",
+    "writtenBy": "{{name}} on {{date}}",
+    "unknownAuthor": "Unknown person",
+    "mistakeButton": "Entered by mistake",
+    "mistakeTitle": "Mark as entered by mistake",
+    "mistakeExplainVaccination": "This vaccination stays in the history, marked as a mistake, with your name and reason. It no longer counts in the passport, the compliance figures, the reminders or the certificates. If it covered a scheduled dose, that dose is due again.",
+    "mistakeExplainAllergy": "This allergy stays in the history, marked as a mistake, with your name and reason. It is no longer shown as an active allergy or used in warnings.",
+    "reasonLabel": "Why was it a mistake?",
+    "reasonPlaceholder": "For example: wrong animal, or wrong date",
+    "confirmMistake": "Mark as mistake",
+    "mistakeBadge": "Entered by mistake",
+    "mistakeDetail": "Marked by {{name}}: {{reason}}",
+    "waiveButton": "Skip this plan",
+    "waiveTitle": "Skip the plan: {{plan}}",
+    "waiveExplain": "The plan stays on the passport, shown as skipped, with your reason. Doses not yet given are no longer asked for.",
+    "waiveReason": "Why is this plan being skipped?",
+    "waiveReasonPlaceholder": "For example: not needed on this farm, or the vet advised against it",
+    "waiveConfirm": "Skip plan",
+    "waived": "Plan skipped. The passport shows it as skipped, with your reason.",
+    "errors": {
+      "REC_NOT_AUTHOR": "Only the person who entered this, the animal's owner, their farm team or an admin can mark it as entered by mistake. You can add a correction to the record instead, or ask one of them.",
+      "generic": "This could not be saved, so nothing was changed. Please try again."
+    }
+  }
+}

@@ -272,24 +272,6 @@ class InvoiceService {
     }
   }
 
-  /** Fetch an invoice with access control (payer, payee/doctor, or admin). */
-  async getInvoice(invoiceId: string, requesterId: string, requesterRole: string): Promise<any> {
-    const res = await database.query(
-      `SELECT i.*, p.user_id as payer_id, p.payee_id, wr.doctor_id
-       FROM invoices i
-       LEFT JOIN payments p ON p.id = i.payment_id
-       LEFT JOIN withdrawal_requests wr ON wr.id = i.withdrawal_id
-       WHERE i.id = $1`,
-      [invoiceId]
-    );
-    if (res.rows.length === 0) throw new NotFoundError('Invoice', invoiceId);
-    const inv = res.rows[0];
-    const allowed = requesterRole === 'admin'
-      || inv.payer_id === requesterId || inv.payee_id === requesterId || inv.doctor_id === requesterId;
-    if (!allowed) throw new ForbiddenError('You do not have access to this invoice');
-    return this.mapInvoice(inv);
-  }
-
   async getInvoiceByPayment(paymentId: string, requesterId: string, requesterRole: string): Promise<any | null> {
     const res = await database.query(
       `SELECT i.*, p.user_id as payer_id, p.payee_id, NULL as doctor_id

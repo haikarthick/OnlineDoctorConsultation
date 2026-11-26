@@ -1,0 +1,32 @@
+{
+  "reviewActions": {
+    "helpful": "Helpful ({{count}})",
+    "helpfulCount": "{{count}} found this helpful",
+    "report": "Report",
+    "reportTitle": "Report this review",
+    "reportHint": "Tell us what is wrong. An administrator will look at it. Your name is not shown to the reviewer.",
+    "reportWhy": "What is wrong with it?",
+    "reportSend": "Send report",
+    "reportedThanks": "Thank you. We have sent this review to an administrator to look at.",
+    "reportedAlready": "You reported this review",
+    "reply": "Reply",
+    "editReply": "Edit your reply",
+    "replyTitle": "Reply to this review",
+    "replyHint": "Your reply is shown under the review for everyone to read. You can change it later.",
+    "replyLabel": "Your reply",
+    "replySend": "Save reply",
+    "replySaved": "Your reply is saved.",
+    "failed": "We could not do that just now. Check your connection and try again.",
+    "reasons": {
+      "inappropriate": "Rude or inappropriate",
+      "fake": "Not a real visit",
+      "spam": "Spam or advertising",
+      "other": "Something else"
+    },
+    "errors": {
+      "RV_NOT_YOUR_REVIEW": "You can only reply to reviews written about you.",
+      "RV_NOT_FOUND": "This review is no longer available. Refresh the page to see the current reviews.",
+      "RV_OWN_REVIEW": "This is your own review, so you cannot mark it helpful or report it."
+    }
+  }
+}

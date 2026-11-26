@@ -1,4 +1,5 @@
 import React from 'react'
+import { SignOutAllDevices } from './SignOutAllDevices'
 import { useTranslation } from 'react-i18next'
 
 interface PrivacyDataSectionProps {
@@ -44,6 +45,8 @@ const PrivacyDataSection: React.FC<PrivacyDataSectionProps> = ({ dataSummary, da
           )}
         </div>
       )}
+
+      <SignOutAllDevices />
 
       <div className="si-4c7fdb19">
         <h4 className="si-9449bd55">{t('settings.privacy.dataRightsTitle')}</h4>

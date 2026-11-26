@@ -12,6 +12,7 @@ import BookingCard from '../components/consultations/BookingCard'
 import HistoryCard from '../components/consultations/HistoryCard'
 import RescheduleModal from '../components/consultations/RescheduleModal'
 import ActionLogModal from '../components/consultations/ActionLogModal'
+import { MyActionHistorySheet } from '../components/consultations/MyActionHistorySheet'
 import CancelBookingModal from '../components/consultations/CancelBookingModal'
 import { toRefundPreview, type RefundPreviewData } from '../components/shared/RefundPreview'
 import NoShowModal from '../components/consultations/NoShowModal'
@@ -84,6 +85,7 @@ const Consultations: React.FC = () => {
   const [actionLogBookingId, setActionLogBookingId] = useState<string | null>(null)
   const [actionLogs, setActionLogs] = useState<any[]>([])
   const [actionLogsLoading, setActionLogsLoading] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
 
   const isVet = user?.role === 'veterinarian'
   const isPetOwner = user?.role === 'pet_owner' || user?.role === 'farmer'
@@ -359,10 +361,14 @@ const Consultations: React.FC = () => {
             {isAdmin ? t('consultations.subtitles.admin') : isVet ? t('consultations.subtitles.vet') : t('consultations.subtitles.petOwner')}
           </p>
         </div>
-        {isPetOwner && (
-          <button className="btn-primary" onClick={() => navigate('/book-consultation')}>{t('consultations.bookConsultation')}</button>
-        )}
+        <div className="ot-actions">
+          <button className="btn-small" onClick={() => setHistoryOpen(true)}>{t('bookingHistory.button')}</button>
+          {isPetOwner && (
+            <button className="btn-primary" onClick={() => navigate('/book-consultation')}>{t('consultations.bookConsultation')}</button>
+          )}
+        </div>
       </div>
+      <MyActionHistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} myUserId={user?.id} actionLabel={actionLabel} />
 
       {error && (
         <div className="si-131754ed">

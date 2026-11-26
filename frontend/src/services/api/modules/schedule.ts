@@ -12,10 +12,6 @@ export const scheduleApi2 = {
     return response.data
   },
 
-  async getVetSchedules(vetId: string) {
-    const response = await sharedClient.get(`/schedules/vet/${vetId}`)
-    return response.data
-  },
 
   async updateSchedule(id: string, data: Record<string, unknown>) {
     const response = await sharedClient.put(`/schedules/${id}`, data)

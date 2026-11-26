@@ -6,9 +6,9 @@ import { asyncHandler } from '../utils/errorHandler';
 import MedicalRecordController from '../controllers/MedicalRecordController';
 import NotificationController from '../controllers/NotificationController';
 import {
-  createMedicalRecordSchema, updateMedicalRecordSchema,
-  createVaccinationSchema, updateVaccinationSchema,
-  addWeightSchema, createAllergySchema, updateAllergySchema, createLabResultSchema, updateLabResultSchema,
+  createMedicalRecordSchema, createVaccinationSchema,
+  addWeightSchema, createAllergySchema, createLabResultSchema, updateLabResultSchema,
+  addAddendumSchema, markMistakeSchema,
 } from '../middleware/validation';
 
 const router = Router();
@@ -20,14 +20,16 @@ router.get('/medical-records/audit', authMiddleware, asyncHandler((req: Request,
 router.post('/medical-records', authMiddleware, roleMiddleware(['veterinarian', 'farmer', 'admin']), validateBody(createMedicalRecordSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.createRecord(req, res)));
 router.get('/medical-records', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listRecords(req, res)));
 router.get('/medical-records/:id', authMiddleware, requireRecordAccess('medical_records'), asyncHandler((req: Request, res: Response) => MedicalRecordController.getRecord(req, res)));
-router.put('/medical-records/:id', authMiddleware, requireRecordAccess('medical_records'), validateBody(updateMedicalRecordSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.updateRecord(req, res)));
+// A saved record is never edited in place (owner decision 2026-11-25): it is corrected by an addendum, a new dated note on the record.
+router.get('/medical-records/:id/addenda', authMiddleware, requireRecordAccess('medical_records'), asyncHandler((req: Request, res: Response) => MedicalRecordController.listAddenda(req, res)));
+router.post('/medical-records/:id/addenda', authMiddleware, requireRecordAccess('medical_records'), validateBody(addAddendumSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.addAddendum(req, res)));
 router.delete('/medical-records/:id', authMiddleware, requireRecordAccess('medical_records'), asyncHandler((req: Request, res: Response) => MedicalRecordController.deleteRecord(req, res)));
 
 // ─── Vaccination routes ──────────────────────────────────────
 router.post('/vaccinations', authMiddleware, requireAnimalAccess('body:animalId', 'vaccinations'), requireAnimal('body:animalId'), validateBody(createVaccinationSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.createVaccination(req, res)));
 router.get('/vaccinations/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'vaccinations'), requireAnimal('params:animalId'), asyncHandler((req: Request, res: Response) => MedicalRecordController.listVaccinations(req, res)));
-router.put('/vaccinations/:id', authMiddleware, requireRecordAccess('vaccination_records'), validateBody(updateVaccinationSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.updateVaccination(req, res)));
-router.delete('/vaccinations/:id', authMiddleware, requireRecordAccess('vaccination_records'), asyncHandler((req: Request, res: Response) => MedicalRecordController.deleteVaccination(req, res)));
+// A wrong vaccination is marked "entered by mistake" (reason required), never overwritten or deleted.
+router.post('/vaccinations/:id/mistake', authMiddleware, requireRecordAccess('vaccination_records'), validateBody(markMistakeSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.markVaccinationMistake(req, res)));
 
 // ─── Weight History routes ───────────────────────────────────
 // CRITICAL FIX: Added requireAnimalAccess for body:animalId (POST) and params:animalId (GET)
@@ -38,7 +40,7 @@ router.get('/weight-history/animal/:animalId', authMiddleware, requireAnimalAcce
 // CRITICAL FIX: Added requireAnimalAccess for all allergy routes
 router.post('/allergies', authMiddleware, requireAnimalAccess('body:animalId', 'allergies'), requireAnimal('body:animalId'), validateBody(createAllergySchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.createAllergy(req, res)));
 router.get('/allergies/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'allergies'), requireAnimal('params:animalId'), asyncHandler((req: Request, res: Response) => MedicalRecordController.listAllergies(req, res)));
-router.put('/allergies/:id', authMiddleware, requireRecordAccess('allergy_records'), validateBody(updateAllergySchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.updateAllergy(req, res)));
+router.post('/allergies/:id/mistake', authMiddleware, requireRecordAccess('allergy_records'), validateBody(markMistakeSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.markAllergyMistake(req, res)));
 
 // ─── Lab Result routes ──────────────────────────────────────
 // CRITICAL FIX: Added requireAnimalAccess for all lab result routes

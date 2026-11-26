@@ -179,7 +179,7 @@ class AiCopilotService {
                   a.name AS animal_name
            FROM vaccination_records v
            JOIN animals a ON v.animal_id = a.id
-           WHERE v.animal_id = ANY($1)
+           WHERE v.animal_id = ANY($1) AND v.entered_by_mistake_at IS NULL
            ORDER BY v.date_administered DESC LIMIT 300`,
           [historyIds]
         ),
@@ -214,7 +214,7 @@ class AiCopilotService {
                   al.identified_date, a.name AS animal_name
            FROM allergy_records al
            JOIN animals a ON al.animal_id = a.id
-           WHERE al.animal_id = ANY($1)
+           WHERE al.animal_id = ANY($1) AND al.entered_by_mistake_at IS NULL
            ORDER BY al.identified_date DESC NULLS LAST LIMIT 300`,
           [historyIds]
         ),

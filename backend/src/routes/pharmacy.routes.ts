@@ -154,21 +154,6 @@ router.get('/pharmacy/my-pharmacies', authMiddleware, asyncHandler(async (req: R
 // ── Pharmacy Setup ──────────────────────────────────────────
 
 // List pharmacies for a network
-router.get('/networks/:networkId/pharmacies', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const authReq = req as any;
-  const { networkId } = req.params;
-  if (!await guardNetworkPharmacy(req, res, networkId)) return;
-  const result = await database.query(
-    `SELECT hp.*, vh.name AS hospital_name, u.first_name || ' ' || u.last_name AS created_by_name
-     FROM hospital_pharmacies hp
-     LEFT JOIN vet_hospitals vh ON hp.hospital_id = vh.id
-     LEFT JOIN users u ON hp.created_by = u.id
-     WHERE hp.network_id = $1
-     ORDER BY hp.is_primary_pharmacy DESC, hp.pharmacy_name ASC`,
-    [networkId]
-  );
-  res.json(result.rows);
-}));
 
 // Create pharmacy
 router.post('/networks/:networkId/pharmacies', authMiddleware, asyncHandler(async (req: Request, res: Response) => {

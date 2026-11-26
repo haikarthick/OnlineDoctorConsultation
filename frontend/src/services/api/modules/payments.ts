@@ -2,18 +2,8 @@ import { sharedClient } from '../core'
 
 export const paymentsApi = {
   // ─── Payments ─────────────────────────────────────────────
-  async createPayment(data: { consultationId: string; bookingId?: string; amount: number; currency?: string; paymentMethod?: string }) {
-    const response = await sharedClient.post('/payments', data)
-    return response.data
-  },
-
   async listPayments(params?: { limit?: number; offset?: number }) {
     const response = await sharedClient.get('/payments', { params })
-    return response.data
-  },
-
-  async getPaymentByBooking(bookingId: string) {
-    const response = await sharedClient.get(`/payments/booking/${bookingId}`)
     return response.data
   },
 
@@ -157,11 +147,6 @@ export const paymentsApi = {
   },
 
   // ─── Legal documents & consent ──────────────────────────────
-  async getLegalDocuments() {
-    const response = await sharedClient.get('/legal/documents')
-    return response.data
-  },
-
   async getLegalDocument(docType: string) {
     const response = await sharedClient.get(`/legal/documents/${docType}`)
     return response.data
@@ -235,8 +220,8 @@ export const paymentsApi = {
     return response.data
   },
 
-  async reportReview(reviewId: string) {
-    const response = await sharedClient.post(`/reviews/${reviewId}/report`)
+  async reportReview(reviewId: string, reason: 'inappropriate' | 'fake' | 'spam' | 'other') {
+    const response = await sharedClient.post(`/reviews/${reviewId}/report`, { reason })
     return response.data
   }
 

@@ -8,6 +8,9 @@ import { useTranslation } from 'react-i18next'
 
 import { userMessage } from '../utils/userMessage'
 import { appLocale } from '../utils/appLocale'
+import { RowActions, ConfirmDeleteSheet, EditFieldsSheet, textOrEmpty, type SheetField } from '../components/mobile/RowActions'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
+import { pickField, dateInput, timeInput, fieldText, mayChangeFarmRecords } from '../utils/recordForm'
 const PRIORITY_COLORS: Record<string, string> = {
   low: '#6b7280', medium: '#3b82f6', high: '#f97316', critical: '#ef4444'
 }
@@ -27,6 +30,23 @@ const WorkforcePage: React.FC = () => {
   const [showShiftForm, setShowShiftForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [editingShift, setEditingShift] = useState<ShiftSchedule | null>(null)
+  const [deletingShift, setDeletingShift] = useState<ShiftSchedule | null>(null)
+  const [deletingTask, setDeletingTask] = useState<WorkforceTask | null>(null)
+  const farmRole = useMyFarmRole(enterprises.find(en => en.id === selectedEnterpriseId))
+  const mayChange = mayChangeFarmRecords(farmRole)
+
+  const shiftFields: SheetField[] = [
+    { key: 'shiftDate', label: t('workforce.form.shiftDate'), type: 'date', required: true },
+    { key: 'startTime', label: t('workforce.form.startTime'), type: 'time', required: true },
+    { key: 'endTime', label: t('workforce.form.endTime'), type: 'time', required: true },
+    { key: 'roleOnShift', label: t('workforce.form.roleOnShift'), type: 'text' },
+    { key: 'notes', label: t('common.notes'), type: 'textarea' },
+  ]
+  const shiftInitial = (s: ShiftSchedule | null): Record<string, string> => ({
+    shiftDate: dateInput(pickField(s, 'shiftDate')), startTime: timeInput(pickField(s, 'startTime')), endTime: timeInput(pickField(s, 'endTime')),
+    roleOnShift: fieldText(pickField(s, 'roleOnShift')), notes: fieldText(pickField(s, 'notes')),
+  })
 
   const [formData, setFormData] = useState({
     title: '', description: '', taskType: 'general', priority: 'medium',
@@ -278,6 +298,7 @@ const WorkforcePage: React.FC = () => {
                       {(task.estimatedHours || (task as any).estimated_hours) && <div>{t('workforce.est')}: {task.estimatedHours || (task as any).estimated_hours}h</div>}
                     </div>
                     <div className="card-footer">
+                      {mayChange && <RowActions name={task.title} onDelete={() => setDeletingTask(task)} />}
                       {task.status === 'pending' && <button className="btn-sm" onClick={() => handleUpdateStatus(task.id, 'in_progress')}>▶ {t('workforce.start')}</button>}
                       {task.status === 'in_progress' && <button className="btn-sm btn-success" onClick={() => handleUpdateStatus(task.id, 'completed')}>✓ {t('workforce.complete')}</button>}
                     </div>
@@ -322,6 +343,7 @@ const WorkforcePage: React.FC = () => {
                       <td>
                         {s.status === 'scheduled' && <button className="btn-sm" onClick={() => handleCheckIn(s.id)}>{t('workforce.checkIn')}</button>}
                         {s.status === 'active' && <button className="btn-sm btn-success" onClick={() => handleCheckOut(s.id)}>{t('workforce.checkOut')}</button>}
+                        {mayChange && <RowActions name={`${s.userName || (s as any).user_name || ''} ${dateInput(pickField(s, 'shiftDate'))}`.trim()} onEdit={() => setEditingShift(s)} onDelete={() => setDeletingShift(s)} />}
                       </td>
                     </tr>
                   ))}
@@ -332,6 +354,35 @@ const WorkforcePage: React.FC = () => {
           )}
         </>
       )}
+
+      <EditFieldsSheet
+        open={!!editingShift}
+        title={t('recordActions.workforce.editShift')}
+        fields={shiftFields}
+        initial={shiftInitial(editingShift)}
+        onSave={values => apiService.updateShift(editingShift!.id, {
+          shiftDate: values.shiftDate, startTime: values.startTime, endTime: values.endTime,
+          roleOnShift: textOrEmpty(values.roleOnShift), notes: textOrEmpty(values.notes),
+        })}
+        onClose={() => setEditingShift(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.saved')); fetchData() }}
+      />
+      <ConfirmDeleteSheet
+        open={!!deletingShift}
+        name={t('recordActions.workforce.shiftName', { who: (deletingShift as any)?.userName || (deletingShift as any)?.user_name || '', date: dateInput(pickField(deletingShift, 'shiftDate')) })}
+        what={t('recordActions.workforce.shiftWhat')}
+        onConfirm={() => apiService.deleteShift(deletingShift!.id)}
+        onClose={() => setDeletingShift(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.deleted')); fetchData() }}
+      />
+      <ConfirmDeleteSheet
+        open={!!deletingTask}
+        name={deletingTask?.title || ''}
+        what={t('recordActions.workforce.taskWhat')}
+        onConfirm={() => apiService.deleteWorkforceTask(deletingTask!.id)}
+        onClose={() => setDeletingTask(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.deleted')); fetchData() }}
+      />
     </div>
   )
 }

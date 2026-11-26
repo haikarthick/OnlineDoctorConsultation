@@ -157,7 +157,7 @@ const ReviewModeration: React.FC<ReviewModerationProps> = ({ onNavigate }) => {
                         <span>{t('reviewModeration.consultationDate')}: {formatDate((review as any).consultationDate)}</span>
                       )}
                       {review.helpfulCount ? <span>👍 {review.helpfulCount} {t('reviewModeration.helpful')}</span> : null}
-                      {review.reportCount ? <span className="si-f84f41a5">🚩 {review.reportCount} {t('reviewModeration.reports')}</span> : null}
+                      {review.reportCount ? <span className="si-f84f41a5">🚩 {review.reportCount} {t('reviewModeration.reports')}{review.reportReasons && review.reportReasons.length > 0 ? ` (${review.reportReasons.map(r => t(`reviewActions.reasons.${r}`, { defaultValue: r })).join(', ')})` : ''}</span> : null}
                     </div>
 
                     {/* Vet response */}

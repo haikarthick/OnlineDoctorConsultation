@@ -195,7 +195,7 @@ class GroupNetworkSharingService {
       out.vaccinations = (await database.query(
         `SELECT x.id, x.vaccine_name AS "vaccineName", x.date_administered AS "dateAdministered", x.next_due_date AS "nextDueDate",
                 x.head_count_treated AS "headCountTreated", x.batch_number AS "batchNumber"
-           FROM vaccination_records x WHERE x.group_id = $1 ${cycleSql} ORDER BY x.date_administered DESC LIMIT 200`, params)).rows;
+           FROM vaccination_records x WHERE x.group_id = $1 AND x.entered_by_mistake_at IS NULL ${cycleSql} ORDER BY x.date_administered DESC LIMIT 200`, params)).rows;
     }
     if (c.allow_prescriptions) {
       out.prescriptions = (await database.query(

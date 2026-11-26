@@ -370,7 +370,7 @@ class VaccineProtocolService {
     // Mark pending schedule rows as waived
     await database.query(
       `UPDATE vaccine_schedule SET status = 'waived'
-       WHERE animal_id = $1 AND protocol_id = $2 AND status = 'pending'`,
+       WHERE animal_id = $1 AND protocol_id = $2 AND status IN ('pending','overdue')`,
       [animalId, protocolId]
     );
   }
@@ -498,7 +498,7 @@ class VaccineProtocolService {
                 date_administered, next_due_date, head_count_treated, cycle_id, campaign_id,
                 site_of_administration, administered_by, created_at
          FROM vaccination_records
-         WHERE group_id = $1
+         WHERE group_id = $1 AND entered_by_mistake_at IS NULL
          ORDER BY date_administered ASC`, [groupId]
       ),
     ]);

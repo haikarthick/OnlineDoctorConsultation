@@ -1,11 +1,11 @@
 ﻿import {
   cancelBookingSchema, createVideoSessionSchema, endVideoSessionSchema, sendVideoMessageSchema,
   createScheduleSchema, updateScheduleSchema, createAnimalSchema, updateAnimalSchema,
-  createVetProfileSchema, updateVetProfileSchema, createMedicalRecordSchema, updateMedicalRecordSchema,
+  updateVetProfileSchema, createMedicalRecordSchema,
   deleteMedicalRecordSchema, createVaccinationSchema, addWeightSchema, createAllergySchema,
-  createLabResultSchema, createPaymentSchema, changeUserRoleSchema,
+  createLabResultSchema, changeUserRoleSchema,
   processRefundSchema, moderateReviewSchema, updateSystemSettingSchema, updatePermissionSchema,
-  bulkUpdatePermissionsSchema, resetPermissionsSchema, createEnterpriseSchema, addMemberSchema,
+  bulkUpdatePermissionsSchema, resetPermissionsSchema, createEnterpriseSchema,
   updateMemberSchema, createAnimalGroupSchema, assignAnimalToGroupSchema, createLocationSchema,
   createMovementSchema, createCampaignSchema, createObservationSchema, resolveObservationSchema,
   createBreedingRecordSchema, updateBreedingRecordSchema, createFeedSchema, restockFeedSchema,
@@ -19,9 +19,9 @@
   updateReportTemplateSchema, generateReportSchema, createChatSessionSchema, sendChatMessageSchema,
   checkDrugInteractionsSchema, analyzeSymptomsSchema, createDigitalTwinSchema, updateDigitalTwinSchema,
   runSimulationSchema, createMarketplaceListingSchema, updateMarketplaceListingSchema, placeBidSchema,
-  createMarketplaceOrderSchema, updateOrderStatusSchema, createSustainabilityMetricSchema,
+  createMarketplaceOrderSchema, createSustainabilityMetricSchema,
   updateSustainabilityMetricSchema, createSustainabilityGoalSchema, updateSustainabilityGoalSchema,
-  createWellnessScorecardSchema, updateWellnessScorecardSchema, createWellnessReminderSchema,
+  createWellnessScorecardSchema, createWellnessReminderSchema,
   snoozeReminderSchema, createGeofenceZoneSchema, updateGeofenceZoneSchema,
   createGeospatialEventSchema, paginationSchema, createHospitalSchema, updateHospitalSchema,
   addHospitalDoctorSchema, updateHospitalDoctorSchema, createDepartmentSchema,
@@ -64,11 +64,6 @@ describe('Extended Validation Schemas', () => {
     it('accepts partial', () => { expect(updateAnimalSchema.validate({ name: 'Buddy' }).error).toBeUndefined(); });
   });
 
-  describe('createVetProfileSchema', () => {
-    it('accepts valid', () => { expect(createVetProfileSchema.validate({ licenseNumber: 'VET-001', yearsOfExperience: 5, consultationFee: 50 }).error).toBeUndefined(); });
-    it('rejects missing licenseNumber', () => { expect(createVetProfileSchema.validate({ yearsOfExperience: 5 }).error).toBeDefined(); });
-  });
-
   describe('updateVetProfileSchema', () => {
     it('accepts partial', () => { expect(updateVetProfileSchema.validate({ consultationFee: 75 }).error).toBeUndefined(); });
   });
@@ -76,13 +71,6 @@ describe('Extended Validation Schemas', () => {
   describe('createMedicalRecordSchema', () => {
     it('accepts valid', () => { expect(createMedicalRecordSchema.validate({ animalId: u, recordType: 'other', title: 'Checkup', content: 'Healthy' }).error).toBeUndefined(); });
     it('rejects missing title', () => { expect(createMedicalRecordSchema.validate({ recordType: 'other', content: 'text' }).error).toBeDefined(); });
-  });
-
-  describe('updateMedicalRecordSchema', () => {
-    // animalId/groupId stays required (xor, inherited from createMedicalRecordSchema) even on
-    // update - the record has exactly one subject, and that doesn't become optional just
-    // because this request only changes `content`.
-    it('accepts partial', () => { expect(updateMedicalRecordSchema.validate({ animalId: u, content: 'Updated' }).error).toBeUndefined(); });
   });
 
   describe('deleteMedicalRecordSchema', () => {
@@ -105,11 +93,6 @@ describe('Extended Validation Schemas', () => {
 
   describe('createLabResultSchema', () => {
     it('accepts valid', () => { expect(createLabResultSchema.validate({ animalId: u, testName: 'CBC', testDate: '2024-06-01' }).error).toBeUndefined(); });
-  });
-
-  describe('createPaymentSchema', () => {
-    it('accepts valid', () => { expect(createPaymentSchema.validate({ consultationId: u, amount: 50 }).error).toBeUndefined(); });
-    it('rejects missing amount', () => { expect(createPaymentSchema.validate({ consultationId: u }).error).toBeDefined(); });
   });
 
   describe('changeUserRoleSchema', () => {
@@ -143,10 +126,6 @@ describe('Extended Validation Schemas', () => {
   describe('createEnterpriseSchema', () => {
     it('accepts valid', () => { expect(createEnterpriseSchema.validate({ name: 'My Farm', enterpriseType: 'dairy' }).error).toBeUndefined(); });
     it('rejects missing name', () => { expect(createEnterpriseSchema.validate({ enterpriseType: 'dairy' }).error).toBeDefined(); });
-  });
-
-  describe('addMemberSchema', () => {
-    it('accepts valid', () => { expect(addMemberSchema.validate({ userId: u, role: 'manager' }).error).toBeUndefined(); });
   });
 
   describe('updateMemberSchema', () => {
@@ -359,10 +338,6 @@ describe('Extended Validation Schemas', () => {
     it('accepts valid', () => { expect(createMarketplaceOrderSchema.validate({ listingId: u, quantity: 1 }).error).toBeUndefined(); });
   });
 
-  describe('updateOrderStatusSchema', () => {
-    it('accepts valid', () => { expect(updateOrderStatusSchema.validate({ status: 'shipped' }).error).toBeUndefined(); });
-  });
-
   describe('createSustainabilityMetricSchema', () => {
     it('accepts valid', () => { expect(createSustainabilityMetricSchema.validate({ metricType: 'water', metricName: 'Water Usage', value: 500, unit: 'liters', periodStart: '2024-01-01', periodEnd: '2024-06-01' }).error).toBeUndefined(); });
   });
@@ -388,10 +363,6 @@ describe('Extended Validation Schemas', () => {
       expect(createWellnessScorecardSchema.validate({ animalId: u, activityScore: 85 }).error).toBeDefined();
       expect(createWellnessScorecardSchema.validate({ animalId: u, weightStatus: 'normal' }).error).toBeDefined();
     });
-  });
-
-  describe('updateWellnessScorecardSchema', () => {
-    it('accepts partial', () => { expect(updateWellnessScorecardSchema.validate({ dentalScore: 70 }).error).toBeUndefined(); });
   });
 
   describe('createWellnessReminderSchema', () => {

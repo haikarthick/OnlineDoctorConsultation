@@ -2,14 +2,6 @@ import Joi from 'joi';
 import { requiredUuid, longText } from './core';
 
 // ─── Payment ─────────────────────────────────────────────────
-export const createPaymentSchema = Joi.object({
-  consultationId: requiredUuid,
-  bookingId: Joi.string().uuid().optional(),
-  amount: Joi.number().positive().required(),
-  currency: Joi.string().max(3).optional().default('USD'),
-  paymentMethod: Joi.string().valid('credit_card', 'debit_card', 'bank_transfer', 'e_wallet', 'cash').optional(),
-});
-
 // ── Payment module (docs/PAYMENT_MODULE_PLAN.md §9) ──────────
 // NOTE: no client-supplied amounts anywhere - prices are server-derived.
 export const checkoutPaymentSchema = Joi.object({

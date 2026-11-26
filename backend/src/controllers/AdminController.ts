@@ -3,6 +3,8 @@ import { AuthRequest } from '../middleware/auth';
 import AdminService from '../services/AdminService';
 import AuditService from '../services/AuditService';
 import { ForbiddenError, ValidationError } from '../utils/errors';
+import database from '../utils/database';
+import RefreshTokenService from '../services/RefreshTokenService';
 import logger from '../utils/logger';
 
 class AdminController {
@@ -317,9 +319,14 @@ class AdminController {
 
   async revokeUserSessions(req: Request, res: Response) {
     const authReq = this.assertAdmin(req);
+    const reason = String(req.body?.reason || '').trim().slice(0, 500);
+    if (reason.length < 3) throw new ValidationError('Say why you are signing this person out, in a few words. It is kept in the audit log.');
     await AuditService.revokeUserSessions(req.params.userId);
+    // The part that actually ends a visit: every access token issued before now stops working, and no refresh token can make a new one.
+    await database.query(`UPDATE users SET sessions_revoked_at = NOW() WHERE id = $1`, [req.params.userId]);
+    await RefreshTokenService.revokeAllForUser(req.params.userId);
     await AuditService.log(authReq.userId, 'admin.revoke_sessions', 'user', req.params.userId,
-      undefined, undefined, req.ip, req.get('user-agent'));
+      undefined, { reason }, req.ip, req.get('user-agent'));
     res.json({ success: true, message: 'All sessions revoked' });
   }
 }

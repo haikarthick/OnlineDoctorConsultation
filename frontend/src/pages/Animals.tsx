@@ -15,6 +15,7 @@ import AnimalFormModal from '../components/animals/AnimalFormModal'
 import AnimalCard from '../components/animals/AnimalCard'
 import AnimalDetailModal from '../components/animals/AnimalDetailModal'
 import BulkImportModal from '../components/animals/BulkImportModal'
+import { FindByCardSheet } from '../components/animals/FindByCardSheet'
 import { emptyAnimalFormData, animalToFormData, buildAnimalPayload, type AnimalData, type EnterpriseOption, type GroupOption } from '../components/animals/animalsShared'
 
 import { userMessage } from '../utils/userMessage'
@@ -38,6 +39,7 @@ const Animals: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [findByCardOpen, setFindByCardOpen] = useState(false)
   const [speciesFilter, setSpeciesFilter] = useState('')
   const [enterpriseFilter, setEnterpriseFilter] = useState('')
   const [groupFilter, setGroupFilter] = useState('')
@@ -254,7 +256,8 @@ const Animals: React.FC = () => {
         (apiService as any).get(`/vaccinations/animal/${animal.id}`).catch(() => { vaccFailed = true; return null }),
         (apiService as any).get(`/medical-records?animalId=${animal.id}&limit=100`).catch(() => { medFailed = true; return null })
       ])
-      const vaccinations: any[] = vaccRes?.data?.data?.vaccinations || vaccRes?.data?.vaccinations || (Array.isArray(vaccRes?.data?.data) ? vaccRes.data.data : []) || []
+      const vaccinations: any[] = (vaccRes?.data?.data?.records || vaccRes?.data?.records || vaccRes?.data?.data?.vaccinations || (Array.isArray(vaccRes?.data?.data) ? vaccRes.data.data : []) || [])
+        .filter((v: any) => !(v?.enteredByMistakeAt || v?.entered_by_mistake_at))
       const records: any[] = medRes?.data?.data?.records || medRes?.data?.records || (Array.isArray(medRes?.data?.data) ? medRes.data.data : []) || []
 
       const microchipHtml = animal.microchipId
@@ -377,8 +380,12 @@ const Animals: React.FC = () => {
           <button className={`module-tab ${vetView === 'patients' ? 'active' : ''}`} onClick={() => setVetView('patients')}>
             🩺 {t('animals.vetTabs.patientAnimals')}
           </button>
+          <button className="module-tab" onClick={() => setFindByCardOpen(true)}>
+            🔎 {t('animalLookup.open_button')}
+          </button>
         </div>
       )}
+      {isVet && <FindByCardSheet open={findByCardOpen} onClose={() => setFindByCardOpen(false)} onOpen={a => { setVetView('patients'); setDetailAnimal(a) }} />}
 
       {/* ─── Search & Filter Bar ───────────────────────────── */}
       {!showForm && animals.length > 0 && (

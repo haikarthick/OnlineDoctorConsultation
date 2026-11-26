@@ -2,10 +2,6 @@ import { sharedClient } from '../core'
 
 export const networkSubscriptionsApi = {
   // ── Network Subscription Plans ──
-  async getNetworkSubscriptionPlans() {
-    const response = await sharedClient.get('/network-subscription-plans')
-    return response.data
-  },
   async createNetworkPlan(data: Record<string, unknown>) {
     const response = await sharedClient.post('/admin/network-subscription-plans', data)
     return response.data

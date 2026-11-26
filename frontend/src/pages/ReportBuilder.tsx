@@ -6,6 +6,9 @@ import { useTranslation } from 'react-i18next'
 
 import { userMessage } from '../utils/userMessage'
 import { appLocale } from '../utils/appLocale'
+import { RowActions, ConfirmDeleteSheet, EditFieldsSheet, textOrEmpty, type SheetField } from '../components/mobile/RowActions'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
+import { pickField, fieldText, mayChangeFarmRecords } from '../utils/recordForm'
 const REPORT_TYPES = [
   { value: 'animal_census', label: '🐄 Animal Census', desc: 'Comprehensive animal inventory by species, breed, gender' },
   { value: 'health_summary', label: '🏥 Health Summary', desc: 'Health observations, resolution rates, severity analysis' },
@@ -30,6 +33,15 @@ const ReportBuilderPage: React.FC = () => {
   const [showTemplateForm, setShowTemplateForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [editingTpl, setEditingTpl] = useState<ReportTemplate | null>(null)
+  const [deletingTpl, setDeletingTpl] = useState<ReportTemplate | null>(null)
+  const farmRole = useMyFarmRole(enterprises.find(en => en.id === selectedEnterpriseId))
+  const mayChange = mayChangeFarmRecords(farmRole)
+  const tplFields: SheetField[] = [
+    { key: 'name', label: t('common.name'), type: 'text', required: true },
+    { key: 'reportType', label: t('reportBuilder.reportType'), type: 'select', options: REPORT_TYPES.map(rt => ({ value: rt.value, label: rt.label })) },
+    { key: 'description', label: t('common.description'), type: 'textarea' },
+  ]
 
   const [genForm, setGenForm] = useState({
     reportType: 'animal_census', name: '', format: 'json', days: '90', months: '12'
@@ -283,6 +295,9 @@ const ReportBuilderPage: React.FC = () => {
                       {(tpl.isSystem || (tpl as any).is_system) && <span className="badge badge-system">System</span>}
                     </div>
                     {tpl.description && <p className="card-note">{tpl.description}</p>}
+                    {mayChange && !(tpl.isSystem || (tpl as any).is_system) && (
+                      <RowActions name={tpl.name} onEdit={() => setEditingTpl(tpl)} onDelete={() => setDeletingTpl(tpl)} />
+                    )}
                   </div>
                 ))}
                 {!templates.length && <div className="empty-state">{t('reportBuilder.noTemplates')}</div>}
@@ -291,6 +306,26 @@ const ReportBuilderPage: React.FC = () => {
           )}
         </>
       )}
+
+      <EditFieldsSheet
+        open={!!editingTpl}
+        title={t('recordActions.reportBuilder.editTemplate')}
+        fields={tplFields}
+        initial={{ name: fieldText(editingTpl?.name), reportType: fieldText(pickField(editingTpl, 'reportType')) || 'animal_census', description: fieldText(editingTpl?.description) }}
+        onSave={values => apiService.updateReportTemplate(editingTpl!.id, {
+          name: textOrEmpty(values.name), reportType: values.reportType, description: textOrEmpty(values.description),
+        })}
+        onClose={() => setEditingTpl(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.saved')); fetchData() }}
+      />
+      <ConfirmDeleteSheet
+        open={!!deletingTpl}
+        name={deletingTpl?.name || ''}
+        what={t('recordActions.reportBuilder.templateWhat')}
+        onConfirm={() => apiService.deleteReportTemplate(deletingTpl!.id)}
+        onClose={() => setDeletingTpl(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.deleted')); fetchData() }}
+      />
     </div>
   )
 }

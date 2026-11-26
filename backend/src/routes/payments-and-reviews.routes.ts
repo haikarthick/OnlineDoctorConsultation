@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { authMiddleware, roleMiddleware, validateBody, AuthRequest } from '../middleware/auth';
 import { asyncHandler } from '../utils/errorHandler';
 import database from '../utils/database';
@@ -9,7 +9,7 @@ import BookingController from '../controllers/BookingController';
 import WalletController from '../controllers/WalletController';
 import WalletWithdrawalService from '../services/WalletWithdrawalService';
 import {
-  createPaymentSchema, createReviewSchema,
+  createReviewSchema,
   checkoutPaymentSchema, verifyPaymentSchema, legalAcceptSchema, adminLegalDocSchema, razorpayCredentialsSchema,
   createPlatformReferralSchema, acceptReferralSchema, declineReferralSchema,
   walletWithdrawalRequestSchema,
@@ -115,12 +115,6 @@ router.get('/invoices/payment/:paymentId', authMiddleware, asyncHandler(async (r
   res.json({ success: true, data: invoice });
 }));
 
-router.get('/invoices/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const authReq = req as AuthRequest;
-  const InvoiceService = (await import('../services/payment/InvoiceService')).default;
-  const invoice = await InvoiceService.getInvoice(req.params.id, authReq.userId!, authReq.userRole || '');
-  res.json({ success: true, data: invoice });
-}));
 
 // Admin: SAC tax-code management (D13 - rate changes need zero code)
 router.get('/admin/tax-codes', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
@@ -459,10 +453,6 @@ router.put('/admin/commission/doctors/:userId', authMiddleware, roleMiddleware([
 }));
 
 // ─── Legal documents & consent (docs/PAYMENT_MODULE_PLAN.md §17) ───────────
-router.get('/legal/documents', asyncHandler(async (_req: Request, res: Response) => {
-  const LegalService = (await import('../services/LegalService')).default;
-  res.json({ success: true, data: await LegalService.listActiveDocuments() });
-}));
 
 router.get('/legal/documents/:docType', asyncHandler(async (req: Request, res: Response) => {
   const LegalService = (await import('../services/LegalService')).default;
@@ -520,11 +510,8 @@ router.get('/admin/legal-documents/user/:userId', authMiddleware, roleMiddleware
   res.json({ success: true, data: await LegalService.getUserAcceptances(req.params.userId) });
 }));
 
-router.post('/payments', authMiddleware, validateBody(createPaymentSchema), asyncHandler((req: Request, res: Response) => PaymentController.createPayment(req, res)));
 router.get('/payments', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.listPayments(req, res)));
-router.get('/payments/booking/:bookingId', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.getPaymentByBooking(req, res)));
 router.get('/payments/gateway-settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => PaymentController.getGatewaySettings(req, res)));
-router.get('/payments/:id', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.getPayment(req, res)));
 
 // ─── Razorpay credentials (payment module - §12 rule 6: masked only, never plaintext) ───
 router.get('/admin/razorpay-credentials', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
@@ -596,7 +583,9 @@ router.get('/doctors/:vetId/reliability', authMiddleware, asyncHandler((req: Req
 // ─── Review routes ───────────────────────────────────────────
 router.get('/reviews/reviewable', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.listReviewableConsultations(req, res)));
 router.post('/reviews', authMiddleware, validateBody(createReviewSchema), asyncHandler((req: Request, res: Response) => ReviewController.createReview(req, res)));
-router.get('/reviews/vet/:vetId', asyncHandler((req: Request, res: Response) => ReviewController.listReviews(req, res)));
+// Public list; when the reader is signed in the answer also says which reviews they already marked or reported.
+const optionalAuth = (req: Request, res: Response, next: NextFunction) => (req.headers.authorization ? authMiddleware(req as any, res, next) : next());
+router.get('/reviews/vet/:vetId', optionalAuth, asyncHandler((req: Request, res: Response) => ReviewController.listReviews(req, res)));
 router.put('/reviews/:id/vet-response', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.addVetResponse(req, res)));
 router.post('/reviews/:id/helpful', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.markHelpful(req, res)));
 router.post('/reviews/:id/report', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.reportReview(req, res)));

@@ -27,12 +27,6 @@ export const updateEnterpriseSchema = createEnterpriseSchema.fork(
   ['name', 'enterpriseType'], (schema) => schema.optional()
 ).min(1);
 
-export const addMemberSchema = Joi.object({
-  userId: requiredUuid,
-  role: Joi.string().max(50).required(),
-  title: shortText(100).optional().allow('', null),
-});
-
 export const updateMemberSchema = Joi.object({
   role: Joi.string().max(50).required(),
   title: shortText(100).optional().allow('', null),

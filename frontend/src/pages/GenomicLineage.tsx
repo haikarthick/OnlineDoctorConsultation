@@ -7,6 +7,10 @@ import { useTranslation } from 'react-i18next'
 import { useMasterData } from '../context/MasterDataContext'
 
 import { userMessage } from '../utils/userMessage'
+import { EditFieldsSheet, textOrEmpty, textOrNull, numOrUndefined, type SheetField } from '../components/mobile/RowActions'
+import { LineageTreeSheet } from '../components/genomicLineage/LineageTreeSheet'
+import { useMyFarmRole } from '../hooks/useMyFarmRole'
+import { pickField, dateInput, fieldText, mayChangeFarmRecords } from '../utils/recordForm'
 const GenomicLineagePage: React.FC = () => {
   const { t } = useTranslation()
   const { speciesLabel } = useMasterData()
@@ -23,6 +27,24 @@ const GenomicLineagePage: React.FC = () => {
   const [showPairForm, setShowPairForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [editingProfile, setEditingProfile] = useState<GeneticProfile | null>(null)
+  const [treeFor, setTreeFor] = useState<GeneticProfile | null>(null)
+  const farmRole = useMyFarmRole(enterprises.find(en => en.id === selectedEnterpriseId))
+  const mayChange = mayChangeFarmRecords(farmRole)
+  const profileFields: SheetField[] = [
+    { key: 'generation', label: t('genomicLineage.generation'), type: 'number', step: '1' },
+    { key: 'inbreedingCoefficient', label: t('genomicLineage.inbreedingCoeff'), type: 'number', step: '0.0001', hint: t('recordActions.lineage.inbreedingHint') },
+    { key: 'breedPurityPct', label: t('genomicLineage.purity'), type: 'number', step: '0.01' },
+    { key: 'dnaTestDate', label: t('genomicLineage.dnaTestDate'), type: 'date' },
+    { key: 'dnaLab', label: t('genomicLineage.dnaLab'), type: 'text' },
+    { key: 'dnaSampleId', label: t('recordActions.lineage.dnaSampleId'), type: 'text' },
+    { key: 'notes', label: t('common.notes'), type: 'textarea' },
+  ]
+  const profileInitial = (p: GeneticProfile | null): Record<string, string> => ({
+    generation: fieldText(pickField(p, 'generation')), inbreedingCoefficient: fieldText(pickField(p, 'inbreedingCoefficient')),
+    breedPurityPct: fieldText(pickField(p, 'breedPurityPct')), dnaTestDate: dateInput(pickField(p, 'dnaTestDate')),
+    dnaLab: fieldText(pickField(p, 'dnaLab')), dnaSampleId: fieldText(pickField(p, 'dnaSampleId')), notes: fieldText(p?.notes),
+  })
 
   const [formData, setFormData] = useState({
     animalId: '', sireId: '', damId: '', generation: '', inbreedingCoefficient: '',
@@ -209,7 +231,7 @@ const GenomicLineagePage: React.FC = () => {
               )}
 
               <table className="data-table">
-                <thead><tr><th>{t('genomicLineage.animal')}</th><th>{t('genomicLineage.species')}</th><th>{t('genomicLineage.sire')}</th><th>{t('genomicLineage.dam')}</th><th>{t('genomicLineage.gen')}</th><th>{t('genomicLineage.inbreeding')}</th><th>{t('genomicLineage.purity')}</th></tr></thead>
+                <thead><tr><th>{t('genomicLineage.animal')}</th><th>{t('genomicLineage.species')}</th><th>{t('genomicLineage.sire')}</th><th>{t('genomicLineage.dam')}</th><th>{t('genomicLineage.gen')}</th><th>{t('genomicLineage.inbreeding')}</th><th>{t('genomicLineage.purity')}</th><th>{t('common.actions')}</th></tr></thead>
                 <tbody>
                   {profiles.map(p => (
                     <tr key={p.id}>
@@ -222,9 +244,13 @@ const GenomicLineagePage: React.FC = () => {
                         {(+(p.inbreedingCoefficient || (p as any).inbreeding_coefficient || 0)).toFixed(4)}
                       </td>
                       <td>{(p.breedPurityPct || (p as any).breed_purity_pct) ? `${p.breedPurityPct || (p as any).breed_purity_pct}%` : '-'}</td>
+                      <td>
+                        <button className="btn-sm" onClick={() => setTreeFor(p)}>{t('recordActions.lineage.viewTree')}</button>
+                        {mayChange && <button className="btn-sm" onClick={() => setEditingProfile(p)} aria-label={t('recordActions.editItem', { name: p.animalName || (p as any).animal_name || '' })}>{t('recordActions.edit')}</button>}
+                      </td>
                     </tr>
                   ))}
-                  {!profiles.length && <tr><td colSpan={7} className="empty-cell">{t('genomicLineage.noProfiles')}</td></tr>}
+                  {!profiles.length && <tr><td colSpan={8} className="empty-cell">{t('genomicLineage.noProfiles')}</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -278,6 +304,26 @@ const GenomicLineagePage: React.FC = () => {
           )}
         </>
       )}
+
+      <EditFieldsSheet
+        open={!!editingProfile}
+        title={t('recordActions.lineage.editProfile', { name: editingProfile?.animalName || (editingProfile as any)?.animal_name || '' })}
+        fields={profileFields}
+        initial={profileInitial(editingProfile)}
+        onSave={values => apiService.updateGeneticProfile(editingProfile!.id, {
+          generation: numOrUndefined(values.generation), inbreedingCoefficient: numOrUndefined(values.inbreedingCoefficient),
+          breedPurityPct: numOrUndefined(values.breedPurityPct), dnaTestDate: textOrNull(values.dnaTestDate),
+          dnaLab: textOrEmpty(values.dnaLab), dnaSampleId: textOrEmpty(values.dnaSampleId), notes: textOrEmpty(values.notes),
+        })}
+        onClose={() => setEditingProfile(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.saved')); fetchData() }}
+      />
+      <LineageTreeSheet
+        open={!!treeFor}
+        animalId={treeFor ? (pickField(treeFor, 'animalId') as string) : null}
+        animalName={treeFor?.animalName || (treeFor as any)?.animal_name || ''}
+        onClose={() => setTreeFor(null)}
+      />
     </div>
   )
 }

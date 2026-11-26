@@ -153,27 +153,6 @@ export class MovementService {
     };
   }
 
-  async getMovement(id: string): Promise<MovementRecord> {
-    const result = await database.query(
-      `SELECT mr.*,
-              a.name as animal_name,
-              ag.name as group_name,
-              fl.name as from_location_name,
-              tl.name as to_location_name,
-              u.first_name || ' ' || u.last_name as recorded_by_name
-       FROM movement_records mr
-       LEFT JOIN animals a ON mr.animal_id = a.id
-       LEFT JOIN animal_groups ag ON mr.group_id = ag.id
-       LEFT JOIN locations fl ON mr.from_location_id = fl.id
-       LEFT JOIN locations tl ON mr.to_location_id = tl.id
-       JOIN users u ON mr.recorded_by = u.id
-       WHERE mr.id = $1`,
-      [id]
-    );
-    if (result.rows.length === 0) throw new NotFoundError('Movement record not found');
-    return this.mapRow(result.rows[0]);
-  }
-
   private mapRow(row: any): MovementRecord {
     return {
       id: row.id,

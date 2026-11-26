@@ -79,18 +79,6 @@ class VideoSessionService {
     return result.rows[0] || null;
   }
 
-  async getSessionByRoom(roomId: string): Promise<VideoSession | null> {
-    const result = await database.query(
-      `SELECT id, consultation_id as "consultationId", room_id as "roomId",
-       host_user_id as "hostUserId", participant_user_id as "participantUserId",
-       status, started_at as "startedAt", ended_at as "endedAt", duration,
-       quality, created_at as "createdAt", updated_at as "updatedAt"
-       FROM video_sessions WHERE room_id = $1`,
-      [roomId]
-    );
-    return result.rows[0] || null;
-  }
-
   async startSession(id: string): Promise<VideoSession> {
     // If already active, just return the existing session (idempotent)
     const existing = await this.getSession(id);
@@ -194,18 +182,6 @@ class VideoSessionService {
        sender_name as "senderName", message, message_type as "messageType", timestamp
        FROM chat_messages WHERE session_id = $1 ORDER BY timestamp ASC`,
       [sessionId]
-    );
-    return result.rows;
-  }
-
-  async listActiveSessions(): Promise<VideoSession[]> {
-    const result = await database.query(
-      `SELECT id, consultation_id as "consultationId", room_id as "roomId",
-       host_user_id as "hostUserId", participant_user_id as "participantUserId",
-       status, started_at as "startedAt", quality,
-       created_at as "createdAt", updated_at as "updatedAt"
-       FROM video_sessions WHERE status IN ('waiting', 'active') ORDER BY created_at DESC`,
-      []
     );
     return result.rows;
   }

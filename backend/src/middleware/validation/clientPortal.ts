@@ -55,14 +55,6 @@ export const createWellnessScorecardSchema = Joi.object({
   riskFlags: Joi.array().items(Joi.any()).optional(),
 });
 
-export const updateWellnessScorecardSchema = Joi.object({
-  vaccinationScore: Joi.number().min(0).max(100).optional(),
-  dentalScore: Joi.number().min(0).max(100).optional(),
-  nextCheckup: Joi.string().optional().allow('', null),
-  recommendations: Joi.array().items(Joi.any()).optional(),
-  riskFlags: Joi.array().items(Joi.any()).optional(),
-}).min(1);
-
 export const createWellnessReminderSchema = Joi.object({
   animalId: requiredUuid,
   reminderType: shortText(50).required(),

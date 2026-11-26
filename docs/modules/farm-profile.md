@@ -39,7 +39,7 @@ files; render them with `resolveLabel` from `useMasterData()`.
 ## Routes (`backend/src/routes/farm-profile.routes.ts`)
 
 - `GET /master-data/group-types`, `GET /master-data/record-types` - public, active only.
-- `GET /farm-profile/resolve?species=&animalClass=&gender=&managementMode=&groupType=`
+- The browser resolves what applies to an animal or group itself (`useFarmProfile.ts`); the `GET /farm-profile/resolve` HTTP route was deleted 2026-11-26 (no screen called it).
 - `/admin/master-data/group-types` - admin CRUD (+ archive/restore).
 - `/admin/master-data/record-types` - admin list, update, archive/restore. No create/delete.
 
@@ -183,7 +183,7 @@ below a manager) invite by mobile number and/or email with a role (`FarmInvitati
 - Delivery: SMS (`SmsService`, Admin -> SMS Settings, migration 046: MSG91 / Twilio / log provider, DLT template ids,
   write-only secrets, test send, send log), email (`farm_invite` template), in-app notification for an existing
   account. SMS off or failing never blocks: the invitation is created and the link is shown to share by hand.
-- The older `POST /enterprises/:id/invite-member` now creates an invitation (no instant add).
+- The older `POST /enterprises/:id/invite-member` route (it only forwarded to the invitation flow) was deleted 2026-11-26; invitations go through the farm-invitations routes.
 - Screens: `components/enterprise/{InviteMemberModal,InviteResultNotice,FarmInvitationsPanel,PendingFarmInvitations}.tsx`,
   `pages/JoinFarm.tsx`, `pages/admin/SmsSettings.tsx`. Verified: 41 server checks, 19 browser checks.
 

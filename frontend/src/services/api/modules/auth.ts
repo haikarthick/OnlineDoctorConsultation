@@ -1,8 +1,9 @@
-import { sharedClient, fetchCsrfToken } from '../core'
+import { sharedClient } from '../core'
 
 export const authApi = {
-  async fetchCsrfToken(): Promise<void> {
-    return fetchCsrfToken()
+  /** Signs this person out on every phone and browser, this one included. */
+  async logoutAll() {
+    return (await sharedClient.post('/auth/logout-all', {})).data
   },
 
   // ─── Batch (flock/herd) management ─────────────────────────
@@ -73,11 +74,6 @@ export const authApi = {
     return sharedClient.get(url, config)
   },
 
-  async getProfile() {
-    const response = await sharedClient.get('/auth/profile')
-    return response.data
-  },
-
   async updateProfile(data: { firstName?: string; lastName?: string; phone?: string; avatar?: string }) {
     const response = await sharedClient.put('/auth/profile', data)
     return response.data
@@ -96,6 +92,12 @@ export const authApi = {
     formData.append('file', file)
     if (folder) formData.append('folder', folder)
     const response = await sharedClient.post('/files/upload-image', formData, { headers: { 'Content-Type': undefined } })
+    return response.data
+  },
+
+  /** Delete a file the signed-in person uploaded (by the storage key the upload returned). The server refuses anyone else's file. */
+  async deleteUploadedFile(key: string) {
+    const response = await sharedClient.delete(`/files/${key.split('/').map(encodeURIComponent).join('/')}`)
     return response.data
   },
 

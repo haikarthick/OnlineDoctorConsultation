@@ -1,7 +1,7 @@
 import database from '../utils/database';
 import WithdrawalService from './withdrawal/WithdrawalService';
 import logger from '../utils/logger';
-import { DatabaseError, ValidationError, NotFoundError } from '../utils/errors';
+import { DatabaseError, ValidationError, NotFoundError, CodedError } from '../utils/errors';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -17,6 +17,8 @@ import { v4 as uuidv4 } from 'uuid';
  *   3. Lifetime history - an animal promoted out of a batch keeps that history by MEMBERSHIP,
  *      not by copying rows. getAnimalLifetimeHistory() composes it at read time.
  */
+
+export const POPULATION_EVENT_TYPES: string[] = ['placement', 'hatch', 'mortality', 'cull', 'sale', 'transfer_in', 'transfer_out', 'promotion', 'adjustment'];
 
 export type PopulationEventType =
   | 'placement' | 'hatch' | 'mortality' | 'cull' | 'sale'
@@ -201,8 +203,15 @@ export class BatchManagementService {
     groupId: string; cycleId?: string | null; eventType: PopulationEventType;
     quantity: number; eventDate?: string; reason?: string; sourceRef?: string; userId: string;
   }) {
+    if (!POPULATION_EVENT_TYPES.includes(data.eventType)) {
+      throw new ValidationError('That kind of head-count change is not recognised.');
+    }
     if (!Number.isInteger(data.quantity) || data.quantity === 0) {
       throw new ValidationError('quantity must be a non-zero whole number');
+    }
+    // A correction changes the count with no animal arriving or leaving, so it must say why (it is what an auditor reads later).
+    if (data.eventType === 'adjustment' && !String(data.reason || '').trim()) {
+      throw new ValidationError('Say why you are correcting the count, for example "recounted the shed".');
     }
     const magnitude = Math.abs(data.quantity);
     const signed = NEGATIVE_EVENTS.includes(data.eventType) ? -magnitude
@@ -217,7 +226,11 @@ export class BatchManagementService {
       if (!grp.rows.length) throw new NotFoundError('Animal group not found');
 
       let cycleId = data.cycleId ?? null;
-      if (!cycleId) {
+      if (cycleId) {
+        // A cycle named by the request must be THIS group's own: its count is changed below.
+        const own = await client.query(`SELECT 1 FROM group_cycles WHERE id = $1 AND group_id = $2`, [cycleId, data.groupId]);
+        if (!own.rows.length) throw new ValidationError('That batch does not belong to this group.');
+      } else {
         const active = await client.query(
           `SELECT id FROM group_cycles WHERE group_id = $1 AND status = 'active' LIMIT 1`, [data.groupId]
         );
@@ -375,7 +388,7 @@ export class BatchManagementService {
                 COALESCE(SUM(head_count_treated), 0) AS treated
            FROM medical_records WHERE cycle_id = $1`, [cycle.id]
       ),
-      database.query(`SELECT COUNT(*) AS c FROM vaccination_records WHERE cycle_id = $1`, [cycle.id]),
+      database.query(`SELECT COUNT(*) AS c FROM vaccination_records WHERE cycle_id = $1 AND entered_by_mistake_at IS NULL`, [cycle.id]),
     ]);
 
     const mortality = Number(losses.rows[0]?.mortality || 0);
@@ -492,8 +505,23 @@ export class BatchManagementService {
   }) {
     try {
       return await database.transaction(async (client: any) => {
+      // H15: the animal named in the request must be on THIS group's own farm (never another farm's animal), and a bird that was
+      // already kept as an individual cannot be taken out of the count a second time.
+      const subject = await client.query(
+        `SELECT a.enterprise_id, a.origin_group_id, g.enterprise_id AS group_enterprise
+           FROM animals a, animal_groups g WHERE a.id = $1 AND g.id = $2`, [data.animalId, data.groupId]
+      );
+      if (!subject.rows.length || !subject.rows[0].group_enterprise || subject.rows[0].enterprise_id !== subject.rows[0].group_enterprise) {
+        throw new CodedError(403, 'BM_ANIMAL_NOT_ON_FARM', 'That animal is not on this farm, so it cannot be kept from this group.');
+      }
+      if (subject.rows[0].origin_group_id) {
+        throw new CodedError(409, 'BM_ALREADY_KEPT', 'This animal was already kept as an individual.');
+      }
       let cycleId = data.cycleId ?? null;
-      if (!cycleId) {
+      if (cycleId) {
+        const own = await client.query(`SELECT 1 FROM group_cycles WHERE id = $1 AND group_id = $2`, [cycleId, data.groupId]);
+        if (!own.rows.length) throw new ValidationError('That batch does not belong to this group.');
+      } else {
         const active = await client.query(
           `SELECT id FROM group_cycles WHERE group_id = $1 AND status = 'active' LIMIT 1`, [data.groupId]
         );
@@ -551,6 +579,7 @@ export class BatchManagementService {
       return { animalId: data.animalId, groupId: data.groupId, cycleId };
       });
     } catch (err: any) {
+      if (err instanceof ValidationError || err instanceof CodedError) throw err;
       throw new DatabaseError('Error promoting animal from batch', { originalError: err.message });
     }
   }

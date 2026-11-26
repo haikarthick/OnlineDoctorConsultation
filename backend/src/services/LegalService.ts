@@ -58,17 +58,6 @@ class LegalService {
     return res.rows[0];
   }
 
-  async listActiveDocuments(): Promise<any[]> {
-    const res = await database.query(
-      `SELECT DISTINCT ON (doc_type)
-              id, doc_type as "docType", version, title,
-              effective_from as "effectiveFrom", requires_reacceptance as "requiresReacceptance"
-       FROM legal_documents WHERE is_active = true
-       ORDER BY doc_type, version DESC`
-    );
-    return res.rows;
-  }
-
   /**
    * Record acceptance of the ACTIVE version of each given doc type.
    * user_email is snapshotted so the proof survives account deletion.

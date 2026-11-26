@@ -240,10 +240,6 @@ router.get('/grooming/orders', authMiddleware, groomingEnabled,
   asyncHandler(async (req: Request, res: Response) => {
     res.json({ success: true, data: await GroomingOrderService.listMyOrders((req as any).userId) });
   }));
-router.get('/grooming/orders/:id', authMiddleware, groomingEnabled,
-  asyncHandler(async (req: Request, res: Response) => {
-    res.json({ success: true, data: await GroomingOrderService.getOrder((req as any).userId, req.params.id) });
-  }));
 // NOTE: the legacy POST /grooming/orders/:id/pay route was REMOVED. It was the demo-era
 // "mark it paid" shortcut and it confirmed an order, set amount_paid and credited the provider
 // WITHOUT taking any money - any customer could self-issue a free booking. Payment goes through

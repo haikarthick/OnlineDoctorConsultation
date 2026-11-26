@@ -7,10 +7,9 @@ import database from '../utils/database';
 import EnterpriseController from '../controllers/EnterpriseController';
 import BatchManagementService from '../services/BatchManagementService';
 import FarmAccessService from '../services/FarmAccessService';
-import FarmInvitationService from '../services/FarmInvitationService';
 import { ForbiddenError } from '../utils/errors';
 import {
-  createEnterpriseSchema, updateEnterpriseSchema, addMemberSchema, updateMemberSchema,
+  createEnterpriseSchema, updateEnterpriseSchema, updateMemberSchema,
   createAnimalGroupSchema, updateAnimalGroupSchema, assignAnimalToGroupSchema,
   createLocationSchema, updateLocationSchema, createMovementSchema,
   createCampaignSchema, updateCampaignSchema,
@@ -21,7 +20,6 @@ const router = Router();
 // ─── Enterprise / Farm routes ────────────────────────────────
 router.post('/enterprises', authMiddleware, validateBody(createEnterpriseSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.createEnterprise(req, res)));
 router.get('/enterprises', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listEnterprises(req, res)));
-router.get('/enterprises/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getEnterprise(req, res)));
 router.put('/enterprises/:id', authMiddleware, validateBody(updateEnterpriseSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.updateEnterprise(req, res)));
 router.delete('/enterprises/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.deleteEnterprise(req, res)));
 router.get('/enterprises/:id/stats', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getEnterpriseStats(req, res)));
@@ -31,30 +29,12 @@ router.get('/enterprises/:enterpriseId/animals', authMiddleware, asyncHandler((r
 
 // Enterprise Members
 router.get('/enterprises/:id/members', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listMembers(req, res)));
-router.post('/enterprises/:id/members', authMiddleware, validateBody(addMemberSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.addMember(req, res)));
 router.put('/enterprises/:enterpriseId/members/:userId', authMiddleware, validateBody(updateMemberSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.updateMember(req, res)));
 router.post('/enterprises/:id/transfer-ownership', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.transferOwnership(req, res)));
 router.delete('/enterprises/:enterpriseId/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.removeMember(req, res)));
 
-// Enterprise member invite by email (finds user by email then adds as member)
-router.post('/enterprises/:id/invite-member', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const userId = (req as any).userId;
-  const userRole = (req as any).userRole;
-  const { email, role } = req.body;
-
-  if (!email || !role) {
-    return res.status(400).json({ success: false, message: 'email and role are required' });
-  }
-
-  // Kept for older clients; it now starts an INVITATION (the person accepts or declines) instead of adding
-  // them straight away. Who may invite whom, and the messages, are FarmInvitationService's.
-  const data = await FarmInvitationService.create(req.params.id, { userId, role: userRole }, { email, role });
-  res.status(201).json({ success: true, data });
-}));
-
 // Animal Groups
 router.post('/animal-groups', authMiddleware, validateBody(createAnimalGroupSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.createGroup(req, res)));
-router.get('/animal-groups/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getGroup(req, res)));
 router.put('/animal-groups/:id', authMiddleware, validateBody(updateAnimalGroupSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.updateGroup(req, res)));
 router.delete('/animal-groups/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.deleteGroup(req, res)));
 router.get('/enterprises/:enterpriseId/groups', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listGroups(req, res)));
@@ -163,7 +143,7 @@ router.get('/animal-groups/:groupId/withdrawal', authMiddleware, asyncHandler(as
   res.json({ success: true, data: await BatchManagementService.getWithdrawalStatus({ groupId }) });
 }));
 
-router.post('/animal-groups/:groupId/promote', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.post('/animal-groups/:groupId/promote', authMiddleware, requireAnimal('body:animalId'), asyncHandler(async (req: Request, res: Response) => {
   const groupId = await ensureGroupAccess(req, res); if (!groupId) return;
   const { animalId, cycleId, reason } = req.body;
   if (!animalId) { res.status(400).json({ success: false, message: 'animalId is required' }); return; }
@@ -181,7 +161,6 @@ router.get('/animals/:animalId/lifetime-history', authMiddleware, requireAnimalA
 
 // Locations
 router.post('/locations', authMiddleware, validateBody(createLocationSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.createLocation(req, res)));
-router.get('/locations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getLocation(req, res)));
 router.put('/locations/:id', authMiddleware, validateBody(updateLocationSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.updateLocation(req, res)));
 router.delete('/locations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.deleteLocation(req, res)));
 router.get('/enterprises/:enterpriseId/locations', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listLocations(req, res)));
@@ -189,7 +168,6 @@ router.get('/enterprises/:enterpriseId/location-tree', authMiddleware, asyncHand
 
 // Movement Records
 router.post('/movements', authMiddleware, validateBody(createMovementSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.createMovement(req, res)));
-router.get('/movements/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getMovement(req, res)));
 router.get('/enterprises/:enterpriseId/movements', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listMovements(req, res)));
 
 // Movement approval/rejection (farm owner or manager, or admin) - EnterpriseController.decideMovement
@@ -197,7 +175,6 @@ router.patch('/movements/:id/approve', authMiddleware, asyncHandler((req: Reques
 
 // Treatment Campaigns
 router.post('/campaigns', authMiddleware, validateBody(createCampaignSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.createCampaign(req, res)));
-router.get('/campaigns/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getCampaign(req, res)));
 router.put('/campaigns/:id', authMiddleware, validateBody(updateCampaignSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.updateCampaign(req, res)));
 router.delete('/campaigns/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.deleteCampaign(req, res)));
 router.get('/enterprises/:enterpriseId/campaigns', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listCampaigns(req, res)));

@@ -10,6 +10,7 @@ import { useMasterData } from '../context/MasterDataContext'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 import { userMessage } from '../utils/userMessage'
+import { RowActions, ConfirmDeleteSheet } from '../components/mobile/RowActions'
 const SCORE_COLORS = (score: number) => score >= 80 ? '#22c55e' : score >= 60 ? '#eab308' : score >= 40 ? '#f97316' : '#ef4444'
 const PRIORITY_COLORS: Record<string, string> = { low: '#94a3b8', medium: '#3b82f6', high: '#f97316', urgent: '#ef4444' }
 
@@ -34,6 +35,7 @@ const WellnessPortal: React.FC = () => {
   const [showReminderForm, setShowReminderForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [deletingReminder, setDeletingReminder] = useState<WellnessReminder | null>(null)
   const [animals, setAnimals] = useState<any[]>([])
 
   const [scorecardForm, setScorecardForm] = useState({
@@ -335,6 +337,7 @@ const WellnessPortal: React.FC = () => {
                 </div>
                 <div className="si-d23d3f41">{r.animalName} · {t('wellnessPortal.due')} {r.dueDate ? formatDate(r.dueDate.slice(0, 10)) : ''}
                   {r.recurrence && <span className="si-7984dfbc">🔄 {r.recurrence}</span>}</div>
+                <RowActions name={r.title} onDelete={() => setDeletingReminder(r)} />
               </div>
               {r.status === 'pending' && (
                 <div className="si-9f48dfc6">
@@ -355,6 +358,15 @@ const WellnessPortal: React.FC = () => {
           {reminders.length === 0 && animals.length > 0 && <p className="si-3a7b9567">{t('wellnessPortal.emptyReminders')}</p>}
         </div>
       )}
+
+      <ConfirmDeleteSheet
+        open={!!deletingReminder}
+        name={deletingReminder?.title || ''}
+        what={t('recordActions.wellness.reminderWhat')}
+        onConfirm={() => apiService.deleteReminder(deletingReminder!.id)}
+        onClose={() => setDeletingReminder(null)}
+        onDone={() => { setSuccessMsg(t('recordActions.deleted')); fetchAll() }}
+      />
     </div>
   )
 }

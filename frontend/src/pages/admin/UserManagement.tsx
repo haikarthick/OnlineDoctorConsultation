@@ -16,6 +16,8 @@ import SecondaryRolesModal from '../../components/userManagement/SecondaryRolesM
 import FreezeAccountModal from '../../components/userManagement/FreezeAccountModal'
 import SuspendAccountModal from '../../components/userManagement/SuspendAccountModal'
 import ResetPasswordModal from '../../components/userManagement/ResetPasswordModal'
+import { SignOutEverywhereSheet } from '../../components/userManagement/SignOutEverywhereSheet'
+import { PolicyAcceptancesSheet } from '../../components/userManagement/PolicyAcceptancesSheet'
 
 import { userMessage } from '../../utils/userMessage'
 interface UserManagementProps {
@@ -76,6 +78,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
 
   // Reset password modal (C7)
   const [showResetPasswordModal, setShowResetPasswordModal] = useState<User | null>(null)
+  const [signOutUser, setSignOutUser] = useState<User | null>(null)
+  const [policyUser, setPolicyUser] = useState<User | null>(null)
   const [resetPasswordValue, setResetPasswordValue] = useState('')
   const [resetPasswordSaving, setResetPasswordSaving] = useState(false)
   const [resetPasswordMsg, setResetPasswordMsg] = useState('')
@@ -497,6 +501,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
           onOpenVetProfile={openVetProfile}
           onOpenSecondaryRoles={openSecondaryRoles}
           onOpenResetPassword={(u) => { setShowResetPasswordModal(u); setResetPasswordValue(''); setResetPasswordMsg('') }}
+          onOpenSignOut={setSignOutUser}
+          onOpenPolicies={setPolicyUser}
           onApproveRegistration={handleApproveRegistration}
           onOpenRejectRegistration={(u) => { setShowRejectRegistrationModal(u as any); setRejectRegistrationReason('') }}
           onUnfreeze={handleUnfreezeUser}
@@ -504,6 +510,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
           onOpenFreeze={(u) => { setShowFreezeModal(u); setActionReason('') }}
           onOpenSuspend={(u) => { setShowSuspendModal(u); setActionReason('') }}
         />
+
+        <SignOutEverywhereSheet user={signOutUser} onClose={() => setSignOutUser(null)} />
+        <PolicyAcceptancesSheet user={policyUser} onClose={() => setPolicyUser(null)} />
 
         <RoleChangeModal
           showRoleModal={showRoleModal}

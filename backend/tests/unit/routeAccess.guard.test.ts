@@ -51,7 +51,7 @@ describe('H15 - every route that reaches an animal names its access gate', () =>
 
   it('finds the routes it guards (the scanner itself works)', () => {
     expect(relevant.length).toBeGreaterThan(30);
-    expect(relevant.some(r => r.key === 'PUT /allergies/:id')).toBe(true);
+    expect(relevant.some(r => r.key === 'POST /allergies/:id/mistake')).toBe(true);
   });
 
   it('has a gate on the route, or an allowlisted service gate with a reason', () => {

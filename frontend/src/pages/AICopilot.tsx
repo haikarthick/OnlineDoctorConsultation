@@ -9,6 +9,7 @@ import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 import { userMessage } from '../utils/userMessage'
 import { appLocale } from '../utils/appLocale'
+import { ConfirmDeleteSheet } from '../components/mobile/RowActions'
 // Render AI markdown responses nicely
 const AIMessage: React.FC<{ content: string; confidence?: number; sources?: string[] }> = ({ content, confidence, sources }) => (
   <div className="si-369fec94">
@@ -60,6 +61,7 @@ const AICopilot: React.FC = () => {
   const [tab, setTab] = useState<'chat' | 'drugs' | 'symptoms' | 'scan'>('chat')
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [deletingSession, setDeletingSession] = useState<AIChatSession | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
   // Drug interaction state
@@ -96,10 +98,16 @@ const AICopilot: React.FC = () => {
   const selectSession = async (session: AIChatSession) => {
     setSelectedSession(session)
     setLoading(true)
+    setError('')
     try {
-      const res = await apiService.listChatMessages(session.id)
-      setMessages(res.data || [])
-    } catch (err: any) { console.error('Failed to load messages:', err?.message); setMessages([]) }
+      // Reopen a past chat: the saved chat itself (title, animal, farm) and its messages. If the chat is no longer there the server says why.
+      const [sessionRes, msgRes] = await Promise.all([apiService.getChatSession(session.id), apiService.listChatMessages(session.id)])
+      if (sessionRes?.data) setSelectedSession(prev => (prev && prev.id === session.id ? { ...prev, ...sessionRes.data } : prev))
+      setMessages(msgRes.data || [])
+    } catch (err: any) {
+      setMessages([])
+      setError(userMessage(err, 'recordActions.chat.openFailed'))
+    }
     setLoading(false)
   }
 
@@ -185,13 +193,12 @@ const AICopilot: React.FC = () => {
     setScanAnalyzing(false)
   }
 
+  // Asked first (ConfirmDeleteSheet); a failure is shown inside that sheet in the server's own words.
   const deleteSession = async (id: string) => {
-    try {
-      await apiService.deleteChatSession(id)
-      setSessions(prev => prev.filter(s => s.id !== id))
-      if (selectedSession?.id === id) { setSelectedSession(null); setMessages([]) }
-      setSuccessMsg(t('aiCopilot.errors.deleted'))
-    } catch { setError(t('aiCopilot.errors.deleteFailed')) }
+    await apiService.deleteChatSession(id)
+    setSessions(prev => prev.filter(s => s.id !== id))
+    if (selectedSession?.id === id) { setSelectedSession(null); setMessages([]) }
+    setSuccessMsg(t('aiCopilot.errors.deleted'))
   }
 
   const SUGGESTED_PROMPTS = [
@@ -235,7 +242,7 @@ const AICopilot: React.FC = () => {
                   border: selectedSession?.id === s.id ? '1px solid #667eea40' : '1px solid transparent' }}>
                 <div className="si-660018c2">{s.title}</div>
                 <div className="si-a3f3564c">{s.messageCount || 0} messages · {s.contextType}</div>
-                <button onClick={(e) => { e.stopPropagation(); deleteSession(s.id) }}
+                <button onClick={(e) => { e.stopPropagation(); setDeletingSession(s) }}
                   className="si-4a100ba9">{t('common.delete')}</button>
               </div>
             ))}
@@ -587,6 +594,14 @@ const AICopilot: React.FC = () => {
           )}
         </div>
       )}
+
+      <ConfirmDeleteSheet
+        open={!!deletingSession}
+        name={deletingSession?.title || ''}
+        what={t('recordActions.chat.chatWhat')}
+        onConfirm={() => deleteSession(deletingSession!.id)}
+        onClose={() => setDeletingSession(null)}
+      />
     </div>
   )
 }

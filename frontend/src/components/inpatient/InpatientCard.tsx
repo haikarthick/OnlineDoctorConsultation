@@ -1,6 +1,7 @@
 import React from 'react'
 import type { TFunction } from 'i18next'
 import { STATUS_COLORS, parseJsonbArray } from './inpatientShared'
+import { RowActions } from '../mobile/RowActions'
 
 // ─── Single inpatient card: status, room, last vitals, medical history + status-transition actions ───
 export const InpatientCard: React.FC<{
@@ -13,7 +14,9 @@ export const InpatientCard: React.FC<{
   onShowVitalsHistory: (p: any) => void
   onLoadMedicalHistory: (p: any) => void
   onStatusChange: (id: string, status: string) => void
-}> = ({ p, t, formatDateTime, formatCurrency, speciesLabel, onShowVitals, onShowVitalsHistory, onLoadMedicalHistory, onStatusChange }) => {
+  /** Opens the shared edit sheet for room, bed, care instructions, special needs, estimated discharge and daily rate. */
+  onEdit?: (p: any) => void
+}> = ({ p, t, formatDateTime, formatCurrency, speciesLabel, onShowVitals, onShowVitalsHistory, onLoadMedicalHistory, onStatusChange, onEdit }) => {
   const statusClass = STATUS_COLORS[p.status] ? `status-${p.status}` : 'status-admitted'
   const meds = parseJsonbArray(p.medications)
   const vitals = parseJsonbArray(p.vitals_log)
@@ -67,6 +70,7 @@ export const InpatientCard: React.FC<{
       <div className="si-d2dd2367">
         <button onClick={() => onShowVitals(p)} className="si-c49f76ab">📊 {t('inpatientManagement.vitals')}</button>
         <button onClick={() => onLoadMedicalHistory(p)} className="si-99c426a3">📋 {t('inpatientManagement.history')}</button>
+        {onEdit && p.status !== 'discharged' && <RowActions name={p.animal_name} onEdit={() => onEdit(p)} />}
         {p.status === 'admitted' && <button onClick={() => onStatusChange(p.id, 'in_treatment')} className="si-816667d0">{t('inpatientManagement.startTreatment')}</button>}
         {p.status === 'in_treatment' && <button onClick={() => onStatusChange(p.id, 'recovering')} className="si-9b0031b9">{t('inpatientManagement.recovering')}</button>}
         {p.status === 'recovering' && <button onClick={() => onStatusChange(p.id, 'ready_to_discharge')} className="si-255a19db">{t('inpatientManagement.readyToDischarge')}</button>}

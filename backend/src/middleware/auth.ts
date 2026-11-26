@@ -23,10 +23,22 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     const decoded = jwt.verify(token, config.jwt.secret, { algorithms: ['HS256'] }) as any;
 
     // Verify the user actually exists in the database and fetch all roles
-    const userCheck = await database.query('SELECT id, role FROM users WHERE id = $1', [decoded.userId]);
+    // sessions_revoked_at: set when an admin signs the person out everywhere (migration 073). A database that has not got the column
+    // yet (42703) answers exactly as before, so a late migration can never lock everyone out.
+    let userCheck: { rows: any[] };
+    try {
+      userCheck = await database.query('SELECT id, role, sessions_revoked_at FROM users WHERE id = $1', [decoded.userId]);
+    } catch (e: any) {
+      if (e?.code !== '42703') throw e;
+      userCheck = await database.query('SELECT id, role FROM users WHERE id = $1', [decoded.userId]);
+    }
     if (userCheck.rows.length === 0) {
       logger.warn('Token references non-existent user', { userId: decoded.userId });
       return res.status(401).json({ error: 'User no longer exists. Please register again.' });
+    }
+    const revokedAt = userCheck.rows[0].sessions_revoked_at ? new Date(userCheck.rows[0].sessions_revoked_at).getTime() : 0;
+    if (revokedAt && typeof decoded.iat === 'number' && decoded.iat < Math.floor(revokedAt / 1000)) {
+      return res.status(401).json({ error: 'You were signed out on all your devices. Please sign in again.' });
     }
 
     req.userId = decoded.userId;

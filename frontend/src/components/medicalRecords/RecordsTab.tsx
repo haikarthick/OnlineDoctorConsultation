@@ -1,6 +1,7 @@
 import React from 'react'
 import { TFunction } from 'i18next'
 import { EmptyState, RECORD_TYPES, getRecordTypeInfo } from './medicalRecordsShared'
+import { CorrectionsToggle } from '../recordCorrections/AddendaPanel'
 
 interface Props {
   t: TFunction
@@ -62,6 +63,7 @@ const RecordsTab: React.FC<Props> = ({ t, selectedAnimal, medRecords, recordType
                       {t('medicalRecords.recordsTab.by')} {rec.veterinarianName}
                     </p>
                   )}
+                  <CorrectionsToggle recordId={rec.id} fmtDate={fmtDate} />
                 </div>
               )
             })}
